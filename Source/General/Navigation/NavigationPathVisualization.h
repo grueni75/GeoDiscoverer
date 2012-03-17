@@ -1,0 +1,119 @@
+//============================================================================
+// Name        : NavigationPathVisualization.h
+// Author      : Matthias Gruenewald
+// Copyright   : Copyright 2010 Matthias Gruenewald
+//
+// This file is part of GeoDiscoverer.
+//
+// GeoDiscoverer is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// GeoDiscoverer is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GeoDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
+//
+//============================================================================
+
+
+#ifndef NAVIGATIONPATHVISUALIZATION_H_
+#define NAVIGATIONPATHVISUALIZATION_H_
+
+namespace GEODISCOVERER {
+
+// Types for stroing the tile info
+typedef std::map<MapTile*, NavigationPathTileInfo*> NavigationPathTileInfoMap;
+typedef std::pair<MapTile*, NavigationPathTileInfo*> NavigationPathTileInfoPair;
+
+class NavigationPathVisualization {
+
+protected:
+
+  Int zoomLevel;                                  // Zoom level that is represented by this visualization
+  double latScale;                                // Scale factor for latitude
+  double lngScale;                                // Scale factor for longitude
+  MapPosition prevLinePoint;                      // Last position used for creating the graphic line
+  MapPosition prevArrowPoint;                     // Last position used for creating the direction arrow
+  NavigationPathTileInfoMap tileInfoMap;          // Hash that holds information for each map tile
+
+public:
+
+  // Constructor
+  NavigationPathVisualization();
+
+  // Destructor
+  virtual ~NavigationPathVisualization();
+
+  // Indicates that textures and buffers have been invalidated
+  void graphicInvalidated();
+
+  // Returns the tile info for the given tile
+  NavigationPathTileInfo *findTileInfo(MapTile *tile);
+
+  // Recreate the graphic objects to reduce the number of graphic point buffers
+  void optimizeGraphic();
+
+  // Compute the distance in pixels between two points
+  double computePixelDistance(MapPosition a, MapPosition b);
+
+  // Getters and setters
+  double getLatScale() const
+  {
+      return latScale;
+  }
+
+  double getLngScale() const
+  {
+      return lngScale;
+  }
+
+  MapPosition getPrevArrowPoint() const
+  {
+      return prevArrowPoint;
+  }
+
+  MapPosition getPrevLinePoint() const
+  {
+      return prevLinePoint;
+  }
+
+  Int getZoomLevel() const
+  {
+      return zoomLevel;
+  }
+
+  void setLatScale(double latScale)
+  {
+      this->latScale = latScale;
+  }
+
+  void setLngScale(double lngScale)
+  {
+      this->lngScale = lngScale;
+  }
+
+  void setPrevArrowPoint(MapPosition prevArrowPoint)
+  {
+      this->prevArrowPoint = prevArrowPoint;
+  }
+
+  void setPrevLinePoint(MapPosition prevLinePoint)
+  {
+      this->prevLinePoint = prevLinePoint;
+  }
+
+  void setZoomLevel(Int zoomLevel)
+  {
+      this->zoomLevel = zoomLevel;
+  }
+
+};
+
+}
+
+#endif /* NAVIGATIONPATHVISUALIZATION_H_ */

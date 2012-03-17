@@ -1,0 +1,168 @@
+//============================================================================
+// Name        : WidgetMeter.cpp
+// Author      : Matthias Gruenewald
+// Copyright   : Copyright 2010 Matthias Gruenewald
+//
+// This file is part of GeoDiscoverer.
+//
+// GeoDiscoverer is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// GeoDiscoverer is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GeoDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
+//
+//============================================================================
+
+
+#include <Core.h>
+
+namespace GEODISCOVERER {
+
+// Constructor
+WidgetMeter::WidgetMeter() : WidgetPrimitive() {
+  widgetType=WidgetMeterType;
+  setMeterType(WidgetMeterAltitudeType);
+  nextUpdateTime=0;
+  lastWorkTime=0;
+  updateInterval=1*1000*1000;
+  valueFontString=NULL;
+  unitFontString=NULL;
+  labelFontString=NULL;
+}
+
+// Destructor
+WidgetMeter::~WidgetMeter() {
+}
+
+// Executed every time the graphic engine checks if drawing is required
+bool WidgetMeter::work(TimestampInMicroseconds t) {
+
+  FontEngine *fontEngine=core->getFontEngine();
+  std::string value;
+  std::string unit;
+  bool update;
+
+  // Do the inherited stuff
+  bool changed=WidgetPrimitive::work(t);
+
+  // Check for overflow in microseconds counter
+  if (t<lastWorkTime) {
+    ERROR("microseconds overflow detected (before=%llu, after=%llu)",lastWorkTime,t);
+    nextUpdateTime=t;
+  }
+  lastWorkTime=t;
+
+  // Only update the info at given update interval
+  if (t>=nextUpdateTime) {
+
+    // Get the new value
+    MapPosition *locationPos;
+    NavigationPath *trackPath;
+    switch(meterType) {
+      case WidgetMeterAltitudeType:
+        locationPos=core->getNavigationEngine()->lockLocationPos();
+        if (locationPos->getHasAltitude()) {
+          core->getUnitConverter()->formatMeters(locationPos->getAltitude(),value,unit);
+        } else {
+          core->getUnitConverter()->formatMeters(0,value,unit);
+          value="--";
+        }
+        core->getNavigationEngine()->unlockLocationPos();
+        break;
+      case WidgetMeterSpeedType:
+        locationPos=core->getNavigationEngine()->lockLocationPos();
+        if (locationPos->getHasSpeed()) {
+          core->getUnitConverter()->formatMetersPerSecond(locationPos->getSpeed(),value,unit);
+        } else {
+          core->getUnitConverter()->formatMetersPerSecond(0,value,unit);
+          value="--";
+        }
+        core->getNavigationEngine()->unlockLocationPos();
+        break;
+      case WidgetMeterTrackLengthType:
+        trackPath=core->getNavigationEngine()->lockRecordedTrack();
+        if (trackPath)
+          core->getUnitConverter()->formatMeters(trackPath->getLength(),value,unit);
+        else {
+          core->getUnitConverter()->formatMeters(0,value,unit);
+          value="--";
+        }
+        core->getNavigationEngine()->unlockRecordedTrack();
+        break;
+      default:
+        FATAL("unknown meter type",NULL);
+        return false;
+    }
+    changed=true;
+
+    // Update the font string objects
+    fontEngine->setFont("sansNormal");
+    fontEngine->updateString(&unitFontString,unit);
+    unitFontString->setX(x+(iconWidth-unitFontString->getIconWidth())/2);
+    unitFontString->setY(y+unitY);
+    fontEngine->setFont("sansLarge");
+    fontEngine->updateString(&valueFontString,value);
+    valueFontString->setX(x+(iconWidth-valueFontString->getIconWidth())/2);
+    valueFontString->setY(y+valueY);
+    labelFontString->setX(x+(iconWidth-labelFontString->getIconWidth())/2);
+    labelFontString->setY(y+labelY);
+
+    // Set the next update time
+    nextUpdateTime+=updateInterval;
+
+  }
+
+  // Return result
+  return changed;
+}
+
+// Executed every time the graphic engine needs to draw
+void WidgetMeter::draw(Screen *screen, TimestampInMicroseconds t) {
+
+  // Let the primitive draw the background
+  WidgetPrimitive::draw(screen,t);
+
+  // Draw the text
+  labelFontString->setColor(color);
+  labelFontString->draw(screen,t);
+  valueFontString->setColor(color);
+  valueFontString->draw(screen,t);
+  unitFontString->setColor(color);
+  unitFontString->draw(screen,t);
+}
+
+// Sets the type of meter
+void WidgetMeter::setMeterType(WidgetMeterTypes meterType)
+{
+  FontEngine *fontEngine=core->getFontEngine();
+
+  // Set the type
+  this->meterType=meterType;
+
+  // Set the label
+  fontEngine->setFont("sansBoldNormal");
+  switch(meterType) {
+    case WidgetMeterAltitudeType:
+      labelFontString=fontEngine->createString("Altitude");
+      break;
+    case WidgetMeterSpeedType:
+      labelFontString=fontEngine->createString("Speed");
+      break;
+    case WidgetMeterTrackLengthType:
+      labelFontString=fontEngine->createString("Track");
+      break;
+    default:
+      FATAL("meter type not supported",NULL);
+      return;
+  }
+}
+
+
+}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GDM version="1.0">
+  <calibrationPoint>
+    <latitude>50.9584267233599</latitude>
+    <longitude>6.6796875</longitude>
+    <x>0</x>
+    <y>0</y>
+  </calibrationPoint>
+  <calibrationPoint>
+    <latitude>50.9584267233599</latitude>
+    <longitude>6.85546875</longitude>
+    <x>256</x>
+    <y>0</y>
+  </calibrationPoint>
+  <calibrationPoint>
+    <latitude>50.8475729536539</latitude>
+    <longitude>6.85546875</longitude>
+    <x>256</x>
+    <y>256</y>
+  </calibrationPoint>
+  <calibrationPoint>
+    <latitude>50.8475729536539</latitude>
+    <longitude>6.6796875</longitude>
+    <x>0</x>
+    <y>256</y>
+  </calibrationPoint>
+  <imageFileName>11_1062_686.png</imageFileName>
+  <zoomLevel>11</zoomLevel>
+</GDM>

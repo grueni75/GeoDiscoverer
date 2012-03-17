@@ -1,0 +1,204 @@
+//============================================================================
+// Name        : NavigationPath.cpp
+// Author      : Matthias Gruenewald
+// Copyright   : Copyright 2010 Matthias Gruenewald
+//
+// This file is part of GeoDiscoverer.
+//
+// GeoDiscoverer is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// GeoDiscoverer is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with GeoDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
+//
+//============================================================================
+
+
+#include <Core.h>
+
+namespace GEODISCOVERER {
+
+// Constructor
+NavigationPath::NavigationPath() {
+  hasLastPoint=false;
+  hasSecondLastPoint=false;
+  gpxFilefolder=core->getNavigationEngine()->getTrackPath();
+  gpxFilename="track-" + core->getClock()->getFormattedDate() + ".gpx";
+  setName("Track-" + core->getClock()->getFormattedDate());
+  setDescription("Track recorded with GeoDiscoverer.");
+  hasChanged=true;
+  isStored=true;
+  hasBeenLoaded=false;
+  pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength","Minimum segment length of tracks, routes and other paths",8);
+  pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance","Minimum distance between two direction arrows of tracks, routes and other paths",64);
+  //pathArrowHeight=core->getConfigStore()->getIntValue("Graphic","pathArrowHeight","Height of the arrow drawn in each segment of paths",6);
+  //pathArrowSideWidth=core->getConfigStore()->getIntValue("Graphic","pathArrowWiidth","Width of each side of the arrow drawn in each segment of paths",3);
+}
+
+// Destructor
+NavigationPath::~NavigationPath() {
+}
+
+// Replaces the last point by a new one
+void NavigationPath::replaceEndPosition(MapPosition pos, bool posIsStable) {
+
+  // Sanity check
+  if (mapPositions.size()==0) {
+    FATAL("end point should be replaced but path has no end point yet",NULL);
+    return;
+  }
+
+  // Update the curent end point
+  mapPositions.pop_back();
+  mapPositions.push_back(pos);
+
+  // If this is a stable point, use it as the end point
+  if (posIsStable) {
+    secondLastPoint=lastPoint;
+    hasSecondLastPoint=true;
+    lastPoint=pos;
+  }
+
+  // Path was modified
+  hasChanged=true;
+  isStored=false;
+}
+
+// Adds a point to the path
+void NavigationPath::addEndPosition(MapPosition pos, bool posIsStable) {
+
+  bool addNewPair=false;
+
+  // Decide whether to add a new point or use the last one
+  if (!hasLastPoint) {
+    lastPoint=pos;
+    hasLastPoint=true;
+  }
+
+  // If this is a stable point, use it as the end point
+  if (posIsStable) {
+    secondLastPoint=lastPoint;
+    hasSecondLastPoint=true;
+    lastPoint=pos;
+  }
+
+  // Add the new pair
+  mapPositions.push_back(pos);
+
+  // Path was modified
+  hasChanged=true;
+  isStored=false;
+}
+
+// Creates a graphic line object for drawing the path
+GraphicObject *NavigationPath::createGraphicObject(MapPosition mapPos, MapArea area) {
+
+  GraphicObject *result=NULL;
+  std::list<MapPosition> linePoints;
+  MapPosition prevPos;
+
+  // Get important properties of the area
+  MapPosition refPos=area.getRefPos();
+  MapTile *refTile=refPos.getMapTile();
+  if (!refTile)
+    return result;
+  MapCalibrator *calibrator=refTile->getParentMapContainer()->getMapCalibrator();
+
+  // Create the graphic object
+  if (!(result=new GraphicObject(true))) {
+    FATAL("can not create graphic object",NULL);
+    return NULL;
+  }
+
+  // Iterate through the path and decide on the points
+  // Each segment of the line must have a minimum length
+  prevPos=NavigationPath::getPathInterruptedPos();
+  for (std::list<MapPosition>::iterator i=mapPositions.begin();i!=mapPositions.end();i++) {
+    bool resultOK=true;
+    MapPosition pos=*i;
+    Int x,y,diffX,diffY;
+    resultOK&=calibrator->setPictureCoordinates(pos);
+    resultOK&=Integer::add(refPos.getX(),pos.getX(),x);
+    resultOK&=Integer::add(x,-mapPos.getX(),x);
+    if ((x<std::numeric_limits<Short>::min())||(x>std::numeric_limits<Short>::max()))
+      resultOK=false;
+    resultOK&=Integer::add(refPos.getY(),mapPos.getY(),y);
+    resultOK&=Integer::add(y,-pos.getY(),y);
+    if ((y<std::numeric_limits<Short>::min())||(y>std::numeric_limits<Short>::max()))
+      resultOK=false;
+    resultOK&=Integer::add(pos.getX(),-prevPos.getX(),diffX);
+    resultOK&=Integer::add(pos.getY(),-prevPos.getY(),diffY);
+    if (!resultOK)
+      pos=NavigationPath::getPathInterruptedPos();
+    if (pos!=NavigationPath::getPathInterruptedPos()) {
+      Int len=sqrt((double)(diffX*diffX+diffY*diffY));
+      if ((len>=pathMinSegmentLength)||(prevPos==NavigationPath::getPathInterruptedPos())) {
+        pos.setX(x);
+        pos.setY(y);
+        linePoints.push_back(pos);
+        prevPos=pos;
+      }
+    } else {
+      linePoints.push_back(pos);
+      prevPos=NavigationPath::getPathInterruptedPos();
+    }
+  }
+
+  // Create the graphic line object and the related arrows
+  GraphicLine *line=new GraphicLine(2*linePoints.size());
+  if (!line) {
+    FATAL("can not create graphic line object",NULL);
+    return result;
+  }
+  line->setColor(getColor());
+  MapPosition lastArrowPos;
+  for (std::list<MapPosition>::iterator i=linePoints.begin();i!=linePoints.end();i++) {
+    MapPosition pos=*i;
+    if ((i!=linePoints.begin())&&(prevPos!=NavigationPath::getPathInterruptedPos())){
+      if (pos!=NavigationPath::getPathInterruptedPos()) {
+        line->addPoint(prevPos.getX(),prevPos.getY());
+        line->addPoint(pos.getX(),pos.getY());
+        Int distX=pos.getX()-lastArrowPos.getX();
+        Int distY=pos.getY()-lastArrowPos.getY();
+        Int dist=sqrt((double)(distX*distX+distY*distY));
+        DEBUG("dist=%d",dist);
+        if (dist>=pathMinDirectionDistance) {
+          distX=pos.getX()-prevPos.getX();
+          distY=pos.getY()-prevPos.getY();
+          dist=sqrt((double)(distX*distX+distY*distY));
+          double angle=FloatingPoint::computeAngle(distX,distY);
+          GraphicRectangle *directionIcon=new GraphicRectangle(*(core->getGraphicEngine()->getPathDirectionIcon()));
+          if (!directionIcon) {
+            FATAL("can not duplicate graphic rectangle object",NULL);
+            return result;
+          }
+          Int x=prevPos.getX()+dist/2*cos(angle);
+          Int y=prevPos.getY()+dist/2*sin(angle);
+          directionIcon->setX(x);
+          directionIcon->setY(y);
+          directionIcon->setAngle(FloatingPoint::rad2degree(angle));
+          DEBUG("adding arrow at %d,%d",x,y);
+          result->addPrimitive(directionIcon);
+          lastArrowPos=pos;
+        }
+      }
+    } else {
+      lastArrowPos=pos;
+    }
+    prevPos=pos;
+  }
+  result->addPrimitive(line);
+
+  // That's it
+  return result;
+}
+
+
+}

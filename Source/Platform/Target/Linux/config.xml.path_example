@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GDC version="1.0">
+  <General>
+    <unitSystem description="System of unit to use for reporting lengths and speeds">metric</unitSystem>
+    <backupPeriod description="Time in seconds between storing unsaved data (e.g., recorded track).">60</backupPeriod>
+  </General>
+  <Screen>
+    <wakeLock description="Indicates if the screen backlight is kept on">0</wakeLock>
+  </Screen>
+  <Font>
+    <backgroundStrokeWidth description="Width of the stroke behind the font letters for better contrast on black background">2</backgroundStrokeWidth>
+    <stringCacheSize description="Maximum size of the cache string map">16</stringCacheSize>
+    <sansFilename description="File to use as the sans font">DroidSans.ttf</sansFilename>
+    <sansBoldFilename description="File to use as the sans font">DroidSans-Bold.ttf</sansBoldFilename>
+    <sansLargeSize description="Small size of the sans font">16</sansLargeSize>
+    <sansNormalSize description="Normal size of the sans font">12</sansNormalSize>
+    <sansSmallSize description="Small size of the sans font">8</sansSmallSize>
+  </Font>
+  <Graphic>
+    <fadeDuration description="Time in microseconds that a fade animation lasts.">500000</fadeDuration>
+    <blinkDuration description="Duration to show the highlight color.">250000</blinkDuration>
+    <blinkPeriod description="Distance between two blinks.">500000</blinkPeriod>
+    <debugMode description="Enable debugging mode">0</debugMode>
+    <locationAccuracyBackgroundColor>
+      <red description="Red component [0-255] of the accuracy circle background around the location indicator">255</red>
+      <green description="Green component [0-255] of the accuracy circle background around the location indicator">190</green>
+      <blue description="Blue component [0-255] of the accuracy circle background around the location indicator">127</blue>
+      <alpha description="Alpha component [0-255] of the accuracy circle background around the location indicator">120</alpha>
+    </locationAccuracyBackgroundColor>
+    <locationAccuracyCircleColor>
+      <red description="Red component [0-255] of the accuracy circle around the location indicator">255</red>
+      <green description="Green component [0-255] of the accuracy circle around the location indicator">127</green>
+      <blue description="Blue component [0-255] of the accuracy circle around the location indicator">0</blue>
+      <alpha description="Alpha component [0-255] of the accuracy circle around the location indicator">120</alpha>
+    </locationAccuracyCircleColor>
+    <locationAccuracyCircleLineWidth description="Line width of the accuracy circle around the location indicator">4</locationAccuracyCircleLineWidth>
+    <centerIconTimeout description="Time in us to wait after a user interaction before the cursor is hidden">10000000</centerIconTimeout>
+    <compassConeColor>
+      <red description="Red component [0-255] of the compass cone">255</red>
+      <green description="Green component [0-255] of the compass cone">255</green>
+      <blue description="Blue component [0-255] of the compass cone">255</blue>
+      <alpha description="Alpha component [0-255] of the compass cone">150</alpha>
+    </compassConeColor>
+    <centerIconFilename description="Image of the center cursor">center</centerIconFilename>
+    <locationIconFilename description="Image of the location cursor">location</locationIconFilename>
+    <pathDirectionIconFilename description="Image of the path arrow that indicates the direction">pathDirection</pathDirectionIconFilename>
+    <compassConeFilename description="Image of the compass cone">compassCone</compassConeFilename>
+    <notCachedTileAlpha description="Alpha value of a tile whose image is not cached.">64</notCachedTileAlpha>
+    <pathMinSegmentLength description="Minimum segment length of tracks, routes and other paths">8</pathMinSegmentLength>
+    <pathMinDirectionDistance description="Minimum distance between two direction arrows of tracks, routes and other paths">64</pathMinDirectionDistance>
+    <pathWidth description="Width of tracks, routes and other paths">8</pathWidth>
+    <lineNumberOfTrianglesOtherSegemnts description="Number of triangles to reserve if current segment has no strokes left anymore">128</lineNumberOfTrianglesOtherSegemnts>
+  <lineNumberOfStrokesOtherSegemnts description="Number of triangles to reserve if current segment has no strokes left anymore">32</lineNumberOfStrokesOtherSegemnts></Graphic>
+  <Widget>
+    <SelectedColor>
+      <red description="Red component [0-255] of the selected widget">255</red>
+      <green description="Green component [0-255] of the selected widget">127</green>
+      <blue description="Blue component [0-255] of the selected widget">0</blue>
+      <alpha description="Alpha component [0-255] of the selected widget">255</alpha>
+    </SelectedColor>
+    <buttonRepeatDelay description="Time to wait before dispatching repeating commands [us]">500000</buttonRepeatDelay>
+    <buttonRepeatPeriod description="Time distance between command dispatching [us]">100000</buttonRepeatPeriod>
+    <Page name="Default">
+      <Primitive name="Zoom In">
+        <type description="Kind of widget">button</type>
+        <Portrait>
+          <x description="X position in percent">87.5</x>
+          <y description="Y position in percent">23</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">93</x>
+          <y description="Y position in percent">87.5</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <iconFilename description="Filename of the background image">zoomIn</iconFilename>
+        <command description="Command to execute if widget is clicked">zoom(1.125)</command>
+      </Primitive>
+      <Primitive name="Zoom Out">
+        <type description="Kind of widget">button</type>
+        <Portrait>
+          <x description="X position in percent">62.5</x>
+          <y description="Y position in percent">23</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">93</x>
+          <y description="Y position in percent">62.5</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <iconFilename description="Filename of the background image">zoomOut</iconFilename>
+        <command description="Command to execute if widget is clicked">zoom(0.875)</command>
+      </Primitive>
+      <Primitive name="Rotate Left">
+        <type description="Kind of widget">button</type>
+        <Portrait>
+          <x description="X position in percent">37.5</x>
+          <y description="Y position in percent">23</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">93</x>
+          <y description="Y position in percent">37.5</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <iconFilename description="Filename of the background image">rotateLeft</iconFilename>
+        <command description="Command to execute if widget is clicked">rotate(+3)</command>
+      </Primitive>
+      <Primitive name="Rotate Right">
+        <type description="Kind of widget">button</type>
+        <Portrait>
+          <x description="X position in percent">12.5</x>
+          <y description="Y position in percent">23</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">93</x>
+          <y description="Y position in percent">12.5</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <iconFilename description="Filename of the background image">rotateRight</iconFilename>
+        <command description="Command to execute if widget is clicked">rotate(-3)</command>
+      </Primitive>
+      <Primitive name="Track Recording">
+        <type description="Kind of widget">checkbox</type>
+        <Portrait>
+          <x description="X position in percent">87.5</x>
+          <y description="Y position in percent">93</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">7</x>
+          <y description="Y position in percent">87.5</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <checkedIconFilename description="Filename of the background image showing the unchecked state">trackRecordingOn</checkedIconFilename>
+        <checkedCommand description="Command to execute if widget is unchecked">setRecordTrack(1)</checkedCommand>
+        <uncheckedIconFilename description="Filename of the background image showing the checked state">trackRecordingOff</uncheckedIconFilename>
+        <uncheckedCommand description="Command to execute if widget is checked">setRecordTrack(0)</uncheckedCommand>
+        <stateConfigPath description="Path to the config entry that holds the check state">Navigation</stateConfigPath>
+        <stateConfigName description="Name of the config entry that holds the check state">recordTrack</stateConfigName>
+      </Primitive>
+      <Primitive name="Create New Track">
+        <type description="Kind of widget">button</type>
+        <Portrait>
+          <x description="X position in percent">62.5</x>
+          <y description="Y position in percent">93</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">7</x>
+          <y description="Y position in percent">62.5</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <iconFilename description="Filename of the background image">createNewTrack</iconFilename>
+        <command description="Command to execute if widget is clicked">createNewTrack()</command>
+      </Primitive>
+      <Primitive name="Wake Lock">
+        <type description="Kind of widget">checkbox</type>
+        <Portrait>
+          <x description="X position in percent">37.5</x>
+          <y description="Y position in percent">93</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">7</x>
+          <y description="Y position in percent">37.5</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <checkedIconFilename description="Filename of the background image showing the unchecked state">wakeLockOn</checkedIconFilename>
+        <checkedCommand description="Command to execute if widget is unchecked">setWakeLock(1)</checkedCommand>
+        <uncheckedIconFilename description="Filename of the background image showing the checked state">wakeLockOff</uncheckedIconFilename>
+        <uncheckedCommand description="Command to execute if widget is checked">setWakeLock(0)</uncheckedCommand>
+        <stateConfigPath description="Path to the config entry that holds the check state">Screen</stateConfigPath>
+        <stateConfigName description="Name of the config entry that holds the check state">wakeLock</stateConfigName>
+      </Primitive>
+      <Primitive name="Return To Location">
+        <type description="Kind of widget">checkbox</type>
+        <Portrait>
+          <x description="X position in percent">12.5</x>
+          <y description="Y position in percent">93</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">7</x>
+          <y description="Y position in percent">12.5</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <checkedIconFilename description="Filename of the background image showing the unchecked state">returnToLocationOn</checkedIconFilename>
+        <checkedCommand description="Command to execute if widget is unchecked">setReturnToLocation(1)</checkedCommand>
+        <uncheckedIconFilename description="Filename of the background image showing the checked state">returnToLocationOff</uncheckedIconFilename>
+        <uncheckedCommand description="Command to execute if widget is checked">setReturnToLocation(0)</uncheckedCommand>
+        <stateConfigPath description="Path to the config entry that holds the check state">Map</stateConfigPath>
+        <stateConfigName description="Name of the config entry that holds the check state">returnToLocation</stateConfigName>
+      </Primitive>
+      <Primitive name="Zoom Level Lock">
+        <type description="Kind of widget">checkbox</type>
+        <Portrait>
+          <x description="X position in percent">87.5</x>
+          <y description="Y position in percent">81</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">75</x>
+          <y description="Y position in percent">87.5</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <checkedIconFilename description="Filename of the background image showing the unchecked state">zoomLevelLockOn</checkedIconFilename>
+        <checkedCommand description="Command to execute if widget is unchecked">setZoomLevelLock(1)</checkedCommand>
+        <uncheckedIconFilename description="Filename of the background image showing the checked state">zoomLevelLockOff</uncheckedIconFilename>
+        <uncheckedCommand description="Command to execute if widget is checked">setZoomLevelLock(0)</uncheckedCommand>
+        <stateConfigPath description="Path to the config entry that holds the check state">Map</stateConfigPath>
+        <stateConfigName description="Name of the config entry that holds the check state">zoomLevelLock</stateConfigName>
+      </Primitive>
+      <Primitive name="Current altitude">
+        <type description="Kind of widget">meter</type>
+        <Portrait>
+          <x description="X position in percent">17</x>
+          <y description="Y position in percent">9</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">25</x>
+          <y description="Y position in percent">14</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <iconFilename description="Filename of the background image">meterBackground</iconFilename>
+        <meterType description="Kind of meter to display">altitude</meterType>
+        <updateInterval description="Time in microseconds to elapse before updating the widget">1000000</updateInterval>
+        <labelY description="Vertical position of the label in percent of the widget height">78.0</labelY>
+        <valueY description="Vertical position of the value in percent of the widget height">40.0</valueY>
+        <unitY description="Vertical position of the unit in percent of the widget height">10.0</unitY>
+      </Primitive>
+      <Primitive name="Current speed">
+        <type description="Kind of widget">meter</type>
+        <Portrait>
+          <x description="X position in percent">50</x>
+          <y description="Y position in percent">9</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">50</x>
+          <y description="Y position in percent">14</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <iconFilename description="Filename of the background image">meterBackground</iconFilename>
+        <meterType description="Kind of meter to display">speed</meterType>
+        <updateInterval description="Time in microseconds to elapse before updating the widget">1000000</updateInterval>
+        <labelY description="Vertical position of the label in percent of the widget height">78.0</labelY>
+        <valueY description="Vertical position of the value in percent of the widget height">40.0</valueY>
+        <unitY description="Vertical position of the unit in percent of the widget height">10.0</unitY>
+      </Primitive>
+      <Primitive name="Track length">
+        <type description="Kind of widget">meter</type>
+        <Portrait>
+          <x description="X position in percent">83</x>
+          <y description="Y position in percent">9</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">75</x>
+          <y description="Y position in percent">14</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <iconFilename description="Filename of the background image">meterBackground</iconFilename>
+        <meterType description="Kind of meter to display">trackLength</meterType>
+        <updateInterval description="Time in microseconds to elapse before updating the widget">1000000</updateInterval>
+        <labelY description="Vertical position of the label in percent of the widget height">78.0</labelY>
+        <valueY description="Vertical position of the value in percent of the widget height">40.0</valueY>
+        <unitY description="Vertical position of the unit in percent of the widget height">10.0</unitY>
+      </Primitive>
+      <Primitive name="Map scale">
+        <type description="Kind of widget">scale</type>
+        <Portrait>
+          <x description="X position in percent">40</x>
+          <y description="Y position in percent">81</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">42</x>
+          <y description="Y position in percent">88</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <iconFilename description="Filename of the background image">scale</iconFilename>
+        <updateInterval description="Time in microseconds to elapse before updating the widget">1000000</updateInterval>
+        <tickLabelOffsetX description="Horizontal offset for the scale values in percent of the widget width">-3.5</tickLabelOffsetX>
+        <mapLabelOffsetY description="Vertical offset for the map label in percent of the widget height">9.0</mapLabelOffsetY>
+      </Primitive>
+    </Page>
+  </Widget>
+  <Map>
+    <folder description="Folder that contains calibrated maps">Default</folder>
+    <neighborDegreeTolerance description="// Maximum allowed difference in degrees to classify a tile as a neighbor">1e-07</neighborDegreeTolerance>
+    <tileLength description="Width and height of a tile.">256</tileLength>
+    <tileCacheSize description="Number of map tiles to cache.">128</tileCacheSize>
+    <initDistance description="Distance to the max/min values of integer that triggers a initialization of the map to avoid overflows.">65536</initDistance>
+    <maxTiles description="Maximum number of tiles to show.">128</maxTiles>
+    <returnToLocationTimeout description="Time in us that must elapse before the map is repositioned to the current location.">20000000</returnToLocationTimeout>
+    <returnToLocation description="Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed.">1</returnToLocation>
+    <zoomLevelLock description="Indicates if the zoom level of the map shall not be changed when zooming.">0</zoomLevelLock>
+    <LastPosition>
+      <folder description="Folder that contains the map images.">Default</folder>
+      <lng description="Longitude of the last position in the map.">6.77719</lng>
+      <lat description="Latitude of the last position in the map.">51.2271</lat>
+      <latScale description="Latitude scale of the last position in the map.">2736.01</latScale>
+      <lngScale description="Longitude scale of the last position in the map.">1682.5</lngScale>
+      <zoom description="Zoom value used in the graphic engine when the last position was active.">1.17036</zoom>
+      <angle description="Angle value used in the graphic engine when the last position was active.">0</angle>
+      <zoomLevel description="Map zoom level used when the last position was active.">4</zoomLevel>
+    </LastPosition>
+  </Map>
+  <Navigation>
+    <locationOutdatedThreshold description="Duration in milliseconds after which a position will be discarded.">120000</locationOutdatedThreshold>
+    <locationSignificantlyInaccurateThreshold description="Distance in meter that indicates a significantly less accurate position.">100</locationSignificantlyInaccurateThreshold>
+    <trackRecordingMinDistance description="Required minimum distance in meter to the last track point such that the point is added to the track.">25</trackRecordingMinDistance>
+    <recordTrack description="Indicates if track recording is enabled.">0</recordTrack>
+    <trackColor>
+      <red description="Red component [0-255] of the recorded track">255</red>
+      <green description="Green component [0-255] of the recorded track">127</green>
+      <blue description="Blue component [0-255] of the recorded track">0</blue>
+      <alpha description="Alpha component [0-255] of the recorded track">255</alpha>
+    </trackColor>
+    <lastRecordedTrackFilename description="Filename of the last recorded track.">track-20110905-075442.gpx</lastRecordedTrackFilename>
+    <Route number="0">
+      <NormalColor>
+        <red>255</red>
+        <green>255</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </NormalColor>
+      <HighlightColor>
+        <red>255</red>
+        <green>0</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </HighlightColor>
+      <filename>ddorf-runde1.gpx</filename>
+    </Route>
+  </Navigation>
+</GDC>

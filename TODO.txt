@@ -1,0 +1,2 @@
+- Use linux jpeg library instead of including it in the ThirdParty folder
+- Shall we use double instead of the FixedPoint class?

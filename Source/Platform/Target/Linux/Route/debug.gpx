@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" creator="GPSies http://www.gpsies.com - Ratingen-kaiserswerth-meerbusch-buederich-düsseldorf-ratingen" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <metadata>
+    <name>Ratingen-kaiserswerth-meerbusch-buederich-düsseldorf-ratingen</name>
+    <link href="http://www.gpsies.com/map.do?fileId=tgtwvlsherfbtuin">
+      <text>Ratingen-kaiserswerth-meerbusch-buederich-düsseldorf-ratingen on GPSies.com</text>
+    </link>
+    <time>2011-02-12T14:11:12Z</time>
+  </metadata>
+  <rte>
+    <name>Ratingen-kaiserswerth-meerbusch-buederich-düsseldorf-ratingen on GPSies.com</name>
+    <link href="http://www.gpsies.com/map.do?fileId=tgtwvlsherfbtuin" />
+    <rtept lat="51.29598300" lon="6.716733000">
+      <ele>33.000000</ele>
+    </rtept>
+    <rtept lat="51.29596700" lon="6.716683000">
+      <ele>33.000000</ele>
+    </rtept>
+    <rtept lat="51.29576700" lon="6.716433000">
+      <ele>33.000000</ele>
+    </rtept>
+    <rtept lat="51.29500000" lon="6.715617000">
+      <ele>33.000000</ele>
+    </rtept>
+  </rte>
+</gpx>
+

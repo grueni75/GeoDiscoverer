@@ -1,0 +1,4 @@
+#!/bin/bash
+LATEST_TRACE_LOG=`ls -l -c Log/trace-* | tail -n 1 | sed "s/.*\(trace-.*\)/\1/"`
+cp Log/$LATEST_TRACE_LOG replay.log
+
