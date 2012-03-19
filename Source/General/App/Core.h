@@ -331,6 +331,7 @@ extern Core *core;
 #include <MapCache.h>
 #include <MapEngine.h>
 #include <MapSource.h>
+#include <MapOfflineSource.h>
 #include <NavigationPathTileInfo.h>
 #include <NavigationPathVisualization.h>
 #include <NavigationPath.h>

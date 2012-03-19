@@ -26,19 +26,19 @@
 
 namespace GEODISCOVERER {
 
+typedef enum { MapOfflineSourceType, MapOnlineSourceType } MapSourceTypes;
+
 class MapSource {
 
 protected:
 
+  MapSourceTypes type;                      // Type of source
   std::string folder;                       // Folder that contains calibrated maps
   double neighborDegreeTolerance;           // Maximum allowed difference in degrees to classify a tile as a neighbor
   std::vector<MapContainer*> mapContainers; // Vector of all maps
   MapPosition centerPosition;               // Center position of the map
   MapPosition currentPosition;              // Current position in the map
   bool isInitialized;                       // Indicates if the object is initialized
-  bool isScratchOnly;                       // Indicates that the object should not be deinited
-  bool doNotDelete;                         // Indicates if the object has been alloacted by an own memory handler
-  char *objectData;                         // Memory that holds all the sub objects if retrieve was used
   Int mapTileLength;                        // Default length of a tile
   Int progressValue;                        // Current progress value of the retrieve
   DialogKey progressDialog;                 // Handle to progress dialog
@@ -67,50 +67,38 @@ protected:
   // Creates the kd tree recursively
   MapContainerTreeNode *createSearchTree(MapContainerTreeNode *parentNode, bool leftBranch, GeographicBorder dimension, std::vector<Int> remainingMapContainersIndex);
 
-  // Stores the contents of the search tree in a binary file
-  void storeSearchTree(std::ofstream *ofs, MapContainerTreeNode *node, Int &memorySize);
-
-  // Reads the contents of the search tree from a binary file
-  static MapContainerTreeNode *retrieveSearchTree(MapSource *mapSource, char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize);
-
-  // Returns the map container that lies in a given area
-  MapContainer *findMapContainerByGeographicArea(MapArea area, MapTile *preferredNeigbor, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, double &bestDistance, MapArea &bestTranslatedArea, bool &betterMapContainerFound, std::list<MapContainer*> *foundMapContainers=NULL);
-
-  // Returns the map tile in which the position lies
-  MapContainer *findMapContainerByGeographicCoordinates(MapPosition pos, MapContainer *preferredMapContainer, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, MapPosition &bestPos, double &distToNearestLngScale, double &distToNearestLatScale, bool &betterMapContainerFound);
-
 public:
 
   // Constructurs and destructor
-  MapSource(bool isScratchOnly=false, bool doNotDelete=false);
+  MapSource();
   virtual ~MapSource();
 
-  // Destructs the objects correctly (i.e., if memory has not been allocated by new)
-  static void destruct(MapSource *object);
-
   // Initialzes the source
-  bool init();
+  virtual bool init() = 0;
 
   // Clears the source
-  void deinit();
+  virtual void deinit();
 
   // Returns the map tile in which the position lies
-  MapTile *findMapTileByGeographicCoordinates(MapPosition pos, Int zoomLevel, bool lockZoomLevel, MapContainer *preferredMapContainer=NULL);
+  virtual MapTile *findMapTileByGeographicCoordinates(MapPosition pos, Int zoomLevel, bool lockZoomLevel, MapContainer *preferredMapContainer=NULL) = 0;
 
   // Returns the map tile that lies in a given area
-  MapTile *findMapTileByGeographicArea(MapArea area, MapTile *preferredNeigbor, MapContainer* &usedMapContainer);
+  virtual MapTile *findMapTileByGeographicArea(MapArea area, MapTile *preferredNeigbor, MapContainer* &usedMapContainer) = 0;
 
   // Returns a list of map containers that overlap the given area
-  std::list<MapContainer*> findMapContainersByGeographicArea(MapArea area);
+  virtual std::list<MapContainer*> findMapContainersByGeographicArea(MapArea area) = 0;
 
-  // Store the contents of the object in a binary file
-  void store(std::ofstream *ofs, Int &memorySize);
-
-  // Reads the contents of the object from a binary file
-  static MapSource *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, std::string folder);
+  // Initializes the progress bar
+  void openProgress(std::string title, Int valueMax);
 
   // Increases the progress by one tep
   void increaseProgress();
+
+  // Closes the progress bar
+  void closeProgress();
+
+  // Finds out which type of source to create
+  static MapSourceTypes determineType();
 
   // Getters and setters
   Int getMapTileLength() const

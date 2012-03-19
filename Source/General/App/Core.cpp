@@ -245,7 +245,15 @@ bool Core::init() {
     return false;
   }
   DEBUG("initializing mapSource",NULL);
-  if (!(mapSource=new MapSource())) {
+  switch(MapSource::determineType()) {
+    case MapOfflineSourceType:
+      mapSource=new MapOfflineSource();
+      break;
+    default:
+      FATAL("map source type not yet supported",NULL);
+      break;
+  }
+  if (!mapSource) {
     FATAL("can not create map source object",NULL);
     return false;
   }
