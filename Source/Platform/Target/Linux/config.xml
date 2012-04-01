@@ -415,12 +415,12 @@
       <Primitive name="Map scale">
         <type description="Kind of widget">scale</type>
         <Portrait>
-          <x description="X position in percent">40</x>
+          <x description="X position in percent">35</x>
           <y description="Y position in percent">81</y>
           <z description="Z position in pixel">0</z>
         </Portrait>
         <Landscape>
-          <x description="X position in percent">42</x>
+          <x description="X position in percent">37</x>
           <y description="Y position in percent">88</y>
           <z description="Z position in pixel">0</z>
         </Landscape>
@@ -444,8 +444,8 @@
     </Page>
   </Widget>
   <Map>
-    <folder description="Folder that contains calibrated maps">OCM_DDorf</folder>
-    <neighborDegreeTolerance description="// Maximum allowed difference in degrees to classify a tile as a neighbor">1e-07</neighborDegreeTolerance>
+    <folder description="Folder that contains calibrated maps">OpenCycleMap</folder>
+    <neighborPixelTolerance description="// Maximum allowed difference in pixels to classify a tile as a neighbor">2</neighborPixelTolerance>
     <tileLength description="Width and height of a tile.">256</tileLength>
     <tileCacheSize description="Number of map tiles to cache.">128</tileCacheSize>
     <initDistance description="Distance to the max/min values of integer that triggers a initialization of the map to avoid overflows.">65536</initDistance>
@@ -454,16 +454,16 @@
     <returnToLocation description="Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed.">1</returnToLocation>
     <zoomLevelLock description="Indicates if the zoom level of the map shall not be changed when zooming.">0</zoomLevelLock>
     <LastPosition>
-      <folder description="Folder that contains the map images.">OCM_DDorf</folder>
-      <lng description="Longitude of the last position in the map.">6.76586</lng>
-      <lat description="Latitude of the last position in the map.">51.2411</lat>
-      <latScale description="Latitude scale of the last position in the map.">18401.8</latScale>
-      <lngScale description="Longitude scale of the last position in the map.">11515.5</lngScale>
-      <zoom description="Zoom value used in the graphic engine when the last position was active.">3.96897</zoom>
+      <folder description="Folder that contains the map images.">OpenCycleMap</folder>
+      <lng description="Longitude of the last position in the map.">6.77344</lng>
+      <lat description="Latitude of the last position in the map.">51.2342</lat>
+      <latScale description="Latitude scale of the last position in the map.">5730.68</latScale>
+      <lngScale description="Longitude scale of the last position in the map.">2707.78</lngScale>
+      <zoom description="Zoom value used in the graphic engine when the last position was active.">1.0889</zoom>
       <angle description="Angle value used in the graphic engine when the last position was active.">0</angle>
-      <zoomLevel description="Map zoom level used when the last position was active.">1</zoomLevel>
+      <zoomLevel description="Map zoom level used when the last position was active.">13</zoomLevel>
     </LastPosition>
-  </Map>
+  <mapContainerCacheSize description="Number of map containers to remember if the source is using a cache.">256</mapContainerCacheSize></Map>
   <Navigation>
     <locationOutdatedThreshold description="Duration in milliseconds after which a position will be discarded.">120000</locationOutdatedThreshold>
     <locationSignificantlyInaccurateThreshold description="Distance in meter that indicates a significantly less accurate position.">100</locationSignificantlyInaccurateThreshold>
@@ -475,6 +475,6 @@
       <blue description="Blue component [0-255] of the recorded track">0</blue>
       <alpha description="Alpha component [0-255] of the recorded track">255</alpha>
     </trackColor>
-    <lastRecordedTrackFilename description="Filename of the last recorded track.">track-20120319-084931.gpx</lastRecordedTrackFilename>
+    <lastRecordedTrackFilename description="Filename of the last recorded track.">track-20120331-224846.gpx</lastRecordedTrackFilename>
   </Navigation>
 </GDC>
