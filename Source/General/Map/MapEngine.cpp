@@ -126,23 +126,33 @@ void MapEngine::initMap()
   core->getGraphicEngine()->unlockPos();
 
   // Set the current position
-  std::string lastMapFolder=core->getConfigStore()->getStringValue("Map/LastPosition","folder","Folder that contains the map images.","<unknown>");
-  if (lastMapFolder==core->getMapSource()->getFolder()) {
+  std::string lastMapFolder=core->getConfigStore()->getStringValue("Map/LastPosition","folder","Last used map folder.","<unknown>");
+  if (lastMapFolder!="<unknown>") {
     lockMapPos();
     mapPos.setLng(core->getConfigStore()->getDoubleValue("Map/LastPosition","lng","Longitude of the last position in the map.",mapPos.getLng()));
     mapPos.setLat(core->getConfigStore()->getDoubleValue("Map/LastPosition","lat","Latitude of the last position in the map.",mapPos.getLat()));
     mapPos.setLatScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","latScale","Latitude scale of the last position in the map.",mapPos.getLatScale()));
     mapPos.setLngScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","lngScale","Longitude scale of the last position in the map.",mapPos.getLatScale()));
     unlockMapPos();
+    core->getMapSource()->lockAccess();
+    MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
+    core->getMapSource()->unlockAccess();
+    if (tile==NULL) {
+      lockMapPos();
+      mapPos=core->getMapSource()->getCenterPosition();
+      unlockMapPos();
+    }
+  } else {
+    lockMapPos();
+    mapPos=core->getMapSource()->getCenterPosition();
+    unlockMapPos();
+  }
+  if (lastMapFolder==core->getMapSource()->getFolder()) {
     visPos.setZoom(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoom","Zoom value used in the graphic engine when the last position was active.",visPos.getZoom()));
     visPos.setAngle(core->getConfigStore()->getDoubleValue("Map/LastPosition","angle","Angle value used in the graphic engine when the last position was active.",visPos.getAngle()));
     lockDisplayArea();
     displayArea.setZoomLevel(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoomLevel","Map zoom level used when the last position was active.",this->displayArea.getZoomLevel()));
     unlockDisplayArea();
-  } else {
-    lockMapPos();
-    mapPos=core->getMapSource()->getCenterPosition();
-    unlockMapPos();
   }
 
   // Update the visual position in the graphic engine
