@@ -172,8 +172,8 @@ Int Screen::getHeight() {
 
 // Gets the orientation of the screen
 GraphicScreenOrientation Screen::getOrientation() {
-  return graphicScreenOrientationProtrait;
-  //return graphicScreenOrientationLandscape;
+  //return graphicScreenOrientationProtrait;
+  return graphicScreenOrientationLandscape;
 }
 
 // Inits the screen

@@ -26,17 +26,29 @@
 
 namespace GEODISCOVERER {
 
+typedef enum { MapCalibratorTypeLinear=0, MapCalibratorTypeMercator=1 } MapCalibratorType;
+
 class MapCalibrator {
 
 protected:
 
+  MapCalibratorType type; // Type of calibrator
   bool doNotDelete; // Indicates if the object has been alloacted by an own memory handler
   std::list<MapPosition *> calibrationPoints; // List of calibration points
   ThreadMutexInfo *accessMutex; // Mutex for using the set*Coordinates methods
 
+  // Finds the nearest n calibration points
+  void sortCalibrationPoints(MapPosition &pos, bool usePictureCoordinates);
+
 public:
 
-  // Constructors and desctructor
+  // Creates a new map calibrator of the given type by reserving new memory
+  static MapCalibrator *newMapCalibrator(MapCalibratorType type);
+
+  // Creates a new map calibrator of the given type by using given memory
+  static MapCalibrator *newMapCalibrator(MapCalibratorType type, char *&objectData, Int &objectSize);
+
+  // Constructors and destructor
   MapCalibrator(bool doNotDelete=false);
   virtual ~MapCalibrator();
 
@@ -47,10 +59,13 @@ public:
   void addCalibrationPoint(MapPosition pos);
 
   // Updates the geographic coordinates (longitude and latitude) from the given picture coordinates
-  void setGeographicCoordinates(MapPosition &pos);
+  virtual void setGeographicCoordinates(MapPosition &pos) = 0;
 
   // Updates the picture coordinates from the given geographic coordinates
-  bool setPictureCoordinates(MapPosition &pos);
+  virtual bool setPictureCoordinates(MapPosition &pos) = 0;
+
+  // Compute the distance in pixels for the given points
+  double computePixelDistance(MapPosition a, MapPosition b);
 
   // Returns the number of calibration points
   Int numberOfCalibrationPoints() const
@@ -68,6 +83,10 @@ public:
   std::list<MapPosition*> *getCalibrationPoints()
   {
       return &calibrationPoints;
+  }
+
+  MapCalibratorType getType() const {
+    return type;
   }
 
 };

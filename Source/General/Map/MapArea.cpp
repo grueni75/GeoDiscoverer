@@ -59,4 +59,12 @@ bool MapArea::operator!=(const MapArea &rhs)
   return (!(*this==rhs));
 }
 
+// Getters and setters
+MapPosition MapArea::getCenterPos() {
+  MapPosition pos;
+  pos.setLat(latSouth+(latNorth-latSouth)/2);
+  pos.setLng(lngWest+(lngEast-lngWest)/2);
+  return pos;
+}
+
 }

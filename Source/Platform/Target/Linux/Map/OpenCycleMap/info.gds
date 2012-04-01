@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GDS version="1.0">
+  <tileServerURL>http://a.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png</tileServerURL>
+  <minZoomLevel>0</minZoomLevel>
+  <maxZoomLevel>18</maxZoomLevel>
+</GDS>

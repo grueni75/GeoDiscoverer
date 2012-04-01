@@ -38,6 +38,10 @@ MapContainer::MapContainer(bool doNotDelete) {
   this->searchTree=NULL;
   this->leftChild=NULL;
   this->rightChild=NULL;
+  this->imageFileAvailable=true;
+  this->x=0;
+  this->y=0;
+  this->overlayGraphicInvalid=false;
 
 }
 
@@ -395,15 +399,7 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
 
   // Set some variables
   mapFileFolder=fileFolder;
-  calibrationFileName=fileBasename + "." + fileExtension;
-  calibrationFilePath=mapFileFolder + "/" + calibrationFileName;
-
-  // Create a new calibrator object
-  mapCalibrator=new MapCalibrator();
-  if (!mapCalibrator) {
-    FATAL("can not create map calibrator",NULL);
-    return false;
-  }
+  setCalibrationFileName(fileBasename + "." + fileExtension);
 
   /* GPS Tuner file format?
   if (fileExtension=="gmi") {
@@ -470,7 +466,7 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
   }
 
   // Update the search structures
-  createSearchTree(NULL,false,PictureBorderTop,mapTilesIndexByMapTop);
+  createSearchTree();
 
   // Create a new calibration file if the used one was not the native one
   if (fileExtension!="gdm") {
@@ -481,6 +477,11 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
 
   // Success!
   return true;
+}
+
+// Creates the search tree
+void MapContainer::createSearchTree() {
+  createSearchTree(NULL,false,PictureBorderTop,mapTilesIndexByMapTop);
 }
 
 // Returns the file extension of supported calibration files
@@ -626,7 +627,11 @@ double MapContainer::getBorder(GeographicBorder border)
     case GeographicBorderLngWest:
       return getLngWest();
       break;
+    default:
+      FATAL("unsupported border",NULL);
+      break;
   }
+  return 0;
 }
 
 // Stores the contents of the search tree in a binary file
@@ -668,16 +673,7 @@ void MapContainer::store(std::ofstream *ofs, Int &memorySize) {
   Storage::storeString(ofs,imageFileName);
   Storage::storeString(ofs,imageFilePath);
   Storage::storeInt(ofs,zoomLevel);
-  switch(imageType) {
-    case ImageTypeJPEG:
-      Storage::storeInt(ofs,0);
-      break;
-    case ImageTypePNG:
-      Storage::storeInt(ofs,1);
-      break;
-    default:
-      FATAL("image type not suppported",NULL);
-  }
+  Storage::storeInt(ofs,imageType);
   Storage::storeString(ofs,calibrationFileName);
   Storage::storeString(ofs,calibrationFilePath);
   mapCalibrator->store(ofs,memorySize);
@@ -744,7 +740,7 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize, char *&ob
   // Check if the class has changed
   Int size=sizeof(MapContainer);
 #ifdef TARGET_LINUX
-  if (size!=280) {
+  if (size!=296) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return NULL;
   }
@@ -778,18 +774,7 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize, char *&ob
   Storage::retrieveInt(cacheData,cacheSize,mapContainer->zoomLevel);
   Int t;
   Storage::retrieveInt(cacheData,cacheSize,t);
-  switch(t) {
-    case 0:
-      mapContainer->imageType=ImageTypeJPEG;
-      break;
-    case 1:
-      mapContainer->imageType=ImageTypePNG;
-      break;
-    default:
-      FATAL("image type not suppported",NULL);
-      MapContainer::destruct(mapContainer);
-      return NULL;
-  }
+  mapContainer->imageType=(ImageType)t;
   Storage::retrieveString(cacheData,cacheSize,mapContainer->calibrationFileName);
   Storage::retrieveString(cacheData,cacheSize,mapContainer->calibrationFilePath);
   //PROFILE_ADD("field read part one");
@@ -841,6 +826,26 @@ void MapContainer::destruct(MapContainer *object) {
   } else {
     delete object;
   }
+}
+
+// Checks if the container contains tiles that are currently used for screen drawing
+bool MapContainer::isDrawn() {
+  for(std::vector<MapTile*>::iterator i=mapTiles.begin();i!=mapTiles.end();i++) {
+    if ((*i)->isDrawn())
+      return true;
+  }
+  return false;
+}
+
+// Finds out the last access time
+TimestampInSeconds MapContainer::getLastAccess() {
+  TimestampInSeconds newestAccess=0;
+  for(std::vector<MapTile*>::iterator i=mapTiles.begin();i!=mapTiles.end();i++) {
+    if ((*i)->getLastAccess()>newestAccess) {
+      newestAccess=(*i)->getLastAccess();
+    }
+  }
+  return newestAccess;
 }
 
 }

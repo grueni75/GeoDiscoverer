@@ -26,13 +26,13 @@
 
 namespace GEODISCOVERER {
 
-typedef enum {WidgetPrimitiveType, WidgetButtonType, WidgetCheckboxType, WidgetMeterType, WidgetScaleType} WidgetTypes;
+typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale} WidgetType;
 
 class WidgetPrimitive : public GraphicRectangle {
 
 protected:
 
-  WidgetTypes widgetType;       // Type of widget
+  WidgetType widgetType;       // Type of widget
   GraphicColor activeColor;     // Color if the widget is active
   GraphicColor inactiveColor;   // Color if the widget is inactive
   bool isFirstTimeSelected;     // Indicates that the widget has just been selected
@@ -60,12 +60,12 @@ public:
       return isHit;
   }
 
-  WidgetTypes getWidgetType() const
+  WidgetType getWidgetType() const
   {
       return widgetType;
   }
 
-  void setWidgetType(WidgetTypes widgetType)
+  void setWidgetType(WidgetType widgetType)
   {
       this->widgetType = widgetType;
   }

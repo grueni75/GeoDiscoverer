@@ -55,6 +55,166 @@ NavigationPath::~NavigationPath() {
   core->getGraphicEngine()->unlockPathAnimators();
 }
 
+// Updates the visualization of the tile
+void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, MapPosition prevPos, MapPosition prevArrowPos, MapPosition currentPos) {
+
+  // Compute the search boundary
+  double lngEast,lngWest;
+  lngEast=currentPos.getLng();
+  if (prevPos.getLng()>lngEast) {
+    lngWest=lngEast;
+    lngEast=prevPos.getLng();
+  } else {
+    lngWest=prevPos.getLng();
+  }
+  double latNorth,latSouth;
+  latNorth=currentPos.getLat();
+  if (prevPos.getLat()>latNorth) {
+    latSouth=latNorth;
+    latNorth=prevPos.getLat();
+  } else {
+    latSouth=prevPos.getLat();
+  }
+
+  // Find all map tiles that overlap with this segment
+  std::list<MapContainer*> foundContainers;
+  MapArea area;
+  area.setZoomLevel(visualization->getZoomLevel());
+  double latExtend=pathWidth/visualization->getLatScale();
+  double lngExtend=pathWidth/visualization->getLngScale();
+  area.setLatNorth(latNorth+latExtend);
+  area.setLatSouth(latSouth-latExtend);
+  area.setLngWest(lngWest-lngExtend);
+  area.setLngEast(lngEast+lngExtend);
+  core->getMapSource()->lockAccess();
+  if (!mapContainers) {
+    foundContainers=core->getMapSource()->findMapContainersByGeographicArea(area);
+  } else {
+    for (std::list<MapContainer*>::iterator i=mapContainers->begin();i!=mapContainers->end();i++) {
+      if ((area.getLngEast()>=(*i)->getLngWest())&&(area.getLngWest()<=(*i)->getLngEast())&&
+          (area.getLatNorth()>=(*i)->getLatSouth())&&(area.getLatSouth()<=(*i)->getLatNorth())) {
+        foundContainers.push_back(*i);
+      }
+    }
+  }
+
+  // Go through all of them
+  for(std::list<MapContainer*>::iterator j=foundContainers.begin();j!=foundContainers.end();j++) {
+
+    // Compute the coordinates of the segment within the container
+    MapContainer *mapContainer=*j;
+    MapPosition prevArrowPos=prevPos;
+    bool overflowOccured=false;
+    if (!mapContainer->getMapCalibrator()->setPictureCoordinates(prevPos)) {
+      overflowOccured=true;
+    }
+    if (!mapContainer->getMapCalibrator()->setPictureCoordinates(prevArrowPos)) {
+      overflowOccured=true;
+    }
+    if (!mapContainer->getMapCalibrator()->setPictureCoordinates(currentPos)) {
+      overflowOccured=true;
+    }
+    if (!overflowOccured) {
+
+      // Find all map tiles that overlap the area defined by the line segment
+      if (prevPos.getX()>currentPos.getX()) {
+        area.setXEast(prevPos.getX());
+        area.setXWest(currentPos.getX());
+      } else {
+        area.setXWest(prevPos.getX());
+        area.setXEast(currentPos.getX());
+      }
+      if (prevPos.getY()>currentPos.getY()) {
+        area.setYSouth(prevPos.getY());
+        area.setYNorth(currentPos.getY());
+      } else {
+        area.setYNorth(prevPos.getY());
+        area.setYSouth(currentPos.getY());
+      }
+      area.setXEast(area.getXEast()+pathWidth);
+      area.setXWest(area.getXWest()-pathWidth);
+      area.setYNorth(area.getYNorth()-pathWidth);
+      area.setYSouth(area.getYSouth()+pathWidth);
+      std::list<MapTile*> mapTiles=mapContainer->findMapTilesByPictureArea(area);
+
+      // Go through all of them
+      for(std::list<MapTile*>::iterator k=mapTiles.begin();k!=mapTiles.end();k++) {
+
+        // Check if the map tile has already graphic objects for this path
+        NavigationPathTileInfo *info=visualization->findTileInfo(*k);
+        GraphicLine *line=info->getGraphicLine();
+        GraphicObject *tileVisualization=(*k)->getVisualization();
+        tileVisualization->lockAccess();
+        if (!line) {
+
+          // Create a new line and add it to the tile
+          line=new GraphicLine(0,pathWidth);
+          if (!line) {
+            FATAL("can not create graphic line object",NULL);
+            return;
+          }
+          line->setAnimator(&animator);
+          line->setZ(1); // ensure that line is drawn after tile texture
+          line->setCutEnabled(true);
+          line->setCutWidth((*k)->getWidth());
+          line->setCutHeight((*k)->getHeight());
+          info->setGraphicLine(line);
+          info->setGraphicLineKey(tileVisualization->addPrimitive(line));
+
+        }
+
+        // Add the stroke to the line
+        Int x1=prevPos.getX()-(*k)->getMapX(0);
+        Int y1=(*k)->getHeight()-(prevPos.getY()-(*k)->getMapY(0));
+        Int x2=currentPos.getX()-(*k)->getMapX(0);
+        Int y2=(*k)->getHeight()-(currentPos.getY()-(*k)->getMapY(0));
+        line->addStroke(x1,y1,x2,y2);
+
+        // Add arrow if necessary
+        if (currentPos.getHasBearing()) {
+
+          // Get the existing rectangle list or create a new one
+          GraphicRectangleList *rectangleList=info->getGraphicRectangeList();
+          if (!rectangleList) {
+
+            // Create a new rectangle list and add it to the tile
+            rectangleList=new GraphicRectangleList(0);
+            if (!rectangleList) {
+              FATAL("can not create graphic rectangle list object",NULL);
+              return;
+            }
+            rectangleList->setAnimator(&animator);
+            rectangleList->setZ(2); // ensure that rectangle is drawn after line texture
+            rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
+            rectangleList->setDestroyTexture(false);
+            rectangleList->setCutEnabled(true);
+            rectangleList->setCutWidth((*k)->getWidth());
+            rectangleList->setCutHeight((*k)->getHeight());
+            Int arrowWidth=core->getGraphicEngine()->getPathDirectionIcon()->getWidth();
+            Int arrowHeight=core->getGraphicEngine()->getPathDirectionIcon()->getHeight();
+            rectangleList->setRadius(sqrt((double)(arrowWidth*arrowWidth/4+arrowHeight*arrowHeight/4)));
+            info->setGraphicRectangleList(rectangleList);
+            info->setGraphicRectangleListKey(tileVisualization->addPrimitive(rectangleList));
+          }
+
+          // Add the arrow
+          Int distX=x2-x1;
+          Int distY=y2-y1;
+          double dist=sqrt((double)(distX*distX+distY*distY));
+          double angle=FloatingPoint::computeAngle(distX,distY);
+          double x=x1+dist/2*cos(angle);
+          double y=y1+dist/2*sin(angle);
+          rectangleList->addRectangle(x,y,angle);
+
+        }
+        tileVisualization->unlockAccess();
+
+      }
+    }
+  }
+  core->getMapSource()->unlockAccess();
+}
+
 // Adds a point to the path
 void NavigationPath::addEndPosition(MapPosition pos) {
 
@@ -82,179 +242,62 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   isStored=false;
 
   // Update the visualization for each zoom level
-  for(std::list<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
+  for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     NavigationPathVisualization *visualization=*i;
+
+    // Get the calibrator for this point
+    core->getMapSource()->lockAccess();
+    bool deleteCalibrator;
+    MapCalibrator *calibrator=NULL;
+    if (pos!=NavigationPath::getPathInterruptedPos())
+      calibrator=visualization->findCalibrator(pos,deleteCalibrator);
 
     // Just add this point if the prev point or the current point interrupted the line
     if ((visualization->getPrevLinePoint()==NavigationPath::getPathInterruptedPos())||(pos==NavigationPath::getPathInterruptedPos())) {
-      visualization->setPrevLinePoint(pos);
-      visualization->setPrevArrowPoint(pos);
+      if ((pos==NavigationPath::getPathInterruptedPos())||(calibrator!=NULL)) {
+        visualization->addPoint(pos);
+      }
+      core->getMapSource()->unlockAccess();
+
     } else {
 
       // Check if the point is far enough away from the previous point for this zoom level
-      double length=visualization->computePixelDistance(visualization->getPrevLinePoint(),pos);
-      if (length>=pathMinSegmentLength) {
+      if (!calibrator) {
 
-        // Check if an arrow needs to be added
-        bool addArrow=false;
-        double arrowDistance=visualization->computePixelDistance(visualization->getPrevArrowPoint(),pos);
-        if (arrowDistance>=pathMinDirectionDistance) {
-          addArrow=true;
-        }
+        // Position can not be found in map, interrupt it
+        visualization->addPoint(NavigationPath::getPathInterruptedPos());
+        core->getMapSource()->unlockAccess();
 
-        // Compute the search boundary
-        double lngEast,lngWest;
-        lngEast=pos.getLng();
-        if (visualization->getPrevLinePoint().getLng()>lngEast) {
-          lngWest=lngEast;
-          lngEast=visualization->getPrevLinePoint().getLng();
+      } else {
+        double length=calibrator->computePixelDistance(visualization->getPrevLinePoint(),pos);
+        if (length>=pathMinSegmentLength) {
+
+          // Check if an arrow needs to be added
+          bool addArrow=false;
+          double arrowDistance=calibrator->computePixelDistance(visualization->getPrevArrowPoint(),pos);
+          core->getMapSource()->unlockAccess();
+          if (arrowDistance>=pathMinDirectionDistance) {
+            pos.setHasBearing(true);  // bearing flag is used to indicate that an arrow must be added
+          } else {
+            pos.setHasBearing(false);
+          }
+
+          // Add a line stroke to all matching tiles
+          updateTileVisualization(NULL,visualization,visualization->getPrevLinePoint(),visualization->getPrevArrowPoint(),pos);
+
+          // Update the previous point
+          visualization->addPoint(pos);
+
         } else {
-          lngWest=visualization->getPrevLinePoint().getLng();
+          core->getMapSource()->unlockAccess();
         }
-        double latNorth,latSouth;
-        latNorth=pos.getLat();
-        if (visualization->getPrevLinePoint().getLat()>latNorth) {
-          latSouth=latNorth;
-          latNorth=visualization->getPrevLinePoint().getLat();
-        } else {
-          latSouth=visualization->getPrevLinePoint().getLat();
-        }
-
-        // Find all map tiles that overlap with this segment
-        MapArea area;
-        area.setZoomLevel(visualization->getZoomLevel());
-        double latExtend=pathWidth/visualization->getLatScale();
-        double lngExtend=pathWidth/visualization->getLngScale();
-        area.setLatNorth(latNorth+latExtend);
-        area.setLatSouth(latSouth-latExtend);
-        area.setLngWest(lngWest-lngExtend);
-        area.setLngEast(lngEast+lngExtend);
-        std::list<MapContainer*> mapContainers=core->getMapSource()->findMapContainersByGeographicArea(area);
-
-        // Go through all of them
-        for(std::list<MapContainer*>::iterator j=mapContainers.begin();j!=mapContainers.end();j++) {
-
-          // Compute the coordinates of the segment within the container
-          MapContainer *mapContainer=*j;
-          MapPosition prevPos=visualization->getPrevLinePoint();
-          MapPosition prevArrowPos=visualization->getPrevArrowPoint();
-          MapPosition currentPos=pos;
-          bool overflowOccured=false;
-          if (!mapContainer->getMapCalibrator()->setPictureCoordinates(prevPos)) {
-            overflowOccured=true;
-          }
-          if (!mapContainer->getMapCalibrator()->setPictureCoordinates(prevArrowPos)) {
-            overflowOccured=true;
-          }
-          if (!mapContainer->getMapCalibrator()->setPictureCoordinates(currentPos)) {
-            overflowOccured=true;
-          }
-          if (!overflowOccured) {
-
-            // Find all map tiles that overlap the area defined by the line segment
-            if (prevPos.getX()>currentPos.getX()) {
-              area.setXEast(prevPos.getX());
-              area.setXWest(currentPos.getX());
-            } else {
-              area.setXWest(prevPos.getX());
-              area.setXEast(currentPos.getX());
-            }
-            if (prevPos.getY()>currentPos.getY()) {
-              area.setYSouth(prevPos.getY());
-              area.setYNorth(currentPos.getY());
-            } else {
-              area.setYNorth(prevPos.getY());
-              area.setYSouth(currentPos.getY());
-            }
-            area.setXEast(area.getXEast()+pathWidth);
-            area.setXWest(area.getXWest()-pathWidth);
-            area.setYNorth(area.getYNorth()-pathWidth);
-            area.setYSouth(area.getYSouth()+pathWidth);
-            std::list<MapTile*> mapTiles=mapContainer->findMapTilesByPictureArea(area);
-
-            // Go through all of them
-            for(std::list<MapTile*>::iterator k=mapTiles.begin();k!=mapTiles.end();k++) {
-
-              // Check if the map tile has already graphic objects for this path
-              MapTile *mapTile=*k;
-              NavigationPathTileInfo *info=visualization->findTileInfo(mapTile);
-              GraphicLine *line=info->getGraphicLine();
-              GraphicObject *tileVisualization=mapTile->getVisualization();
-              tileVisualization->lockAccess();
-              if (!line) {
-
-                // Create a new line and add it to the tile
-                line=new GraphicLine(0,pathWidth);
-                if (!line) {
-                  FATAL("can not create graphic line object",NULL);
-                  return;
-                }
-                line->setAnimator(&animator);
-                line->setZ(1); // ensure that line is drawn after tile texture
-                line->setCutEnabled(true);
-                line->setCutWidth(mapTile->getWidth());
-                line->setCutHeight(mapTile->getHeight());
-                info->setGraphicLine(line);
-                info->setGraphicLineKey(tileVisualization->addPrimitive(line));
-
-              }
-
-              // Add the stroke to the line
-              Int x1=prevPos.getX()-mapTile->getMapX(0);
-              Int y1=mapTile->getHeight()-(prevPos.getY()-mapTile->getMapY(0));
-              Int x2=currentPos.getX()-mapTile->getMapX(0);
-              Int y2=mapTile->getHeight()-(currentPos.getY()-mapTile->getMapY(0));
-              line->addStroke(x1,y1,x2,y2);
-
-              // Add arrow if necessary
-              if (addArrow) {
-
-                // Get the existing rectangle list or create a new one
-                GraphicRectangleList *rectangleList=info->getGraphicRectangeList();
-                if (!rectangleList) {
-
-                  // Create a new rectangle list and add it to the tile
-                  rectangleList=new GraphicRectangleList(0);
-                  if (!rectangleList) {
-                    FATAL("can not create graphic rectangle list object",NULL);
-                    return;
-                  }
-                  rectangleList->setAnimator(&animator);
-                  rectangleList->setZ(2); // ensure that rectangle is drawn after line texture
-                  rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
-                  rectangleList->setDestroyTexture(false);
-                  rectangleList->setCutEnabled(true);
-                  rectangleList->setCutWidth(mapTile->getWidth());
-                  rectangleList->setCutHeight(mapTile->getHeight());
-                  Int arrowWidth=core->getGraphicEngine()->getPathDirectionIcon()->getWidth();
-                  Int arrowHeight=core->getGraphicEngine()->getPathDirectionIcon()->getHeight();
-                  rectangleList->setRadius(sqrt((double)(arrowWidth*arrowWidth/4+arrowHeight*arrowHeight/4)));
-                  info->setGraphicRectangleList(rectangleList);
-                  info->setGraphicRectangleListKey(tileVisualization->addPrimitive(rectangleList));
-                }
-
-                // Add the arrow
-                Int distX=x2-x1;
-                Int distY=y2-y1;
-                double dist=sqrt((double)(distX*distX+distY*distY));
-                double angle=FloatingPoint::computeAngle(distX,distY);
-                double x=x1+dist/2*cos(angle);
-                double y=y1+dist/2*sin(angle);
-                rectangleList->addRectangle(x,y,angle);
-
-              }
-              tileVisualization->unlockAccess();
-            }
-          }
-        }
-
-        // Update the previous point
-        visualization->setPrevLinePoint(pos);
-        if (addArrow)
-          visualization->setPrevArrowPoint(pos);
-
       }
     }
+
+    // Delete the calibrator if required
+    if ((deleteCalibrator)&&(calibrator))
+      delete calibrator;
+
   }
 }
 
@@ -262,7 +305,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
 void NavigationPath::deinit() {
 
   // Delete the zoom level visualization
-  for(std::list<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
+  for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     delete *i;
   }
   zoomLevelVisualizations.clear();
@@ -293,26 +336,28 @@ void NavigationPath::init() {
   animator.setBlinkAnimation(blinkMode,highlightColor);
 
   // Create a visualization object for each zoom level
-  std::vector<MapContainerTreeNode*> *zoomLevelSearchTrees=core->getMapSource()->getZoomLevelSearchTrees();
-  for(Int zoomLevel=1;zoomLevel<zoomLevelSearchTrees->size();zoomLevel++) {
+  core->getMapSource()->lockAccess();
+  for(Int zoomLevel=1;zoomLevel<core->getMapSource()->getZoomLevelCount();zoomLevel++) {
     NavigationPathVisualization *visualization=new NavigationPathVisualization();
-    MapContainerTreeNode *searchTree=(*zoomLevelSearchTrees)[zoomLevel];
     if (!visualization) {
       FATAL("can not create navigation path visualization object",NULL);
     }
     visualization->setZoomLevel(zoomLevel);
-    visualization->setLatScale(searchTree->getContents()->getLatScale());
-    visualization->setLngScale(searchTree->getContents()->getLngScale());
+    double latScale, lngScale;
+    core->getMapSource()->getScales(zoomLevel,latScale,lngScale);
+    visualization->setLatScale(latScale);
+    visualization->setLngScale(lngScale);
     zoomLevelVisualizations.push_back(visualization);
+    //DEBUG("z=%d latScale=%e lngScale=%e",zoomLevel,latScale,lngScale);
   }
-
+  core->getMapSource()->unlockAccess();
 }
 
 // Indicates that textures and buffers have been invalidated
 void NavigationPath::graphicInvalidated() {
 
   // Invalidate all zoom levels
-  for(std::list<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
+  for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     (*i)->graphicInvalidated();
   }
 
@@ -322,8 +367,78 @@ void NavigationPath::graphicInvalidated() {
 void NavigationPath::optimizeGraphic() {
 
   // Go through all zoom levels
-  for(std::list<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
+  for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     (*i)->optimizeGraphic();
+  }
+
+}
+
+// Updates the visualization of the given containers
+void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
+
+  std::list<MapContainer*> mapContainersOfSameZoomLevel;
+  Int zoomLevel=-1;
+
+  // Go through all containers
+  // The mapContainers list is sorted according to the zoom level
+  std::list<MapContainer*>::iterator j=mapContainers->begin();
+  bool more_entries=true;
+  while(more_entries) {
+
+    // New zoom level?
+    if ((j==mapContainers->end())||(zoomLevel!=(*j)->getZoomLevel())) {
+      if (zoomLevel!=-1) {
+
+        // Process the so far collected containers
+        MapPosition prevPoint=NavigationPath::getPathInterruptedPos();
+        MapPosition prevArrowPoint;
+        NavigationPathVisualization *visualization = zoomLevelVisualizations[zoomLevel-1];
+        std::list<MapPosition> *points = visualization->getPoints();
+        for(std::list<MapPosition>::iterator i=points->begin();i!=points->end();i++) {
+
+          // Handle path interrupted positions
+          if ((*i==NavigationPath::getPathInterruptedPos())||(prevPoint==NavigationPath::getPathInterruptedPos())) {
+            prevArrowPoint=*i;
+            prevPoint=*i;
+          } else {
+
+            // Add visualization
+            updateTileVisualization(&mapContainersOfSameZoomLevel,visualization,prevPoint,prevArrowPoint,*i);
+
+            // Remember the last point
+            prevPoint=*i;
+            if ((*i).getHasBearing())
+              prevArrowPoint=*i;
+          }
+        }
+      }
+
+      // Create a new empty list
+      mapContainersOfSameZoomLevel.clear();
+    }
+
+    // Add the current container to the list
+    if (j==mapContainers->end()) {
+      more_entries=false;
+    } else {
+      mapContainersOfSameZoomLevel.push_back(*j);
+      zoomLevel=(*j)->getZoomLevel();
+      j++;
+    }
+  }
+}
+
+// Removes the visualization of the given container
+void NavigationPath::removeVisualization(MapContainer* mapContainer) {
+
+  std::list<MapContainer*> mapContainersOfSameZoomLevel;
+  Int zoomLevel=-1;
+
+  // Remove the tile from the visualization
+  NavigationPathVisualization *visualization=zoomLevelVisualizations[mapContainer->getZoomLevel()-1];
+  std::vector<MapTile*> *mapTiles=mapContainer->getMapTiles();
+  for(std::vector<MapTile*>::iterator i=mapTiles->begin();i!=mapTiles->end();i++) {
+    visualization->removeTileInfo(*i);
   }
 
 }

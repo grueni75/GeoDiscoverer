@@ -78,6 +78,11 @@ MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool 
 }
 
 MapTile::~MapTile() {
+  visualization.lockAccess();
+  if (visualization.getPrimitiveMap()->size()!=1) {
+    FATAL("expected only the rectangle in the visualization object",NULL);
+  }
+  visualization.unlockAccess();
 }
 
 // Does the computationly intensive part of the initialization
@@ -179,7 +184,11 @@ Int MapTile::getMapBorder(PictureBorder border)
     case PictureBorderRight:
       return getMapX(1);
       break;
+    default:
+      FATAL("unsupported border",NULL);
+      break;
   }
+  return 0;
 }
 
 // Store the contents of the object in a binary file
@@ -277,9 +286,11 @@ MapTile *MapTile::retrieve(char *&cacheData, Int &cacheSize, char *&objectData, 
 // Compares the latitude and longitude positions with the one of the given tile
 bool MapTile::isNeighbor(MapTile *t, Int ownEdgeX, Int ownEdgeY, Int foreignEdgeX, Int foreignEdgeY) const {
   double diffLat=fabs(getLatY(ownEdgeY)-t->getLatY(foreignEdgeY));
+  double diffX=diffLat*latScale;
   double diffLng=fabs(getLngX(ownEdgeX)-t->getLngX(foreignEdgeX));
-  //DEBUG("diffLat=%e diffLng=%e",diffLat,diffLng);
-  if ((diffLat<core->getMapSource()->getNeighborDegreeTolerance())&&(diffLng<core->getMapSource()->getNeighborDegreeTolerance()))
+  double diffY=diffLng*latScale;
+  DEBUG("diffX=%e diffY=%e",diffX,diffY);
+  if ((diffX<core->getMapSource()->getNeighborPixelTolerance())&&(diffY<core->getMapSource()->getNeighborPixelTolerance()))
     return true;
   else
     return false;

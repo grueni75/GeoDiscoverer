@@ -9,21 +9,22 @@
   <calibrationPoint>
     <latitude>51.4540069100598</latitude>
     <longitude>6.943359375</longitude>
-    <x>256</x>
+    <x>255</x>
     <y>0</y>
   </calibrationPoint>
   <calibrationPoint>
     <latitude>51.3992056535538</latitude>
     <longitude>6.943359375</longitude>
-    <x>256</x>
-    <y>256</y>
+    <x>255</x>
+    <y>255</y>
   </calibrationPoint>
   <calibrationPoint>
     <latitude>51.3992056535538</latitude>
     <longitude>6.85546875</longitude>
     <x>0</x>
-    <y>256</y>
+    <y>255</y>
   </calibrationPoint>
   <imageFileName>12_2126_1363.png</imageFileName>
   <zoomLevel>12</zoomLevel>
+  <mapProjection>mercator</mapProjection>
 </GDM>

@@ -29,7 +29,7 @@ namespace GEODISCOVERER {
 GraphicObject::GraphicObject(bool deletePrimitivesOnDestruct) : GraphicPrimitive() {
 
   // Init variables
-  type=GraphicObjectType;
+  type=GraphicTypeObject;
   nextPrimitiveKey=1;
   isUpdated=false;
   this->deletePrimitivesOnDestruct=deletePrimitivesOnDestruct;

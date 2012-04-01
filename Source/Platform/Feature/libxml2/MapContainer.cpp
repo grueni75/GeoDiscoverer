@@ -53,8 +53,33 @@ void MapContainer::writeCalibrationFile()
   }
   xmlDocSetRootElement(doc, rootNode);
 
+  // Add the map projection
+  std::string mapProjection;
+  switch(mapCalibrator->getType()) {
+    case MapCalibratorTypeLinear:
+      mapProjection="linear";
+      break;
+    case MapCalibratorTypeMercator:
+      mapProjection="mercator";
+      break;
+    default:
+      FATAL("unsupported map calibrator type",NULL);
+      break;
+  }
+  if (!xmlNewChild(rootNode,NULL,BAD_CAST "mapProjection",BAD_CAST mapProjection.c_str())) {
+    FATAL("can not create xml child node",NULL);
+    return;
+  }
+
   // Add the image file name
   if (!xmlNewChild(rootNode,NULL,BAD_CAST "imageFileName",BAD_CAST imageFileName.c_str())) {
+    FATAL("can not create xml child node",NULL);
+    return;
+  }
+
+  // Add the zoom level
+  out << zoomLevel;
+  if (!xmlNewChild(rootNode,NULL,BAD_CAST "zoomLevel",BAD_CAST out.str().c_str())) {
     FATAL("can not create xml child node",NULL);
     return;
   }
@@ -133,9 +158,12 @@ bool MapContainer::readGDMCalibrationFile()
   bool yFound=false;
   bool longitudeFound=false;
   bool latitudeFound=false;
+  bool mapProjectionFound=false;
   std::string name,name2;
   std::stringstream in;
   MapPosition pos;
+  MapCalibratorType calibratorType=MapCalibratorTypeLinear;
+  std::list<MapPosition> calibrationPoints;
 
   // Init
   //xmlInitParser(); // already done by config store
@@ -184,7 +212,18 @@ bool MapContainer::readGDMCalibrationFile()
       if (name=="imageFileName") {
         imageFileNameFound=true;
         imageFileName=getNodeText(n);
-        imageFilePath=mapFileFolder+"/"+imageFileName;
+        setImageFileName(imageFileName);
+      }
+      if (name=="mapProjection") {
+        std::string mapProjection=getNodeText(n);
+        if (mapProjection=="linear") {
+          calibratorType=MapCalibratorTypeLinear;
+        } else if (mapProjection=="mercator") {
+          calibratorType=MapCalibratorTypeMercator;
+        } else {
+          ERROR("map projection <%s> defined in <%s> not supported",mapProjection.c_str(),calibrationFilePath.c_str());
+          goto cleanup;
+        }
       }
       if (name=="zoomLevel") {
         zoomLevelFound=true;
@@ -226,7 +265,7 @@ bool MapContainer::readGDMCalibrationFile()
         pos.setY(y);
         pos.setLat(latitude);
         pos.setLng(longitude);
-        mapCalibrator->addCalibrationPoint(pos);
+        calibrationPoints.push_back(pos);
       }
     }
   }
@@ -239,6 +278,16 @@ bool MapContainer::readGDMCalibrationFile()
     goto cleanup;
   }
   result=true;
+
+  // Create the calibrator
+  mapCalibrator=MapCalibrator::newMapCalibrator(calibratorType);
+  if (!mapCalibrator) {
+    FATAL("can not create map calibrator",NULL);
+    return false;
+  }
+  for(std::list<MapPosition>::iterator i=calibrationPoints.begin();i!=calibrationPoints.end();i++) {
+    mapCalibrator->addCalibrationPoint(*i);
+  }
 
 cleanup:
 

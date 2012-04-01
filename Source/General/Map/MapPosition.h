@@ -109,6 +109,15 @@ public:
   // Converts WGS84 height to height above mean sea level
   void toMSLHeight();
 
+  // Get the tile x and y number if a mercator projection is used (as in OSM)
+  void computeMercatorTileXY(Int zoomLevel, Int &x, Int &y);
+
+  // Get the bounds of the tile this position lies in if a mercator project is used
+  void computeMercatorTileBounds(Int zoomLevel, double &latNorth, double &latSouth, double &lngWest, double &lngEast);
+
+  // Checks if the location is valid
+  bool isValid();
+
   // Getters and setters
   double getDistance() const
   {

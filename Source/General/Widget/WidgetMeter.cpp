@@ -27,8 +27,8 @@ namespace GEODISCOVERER {
 
 // Constructor
 WidgetMeter::WidgetMeter() : WidgetPrimitive() {
-  widgetType=WidgetMeterType;
-  setMeterType(WidgetMeterAltitudeType);
+  widgetType=WidgetTypeMeter;
+  setMeterType(WidgetMeterTypeAltitude);
   nextUpdateTime=0;
   lastWorkTime=0;
   updateInterval=1*1000*1000;
@@ -66,7 +66,7 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
     MapPosition *locationPos;
     NavigationPath *trackPath;
     switch(meterType) {
-      case WidgetMeterAltitudeType:
+      case WidgetMeterTypeAltitude:
         locationPos=core->getNavigationEngine()->lockLocationPos();
         if (locationPos->getHasAltitude()) {
           core->getUnitConverter()->formatMeters(locationPos->getAltitude(),value,unit);
@@ -76,7 +76,7 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
         }
         core->getNavigationEngine()->unlockLocationPos();
         break;
-      case WidgetMeterSpeedType:
+      case WidgetMeterTypeSpeed:
         locationPos=core->getNavigationEngine()->lockLocationPos();
         if (locationPos->getHasSpeed()) {
           core->getUnitConverter()->formatMetersPerSecond(locationPos->getSpeed(),value,unit);
@@ -86,7 +86,7 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
         }
         core->getNavigationEngine()->unlockLocationPos();
         break;
-      case WidgetMeterTrackLengthType:
+      case WidgetMeterTypeTrackLength:
         trackPath=core->getNavigationEngine()->lockRecordedTrack();
         if (trackPath)
           core->getUnitConverter()->formatMeters(trackPath->getLength(),value,unit);
@@ -139,7 +139,7 @@ void WidgetMeter::draw(Screen *screen, TimestampInMicroseconds t) {
 }
 
 // Sets the type of meter
-void WidgetMeter::setMeterType(WidgetMeterTypes meterType)
+void WidgetMeter::setMeterType(WidgetMeterType meterType)
 {
   FontEngine *fontEngine=core->getFontEngine();
 
@@ -149,13 +149,13 @@ void WidgetMeter::setMeterType(WidgetMeterTypes meterType)
   // Set the label
   fontEngine->setFont("sansBoldNormal");
   switch(meterType) {
-    case WidgetMeterAltitudeType:
+    case WidgetMeterTypeAltitude:
       labelFontString=fontEngine->createString("Altitude");
       break;
-    case WidgetMeterSpeedType:
+    case WidgetMeterTypeSpeed:
       labelFontString=fontEngine->createString("Speed");
       break;
-    case WidgetMeterTrackLengthType:
+    case WidgetMeterTypeTrackLength:
       labelFontString=fontEngine->createString("Track");
       break;
     default:

@@ -28,7 +28,7 @@ namespace GEODISCOVERER {
 // Constructors
 GraphicRectangle::GraphicRectangle() : GraphicPrimitive()
 {
-  type=GraphicRectangleType;
+  type=GraphicTypeRectangle;
   setFilled(true);
   setWidth(0);
   setHeight(0);

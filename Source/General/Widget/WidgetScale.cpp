@@ -27,7 +27,7 @@ namespace GEODISCOVERER {
 
 // Constructor
 WidgetScale::WidgetScale() : WidgetPrimitive() {
-  widgetType=WidgetScaleType;
+  widgetType=WidgetTypeScale;
   updateInterval=1000000;
   nextUpdateTime=0;
   tickLabelOffsetX=0;

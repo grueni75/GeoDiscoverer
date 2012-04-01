@@ -54,7 +54,7 @@ protected:
   double length;                                  // Current length of the track in meters
 
   // Visualization of the path for each zoom level
-  std::list<NavigationPathVisualization*> zoomLevelVisualizations;
+  std::vector<NavigationPathVisualization*> zoomLevelVisualizations;
 
   // Finds nodes in a xml tree
   std::list<XMLNode> findNodes(XMLDocument document, XMLXPathContext xpathCtx, std::string path);
@@ -64,6 +64,9 @@ protected:
 
   // Extracts information about the path from the given node set
   void extractInformation(std::list<XMLNode> nodes);
+
+  // Updates the visualization of the tile
+  void updateTileVisualization(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, MapPosition prevPos, MapPosition prevArrowPos, MapPosition currentPos);
 
 public:
 
@@ -93,6 +96,12 @@ public:
 
   // Recreate the graphic objects to reduce the number of graphic point buffers
   void optimizeGraphic();
+
+  // Adds the visualization for the given containers
+  void addVisualization(std::list<MapContainer*> *containers);
+
+  // Remove the visualization for the given container
+  void removeVisualization(MapContainer *container);
 
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)

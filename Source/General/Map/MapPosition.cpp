@@ -271,4 +271,32 @@ void MapPosition::toMSLHeight() {
   }
 }
 
+// Get the tile x and y number if a mercator projection is used (as in OSM)
+void MapPosition::computeMercatorTileXY(Int zoomLevel, Int &x, Int &y) {
+  Int t=pow(2.0, zoomLevel);
+  x=(Int)(floor((lng + 180.0) / 360.0 * t));
+  y=(Int)(floor((1.0 - log( tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * t));
+}
+
+// Get the bounds of the tile this position lies in if a mercator project is used
+void MapPosition::computeMercatorTileBounds(Int zoomLevel, double &latNorth, double &latSouth, double &lngWest, double &lngEast) {
+  Int x,y;
+  computeMercatorTileXY(zoomLevel,x,y);
+  double unit = 1.0 / pow(2.0, zoomLevel);
+  lngWest = x * unit * 360.0 - 180.0;
+  lngEast = (x+1) * unit * 360.0 - 180.0;
+  double n = M_PI - 2.0 * M_PI * y * unit;
+  latNorth = 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
+  n = M_PI - 2.0 * M_PI * (y+1) * unit;
+  latSouth = 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
+}
+
+// Checks if the location is valid
+bool MapPosition::isValid() {
+  if ((lng==-std::numeric_limits<double>::max())&&(lat==-std::numeric_limits<double>::max()))
+    return false;
+  else
+    return true;
+}
+
 }

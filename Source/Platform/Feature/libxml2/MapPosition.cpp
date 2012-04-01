@@ -256,6 +256,8 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
       }
     }
   }
+
+  return true;
 }
 
 }

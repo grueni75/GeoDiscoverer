@@ -326,12 +326,15 @@ extern Core *core;
 #include <WidgetEngine.h>
 #include <MapArea.h>
 #include <MapCalibrator.h>
+#include <MapCalibratorLinear.h>
+#include <MapCalibratorMercator.h>
 #include <MapContainer.h>
 #include <MapContainerTreeNode.h>
 #include <MapCache.h>
 #include <MapEngine.h>
 #include <MapSource.h>
-#include <MapOfflineSource.h>
+#include <MapSourceCalibratedPictures.h>
+#include <MapSourceMercatorTiles.h>
 #include <NavigationPathTileInfo.h>
 #include <NavigationPathVisualization.h>
 #include <NavigationPath.h>

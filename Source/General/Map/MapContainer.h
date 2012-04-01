@@ -27,7 +27,7 @@
 namespace GEODISCOVERER {
 
 typedef enum { GeographicBorderLatNorth, GeographicBorderLatSouth, GeographicBorderLngEast, GeographicBorderLngWest } GeographicBorder;
-typedef enum { ImageTypeJPEG, ImageTypePNG } ImageType;
+typedef enum { ImageTypeJPEG=0, ImageTypePNG=1 } ImageType;
 
 class MapContainer {
 
@@ -40,6 +40,8 @@ protected:
   ImageType           imageType;            // File format of the image
   std::string         calibrationFileName;  // Filename of the calibration data of the map
   std::string         calibrationFilePath;  // Complete path to the calibration data of the map
+  Int                 x;                    // X coordinate
+  Int                 y;                    // Y coordinate
   Int                 zoomLevel;            // Zoom level of the map
   MapCalibrator       *mapCalibrator;       // Calibration model of the map
   Int                 width;                // Width of the map
@@ -53,6 +55,8 @@ protected:
   double latScale;                          // Scale factor for latitude
   MapContainer *leftChild;                  // Left child in the kd tree
   MapContainer *rightChild;                 // Right child in the kd tree
+  bool imageFileAvailable;                  // Indicates that the image has been downloaded to disk
+  bool overlayGraphicInvalid;               // Indicates that this tile is missing it's overlay graphics
 
   // Lists of map tiles sorted by their boundaries
   std::vector<Int> mapTilesIndexByMapTop;
@@ -62,9 +66,6 @@ protected:
 
   // Root node of the kd tree
   MapTile *searchTree;
-
-  // Adds a tile to the map
-  void addTile(MapTile *tile);
 
   // Gets the next field in a semicolon seperated list
   std::string getNextSemicolonField(std::string list, Int &start);
@@ -139,7 +140,24 @@ public:
   // Reads the contents of the object from a binary file
   static MapContainer *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize);
 
+  // Checks if the container contains tiles that are currently used for screen drawing
+  bool isDrawn();
+
+  // Adds a tile to the map
+  void addTile(MapTile *tile);
+
+  // Creates the search tree
+  void createSearchTree();
+
   // Getters and setters
+  bool getOverlayGraphicInvalid() const {
+    return overlayGraphicInvalid;
+  }
+
+  void setOverlayGraphicInvalid(bool overlayGraphisInvalid) {
+    this->overlayGraphicInvalid = overlayGraphicInvalid;
+  }
+
   double getLatScale() const
   {
       return latScale;
@@ -170,92 +188,132 @@ public:
       return imageFileName;
   }
 
-  std::vector<MapTile*> *getMapTiles()
-  {
-  return (std::vector<MapTile*>*)(((((&mapTiles)))));
+  std::vector<MapTile*> *getMapTiles() {
+    return (std::vector<MapTile*>*)((((((((((((&mapTiles))))))))))));
   }
 
-  Int getHeight() const
-  {
-      return height;
+  Int getHeight() const {
+    return height;
   }
 
-  Int getWidth() const
-  {
-      return width;
+  Int getWidth() const {
+    return width;
   }
 
-  double getLatNorth() const
-  {
-      return latNorth;
+  double getLatNorth() const {
+    return latNorth;
   }
 
-  double getLatSouth() const
-  {
-      return latSouth;
+  double getLatSouth() const {
+    return latSouth;
   }
 
-  double getLngEast() const
-  {
-      return lngEast;
+  double getLngEast() const {
+    return lngEast;
   }
 
-  double getLngWest() const
-  {
-      return lngWest;
+  double getLngWest() const {
+    return lngWest;
   }
 
   double getBorder(GeographicBorder border);
 
-  Int getZoomLevel() const
-  {
-      return zoomLevel;
+  Int getZoomLevel() const {
+    return zoomLevel;
   }
 
-  void setZoomLevel(Int zoomLevel)
-  {
-      this->zoomLevel = zoomLevel;
+  void setZoomLevel(Int zoomLevel) {
+    this->zoomLevel = zoomLevel;
   }
 
-  ImageType getImageType() const
-  {
-      return imageType;
+  ImageType getImageType() const {
+    return imageType;
   }
 
-  MapContainer *getLeftChild() const
-{
+  MapContainer* getLeftChild() const {
     return leftChild;
-}
-
-  MapContainer *getRightChild() const
-  {
-      return rightChild;
   }
 
-  void setLeftChild(MapContainer *leftChild)
-  {
-      this->leftChild = leftChild;
+  MapContainer* getRightChild() const {
+    return rightChild;
   }
 
-  void setRightChild(MapContainer *rightChild)
-  {
-      this->rightChild = rightChild;
+  void setLeftChild(MapContainer* leftChild) {
+    this->leftChild = leftChild;
   }
 
-  double getLatCenter() const
-  {
-    return latSouth+(latNorth-latSouth)/2;
+  void setRightChild(MapContainer* rightChild) {
+    this->rightChild = rightChild;
   }
 
-  double getLngCenter() const
-  {
-    return lngWest+(lngEast-lngWest)/2;
+  double getLatCenter() const {
+    return latSouth + (latNorth - latSouth) / 2;
   }
 
-  Int getTileCount() const
-  {
+  double getLngCenter() const {
+    return lngWest + (lngEast - lngWest) / 2;
+  }
+
+  Int getTileCount() const {
     return mapTiles.size();
   }
+
+  TimestampInSeconds getLastAccess();
+
+  Int getX() const {
+    return x;
+  }
+
+  void setX(Int x) {
+    this->x = x;
+  }
+
+  Int getY() const {
+    return y;
+  }
+
+  void setY(Int y) {
+    this->y = y;
+  }
+
+  bool getImageFileAvailable() const {
+    return imageFileAvailable;
+  }
+
+  void setImageFileAvailable(bool imageFileAvailable) {
+    this->imageFileAvailable = imageFileAvailable;
+  }
+
+  void setMapCalibrator(MapCalibrator* mapCalibrator) {
+    this->mapCalibrator = mapCalibrator;
+  }
+
+  void setHeight(Int height) {
+    this->height = height;
+  }
+
+  void setWidth(Int width) {
+    this->width = width;
+  }
+
+  void setCalibrationFileName(std::string calibrationFileName) {
+    this->calibrationFileName = calibrationFileName;
+    this->calibrationFilePath = mapFileFolder + "/" + calibrationFileName;
+  }
+
+  void setImageType(ImageType imageType) {
+    this->imageType = imageType;
+  }
+
+  void setImageFileName(std::string imageFileName) {
+    this->imageFileName = imageFileName;
+    this->imageFilePath = mapFileFolder+"/"+imageFileName;
+  }
+
+  void setMapFileFolder(std::string mapFileFolder) {
+    this->mapFileFolder = mapFileFolder;
+  }
+
 };
 
 }

@@ -27,8 +27,8 @@ namespace GEODISCOVERER {
 
 // Constructor
 WidgetPrimitive::WidgetPrimitive() : GraphicRectangle() {
-  type=GraphicWidgetType;
-  widgetType=WidgetPrimitiveType;
+  type=GraphicTypeWidget;
+  widgetType=WidgetTypePrimitive;
   isHit=false;
   isSelected=false;
   isFirstTimeSelected=false;

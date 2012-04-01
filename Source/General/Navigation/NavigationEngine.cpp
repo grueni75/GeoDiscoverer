@@ -82,11 +82,9 @@ void NavigationEngine::init() {
   recordedTrack->setNormalColor(c->getGraphicColorValue("Navigation/trackColor","recorded track",GraphicColor(255,127,0,255)));
 
   // Load the last recorded track if it does exist
-  FILE *in;
   std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename","Filename of the last recorded track.","");
   std::string filepath=recordedTrack->getGpxFilefolder()+"/"+lastRecordedTrackFilename;
-  if ((lastRecordedTrackFilename!="")&&(in=fopen(filepath.c_str(),"r"))) {
-    fclose(in);
+  if ((lastRecordedTrackFilename!="")&&(access(filepath.c_str(),F_OK)==0)) {
     recordedTrack->setGpxFilename(lastRecordedTrackFilename);
     recordedTrack->readGPXFile();
   } else {
@@ -249,7 +247,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     PROFILE_ADD("track update");
 
     // Update the graphics
-    updateGraphics(false);
+    updateScreenGraphic(false);
     PROFILE_ADD("graphics update");
 
   }
@@ -263,7 +261,7 @@ void NavigationEngine::newCompassBearing(double bearing) {
   lockCompassBearing();
   compassBearing=bearing;
   unlockCompassBearing();
-  updateGraphics(false);
+  updateScreenGraphic(false);
 }
 
 // Updates the currently recorded track
@@ -348,7 +346,7 @@ void NavigationEngine::setRecordTrack(bool recordTrack)
   } else {
     INFO("track recording is disabled",NULL);
   }
-  updateGraphics(false);
+  updateScreenGraphic(false);
 }
 
 // Creates a new track
@@ -360,15 +358,14 @@ void NavigationEngine::createNewTrack() {
   core->getConfigStore()->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename());
   unlockRecordedTrack();
   INFO("new %s created",recordedTrack->getGpxFilename().c_str());
-  updateGraphics(false);
+  updateScreenGraphic(false);
 }
 
-// Updates navigation-related graphic that is overlayed on the map
-void NavigationEngine::updateGraphics(bool scaleHasChanged) {
-  bool updateCursor=false;
+// Updates navigation-related graphic that is overlayed on the screen
+void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   Int mapDiffX, mapDiffY;
-  bool showCursor=true;
-  bool updatePosition=false;
+  bool showCursor;
+  bool updatePosition;
   Int visPosX, visPosY, visRadiusX, visRadiusY;
   double visAngle;
   GraphicPosition visPos;
@@ -399,40 +396,45 @@ void NavigationEngine::updateGraphics(bool scaleHasChanged) {
   // Update the location icon
   //DEBUG("before location pos lock",NULL);
   lockLocationPos();
-  MapPosition newLocationPos=locationPos;
-  MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
-  //DEBUG("calibrator=%08x",calibrator);
-  if (!calibrator->setPictureCoordinates(newLocationPos)) {
-    showCursor=false;
-  } else {
-    locationPos=newLocationPos;
-    //DEBUG("locationPos.getX()=%d locationPos.getY()=%d",locationPos.getX(),locationPos.getY());
-    if (!Integer::add(locationPos.getX(),-mapPos.getX(),mapDiffX))
+  showCursor=false;
+  updatePosition=false;
+  if (locationPos.isValid()) {
+    showCursor=true;
+    MapPosition newLocationPos=locationPos;
+    MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
+    //DEBUG("calibrator=%08x",calibrator);
+    if (!calibrator->setPictureCoordinates(newLocationPos)) {
       showCursor=false;
-    if (!Integer::add(locationPos.getY(),-mapPos.getY(),mapDiffY))
-      showCursor=false;
-    //DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
-    if (!Integer::add(displayArea.getRefPos().getX(),mapDiffX,visPosX))
-      showCursor=false;
-    if (!Integer::add(displayArea.getRefPos().getY(),-mapDiffY,visPosY))
-      showCursor=false;
-    if (showCursor) {
-      updatePosition=true;
-      visAngle=-locationPos.getBearing()-mapPos.getMapTile()->getNorthAngle();
-      if (locationPos.getHasAccuracy()) {
-        MapPosition t=locationPos.computeTarget(0,locationPos.getAccuracy());
-        //DEBUG("locationPos.getLat=%f locationPos.getLng=%f t.getLat=%f t.getLng=%f",locationPos.getLat(),locationPos.getLng(),t.getLat(),t.getLng());
-        calibrator->setPictureCoordinates(t);
-        visRadiusY=sqrt((double)(t.getX()-locationPos.getX())*(t.getX()-locationPos.getX())+(t.getY()-locationPos.getY())*(t.getY()-locationPos.getY()));
-        //DEBUG("visRadiusY=%d",visRadiusY);
-        t=locationPos.computeTarget(90,locationPos.getAccuracy());
-        //DEBUG("locationPos.getLat=%f locationPos.getLng=%f t.getLat=%f t.getLng=%f",locationPos.getLat(),locationPos.getLng(),t.getLat(),t.getLng());
-        calibrator->setPictureCoordinates(t);
-        visRadiusX=sqrt((double)(t.getX()-locationPos.getX())*(t.getX()-locationPos.getX())+(t.getY()-locationPos.getY())*(t.getY()-locationPos.getY()));
-        //DEBUG("visRadiusX=%d",visRadiusX);
-      } else {
-        visRadiusX=0;
-        visRadiusY=0;
+    } else {
+      locationPos=newLocationPos;
+      //DEBUG("locationPos.getX()=%d locationPos.getY()=%d",locationPos.getX(),locationPos.getY());
+      if (!Integer::add(locationPos.getX(),-mapPos.getX(),mapDiffX))
+        showCursor=false;
+      if (!Integer::add(locationPos.getY(),-mapPos.getY(),mapDiffY))
+        showCursor=false;
+      //DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
+      if (!Integer::add(displayArea.getRefPos().getX(),mapDiffX,visPosX))
+        showCursor=false;
+      if (!Integer::add(displayArea.getRefPos().getY(),-mapDiffY,visPosY))
+        showCursor=false;
+      if (showCursor) {
+        updatePosition=true;
+        visAngle=-locationPos.getBearing()-mapPos.getMapTile()->getNorthAngle();
+        if (locationPos.getHasAccuracy()) {
+          MapPosition t=locationPos.computeTarget(0,locationPos.getAccuracy());
+          //DEBUG("locationPos.getLat=%f locationPos.getLng=%f t.getLat=%f t.getLng=%f",locationPos.getLat(),locationPos.getLng(),t.getLat(),t.getLng());
+          calibrator->setPictureCoordinates(t);
+          visRadiusY=sqrt((double)(t.getX()-locationPos.getX())*(t.getX()-locationPos.getX())+(t.getY()-locationPos.getY())*(t.getY()-locationPos.getY()));
+          //DEBUG("visRadiusY=%d",visRadiusY);
+          t=locationPos.computeTarget(90,locationPos.getAccuracy());
+          //DEBUG("locationPos.getLat=%f locationPos.getLng=%f t.getLat=%f t.getLng=%f",locationPos.getLat(),locationPos.getLng(),t.getLat(),t.getLng());
+          calibrator->setPictureCoordinates(t);
+          visRadiusX=sqrt((double)(t.getX()-locationPos.getX())*(t.getX()-locationPos.getX())+(t.getY()-locationPos.getY())*(t.getY()-locationPos.getY()));
+          //DEBUG("visRadiusX=%d",visRadiusX);
+        } else {
+          visRadiusX=0;
+          visRadiusY=0;
+        }
       }
     }
   }
@@ -493,64 +495,40 @@ void NavigationEngine::updateGraphics(bool scaleHasChanged) {
   core->getGraphicEngine()->unlockCompassConeIcon();
   //DEBUG("after compass cone icon lock",NULL);
 
-  /* Redraw if the recorded track has changed
-  //DEBUG("before recorded track lock",NULL);
-  lockRecordedTrack();
-  GraphicObject *recordedTrackObject=NULL;
-  if ((recordedTrack->getIsNew())||(scaleHasChanged)) {
-    core->getGraphicEngine()->lockPaths();
-    recordedTrackObject=recordedTrack->createGraphicObject(mapPos,displayArea);
-    core->getGraphicEngine()->unlockPaths();
-    recordedTrack->setIsNew(false);
-  }
-  unlockRecordedTrack();
-  //DEBUG("after recorded track lock",NULL);
-
-  // Update the routes if the scale has changed
-  std::list<GraphicObject*> routeObjects;
-  if (scaleHasChanged) {
-    //DEBUG("before routes lock",NULL);
-    lockRoutes();
-    core->getGraphicEngine()->lockPaths();
-    for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-      NavigationPath *route=*i;
-      GraphicObject *graphicObject=route->createGraphicObject(mapPos,displayArea);
-      graphicObject->setZ(1);
-      routeObjects.push_back(graphicObject);
-    }
-    core->getGraphicEngine()->unlockPaths();
-    unlockRoutes();
-    //DEBUG("after routes lock",NULL);
-  }
-
-  // Ensure that the graphic engine does not work with the paths object
-  //DEBUG("before path lock",NULL);
-  core->getGraphicEngine()->lockPaths();
-
-  // Redraw all tracks if the scale has changed
-  if (scaleHasChanged) {
-    paths->deinit(false);
-  }
-
-  // Update the recorded track
-  if (recordedTrackObject) {
-    paths->removePrimitive(recordedTrackPrimitiveKey);
-    recordedTrackPrimitiveKey=paths->addPrimitive(recordedTrackObject);
-  }
-
-  // Update the routes
-  for(std::list<GraphicObject*>::iterator i=routeObjects.begin();i!=routeObjects.end();i++) {
-    GraphicObject *graphicObject=*i;
-    paths->addPrimitive(graphicObject);
-  }
-
-  // Let the graphic engine continue
-  core->getGraphicEngine()->unlockPaths();*/
-  //DEBUG("after path lock",NULL);
-
   // Unlock the drawing mutex
   core->getThread()->unlockMutex(updateGraphicsMutex);
   //DEBUG("after graphics update",NULL);
+}
+
+// Updates navigation-related graphic that is overlayed on the map
+void NavigationEngine::updateMapGraphic() {
+
+  std::list<MapContainer*> containers;
+
+  // Get the current unfinished list
+  core->getMapSource()->lockAccess();
+  containers = unvisualizedMapContainers;
+  unvisualizedMapContainers.clear();
+  core->getMapSource()->unlockAccess();
+
+  // Process the unfinished tile list
+  lockRoutes();
+  for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    (*i)->addVisualization(&containers);
+  }
+  unlockRoutes();
+  lockRecordedTrack();
+  if (recordedTrack) {
+    recordedTrack->addVisualization(&containers);
+  }
+  unlockRecordedTrack();
+
+  // Indicate that all tiles have been processed
+  core->getMapSource()->lockAccess();
+  for (std::list<MapContainer*>::iterator i=containers.begin();i!=containers.end();i++) {
+    (*i)->setOverlayGraphicInvalid(false);
+  }
+  core->getMapSource()->unlockAccess();
 }
 
 // Indicates that textures and buffers have been invalidated
@@ -584,6 +562,38 @@ void NavigationEngine::optimizeGraphic() {
     recordedTrack->optimizeGraphic();
   }
   unlockRecordedTrack();
+}
+
+// Adds the visualization for the given tile
+void NavigationEngine::addGraphics(MapContainer *container) {
+  std::list<MapContainer*>::iterator i;
+  bool inserted=false;
+  for (i=unvisualizedMapContainers.begin();i!=unvisualizedMapContainers.end();i++) {
+    if ((*i)->getZoomLevel() > container->getZoomLevel()) {
+      unvisualizedMapContainers.insert(i,container);
+      inserted=true;
+      break;
+    }
+  }
+  if (!inserted)
+    unvisualizedMapContainers.push_back(container);
+}
+
+// Removes the viualization for the given map container
+void NavigationEngine::removeGraphics(MapContainer *container) {
+
+  // Process the unfinished tile list
+  lockRoutes();
+  for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    (*i)->removeVisualization(container);
+  }
+  unlockRoutes();
+  lockRecordedTrack();
+  if (recordedTrack) {
+    recordedTrack->removeVisualization(container);
+  }
+  unlockRecordedTrack();
+
 }
 
 }

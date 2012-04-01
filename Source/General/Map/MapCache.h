@@ -44,6 +44,9 @@ protected:
   bool updateInProgress;                          // Indicates if an update is currently ongoing
   bool isInitialized;                             // Indicates if the map cache is initialized
 
+  // Updates the map images of tiles
+  void updateMapTileImages();
+
 public:
 
   // Constructors and destructor
@@ -56,11 +59,14 @@ public:
   // Clears the cache
   void deinit();
 
-  // Updates the map images of tiles
-  void updateMapTileImages();
-
   // Indicates that there was a change in the visibility of tiles
   void tileVisibilityChanged();
+
+  // Adds a new tile to the cache
+  void addTile(MapTile *tile);
+
+  // Removes a tile from the cache
+  void removeTile(MapTile *tile);
 
   // Updates the currently waiting texture
   void setNextTileTexture();

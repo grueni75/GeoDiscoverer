@@ -46,9 +46,7 @@ void NavigationPath::writeGPXFile() {
   }
 
   // Backup the previous file
-  FILE *in;
-  if (in=fopen(filepath.c_str(),"r")) {
-    fclose(in);
+  if (access(filepath.c_str(),F_OK)==0) {
     std::string backupFilepath=filepath + "~";
     rename(filepath.c_str(),backupFilepath.c_str());
   }

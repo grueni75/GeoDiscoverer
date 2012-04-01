@@ -45,7 +45,6 @@ void ConfigStore::deinit()
 // Reads the config
 void ConfigStore::read()
 {
-  FILE *in;
   xmlDocPtr doc = NULL;
   xmlNodePtr rootNode = NULL, node = NULL, node1 = NULL;
   xmlDtdPtr dtd = NULL;
@@ -53,7 +52,7 @@ void ConfigStore::read()
   int i, j;
 
   // Check if the file exists
-  if (!(in=fopen(configFilepath.c_str(),"r"))) {
+  if (access(configFilepath.c_str(),F_OK)) {
 
     // No, so create empty XML document
     doc = xmlNewDoc(BAD_CAST "1.0");
@@ -80,8 +79,6 @@ void ConfigStore::read()
     xmlFreeDoc(doc);
     document=NULL;
 
-  } else {
-    fclose(in);
   }
 
   // Read the document

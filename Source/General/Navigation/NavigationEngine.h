@@ -72,6 +72,9 @@ protected:
   // Required minimum distance in meter to the last track point such that the point is added to the track
   double trackRecordingMinDistance;
 
+  // List of containers that need a graphic update
+  std::list<MapContainer*> unvisualizedMapContainers;
+
   // Updates the currently recorded track
   void updateTrack();
 
@@ -104,14 +107,23 @@ public:
   // Switches the track recording
   void setRecordTrack(bool recordTrack);
 
-  // Updates navigation-related graphic that is overlayed on the map
-  void updateGraphics(bool scaleHasChanged);
+  // Updates navigation-related graphic that is overlayed on the screen
+  void updateScreenGraphic(bool scaleHasChanged);
+
+  // Updates navigation-related graphic that is overlayed on the map tiles
+  void updateMapGraphic();
 
   // Indicates that textures have been invalidated
   void graphicInvalidated();
 
   // Recreate the objects to reduce the number of graphic point buffers
   void optimizeGraphic();
+
+  // Adds the visualization for the given map container
+  void addGraphics(MapContainer *container);
+
+  // Removes the viualization for the given map container
+  void removeGraphics(MapContainer *container);
 
   // Getters and setters
   NavigationPath *lockRecordedTrack()

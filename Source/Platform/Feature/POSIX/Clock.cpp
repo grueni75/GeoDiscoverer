@@ -86,8 +86,9 @@ TimestampInMicroseconds Clock::getMicrosecondsSinceStart() {
   }
 
   // Convert it to a 64-bit timestamp
-  TimestampInSeconds secondsSinceStart=tv.tv_sec-startTime;
-  return secondsSinceStart*1000*1000+tv.tv_usec;
+  TimestampInMicroseconds t=tv.tv_sec-startTime;
+  t=t*1000*1000+tv.tv_usec;
+  return t;
 }
 
 

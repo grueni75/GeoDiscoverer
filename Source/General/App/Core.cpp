@@ -30,16 +30,19 @@ Core *core=NULL;
 // Map update thread
 void *mapUpdateThread(void *args) {
   core->updateMap();
+  return NULL;
 }
 
 // Maintenance thread
 void *maintenanceThread(void *args) {
   core->maintenance();
+  return NULL;
 }
 
 // Late init thread
 void *lateInitThread(void *args) {
   core->lateInit();
+  return NULL;
 }
 
 // Constructor of the main application
@@ -245,15 +248,7 @@ bool Core::init() {
     return false;
   }
   DEBUG("initializing mapSource",NULL);
-  switch(MapSource::determineType()) {
-    case MapOfflineSourceType:
-      mapSource=new MapOfflineSource();
-      break;
-    default:
-      FATAL("map source type not yet supported",NULL);
-      break;
-  }
-  if (!mapSource) {
+  if (!(mapSource=MapSource::newMapSource())) {
     FATAL("can not create map source object",NULL);
     return false;
   }
@@ -474,6 +469,11 @@ void Core::maintenance(bool endlessLoop) {
     core->getGraphicEngine()->outputStats();
 #endif
 
+    // Call the maintenance in the map source
+    if (mapSource->getIsInitialized()) {
+      mapSource->maintenance();
+    }
+
     // Other threads can access now
     thread->unlockMutex(maintenanceMutex);
 
@@ -491,7 +491,7 @@ void Core::maintenance(bool endlessLoop) {
 void Core::interruptAllowedHere() {
   if (noInterruptAllowed==false) {
     thread->unlockMutex(mapUpdateInterruptMutex);
-    //thread->reschedule();
+    //sleep(1); // enable to get debug rectangles in the map
     thread->lockMutex(mapUpdateInterruptMutex);
   }
 }
@@ -510,6 +510,11 @@ bool Core::graphicInvalidated() {
   // Do not invalidate textures until core is initialized
   if (!isInitialized)
     return false;
+
+  // Ensure that the commander is not executing something
+  DEBUG("before lock",NULL);
+  commander->interruptOperation();
+  DEBUG("after lock",NULL);
 
   // Wait until the map update thread is in a clean state
   bool mapUpdateThreadFinished=false;
@@ -567,6 +572,9 @@ bool Core::graphicInvalidated() {
 
   // Let the map update thread continue
   continueMapUpdate();
+
+  // Let the commander continue
+  commander->continueOperation();
 
   // That's it
   return true;

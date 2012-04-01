@@ -244,113 +244,137 @@ void GraphicEngine::draw(bool forceRedraw) {
       for(std::list<GraphicPrimitive *>::const_iterator i=mapDrawList->begin(); i != mapDrawList->end(); i++) {
 
         //DEBUG("inside primitive draw",NULL);
+        switch((*i)->getType()) {
 
-        // Get graphic object
-        GraphicObject *tileVisualization;
-        tileVisualization=(GraphicObject*)*i;
-        tileVisualization->lockAccess();
+          case GraphicTypeObject:
+          {
+            // Get graphic object
+            GraphicObject *tileVisualization;
+            tileVisualization=(GraphicObject*)*i;
+            tileVisualization->lockAccess();
 
-        // Skip drawing if primitive is invisible
-        UByte alpha=tileVisualization->getColor().getAlpha();
-        if (alpha!=0) {
+            // Skip drawing if primitive is invisible
+            UByte alpha=tileVisualization->getColor().getAlpha();
+            if (alpha!=0) {
 
-          // Position the object
-          screen->startObject();
-          screen->translate(tileVisualization->getX(),tileVisualization->getY(),tileVisualization->getZ());
+              // Position the object
+              screen->startObject();
+              screen->translate(tileVisualization->getX(),tileVisualization->getY(),tileVisualization->getZ());
 
-          // Go through all objects of the tile visualization
-          std::list<GraphicPrimitive*> *tileDrawList=tileVisualization->getDrawList();
-          for(std::list<GraphicPrimitive *>::const_iterator j=tileDrawList->begin(); j != tileDrawList->end(); j++) {
+              // Go through all objects of the tile visualization
+              std::list<GraphicPrimitive*> *tileDrawList=tileVisualization->getDrawList();
+              for(std::list<GraphicPrimitive *>::const_iterator j=tileDrawList->begin(); j != tileDrawList->end(); j++) {
 
-            // Which type of primitive?
-            GraphicPrimitive *primitive=*j;
-            switch(primitive->getType()) {
+                // Which type of primitive?
+                GraphicPrimitive *primitive=*j;
+                switch(primitive->getType()) {
 
-              // Rectangle primitive?
-              case GraphicRectangleType:
-              {
-                GraphicRectangle *rectangle=(GraphicRectangle*)primitive;
+                  // Rectangle primitive?
+                  case GraphicTypeRectangle:
+                  {
+                    GraphicRectangle *rectangle=(GraphicRectangle*)primitive;
 
-                // Set color
-                screen->setColor(rectangle->getColor().getRed(),rectangle->getColor().getGreen(),rectangle->getColor().getBlue(),rectangle->getColor().getAlpha());
+                    // Set color
+                    screen->setColor(rectangle->getColor().getRed(),rectangle->getColor().getGreen(),rectangle->getColor().getBlue(),rectangle->getColor().getAlpha());
 
-                // Dimm the color in debug mode
-                // This allows to differntiate the tiles
-                if ((debugMode)&&(primitive->getName().size()!=0))
-                  screen->setColor(rectangle->getColor().getRed()/2,rectangle->getColor().getGreen()/2,rectangle->getColor().getBlue()/2,rectangle->getColor().getAlpha());
+                    // Dimm the color in debug mode
+                    // This allows to differntiate the tiles
+                    if ((debugMode)&&(primitive->getName().size()!=0))
+                      screen->setColor(rectangle->getColor().getRed()/2,rectangle->getColor().getGreen()/2,rectangle->getColor().getBlue()/2,rectangle->getColor().getAlpha());
 
-                // Draw a rectangle if primitive matches
-                x1=rectangle->getX();
-                y1=rectangle->getY();
-                x2=(GLfloat)(rectangle->getWidth()+x1);
-                y2=(GLfloat)(rectangle->getHeight()+y1);
-                //DEBUG("x1=%d y1=%d x2=%d y2=%d",x1,y1,x2,y2);
-                screen->drawRectangle(x1,y1,x2,y2,rectangle->getTexture(),rectangle->getFilled());
+                    // Draw a rectangle if primitive matches
+                    x1=rectangle->getX();
+                    y1=rectangle->getY();
+                    x2=(GLfloat)(rectangle->getWidth()+x1);
+                    y2=(GLfloat)(rectangle->getHeight()+y1);
+                    //DEBUG("x1=%d y1=%d x2=%d y2=%d",x1,y1,x2,y2);
+                    screen->drawRectangle(x1,y1,x2,y2,rectangle->getTexture(),rectangle->getFilled());
 
-                //DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
+                    //DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
 
-                // If the texture is not defined, draw a box around it and it's name inside the box
-                if ((primitive->getName().size()!=0)&&(rectangle->getTexture()==screen->getTextureNotDefined())||(debugMode)) {
+                    // If the texture is not defined, draw a box around it and it's name inside the box
+                    if ((primitive->getName().size()!=0)&&(rectangle->getTexture()==screen->getTextureNotDefined())||(debugMode)) {
 
-                  // Draw the name of the tile
-                  //std::string name=".";
-                  core->getFontEngine()->setFont("sansSmall");
-                  std::list<std::string> name=rectangle->getName();
-                  FontEngine *fontEngine=core->getFontEngine();
-                  Int nameHeight=name.size()*fontEngine->getLineHeight();
-                  Int lineNr=name.size()-1;
-                  for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
-                    FontString *fontString=fontEngine->createString(*i);
-                    fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
-                    fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
-                    fontString->draw(screen,currentTime);
-                    fontEngine->destroyString(fontString);
-                    lineNr--;
+                      // Draw the name of the tile
+                      //std::string name=".";
+                      core->getFontEngine()->setFont("sansSmall");
+                      std::list<std::string> name=rectangle->getName();
+                      FontEngine *fontEngine=core->getFontEngine();
+                      Int nameHeight=name.size()*fontEngine->getLineHeight();
+                      Int lineNr=name.size()-1;
+                      for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
+                        FontString *fontString=fontEngine->createString(*i);
+                        fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
+                        fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
+                        fontString->draw(screen,currentTime);
+                        fontEngine->destroyString(fontString);
+                        lineNr--;
+                      }
+
+                      // Draw the borders of the tile
+                      screen->setColor(255,255,255,255);
+                      screen->setLineWidth(1);
+                      screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
+                    }
+                    break;
                   }
 
-                  // Draw the borders of the tile
-                  screen->setColor(255,255,255,255);
-                  screen->setLineWidth(1);
-                  screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
+                  // Line primitive?
+                  case GraphicTypeLine:
+                  {
+                    GraphicLine *line=(GraphicLine*)primitive;
+                    screen->setColorModeMultiply();
+                    GraphicColor color=line->getAnimator()->getColor();
+                    screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
+                    line->draw(screen);
+                    screen->setColorModeAlpha();
+                    break;
+                  }
+
+                  // Rectangle list primitive?
+                  case GraphicTypeRectangleList:
+                  {
+                    GraphicRectangleList *rectangleList=(GraphicRectangleList*)primitive;
+                    GraphicColor color=rectangleList->getAnimator()->getColor();
+                    screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
+                    rectangleList->draw(screen);
+                    break;
+                  }
+
+                  default:
+                    FATAL("unknown primitive type",NULL);
+                    break;
                 }
-                break;
               }
 
-              // Line primitive?
-              case GraphicLineType:
-              {
-                GraphicLine *line=(GraphicLine*)primitive;
-                screen->setColorModeMultiply();
-                GraphicColor color=line->getAnimator()->getColor();
-                screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
-                line->draw(screen);
-                screen->setColorModeAlpha();
-                break;
-              }
-
-              // Rectangle list primitive?
-              case GraphicRectangleListType:
-              {
-                GraphicRectangleList *rectangleList=(GraphicRectangleList*)primitive;
-                GraphicColor color=rectangleList->getAnimator()->getColor();
-                screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
-                rectangleList->draw(screen);
-                break;
-              }
-
-              default:
-                FATAL("unknown primitive type",NULL);
-                break;
+              // That's it
+              screen->endObject();
             }
+
+            // Unlock the visualization
+            tileVisualization->unlockAccess();
+            break;
           }
 
-          // That's it
-          screen->endObject();
+          case GraphicTypeRectangle:
+          {
+            GraphicRectangle *r=(GraphicRectangle*)*i;
+            x1=r->getX();
+            y1=r->getY();
+            x2=(GLfloat)(r->getWidth()+x1);
+            y2=(GLfloat)(r->getHeight()+y1);
+            screen->startObject();
+            screen->setColor(r->getColor().getRed(),r->getColor().getGreen(),r->getColor().getBlue(),r->getColor().getAlpha());
+            screen->setLineWidth(1);
+            screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
+            screen->endObject();
+            break;
+          }
+
+          default:
+            FATAL("unknown primitive type",NULL);
+            break;
         }
-
-        // Unlock the visualization
-        tileVisualization->unlockAccess();
-
       }
     }
 

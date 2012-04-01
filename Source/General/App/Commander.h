@@ -33,14 +33,27 @@ protected:
   // The current position of the graphic engine
   GraphicPosition *pos;
 
+  // Mutex to ensure that only one thread is executing a command at a time
+  ThreadMutexInfo *accessMutex;
+
 public:
 
   // Constructor and destructor
   Commander();
   virtual ~Commander();
 
+  // Interrupts the commander
+  void interruptOperation() const {
+    core->getThread()->lockMutex(accessMutex);
+  }
+
+  // Continues the commander
+  void continueOperation() const {
+    core->getThread()->unlockMutex(accessMutex);
+  }
+
   // Execute a command
-  std::string execute(std::string cmd);
+  std::string execute(std::string cmd, bool innerCall=false);
 
 };
 

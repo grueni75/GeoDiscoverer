@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum {GraphicPrimitiveType, GraphicRectangleType, GraphicRectangleListType, GraphicTextType, GraphicWidgetType, GraphicLineType, GraphicObjectType } GraphicPrimitiveTypes;
+typedef enum {GraphicTypePrimitive, GraphicTypeRectangle, GraphicTypeRectangleList, GraphicTypeText, GraphicTypeWidget, GraphicTypeLine, GraphicTypeObject } GraphicType;
 
 typedef enum {GraphicBlinkIdle, GraphicBlinkFadeToHighlightColor, GraphicBlinkFadeToOriginalColor} GraphicBlinkMode;
 
@@ -34,7 +34,7 @@ class GraphicPrimitive {
 
 protected:
 
-  GraphicPrimitiveTypes type;               // Type of primitive
+  GraphicType type;               // Type of primitive
   GraphicPrimitive *animator;               // Object to use as the animator
   std::list<std::string> name;              // Multiline name of primitive
   Int x;                                    // X coordinate
@@ -150,7 +150,7 @@ public:
       this->name = name;
   }
 
-  GraphicPrimitiveTypes getType() const
+  GraphicType getType() const
   {
       return type;
   }

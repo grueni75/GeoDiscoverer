@@ -26,15 +26,15 @@
 
 namespace GEODISCOVERER {
 
-typedef enum { MapOfflineSourceType, MapOnlineSourceType } MapSourceTypes;
+typedef enum { MapSourceTypeCalibratedPictures, MapSourceTypeMercatorTiles } MapSourceType;
 
 class MapSource {
 
 protected:
 
-  MapSourceTypes type;                      // Type of source
+  MapSourceType type;                      // Type of source
   std::string folder;                       // Folder that contains calibrated maps
-  double neighborDegreeTolerance;           // Maximum allowed difference in degrees to classify a tile as a neighbor
+  double neighborPixelTolerance ;           // Maximum allowed difference in pixels to classify a tile as a neighbor
   std::vector<MapContainer*> mapContainers; // Vector of all maps
   MapPosition centerPosition;               // Center position of the map
   MapPosition currentPosition;              // Current position in the map
@@ -46,6 +46,7 @@ protected:
   Int progressUpdateValue;                  // Value when to update the progress dialog
   Int progressValueMax;                     // Maximum progress value
   Int progressIndex;                        // State of progress dialog
+  bool contentsChanged;                     // Indicates if the users of the map source need to update their data structures
 
   // Lists of map containers sorted by their boundaries
   std::vector<Int> mapsIndexByLatNorth;
@@ -67,6 +68,18 @@ protected:
   // Creates the kd tree recursively
   MapContainerTreeNode *createSearchTree(MapContainerTreeNode *parentNode, bool leftBranch, GeographicBorder dimension, std::vector<Int> remainingMapContainersIndex);
 
+  // Returns the map container that lies in a given area
+  MapContainer *findMapContainerByGeographicArea(MapArea area, MapTile *preferredNeigbor, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, double &bestDistance, MapArea &bestTranslatedArea, bool &betterMapContainerFound, std::list<MapContainer*> *foundMapContainers=NULL);
+
+  // Returns the map tile in which the position lies
+  MapContainer *findMapContainerByGeographicCoordinates(MapPosition pos, MapContainer *preferredMapContainer, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, MapPosition &bestPos, double &distToNearestLngScale, double &distToNearestLatScale, bool &betterMapContainerFound);
+
+  // Inserts a new map container in the search tree
+  void insertNodeIntoSearchTree(MapContainer *newMapContainer, Int zoomLevel, MapContainerTreeNode* prevMapContainerTreeNode, bool useRightChild, GeographicBorder currentDimension);
+
+  // Recreates the search data structures
+  void createSearchDataStructures(bool showProgressDialog=false);
+
 public:
 
   // Constructurs and destructor
@@ -80,13 +93,13 @@ public:
   virtual void deinit();
 
   // Returns the map tile in which the position lies
-  virtual MapTile *findMapTileByGeographicCoordinates(MapPosition pos, Int zoomLevel, bool lockZoomLevel, MapContainer *preferredMapContainer=NULL) = 0;
+  virtual MapTile *findMapTileByGeographicCoordinate(MapPosition pos, Int zoomLevel, bool lockZoomLevel, MapContainer *preferredMapContainer=NULL);
 
   // Returns the map tile that lies in a given area
-  virtual MapTile *findMapTileByGeographicArea(MapArea area, MapTile *preferredNeigbor, MapContainer* &usedMapContainer) = 0;
+  virtual MapTile *findMapTileByGeographicArea(MapArea area, MapTile *preferredNeigbor, MapContainer* &usedMapContainer);
 
   // Returns a list of map containers that overlap the given area
-  virtual std::list<MapContainer*> findMapContainersByGeographicArea(MapArea area) = 0;
+  std::list<MapContainer*> findMapContainersByGeographicArea(MapArea area);
 
   // Initializes the progress bar
   void openProgress(std::string title, Int valueMax);
@@ -97,38 +110,37 @@ public:
   // Closes the progress bar
   void closeProgress();
 
-  // Finds out which type of source to create
-  static MapSourceTypes determineType();
+  // Creates the required type of map source object
+  static MapSource *newMapSource();
+
+  // Performs maintenance (e.g., recreate degraded search tree)
+  virtual void maintenance();
+
+  // Returns the scale values for the given zoom level
+  virtual void getScales(Int zoomLevel, double &latScale, double &lngScale) = 0;
+
+  // Finds the calibrator for the given position
+  virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator) = 0;
 
   // Getters and setters
-  Int getMapTileLength() const
-  {
-      return mapTileLength;
+  Int getMapTileLength() const {
+    return mapTileLength;
   }
 
-  Int getMapTileWidth() const
-  {
-      return mapTileLength;
+  Int getMapTileWidth() const {
+    return mapTileLength;
   }
 
-  Int getMapTileHeight() const
-  {
-      return mapTileLength;
+  Int getMapTileHeight() const {
+    return mapTileLength;
   }
 
-  double getNeighborDegreeTolerance() const
-  {
-      return neighborDegreeTolerance;
+  double getNeighborPixelTolerance() const {
+    return neighborPixelTolerance;
   }
 
-  MapPosition getCenterPosition()
-  {
-      return centerPosition;
-  }
-
-  std::vector<MapContainer*> *getMapContainers()
-  {
-      return (std::vector<MapContainer*>*)((((((&mapContainers))))));
+  MapPosition getCenterPosition() {
+    return centerPosition;
   }
 
   void setIsInitialized(bool value)
@@ -145,10 +157,25 @@ public:
     return folder;
   }
 
-  std::vector<MapContainerTreeNode*> *getZoomLevelSearchTrees()
-  {
-      return &zoomLevelSearchTrees;
+  std::string getFolderPath() const {
+    return core->getHomePath() + "/Map/" + folder;
   }
+
+  virtual void lockAccess() {
+  }
+
+  virtual void unlockAccess() {
+  }
+
+  std::vector<MapContainer*>* getMapContainers() {
+    return (std::vector<MapContainer*>*) (((((((&mapContainers)))))));
+  }
+
+  Int getZoomLevelCount()
+  {
+      return zoomLevelSearchTrees.size();
+  }
+
 };
 
 }

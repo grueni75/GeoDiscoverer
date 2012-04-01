@@ -67,7 +67,7 @@ public:
   void pan(Int x, Int y);
 
   // Sets the position
-  bool set(Int valueX, Int valueY, double valueZoom, double valueAngle);
+  void set(Int valueX, Int valueY, double valueZoom, double valueAngle);
 
   // Indicates that postion has changed
   bool hasChanged() const

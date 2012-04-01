@@ -64,6 +64,7 @@ void MapCache::init() {
   }
 
   // Put all tiles from the map source in the uncached list
+  core->getMapSource()->lockAccess();
   std::vector<MapContainer *> *maps=core->getMapSource()->getMapContainers();
   for (std::vector<MapContainer*>::const_iterator i=maps->begin();i!=maps->end();i++) {
     MapContainer *c=*i;
@@ -77,6 +78,7 @@ void MapCache::init() {
       t->getRectangle()->setTexture(core->getScreen()->getTextureNotDefined());
     }
   }
+  core->getMapSource()->unlockAccess();
   //DEBUG("number of tiles = %d",uncachedTiles.size());
 
   // Object is initialized
@@ -104,6 +106,28 @@ void MapCache::deinit() {
 
 }
 
+// Adds a new tile to the cache
+void MapCache::addTile(MapTile *tile) {
+  uncachedTiles.push_back(tile);
+}
+
+// Removes a tile from the cache
+void MapCache::removeTile(MapTile *tile) {
+  std::list<MapTile*>::iterator i = std::find(cachedTiles.begin(), cachedTiles.end(), tile);
+  if (i==cachedTiles.end()) {
+    uncachedTiles.remove(tile);
+  } else {
+    GraphicRectangle *r=tile->getRectangle();
+    GraphicTextureInfo m=r->getTexture();
+    usedTextures.remove(m);
+    unusedTextures.push_back(m);
+    cachedTiles.erase(i);
+    r->setTexture(core->getScreen()->getTextureNotDefined());
+    r->setZ(0);
+    tile->setIsCached(false);
+  }
+}
+
 // Updates the map images of tiles
 void MapCache::updateMapTileImages() {
 
@@ -112,7 +136,7 @@ void MapCache::updateMapTileImages() {
   std::list<MapTile *> mapTileLoadList;
   for (std::list<MapTile*>::const_iterator i=uncachedTiles.begin();i!=uncachedTiles.end();i++) {
     MapTile *t=*i;
-    if (t->isDrawn()) {
+    if ((t->isDrawn())&&(t->getParentMapContainer()->getImageFileAvailable())) {
       mapTileLoadList.push_back(t);
     }
   }
@@ -153,7 +177,7 @@ void MapCache::updateMapTileImages() {
           break;
       }
       if (!currentImage)
-        break; // Do not continue in case of error
+        continue; // Do not continue in case of error
 
     }
 

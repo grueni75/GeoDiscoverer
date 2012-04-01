@@ -31,8 +31,11 @@ public:
   FloatingPoint();
   virtual ~FloatingPoint();
 
-  // Solve z=c1*x+c2*y+c3
-  static std::vector<double> solveZEqualsC1XPlusC2YPlusC3(std::vector<double> &x,std::vector<double> &y,std::vector<double> &z);
+  // Solve z=c0*x+c1
+  static std::vector<double> solveZEqualsC0XPlusC1(std::vector<double> &x, std::vector<double> &z);
+
+  // Solve z=c0*x+c1*y+c2
+  static std::vector<double> solveZEqualsC0XPlusC1YPlusC2(std::vector<double> &x,std::vector<double> &y,std::vector<double> &z);
 
   // Compute the angle of a orthogonal triangle
   static double computeAngle(double adjacent, double opposite);

@@ -41,6 +41,7 @@ MapEngine::MapEngine() {
   compassBearingMutex=core->getThread()->createMutex();
   displayAreaMutex=core->getThread()->createMutex();
   locationPos2visPosMutex=core->getThread()->createMutex();
+  forceCacheUpdateMutex=core->getThread()->createMutex();
   locationPos2visPosOffsetValid=false;
   prevCompassBearing=-std::numeric_limits<double>::max();
   compassBearing=prevCompassBearing;
@@ -55,6 +56,7 @@ MapEngine::~MapEngine() {
   core->getThread()->destroyMutex(compassBearingMutex);
   core->getThread()->destroyMutex(displayAreaMutex);
   core->getThread()->destroyMutex(locationPos2visPosMutex);
+  core->getThread()->destroyMutex(forceCacheUpdateMutex);
 }
 
 // Does all action to remove a tile from the map
@@ -176,7 +178,7 @@ void MapEngine::removeDebugPrimitives() {
     GraphicPrimitive *primitive;
     key=i->first;
     primitive=i->second;
-    if (primitive->getName().size()==0) {
+    if ((primitive->getName().size()==1)&&(primitive->getName().front()=="")) {
       primitives.push_back(primitive);
       keys.push_back(key);
     }
@@ -223,7 +225,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   if (tiles.size()>=maxTiles)
     return;
 
-  /* Visualize the search area
+  /*Visualize the search area
   if (core->getGraphicEngine()->getDebugMode()) {
     removeDebugPrimitives();
     GraphicRectangle *r;
@@ -238,10 +240,11 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
     r->setWidth(area.getXEast()-area.getXWest());
     r->setHeight(area.getYNorth()-area.getYSouth());
     //r->setFilled(false);
-    r->setName("");
+    std::list<std::string> names;
+    names.push_back("");
+    //r->setName(names);
     r->setZ(-10);
     map->addPrimitive(r);
-    sleep(3);
     core->interruptAllowedHere();
     DEBUG("redraw!",NULL);
   }*/
@@ -272,9 +275,9 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
       /* Some debug messages
       if (preferredNeighbor) {
-        DEBUG("preferred neighbor: %s found tile: %s",preferredNeighbor->getVisName().c_str(),tile->getVisName().c_str());
+        DEBUG("preferred neighbor: %s found tile: %s",preferredNeighbor->getVisName().front().c_str(),tile->getVisName().front().c_str());
       } else {
-        DEBUG("found tile: %s",tile->getVisName().c_str());
+        DEBUG("found tile: %s",tile->getVisName().front().c_str());
       }*/
 
       // If the found tile is a direct neighbor: set the visual position accordingly
@@ -531,7 +534,7 @@ bool MapEngine::mapUpdateIsRequired(GraphicPosition &visPos, Int *diffVisX, Int 
 
   // Do not update map graphic if no change
   //DEBUG("diffVisX=%d diffVisY=%d diffZoom=%f",diffVisX,diffVisY,diffZoom);
-  if ((tmpDiffVisX==0)&&(tmpDiffVisY==0)&&(tmpDiffZoom==1.0)&&(forceMapUpdate==false)) {
+  if ((tmpDiffVisX==0)&&(tmpDiffVisY==0)&&(tmpDiffZoom==1.0)&&(forceMapUpdate==false)&&(forceCacheUpdate==false)) {
     return false;
   } else {
     return true;
@@ -573,11 +576,20 @@ void MapEngine::updateMap() {
   Int diffVisX, diffVisY;
   double diffZoom;
   Int zoomLevel=0;
+  bool mapChanged=false;
 
   PROFILE_START;
 
   // Indicate that the map is currently updated
   updateInProgress=true;
+
+  // Check if a cache update is required
+  if (forceCacheUpdate) {
+    mapChanged=true;
+    core->getThread()->lockMutex(forceCacheUpdateMutex);
+    forceCacheUpdate=false;
+    core->getThread()->unlockMutex(forceCacheUpdateMutex);
+  }
 
   // Get the current position from the graphic engine
   GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
@@ -639,7 +651,8 @@ void MapEngine::updateMap() {
     // Find the map tile that closest matches the position
     // Lock the zoom level if the zoom did not change
     // Search all maps if no tile can be found for given zoom level
-    MapTile *bestMapTile=core->getMapSource()->findMapTileByGeographicCoordinates(newMapPos,zoomLevel,zoomLevelLock);
+    core->getMapSource()->lockAccess();
+    MapTile *bestMapTile=core->getMapSource()->findMapTileByGeographicCoordinate(newMapPos,zoomLevel,zoomLevelLock);
     PROFILE_ADD("best map tile search");
     if (bestMapTile) {
 
@@ -657,7 +670,7 @@ void MapEngine::updateMap() {
       PROFILE_ADD("position update");
 
       // Check that there is a tile at the new geo position
-      if (!core->getMapSource()->findMapTileByGeographicCoordinates(newMapPos,zoomLevel,zoomLevelLock)) {
+      if (!core->getMapSource()->findMapTileByGeographicCoordinate(newMapPos,zoomLevel,zoomLevelLock)) {
 
         // Reset the visual position to the previous one
         //DEBUG("resetting visPos",NULL);
@@ -689,10 +702,15 @@ void MapEngine::updateMap() {
         }
 
         // Compute the new zoom value for the found scale
-        double newLngZoom=newMapPos.getLngScale()/bestMapTile->getLngScale();
-        double newLatZoom=newMapPos.getLatScale()/bestMapTile->getLatScale();
-        double newZoom=(newLngZoom+newLatZoom)/2;
-        visPos->setZoom(newZoom);
+        double newZoom;
+        if (bestMapTile->getParentMapContainer()->getZoomLevel()!=displayArea.getZoomLevel()) {
+          double newLngZoom=newMapPos.getLngScale()/bestMapTile->getLngScale();
+          double newLatZoom=newMapPos.getLatScale()/bestMapTile->getLatScale();
+          newZoom=(newLngZoom+newLatZoom)/2;
+          visPos->setZoom(newZoom);
+        } else {
+          newZoom=visPos->getZoom();
+        }
 
         // Compute the required display length
         //DEBUG("screenHeight=%d screenWidth=%d",core->getScreen()->getHeight(),core->getScreen()->getWidth());
@@ -727,7 +745,7 @@ void MapEngine::updateMap() {
         calibrator->setGeographicCoordinates(t);
         latNorth=t.getLat();
         lngWest=t.getLng();
-        t.setY(newMapPos.getY()+zoomedScreenHeight);
+        t.setY(newMapPos.getY()+zoomedScreenHeight/2);
         calibrator->setGeographicCoordinates(t);
         latSouth=t.getLat();
         if (t.getLng()<lngWest) lngWest=t.getLng();
@@ -761,7 +779,7 @@ void MapEngine::updateMap() {
 
         // Update the overlaying graphic
         //DEBUG("before updateOverlays",NULL);
-        core->getNavigationEngine()->updateGraphics(scaleHasChanged);
+        core->getNavigationEngine()->updateScreenGraphic(scaleHasChanged);
         PROFILE_ADD("overlay graphic update");
 
         // Remove all tiles that are not visible anymore in the new display area
@@ -807,9 +825,8 @@ void MapEngine::updateMap() {
         }
         PROFILE_ADD("tile list update");
 
-        // Inform the cache
-        core->getMapCache()->tileVisibilityChanged();
-        PROFILE_ADD("cache update");
+        // Request cache and map tile overlay graphic update
+        mapChanged=true;
 
       }
 
@@ -821,7 +838,18 @@ void MapEngine::updateMap() {
       PROFILE_ADD("no tile found");
 
     }
+    core->getMapSource()->unlockAccess();
 
+  }
+
+  // Was the map changed?
+  if (mapChanged) {
+
+    // Update the tile graphic
+    core->getNavigationEngine()->updateMapGraphic();
+
+    // Inform the cache
+    core->getMapCache()->tileVisibilityChanged();
   }
 
   // Indicate that the map update is finished

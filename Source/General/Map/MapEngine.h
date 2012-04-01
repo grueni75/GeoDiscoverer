@@ -51,6 +51,8 @@ protected:
   bool abortUpdate;                               // Indicates that the current update shall be stopped
   bool updateInProgress;                          // Indicates if the map is currently being updated
   bool forceMapUpdate;                            // Force an update of the map on the next call
+  bool forceCacheUpdate;                          // Force an update of the map cache on the next call
+  ThreadMutexInfo *forceCacheUpdateMutex;         // Mutex for accessing the force map update flag
   ThreadMutexInfo *locationPos2visPosMutex;       // Mutex for accessing the locationPos2visPos* variables
   Int locationPos2visPosOffsetX;                  // X offset from the location pos to the visual position
   Int locationPos2visPosOffsetY;                  // Y offset from the location pos to the visual position
@@ -130,6 +132,13 @@ public:
   {
     forceMapUpdate=true;
   }
+  void setForceCacheUpdate()
+  {
+    core->getThread()->lockMutex(forceCacheUpdateMutex);
+    forceCacheUpdate=true;
+    core->getThread()->unlockMutex(forceCacheUpdateMutex);
+  }
+
   MapPosition *lockMapPos()
   {
       core->getThread()->lockMutex(mapPosMutex);

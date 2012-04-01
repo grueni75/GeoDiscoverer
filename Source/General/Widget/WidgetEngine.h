@@ -44,7 +44,7 @@ protected:
   // Adds a widget to a page
   void addWidgetToPage(
     std::string pageName,
-    WidgetTypes widgetType,
+    WidgetType widgetType,
     std::string widgetName,
     double portraitX, double portraitY, Int portraitZ,
     double landscapeX, double landscapeY, Int landscapeZ,

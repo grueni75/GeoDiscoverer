@@ -27,7 +27,7 @@ namespace GEODISCOVERER {
 
 // Constructor
 GraphicLine::GraphicLine(Int numberOfStrokes, Short width) : GraphicPrimitive() {
-  type=GraphicLineType;
+  type=GraphicTypeLine;
   this->valuesPerTriangle=3;
   this->numberOfTrianglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","lineNumberOfStrokesOtherSegemnts","Number of strokes to reserve if current segment has no strokes left anymore",32);
   this->width=width;

@@ -26,7 +26,7 @@
 namespace GEODISCOVERER {
 
 WidgetCheckbox::WidgetCheckbox() {
-  widgetType=WidgetCheckboxType;
+  widgetType=WidgetTypeCheckbox;
   firstTime=true;
 }
 
@@ -55,12 +55,12 @@ void WidgetCheckbox::update(bool checked, bool executeCommand) {
     texture=uncheckedTexture;
     //DEBUG("executing unchecked command",NULL);
     if (executeCommand)
-      core->getCommander()->execute(uncheckedCommand);
+      core->getCommander()->execute(uncheckedCommand,true);
   } else {
     texture=checkedTexture;
     //DEBUG("executing checked command",NULL);
     if (executeCommand)
-      core->getCommander()->execute(checkedCommand);
+      core->getCommander()->execute(checkedCommand,true);
   }
   isUpdated=true;
 }

@@ -46,7 +46,7 @@ WidgetEngine::~WidgetEngine() {
 // Adds a widget to a page
 void WidgetEngine::addWidgetToPage(
   std::string pageName,
-  WidgetTypes widgetType,
+  WidgetType widgetType,
   std::string widgetName,
   double portraitX, double portraitY, Int portraitZ,
   double landscapeX, double landscapeY, Int landscapeZ,
@@ -58,10 +58,10 @@ void WidgetEngine::addWidgetToPage(
   ConfigStore *c=core->getConfigStore();
   std::string widgetTypeString="unknown";
   switch(widgetType) {
-    case WidgetButtonType: widgetTypeString="button"; break;
-    case WidgetCheckboxType: widgetTypeString="checkbox"; break;
-    case WidgetMeterType: widgetTypeString="meter"; break;
-    case WidgetScaleType: widgetTypeString="scale"; break;
+    case WidgetTypeButton: widgetTypeString="button"; break;
+    case WidgetTypeCheckbox: widgetTypeString="checkbox"; break;
+    case WidgetTypeMeter: widgetTypeString="meter"; break;
+    case WidgetTypeScale: widgetTypeString="scale"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
   c->getStringValue(path,"type","Kind of widget",widgetTypeString);
@@ -74,11 +74,11 @@ void WidgetEngine::addWidgetToPage(
   c->getGraphicColorValue(path + "/ActiveColor","active widget",GraphicColor(activeRed,activeGreen,activeBlue,activeAlpha));
   c->getGraphicColorValue(path + "/InactiveColor","inactive widget",GraphicColor(inactiveRed,inactiveGreen,inactiveBlue,inactiveAlpha));
   switch(widgetType) {
-    case WidgetButtonType:
+    case WidgetTypeButton:
       c->getStringValue(path,"iconFilename","Filename of the background image",parameters["iconFilename"]);
       c->getStringValue(path,"command","Command to execute if widget is clicked",parameters["command"]);
       break;
-    case WidgetCheckboxType:
+    case WidgetTypeCheckbox:
       c->getStringValue(path,"checkedIconFilename","Filename of the background image showing the unchecked state",parameters["checkedIconFilename"]);
       c->getStringValue(path,"checkedCommand","Command to execute if widget is unchecked",parameters["checkedCommand"]);
       c->getStringValue(path,"uncheckedIconFilename","Filename of the background image showing the checked state",parameters["uncheckedIconFilename"]);
@@ -86,7 +86,7 @@ void WidgetEngine::addWidgetToPage(
       c->getStringValue(path,"stateConfigPath","Path to the config entry that holds the check state",parameters["stateConfigPath"]);
       c->getStringValue(path,"stateConfigName","Name of the config entry that holds the check state",parameters["stateConfigName"]);
       break;
-    case WidgetMeterType:
+    case WidgetTypeMeter:
       c->getStringValue(path,"iconFilename","Filename of the background image",parameters["iconFilename"]);
       c->getStringValue(path,"meterType","Kind of meter to display",parameters["meterType"]);
       c->getStringValue(path,"updateInterval","Time in microseconds to elapse before updating the widget",parameters["updateInterval"]);
@@ -94,7 +94,7 @@ void WidgetEngine::addWidgetToPage(
       c->getStringValue(path,"valueY","Vertical position of the value in percent of the widget height",parameters["valueY"]);
       c->getStringValue(path,"unitY","Vertical position of the unit in percent of the widget height",parameters["unitY"]);
       break;
-    case WidgetScaleType:
+    case WidgetTypeScale:
       c->getStringValue(path,"iconFilename","Filename of the background image",parameters["iconFilename"]);
       c->getStringValue(path,"updateInterval","Time in microseconds to elapse before updating the widget",parameters["updateInterval"]);
       c->getStringValue(path,"tickLabelOffsetX","Horizontal offset for the scale values in percent of the widget width",parameters["tickLabelOffsetX"]);
@@ -116,19 +116,19 @@ void WidgetEngine::init() {
     parameters.clear();
     parameters["iconFilename"]="zoomIn";
     parameters["command"]="zoom(1.125)";
-    addWidgetToPage("Default",WidgetButtonType,"Zoom In",               87.5, 23.0,0,93.0, 87.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Zoom In",               87.5, 23.0,0,93.0, 87.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="zoomOut";
     parameters["command"]="zoom(0.875)";
-    addWidgetToPage("Default",WidgetButtonType,"Zoom Out",              62.5, 23.0,0,93.0, 62.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Zoom Out",              62.5, 23.0,0,93.0, 62.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="rotateLeft";
     parameters["command"]="rotate(+3)";
-    addWidgetToPage("Default",WidgetButtonType,"Rotate Left",           37.5, 23.0,0,93.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Rotate Left",           37.5, 23.0,0,93.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="rotateRight";
     parameters["command"]="rotate(-3)";
-    addWidgetToPage("Default",WidgetButtonType,"Rotate Right",          12.5, 23.0,0,93.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Rotate Right",          12.5, 23.0,0,93.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["uncheckedIconFilename"]="trackRecordingOff";
     parameters["uncheckedCommand"]="setRecordTrack(0)";
@@ -136,11 +136,11 @@ void WidgetEngine::init() {
     parameters["checkedCommand"]="setRecordTrack(1)";
     parameters["stateConfigPath"]="Navigation";
     parameters["stateConfigName"]="recordTrack";
-    addWidgetToPage("Default",WidgetCheckboxType,"Track Recording",     87.5, 93.0,0,7.0, 87.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Track Recording",     87.5, 93.0,0,7.0, 87.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="createNewTrack";
     parameters["command"]="createNewTrack()";
-    addWidgetToPage("Default",WidgetButtonType,"Create New Track",      62.5, 93.0,0,7.0, 62.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Create New Track",      62.5, 93.0,0,7.0, 62.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["uncheckedIconFilename"]="wakeLockOff";
     parameters["uncheckedCommand"]="setWakeLock(0)";
@@ -148,7 +148,7 @@ void WidgetEngine::init() {
     parameters["checkedCommand"]="setWakeLock(1)";
     parameters["stateConfigPath"]="Screen";
     parameters["stateConfigName"]="wakeLock";
-    addWidgetToPage("Default",WidgetCheckboxType,"Wake Lock",           37.5, 93.0,0,7.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Wake Lock",           37.5, 93.0,0,7.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["uncheckedIconFilename"]="returnToLocationOff";
     parameters["uncheckedCommand"]="setReturnToLocation(0)";
@@ -156,7 +156,7 @@ void WidgetEngine::init() {
     parameters["checkedCommand"]="setReturnToLocation(1)";
     parameters["stateConfigPath"]="Map";
     parameters["stateConfigName"]="returnToLocation";
-    addWidgetToPage("Default",WidgetCheckboxType,"Return To Location",  12.5, 93.0,0,7.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Return To Location",  12.5, 93.0,0,7.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["uncheckedIconFilename"]="zoomLevelLockOff";
     parameters["uncheckedCommand"]="setZoomLevelLock(0)";
@@ -164,7 +164,7 @@ void WidgetEngine::init() {
     parameters["checkedCommand"]="setZoomLevelLock(1)";
     parameters["stateConfigPath"]="Map";
     parameters["stateConfigName"]="zoomLevelLock";
-    addWidgetToPage("Default",WidgetCheckboxType,"Zoom Level Lock",     87.5, 81.0,0,75.0,87.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Zoom Level Lock",     87.5, 81.0,0,75.0,87.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="meterBackground";
     parameters["meterType"]="altitude";
@@ -172,17 +172,17 @@ void WidgetEngine::init() {
     parameters["labelY"]="78.0";
     parameters["valueY"]="40.0";
     parameters["unitY"]="10.0";
-    addWidgetToPage("Default",WidgetMeterType,"Current altitude",       17.0, 9.0,0,25.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeMeter,"Current altitude",       17.0, 9.0,0,25.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters["meterType"]="speed";
-    addWidgetToPage("Default",WidgetMeterType,"Current speed",          50.0, 9.0,0,50.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeMeter,"Current speed",          50.0, 9.0,0,50.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters["meterType"]="trackLength";
-    addWidgetToPage("Default",WidgetMeterType,"Track length",           83.0, 9.0,0,75.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeMeter,"Track length",           83.0, 9.0,0,75.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="scale";
     parameters["updateInterval"]="1000000";
     parameters["tickLabelOffsetX"]="-3.5";
     parameters["mapLabelOffsetY"]="9.0";
-    addWidgetToPage("Default",WidgetScaleType,"Map scale",              40.0, 81.0,0,42.0, 88.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeScale,"Map scale",              35.0, 81.0,0,37.0, 88.0,0,255,255,255,255,255,255,255,100,parameters);
     pageNames=c->getAttributeValues("Widget/Page","name");
   }
 
@@ -265,11 +265,11 @@ void WidgetEngine::init() {
       if (widgetType=="meter") {
         std::string meterType=c->getStringValue(widgetPath,"meterType");
         if (meterType=="altitude") {
-          meter->setMeterType(WidgetMeterAltitudeType);
+          meter->setMeterType(WidgetMeterTypeAltitude);
         } else if (meterType=="speed") {
-          meter->setMeterType(WidgetMeterSpeedType);
+          meter->setMeterType(WidgetMeterTypeSpeed);
         } else if (meterType=="trackLength") {
-          meter->setMeterType(WidgetMeterTrackLengthType);
+          meter->setMeterType(WidgetMeterTypeTrackLength);
         } else {
           FATAL("unknown meter type",NULL);
           return;

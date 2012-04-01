@@ -27,7 +27,7 @@ namespace GEODISCOVERER {
 
 // Constructor
 GraphicRectangleList::GraphicRectangleList(Int numberOfRectangles) : GraphicPrimitive() {
-  type=GraphicRectangleListType;
+  type=GraphicTypeRectangleList;
   this->numberOfRectanglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","rectangleListNumberOfRectanglesOtherSegemnts","Number of rectangles to reserve if current segment has no rectangles left anymore",4);
   if (numberOfRectangles==0) {
     numberOfRectangles=numberOfRectanglesOtherSegments;

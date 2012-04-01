@@ -37,18 +37,29 @@ NavigationPathVisualization::~NavigationPathVisualization() {
   // Remove all visualizations from the tiles
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
     MapTile *mapTile=i->first;
+    removeTileInfo(mapTile);
+    delete i->second;
+  }
+
+}
+
+// Removes the tile from the visualization
+void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
+  NavigationPathTileInfoMap::iterator i;
+  i=tileInfoMap.find(tile);
+  if (i!=tileInfoMap.end()) {
     NavigationPathTileInfo *tileInfo=i->second;
-    GraphicObject *tileVisualization=mapTile->getVisualization();
+    GraphicObject *tileVisualization=tile->getVisualization();
     tileVisualization->lockAccess();
     if (tileInfo->getGraphicLine())
       tileVisualization->removePrimitive(tileInfo->getGraphicLineKey(),true);
     if (tileInfo->getGraphicRectangeList())
       tileVisualization->removePrimitive(tileInfo->getGraphicRectangleListKey(),true);
     tileVisualization->unlockAccess();
-    delete tileInfo;
+    tileInfoMap.erase(i);
   }
-
 }
+
 
 // Returns the tile info for the given tile
 NavigationPathTileInfo *NavigationPathVisualization::findTileInfo(MapTile *tile) {
@@ -96,12 +107,17 @@ void NavigationPathVisualization::optimizeGraphic() {
 }
 
 // Compute the distance in pixels between two points
-double NavigationPathVisualization::computePixelDistance(MapPosition a, MapPosition b) {
-  double lngDiff=b.getLng()-a.getLng();
-  lngDiff*=lngScale;
-  double latDiff=b.getLat()-a.getLat();
-  latDiff*=latScale;
-  return sqrt(lngDiff*lngDiff+latDiff*latDiff);
+MapCalibrator *NavigationPathVisualization::findCalibrator(MapPosition pos, bool &deleteCalibrator) {
+  return core->getMapSource()->findMapCalibrator(zoomLevel,pos,deleteCalibrator);
+}
+
+// Adds a new point to the visualization
+void NavigationPathVisualization::addPoint(MapPosition pos) {
+  if (pos.getHasBearing()) {
+    prevArrowPoint=pos;
+  }
+  points.push_back(pos);
+  prevLinePoint=pos;
 }
 
 }

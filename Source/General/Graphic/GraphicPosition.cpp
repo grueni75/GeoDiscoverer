@@ -87,7 +87,7 @@ double GraphicPosition::getAngleRad() {
 }
 
 // Sets the position
-bool GraphicPosition::set(Int valueX, Int valueY, double valueZoom, double valueAngle) {
+void GraphicPosition::set(Int valueX, Int valueY, double valueZoom, double valueAngle) {
   this->valueAngle=valueAngle;
   this->valueZoom=valueZoom;
   this->valueX=valueX;

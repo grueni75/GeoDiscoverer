@@ -27,7 +27,7 @@ namespace GEODISCOVERER {
 
 // Constructor
 GraphicPrimitive::GraphicPrimitive() {
-  type=GraphicPrimitiveType;
+  type=GraphicTypePrimitive;
   setTexture(core->getScreen()->getTextureNotDefined());
   setX(0);
   setY(0);

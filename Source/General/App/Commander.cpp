@@ -28,14 +28,19 @@ namespace GEODISCOVERER {
 // Constructor
 Commander::Commander() {
   pos=NULL;
+  accessMutex=core->getThread()->createMutex();
 }
 
 // Destructor
 Commander::~Commander() {
+  core->getThread()->destroyMutex(accessMutex);
 }
 
 // Execute a command
-std::string Commander::execute(std::string cmd) {
+std::string Commander::execute(std::string cmd, bool innerCall) {
+
+  // Only one at a time
+  if (!innerCall) core->getThread()->lockMutex(accessMutex);
 
   //DEBUG("executing command <%s>",cmd.c_str());
   TRACE(cmd.c_str(),NULL);
@@ -48,11 +53,13 @@ std::string Commander::execute(std::string cmd) {
   Int argStart=cmd.find('(');
   if (argStart==std::string::npos) {
     ERROR("can not extract start of arguments from command <%s>",cmd.c_str());
+    if (!innerCall) core->getThread()->unlockMutex(accessMutex);
     return "";
   }
   Int argEnd=cmd.find(')');
   if (argEnd==std::string::npos) {
     ERROR("can not extract end of arguments from command <%s>",cmd.c_str());
+    if (!innerCall) core->getThread()->unlockMutex(accessMutex);
     return "";
   }
   std::string cmdName=cmd.substr(0,argStart);
@@ -234,6 +241,7 @@ std::string Commander::execute(std::string cmd) {
   if (!cmdExecuted) {
     ERROR("unknown command <%s>",cmd.c_str());
   }
+  if (!innerCall) core->getThread()->unlockMutex(accessMutex);
   return result;
 }
 

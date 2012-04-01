@@ -27,7 +27,7 @@ namespace GEODISCOVERER {
 
 // Constructor
 WidgetButton::WidgetButton() : WidgetPrimitive() {
-  widgetType=WidgetButtonType;
+  widgetType=WidgetTypeButton;
 }
 
 // Destructor
@@ -73,7 +73,7 @@ void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 
     // Execute the command only if the repeating dispatching has not yet started
     if (t<nextDispatchTime) {
-      core->getCommander()->execute(command);
+      core->getCommander()->execute(command, true);
     }
   }
 }

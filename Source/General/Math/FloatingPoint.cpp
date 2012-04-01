@@ -34,21 +34,56 @@ FloatingPoint::~FloatingPoint() {
   // TODO Auto-generated destructor stub
 }
 
-// Computes the constants c1-c3 of the equation c0*x+c1*y+c2
-std::vector<double> FloatingPoint::solveZEqualsC1XPlusC2YPlusC3(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z) {
+// Computes the constants c0-c1 of the equation c0*x+c1
+std::vector<double> FloatingPoint::solveZEqualsC0XPlusC1(std::vector<double> &x, std::vector<double> &z) {
+  std::vector<double> c;
+  c.resize(2);
+  double t;
+  if (x.size()!=2) {
+    FATAL("two samples for x are required to solve z=c0*x+c1",NULL);
+    return c;
+  }
+  if (z.size()!=2) {
+    FATAL("two samples for z are required to solve z=c0*x+c1",NULL);
+    return c;
+  }
+  for (int i=0;i<2;i++) {
+    DEBUG("x[%d]=%.2f z[%d]=%.2f",i,x[i],i,z[i]);
+  }
+
+  // Compute differences between factors
+  double x1x0=x[1]-x[0];
+  double z1z0=z[1]-z[0];
+
+  // Compute c0
+  if (x1x0==0.0) {
+    ERROR("can not compute c[1] (divisor is zero)",NULL);
+    return std::vector<double>();
+  }
+  c[0]=z1z0/x1x0;
+  DEBUG("c[0]=%e",c[0]);
+
+  // Compute c1
+  c[1]=z[0]-c[0]*x[0];
+  DEBUG("c[1]=%e",c[1]);
+  return c;
+}
+
+// Computes the constants c0-c2 of the equation c0*x+c1*y+c2
+std::vector<double> FloatingPoint::solveZEqualsC0XPlusC1YPlusC2(std::vector<double> &x, std::vector<double> &y, std::vector<double> &z) {
   std::vector<double> c;
   c.resize(3);
   double t;
   if (x.size()!=3) {
-    FATAL("three samples for x are required to solve z=c1*x+c2*y+c3",NULL);
+    FATAL("three samples for x are required to solve z=c0*x+c1*y+c2",NULL);
     return c;
   }
-  if (x.size()!=3) {
-    FATAL("three samples for y are required to solve z=c1*x+c2*y+c3",NULL);
+  if (y.size()!=3) {
+    FATAL("three samples for y are required to solve z=c0*x+c1*y+c2",NULL);
     return c;
   }
   if (z.size()!=3) {
-    FATAL("three samples for z are required to solve z=c1*x+c2*y+c3",NULL);
+    FATAL("three samples for z are required to solve z=c0*x+c1*y+c2",NULL);
     return c;
   }
   /*for (int i=0;i<3;i++) {

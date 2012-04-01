@@ -54,7 +54,10 @@ void UnitConverter::formatMeters(double lengthInMeters, std::string &value, std:
   switch(unitSystem) {
     case MetricSystem:
       length=lengthInMeters;
-      if ((((length/1000.0)>=1.0)&&(lockedUnit==""))||(lockedUnit=="km")) {
+      if ((((length/1000.0/1000.0)>=1.0)&&(lockedUnit==""))||(lockedUnit=="Mm")) {
+        length=length/1000.0/1000.0;
+        unit="Mm";
+      } else if ((((length/1000.0)>=1.0)&&(lockedUnit==""))||(lockedUnit=="km")) {
         length=length/1000.0;
         unit="km";
       } else {

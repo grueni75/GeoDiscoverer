@@ -28,14 +28,14 @@
 
 namespace GEODISCOVERER {
 
-typedef enum { WidgetMeterAltitudeType, WidgetMeterSpeedType, WidgetMeterTrackLengthType } WidgetMeterTypes;
+typedef enum { WidgetMeterTypeAltitude, WidgetMeterTypeSpeed, WidgetMeterTypeTrackLength } WidgetMeterType;
 
 class WidgetMeter: public WidgetPrimitive {
 
 protected:
 
   // Type of info to display
-  WidgetMeterTypes meterType;
+  WidgetMeterType meterType;
 
   // Label
   FontString *labelFontString;
@@ -79,7 +79,7 @@ public:
   virtual void draw(Screen *screen, TimestampInMicroseconds t);
 
   // Getters and setters
-  void setMeterType(WidgetMeterTypes meterType);
+  void setMeterType(WidgetMeterType meterType);
 
   void setUpdateInterval(TimestampInMicroseconds updateInterval) {
     this->updateInterval=updateInterval;
