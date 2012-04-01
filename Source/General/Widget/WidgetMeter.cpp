@@ -54,7 +54,7 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
 
   // Check for overflow in microseconds counter
   if (t<lastWorkTime) {
-    ERROR("microseconds overflow detected (before=%llu, after=%llu)",lastWorkTime,t);
+    DEBUG("microseconds overflow detected (before=%llu, after=%llu)",lastWorkTime,t);
     nextUpdateTime=t;
   }
   lastWorkTime=t;
