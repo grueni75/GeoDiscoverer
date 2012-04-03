@@ -32,16 +32,25 @@ Thread::Thread() {
 // Creates a thread
 ThreadInfo *Thread::createThread(ThreadFunction threadFunction, void *threadArgument) {
   ThreadInfo *thread;
+  pthread_attr_t attr;
+  struct sched_param param;
   if (!(thread=(ThreadInfo *)malloc(sizeof(ThreadInfo)))) {
     FATAL("can not reserve memory for thread structure",NULL);
     return NULL;
   }
-  int rc = pthread_create(thread, NULL, threadFunction, (void *)threadArgument);
+  pthread_attr_init(&attr);
+  int rc = pthread_create(thread, &attr, threadFunction, (void *)threadArgument);
   if (rc) {
     FATAL("can not create thread object",NULL);
     free(thread);
     return NULL;
   }
+  /*pthread_attr_getschedparam(&attr, &param);
+  param.sched_priority = priority;
+  Int result=pthread_setschedparam(*thread, SCHED_OTHER, &param);
+  if (result!=0) {
+    FATAL("can not set thread priority (error=%d)",result);
+  }*/
   return thread;
 }
 

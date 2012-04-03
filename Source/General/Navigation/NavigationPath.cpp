@@ -29,6 +29,8 @@ namespace GEODISCOVERER {
 NavigationPath::NavigationPath() {
 
   // Init variables
+  accessMutex=core->getThread()->createMutex();
+  isInitMutex=core->getThread()->createMutex();
   gpxFilefolder=core->getNavigationEngine()->getTrackPath();
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength","Minimum segment length of tracks, routes and other paths",8);
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance","Minimum distance between two direction arrows of tracks, routes and other paths",64);
@@ -53,6 +55,10 @@ NavigationPath::~NavigationPath() {
   GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators();
   pathAnimators->removePrimitive(animatorKey,false);
   core->getGraphicEngine()->unlockPathAnimators();
+
+  // Free variables
+  core->getThread()->destroyMutex(accessMutex);
+  core->getThread()->destroyMutex(isInitMutex);
 }
 
 // Updates the visualization of the tile
@@ -218,6 +224,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
 // Adds a point to the path
 void NavigationPath::addEndPosition(MapPosition pos) {
 
+  // Ensure that only one thread is executing this code
+  core->getThread()->lockMutex(accessMutex);
+
   // Decide whether to add a new point or use the last one
   if (!hasLastPoint) {
     hasLastPoint=true;
@@ -299,6 +308,10 @@ void NavigationPath::addEndPosition(MapPosition pos) {
       delete calibrator;
 
   }
+
+  // Unlock the mutex
+  core->getThread()->unlockMutex(accessMutex);
+
 }
 
 // Clears the graphical representation
@@ -314,6 +327,9 @@ void NavigationPath::deinit() {
   GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators();
   pathAnimators->setIsUpdated(true);
   core->getGraphicEngine()->unlockPathAnimators();
+
+  // Is not initialized
+  setIsInit(false);
 }
 
 // Clears all points and sets a new gpx filname
@@ -357,9 +373,11 @@ void NavigationPath::init() {
 void NavigationPath::graphicInvalidated() {
 
   // Invalidate all zoom levels
+  core->getThread()->lockMutex(accessMutex);
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     (*i)->graphicInvalidated();
   }
+  core->getThread()->unlockMutex(accessMutex);
 
 }
 
@@ -367,9 +385,11 @@ void NavigationPath::graphicInvalidated() {
 void NavigationPath::optimizeGraphic() {
 
   // Go through all zoom levels
+  core->getThread()->lockMutex(accessMutex);
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     (*i)->optimizeGraphic();
   }
+  core->getThread()->unlockMutex(accessMutex);
 
 }
 
@@ -381,6 +401,7 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
 
   // Go through all containers
   // The mapContainers list is sorted according to the zoom level
+  core->getThread()->lockMutex(accessMutex);
   std::list<MapContainer*>::iterator j=mapContainers->begin();
   bool more_entries=true;
   while(more_entries) {
@@ -426,6 +447,7 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
       j++;
     }
   }
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Removes the visualization of the given container
@@ -435,11 +457,13 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
   Int zoomLevel=-1;
 
   // Remove the tile from the visualization
+  core->getThread()->lockMutex(accessMutex);
   NavigationPathVisualization *visualization=zoomLevelVisualizations[mapContainer->getZoomLevel()-1];
   std::vector<MapTile*> *mapTiles=mapContainer->getMapTiles();
   for(std::vector<MapTile*>::iterator i=mapTiles->begin();i!=mapTiles->end();i++) {
     visualization->removeTileInfo(*i);
   }
+  core->getThread()->unlockMutex(accessMutex);
 
 }
 

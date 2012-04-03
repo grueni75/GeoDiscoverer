@@ -36,9 +36,6 @@ protected:
   // Current location
   MapPosition locationPos;
 
-  // Mutex for accessing the location pos
-  ThreadMutexInfo *locationPosMutex;
-
   // Current compass bearing in degrees
   double compassBearing;
 
@@ -74,6 +71,12 @@ protected:
 
   // List of containers that need a graphic update
   std::list<MapContainer*> unvisualizedMapContainers;
+
+  // Mutex for accessing the location pos
+  ThreadMutexInfo *locationPosMutex;
+
+  // Information about the background loader thread
+  ThreadInfo *backgroundLoaderThreadInfo;
 
   // Updates the currently recorded track
   void updateTrack();
@@ -124,6 +127,9 @@ public:
 
   // Removes the viualization for the given map container
   void removeGraphics(MapContainer *container);
+
+  // Loads all pathes in the background
+  void backgroundLoader();
 
   // Getters and setters
   NavigationPath *lockRecordedTrack()

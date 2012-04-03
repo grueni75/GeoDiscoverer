@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.perfectapp.android.geodiscoverer"
       android:versionCode="1"
-      android:versionName="20120401">
+      android:versionName="20120403">
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="true" android:name=".GDApplication">
         <activity android:name=".ViewMap"
                   android:configChanges="orientation|keyboardHidden"

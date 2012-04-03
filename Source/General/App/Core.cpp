@@ -512,9 +512,7 @@ bool Core::graphicInvalidated() {
     return false;
 
   // Ensure that the commander is not executing something
-  DEBUG("before lock",NULL);
   commander->interruptOperation();
-  DEBUG("after lock",NULL);
 
   // Wait until the map update thread is in a clean state
   bool mapUpdateThreadFinished=false;

@@ -25,6 +25,12 @@
 
 namespace GEODISCOVERER {
 
+// Background loader thread
+void *navigationEngineBackgroundLoaderThread(void *args) {
+  ((NavigationEngine*)args)->backgroundLoader();
+  return NULL;
+}
+
 // Constructor
 NavigationEngine::NavigationEngine() {
 
@@ -42,6 +48,7 @@ NavigationEngine::NavigationEngine() {
   compassBearing=0;
   isInitialized=false;
   recordedTrack=NULL;
+  backgroundLoaderThreadInfo=NULL;
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -68,7 +75,6 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(updateGraphicsMutex);
 }
 
-
 // Initializes the engine
 void NavigationEngine::init() {
 
@@ -81,21 +87,21 @@ void NavigationEngine::init() {
   }
   recordedTrack->setNormalColor(c->getGraphicColorValue("Navigation/trackColor","recorded track",GraphicColor(255,127,0,255)));
 
-  // Load the last recorded track if it does exist
+  // Prepare the last recorded track if it does exist
   std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename","Filename of the last recorded track.","");
   std::string filepath=recordedTrack->getGpxFilefolder()+"/"+lastRecordedTrackFilename;
   if ((lastRecordedTrackFilename!="")&&(access(filepath.c_str(),F_OK)==0)) {
     recordedTrack->setGpxFilename(lastRecordedTrackFilename);
-    recordedTrack->readGPXFile();
   } else {
     c->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename());
+    recordedTrack->setIsInit(true);
   }
   unlockRecordedTrack();
 
   // Set the track recording
   setRecordTrack(recordTrack);
 
-  // Load any routes
+  // Prepare any routes
   lockRoutes();
   std::string path="Navigation/Route";
   std::list<std::string> routeNumbers=c->getAttributeValues(path,"number");
@@ -112,17 +118,17 @@ void NavigationEngine::init() {
       route->setBlinkMode(true);
     }
     route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor","Normal color of the route",GraphicColor(255,255,0,255)));
-    route->setName(c->getStringValue(path,"filename","GPX filename of the route","unknown.gpx"));
+    route->setName(c->getStringValue(routePath,"filename","GPX filename of the route","unknown.gpx"));
     route->setDescription("route number " + *i);
     route->setGpxFilefolder(getRoutePath());
     route->setGpxFilename(route->getName());
-    if (!(route->readGPXFile())) {
-      delete route;
-    } else {
-      routes.push_back(route);
-    }
+    routes.push_back(route);
   }
   unlockRoutes();
+
+  // Start the background loader
+  if (!(backgroundLoaderThreadInfo=core->getThread()->createThread(navigationEngineBackgroundLoaderThread,this)))
+    FATAL("can not start background loader thread",NULL);
 
   // Object is initialized
   isInitialized=true;
@@ -130,6 +136,10 @@ void NavigationEngine::init() {
 
 // Deinitializes the engine
 void NavigationEngine::deinit() {
+
+  // Wait for the background loader thread to complete
+  if (backgroundLoaderThreadInfo)
+    core->getThread()->waitForThread(backgroundLoaderThreadInfo);
 
   // Save the track first
   lockRecordedTrack();
@@ -280,6 +290,10 @@ void NavigationEngine::updateTrack() {
     return;
   }
 
+  // Do not update the track if it is not yet initialized
+  if (!recordedTrack->getIsInit())
+    return;
+
   // Get access to the recorded track
   //DEBUG("before recorded track update",NULL);
   lockRecordedTrack();
@@ -329,6 +343,12 @@ void NavigationEngine::backup() {
 // Switches the track recording
 void NavigationEngine::setRecordTrack(bool recordTrack)
 {
+  // Ignore command if track is not initialized
+  if (!recordedTrack->getIsInit()) {
+    WARNING("can not change track recording status because track is currently loading",NULL);
+    return;
+  }
+
   // Interrupt the track if there is a previous point
   lockRecordedTrack();
   if ((recordTrack)&&(!this->recordTrack)) {
@@ -351,6 +371,11 @@ void NavigationEngine::setRecordTrack(bool recordTrack)
 
 // Creates a new track
 void NavigationEngine::createNewTrack() {
+
+  if (!recordedTrack->getIsInit()) {
+    WARNING("can not change track recording status because track is currently loading",NULL);
+    return;
+  }
   lockRecordedTrack();
   recordedTrack->writeGPXFile();
   recordedTrack->deinit();
@@ -545,7 +570,6 @@ void NavigationEngine::graphicInvalidated() {
     recordedTrack->graphicInvalidated();
   }
   unlockRecordedTrack();
-
 }
 
 // Recreate the objects to reduce the number of graphic point buffers
@@ -593,7 +617,26 @@ void NavigationEngine::removeGraphics(MapContainer *container) {
     recordedTrack->removeVisualization(container);
   }
   unlockRecordedTrack();
+}
+
+// Loads all pathes in the background
+void NavigationEngine::backgroundLoader() {
+
+  // Load the recorded track
+  if (!recordedTrack->getIsInit()) {
+    INFO("loading track <%s>",recordedTrack->getGpxFilename().c_str());
+    recordedTrack->readGPXFile();
+    recordedTrack->setIsInit(true);
+  }
+
+  // Load all routes
+  for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    INFO("loading route <%s>",(*i)->getGpxFilename().c_str());
+    (*i)->readGPXFile();
+    (*i)->setIsInit(true);
+  }
 
 }
+
 
 }

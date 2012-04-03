@@ -286,7 +286,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, std:
 
   // Sanity check
   if (nodes.size()!=1) {
-    FATAL("more than one node found",NULL);
+    FATAL("more than one node found (path=%s)",path.c_str());
     return "";
   }
   node=nodes.front();

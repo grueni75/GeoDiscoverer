@@ -49,7 +49,7 @@
     <pathMinSegmentLength description="Minimum segment length of tracks, routes and other paths">8</pathMinSegmentLength>
     <pathMinDirectionDistance description="Minimum distance between two direction arrows of tracks, routes and other paths">64</pathMinDirectionDistance>
     <pathWidth description="Width of tracks, routes and other paths">8</pathWidth>
-  </Graphic>
+  <lineNumberOfStrokesOtherSegemnts description="Number of strokes to reserve if current segment has no strokes left anymore">32</lineNumberOfStrokesOtherSegemnts><rectangleListNumberOfRectanglesOtherSegemnts description="Number of rectangles to reserve if current segment has no rectangles left anymore">4</rectangleListNumberOfRectanglesOtherSegemnts></Graphic>
   <Widget>
     <SelectedColor>
       <red description="Red component [0-255] of the selected widget">255</red>
@@ -455,13 +455,13 @@
     <zoomLevelLock description="Indicates if the zoom level of the map shall not be changed when zooming.">0</zoomLevelLock>
     <LastPosition>
       <folder description="Folder that contains the map images.">OpenCycleMap</folder>
-      <lng description="Longitude of the last position in the map.">6.77344</lng>
-      <lat description="Latitude of the last position in the map.">51.2342</lat>
-      <latScale description="Latitude scale of the last position in the map.">5730.68</latScale>
-      <lngScale description="Longitude scale of the last position in the map.">2707.78</lngScale>
-      <zoom description="Zoom value used in the graphic engine when the last position was active.">1.0889</zoom>
+      <lng description="Longitude of the last position in the map.">6.89062</lng>
+      <lat description="Latitude of the last position in the map.">51.2605</lat>
+      <latScale description="Latitude scale of the last position in the map.">773.262</latScale>
+      <lngScale description="Longitude scale of the last position in the map.">365.371</lngScale>
+      <zoom description="Zoom value used in the graphic engine when the last position was active.">1.17344</zoom>
       <angle description="Angle value used in the graphic engine when the last position was active.">0</angle>
-      <zoomLevel description="Map zoom level used when the last position was active.">13</zoomLevel>
+      <zoomLevel description="Map zoom level used when the last position was active.">10</zoomLevel>
     </LastPosition>
   <mapContainerCacheSize description="Number of map containers to remember if the source is using a cache.">256</mapContainerCacheSize></Map>
   <Navigation>
@@ -475,6 +475,36 @@
       <blue description="Blue component [0-255] of the recorded track">0</blue>
       <alpha description="Alpha component [0-255] of the recorded track">255</alpha>
     </trackColor>
-    <lastRecordedTrackFilename description="Filename of the last recorded track.">track-20120331-224846.gpx</lastRecordedTrackFilename>
+    <lastRecordedTrackFilename description="Filename of the last recorded track.">track-20120402-093129.gpx</lastRecordedTrackFilename>
+    <Route number="0">
+      <NormalColor>
+        <red>255</red>
+        <green>255</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </NormalColor>
+      <HighlightColor>
+        <red>255</red>
+        <green>0</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </HighlightColor>
+      <filename>ddorf-runde1.gpx</filename>
+    </Route>
+    <Route number="1">
+      <NormalColor>
+        <red>255</red>
+        <green>255</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </NormalColor>
+      <HighlightColor>
+        <red>255</red>
+        <green>0</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </HighlightColor>
+      <filename>ddorf-duisburg.gpx</filename>
+    </Route>
   </Navigation>
 </GDC>

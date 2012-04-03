@@ -289,7 +289,7 @@ bool MapTile::isNeighbor(MapTile *t, Int ownEdgeX, Int ownEdgeY, Int foreignEdge
   double diffX=diffLat*latScale;
   double diffLng=fabs(getLngX(ownEdgeX)-t->getLngX(foreignEdgeX));
   double diffY=diffLng*latScale;
-  DEBUG("diffX=%e diffY=%e",diffX,diffY);
+  //DEBUG("diffX=%e diffY=%e",diffX,diffY);
   if ((diffX<core->getMapSource()->getNeighborPixelTolerance())&&(diffY<core->getMapSource()->getNeighborPixelTolerance()))
     return true;
   else

@@ -30,6 +30,7 @@ class NavigationPath {
 
 protected:
 
+  ThreadMutexInfo *accessMutex;                   // Mutex for accessing the path
   std::string name;                               // The name of the path
   std::string description;                        // The description of this path
   std::string gpxFilefolder;                      // Filename of the gpx file that stores this path
@@ -52,6 +53,8 @@ protected:
   Int pathMinDirectionDistance;                   // Minimum distance between two direction arrows of tracks, routes and other paths
   Int pathWidth;                                  // Width of tracks, routes and other paths
   double length;                                  // Current length of the track in meters
+  ThreadMutexInfo *isInitMutex;                   // Mutex for accessing the isInit variable
+  bool isInit;                                    // Indicates if the track is initialized
 
   // Visualization of the path for each zoom level
   std::vector<NavigationPathVisualization*> zoomLevelVisualizations;
@@ -102,6 +105,12 @@ public:
 
   // Remove the visualization for the given container
   void removeVisualization(MapContainer *container);
+
+  // Starts the background loader
+  void startBackgroundLoader();
+
+  // Loads the path in the background
+  void backgroundLoader();
 
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)
@@ -223,6 +232,20 @@ public:
       this->blinkMode = blinkMode;
       animator.setColor(normalColor);
       animator.setBlinkAnimation(blinkMode,highlightColor);
+  }
+
+  bool getIsInit() const {
+    bool isInit;
+    core->getThread()->lockMutex(isInitMutex);
+    isInit=this->isInit;
+    core->getThread()->unlockMutex(isInitMutex);
+    return isInit;
+  }
+
+  void setIsInit(bool isInit) {
+    core->getThread()->lockMutex(isInitMutex);
+    this->isInit = isInit;
+    core->getThread()->unlockMutex(isInitMutex);
   }
 
 };

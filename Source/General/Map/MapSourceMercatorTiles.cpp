@@ -29,7 +29,7 @@ const double MapSourceMercatorTiles::latBound = 85.0511287798;
 const double MapSourceMercatorTiles::lngBound = 180.0;
 
 // Map download thread
-void *MapSourceMercatorTilesDownloadThread(void *args) {
+void *mapSourceMercatorTilesDownloadThread(void *args) {
   ((MapSourceMercatorTiles*)args)->downloadMapImages();
   return NULL;
 }
@@ -45,7 +45,7 @@ MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   downloadQueueMutex=core->getThread()->createMutex();
   downloadStartSignal=core->getThread()->createSignal();
   quitMapImageDownloadThread=false;
-  mapImageDownloadThreadInfo=core->getThread()->createThread(MapSourceMercatorTilesDownloadThread,this);
+  mapImageDownloadThreadInfo=core->getThread()->createThread(mapSourceMercatorTilesDownloadThread,this);
 }
 
 // Destructor

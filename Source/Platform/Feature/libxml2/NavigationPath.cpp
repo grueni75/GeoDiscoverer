@@ -37,6 +37,10 @@ void NavigationPath::writeGPXFile() {
   xmlNodePtr node;
   std::string filepath=gpxFilefolder + "/" + gpxFilename;
 
+  // Only store if it is initialized
+  if (!getIsInit())
+    return;
+
   // Only store if it has changed
   if (isStored) {
     //DEBUG("path is already stored, skipping write",NULL);
@@ -250,10 +254,6 @@ bool NavigationPath::readGPXFile() {
   MapPosition pos;
   bool result=false;
 
-  // Create the progress dialog
-  std::string dialogTitle="Reading <" + gpxFilename + ">";
-  DialogKey dialog=core->getDialog()->createProgress(dialogTitle,100);
-
   // Read the document
   doc = xmlReadFile(filepath.c_str(), NULL, 0);
   if (!doc) {
@@ -364,9 +364,8 @@ bool NavigationPath::readGPXFile() {
         }
         processedPoints++;
         processedPercentage=processedPoints*100/totalNumberOfPoints;
-        if (processedPercentage!=prevProcessedPercentage)
-          core->getDialog()->updateProgress(dialog,dialogTitle,processedPercentage);
         prevProcessedPercentage=processedPercentage;
+        core->getThread()->reschedule();
       }
       if (i!=numberOfSegments)
         addEndPosition(NavigationPath::getPathInterruptedPos());
@@ -391,9 +390,8 @@ bool NavigationPath::readGPXFile() {
       }
       processedPoints++;
       processedPercentage=processedPoints*100/totalNumberOfPoints;
-      if (processedPercentage!=prevProcessedPercentage)
-        core->getDialog()->updateProgress(dialog,dialogTitle,processedPercentage);
       prevProcessedPercentage=processedPercentage;
+      core->getThread()->reschedule();
     }
   }
 
@@ -402,7 +400,6 @@ bool NavigationPath::readGPXFile() {
 cleanup:
   if (xpathCtx) xmlXPathFreeContext(xpathCtx);
   if (doc) xmlFreeDoc(doc);
-  core->getDialog()->closeProgress(dialog);
   isStored=true;
   hasChanged=true;
   hasBeenLoaded=true;
