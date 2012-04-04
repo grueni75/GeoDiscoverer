@@ -34,6 +34,8 @@ protected:
   Int minZoomLevel;                                 // Minimum zoom value
   Int maxZoomLevel;                                 // Maximum zoom value
   Int mapContainerCacheSize;                        // Number of map containers to hold in the cache
+  Int downloadErrorWaitTime;                        // Time in seconds to wait after a download error before starting a new download
+  Int maxDownloadRetries;                           // Maximum number of retries before a download is aborted
   bool errorOccured;                                // Indicates that an error has occured
   bool downloadWarningOccured;                      // Indicates that a warning has occured
   static const double latBound;                     // Maximum allowed latitude value

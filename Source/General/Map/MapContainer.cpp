@@ -38,10 +38,11 @@ MapContainer::MapContainer(bool doNotDelete) {
   this->searchTree=NULL;
   this->leftChild=NULL;
   this->rightChild=NULL;
-  this->imageFileAvailable=true;
+  this->downloadComplete=true;
   this->x=0;
   this->y=0;
   this->overlayGraphicInvalid=false;
+  this->downloadRetries=0;
 
 }
 

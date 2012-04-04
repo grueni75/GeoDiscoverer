@@ -88,6 +88,10 @@ public:
   {
       return buttonRepeatPeriod;
   }
+
+  bool getWidgetsActive() const {
+    return currentPage->getWidgetsActive();
+  }
 };
 
 }

@@ -8,8 +8,9 @@
     <wakeLock description="Indicates if the screen backlight is kept on">0</wakeLock>
   </Screen>
   <Font>
-    <backgroundStrokeWidth description="Width of the stroke behind the font letters for better contrast on black background">2</backgroundStrokeWidth>
+    <backgroundStrokeWidth description="Width of the stroke (for 12 pt font) behind the font letters for better contrast on black background">2</backgroundStrokeWidth>
     <stringCacheSize description="Maximum size of the cache string map">16</stringCacheSize>
+    <fadeOutOffset description="Distance to the right border when to start fading out the character">32</fadeOutOffset>
     <sansFilename description="File to use as the sans font">DroidSans.ttf</sansFilename>
     <sansBoldFilename description="File to use as the sans font">DroidSans-Bold.ttf</sansBoldFilename>
     <sansLargeSize description="Small size of the sans font">16</sansLargeSize>
@@ -46,10 +47,7 @@
     <pathDirectionIconFilename description="Image of the path arrow that indicates the direction">pathDirection</pathDirectionIconFilename>
     <compassConeFilename description="Image of the compass cone">compassCone</compassConeFilename>
     <notCachedTileAlpha description="Alpha value of a tile whose image is not cached.">64</notCachedTileAlpha>
-    <pathMinSegmentLength description="Minimum segment length of tracks, routes and other paths">8</pathMinSegmentLength>
-    <pathMinDirectionDistance description="Minimum distance between two direction arrows of tracks, routes and other paths">64</pathMinDirectionDistance>
-    <pathWidth description="Width of tracks, routes and other paths">8</pathWidth>
-  <lineNumberOfStrokesOtherSegemnts description="Number of strokes to reserve if current segment has no strokes left anymore">32</lineNumberOfStrokesOtherSegemnts><rectangleListNumberOfRectanglesOtherSegemnts description="Number of rectangles to reserve if current segment has no rectangles left anymore">4</rectangleListNumberOfRectanglesOtherSegemnts></Graphic>
+  <pathMinSegmentLength description="Minimum segment length of tracks, routes and other paths">8</pathMinSegmentLength><pathMinDirectionDistance description="Minimum distance between two direction arrows of tracks, routes and other paths">64</pathMinDirectionDistance><pathWidth description="Width of tracks, routes and other paths">8</pathWidth></Graphic>
   <Widget>
     <SelectedColor>
       <red description="Red component [0-255] of the selected widget">255</red>
@@ -441,6 +439,34 @@
         <tickLabelOffsetX description="Horizontal offset for the scale values in percent of the widget width">-3.5</tickLabelOffsetX>
         <mapLabelOffsetY description="Vertical offset for the map label in percent of the widget height">9.0</mapLabelOffsetY>
       </Primitive>
+      <Primitive name="Status">
+        <type description="Kind of widget">status</type>
+        <Portrait>
+          <x description="X position in percent">50</x>
+          <y description="Y position in percent">33</y>
+          <z description="Z position in pixel">0</z>
+        </Portrait>
+        <Landscape>
+          <x description="X position in percent">50</x>
+          <y description="Y position in percent">35</y>
+          <z description="Z position in pixel">0</z>
+        </Landscape>
+        <ActiveColor>
+          <red description="Red component [0-255] of the active widget">255</red>
+          <green description="Green component [0-255] of the active widget">255</green>
+          <blue description="Blue component [0-255] of the active widget">255</blue>
+          <alpha description="Alpha component [0-255] of the active widget">255</alpha>
+        </ActiveColor>
+        <InactiveColor>
+          <red description="Red component [0-255] of the inactive widget">255</red>
+          <green description="Green component [0-255] of the inactive widget">255</green>
+          <blue description="Blue component [0-255] of the inactive widget">255</blue>
+          <alpha description="Alpha component [0-255] of the inactive widget">100</alpha>
+        </InactiveColor>
+        <labelWidth description="Width of the text">230</labelWidth>
+        <iconFilename description="Filename of the background image">statusBackground</iconFilename>
+        <updateInterval description="Time in microseconds to elapse before updating the widget">100000</updateInterval>
+      </Primitive>
     </Page>
   </Widget>
   <Map>
@@ -453,58 +479,11 @@
     <returnToLocationTimeout description="Time in us that must elapse before the map is repositioned to the current location.">20000000</returnToLocationTimeout>
     <returnToLocation description="Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed.">1</returnToLocation>
     <zoomLevelLock description="Indicates if the zoom level of the map shall not be changed when zooming.">0</zoomLevelLock>
-    <LastPosition>
-      <folder description="Folder that contains the map images.">OpenCycleMap</folder>
-      <lng description="Longitude of the last position in the map.">6.89062</lng>
-      <lat description="Latitude of the last position in the map.">51.2605</lat>
-      <latScale description="Latitude scale of the last position in the map.">773.262</latScale>
-      <lngScale description="Longitude scale of the last position in the map.">365.371</lngScale>
-      <zoom description="Zoom value used in the graphic engine when the last position was active.">1.17344</zoom>
-      <angle description="Angle value used in the graphic engine when the last position was active.">0</angle>
-      <zoomLevel description="Map zoom level used when the last position was active.">10</zoomLevel>
-    </LastPosition>
-  <mapContainerCacheSize description="Number of map containers to remember if the source is using a cache.">256</mapContainerCacheSize></Map>
+  <LastPosition><folder description="Last used map folder.">OpenCycleMap</folder><lng description="Longitude of the last position in the map.">6.77688</lng><lat description="Latitude of the last position in the map.">51.2251</lat><latScale description="Latitude scale of the last position in the map.">1933.6</latScale><lngScale description="Longitude scale of the last position in the map.">1189.1</lngScale><zoom description="Zoom value used in the graphic engine when the last position was active.">0.830381</zoom><angle description="Angle value used in the graphic engine when the last position was active.">0</angle><zoomLevel description="Map zoom level used when the last position was active.">12</zoomLevel></LastPosition><mapContainerCacheSize description="Number of map containers to remember if the source is using a cache.">256</mapContainerCacheSize><downloadErrorWaitTime description="Time in seconds to wait after a download error before starting a new download.">1</downloadErrorWaitTime><maxDownloadRetries description="Maximum number of retries before a download is aborted.">360</maxDownloadRetries></Map>
   <Navigation>
     <locationOutdatedThreshold description="Duration in milliseconds after which a position will be discarded.">120000</locationOutdatedThreshold>
     <locationSignificantlyInaccurateThreshold description="Distance in meter that indicates a significantly less accurate position.">100</locationSignificantlyInaccurateThreshold>
     <trackRecordingMinDistance description="Required minimum distance in meter to the last track point such that the point is added to the track.">25</trackRecordingMinDistance>
     <recordTrack description="Indicates if track recording is enabled.">0</recordTrack>
-    <trackColor>
-      <red description="Red component [0-255] of the recorded track">255</red>
-      <green description="Green component [0-255] of the recorded track">127</green>
-      <blue description="Blue component [0-255] of the recorded track">0</blue>
-      <alpha description="Alpha component [0-255] of the recorded track">255</alpha>
-    </trackColor>
-    <lastRecordedTrackFilename description="Filename of the last recorded track.">track-20120402-093129.gpx</lastRecordedTrackFilename>
-    <Route number="0">
-      <NormalColor>
-        <red>255</red>
-        <green>255</green>
-        <blue>0</blue>
-        <alpha>255</alpha>
-      </NormalColor>
-      <HighlightColor>
-        <red>255</red>
-        <green>0</green>
-        <blue>0</blue>
-        <alpha>255</alpha>
-      </HighlightColor>
-      <filename>ddorf-runde1.gpx</filename>
-    </Route>
-    <Route number="1">
-      <NormalColor>
-        <red>255</red>
-        <green>255</green>
-        <blue>0</blue>
-        <alpha>255</alpha>
-      </NormalColor>
-      <HighlightColor>
-        <red>255</red>
-        <green>0</green>
-        <blue>0</blue>
-        <alpha>255</alpha>
-      </HighlightColor>
-      <filename>ddorf-duisburg.gpx</filename>
-    </Route>
-  </Navigation>
+  <trackColor><red description="Red component [0-255] of the recorded track">255</red><green description="Green component [0-255] of the recorded track">127</green><blue description="Blue component [0-255] of the recorded track">0</blue><alpha description="Alpha component [0-255] of the recorded track">255</alpha></trackColor><lastRecordedTrackFilename description="Filename of the last recorded track.">track-20120404-201022.gpx</lastRecordedTrackFilename></Navigation>
 </GDC>

@@ -40,8 +40,9 @@ protected:
   FT_Library freeTypeLib;     // Pointer to the library
   FontTypeMap fontTypeMap;    // Holds all available fonts
   Font *currentFont;          // Font that is currently used for drawing
-  Int backgroundStrokeWidth;  // Width of the stroke behind the font letters for better contrast on black background
+  Int backgroundStrokeWidth;  // Width of the stroke (for 12 pt font) behind the font letters for better contrast on black background
   Int stringCacheSize;        // Maximum size of the cache string map
+  Int fadeOutOffset;          // Distance to the right border when to start fading out the character
 
   // Loads a font
   bool loadFont(std::string fontType, std::string fontFilename, Int fontSize);
@@ -73,10 +74,10 @@ public:
   Int getLineHeight();
 
   // Creates a text with the current font type
-  FontString *createString(std::string contents);
+  FontString *createString(std::string contents, Int widthLimit=-1);
 
   // Creates or updates a text with the current font type
-  void updateString(FontString **fontString, std::string contents);
+  void updateString(FontString **fontString, std::string contents, Int widthLimit=-1);
 
   // Destroys a drawn text of the current font type
   void destroyString(FontString *fontString);
@@ -90,6 +91,10 @@ public:
   Int getStringCacheSize() const
   {
       return stringCacheSize;
+  }
+
+  Int getFadeOutOffset() const {
+    return fadeOutOffset;
   }
 };
 

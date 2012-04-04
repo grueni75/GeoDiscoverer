@@ -194,7 +194,10 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
       } else {
         state=false;
       }
-      core->getNavigationEngine()->setRecordTrack(state);
+      if (core->getNavigationEngine()->setRecordTrack(state))
+        result="true";
+      else
+        result="false";
     }
     cmdExecuted=true;
   }

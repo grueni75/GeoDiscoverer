@@ -93,6 +93,7 @@ protected:
 
   FT_Library freeTypeLib;                         // Pointer to the library
   FT_Face face;                                   // Holds the font data
+  Int size;                                       // Size of the font
   Int height;                                     // Height of the font
 
   // Map of all cached characters
@@ -129,7 +130,7 @@ public:
   void deinit();
 
   // Creates a string
-  FontString *createString(std::string contents);
+  FontString *createString(std::string contents, Int widthLimit=-1);
 
   // Creates the bitmap for the font string
   void createStringBitmap(FontString *fontString);

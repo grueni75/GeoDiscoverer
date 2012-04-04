@@ -321,6 +321,7 @@ extern Core *core;
 #include <WidgetCheckbox.h>
 #include <WidgetMeter.h>
 #include <WidgetScale.h>
+#include <WidgetStatus.h>
 #include <WidgetPage.h>
 #include <GraphicEngine.h>
 #include <WidgetEngine.h>

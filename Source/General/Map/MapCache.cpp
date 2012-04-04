@@ -136,7 +136,7 @@ void MapCache::updateMapTileImages() {
   std::list<MapTile *> mapTileLoadList;
   for (std::list<MapTile*>::const_iterator i=uncachedTiles.begin();i!=uncachedTiles.end();i++) {
     MapTile *t=*i;
-    if ((t->isDrawn())&&(t->getParentMapContainer()->getImageFileAvailable())) {
+    if ((t->isDrawn())&&(t->getParentMapContainer()->getDownloadComplete())) {
       mapTileLoadList.push_back(t);
     }
   }
@@ -162,19 +162,22 @@ void MapCache::updateMapTileImages() {
 
       if (currentImage)
         free(currentImage);
+      currentImage=NULL;
       currentContainer=t->getParentMapContainer();
       //DEBUG("loading tiles from image <%s>",currentContainer->getImageFileName().c_str());
-      switch(currentContainer->getImageType()) {
-        case ImageTypeJPEG:
-          currentImage=core->getImage()->loadJPEG(currentContainer->getImageFilePath(),currentImageWidth,currentImageHeight,currentImagePixelSize);
-          break;
-        case ImageTypePNG:
-          currentImage=core->getImage()->loadPNG(currentContainer->getImageFilePath(),currentImageWidth,currentImageHeight,currentImagePixelSize);
-          break;
-        default:
-          FATAL("unsupported image type",NULL);
-          currentImage=NULL;
-          break;
+      if (access(currentContainer->getImageFilePath().c_str(),F_OK)==0) {
+        switch(currentContainer->getImageType()) {
+          case ImageTypeJPEG:
+            currentImage=core->getImage()->loadJPEG(currentContainer->getImageFilePath(),currentImageWidth,currentImageHeight,currentImagePixelSize);
+            break;
+          case ImageTypePNG:
+            currentImage=core->getImage()->loadPNG(currentContainer->getImageFilePath(),currentImageWidth,currentImageHeight,currentImagePixelSize);
+            break;
+          default:
+            FATAL("unsupported image type",NULL);
+            currentImage=NULL;
+            break;
+        }
       }
       if (!currentImage)
         continue; // Do not continue in case of error

@@ -40,7 +40,7 @@ protected:
   std::string configPath;                // Path to this widget in the config
 
   // Updates the state of the check box
-  void update(bool checked, bool executeCommand);
+  bool update(bool checked, bool executeCommand);
 
 public:
 

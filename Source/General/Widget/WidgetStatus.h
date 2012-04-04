@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : WidgetScale.h
+// Name        : WidgetStatus.h
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -20,45 +20,31 @@
 //
 //============================================================================
 
-
-#ifndef WIDGETSCALE_H_
-#define WIDGETSCALE_H_
+#ifndef WIDGETSTATUS_H_
+#define WIDGETSTATUS_H_
 
 namespace GEODISCOVERER {
 
-class WidgetScale : public WidgetPrimitive {
-
-protected:
+class WidgetStatus: public GEODISCOVERER::WidgetPrimitive {
 
   // Update interval
   TimestampInMicroseconds updateInterval;
 
+  // Width of the text label
+  Int labelWidth;
+
   // Next timestamp when to update the widget
   TimestampInMicroseconds nextUpdateTime;
 
-  // Current meters per tick of the scale icon
-  Int metersPerTick;
-
-  // Current map name
-  std::string mapName;
-
-  // Horizontal offset to use for the scale values
-  Int tickLabelOffsetX;
-
-  // Vertical offset to use for the map label
-  Int mapLabelOffsetY;
-
-  // Font string objects for drawing
-  std::vector<FontString*> scaledNumberFontString;
-  FontString *mapNameFontString;
+  // Graphical representation of the status string
+  FontString *firstStatusFontString;
+  FontString *secondStatusFontString;
 
 public:
 
-  // Constructor
-  WidgetScale();
-
-  // Destructor
-  virtual ~WidgetScale();
+  // Constructors and destructor
+  WidgetStatus();
+  virtual ~WidgetStatus();
 
   // Let the widget work
   virtual bool work(TimestampInMicroseconds t);
@@ -68,20 +54,13 @@ public:
 
   // Getters and setters
   void setUpdateInterval(TimestampInMicroseconds updateInterval) {
-    this->updateInterval=updateInterval;
+    this->updateInterval = updateInterval;
   }
 
-  void setTickLabelOffsetX(Int tickLabelOffsetX)
-  {
-      this->tickLabelOffsetX = tickLabelOffsetX;
-  }
-
-  void setMapLabelOffsetY(Int mapLabelOffsetY)
-  {
-      this->mapLabelOffsetY = mapLabelOffsetY;
+  void setLabelWidth(Int labelWidth) {
+    this->labelWidth = labelWidth;
   }
 };
 
-}
-
-#endif /* WIDGETSCALE_H_ */
+} /* namespace GEODISCOVERER */
+#endif /* WIDGETSTATUS_H_ */

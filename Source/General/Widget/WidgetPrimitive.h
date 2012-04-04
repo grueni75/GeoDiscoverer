@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale} WidgetType;
+typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale, WidgetTypeStatus} WidgetType;
 
 class WidgetPrimitive : public GraphicRectangle {
 
@@ -38,6 +38,7 @@ protected:
   bool isFirstTimeSelected;     // Indicates that the widget has just been selected
   bool isHit;                   // Indicates that the widget is hit by the pointer
   bool isSelected;              // Indicates that the widget is selected
+  bool isHidden;                // Indicates that the widget shall not be activated
 
   // Updates various flags
   void updateFlags(Int x, Int y);
@@ -98,6 +99,14 @@ public:
   bool getIsSelected() const
   {
       return isSelected;
+  }
+
+  bool getIsHidden() const {
+    return isHidden;
+  }
+
+  void setIsHidden(bool isHidden) {
+    this->isHidden = isHidden;
   }
 
 };

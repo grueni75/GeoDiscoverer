@@ -32,6 +32,7 @@ protected:
 
   TimestampInSeconds lastAccess;   // Timestamp of the last access to the string
   std::string contents;            // String to display
+  Int widthLimit;                  // Maximum allowed width
   Int baselineOffsetY;             // Vertical offset to the baseline
   Int useCount;                    // Number of objects that use the string bitmap
 
@@ -90,6 +91,14 @@ public:
   Int getBaselineOffsetY() const
   {
       return baselineOffsetY;
+  }
+
+  Int getWidthLimit() const {
+    return widthLimit;
+  }
+
+  void setWidthLimit(Int widthLimit) {
+    this->widthLimit = widthLimit;
   }
 
 };

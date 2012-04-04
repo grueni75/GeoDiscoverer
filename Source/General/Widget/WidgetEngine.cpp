@@ -62,6 +62,7 @@ void WidgetEngine::addWidgetToPage(
     case WidgetTypeCheckbox: widgetTypeString="checkbox"; break;
     case WidgetTypeMeter: widgetTypeString="meter"; break;
     case WidgetTypeScale: widgetTypeString="scale"; break;
+    case WidgetTypeStatus: widgetTypeString="status"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
   c->getStringValue(path,"type","Kind of widget",widgetTypeString);
@@ -99,6 +100,11 @@ void WidgetEngine::addWidgetToPage(
       c->getStringValue(path,"updateInterval","Time in microseconds to elapse before updating the widget",parameters["updateInterval"]);
       c->getStringValue(path,"tickLabelOffsetX","Horizontal offset for the scale values in percent of the widget width",parameters["tickLabelOffsetX"]);
       c->getStringValue(path,"mapLabelOffsetY","Vertical offset for the map label in percent of the widget height",parameters["mapLabelOffsetY"]);
+      break;
+    case WidgetTypeStatus:
+      c->getStringValue(path,"labelWidth","Width of the text",parameters["labelWidth"]);
+      c->getStringValue(path,"iconFilename","Filename of the background image",parameters["iconFilename"]);
+      c->getStringValue(path,"updateInterval","Time in microseconds to elapse before updating the widget",parameters["updateInterval"]);
       break;
   }
 }
@@ -183,6 +189,11 @@ void WidgetEngine::init() {
     parameters["tickLabelOffsetX"]="-3.5";
     parameters["mapLabelOffsetY"]="9.0";
     addWidgetToPage("Default",WidgetTypeScale,"Map scale",              35.0, 81.0,0,37.0, 88.0,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="statusBackground";
+    parameters["updateInterval"]="100000";
+    parameters["labelWidth"]="230";
+    addWidgetToPage("Default",WidgetTypeStatus,"Status",                50.0, 33.0,0,50.0, 35.0,0,255,255,255,255,255,255,255,100,parameters);
     pageNames=c->getAttributeValues("Widget/Page","name");
   }
 
@@ -215,6 +226,7 @@ void WidgetEngine::init() {
       WidgetCheckbox *checkbox;
       WidgetMeter *meter;
       WidgetScale *scale;
+      WidgetStatus *status;
       if (widgetType=="button") {
         button=new WidgetButton();
         primitive=button;
@@ -231,6 +243,10 @@ void WidgetEngine::init() {
         scale=new WidgetScale();
         primitive=scale;
       }
+      if (widgetType=="status") {
+        status=new WidgetStatus();
+        primitive=status;
+      }
 
       // Set type-independent properties
       std::list<std::string> name;
@@ -241,7 +257,7 @@ void WidgetEngine::init() {
       primitive->setColor(primitive->getInactiveColor());
 
       // Load the image of the widget
-      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")) {
+      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")) {
         primitive->setTextureFromIcon(c->getStringValue(widgetPath,"iconFilename"));
       }
       if (widgetType=="checkbox") {
@@ -283,6 +299,13 @@ void WidgetEngine::init() {
         scale->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
         scale->setTickLabelOffsetX(c->getDoubleValue(widgetPath,"tickLabelOffsetX")*meter->getIconWidth()/100.0);
         scale->setMapLabelOffsetY(c->getDoubleValue(widgetPath,"mapLabelOffsetY")*meter->getIconHeight()/100.0);
+      }
+      if (widgetType=="status") {
+        status->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
+        status->setLabelWidth(c->getIntValue(widgetPath,"labelWidth"));
+        GraphicColor c=status->getColor();
+        c.setAlpha(0);
+        status->setColor(c);
       }
 
       // Add the widget to the page

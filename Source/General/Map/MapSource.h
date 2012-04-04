@@ -47,6 +47,8 @@ protected:
   Int progressValueMax;                     // Maximum progress value
   Int progressIndex;                        // State of progress dialog
   bool contentsChanged;                     // Indicates if the users of the map source need to update their data structures
+  std::list<std::string> status;            // Status of the map source
+  ThreadMutexInfo *statusMutex;             // Mutex for accessing the status
 
   // Lists of map containers sorted by their boundaries
   std::vector<Int> mapsIndexByLatNorth;
@@ -174,6 +176,19 @@ public:
   Int getZoomLevelCount()
   {
       return zoomLevelSearchTrees.size();
+  }
+
+  std::list<std::string> getStatus() const {
+    core->getThread()->lockMutex(statusMutex);
+    std::list<std::string> status=this->status;
+    core->getThread()->unlockMutex(statusMutex);
+    return status;
+  }
+
+  void setStatus(std::list<std::string> status) {
+    core->getThread()->lockMutex(statusMutex);
+    this->status = status;
+    core->getThread()->unlockMutex(statusMutex);
   }
 
 };

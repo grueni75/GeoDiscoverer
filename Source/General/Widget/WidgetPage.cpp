@@ -56,15 +56,17 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
     GraphicPrimitiveMap::iterator i;
     for(i = primitiveMap->begin(); i!=primitiveMap->end(); i++) {
       WidgetPrimitive *primitive=(WidgetPrimitive*)i->second;
-      if (widgetsActive) {
-        if (primitive==selectedWidget)
-          primitive->setFadeAnimation(t,primitive->getColor(),core->getWidgetEngine()->getSelectedWidgetColor());
-        else
-          primitive->setFadeAnimation(t,primitive->getColor(),primitive->getActiveColor());
-        //primitive->setColor(primitive->getActiveColor());
-      } else {
-        primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor());
-        //primitive->setColor(primitive->getInactiveColor());
+      if (!primitive->getIsHidden()) {
+        if (widgetsActive) {
+          if (primitive==selectedWidget)
+            primitive->setFadeAnimation(t,primitive->getColor(),core->getWidgetEngine()->getSelectedWidgetColor());
+          else
+            primitive->setFadeAnimation(t,primitive->getColor(),primitive->getActiveColor());
+          //primitive->setColor(primitive->getActiveColor());
+        } else {
+          primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor());
+          //primitive->setColor(primitive->getInactiveColor());
+        }
       }
     }
     this->widgetsActive=widgetsActive;

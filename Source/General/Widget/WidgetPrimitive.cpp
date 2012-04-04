@@ -32,6 +32,7 @@ WidgetPrimitive::WidgetPrimitive() : GraphicRectangle() {
   isHit=false;
   isSelected=false;
   isFirstTimeSelected=false;
+  isHidden=false;
 }
 
 // Destructor

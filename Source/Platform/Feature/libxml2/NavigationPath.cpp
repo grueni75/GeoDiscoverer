@@ -253,8 +253,13 @@ bool NavigationPath::readGPXFile() {
   bool loadRoute=false;
   MapPosition pos;
   bool result=false;
+  std::list<std::string> status;
+  std::stringstream progress;
 
   // Read the document
+  status.push_back("Loading path (Init):");
+  status.push_back(getGpxFilename());
+  core->getNavigationEngine()->setStatus(status);
   doc = xmlReadFile(filepath.c_str(), NULL, 0);
   if (!doc) {
     ERROR("can not read file <%s>",gpxFilename.c_str());
@@ -365,6 +370,10 @@ bool NavigationPath::readGPXFile() {
         processedPoints++;
         processedPercentage=processedPoints*100/totalNumberOfPoints;
         prevProcessedPercentage=processedPercentage;
+        progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
+        status.pop_front();
+        status.push_front(progress.str());
+        core->getNavigationEngine()->setStatus(status);
         core->getThread()->reschedule();
       }
       if (i!=numberOfSegments)
@@ -391,6 +400,10 @@ bool NavigationPath::readGPXFile() {
       processedPoints++;
       processedPercentage=processedPoints*100/totalNumberOfPoints;
       prevProcessedPercentage=processedPercentage;
+      progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
+      status.pop_front();
+      status.push_front(progress.str());
+      core->getNavigationEngine()->setStatus(status);
       core->getThread()->reschedule();
     }
   }
@@ -403,6 +416,8 @@ cleanup:
   isStored=true;
   hasChanged=true;
   hasBeenLoaded=true;
+  status.clear();
+  core->getNavigationEngine()->setStatus(status);
   return result;
 }
 

@@ -68,6 +68,10 @@ public:
       return name;
   }
 
+  bool getWidgetsActive() const {
+    return widgetsActive;
+  }
+
 
 };
 

@@ -35,8 +35,9 @@ FontEngine::FontEngine() {
   }
 
   // Get config parameters
-  backgroundStrokeWidth=core->getConfigStore()->getIntValue("Font","backgroundStrokeWidth","Width of the stroke behind the font letters for better contrast on black background",2);
+  backgroundStrokeWidth=core->getConfigStore()->getIntValue("Font","backgroundStrokeWidth","Width of the stroke (for 12 pt font) behind the font letters for better contrast on black background",2);
   stringCacheSize=core->getConfigStore()->getIntValue("Font","stringCacheSize","Maximum size of the cache string map",16);
+  fadeOutOffset=core->getConfigStore()->getIntValue("Font","fadeOutOffset","Distance to the right border when to start fading out the character",32);
 
   // Load the supported fonts
   std::string fontBaseDir = core->getHomePath() + "/Font/";
@@ -113,19 +114,19 @@ Int FontEngine::getLineHeight() {
 }
 
 // Creates a text with the current font type
-FontString *FontEngine::createString(std::string contents) {
+FontString *FontEngine::createString(std::string contents, Int widthLimit) {
   return currentFont->createString(contents);
 }
 
 // Creates or updates a text with the current font type
-void FontEngine::updateString(FontString **fontString, std::string contents) {
+void FontEngine::updateString(FontString **fontString, std::string contents, Int widthLimit) {
   if (*fontString) {
     if ((*fontString)->getContents()!=contents) {
       currentFont->destroyString(*fontString);
-      *fontString=currentFont->createString(contents);
+      *fontString=currentFont->createString(contents,widthLimit);
     }
   } else {
-    *fontString=currentFont->createString(contents);
+    *fontString=currentFont->createString(contents,widthLimit);
   }
 }
 

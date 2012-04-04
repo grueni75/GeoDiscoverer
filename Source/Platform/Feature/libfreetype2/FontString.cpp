@@ -33,6 +33,7 @@ FontString::FontString() : GraphicRectangle() {
   color.setBlue(255);
   color.setAlpha(255);
   useCount=0;
+  widthLimit=-1;
 }
 
 // Destructor

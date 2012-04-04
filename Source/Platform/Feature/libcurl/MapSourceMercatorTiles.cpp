@@ -31,6 +31,7 @@ bool MapSourceMercatorTiles::downloadMapImage(std::string url, std::string fileP
   FILE *out;
   char curlErrorBuffer[CURL_ERROR_SIZE];
   std::string tempFilePath = getFolderPath() + "/downloadBuffer.bin";
+  Int imageWidth, imageHeight;
 
   // Open the file for writing
   if (!(out=fopen(tempFilePath.c_str(),"w"))) {
@@ -73,9 +74,20 @@ bool MapSourceMercatorTiles::downloadMapImage(std::string url, std::string fileP
 
   } else {
 
-    // Move the file to its intended position
-    rename(tempFilePath.c_str(),filePath.c_str());
-    return true;
+    // Check if the image can be loaded
+    if ((!core->getImage()->queryPNG(tempFilePath,imageWidth,imageHeight))&&
+       (!core->getImage()->queryJPEG(tempFilePath,imageWidth,imageHeight))) {
+
+      WARNING("downloaded map from <%s> is not a valid image",url.c_str());
+      return false;
+
+    } else {
+
+      // Move the file to its intended position
+      rename(tempFilePath.c_str(),filePath.c_str());
+      return true;
+
+    }
 
   }
 

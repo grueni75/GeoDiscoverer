@@ -43,6 +43,7 @@ protected:
   Int                 x;                    // X coordinate
   Int                 y;                    // Y coordinate
   Int                 zoomLevel;            // Zoom level of the map
+  Int                 downloadRetries;      // Number of retries done so far for downloading the image
   MapCalibrator       *mapCalibrator;       // Calibration model of the map
   Int                 width;                // Width of the map
   Int                 height;               // Height of the map
@@ -55,7 +56,7 @@ protected:
   double latScale;                          // Scale factor for latitude
   MapContainer *leftChild;                  // Left child in the kd tree
   MapContainer *rightChild;                 // Right child in the kd tree
-  bool imageFileAvailable;                  // Indicates that the image has been downloaded to disk
+  bool downloadComplete;                    // Indicates that the image has been downloaded to disk
   bool overlayGraphicInvalid;               // Indicates that this tile is missing it's overlay graphics
 
   // Lists of map tiles sorted by their boundaries
@@ -189,7 +190,7 @@ public:
   }
 
   std::vector<MapTile*> *getMapTiles() {
-    return (std::vector<MapTile*>*)((((((((((((&mapTiles))))))))))));
+    return (std::vector<MapTile*>*)(((((((((((((&mapTiles)))))))))))));
   }
 
   Int getHeight() const {
@@ -260,6 +261,14 @@ public:
 
   TimestampInSeconds getLastAccess();
 
+  Int getDownloadRetries() const {
+    return downloadRetries;
+  }
+
+  void setDownloadRetries(Int downloadRetries) {
+    this->downloadRetries = downloadRetries;
+  }
+
   Int getX() const {
     return x;
   }
@@ -276,12 +285,12 @@ public:
     this->y = y;
   }
 
-  bool getImageFileAvailable() const {
-    return imageFileAvailable;
+  bool getDownloadComplete() const {
+    return downloadComplete;
   }
 
-  void setImageFileAvailable(bool imageFileAvailable) {
-    this->imageFileAvailable = imageFileAvailable;
+  void setDownloadComplete(bool downloadComplete) {
+    this->downloadComplete = downloadComplete;
   }
 
   void setMapCalibrator(MapCalibrator* mapCalibrator) {

@@ -38,6 +38,8 @@ void *mapSourceMercatorTilesDownloadThread(void *args) {
 MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   type=MapSourceTypeMercatorTiles;
   mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize","Number of map containers to remember if the source is using a cache.",256);
+  downloadErrorWaitTime=core->getConfigStore()->getIntValue("Map","downloadErrorWaitTime","Time in seconds to wait after a download error before starting a new download.",1);
+  maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries","Maximum number of retries before a download is aborted.",360);
   mapTileLength=256;
   accessMutex=core->getThread()->createMutex();
   errorOccured=false;
@@ -302,7 +304,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   if (access(imageFilePath.c_str(),F_OK)) {
 
     // Flag that the image of the map container is not yet there
-    mapContainer->setImageFileAvailable(false);
+    mapContainer->setDownloadComplete(false);
 
     // Request the download thread to fetch this image
     core->getThread()->lockMutex(downloadQueueMutex);
@@ -390,7 +392,7 @@ void MapSourceMercatorTiles::maintenance() {
 
         // Remove container if it is not currently downloaded and if it is not visible
         MapContainer *c=*i;
-        if ((!c->isDrawn())&&(c->getImageFileAvailable()&&(!c->getOverlayGraphicInvalid()))) {
+        if ((!c->isDrawn())&&(c->getDownloadComplete()&&(!c->getOverlayGraphicInvalid()))) {
           core->getMapCache()->removeTile(c->getMapTiles()->front());
           core->getNavigationEngine()->removeGraphics(c);
           mapContainers.erase(i);
@@ -418,6 +420,8 @@ void MapSourceMercatorTiles::maintenance() {
 
 // Downloads map tiles from the tile server
 void MapSourceMercatorTiles::downloadMapImages() {
+
+  std::list<std::string> status;
 
   // Do an endless loop
   while (1) {
@@ -456,6 +460,11 @@ void MapSourceMercatorTiles::downloadMapImages() {
       if (!mapContainer)
         break;
 
+      // Change the status
+      status.push_back("Downloading map image:");
+      status.push_back(mapContainer->getImageFileName());
+      setStatus(status);
+
       // Prepare the directory
       std::stringstream t;
       std::stringstream z; z << mapContainer->getZoomLevel()+minZoomLevel-1;
@@ -475,27 +484,42 @@ void MapSourceMercatorTiles::downloadMapImages() {
       replaceVariableInTileServerURL(url,"${y}",y.str());
 
       // Download the image
-      if (downloadMapImage(url,mapContainer->getImageFilePath())) {
+      bool downloadSuccess=downloadMapImage(url,mapContainer->getImageFilePath());
+      bool maxRetriesReached=(mapContainer->getDownloadRetries()>=maxDownloadRetries);
+      if (downloadSuccess||maxRetriesReached) {
 
         // Write the gdm file
-        mapContainer->writeCalibrationFile();
+        if (downloadSuccess)
+          mapContainer->writeCalibrationFile();
+        else {
+          WARNING("aborting download of <%s>",url.c_str());
+        }
+
 
         // Update the map cache
         lockAccess();
-        mapContainer->setImageFileAvailable(true);
+        mapContainer->setDownloadComplete(true);
         unlockAccess();
         core->getMapEngine()->setForceCacheUpdate();
 
       } else {
 
-        // Put the container back in the queue
+        // Put the container back in the queue if the retry count is not reached
         core->getThread()->lockMutex(downloadQueueMutex);
         downloadQueue.push_back(mapContainer);
         core->getThread()->unlockMutex(downloadQueueMutex);
+        mapContainer->setDownloadRetries(mapContainer->getDownloadRetries()+1);
+
+        // Wait some time before downloading again
+        sleep(downloadErrorWaitTime);
 
       }
 
-      // Shall we quit?
+      // Change the status
+      status.clear();
+      setStatus(status);
+
+        // Shall we quit?
       if (quitMapImageDownloadThread) {
         core->getThread()->exitThread();
       }

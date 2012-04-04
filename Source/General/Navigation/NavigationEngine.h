@@ -81,6 +81,12 @@ protected:
   // Updates the currently recorded track
   void updateTrack();
 
+  // Status of the navigation engine
+  std::list<std::string> status;
+
+  // Mutex for accessing the status
+  ThreadMutexInfo *statusMutex;
+
 public:
 
   // Constructor
@@ -108,7 +114,7 @@ public:
   void createNewTrack();
 
   // Switches the track recording
-  void setRecordTrack(bool recordTrack);
+  bool setRecordTrack(bool recordTrack);
 
   // Updates navigation-related graphic that is overlayed on the screen
   void updateScreenGraphic(bool scaleHasChanged);
@@ -188,6 +194,18 @@ public:
       this->isInitialized = isInitialized;
   }
 
+  std::list<std::string> getStatus() const {
+    core->getThread()->lockMutex(statusMutex);
+    std::list<std::string> status=this->status;
+    core->getThread()->unlockMutex(statusMutex);
+    return status;
+  }
+
+  void setStatus(std::list<std::string> status) {
+    core->getThread()->lockMutex(statusMutex);
+    this->status = status;
+    core->getThread()->unlockMutex(statusMutex);
+  }
 };
 
 }

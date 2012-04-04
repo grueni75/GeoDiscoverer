@@ -28,12 +28,14 @@ MapSource::MapSource() {
   folder=core->getConfigStore()->getStringValue("Map","folder");
   neighborPixelTolerance=core->getConfigStore()->getDoubleValue("Map","neighborPixelTolerance","// Maximum allowed difference in pixels to classify a tile as a neighbor",2);
   mapTileLength=core->getConfigStore()->getIntValue("Map","tileLength","Width and height of a tile.",256);
+  statusMutex=core->getThread()->createMutex();
   isInitialized=false;
   contentsChanged=false;
 }
 
 MapSource::~MapSource() {
   deinit();
+  core->getThread()->destroyMutex(statusMutex);
 }
 
 // Clear the source

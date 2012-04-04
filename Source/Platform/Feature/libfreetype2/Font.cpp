@@ -62,6 +62,7 @@ Font::Font(FT_Library freeTypeLib, std::string filename, Int size) {
   }
 
   // Set the size of the font
+  this->size=size;
   double multiplier=(double)core->getScreen()->getDPI()/120.0;
   height=multiplier*size;
   if (FT_Set_Pixel_Sizes(face,0,height)) {
@@ -138,6 +139,7 @@ void Font::createStringBitmap(FontString *fontString) {
   UShort *textureBitmap=NULL;
   Int top,left,bottom,right,width,height;
   Int textureWidth,textureHeight;
+  Int fadeOutOffset=core->getFontEngine()->getFadeOutOffset();
 
   // Reset variables
   top=std::numeric_limits<Int>::min();
@@ -200,7 +202,7 @@ void Font::createStringBitmap(FontString *fontString) {
       // Add a border around the glyph
       FT_Stroker_New(freeTypeLib, &stroker);
       FT_Stroker_Set(stroker,
-                     core->getFontEngine()->getBackgroundStrokeWidth() * 64,
+                     core->getFontEngine()->getBackgroundStrokeWidth() * 64 * size / 12,
                      FT_STROKER_LINECAP_ROUND,
                      FT_STROKER_LINEJOIN_ROUND,
                      0);
@@ -327,9 +329,15 @@ void Font::createStringBitmap(FontString *fontString) {
     // Increase the pen
     penX+=fontCharacter->getPenAdvanceX();
 
+    // Abort if the current width is above the limit
+    width=right-left;
+    if ((fontString->getWidthLimit()>-1)&&(width>=fontString->getWidthLimit())) {
+      width=fontString->getWidthLimit();
+      break;
+    }
+
   }
   height=top-bottom;
-  width=right-left;
 
   // Decide on the width and height to use in the texture
   //DEBUG("contents=%s left=%d top=%d bottom=%d width=%d height=%d",fontString->getContents().c_str(),left,top,bottom,width,height);
@@ -362,7 +370,19 @@ void Font::createStringBitmap(FontString *fontString) {
       for(Int x=0;x<c->getWidth();x++) {
         UShort value=characterBitmap[y*c->getWidth()+x];
         if ((value&0xF)!=0) {
-          textureBitmap[(offsetY+y)*textureWidth+offsetX+x]=value;
+          Int absX=offsetX+x;
+          bool copyValue=true;
+          if ((fontString->getWidthLimit()!=-1)&&(width==fontString->getWidthLimit())) {
+            if (absX>=width)
+              copyValue=false;
+            else if (absX>=width-fadeOutOffset) {
+              Int t=width-1-absX;
+              Int alpha=(value&0xF)*t/fadeOutOffset;
+              value=(value&0xFFF0)|alpha;
+            }
+          }
+          if (copyValue)
+            textureBitmap[(offsetY+y)*textureWidth+offsetX+x]=value;
         }
       }
     }
@@ -388,13 +408,15 @@ cleanup:
 }
 
 // Creates a new string
-FontString *Font::createString(std::string contents) {
+FontString *Font::createString(std::string contents, Int widthLimit) {
 
   FontString *fontString;
 
   // First check if the string is available in the used string map or the cached string map
   FontStringMap::iterator k;
-  k=usedStringMap.find(contents);
+  std::stringstream key;
+  key << contents  << "[" << widthLimit << "]";
+  k=usedStringMap.find(key.str());
   if (k!=usedStringMap.end()) {
 
     // Increase the use count
@@ -412,17 +434,18 @@ FontString *Font::createString(std::string contents) {
     fontString->setWidth(k->second->getWidth());
     fontString->setHeight(k->second->getHeight());
     fontString->setBaselineOffsetY(k->second->getBaselineOffsetY());
+    fontString->setWidthLimit(k->second->getWidthLimit());
     return fontString;
 
   }
-  k=cachedStringMap.find(contents);
+  k=cachedStringMap.find(key.str());
   if (k!=cachedStringMap.end()) {
 
     // Add the string to the used string map before returning it
     fontString=k->second;
     fontString->increaseUseCount();
     cachedStringMap.erase(k);
-    FontStringPair p=FontStringPair(fontString->getContents(),fontString);
+    FontStringPair p=FontStringPair(key.str(),fontString);
     usedStringMap.insert(p);
     return fontString;
 
@@ -434,8 +457,9 @@ FontString *Font::createString(std::string contents) {
     return NULL;
   }
   fontString->setContents(contents);
+  fontString->setWidthLimit(widthLimit);
   fontString->increaseUseCount();
-  FontStringPair p=FontStringPair(fontString->getContents(),fontString);
+  FontStringPair p=FontStringPair(key.str(),fontString);
   usedStringMap.insert(p);
 
   // Get the texture from the unused texture list
@@ -460,7 +484,9 @@ void Font::destroyString(FontString *fontString) {
 
   // Delete the string from the used string map if its use count is 0
   FontStringMap::iterator k;
-  k=usedStringMap.find(fontString->getContents());
+  std::stringstream key;
+  key << fontString->getContents()  << "[" << fontString->getWidthLimit() << "]";
+  k=usedStringMap.find(key.str());
   if (k!=usedStringMap.end()) {
 
     // Destroy the handed over string if it is not from the map
@@ -493,7 +519,9 @@ void Font::destroyString(FontString *fontString) {
         oldestFontStringAccess=oldestFontString->getLastAccess();
       }
     }
-    if (cachedStringMap.erase(oldestFontString->getContents())!=1) {
+    std::stringstream key;
+    key << oldestFontString->getContents()  << "[" << oldestFontString->getWidthLimit() << "]";
+    if (cachedStringMap.erase(key.str())!=1) {
       FATAL("can not erase font string in cached string map",NULL);
       return;
     }
@@ -504,7 +532,7 @@ void Font::destroyString(FontString *fontString) {
 
   // Add this one to the cache
   fontString->setLastAccess(core->getClock()->getSecondsSinceEpoch());
-  FontStringPair p=FontStringPair(fontString->getContents(),fontString);
+  FontStringPair p=FontStringPair(key.str(),fontString);
   cachedStringMap.insert(p);
 
 }

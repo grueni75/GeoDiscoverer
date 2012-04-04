@@ -49,6 +49,7 @@ NavigationEngine::NavigationEngine() {
   isInitialized=false;
   recordedTrack=NULL;
   backgroundLoaderThreadInfo=NULL;
+  statusMutex=core->getThread()->createMutex();
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -73,6 +74,7 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(locationPosMutex);
   core->getThread()->destroyMutex(compassBearingMutex);
   core->getThread()->destroyMutex(updateGraphicsMutex);
+  core->getThread()->destroyMutex(statusMutex);
 }
 
 // Initializes the engine
@@ -341,12 +343,12 @@ void NavigationEngine::backup() {
 }
 
 // Switches the track recording
-void NavigationEngine::setRecordTrack(bool recordTrack)
+bool NavigationEngine::setRecordTrack(bool recordTrack)
 {
   // Ignore command if track is not initialized
   if (!recordedTrack->getIsInit()) {
     WARNING("can not change track recording status because track is currently loading",NULL);
-    return;
+    return false;
   }
 
   // Interrupt the track if there is a previous point
@@ -367,6 +369,7 @@ void NavigationEngine::setRecordTrack(bool recordTrack)
     INFO("track recording is disabled",NULL);
   }
   updateScreenGraphic(false);
+  return true;
 }
 
 // Creates a new track
@@ -380,6 +383,7 @@ void NavigationEngine::createNewTrack() {
   recordedTrack->writeGPXFile();
   recordedTrack->deinit();
   recordedTrack->init();
+  recordedTrack->setIsInit(true);
   core->getConfigStore()->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename());
   unlockRecordedTrack();
   INFO("new %s created",recordedTrack->getGpxFilename().c_str());
@@ -624,14 +628,12 @@ void NavigationEngine::backgroundLoader() {
 
   // Load the recorded track
   if (!recordedTrack->getIsInit()) {
-    INFO("loading track <%s>",recordedTrack->getGpxFilename().c_str());
     recordedTrack->readGPXFile();
     recordedTrack->setIsInit(true);
   }
 
   // Load all routes
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    INFO("loading route <%s>",(*i)->getGpxFilename().c_str());
     (*i)->readGPXFile();
     (*i)->setIsInit(true);
   }
