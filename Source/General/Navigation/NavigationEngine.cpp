@@ -101,7 +101,7 @@ void NavigationEngine::init() {
   unlockRecordedTrack();
 
   // Set the track recording
-  setRecordTrack(recordTrack);
+  setRecordTrack(recordTrack, true);
 
   // Prepare any routes
   lockRoutes();
@@ -344,10 +344,10 @@ void NavigationEngine::backup() {
 }
 
 // Switches the track recording
-bool NavigationEngine::setRecordTrack(bool recordTrack)
+bool NavigationEngine::setRecordTrack(bool recordTrack, bool ignoreIsInit)
 {
   // Ignore command if track is not initialized
-  if (!recordedTrack->getIsInit()) {
+  if ((!recordedTrack->getIsInit())&&(!ignoreIsInit)) {
     WARNING("can not change track recording status because track is currently loading",NULL);
     return false;
   }

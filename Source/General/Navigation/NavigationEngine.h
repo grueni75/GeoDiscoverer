@@ -114,7 +114,7 @@ public:
   void createNewTrack();
 
   // Switches the track recording
-  bool setRecordTrack(bool recordTrack);
+  bool setRecordTrack(bool recordTrack, bool ignoreIsInit=false);
 
   // Updates navigation-related graphic that is overlayed on the screen
   void updateScreenGraphic(bool scaleHasChanged);
