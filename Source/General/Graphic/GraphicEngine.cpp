@@ -116,7 +116,7 @@ void GraphicEngine::draw(bool forceRedraw) {
 
   // Force redraw if requested externally
   if (forceRedraw) {
-    DEBUG("forcing redraw due to external requst",NULL);
+    DEBUG("forcing redraw due to external request",NULL);
     redrawScene=true;
   }
 

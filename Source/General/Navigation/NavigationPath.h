@@ -216,22 +216,28 @@ public:
   void setHighlightColor(GraphicColor highlightColor)
   {
       this->highlightColor = highlightColor;
+      core->getGraphicEngine()->lockPathAnimators();
       animator.setColor(normalColor);
       animator.setBlinkAnimation(blinkMode,highlightColor);
+      core->getGraphicEngine()->unlockPathAnimators();
   }
 
   void setNormalColor(GraphicColor normalColor)
   {
       this->normalColor = normalColor;
+      core->getGraphicEngine()->lockPathAnimators();
       animator.setColor(normalColor);
       animator.setBlinkAnimation(blinkMode,highlightColor);
+      core->getGraphicEngine()->unlockPathAnimators();
   }
 
   void setBlinkMode(bool blinkMode)
   {
       this->blinkMode = blinkMode;
+      core->getGraphicEngine()->lockPathAnimators();
       animator.setColor(normalColor);
       animator.setBlinkAnimation(blinkMode,highlightColor);
+      core->getGraphicEngine()->unlockPathAnimators();
   }
 
   bool getIsInit() const {

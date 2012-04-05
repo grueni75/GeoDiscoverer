@@ -348,8 +348,12 @@ void NavigationPath::init() {
   mapPositions.clear();
   length=0;
   blinkMode=false;
+
+  // Configure the animator
+  core->getGraphicEngine()->lockPathAnimators();
   animator.setColor(normalColor);
   animator.setBlinkAnimation(blinkMode,highlightColor);
+  core->getGraphicEngine()->unlockPathAnimators();
 
   // Create a visualization object for each zoom level
   core->getMapSource()->lockAccess();

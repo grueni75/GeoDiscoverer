@@ -192,8 +192,8 @@ void WidgetEngine::init() {
     parameters.clear();
     parameters["iconFilename"]="statusBackground";
     parameters["updateInterval"]="100000";
-    parameters["labelWidth"]="230";
-    addWidgetToPage("Default",WidgetTypeStatus,"Status",                50.0, 33.0,0,50.0, 35.0,0,255,255,255,255,255,255,255,100,parameters);
+    parameters["labelWidth"]="255";
+    addWidgetToPage("Default",WidgetTypeStatus,"Status",                50.0, 9.0,1,50.0, 14.0,1,255,255,255,255,255,255,255,100,parameters);
     pageNames=c->getAttributeValues("Widget/Page","name");
   }
 

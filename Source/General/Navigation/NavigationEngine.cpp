@@ -116,6 +116,7 @@ void NavigationEngine::init() {
       return;
     }
     if (c->pathExists(routePath + "/HighlightColor")) {
+      DEBUG("setting blink mode for path %s",route->getGpxFilename().c_str());
       route->setHighlightColor(c->getGraphicColorValue(routePath + "/HighlightColor","Highlight color of the route",GraphicColor(255,0,0,255)));
       route->setBlinkMode(true);
     }

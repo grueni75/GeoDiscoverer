@@ -41,7 +41,7 @@ WidgetPrimitive::~WidgetPrimitive() {
 
 // Updates various flags
 void WidgetPrimitive::updateFlags(Int x, Int y) {
-  if ((x>=getX())&&(x<=getX()+getIconWidth()-1)&&(y>=getY())&&(y<=getY()+getIconHeight()-1)) {
+  if ((!isHidden)&&(x>=getX())&&(x<=getX()+getIconWidth()-1)&&(y>=getY())&&(y<=getY()+getIconHeight()-1)) {
     isHit=true;
   } else {
     isHit=false;

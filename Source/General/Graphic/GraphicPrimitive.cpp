@@ -85,6 +85,7 @@ void GraphicPrimitive::setBlinkAnimation(bool active, GraphicColor highlightColo
   } else {
     blinkMode=GraphicBlinkIdle;
   }
+  fadeStartTime=fadeEndTime;
 }
 
 // Lets the primitive work (e.g., animation)
@@ -98,10 +99,12 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
         blinkOriginalColor=this->color;
         setFadeAnimation(currentTime+blinkPeriod,blinkOriginalColor,blinkHighlightColor);
         blinkMode=GraphicBlinkFadeToOriginalColor;
+        //DEBUG("primitive=0x%08x blinkMode=fadeToHighlightColor t=%llu fadeStartTime=%llu fadeEndTime=%llu",this,currentTime,fadeStartTime,fadeEndTime);
         break;
       case GraphicBlinkFadeToOriginalColor:
         setFadeAnimation(currentTime+blinkDuration,blinkHighlightColor,blinkOriginalColor);
         blinkMode=GraphicBlinkFadeToHighlightColor;
+        //DEBUG("primitive=0x%08x blinkMode=fadeToOriginalColor t=%llu fadeStartTime=%llu fadeEndTime=%llu",this,currentTime,fadeStartTime,fadeEndTime);
         break;
     }
   }
@@ -128,6 +131,13 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
       color=fadeEndColor;
       fadeStartTime=fadeEndTime;
     }
+  } else {
+    /*if ((blinkMode==GraphicBlinkFadeToHighlightColor)) {
+      DEBUG("primitive=0x%08x blinkMode=fadeToHighlightColor t=%llu fadeStartTime=%llu fadeEndTime=%llu",this,currentTime,fadeStartTime,fadeEndTime);
+    }
+    if ((blinkMode==GraphicBlinkFadeToOriginalColor)) {
+      DEBUG("primitive=0x%08x blinkMode=fadeToOriginalColor t=%llu fadeStartTime=%llu fadeEndTime=%llu",this,currentTime,fadeStartTime,fadeEndTime);
+    }*/
   }
 
   // If the primitive has changed, redraw it

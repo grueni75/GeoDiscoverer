@@ -53,7 +53,7 @@ FontEngine::FontEngine() {
     return;
   if (!loadFont("sansBoldNormal",sansBoldFontFilename,sansNormalSize))
     return;
-  Int sansSmallSize = core->getConfigStore()->getIntValue("Font","sansSmallSize","Small size of the sans font",8);
+  Int sansSmallSize = core->getConfigStore()->getIntValue("Font","sansSmallSize","Small size of the sans font",10);
   if (!loadFont("sansSmall",sansFontFilename,sansSmallSize))
     return;
   if (!loadFont("sansBoldSmall",sansBoldFontFilename,sansSmallSize))
