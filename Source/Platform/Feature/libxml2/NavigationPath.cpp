@@ -171,10 +171,12 @@ void NavigationPath::writeGPXFile() {
   }
 
   // Write the file
-  if (xmlSaveFormatFileEnc(filepath.c_str(), doc, "UTF-8", 1)==-1) {
-    ERROR("can not write gpx file <%s>",filepath.c_str());
+  std::string tempFilepath = filepath + "+";
+  if (xmlSaveFormatFileEnc(tempFilepath.c_str(), doc, "UTF-8", 1)==-1) {
+    ERROR("can not write gpx file <%s>",tempFilepath.c_str());
     return;
   }
+  rename(tempFilepath.c_str(),filepath.c_str());
 
   // Cleanup
   xmlFreeDoc(doc);

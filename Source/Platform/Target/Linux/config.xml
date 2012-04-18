@@ -480,35 +480,35 @@
     <initDistance description="Distance to the max/min values of integer that triggers a initialization of the map to avoid overflows.">65536</initDistance>
     <maxTiles description="Maximum number of tiles to show.">128</maxTiles>
     <returnToLocationTimeout description="Time in us that must elapse before the map is repositioned to the current location.">20000000</returnToLocationTimeout>
-    <returnToLocation description="Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed.">0</returnToLocation>
+    <returnToLocation description="Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed.">1</returnToLocation>
     <zoomLevelLock description="Indicates if the zoom level of the map shall not be changed when zooming.">0</zoomLevelLock>
     <LastPosition>
       <folder description="Last used map folder.">OpenCycleMap</folder>
-      <lng description="Longitude of the last position in the map.">6.71864</lng>
-      <lat description="Latitude of the last position in the map.">51.3443</lat>
-      <latScale description="Latitude scale of the last position in the map.">6621.51</latScale>
-      <lngScale description="Longitude scale of the last position in the map.">4131.23</lngScale>
-      <zoom description="Zoom value used in the graphic engine when the last position was active.">1.4299</zoom>
+      <lng description="Longitude of the last position in the map.">6.81549</lng>
+      <lat description="Latitude of the last position in the map.">51.2385</lat>
+      <latScale description="Latitude scale of the last position in the map.">2102.93</latScale>
+      <lngScale description="Longitude scale of the last position in the map.">1312.04</lngScale>
+      <zoom description="Zoom value used in the graphic engine when the last position was active.">0.909608</zoom>
       <angle description="Angle value used in the graphic engine when the last position was active.">0</angle>
-      <zoomLevel description="Map zoom level used when the last position was active.">13</zoomLevel>
+      <zoomLevel description="Map zoom level used when the last position was active.">12</zoomLevel>
     </LastPosition>
   <mapContainerCacheSize description="Number of map containers to remember if the source is using a cache.">256</mapContainerCacheSize><downloadErrorWaitTime description="Time in seconds to wait after a download error before starting a new download.">1</downloadErrorWaitTime><maxDownloadRetries description="Maximum number of retries before a download is aborted.">360</maxDownloadRetries></Map>
   <Navigation>
     <locationOutdatedThreshold description="Duration in milliseconds after which a position will be discarded.">120000</locationOutdatedThreshold>
     <locationSignificantlyInaccurateThreshold description="Distance in meter that indicates a significantly less accurate position.">100</locationSignificantlyInaccurateThreshold>
     <trackRecordingMinDistance description="Required minimum distance in meter to the last track point such that the point is added to the track.">25</trackRecordingMinDistance>
-    <recordTrack description="Indicates if track recording is enabled.">0</recordTrack>
+    <recordTrack description="Indicates if track recording is enabled.">1</recordTrack>
     <trackColor>
       <red description="Red component [0-255] of the recorded track">255</red>
       <green description="Green component [0-255] of the recorded track">127</green>
       <blue description="Blue component [0-255] of the recorded track">0</blue>
       <alpha description="Alpha component [0-255] of the recorded track">255</alpha>
     </trackColor>
-    <lastRecordedTrackFilename description="Filename of the last recorded track.">track-20120405-093904.gpx</lastRecordedTrackFilename>
+    <lastRecordedTrackFilename description="Filename of the last recorded track.">track-20120418-154619.gpx</lastRecordedTrackFilename>
     <Route number="0">
       <NormalColor>
         <red>255</red>
-        <green>0</green>
+        <green>255</green>
         <blue>255</blue>
         <alpha>255</alpha>
       </NormalColor>

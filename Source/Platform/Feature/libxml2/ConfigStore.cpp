@@ -119,10 +119,12 @@ void ConfigStore::write()
     FATAL("config object has no xml document",NULL);
     return;
   }
-  if (xmlSaveFormatFileEnc(configFilepath.c_str(), doc, "UTF-8", 1)==-1) {
+  std::string tempFilepath = configFilepath + "+";
+  if (xmlSaveFormatFileEnc(tempFilepath.c_str(), doc, "UTF-8", 1)==-1) {
     FATAL("can not write configuration file <%s>",configFilepath.c_str());
     return;
   }
+  rename(tempFilepath.c_str(),configFilepath.c_str());
 }
 
 // Crates a node inclusive its path

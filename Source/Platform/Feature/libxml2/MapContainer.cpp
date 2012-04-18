@@ -120,9 +120,11 @@ void MapContainer::writeCalibrationFile()
   }
 
   // Write the file
-  if (xmlSaveFormatFileEnc(calibrationFilePath.c_str(), doc, "UTF-8", 1)==-1) {
+  std::string tempFilePath = calibrationFilePath + "+";
+  if (xmlSaveFormatFileEnc(tempFilePath.c_str(), doc, "UTF-8", 1)==-1) {
     ERROR("can not create native map calibration file <%s>",calibrationFilePath.c_str());
   }
+  rename(tempFilePath.c_str(),calibrationFilePath.c_str());
 
   // Clean up
   xmlFreeDoc(doc);
