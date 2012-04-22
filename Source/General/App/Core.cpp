@@ -274,7 +274,7 @@ bool Core::init() {
   }
 
   // Get config
-  maintenancePeriod=configStore->getIntValue("General","maintenancePeriod","Time in seconds between performing maintenance (storing unsaved data, optimizing data structures, ...).",60);
+  maintenancePeriod=configStore->getIntValue("General","maintenancePeriod");
 
   // Create mutexes and signals for thread communication
   mapUpdateStartSignal=thread->createSignal();

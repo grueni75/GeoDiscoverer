@@ -35,25 +35,25 @@ FontEngine::FontEngine() {
   }
 
   // Get config parameters
-  backgroundStrokeWidth=core->getConfigStore()->getIntValue("Font","backgroundStrokeWidth","Width of the stroke (for 12 pt font) behind the font letters for better contrast on black background",2);
-  stringCacheSize=core->getConfigStore()->getIntValue("Font","stringCacheSize","Maximum size of the cache string map",16);
-  fadeOutOffset=core->getConfigStore()->getIntValue("Font","fadeOutOffset","Distance to the right border when to start fading out the character",32);
+  backgroundStrokeWidth=core->getConfigStore()->getIntValue("Graphic/Font","backgroundStrokeWidth");
+  stringCacheSize=core->getConfigStore()->getIntValue("Graphic/Font","stringCacheSize");
+  fadeOutOffset=core->getConfigStore()->getIntValue("Graphic/Font","fadeOutOffset");
 
   // Load the supported fonts
   std::string fontBaseDir = core->getHomePath() + "/Font/";
-  std::string sansFontFilename = fontBaseDir + core->getConfigStore()->getStringValue("Font","sansFilename","File to use as the sans font","DroidSans.ttf");
-  std::string sansBoldFontFilename = fontBaseDir + core->getConfigStore()->getStringValue("Font","sansBoldFilename","File to use as the sans font","DroidSans-Bold.ttf");
-  Int sansLargeSize = core->getConfigStore()->getIntValue("Font","sansLargeSize","Small size of the sans font",16);
+  std::string sansFontFilename = fontBaseDir + core->getConfigStore()->getStringValue("Graphic/Font","sansFilename");
+  std::string sansBoldFontFilename = fontBaseDir + core->getConfigStore()->getStringValue("Graphic/Font","sansBoldFilename");
+  Int sansLargeSize = core->getConfigStore()->getIntValue("Graphic/Font","sansLargeSize");
   if (!loadFont("sansLarge",sansFontFilename,sansLargeSize))
     return;
   if (!loadFont("sansBoldLarge",sansBoldFontFilename,sansLargeSize))
     return;
-  Int sansNormalSize = core->getConfigStore()->getIntValue("Font","sansNormalSize","Normal size of the sans font",12);
+  Int sansNormalSize = core->getConfigStore()->getIntValue("Graphic/Font","sansNormalSize");
   if (!loadFont("sansNormal",sansFontFilename,sansNormalSize))
     return;
   if (!loadFont("sansBoldNormal",sansBoldFontFilename,sansNormalSize))
     return;
-  Int sansSmallSize = core->getConfigStore()->getIntValue("Font","sansSmallSize","Small size of the sans font",10);
+  Int sansSmallSize = core->getConfigStore()->getIntValue("Graphic/Font","sansSmallSize");
   if (!loadFont("sansSmall",sansFontFilename,sansSmallSize))
     return;
   if (!loadFont("sansBoldSmall",sansBoldFontFilename,sansSmallSize))

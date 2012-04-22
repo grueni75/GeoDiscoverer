@@ -1,0 +1,803 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2012 rel. 2 sp1 (http://www.altova.com) by Anna Fiedler (None) -->
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:gpx="http://www.topografix.com/GPX/1/1" xmlns="http://www.perfectapp.de/GeoDiscoverer/GPXExtensions/1/0" targetNamespace="http://www.perfectapp.de/GeoDiscoverer/GPXExtensions/1/0" elementFormDefault="qualified">
+	<xsd:annotation>
+		<xsd:documentation>GeoDiscoverer config schema version 1.0</xsd:documentation>
+	</xsd:annotation>
+	<xsd:element name="GDC">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="General">
+					<xsd:annotation>
+						<xsd:documentation>Preferences that do not fit in any other category.</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="unitSystem" default="metric">
+								<xsd:annotation>
+									<xsd:documentation>System of unit to use for reporting length and speed.</xsd:documentation>
+								</xsd:annotation>
+								<xsd:simpleType>
+									<xsd:restriction base="xsd:string">
+										<xsd:enumeration value="metric"/>
+										<xsd:enumeration value="imperial"/>
+									</xsd:restriction>
+								</xsd:simpleType>
+							</xsd:element>
+							<xsd:element name="maintenancePeriod" type="xsd:integer" default="60">
+								<xsd:annotation>
+									<xsd:documentation>Time in seconds between maintenance operations (storing unsaved data, optimizing data structures, ...).</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="Graphic">
+					<xsd:annotation>
+						<xsd:documentation>Preferences related to the graphic engine.</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="Font">
+								<xsd:annotation>
+									<xsd:documentation>Preferences related to the drawing of text.</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="backgroundStrokeWidth" type="xsd:integer" default="2">
+											<xsd:annotation>
+												<xsd:documentation>Width of the stroke behind font letters (12 pt) in pixel for better contrast on black background.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="stringCacheSize" type="xsd:integer" default="16">
+											<xsd:annotation>
+												<xsd:documentation>Maximum size of the string map cache.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="fadeOutOffset" type="xsd:integer" default="32">
+											<xsd:annotation>
+												<xsd:documentation>Distance in pixel to the right border when to start fading out the character.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="sansFilename" type="xsd:string" default="DroidSans.ttf">
+											<xsd:annotation>
+												<xsd:documentation>File to use as the sans font.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="sansBoldFilename" type="xsd:string" default="DroidSans-Bold.ttf">
+											<xsd:annotation>
+												<xsd:documentation>File to use as the bold sans font.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="sansLargeSize" type="xsd:integer" default="16">
+											<xsd:annotation>
+												<xsd:documentation>Large size of the sans font.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="sansNormalSize" type="xsd:integer" default="12">
+											<xsd:annotation>
+												<xsd:documentation>Normal size of the sans font.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="sansSmallSize" type="xsd:integer" default="10">
+											<xsd:annotation>
+												<xsd:documentation>Small size of the sans font.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="Widget">
+								<xsd:annotation>
+									<xsd:documentation>Preferences related to graphic elements that are displayed above the map.</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="SelectedColor">
+											<xsd:annotation>
+												<xsd:documentation>Color of the selected widget.</xsd:documentation>
+											</xsd:annotation>
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:element name="red" type="xsd:integer" default="255">
+														<xsd:annotation>
+															<xsd:documentation>Red component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+													<xsd:element name="green" type="xsd:integer" default="127">
+														<xsd:annotation>
+															<xsd:documentation>Green component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+													<xsd:element name="blue" type="xsd:integer" default="0">
+														<xsd:annotation>
+															<xsd:documentation>Blue component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+													<xsd:element name="alpha" type="xsd:integer" default="255">
+														<xsd:annotation>
+															<xsd:documentation>Alpha component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+												</xsd:sequence>
+											</xsd:complexType>
+										</xsd:element>
+										<xsd:element name="buttonRepeatDelay" type="xsd:integer" default="500000">
+											<xsd:annotation>
+												<xsd:documentation>Time in microseconds to wait before dispatching repeating commands.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="buttonRepeatPeriod" type="xsd:integer" default="100000">
+											<xsd:annotation>
+												<xsd:documentation>Time distance in microseconds between command dispatching.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="Page" maxOccurs="unbounded">
+											<xsd:annotation>
+												<xsd:documentation>Collection of widgets that are displayed together.</xsd:documentation>
+											</xsd:annotation>
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:element name="Primitive">
+														<xsd:complexType>
+															<xsd:sequence>
+																<xsd:element name="type" default="button">
+																	<xsd:annotation>
+																		<xsd:documentation>Kind of widget.</xsd:documentation>
+																	</xsd:annotation>
+																	<xsd:simpleType>
+																		<xsd:restriction base="xsd:string">
+																			<xsd:enumeration value="button"/>
+																			<xsd:enumeration value="checkbox"/>
+																			<xsd:enumeration value="meter"/>
+																			<xsd:enumeration value="scale"/>
+																			<xsd:enumeration value="status"/>
+																		</xsd:restriction>
+																	</xsd:simpleType>
+																</xsd:element>
+																<xsd:element name="Portrait">
+																	<xsd:annotation>
+																		<xsd:documentation>Position of the widget in portrait orientation.</xsd:documentation>
+																	</xsd:annotation>
+																	<xsd:complexType>
+																		<xsd:sequence>
+																			<xsd:element name="x" type="xsd:double" default="0">
+																				<xsd:annotation>
+																					<xsd:documentation>X coordinate in percent.</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="y" type="xsd:double" default="0">
+																				<xsd:annotation>
+																					<xsd:documentation>Y coordinate in percent.</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="z" type="xsd:double" default="0">
+																				<xsd:annotation>
+																					<xsd:documentation>Z coordinate in percent.</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																		</xsd:sequence>
+																	</xsd:complexType>
+																</xsd:element>
+																<xsd:element name="Landscape">
+																	<xsd:annotation>
+																		<xsd:documentation>Position of the widget in landscape orientation.</xsd:documentation>
+																	</xsd:annotation>
+																	<xsd:complexType>
+																		<xsd:sequence>
+																			<xsd:element name="x" type="xsd:double" default="0">
+																				<xsd:annotation>
+																					<xsd:documentation>X coordinate in percent.</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="y" type="xsd:double" default="0">
+																				<xsd:annotation>
+																					<xsd:documentation>Y coordinate in percent.</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="z" type="xsd:double" default="0">
+																				<xsd:annotation>
+																					<xsd:documentation>Z coordinate in percent.</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																		</xsd:sequence>
+																	</xsd:complexType>
+																</xsd:element>
+																<xsd:element name="ActiveColor">
+																	<xsd:annotation>
+																		<xsd:documentation>Color of the widdget if it is activated.</xsd:documentation>
+																	</xsd:annotation>
+																	<xsd:complexType>
+																		<xsd:sequence>
+																			<xsd:element name="red" type="xsd:integer" default="255">
+																				<xsd:annotation>
+																					<xsd:documentation>Red component [0-255]</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="green" type="xsd:integer" default="255">
+																				<xsd:annotation>
+																					<xsd:documentation>Green component [0-255]</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="blue" type="xsd:integer" default="255">
+																				<xsd:annotation>
+																					<xsd:documentation>Blue component [0-255]</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="alpha" type="xsd:integer" default="255">
+																				<xsd:annotation>
+																					<xsd:documentation>Alpha component [0-255]</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																		</xsd:sequence>
+																	</xsd:complexType>
+																</xsd:element>
+																<xsd:element name="InactiveColor">
+																	<xsd:annotation>
+																		<xsd:documentation>Color of the widdget if it is not activated.</xsd:documentation>
+																	</xsd:annotation>
+																	<xsd:complexType>
+																		<xsd:sequence>
+																			<xsd:element name="red" type="xsd:integer" default="255">
+																				<xsd:annotation>
+																					<xsd:documentation>Red component [0-255]</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="green" type="xsd:integer" default="255">
+																				<xsd:annotation>
+																					<xsd:documentation>Green component [0-255]</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="blue" type="xsd:integer" default="255">
+																				<xsd:annotation>
+																					<xsd:documentation>Blue component [0-255]</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																			<xsd:element name="alpha" type="xsd:integer" default="100">
+																				<xsd:annotation>
+																					<xsd:documentation>Alpha component [0-255]</xsd:documentation>
+																				</xsd:annotation>
+																			</xsd:element>
+																		</xsd:sequence>
+																	</xsd:complexType>
+																</xsd:element>
+																<xsd:element name="iconFilename" type="xsd:string" default="unknown" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Filename of the background image.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="command" type="xsd:string" default="unknown" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Command to execute if widget is clicked.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="checkedIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Filename of the background image showing the checked state.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="checkedCommand" type="xsd:string" default="unknown" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Command to execute if widget is checked.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="uncheckedIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Filename of the background image showing the unchecked state.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="uncheckedCommand" type="xsd:string" default="unknown" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Command to execute if widget is unchecked.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="stateConfigPath" type="xsd:string" default="unknown" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Path to the config entry that holds the check state.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="stateConfigName" type="xsd:string" default="unknown" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Name of the config entry that holds the check state.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="meterType" default="altitude" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Kind of meter to display.</xsd:documentation>
+																	</xsd:annotation>
+																	<xsd:simpleType>
+																		<xsd:restriction base="xsd:string">
+																			<xsd:enumeration value="altitude"/>
+																			<xsd:enumeration value="speed"/>
+																			<xsd:enumeration value="trackLength"/>
+																		</xsd:restriction>
+																	</xsd:simpleType>
+																</xsd:element>
+																<xsd:element name="updateInterval" type="xsd:integer" default="1000000" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Time in microseconds to elapse before updating the widget.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="labelY" type="xsd:double" default="78.0" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Vertical position of the label in percent of the widget height.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="valueY" type="xsd:double" default="40.0" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Vertical position of the value in percent of the widget height.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="unitY" type="xsd:double" default="10.0" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Vertical position of the unit in percent of the widget height.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="tickLabelOffsetX" type="xsd:double" default="-3.5" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Horizontal offset for the scale values in percent of the widget width.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="mapLabelOffsetY" type="xsd:double" default="9.0" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Vertical offset for the map label in percent of the widget height.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+																<xsd:element name="labelWidth" type="xsd:integer" default="255" minOccurs="0">
+																	<xsd:annotation>
+																		<xsd:documentation>Width of the text in pixeel.</xsd:documentation>
+																	</xsd:annotation>
+																</xsd:element>
+															</xsd:sequence>
+															<xsd:attribute name="name">
+																<xsd:annotation>
+																	<xsd:documentation>Name of the widget primitive.</xsd:documentation>
+																</xsd:annotation>
+															</xsd:attribute>
+														</xsd:complexType>
+													</xsd:element>
+												</xsd:sequence>
+												<xsd:attribute name="name">
+													<xsd:annotation>
+														<xsd:documentation>Name of the page.</xsd:documentation>
+													</xsd:annotation>
+												</xsd:attribute>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="wakeLock" type="xsd:boolean" default="0">
+								<xsd:annotation>
+									<xsd:documentation>Indicates if the screen backlight is kept on.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="fadeDuration" type="xsd:integer" default="500000">
+								<xsd:annotation>
+									<xsd:documentation>Time in microseconds that a fade animation lasts.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="blinkDuration" type="xsd:integer" default="250000">
+								<xsd:annotation>
+									<xsd:documentation>Duration in microseconds to show the highlight color.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="blinkPeriod" type="xsd:integer" default="500000">
+								<xsd:annotation>
+									<xsd:documentation>Distance in microseconds between two blinks.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="debugMode" type="xsd:boolean" default="0">
+								<xsd:annotation>
+									<xsd:documentation>Indicates if debugging mode is active.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="LocationAccuracyBackgroundColor">
+								<xsd:annotation>
+									<xsd:documentation>Color of the accuracy circle background around the location indicator.</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="red" type="xsd:integer" default="255">
+											<xsd:annotation>
+												<xsd:documentation>Red component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="green" type="xsd:integer" default="190">
+											<xsd:annotation>
+												<xsd:documentation>Green component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="blue" type="xsd:integer" default="127">
+											<xsd:annotation>
+												<xsd:documentation>Blue component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="alpha" type="xsd:integer" default="120">
+											<xsd:annotation>
+												<xsd:documentation>Alpha component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="LocationAccuracyCircleColor">
+								<xsd:annotation>
+									<xsd:documentation>Color of the accuracy circle around the location indicator.</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="red" type="xsd:integer" default="255">
+											<xsd:annotation>
+												<xsd:documentation>Red component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="green" type="xsd:integer" default="127">
+											<xsd:annotation>
+												<xsd:documentation>Green component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="blue" type="xsd:integer" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Blue component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="alpha" type="xsd:integer" default="120">
+											<xsd:annotation>
+												<xsd:documentation>Alpha component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="locationAccuracyCircleLineWidth" type="xsd:integer" default="4">
+								<xsd:annotation>
+									<xsd:documentation>Line width of the accuracy circle around the location indicator.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="centerIconTimeout" type="xsd:integer" default="10000000">
+								<xsd:annotation>
+									<xsd:documentation>Time in microseconds to wait after a user interaction before the cursor is hidden.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="CompassConeColor">
+								<xsd:annotation>
+									<xsd:documentation>Color of the compass cone.</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="red" type="xsd:integer" default="255">
+											<xsd:annotation>
+												<xsd:documentation>Red component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="green" type="xsd:integer" default="255">
+											<xsd:annotation>
+												<xsd:documentation>Green component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="blue" type="xsd:integer" default="255">
+											<xsd:annotation>
+												<xsd:documentation>Blue component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="alpha" type="xsd:integer" default="150">
+											<xsd:annotation>
+												<xsd:documentation>Alpha component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="centerIconFilename" type="xsd:string" default="center">
+								<xsd:annotation>
+									<xsd:documentation>Image of the center cursor.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="locationIconFilename" type="xsd:string" default="location">
+								<xsd:annotation>
+									<xsd:documentation>Image of the location cursor.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="pathDirectionIconFilename" type="xsd:string" default="pathDirection">
+								<xsd:annotation>
+									<xsd:documentation>Image of the path arrow that indicates the direction.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="compassConeFilename" type="xsd:string" default="compassCone">
+								<xsd:annotation>
+									<xsd:documentation>Image of the compass cone.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="notCachedTileAlpha" type="xsd:integer" default="64">
+								<xsd:annotation>
+									<xsd:documentation>Alpha value of a tile whose image is not cached.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="pathMinSegmentLength" type="xsd:integer" default="8">
+								<xsd:annotation>
+									<xsd:documentation>Minimum segment length of tracks, routes and other paths.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="pathMinDirectionDistance" type="xsd:integer" default="64">
+								<xsd:annotation>
+									<xsd:documentation>Minimum distance between two direction arrows of tracks, routes and other paths.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="pathWidth" type="xsd:integer" default="8">
+								<xsd:annotation>
+									<xsd:documentation>Width of tracks, routes and other paths.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="TrackColor">
+								<xsd:annotation>
+									<xsd:documentation>Color of tracks.</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="red" type="xsd:integer" default="255">
+											<xsd:annotation>
+												<xsd:documentation>Red component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="green" type="xsd:integer" default="127">
+											<xsd:annotation>
+												<xsd:documentation>Green component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="blue" type="xsd:integer" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Blue component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="alpha" type="xsd:integer" default="255">
+											<xsd:annotation>
+												<xsd:documentation>Alpha component [0-255]</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="lineNumberOfStrokesOtherSegemnts" type="xsd:integer" default="32">
+								<xsd:annotation>
+									<xsd:documentation>Number of strokes to reserve if current segment has no strokes left anymore.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="rectangleListNumberOfRectanglesOtherSegemnts" type="xsd:integer" default="4">
+								<xsd:annotation>
+									<xsd:documentation>Number of rectangles to reserve if current segment has no rectangles left anymore.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="Map">
+					<xsd:annotation>
+						<xsd:documentation>Preferences related to the map engine.</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="folder" type="xsd:string" default="Default">
+								<xsd:annotation>
+									<xsd:documentation>Folder that contains map images.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="neighborPixelTolerance" type="xsd:integer" default="2">
+								<xsd:annotation>
+									<xsd:documentation>Maximum allowed difference in pixels to classify a tile as a neighbor.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="tileLength" type="xsd:integer" default="256">
+								<xsd:annotation>
+									<xsd:documentation>Width and height of a tile in pixel.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="tileCacheSize" type="xsd:integer" default="128">
+								<xsd:annotation>
+									<xsd:documentation>Number of map tiles to cache.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="initDistance" type="xsd:integer" default="65536">
+								<xsd:annotation>
+									<xsd:documentation>Distance in pixel to the max/min values of integer that triggers a initialization of the map to avoid overflows.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="maxTiles" type="xsd:integer" default="32">
+								<xsd:annotation>
+									<xsd:documentation>Maximum number of tiles to show.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="returnToLocationTimeout" type="xsd:integer" default="20000000">
+								<xsd:annotation>
+									<xsd:documentation>Time in microseconds that must elapse before the map is repositioned to the current location.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="returnToLocation" type="xsd:boolean" default="1">
+								<xsd:annotation>
+									<xsd:documentation>Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="zoomLevelLock" type="xsd:boolean" default="0">
+								<xsd:annotation>
+									<xsd:documentation>Indicates if the zoom level of the map shall not be changed when zooming.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="LastPosition" minOccurs="0">
+								<xsd:annotation>
+									<xsd:documentation>Information about the last shown position.</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="folder" type="xsd:string" default="*unknown*">
+											<xsd:annotation>
+												<xsd:documentation>Last used map folder.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="lng" type="xsd:double" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Longitude of the last position in the map.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="lat" type="xsd:double" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Latitude of the last position in the map.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="latScale" type="xsd:double" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Latitude scale of the last position in the map.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="lngScale" type="xsd:double" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Longitude scale of the last position in the map.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="zoom" type="xsd:double" default="1">
+											<xsd:annotation>
+												<xsd:documentation>Zoom value used in the graphic engine when the last position was active.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="angle" type="xsd:double" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Angle value used in the graphic engine when the last position was active.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="zoomLevel" type="xsd:integer" default="1">
+											<xsd:annotation>
+												<xsd:documentation>Map zoom level used in the map engine when the last position was active.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="mapContainerCacheSize" type="xsd:integer" default="256">
+								<xsd:annotation>
+									<xsd:documentation>Number of map containers to remember if the source is using a cache.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="downloadErrorWaitTime" type="xsd:integer" default="1">
+								<xsd:annotation>
+									<xsd:documentation>Time in seconds to wait after a download error before starting a new download.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="maxDownloadRetries" type="xsd:integer" default="360">
+								<xsd:annotation>
+									<xsd:documentation>Maximum number of retries before a download is aborted.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="Navigation">
+					<xsd:annotation>
+						<xsd:documentation>Preferences related to the navigation engine.</xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="locationOutdatedThreshold" type="xsd:integer" default="120000">
+								<xsd:annotation>
+									<xsd:documentation>Duration in milliseconds after which a position will be discarded.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="locationSignificantlyInaccurateThreshold" type="xsd:integer" default="100">
+								<xsd:annotation>
+									<xsd:documentation>Distance in meter that indicates a significantly less accurate position.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="trackRecordingMinDistance" type="xsd:integer" default="25">
+								<xsd:annotation>
+									<xsd:documentation>Required minimum distance in meter to the last track point such that the point is added to the track.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="recordTrack" type="xsd:boolean" default="0">
+								<xsd:annotation>
+									<xsd:documentation>Indicates if track recording is enabled.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="lastRecordedTrackFilename" type="xsd:string" default="unknown">
+								<xsd:annotation>
+									<xsd:documentation>Filename of the last recorded track.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="Route" maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="HighlightColor" minOccurs="0">
+											<xsd:annotation>
+												<xsd:documentation>Highlight color of the route. If set, the route color will be periodically change between normal color and highlight color (blink mode).</xsd:documentation>
+											</xsd:annotation>
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:element name="red" type="xsd:integer" default="255">
+														<xsd:annotation>
+															<xsd:documentation>Red component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+													<xsd:element name="green" type="xsd:integer" default="0">
+														<xsd:annotation>
+															<xsd:documentation>Green component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+													<xsd:element name="blue" type="xsd:integer" default="0">
+														<xsd:annotation>
+															<xsd:documentation>Blue component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+													<xsd:element name="alpha" type="xsd:integer" default="255">
+														<xsd:annotation>
+															<xsd:documentation>Alpha component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+												</xsd:sequence>
+											</xsd:complexType>
+										</xsd:element>
+										<xsd:element name="NormalColor">
+											<xsd:annotation>
+												<xsd:documentation>Normal color of the route.</xsd:documentation>
+											</xsd:annotation>
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:element name="red" type="xsd:integer" default="255">
+														<xsd:annotation>
+															<xsd:documentation>Red component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+													<xsd:element name="green" type="xsd:integer" default="255">
+														<xsd:annotation>
+															<xsd:documentation>Green component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+													<xsd:element name="blue" type="xsd:integer" default="0">
+														<xsd:annotation>
+															<xsd:documentation>Blue component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+													<xsd:element name="alpha" type="xsd:integer" default="255">
+														<xsd:annotation>
+															<xsd:documentation>Alpha component [0-255]</xsd:documentation>
+														</xsd:annotation>
+													</xsd:element>
+												</xsd:sequence>
+											</xsd:complexType>
+										</xsd:element>
+										<xsd:element name="filename" type="xsd:string" default="unknown.gpx">
+											<xsd:annotation>
+												<xsd:documentation>Filename of the route.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+									<xsd:attribute name="number">
+										<xsd:annotation>
+											<xsd:documentation>Name of the route.</xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

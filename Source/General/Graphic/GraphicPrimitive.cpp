@@ -33,11 +33,11 @@ GraphicPrimitive::GraphicPrimitive() {
   setY(0);
   setZ(0);
   setAngle(0);
-  fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration","Time in microseconds that a fade animation lasts.",500000);
+  fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration");
   fadeEndTime=0;
   fadeStartTime=0;
-  blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration","Duration to show the highlight color.",250000);
-  blinkPeriod=core->getConfigStore()->getIntValue("Graphic","blinkPeriod","Distance between two blinks.",500000);
+  blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration");
+  blinkPeriod=core->getConfigStore()->getIntValue("Graphic","blinkPeriod");
   blinkMode=GraphicBlinkIdle;
   destroyTexture=true;
   animator=NULL;

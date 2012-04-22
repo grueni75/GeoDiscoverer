@@ -35,16 +35,15 @@ void *navigationEngineBackgroundLoaderThread(void *args) {
 NavigationEngine::NavigationEngine() {
 
   // Init variables
-  locationOutdatedThreshold=core->getConfigStore()->getIntValue("Navigation","locationOutdatedThreshold","Duration in milliseconds after which a position will be discarded.",120*1000);
-  locationSignificantlyInaccurateThreshold=core->getConfigStore()->getIntValue("Navigation","locationSignificantlyInaccurateThreshold","Distance in meter that indicates a significantly less accurate position.",100);
-  trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance","Required minimum distance in meter to the last track point such that the point is added to the track.",25);
-  //trackRecordingMinBearing=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinBearing","Required minimum bearing in degree to the last track point such that the point is added to the track.",10);
+  locationOutdatedThreshold=core->getConfigStore()->getIntValue("Navigation","locationOutdatedThreshold");
+  locationSignificantlyInaccurateThreshold=core->getConfigStore()->getIntValue("Navigation","locationSignificantlyInaccurateThreshold");
+  trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance");
   recordedTrackMutex=core->getThread()->createMutex();
   routesMutex=core->getThread()->createMutex();
   locationPosMutex=core->getThread()->createMutex();
   compassBearingMutex=core->getThread()->createMutex();
   updateGraphicsMutex=core->getThread()->createMutex();
-  recordTrack=core->getConfigStore()->getIntValue("Navigation","recordTrack","Indicates if track recording is enabled.",0);
+  recordTrack=core->getConfigStore()->getIntValue("Navigation","recordTrack");
   compassBearing=0;
   isInitialized=false;
   recordedTrack=NULL;
@@ -87,10 +86,10 @@ void NavigationEngine::init() {
     FATAL("can not create track",NULL);
     return;
   }
-  recordedTrack->setNormalColor(c->getGraphicColorValue("Navigation/trackColor","recorded track",GraphicColor(255,127,0,255)));
+  recordedTrack->setNormalColor(c->getGraphicColorValue("Graphic/TrackColor"));
 
   // Prepare the last recorded track if it does exist
-  std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename","Filename of the last recorded track.","");
+  std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename");
   std::string filepath=recordedTrack->getGpxFilefolder()+"/"+lastRecordedTrackFilename;
   if ((lastRecordedTrackFilename!="")&&(access(filepath.c_str(),F_OK)==0)) {
     recordedTrack->setGpxFilename(lastRecordedTrackFilename);
@@ -106,10 +105,10 @@ void NavigationEngine::init() {
   // Prepare any routes
   lockRoutes();
   std::string path="Navigation/Route";
-  std::list<std::string> routeNumbers=c->getAttributeValues(path,"number");
+  std::list<std::string> routeNames=c->getAttributeValues(path,"name");
   std::list<std::string>::iterator j;
-  for(std::list<std::string>::iterator i=routeNumbers.begin();i!=routeNumbers.end();i++) {
-    std::string routePath=path + "[@number='" + *i + "']";
+  for(std::list<std::string>::iterator i=routeNames.begin();i!=routeNames.end();i++) {
+    std::string routePath=path + "[@name='" + *i + "']";
     NavigationPath *route=new NavigationPath();
     if (!route) {
       FATAL("can not create route",NULL);
@@ -117,14 +116,14 @@ void NavigationEngine::init() {
     }
     if (c->pathExists(routePath + "/HighlightColor")) {
       DEBUG("setting blink mode for path %s",route->getGpxFilename().c_str());
-      route->setHighlightColor(c->getGraphicColorValue(routePath + "/HighlightColor","Highlight color of the route",GraphicColor(255,0,0,255)));
+      route->setHighlightColor(c->getGraphicColorValue(routePath + "/HighlightColor"));
       route->setBlinkMode(true);
     }
-    route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor","Normal color of the route",GraphicColor(255,255,0,255)));
-    route->setName(c->getStringValue(routePath,"filename","GPX filename of the route","unknown.gpx"));
+    route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor"));
+    route->setName(*i);
     route->setDescription("route number " + *i);
     route->setGpxFilefolder(getRoutePath());
-    route->setGpxFilename(route->getName());
+    route->setGpxFilename(c->getStringValue(routePath,"filename"));
     routes.push_back(route);
   }
   unlockRoutes();

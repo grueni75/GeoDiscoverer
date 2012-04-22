@@ -28,7 +28,7 @@ namespace GEODISCOVERER {
 Screen::Screen(Int DPI) {
   this->allowDestroying=false;
   this->DPI=DPI;
-  this->wakeLock=core->getConfigStore()->getIntValue("Screen","wakeLock","Indicates if the screen backlight is kept on",0);
+  this->wakeLock=core->getConfigStore()->getIntValue("Graphic","wakeLock");
   this->ellipseCoordinatesBuffer=bufferNotDefined;
 }
 

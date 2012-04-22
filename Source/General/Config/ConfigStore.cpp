@@ -28,9 +28,12 @@ namespace GEODISCOVERER {
 // Constructor
 ConfigStore::ConfigStore() {
   configFilepath=core->getHomePath() + "/config.xml";
+  schemaFilepath=core->getHomePath() + "/config.xsd";
   configValueWidth=40;
-  document=NULL;
-  xpathCtx=NULL;
+  config=NULL;
+  schema=NULL;
+  xpathConfigCtx=NULL;
+  xpathSchemaCtx=NULL;
   mutex=core->getThread()->createMutex();
   init();
   read();
@@ -43,33 +46,37 @@ ConfigStore::~ConfigStore() {
 }
 
 // Sets an integer value in the config
-void ConfigStore::setIntValue(std::string path, std::string name, Int value, std::string description)
+void ConfigStore::setIntValue(std::string path, std::string name, Int value)
 {
   std::stringstream out;
   out << value;
   std::string valueString = out.str();
-  setStringValue(path,name,valueString,description);
+  setStringValue(path,name,valueString);
 }
 
 // Sets an integer value in the config
-void ConfigStore::setDoubleValue(std::string path, std::string name, double value, std::string description)
+void ConfigStore::setDoubleValue(std::string path, std::string name, double value)
 {
   std::stringstream out;
   out << value;
   std::string valueString = out.str();
-  setStringValue(path,name,valueString,description);
+  setStringValue(path,name,valueString);
+}
+
+// Sets a color value in the config
+void ConfigStore::setGraphicColorValue(std::string path, GraphicColor value) {
+  setIntValue(path,"red",value.getRed());
+  setIntValue(path,"green",value.getGreen());
+  setIntValue(path,"blue",value.getBlue());
+  setIntValue(path,"alpha",value.getAlpha());
 }
 
 // Gets a integer value from the config
-Int ConfigStore::getIntValue(std::string path, std::string name, std::string description, Int defaultValue)
+Int ConfigStore::getIntValue(std::string path, std::string name)
 {
   std::string value;
-  std::string defaultValueString;
-  std::stringstream out;
   Int valueInt;
-  out << defaultValue;
-  defaultValueString = out.str();
-  value=getStringValue(path,name,description,defaultValueString);
+  value=getStringValue(path,name);
   std::istringstream in(value);
   in >> valueInt;
   return valueInt;
@@ -77,15 +84,11 @@ Int ConfigStore::getIntValue(std::string path, std::string name, std::string des
 }
 
 // Gets a unsigned integer value from the config
-UInt ConfigStore::getUIntValue(std::string path, std::string name, std::string description, UInt defaultValue)
+UInt ConfigStore::getUIntValue(std::string path, std::string name)
 {
   std::string value;
-  std::string defaultValueString;
-  std::stringstream out;
   UInt valueUInt;
-  out << defaultValue;
-  defaultValueString = out.str();
-  value=getStringValue(path,name,description,defaultValueString);
+  value=getStringValue(path,name);
   std::istringstream in(value);
   in >> valueUInt;
   return valueUInt;
@@ -93,15 +96,11 @@ UInt ConfigStore::getUIntValue(std::string path, std::string name, std::string d
 }
 
 // Gets a double value from the config
-double ConfigStore::getDoubleValue(std::string path, std::string name, std::string description, double defaultValue)
+double ConfigStore::getDoubleValue(std::string path, std::string name)
 {
   std::string value;
-  std::string defaultValueString;
-  std::stringstream out;
   double valueDouble;
-  out << defaultValue;
-  defaultValueString = out.str();
-  value=getStringValue(path,name,description,defaultValueString);
+  value=getStringValue(path,name);
   std::istringstream in(value);
   in >> valueDouble;
   return valueDouble;
@@ -109,17 +108,17 @@ double ConfigStore::getDoubleValue(std::string path, std::string name, std::stri
 }
 
 // Gets a color value from the config
-GraphicColor ConfigStore::getGraphicColorValue(std::string path, std::string description, GraphicColor defaultValue) {
-  UByte red=core->getConfigStore()->getIntValue(path,"red","Red component [0-255] of the " + description,defaultValue.getRed());
-  UByte green=core->getConfigStore()->getIntValue(path,"green","Green component [0-255] of the " + description,defaultValue.getGreen());
-  UByte blue=core->getConfigStore()->getIntValue(path,"blue","Blue component [0-255] of the " + description,defaultValue.getBlue());
-  UByte alpha=core->getConfigStore()->getIntValue(path,"alpha","Alpha component [0-255] of the " + description,defaultValue.getAlpha());
+GraphicColor ConfigStore::getGraphicColorValue(std::string path) {
+  UByte red=getIntValue(path,"red");
+  UByte green=getIntValue(path,"green");
+  UByte blue=getIntValue(path,"blue");
+  UByte alpha=getIntValue(path,"alpha");
   return GraphicColor(red,green,blue,alpha);
 }
 
 // Test if a path exists
 bool ConfigStore::pathExists(std::string path) {
-  std::list<XMLNode> nodes=findNodes("/GDC/" + path);
+  std::list<XMLNode> nodes=findConfigNodes("/GDC/" + path);
   if (nodes.size()>0) {
     return true;
   } else {

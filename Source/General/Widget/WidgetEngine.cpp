@@ -30,9 +30,9 @@ WidgetEngine::WidgetEngine() {
 
   // Get global config
   ConfigStore *c=core->getConfigStore();
-  selectedWidgetColor=core->getConfigStore()->getGraphicColorValue("Widget/SelectedColor","selected widget",GraphicColor(255,127,0,255));
-  buttonRepeatDelay=c->getIntValue("Widget","buttonRepeatDelay","Time to wait before dispatching repeating commands [us]",500000);
-  buttonRepeatPeriod=c->getIntValue("Widget","buttonRepeatPeriod","Time distance between command dispatching [us]",100000);
+  selectedWidgetColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/SelectedColor");
+  buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay");
+  buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod");
 
   // Init the rest
   init();
@@ -54,7 +54,7 @@ void WidgetEngine::addWidgetToPage(
   UByte inactiveRed, UByte inactiveGreen, UByte inactiveBlue, UByte inactiveAlpha,
   ParameterMap parameters) {
 
-  std::string path="Widget/Page[@name='" + pageName + "']/Primitive[@name='" + widgetName + "']";
+  std::string path="Graphic/Widget/Page[@name='" + pageName + "']/Primitive[@name='" + widgetName + "']";
   ConfigStore *c=core->getConfigStore();
   std::string widgetTypeString="unknown";
   switch(widgetType) {
@@ -65,46 +65,46 @@ void WidgetEngine::addWidgetToPage(
     case WidgetTypeStatus: widgetTypeString="status"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
-  c->getStringValue(path,"type","Kind of widget",widgetTypeString);
-  c->getDoubleValue(path + "/Portrait","x","X position in percent",portraitX);
-  c->getDoubleValue(path + "/Portrait","y","Y position in percent",portraitY);
-  c->getIntValue(path + "/Portrait","z","Z position in pixel",portraitZ);
-  c->getDoubleValue(path + "/Landscape","x","X position in percent",landscapeX);
-  c->getDoubleValue(path + "/Landscape","y","Y position in percent",landscapeY);
-  c->getIntValue(path + "/Landscape","z","Z position in pixel",landscapeZ);
-  c->getGraphicColorValue(path + "/ActiveColor","active widget",GraphicColor(activeRed,activeGreen,activeBlue,activeAlpha));
-  c->getGraphicColorValue(path + "/InactiveColor","inactive widget",GraphicColor(inactiveRed,inactiveGreen,inactiveBlue,inactiveAlpha));
+  c->setStringValue(path,"type",widgetTypeString);
+  c->setDoubleValue(path + "/Portrait","x",portraitX);
+  c->setDoubleValue(path + "/Portrait","y",portraitY);
+  c->setIntValue(path + "/Portrait","z",portraitZ);
+  c->setDoubleValue(path + "/Landscape","x",landscapeX);
+  c->setDoubleValue(path + "/Landscape","y",landscapeY);
+  c->setIntValue(path + "/Landscape","z",landscapeZ);
+  c->setGraphicColorValue(path + "/ActiveColor",GraphicColor(activeRed,activeGreen,activeBlue,activeAlpha));
+  c->setGraphicColorValue(path + "/InactiveColor",GraphicColor(inactiveRed,inactiveGreen,inactiveBlue,inactiveAlpha));
   switch(widgetType) {
     case WidgetTypeButton:
-      c->getStringValue(path,"iconFilename","Filename of the background image",parameters["iconFilename"]);
-      c->getStringValue(path,"command","Command to execute if widget is clicked",parameters["command"]);
+      c->setStringValue(path,"iconFilename",parameters["iconFilename"]);
+      c->setStringValue(path,"command",parameters["command"]);
       break;
     case WidgetTypeCheckbox:
-      c->getStringValue(path,"checkedIconFilename","Filename of the background image showing the unchecked state",parameters["checkedIconFilename"]);
-      c->getStringValue(path,"checkedCommand","Command to execute if widget is unchecked",parameters["checkedCommand"]);
-      c->getStringValue(path,"uncheckedIconFilename","Filename of the background image showing the checked state",parameters["uncheckedIconFilename"]);
-      c->getStringValue(path,"uncheckedCommand","Command to execute if widget is checked",parameters["uncheckedCommand"]);
-      c->getStringValue(path,"stateConfigPath","Path to the config entry that holds the check state",parameters["stateConfigPath"]);
-      c->getStringValue(path,"stateConfigName","Name of the config entry that holds the check state",parameters["stateConfigName"]);
+      c->setStringValue(path,"checkedIconFilename",parameters["checkedIconFilename"]);
+      c->setStringValue(path,"checkedCommand",parameters["checkedCommand"]);
+      c->setStringValue(path,"uncheckedIconFilename",parameters["uncheckedIconFilename"]);
+      c->setStringValue(path,"uncheckedCommand",parameters["uncheckedCommand"]);
+      c->setStringValue(path,"stateConfigPath",parameters["stateConfigPath"]);
+      c->setStringValue(path,"stateConfigName",parameters["stateConfigName"]);
       break;
     case WidgetTypeMeter:
-      c->getStringValue(path,"iconFilename","Filename of the background image",parameters["iconFilename"]);
-      c->getStringValue(path,"meterType","Kind of meter to display",parameters["meterType"]);
-      c->getStringValue(path,"updateInterval","Time in microseconds to elapse before updating the widget",parameters["updateInterval"]);
-      c->getStringValue(path,"labelY","Vertical position of the label in percent of the widget height",parameters["labelY"]);
-      c->getStringValue(path,"valueY","Vertical position of the value in percent of the widget height",parameters["valueY"]);
-      c->getStringValue(path,"unitY","Vertical position of the unit in percent of the widget height",parameters["unitY"]);
+      c->setStringValue(path,"iconFilename",parameters["iconFilename"]);
+      c->setStringValue(path,"meterType",parameters["meterType"]);
+      c->setStringValue(path,"updateInterval",parameters["updateInterval"]);
+      c->setStringValue(path,"labelY",parameters["labelY"]);
+      c->setStringValue(path,"valueY",parameters["valueY"]);
+      c->setStringValue(path,"unitY",parameters["unitY"]);
       break;
     case WidgetTypeScale:
-      c->getStringValue(path,"iconFilename","Filename of the background image",parameters["iconFilename"]);
-      c->getStringValue(path,"updateInterval","Time in microseconds to elapse before updating the widget",parameters["updateInterval"]);
-      c->getStringValue(path,"tickLabelOffsetX","Horizontal offset for the scale values in percent of the widget width",parameters["tickLabelOffsetX"]);
-      c->getStringValue(path,"mapLabelOffsetY","Vertical offset for the map label in percent of the widget height",parameters["mapLabelOffsetY"]);
+      c->setStringValue(path,"iconFilename",parameters["iconFilename"]);
+      c->setStringValue(path,"updateInterval",parameters["updateInterval"]);
+      c->setStringValue(path,"tickLabelOffsetX",parameters["tickLabelOffsetX"]);
+      c->setStringValue(path,"mapLabelOffsetY",parameters["mapLabelOffsetY"]);
       break;
     case WidgetTypeStatus:
-      c->getStringValue(path,"labelWidth","Width of the text",parameters["labelWidth"]);
-      c->getStringValue(path,"iconFilename","Filename of the background image",parameters["iconFilename"]);
-      c->getStringValue(path,"updateInterval","Time in microseconds to elapse before updating the widget",parameters["updateInterval"]);
+      c->setStringValue(path,"labelWidth",parameters["labelWidth"]);
+      c->setStringValue(path,"iconFilename",parameters["iconFilename"]);
+      c->setStringValue(path,"updateInterval",parameters["updateInterval"]);
       break;
   }
 }
@@ -116,7 +116,7 @@ void WidgetEngine::init() {
 
   // Get all widget pages
   // If no exist, create the default ones
-  std::list<std::string> pageNames=c->getAttributeValues("Widget/Page","name");
+  std::list<std::string> pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
   if (pageNames.size()==0) {
     ParameterMap parameters;
     parameters.clear();
@@ -152,7 +152,7 @@ void WidgetEngine::init() {
     parameters["uncheckedCommand"]="setWakeLock(0)";
     parameters["checkedIconFilename"]="wakeLockOn";
     parameters["checkedCommand"]="setWakeLock(1)";
-    parameters["stateConfigPath"]="Screen";
+    parameters["stateConfigPath"]="Graphic";
     parameters["stateConfigName"]="wakeLock";
     addWidgetToPage("Default",WidgetTypeCheckbox,"Wake Lock",           37.5, 93.0,0,7.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
@@ -194,11 +194,11 @@ void WidgetEngine::init() {
     parameters["updateInterval"]="100000";
     parameters["labelWidth"]="255";
     addWidgetToPage("Default",WidgetTypeStatus,"Status",                50.0, 9.0,1,50.0, 14.0,1,255,255,255,255,255,255,255,100,parameters);
-    pageNames=c->getAttributeValues("Widget/Page","name");
+    pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
   }
 
   // Create the widgets from the config
-  pageNames=c->getAttributeValues("Widget/Page","name");
+  pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
   std::list<std::string>::iterator i;
   for(i=pageNames.begin();i!=pageNames.end();i++) {
     DEBUG("found a widget page with name %s",(*i).c_str());
@@ -213,7 +213,7 @@ void WidgetEngine::init() {
     pageMap.insert(pair);
 
     // Go through all widgets of this page
-    std::string path="Widget/Page[@name='" + *i + "']/Primitive";
+    std::string path="Graphic/Widget/Page[@name='" + *i + "']/Primitive";
     std::list<std::string> widgetNames=c->getAttributeValues(path,"name");
     std::list<std::string>::iterator j;
     for(j=widgetNames.begin();j!=widgetNames.end();j++) {
@@ -358,7 +358,7 @@ void WidgetEngine::updateWidgetPositions() {
       WidgetPrimitive *primitive=(WidgetPrimitive*)j->second;
 
       // Update the position
-      std::string path="Widget/Page[@name='" + page->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/" + orientation;
+      std::string path="Graphic/Widget/Page[@name='" + page->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/" + orientation;
       primitive->setZ(c->getIntValue(path,"z"));
       primitive->setX(width*c->getDoubleValue(path,"x")/100.0-width/2-primitive->getIconWidth()/2);
       primitive->setY(height*c->getDoubleValue(path,"y")/100.0-height/2-primitive->getIconHeight()/2);

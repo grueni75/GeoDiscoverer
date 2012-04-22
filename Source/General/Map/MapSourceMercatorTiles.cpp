@@ -37,9 +37,9 @@ void *mapSourceMercatorTilesDownloadThread(void *args) {
 // Constructor
 MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   type=MapSourceTypeMercatorTiles;
-  mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize","Number of map containers to remember if the source is using a cache.",256);
-  downloadErrorWaitTime=core->getConfigStore()->getIntValue("Map","downloadErrorWaitTime","Time in seconds to wait after a download error before starting a new download.",1);
-  maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries","Maximum number of retries before a download is aborted.",360);
+  mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize");
+  downloadErrorWaitTime=core->getConfigStore()->getIntValue("Map","downloadErrorWaitTime");
+  maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries");
   mapTileLength=256;
   accessMutex=core->getThread()->createMutex();
   errorOccured=false;

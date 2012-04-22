@@ -34,18 +34,24 @@ protected:
   // Name of the config file
   std::string configFilepath;
 
+  // Name of the schema file
+  std::string schemaFilepath;
+
   // Width of the value field in config file
   Int configValueWidth;
 
+  // Pointer to the schema
+  XMLDocument schema;
+
   // Pointer to the data
-  XMLDocument document;
+  XMLDocument config;
 
   // Context for using xpath
-  XMLXPathContext xpathCtx;
+  XMLXPathContext xpathConfigCtx;
+  XMLXPathContext xpathSchemaCtx;
 
   // Mutex to sequentialize changes in the config
   ThreadMutexInfo *mutex;
-
 
   // Inits the data
   void init();
@@ -60,10 +66,13 @@ protected:
   void read();
 
   // Creates a node inclusive its path
-  XMLNode createNodeWithPath(XMLNode parentNode, std::string path, std::string name, std::string description, std::string value);
+  XMLNode createNodeWithPath(XMLNode parentNode, std::string path, std::string name, std::string value);
 
-  // Finds a set of nodes at the given path
-  std::list<XMLNode> findNodes(std::string path);
+  // Finds a set of config nodes at the given path
+  std::list<XMLNode> findConfigNodes(std::string path);
+
+  // Finds a set of schema nodes at the given path
+  std::list<XMLNode> findSchemaNodes(std::string path);
 
 public:
 
@@ -77,14 +86,15 @@ public:
   bool pathExists(std::string path);
 
   // Access methods to config values
-  void setStringValue(std::string path, std::string name, std::string value, std::string description="");
-  void setIntValue(std::string path, std::string name, Int value, std::string description="");
-  void setDoubleValue(std::string path, std::string name, double value, std::string description="");
-  std::string getStringValue(std::string path, std::string name, std::string description="", std::string defaultValue="");
-  Int getIntValue(std::string path, std::string name, std::string description="", Int defaultValue=0);
-  UInt getUIntValue(std::string path, std::string name, std::string desription="", UInt defaultValue=0);
-  double getDoubleValue(std::string path, std::string name, std::string description="", double defaultValue=0.0);
-  GraphicColor getGraphicColorValue(std::string path, std::string description="", GraphicColor defaultValue=GraphicColor());
+  void setStringValue(std::string path, std::string name, std::string value, bool innerCall=false);
+  void setIntValue(std::string path, std::string name, Int value);
+  void setDoubleValue(std::string path, std::string name, double value);
+  void setGraphicColorValue(std::string path, GraphicColor value);
+  std::string getStringValue(std::string path, std::string name);
+  Int getIntValue(std::string path, std::string name);
+  UInt getUIntValue(std::string path, std::string name);
+  double getDoubleValue(std::string path, std::string name);
+  GraphicColor getGraphicColorValue(std::string path);
 
   // Returns a list of attribute values for a given path and attribute name
   std::list<std::string> getAttributeValues(std::string path, std::string attributeName);

@@ -28,8 +28,8 @@ namespace GEODISCOVERER {
 MapCache::MapCache() {
 
   // Get some configuration
-  size=core->getConfigStore()->getIntValue("Map","tileCacheSize","Number of map tiles to cache.",128);
-  notCachedTileAlpha=core->getConfigStore()->getIntValue("Graphic","notCachedTileAlpha","Alpha value of a tile whose image is not cached.",64);
+  size=core->getConfigStore()->getIntValue("Map","tileCacheSize");
+  notCachedTileAlpha=core->getConfigStore()->getIntValue("Graphic","notCachedTileAlpha");
   cachedTileAlpha=255;
   abortUpdate=false;
 

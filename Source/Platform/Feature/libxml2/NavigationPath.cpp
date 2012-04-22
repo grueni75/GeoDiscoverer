@@ -83,7 +83,7 @@ void NavigationPath::writeGPXFile() {
   // Create the namespaces
   xmlNsPtr gpxNamespace=xmlNewNs(gpxNode,BAD_CAST "http://www.topografix.com/GPX/1/1", BAD_CAST NULL);
   if (!gpxNamespace) {
-   FATAL("can not create xml namespace",NULL);
+   FATAL("can not create gpx namespace",NULL);
    return;
   }
   xmlNsPtr xmlNamespace=xmlNewNs(gpxNode,BAD_CAST "http://www.w3.org/2001/XMLSchema-instance", BAD_CAST "xsi");

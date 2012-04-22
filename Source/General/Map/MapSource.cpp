@@ -26,8 +26,8 @@ namespace GEODISCOVERER {
 
 MapSource::MapSource() {
   folder=core->getConfigStore()->getStringValue("Map","folder");
-  neighborPixelTolerance=core->getConfigStore()->getDoubleValue("Map","neighborPixelTolerance","// Maximum allowed difference in pixels to classify a tile as a neighbor",2);
-  mapTileLength=core->getConfigStore()->getIntValue("Map","tileLength","Width and height of a tile.",256);
+  neighborPixelTolerance=core->getConfigStore()->getDoubleValue("Map","neighborPixelTolerance");
+  mapTileLength=core->getConfigStore()->getIntValue("Map","tileLength");
   statusMutex=core->getThread()->createMutex();
   isInitialized=false;
   contentsChanged=false;
@@ -271,7 +271,7 @@ void MapSource::closeProgress() {
 // Creates a new map source object of the correct type
 MapSource *MapSource::newMapSource() {
 
-  std::string infoPath = core->getHomePath() + "/Map/" + core->getConfigStore()->getStringValue("Map","folder","Folder that contains calibrated maps","Default") + "/info.gds";
+  std::string infoPath = core->getHomePath() + "/Map/" + core->getConfigStore()->getStringValue("Map","folder") + "/info.gds";
 
   // If the info.gds file does not exist, it is an offline source
   if (access(infoPath.c_str(),F_OK)) {

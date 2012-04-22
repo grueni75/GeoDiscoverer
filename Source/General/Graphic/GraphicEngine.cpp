@@ -30,20 +30,20 @@ GraphicEngine::GraphicEngine() {
   // Init variables
   map=NULL;
   pos=GraphicPosition();
-  debugMode=core->getConfigStore()->getIntValue("Graphic","debugMode","Enable debugging mode",0);
+  debugMode=core->getConfigStore()->getIntValue("Graphic","debugMode");
   posMutex=core->getThread()->createMutex();
   pathAnimatorsMutex=core->getThread()->createMutex();
   noChangeFrameCount=0;
-  locationAccuracyBackgroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/locationAccuracyBackgroundColor","accuracy circle background around the location indicator",GraphicColor(255,190,127,120));
-  locationAccuracyCircleColor=core->getConfigStore()->getGraphicColorValue("Graphic/locationAccuracyCircleColor","accuracy circle around the location indicator",GraphicColor(255,127,0,120));
-  locationAccuracyCircleLineWidth=core->getConfigStore()->getIntValue("Graphic","locationAccuracyCircleLineWidth","Line width of the accuracy circle around the location indicator",4);
+  locationAccuracyBackgroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyBackgroundColor");
+  locationAccuracyCircleColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyCircleColor");
+  locationAccuracyCircleLineWidth=core->getConfigStore()->getIntValue("Graphic","locationAccuracyCircleLineWidth");
   locationAccuracyRadiusX=0;
   locationAccuracyRadiusY=0;
   locationIconMutex=core->getThread()->createMutex();
-  centerIconTimeout=core->getConfigStore()->getIntValue("Graphic","centerIconTimeout","Time in us to wait after a user interaction before the cursor is hidden",10*1000*1000);
+  centerIconTimeout=core->getConfigStore()->getIntValue("Graphic","centerIconTimeout");
   centerIcon.setColor(GraphicColor(255,255,255,0));
   locationIcon.setColor(GraphicColor(255,255,255,255));
-  compassConeIcon.setColor(core->getConfigStore()->getGraphicColorValue("Graphic/compassConeColor","compass cone",GraphicColor(255,255,255,150)));
+  compassConeIcon.setColor(core->getConfigStore()->getGraphicColorValue("Graphic/CompassConeColor"));
   compassConeIcon.setAngle(std::numeric_limits<double>::max());
   compassConeIconMutex=core->getThread()->createMutex();
   lastCenterIconFadeStartTime=0;
@@ -64,14 +64,14 @@ GraphicEngine::GraphicEngine() {
 
 // Inits dynamic data
 void GraphicEngine::init() {
-  centerIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","centerIconFilename","Image of the center cursor","center"));
+  centerIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","centerIconFilename"));
   lockLocationIcon();
-  locationIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","locationIconFilename","Image of the location cursor","location"));
+  locationIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","locationIconFilename"));
   locationIcon.setColor(GraphicColor(255,255,255,0));
   unlockLocationIcon();
-  pathDirectionIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathDirectionIconFilename","Image of the path arrow that indicates the direction","pathDirection"));
+  pathDirectionIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathDirectionIconFilename"));
   lockCompassConeIcon();
-  compassConeIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","compassConeFilename","Image of the compass cone","compassCone"));
+  compassConeIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","compassConeFilename"));
   unlockCompassConeIcon();
 }
 

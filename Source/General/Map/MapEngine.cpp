@@ -26,11 +26,11 @@ namespace GEODISCOVERER {
 
 // Constructor
 MapEngine::MapEngine() {
-  initDistance=core->getConfigStore()->getIntValue("Map","initDistance","Distance to the max/min values of integer that triggers a initialization of the map to avoid overflows.",65536);
-  maxTiles=core->getConfigStore()->getIntValue("Map","maxTiles","Maximum number of tiles to show.",128);
-  returnToLocationTimeout=core->getConfigStore()->getIntValue("Map","returnToLocationTimeout","Time in us that must elapse before the map is repositioned to the current location.",20*1000*1000);
-  setReturnToLocation(core->getConfigStore()->getIntValue("Map","returnToLocation","Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed.",1));
-  setZoomLevelLock(core->getConfigStore()->getIntValue("Map","zoomLevelLock","Indicates if the zoom level of the map shall not be changed when zooming.",0));
+  initDistance=core->getConfigStore()->getIntValue("Map","initDistance");
+  maxTiles=core->getConfigStore()->getIntValue("Map","maxTiles");
+  returnToLocationTimeout=core->getConfigStore()->getIntValue("Map","returnToLocationTimeout");
+  setReturnToLocation(core->getConfigStore()->getIntValue("Map","returnToLocation"));
+  setZoomLevelLock(core->getConfigStore()->getIntValue("Map","zoomLevelLock"));
   returnToLocationOneTime=false;
   map=NULL;
   updateInProgress=false;
@@ -126,13 +126,13 @@ void MapEngine::initMap()
   core->getGraphicEngine()->unlockPos();
 
   // Set the current position
-  std::string lastMapFolder=core->getConfigStore()->getStringValue("Map/LastPosition","folder","Last used map folder.","<unknown>");
-  if (lastMapFolder!="<unknown>") {
+  std::string lastMapFolder=core->getConfigStore()->getStringValue("Map/LastPosition","folder");
+  if (lastMapFolder!="*unknown*") {
     lockMapPos();
-    mapPos.setLng(core->getConfigStore()->getDoubleValue("Map/LastPosition","lng","Longitude of the last position in the map.",mapPos.getLng()));
-    mapPos.setLat(core->getConfigStore()->getDoubleValue("Map/LastPosition","lat","Latitude of the last position in the map.",mapPos.getLat()));
-    mapPos.setLatScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","latScale","Latitude scale of the last position in the map.",mapPos.getLatScale()));
-    mapPos.setLngScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","lngScale","Longitude scale of the last position in the map.",mapPos.getLatScale()));
+    mapPos.setLng(core->getConfigStore()->getDoubleValue("Map/LastPosition","lng"));
+    mapPos.setLat(core->getConfigStore()->getDoubleValue("Map/LastPosition","lat"));
+    mapPos.setLatScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","latScale"));
+    mapPos.setLngScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","lngScale"));
     unlockMapPos();
     core->getMapSource()->lockAccess();
     MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
@@ -148,10 +148,10 @@ void MapEngine::initMap()
     unlockMapPos();
   }
   if (lastMapFolder==core->getMapSource()->getFolder()) {
-    visPos.setZoom(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoom","Zoom value used in the graphic engine when the last position was active.",visPos.getZoom()));
-    visPos.setAngle(core->getConfigStore()->getDoubleValue("Map/LastPosition","angle","Angle value used in the graphic engine when the last position was active.",visPos.getAngle()));
+    visPos.setZoom(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoom"));
+    visPos.setAngle(core->getConfigStore()->getDoubleValue("Map/LastPosition","angle"));
     lockDisplayArea();
-    displayArea.setZoomLevel(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoomLevel","Map zoom level used when the last position was active.",this->displayArea.getZoomLevel()));
+    displayArea.setZoomLevel(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoomLevel"));
     unlockDisplayArea();
   }
 
@@ -886,14 +886,14 @@ void MapEngine::backup() {
   core->getGraphicEngine()->unlockPos();
 
   // Store the position
-  core->getConfigStore()->setStringValue("Map/LastPosition","folder",core->getMapSource()->getFolder(),"Folder that contains the map images.");
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","lng",mapPos.getLng(),"Longitude of the last position in the map.");
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","lat",mapPos.getLat(),"Latitude of the last position in the map.");
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","latScale",mapPos.getLatScale(),"Latitude scale of the last position in the map.");
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","lngScale",mapPos.getLngScale(),"Longitude scale of the last position in the map.");
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","zoom",visPos.getZoom(),"Zoom value used in the graphic engine when the last position was active.");
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","angle",visPos.getAngle(),"Angle value used in the graphic engine when the last position was active.");
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","zoomLevel",displayArea.getZoomLevel(),"Map zoom level used when the last position was active.");
+  core->getConfigStore()->setStringValue("Map/LastPosition","folder",core->getMapSource()->getFolder());
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","lng",mapPos.getLng());
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","lat",mapPos.getLat());
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","latScale",mapPos.getLatScale());
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","lngScale",mapPos.getLngScale());
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","zoom",visPos.getZoom());
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","angle",visPos.getAngle());
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","zoomLevel",displayArea.getZoomLevel());
 }
 
 

@@ -32,9 +32,9 @@ NavigationPath::NavigationPath() {
   accessMutex=core->getThread()->createMutex();
   isInitMutex=core->getThread()->createMutex();
   gpxFilefolder=core->getNavigationEngine()->getTrackPath();
-  pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength","Minimum segment length of tracks, routes and other paths",8);
-  pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance","Minimum distance between two direction arrows of tracks, routes and other paths",64);
-  pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth","Width of tracks, routes and other paths",8);
+  pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength");
+  pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance");
+  pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth");
 
   // Do the dynamic initialization
   init();
