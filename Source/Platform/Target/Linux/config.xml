@@ -477,7 +477,7 @@
     </TrackColor>
   </Graphic>
   <Map>
-    <folder>Default</folder>
+    <folder>OpenCycleMap</folder>
     <neighborPixelTolerance>2</neighborPixelTolerance>
     <tileLength>256</tileLength>
     <tileCacheSize>128</tileCacheSize>
@@ -487,21 +487,24 @@
     <returnToLocation>1</returnToLocation>
     <zoomLevelLock>0</zoomLevelLock>
     <LastPosition>
-      <folder>Default</folder>
-      <lng>7.02298</lng>
-      <lat>51.2795</lat>
-      <latScale>1207.14</latScale>
-      <lngScale>742.349</lngScale>
-      <zoom>1.03618</zoom>
+      <folder>OpenCycleMap</folder>
+      <lng>7.03676</lng>
+      <lat>51.6077</lat>
+      <latScale>293.715</latScale>
+      <lngScale>180.625</lngScale>
+      <zoom>1.00971</zoom>
       <angle>0</angle>
-      <zoomLevel>3</zoomLevel>
+      <zoomLevel>9</zoomLevel>
     </LastPosition>
+    <mapContainerCacheSize>256</mapContainerCacheSize>
+    <downloadErrorWaitTime>1</downloadErrorWaitTime>
+    <maxDownloadRetries>360</maxDownloadRetries>
   </Map>
   <Navigation>
     <locationOutdatedThreshold>120000</locationOutdatedThreshold>
     <locationSignificantlyInaccurateThreshold>100</locationSignificantlyInaccurateThreshold>
     <trackRecordingMinDistance>25</trackRecordingMinDistance>
     <recordTrack>0</recordTrack>
-    <lastRecordedTrackFilename>track-20120422-200023.gpx</lastRecordedTrackFilename>
+    <lastRecordedTrackFilename>track-20120423-173136.gpx</lastRecordedTrackFilename>
   </Navigation>
 </GDC>

@@ -28,6 +28,7 @@ namespace GEODISCOVERER {
 void ConfigStore::init()
 {
   xmlInitParser();
+  xmlKeepBlanksDefault(0);
 }
 
 // Deinits the data
