@@ -22,7 +22,11 @@
 
 package com.perfectapp.android.geodiscoverer;
 
+import java.io.File;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -38,6 +42,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.widget.FrameLayout;
 
 /** Interfaces with the C++ part */
 public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorEventListener {
@@ -82,7 +87,11 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   float[] correctedR = new float[16];
   float[] I = new float[16];
   float[] orientation = new float[3];
-  
+
+  // Thread signaling
+  final Lock lock = new ReentrantLock();
+  final Condition screenUpdated  = lock.newCondition(); 
+    
   //
   // Constructor and destructor
   //
@@ -116,16 +125,40 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   } 
 
   /** Deinits the core */
-  public synchronized void restart()
+  public void restart(boolean resetConfig)
   {
+    lock.lock();
+    
     // Clean up the C++ part
     coreInitialized=false;
     if (coreInitialized) {
       deinit();
     }
+    
+    // Remove the config if requested
+    if (resetConfig) {
+      File configFile = new File(homePath + "/config.xml");
+      configFile.delete();
+    }
+    
+    // Ensure that the screen is recreated
     if (!changeScreenCommand.equals("")) {
       changeScreen=true;
     }
+    
+    // Wait until the first frame is drawn
+    boolean repeat = true;
+    while (repeat) {
+      try {
+        repeat = false;
+        screenUpdated.await();
+      }
+      catch (InterruptedException e) {
+        repeat = true;
+      }
+    }
+    
+    lock.unlock();
   } 
 
   //
@@ -169,13 +202,17 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   native Bundle configStoreGetNodeInfo(String path);
   
   /** Sends an command to the core after checking if it it is ready */
-  public synchronized String executeCoreCommand(String cmd)
+  public String executeCoreCommand(String cmd)
   {
+    lock.lock();
+    String result;
     if (coreInitialized) {
-      return executeCoreCommandInt(cmd);
+      result = executeCoreCommandInt(cmd);
     } else {
-      return "";
+      result = "";
     }
+    lock.unlock();
+    return result;
   }
 
   //
@@ -200,7 +237,8 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   //
   
   /** Called when a frame needs to be drawn */
-  public synchronized void onDrawFrame(GL10 gl) {
+  public void onDrawFrame(GL10 gl) {
+    lock.lock();
     if (firstFrameDrawn) {
       if (!coreInitialized) {
         init(homePath,screenDPI);
@@ -220,25 +258,31 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       }
       updateScreen(forceRedraw);
       forceRedraw=false;
+      screenUpdated.signal();
     } else {
       firstFrameDrawn=true;
     }
+    lock.unlock();
   }
 
   /** Called when the surface changes */
-  public synchronized void onSurfaceChanged(GL10 gl, int width, int height) {
+  public void onSurfaceChanged(GL10 gl, int width, int height) {
+    lock.lock();
     int orientationValue = parentActivity.getResources().getConfiguration().orientation;
     String orientationString="portrait";
     if (orientationValue==Configuration.ORIENTATION_LANDSCAPE)
       orientationString="landscape";
     changeScreenCommand="screenChanged(" + orientationString + "," + width + "," + height + ")";
     changeScreen=true;
+    lock.unlock();
   }
 
   /** Called when the surface is created */
-  public synchronized void onSurfaceCreated(GL10 gl, EGLConfig config) {      
+  public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+    lock.lock();
     // Context is lost, so tell the core to recreate any textures
     createScreen=true;
+    lock.unlock();
   }
 
   /** Called when a new fix is available */  

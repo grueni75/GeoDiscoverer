@@ -24,8 +24,10 @@ package com.perfectapp.android.geodiscoverer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Vector;
 
+import android.app.AlertDialog;
 import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.*;
@@ -425,7 +427,7 @@ public class ViewMap extends GDActivity {
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
       MenuInflater inflater = getMenuInflater();
-      inflater.inflate(R.menu.map, menu);
+      inflater.inflate(R.menu.view_map, menu);
       return true;
   }
 
@@ -439,6 +441,25 @@ public class ViewMap extends GDActivity {
                 startActivityForResult(myIntent, SHOW_PREFERENCE_REQUEST);
               }
               return true;
+          case R.id.reset:
+            if (mapSurfaceView!=null) {
+              AlertDialog.Builder builder = new AlertDialog.Builder(this);
+              builder.setTitle(getTitle());
+              builder.setMessage(R.string.reset_question);
+              builder.setCancelable(true);
+              builder.setPositiveButton(R.string.yes,
+                  new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                      RestartCoreObjectTask task = new RestartCoreObjectTask();
+                      task.resetConfig=true;
+                      task.execute();
+                    }
+                  });
+              builder.setNegativeButton(R.string.no, null);
+              AlertDialog alert = builder.create();
+              alert.show();
+            }
+            return true;
           default:
               return super.onOptionsItemSelected(item);
       }
@@ -448,6 +469,7 @@ public class ViewMap extends GDActivity {
   private class RestartCoreObjectTask extends AsyncTask<Void, Void, Void> {
 
     ProgressDialog progressDialog;
+    public boolean resetConfig = false;
 
     protected void onPreExecute() {
       progressDialog = new ProgressDialog(ViewMap.this);
@@ -458,7 +480,7 @@ public class ViewMap extends GDActivity {
     }
 
     protected Void doInBackground(Void... params) {
-      mapSurfaceView.coreObject.restart();      
+      mapSurfaceView.coreObject.restart(resetConfig);      
       return null;
     }
 
