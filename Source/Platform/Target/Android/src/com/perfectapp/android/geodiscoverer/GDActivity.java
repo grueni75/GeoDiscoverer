@@ -22,16 +22,15 @@
 
 package com.perfectapp.android.geodiscoverer;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
 import android.os.SystemClock;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.Toast;
 
 /** Base class for all activities */
-public class GDActivity extends Activity {
+public class GDActivity extends FragmentActivity {
 
   /** Current dialog */
   AlertDialog alertDialog = null;

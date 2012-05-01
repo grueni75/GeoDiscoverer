@@ -5,6 +5,9 @@
 		<xsd:documentation>GeoDiscoverer config schema version 1.0</xsd:documentation>
 	</xsd:annotation>
 	<xsd:element name="GDC">
+		<xsd:annotation>
+			<xsd:documentation>All preferences of Geo Discoverer.</xsd:documentation>
+		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
 				<xsd:element name="General">
@@ -138,7 +141,10 @@
 											</xsd:annotation>
 											<xsd:complexType>
 												<xsd:sequence>
-													<xsd:element name="Primitive">
+													<xsd:element name="Primitive" maxOccurs="unbounded">
+														<xsd:annotation>
+															<xsd:documentation>Defines a widget.</xsd:documentation>
+														</xsd:annotation>
 														<xsd:complexType>
 															<xsd:sequence>
 																<xsd:element name="type" default="button">
@@ -721,9 +727,12 @@
 								</xsd:annotation>
 							</xsd:element>
 							<xsd:element name="Route" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation>Defines a route for navigation.</xsd:documentation>
+								</xsd:annotation>
 								<xsd:complexType>
 									<xsd:sequence>
-										<xsd:element name="HighlightColor" minOccurs="0">
+										<xsd:element name="HighlightColor">
 											<xsd:annotation>
 												<xsd:documentation>Highlight color of the route. If set, the route color will be periodically change between normal color and highlight color (blink mode).</xsd:documentation>
 											</xsd:annotation>
@@ -786,8 +795,13 @@
 												<xsd:documentation>Filename of the route.</xsd:documentation>
 											</xsd:annotation>
 										</xsd:element>
+										<xsd:element name="visible" type="xsd:boolean" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Route is drawn on map if ticked.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
 									</xsd:sequence>
-									<xsd:attribute name="number">
+									<xsd:attribute name="name">
 										<xsd:annotation>
 											<xsd:documentation>Name of the route.</xsd:documentation>
 										</xsd:annotation>

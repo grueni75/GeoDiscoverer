@@ -23,24 +23,32 @@
 package com.perfectapp.android.geodiscoverer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Vector;
 
+import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.*;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.preference.PreferenceScreen;
 
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class ViewMap extends GDActivity {
   
@@ -50,6 +58,9 @@ public class ViewMap extends GDActivity {
   boolean externalStorageWriteable;
   ProgressDialog externalStorageWaitDialog=null;
   
+  // Request codes for calling other activities
+  static final int SHOW_PREFERENCE_REQUEST = 0;
+
   // GUI components
   ProgressDialog progressDialog;
   int progressMax;
@@ -369,6 +380,7 @@ public class ViewMap extends GDActivity {
     stopWatchingLocation();
     stopWatchingExternalStorage();
     mapSurfaceView.coreObject.executeCoreCommand("maintenance()");
+    mapSurfaceView.coreObject.parentActivity=null;
   }
   
   /** Called when the app resumes */
@@ -381,6 +393,7 @@ public class ViewMap extends GDActivity {
     startWatchingCompass();
     updateWakeLock();
     if (mapSurfaceView!=null) {
+      mapSurfaceView.coreObject.parentActivity=this;
       mapSurfaceView.coreObject.forceRedraw=true;
     }
   }
@@ -407,5 +420,68 @@ public class ViewMap extends GDActivity {
     }*/
           
   }
-    
+  
+  /** Called when a option menu shall be created */  
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+      MenuInflater inflater = getMenuInflater();
+      inflater.inflate(R.menu.map, menu);
+      return true;
+  }
+
+  /** Called when an option menu item has been selected */
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+      switch (item.getItemId()) {
+          case R.id.preferences:
+              if (mapSurfaceView!=null) {
+                Intent myIntent = new Intent(getApplicationContext(), Preferences.class);
+                startActivityForResult(myIntent, SHOW_PREFERENCE_REQUEST);
+              }
+              return true;
+          default:
+              return super.onOptionsItemSelected(item);
+      }
+  }  
+
+  /** Restarts the core object */
+  private class RestartCoreObjectTask extends AsyncTask<Void, Void, Void> {
+
+    ProgressDialog progressDialog;
+
+    protected void onPreExecute() {
+      progressDialog = new ProgressDialog(ViewMap.this);
+      progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+      progressDialog.setMessage(getString(R.string.restarting_core_object));
+      progressDialog.setCancelable(false);
+      progressDialog.show();
+    }
+
+    protected Void doInBackground(Void... params) {
+      mapSurfaceView.coreObject.restart();      
+      return null;
+    }
+
+    protected void onPostExecute(Void result) {
+      progressDialog.dismiss();
+    }
+  }
+  
+  
+  /** Called when a called activity finishes */
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+      
+    // Did the activity changes prefs?
+    if (requestCode == SHOW_PREFERENCE_REQUEST) {
+      if (resultCode==1) {
+        
+        // Restart the core object
+        if (mapSurfaceView!=null) {
+          new RestartCoreObjectTask().execute();
+        }
+        
+      }
+    }
+  }
+
 }

@@ -22,6 +22,12 @@
 
 package com.perfectapp.android.geodiscoverer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+
 import android.app.Application;
 
 /* Main application class */
@@ -36,5 +42,27 @@ public class GDApplication extends Application {
     super.onCreate();  
   }
   
-    
+  /** Copies a source file to a destination file */
+  public static void copyFile(String srcFilename, String dstFilename) throws IOException {
+    File dstFile = new File(dstFilename);
+    File srcFile = new File(srcFilename);    
+    if(!dstFile.exists()) {
+      dstFile.createNewFile();
+    }
+    FileChannel source = null;
+    FileChannel destination = null;
+    try {
+      source = new FileInputStream(srcFile).getChannel();
+      destination = new FileOutputStream(dstFile).getChannel();
+      destination.transferFrom(source, 0, source.size());
+    }
+    finally {
+      if(source != null) {
+        source.close();
+      }
+      if(destination != null) {
+        destination.close();
+      }
+    }
+  }    
 }

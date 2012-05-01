@@ -306,7 +306,7 @@ std::list<XMLNode> ConfigStore::findConfigNodes(std::string path) {
   // Execute the xpath expression
   xpathObj = xmlXPathEvalExpression(BAD_CAST path.c_str(), xpathConfigCtx);
   if (xpathObj == NULL) {
-    FATAL("can not evaluate xpath expression",NULL);
+    FATAL("can not evaluate xpath expression <%s>",path.c_str());
     return result;
   }
   nodes=xpathObj->nodesetval;
@@ -322,7 +322,7 @@ std::list<XMLNode> ConfigStore::findConfigNodes(std::string path) {
 }
 
 // Finds schema nodes
-std::list<XMLNode> ConfigStore::findSchemaNodes(std::string path) {
+std::list<XMLNode> ConfigStore::findSchemaNodes(std::string path, std::string extension) {
   std::list<XMLNode> result;
   xmlXPathObjectPtr xpathObj=NULL;
   xmlNodePtr node=NULL;
@@ -360,18 +360,19 @@ std::list<XMLNode> ConfigStore::findSchemaNodes(std::string path) {
     path=path.replace(j,elementName.size()+1,replaceString);
     i=j+replaceString.size();
   }
+  path=path+extension;
 
   // Execute the xpath expression
   xpathObj = xmlXPathEvalExpression(BAD_CAST path.c_str(), xpathSchemaCtx);
   if (xpathObj == NULL) {
-    FATAL("can not evaluate xpath expression",NULL);
+    FATAL("can not evaluate xpath expression <%s>",path.c_str());
     return result;
   }
   nodes=xpathObj->nodesetval;
   size = (nodes) ? nodes->nodeNr : 0;
   found = false;
   for(Int i = 0; i < size; ++i) {
-    if ((nodes->nodeTab[i]->type == XML_ELEMENT_NODE) || (nodes->nodeTab[i]->type == XML_ATTRIBUTE_NODE)) {
+    if (nodes->nodeTab[i]->type == XML_ELEMENT_NODE) {
       result.push_back(nodes->nodeTab[i]);
     }
   }
@@ -524,6 +525,209 @@ std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::st
   }
   core->getThread()->unlockMutex(mutex);
   return values;
+}
+
+// Lists all elements for the given path
+std::list<std::string> ConfigStore::getNodeNames(std::string path) {
+  std::string xpath = "/GDC" + path;
+  if (path=="")
+    xpath="/GDC";
+  else
+    xpath="/GDC/" + path;
+  std::list<XMLNode> nodes = findSchemaNodes(xpath,"/xsd:complexType/xsd:sequence/xsd:element");
+  std::list<std::string> names;
+  for(std::list<XMLNode>::iterator i=nodes.begin();i!=nodes.end();i++) {
+    for(xmlAttr *attr=(*i)->properties;attr!=NULL;attr=attr->next) {
+       if (attr->type==XML_ATTRIBUTE_NODE) {
+         if (strcmp((const char *)attr->name,"name")==0) {
+           names.push_back(std::string((char*)attr->children->content));
+         }
+       }
+    }
+  }
+  return names;
+}
+
+// Returns information about the given node
+StringMap ConfigStore::getNodeInfo(std::string path) {
+
+  StringMap info;
+
+  // Find the node in the schema
+  std::string xpath;
+  if (path=="")
+    xpath="/GDC";
+  else
+    xpath="/GDC/" + path;
+  std::list<XMLNode> nodes = findSchemaNodes(xpath);
+  if (nodes.size()!=1) {
+    FATAL("could not find path <%s> in schema",path.c_str());
+    return info;
+  }
+  XMLNode node=nodes.front();
+
+  // Extract information
+  bool typeFound=false;
+  bool nameFound=false;
+  bool isUnbounded=false;
+  bool isOptional=false;
+  for(xmlAttr *attr=node->properties;attr!=NULL;attr=attr->next) {
+    if (attr->type==XML_ATTRIBUTE_NODE) {
+      if (strcmp((const char *)attr->name,"name")==0) {
+        info.insert(StringPair("name",(char*)attr->children->content));
+        nameFound=true;
+      }
+      if (strcmp((const char *)attr->name,"maxOccurs")==0) {
+        if (strcmp((const char *)attr->children->content,"unbounded")==0) {
+          isUnbounded=true;
+        }
+      }
+      if (strcmp((const char *)attr->name,"minOccurs")==0) {
+        if (strcmp((const char *)attr->children->content,"0")==0) {
+          info.insert(StringPair("isOptional","1"));
+        }
+      }
+      if (strcmp((const char *)attr->name,"type")==0) {
+        std::string type=(char*)attr->children->content;
+        if (type=="xsd:integer") {
+          type="integer";
+        } else if (type=="xsd:string") {
+          type="string";
+        } else if (type=="xsd:boolean") {
+          type="boolean";
+        } else if (type=="xsd:double") {
+          type="double";
+        } else {
+          FATAL("unknown type <%s> found in schema",type.c_str());
+        }
+        info.insert(StringPair("type",type));
+        typeFound=true;
+      }
+    }
+  }
+
+  // Check that name was found
+  if (!nameFound) {
+    FATAL("element <%s> has no name!",path.c_str());
+  }
+
+  // Check for special types if no type could be extracted
+  if (!typeFound) {
+
+    // Color node?
+    nodes = findSchemaNodes(xpath,"/xsd:complexType/xsd:sequence/xsd:element");
+    bool redFound=false;
+    bool greenFound=false;
+    bool blueFound=false;
+    bool alphaFound=false;
+    if (nodes.size()==4) {
+      for(std::list<XMLNode>::iterator i=nodes.begin();i!=nodes.end();i++) {
+        node = *i;
+        for(xmlAttr *attr=node->properties;attr!=NULL;attr=attr->next) {
+          if (attr->type==XML_ATTRIBUTE_NODE) {
+            if (strcmp((const char *)attr->name,"name")==0) {
+              if (strcmp((char*)attr->children->content,"red")==0)
+                redFound=true;
+              if (strcmp((char*)attr->children->content,"green")==0)
+                greenFound=true;
+              if (strcmp((char*)attr->children->content,"blue")==0)
+                blueFound=true;
+              if (strcmp((char*)attr->children->content,"alpha")==0)
+                alphaFound=true;
+            }
+          }
+        }
+      }
+    }
+    if (redFound&&greenFound&&blueFound&&alphaFound) {
+      info.insert(StringPair("type","color"));
+    } else {
+
+      // Container node?
+      if (nodes.size()!=0) {
+        info.insert(StringPair("type","container"));
+      } else {
+
+        // Enumeration?
+        nodes=findSchemaNodes(xpath,"/xsd:simpleType/xsd:restriction/xsd:enumeration");
+        if (nodes.size()>0) {
+          info.insert(StringPair("type","enumeration"));
+          Int enumerationNumber=0;
+          for(std::list<XMLNode>::iterator i=nodes.begin();i!=nodes.end();i++) {
+            node=*i;
+            for(xmlAttr *attr=node->properties;attr!=NULL;attr=attr->next) {
+              if (attr->type==XML_ATTRIBUTE_NODE) {
+                if (strcmp((const char *)attr->name,"value")==0) {
+                  std::stringstream s; s << enumerationNumber;
+                  info.insert(StringPair(s.str(),(char*)attr->children->content));
+                }
+              }
+            }
+            enumerationNumber++;
+          }
+        } else {
+          FATAL("can not determine type of schema node",NULL);
+        }
+      }
+    }
+  }
+
+  // In case of a container node, check if it has attributes
+  if (info["type"]=="container") {
+
+    // If it is an unbounded container, find out the iterating attribute
+    if (isUnbounded) {
+      bool nameAttributeFound=false;
+      nodes=findSchemaNodes(xpath,"/xsd:complexType/xsd:attribute");
+      for(std::list<XMLNode>::iterator i=nodes.begin();i!=nodes.end();i++) {
+        node=*i;
+        for(xmlAttr *attr=node->properties;attr!=NULL;attr=attr->next) {
+          if (attr->type==XML_ATTRIBUTE_NODE) {
+            if (strcmp((const char *)attr->name,"name")==0) {
+              if (strcmp((const char *)attr->children->content,"name")==0) {
+                info.insert(StringPair("isUnbounded","name"));
+                nameAttributeFound=true;
+              }
+            }
+          }
+        }
+      }
+      if (!nameAttributeFound) {
+        FATAL("container element <%s> is unbounded but has no name attribute",path.c_str());
+      }
+    }
+
+
+  }
+
+  // Get the description
+  nodes=findSchemaNodes(xpath,"/xsd:annotation/xsd:documentation");
+  if (nodes.size()!=1) {
+    FATAL("element <%s> has no or more than one documentation",path.c_str());
+  }
+  info.insert(StringPair("documentation",(char*)nodes.front()->children->content));
+
+  // That's it
+  return info;
+}
+
+// Removes the node from the config
+void ConfigStore::removePath(std::string path) {
+
+  // Search for all matching nodes
+  std::string xpath;
+  if (path=="")
+    xpath="/GDC";
+  else
+    xpath="/GDC/" + path;
+  std::list<XMLNode> configNodes=findConfigNodes(xpath);
+
+  // Remove all of them
+  for (std::list<XMLNode>::iterator i=configNodes.begin();i!=configNodes.end();i++) {
+    XMLNode n=*i;
+    xmlUnlinkNode(n);
+    xmlFreeNode(n);
+  }
 }
 
 }

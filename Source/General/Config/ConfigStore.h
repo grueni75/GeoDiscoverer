@@ -27,6 +27,9 @@
 
 namespace GEODISCOVERER {
 
+typedef std::map<std::string, std::string> StringMap;
+typedef std::pair<std::string, std::string> StringPair;
+
 class ConfigStore {
 
 protected:
@@ -72,7 +75,7 @@ protected:
   std::list<XMLNode> findConfigNodes(std::string path);
 
   // Finds a set of schema nodes at the given path
-  std::list<XMLNode> findSchemaNodes(std::string path);
+  std::list<XMLNode> findSchemaNodes(std::string path, std::string extension="");
 
 public:
 
@@ -92,12 +95,20 @@ public:
   void setGraphicColorValue(std::string path, GraphicColor value);
   std::string getStringValue(std::string path, std::string name);
   Int getIntValue(std::string path, std::string name);
-  UInt getUIntValue(std::string path, std::string name);
   double getDoubleValue(std::string path, std::string name);
   GraphicColor getGraphicColorValue(std::string path);
 
   // Returns a list of attribute values for a given path and attribute name
   std::list<std::string> getAttributeValues(std::string path, std::string attributeName);
+
+  // Lists all elements for the given path
+  std::list<std::string> getNodeNames(std::string path);
+
+  // Returns information about the given node
+  StringMap getNodeInfo(std::string path);
+
+  // Removes the node from the config
+  void removePath(std::string path);
 
 };
 

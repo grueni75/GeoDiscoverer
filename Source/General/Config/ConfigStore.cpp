@@ -83,18 +83,6 @@ Int ConfigStore::getIntValue(std::string path, std::string name)
 
 }
 
-// Gets a unsigned integer value from the config
-UInt ConfigStore::getUIntValue(std::string path, std::string name)
-{
-  std::string value;
-  UInt valueUInt;
-  value=getStringValue(path,name);
-  std::istringstream in(value);
-  in >> valueUInt;
-  return valueUInt;
-
-}
-
 // Gets a double value from the config
 double ConfigStore::getDoubleValue(std::string path, std::string name)
 {
@@ -118,12 +106,16 @@ GraphicColor ConfigStore::getGraphicColorValue(std::string path) {
 
 // Test if a path exists
 bool ConfigStore::pathExists(std::string path) {
+  core->getThread()->lockMutex(mutex);
   std::list<XMLNode> nodes=findConfigNodes("/GDC/" + path);
+  bool result;
   if (nodes.size()>0) {
-    return true;
+    result=true;
   } else {
-    return false;
+    result=false;
   }
+  core->getThread()->unlockMutex(mutex);
+  return result;
 }
 
 }

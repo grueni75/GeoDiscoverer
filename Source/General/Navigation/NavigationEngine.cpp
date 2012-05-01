@@ -109,22 +109,24 @@ void NavigationEngine::init() {
   std::list<std::string>::iterator j;
   for(std::list<std::string>::iterator i=routeNames.begin();i!=routeNames.end();i++) {
     std::string routePath=path + "[@name='" + *i + "']";
-    NavigationPath *route=new NavigationPath();
-    if (!route) {
-      FATAL("can not create route",NULL);
-      return;
+    if (c->getIntValue(routePath,"visible")) {
+      NavigationPath *route=new NavigationPath();
+      if (!route) {
+        FATAL("can not create route",NULL);
+        return;
+      }
+      if (c->pathExists(routePath + "/HighlightColor")) {
+        DEBUG("setting blink mode for path %s",route->getGpxFilename().c_str());
+        route->setHighlightColor(c->getGraphicColorValue(routePath + "/HighlightColor"));
+        route->setBlinkMode(true);
+      }
+      route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor"));
+      route->setName(*i);
+      route->setDescription("route number " + *i);
+      route->setGpxFilefolder(getRoutePath());
+      route->setGpxFilename(c->getStringValue(routePath,"filename"));
+      routes.push_back(route);
     }
-    if (c->pathExists(routePath + "/HighlightColor")) {
-      DEBUG("setting blink mode for path %s",route->getGpxFilename().c_str());
-      route->setHighlightColor(c->getGraphicColorValue(routePath + "/HighlightColor"));
-      route->setBlinkMode(true);
-    }
-    route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor"));
-    route->setName(*i);
-    route->setDescription("route number " + *i);
-    route->setGpxFilefolder(getRoutePath());
-    route->setGpxFilename(c->getStringValue(routePath,"filename"));
-    routes.push_back(route);
   }
   unlockRoutes();
 

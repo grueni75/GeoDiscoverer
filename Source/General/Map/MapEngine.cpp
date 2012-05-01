@@ -138,6 +138,7 @@ void MapEngine::initMap()
     MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
     core->getMapSource()->unlockAccess();
     if (tile==NULL) {
+      DEBUG("could not find tile, using center position of map",NULL);
       lockMapPos();
       mapPos=core->getMapSource()->getCenterPosition();
       unlockMapPos();
@@ -154,6 +155,9 @@ void MapEngine::initMap()
     displayArea.setZoomLevel(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoomLevel"));
     unlockDisplayArea();
   }
+
+  // Store the new values
+  backup();
 
   // Update the visual position in the graphic engine
   graphicEngineVisPos=core->getGraphicEngine()->lockPos();
@@ -837,7 +841,6 @@ void MapEngine::updateMap() {
 
         // Request cache and map tile overlay graphic update
         mapChanged=true;
-
       }
 
     } else {

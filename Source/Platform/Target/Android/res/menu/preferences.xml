@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/add_tracks_as_routes" android:title="@string/add_tracks_as_routes" android:icon="@android:drawable/ic_menu_add" />
+    <item android:id="@+id/remove_routes" android:title="@string/remove_routes" android:icon="@android:drawable/ic_menu_delete" />
+</menu>

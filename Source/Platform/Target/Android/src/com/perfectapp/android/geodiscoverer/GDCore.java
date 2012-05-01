@@ -22,6 +22,8 @@
 
 package com.perfectapp.android.geodiscoverer;
 
+import java.util.List;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import android.content.res.Configuration;
@@ -45,7 +47,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   //
   
   /** Parent activity */
-  ViewMap parentActivity = null;
+  public ViewMap parentActivity = null;
     
   /** Path to the home directory */
   String homePath;
@@ -69,7 +71,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   boolean forceRedraw = false;
   
   /** Command to execute for changing the screen */
-  String changeScreenCommand;
+  String changeScreenCommand = "";
   
   // Sensor readings
   float[] lastAcceleration = null;
@@ -113,6 +115,19 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     }
   } 
 
+  /** Deinits the core */
+  public synchronized void restart()
+  {
+    // Clean up the C++ part
+    coreInitialized=false;
+    if (coreInitialized) {
+      deinit();
+    }
+    if (!changeScreenCommand.equals("")) {
+      changeScreen=true;
+    }
+  } 
+
   //
   // Functions implemented by the native core
   //
@@ -132,8 +147,29 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Send a command to the core */
   protected native String executeCoreCommandInt(String cmd);
   
+  /** Sets a string value in the config */
+  native void configStoreSetStringValue(String path, String name, String value);
+
+  /** Gets a string value from the config */
+  native String configStoreGetStringValue(String path, String name);
+
+  /** Lists all elements for the given path in the config */
+  native String[] configStoreGetNodeNames(String path);
+
+  /** Checks if the path exists in the config */
+  native boolean configStorePathExists(String path);
+
+  /** Removes the path from the config */
+  native void configStoreRemovePath(String path);
+
+  /** Lists all values of the given attribute in the config */
+  native String[] configStoreGetAttributeValues(String path, String attributeName);
+
+  /** Returns information about the given node in the config */
+  native Bundle configStoreGetNodeInfo(String path);
+  
   /** Sends an command to the core after checking if it it is ready */
-  public String executeCoreCommand(String cmd)
+  public synchronized String executeCoreCommand(String cmd)
   {
     if (coreInitialized) {
       return executeCoreCommandInt(cmd);
@@ -149,12 +185,14 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Execute an command */
   public void executeAppCommand(String cmd)
   {
-    Message m=Message.obtain(parentActivity.coreMessageHandler);
-    m.what = ViewMap.EXECUTE_COMMAND;
-    Bundle b = new Bundle();
-    b.putString("command", cmd);
-    m.setData(b);    
-    parentActivity.coreMessageHandler.sendMessage(m); 
+    if (parentActivity!=null) {
+      Message m=Message.obtain(parentActivity.coreMessageHandler);
+      m.what = ViewMap.EXECUTE_COMMAND;
+      Bundle b = new Bundle();
+      b.putString("command", cmd);
+      m.setData(b);    
+      parentActivity.coreMessageHandler.sendMessage(m);
+    }
   }
 
   //
@@ -188,7 +226,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   }
 
   /** Called when the surface changes */
-  public void onSurfaceChanged(GL10 gl, int width, int height) {
+  public synchronized void onSurfaceChanged(GL10 gl, int width, int height) {
     int orientationValue = parentActivity.getResources().getConfiguration().orientation;
     String orientationString="portrait";
     if (orientationValue==Configuration.ORIENTATION_LANDSCAPE)
@@ -198,7 +236,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   }
 
   /** Called when the surface is created */
-  public void onSurfaceCreated(GL10 gl, EGLConfig config) {      
+  public synchronized void onSurfaceCreated(GL10 gl, EGLConfig config) {      
     // Context is lost, so tell the core to recreate any textures
     createScreen=true;
   }
