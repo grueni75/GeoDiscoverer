@@ -456,9 +456,13 @@ public class ViewMap extends GDActivity {
                     }
                   });
               builder.setNegativeButton(R.string.no, null);
+              builder.setIcon(android.R.drawable.ic_dialog_alert);
               AlertDialog alert = builder.create();
               alert.show();
             }
+            return true;
+          case R.id.exit:
+            finish();
             return true;
           default:
               return super.onOptionsItemSelected(item);

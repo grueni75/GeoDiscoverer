@@ -249,6 +249,7 @@ public class Preferences extends PreferenceActivity implements
         
     // Inflate this path
     String[] names = coreObject.configStoreGetNodeNames(path);
+    boolean attributesFound = false;
     Arrays.sort(names);
     for (String name : names) {
 
@@ -337,7 +338,10 @@ public class Preferences extends PreferenceActivity implements
           String[] values = coreObject.configStoreGetAttributeValues(key,
               info.getString("isUnbounded"));
           PreferenceCategory category = new PreferenceCategory(this);
-          category.setTitle(prettyName + " list");
+          if (key.equals("Navigation/Route")) 
+            category.setTitle(prettyName + " list (use menu to modify)");
+          else
+            category.setTitle(prettyName + " list");
           category.setPersistent(false);
           category.setSummary(info.getString("documentation"));
           screen.addPreference(category);
@@ -435,14 +439,19 @@ public class Preferences extends PreferenceActivity implements
       }
 
       // Add the entry
-      if (entry != null) {
+      if (entry != null) {        
         entry.setKey(key);
         entry.setTitle(prettyName);
         entry.setSummary(info.getString("documentation"));
         entry.setPersistent(false);
+        attributesFound = true;
         attributeCategory.addPreference(entry);
       }
     }
+    
+    // Remove the attribute category if no attributes were found
+    if (!attributesFound)
+      screen.removePreference(attributeCategory);
   }
 
   /** Called when the activity is first created. */
@@ -568,7 +577,7 @@ public class Preferences extends PreferenceActivity implements
               boolean isChecked) {
           }
         });
-    builder.setCancelable(false);
+    builder.setCancelable(true);
     builder.setPositiveButton(R.string.finished,
         new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int which) {
@@ -587,6 +596,7 @@ public class Preferences extends PreferenceActivity implements
           }
         });
     builder.setNegativeButton(R.string.cancel, null);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
     AlertDialog alert = builder.create();
     alert.show();
   }
@@ -620,7 +630,7 @@ public class Preferences extends PreferenceActivity implements
               boolean isChecked) {
           }
         });
-    builder.setCancelable(false);
+    builder.setCancelable(true);
     builder.setPositiveButton(R.string.finished,
         new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int which) {
@@ -639,6 +649,7 @@ public class Preferences extends PreferenceActivity implements
           }
         });
     builder.setNegativeButton(R.string.cancel, null);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
     AlertDialog alert = builder.create();
     alert.show();
   }

@@ -12,7 +12,7 @@
 <string name="log_directory">GeoDiscoverer/log</string>
 <string name="button_label_ok">OK</string>
 <string name="preferences">Preferences</string>
-<string name="remove_routes">Remove Routes</string><string name="add_tracks_as_routes">Add Tracks as Routes</string><string name="track_as_route_selection_question">Select the tracks to add as routes:</string><string name="route_remove_selection_question">Select the routes to remove from the Route directory (no undo!):</string>
+<string name="remove_routes">Remove Routes</string><string name="add_tracks_as_routes">Add Tracks as Routes</string><string name="track_as_route_selection_question">Select the tracks to copy to the route directory:</string><string name="route_remove_selection_question">Select the routes to delete from the route directory:</string>
 <string name="finished">Finished</string>
 <string name="cancel">Cancel</string>
 <string name="copying_tracks">Copying tracks from Track to Route directory</string><string name="removing_routes">Removing routes from Route directory</string>
@@ -20,4 +20,5 @@
 <string name="no">No</string>
 <string name="yes">Yes</string>
 <string name="reset_question">Are you sure that you want to reset all preferences to their default values?</string>
+<string name="exit">Exit</string>
 </resources>
