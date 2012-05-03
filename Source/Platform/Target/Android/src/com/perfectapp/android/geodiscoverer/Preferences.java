@@ -97,7 +97,7 @@ public class Preferences extends PreferenceActivity implements
         try {
           GDApplication.copyFile(srcFilename, dstFilename);
         } catch (IOException exception) {
-          Toast.makeText(Preferences.this,"Can not copy file <" + srcFilename + "> to <" + dstFilename + ">!", Toast.LENGTH_LONG).show();
+          Toast.makeText(Preferences.this,String.format(getString(R.string.cannot_copy_file), srcFilename, dstFilename), Toast.LENGTH_LONG).show();
         }
         progress++;
         publishProgress(progress);
@@ -116,7 +116,8 @@ public class Preferences extends PreferenceActivity implements
       progressDialog.dismiss();
 
       // Either rebuild contents of preferences or change to it
-      updateRoutes();
+      coreObject.executeCoreCommand("updateRoutes()");
+      setResult(1);
       if (currentPath.equals("Navigation")) {
         PreferenceScreen rootScreen = getPreferenceScreen();
         rootScreen.removeAll();
@@ -153,9 +154,7 @@ public class Preferences extends PreferenceActivity implements
       for (String routeName : routeNames) {
         File route = new File(coreObject.homePath + "/Route/" + routeName);
         if (!route.delete()) {
-          Toast.makeText(Preferences.this,
-              "Can not remove file <" + route.getPath() + ">!",
-              Toast.LENGTH_LONG).show();
+          Toast.makeText(Preferences.this,String.format(getString(R.string.cannot_remove_file), route.getPath()), Toast.LENGTH_LONG).show();
         }
         progress++;
         publishProgress(progress);
@@ -174,7 +173,8 @@ public class Preferences extends PreferenceActivity implements
       progressDialog.dismiss();
 
       // Either rebuild contents of preferences or change to it
-      updateRoutes();
+      coreObject.executeCoreCommand("updateRoutes()");
+      setResult(1);
       if (currentPath.equals("Navigation")) {
         PreferenceScreen rootScreen = getPreferenceScreen();
         rootScreen.removeAll();
@@ -470,11 +470,6 @@ public class Preferences extends PreferenceActivity implements
     }
     currentPath = path;
 
-    // Clean the routes in the config
-    if (path.equals("")) {
-      updateRoutes();
-    }
-
     // Set the content
     addPreferencesFromResource(R.xml.preferences);
     PreferenceScreen rootScreen = getPreferenceScreen();
@@ -508,44 +503,6 @@ public class Preferences extends PreferenceActivity implements
     MenuInflater inflater = getMenuInflater();
     inflater.inflate(R.menu.preferences, menu);
     return true;
-  }
-
-  /**
-   * Removes any routes from the config that do not exist anymore and adds new
-   * ones
-   */
-  void updateRoutes() {
-
-    // First get a list of all available route filenames
-    File routeFolderFile = new File(coreObject.homePath + "/Route");
-    LinkedList<String> routes = new LinkedList<String>();
-    for (File file : routeFolderFile.listFiles()) {
-      if ((!file.isDirectory())
-          && (!file.getName().substring(file.getName().length() - 1)
-              .equals("~"))) {
-        routes.add(file.getName());
-      }
-    }
-
-    // Go through all routes in the config and remove the ones that do not exist
-    // anymore
-    String[] routeNames = coreObject.configStoreGetAttributeValues(
-        "Navigation/Route", "name");
-    for (String routeName : routeNames) {
-      String path = "Navigation/Route[@name='" + routeName + "']";
-      String filename = coreObject.configStoreGetStringValue(path, "filename");
-      if (!routes.contains(filename)) {
-        coreObject.configStoreRemovePath(path);
-      } else {
-        routes.remove(filename);
-      }
-    }
-
-    // Add new ones
-    for (String routeName : routes) {
-      String path = "Navigation/Route[@name='" + routeName + "']";
-      coreObject.configStoreSetStringValue(path, "filename", routeName);
-    }
   }
 
   /** Copies tracks to the route directory */

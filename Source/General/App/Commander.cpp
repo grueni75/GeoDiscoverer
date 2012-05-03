@@ -239,6 +239,12 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     core->getMapEngine()->setZoomLevelLock(atoi(args[0].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="updateRoutes") {
+    if (core->getIsInitialized()) {
+      core->getNavigationEngine()->updateRoutes();
+    }
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

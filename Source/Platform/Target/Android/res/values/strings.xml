@@ -21,4 +21,12 @@
 <string name="yes">Yes</string>
 <string name="reset_question">Are you sure that you want to reset all preferences to their default values?</string>
 <string name="exit">Exit</string>
+<string name="file_does_not_exist">File does not exist!</string>
+<string name="copy_route_question">Copy file &lt;%s&gt; to route directory?</string>
+<string name="overwrite_route_question">Overwrite file &lt;%s&gt; in route directory?</string>
+<string name="copying_file">Copying file &lt;%s&gt; to route directory</string>
+<string name="unsupported_scheme">The scheme &lt;%s&gt; is not supported!</string>
+<string name="unsupported_intent">This intent is not supported (has no stream)!</string>
+<string name="cannot_copy_file">Can not copy file &lt;%1$s&gt; to &lt;%2$s&gt;!</string>
+<string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
 </resources>

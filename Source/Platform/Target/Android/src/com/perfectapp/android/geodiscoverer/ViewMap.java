@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GDCore.java
+// Name        : ViewMap.java
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -35,6 +35,7 @@ import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -82,6 +83,27 @@ public class ViewMap extends GDActivity {
   boolean locationWatchStarted = false;
   boolean compassWatchStarted = false;
 
+  /** Returns the path of the home dir */
+  protected String getHomeDirPath() {
+
+    // Create the home directory if necessary
+    //File homeDir=Environment.getExternalStorageDirectory(getString(R.string.home_directory));
+    File externalStorageDirectory=Environment.getExternalStorageDirectory(); 
+    String homeDirPath = externalStorageDirectory.getAbsolutePath() + "/GeoDiscoverer";
+    File homeDir=new File(homeDirPath);
+    if (!homeDir.exists()) {
+      try {
+        homeDir.mkdir();
+      }
+      catch (Exception e){
+        fatalDialog(getString(R.string.fatal_home_directory_creation));
+        return "";
+      }
+    }
+    return homeDir.getAbsolutePath();
+    
+  }
+  
   /** Updates the progress dialog */
   protected void updateProgressDialog(String message, int progress) {
     progressCurrent=progress;
@@ -239,27 +261,9 @@ public class ViewMap extends GDActivity {
         GDApplication app=(GDApplication)getApplication();
         if (app.coreObject==null) {
         
-          // Create the home directory
-          //File homeDir=Environment.getExternalStorageDirectory(getString(R.string.home_directory));
-          File externalStorageDirectory=Environment.getExternalStorageDirectory(); 
-          String homeDirPath = externalStorageDirectory.getAbsolutePath() + "/GeoDiscoverer";
-          File homeDir=new File(homeDirPath);
-          if (homeDir == null) {
-            fatalDialog(getString(R.string.fatal_home_directory_creation));
-            return;
-          }
-          if (!homeDir.exists()) {
-            try {
-              homeDir.mkdir();
-            }
-            catch (Exception e){
-              fatalDialog(getString(R.string.fatal_home_directory_creation));
-              return;
-            }
-          }
-          homeDirPath=homeDir.getAbsolutePath();
           
           // Check if the core object is already initialized
+          String homeDirPath = getHomeDirPath();
           app.coreObject=new GDCore(ViewMap.this,homeDirPath);
         }
         
@@ -370,9 +374,84 @@ public class ViewMap extends GDActivity {
     if (wakeLock==null) {
       fatalDialog("Can not obtain wake lock!");
     }
+    
+    // Extract the file path from the intent
+    Intent intent = getIntent();
+    String srcFilename = "";
+    if (Intent.ACTION_SEND.equals(intent.getAction())) {
+      Bundle extras = intent.getExtras();
+      if (extras.containsKey(Intent.EXTRA_STREAM)) {
+        Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
+        if (uri.getScheme().equals("file")) {
+          srcFilename = uri.getPath();
+        } else {
+          warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));
+        }
+      } else {
+        warningDialog(getString(R.string.unsupported_intent));        
+      }
+    }
+    if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+      Uri uri = intent.getData();
+      if (uri.getScheme().equals("file")) {
+        srcFilename = uri.getPath();
+      } else {
+        warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));        
+      }
+    }
+    
+    // Handle the intent
+    if (!srcFilename.equals("")) {
+            
+      // Ask the user if the file should be copied to the route directory
+      final File srcFile = new File(srcFilename);
+      if (srcFile.exists()) {
 
+        // Ask the user if the file should be copied
+        String dstFilename = getHomeDirPath() + "/Route/" + srcFile.getName();
+        final File dstFile = new File(dstFilename);
+        if (!srcFile.equals(dstFile)) {
+          AlertDialog.Builder builder = new AlertDialog.Builder(this);
+          builder.setTitle(getTitle());
+          String message; 
+          if (dstFile.exists())
+            message=getString(R.string.overwrite_route_question);              
+          else
+            message=getString(R.string.copy_route_question);
+          message = String.format(message, srcFile.getName());
+          builder.setMessage(message);              
+          builder.setCancelable(true);
+          builder.setPositiveButton(R.string.yes,
+              new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                  ProgressDialog progressDialog = new ProgressDialog(ViewMap.this);
+                  progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                  String message = getString(R.string.copying_file);
+                  message = String.format(message, srcFile.getName());
+                  progressDialog.setMessage(message);
+                  progressDialog.setCancelable(false);
+                  progressDialog.show();
+                  try {
+                    GDApplication.copyFile(srcFile.getPath(), dstFile.getPath());
+                  }
+                  catch (IOException e) {
+                    errorDialog(String.format(getString(R.string.cannot_copy_file), srcFile.getPath(), dstFile.getPath()));
+                  }
+                  progressDialog.dismiss();
+                  new RestartCoreObjectTask().execute();
+                }
+              });
+          builder.setNegativeButton(R.string.no, null);
+          builder.setIcon(android.R.drawable.ic_dialog_info);
+          AlertDialog alert = builder.create();
+          alert.show();
+        }
+      } else {
+        errorDialog(getString(R.string.file_does_not_exist));
+      }
+    }
   }
-  
+    
   /** Called when the app suspends */
   @Override
   public void onPause() {

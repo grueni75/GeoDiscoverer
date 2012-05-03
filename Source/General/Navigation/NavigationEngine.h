@@ -137,6 +137,9 @@ public:
   // Loads all pathes in the background
   void backgroundLoader();
 
+  // Updates the route list (remove stale ones, add new ones)
+  void updateRoutes();
+
   // Getters and setters
   NavigationPath *lockRecordedTrack()
   {

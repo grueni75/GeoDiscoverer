@@ -102,6 +102,9 @@ void NavigationEngine::init() {
   // Set the track recording
   setRecordTrack(recordTrack, true);
 
+  // Update the route lits
+  updateRoutes();
+
   // Prepare any routes
   lockRoutes();
   std::string path="Navigation/Route";
@@ -115,16 +118,14 @@ void NavigationEngine::init() {
         FATAL("can not create route",NULL);
         return;
       }
-      if (c->pathExists(routePath + "/HighlightColor")) {
-        DEBUG("setting blink mode for path %s",route->getGpxFilename().c_str());
-        route->setHighlightColor(c->getGraphicColorValue(routePath + "/HighlightColor"));
-        route->setBlinkMode(true);
-      }
+      GraphicColor highlightColor = c->getGraphicColorValue(routePath + "/HighlightColor");
+      route->setHighlightColor(highlightColor);
+      route->setBlinkMode(c->getIntValue(routePath,"blink"));
       route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor"));
       route->setName(*i);
       route->setDescription("route number " + *i);
       route->setGpxFilefolder(getRoutePath());
-      route->setGpxFilename(c->getStringValue(routePath,"filename"));
+      route->setGpxFilename(*i);
       routes.push_back(route);
     }
   }
@@ -136,6 +137,60 @@ void NavigationEngine::init() {
 
   // Object is initialized
   isInitialized=true;
+}
+
+/**
+ * Removes any routes from the config that do not exist anymore and adds new
+ * ones
+ */
+void NavigationEngine::updateRoutes() {
+
+  lockRoutes();
+
+  // First get a list of all available route filenames
+  DIR *dp = opendir( getRoutePath().c_str() );
+  struct dirent *dirp;
+  struct stat filestat;
+  std::list<std::string> routes;
+  if (dp == NULL){
+    ERROR("can not open directory <%s> for reading available routes",getRoutePath().c_str());
+    return;
+  }
+  while ((dirp = readdir( dp )))
+  {
+    std::string filename = std::string(dirp->d_name);
+    std::string filepath = getRoutePath() + "/" + dirp->d_name;
+
+    // If the file is a directory (or is in some way invalid) we'll skip it
+    if (stat( filepath.c_str(), &filestat ))        continue;
+    if (S_ISDIR( filestat.st_mode ))                continue;
+
+    // If the file is a backup, skip it
+    if (filename.substr(filename.length()-1)=="~")  continue;
+
+    // Add the found route
+    routes.push_back(filename);
+  }
+
+  // Go through all routes in the config and remove the ones that do not exist anymore
+  std::list<std::string> routeNames = core->getConfigStore()->getAttributeValues("Navigation/Route", "name");
+  for(std::list<std::string>::iterator i=routeNames.begin(); i!=routeNames.end(); i++) {
+    std::string path = "Navigation/Route[@name='" + *i + "']";
+    std::string filepath = getRoutePath() + "/" + *i;
+    if (access(filepath.c_str(), F_OK)==0) {
+      routes.remove(*i);
+    } else {
+      core->getConfigStore()->removePath(path);
+    }
+  }
+
+  // Add new ones
+  for(std::list<std::string>::iterator i=routes.begin(); i!=routes.end(); i++) {
+    std::string path = "Navigation/Route[@name='" + *i + "']";
+    core->getConfigStore()->setIntValue(path,"visible", 1);
+  }
+
+  unlockRoutes();
 }
 
 // Deinitializes the engine

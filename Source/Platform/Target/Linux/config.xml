@@ -475,9 +475,11 @@
       <blue>0</blue>
       <alpha>255</alpha>
     </TrackColor>
+    <lineNumberOfStrokesOtherSegemnts>32</lineNumberOfStrokesOtherSegemnts>
+    <rectangleListNumberOfRectanglesOtherSegemnts>4</rectangleListNumberOfRectanglesOtherSegemnts>
   </Graphic>
   <Map>
-    <folder>OpenCycleMap</folder>
+    <folder>Default</folder>
     <neighborPixelTolerance>2</neighborPixelTolerance>
     <tileLength>256</tileLength>
     <tileCacheSize>128</tileCacheSize>
@@ -487,24 +489,117 @@
     <returnToLocation>1</returnToLocation>
     <zoomLevelLock>0</zoomLevelLock>
     <LastPosition>
-      <folder>OpenCycleMap</folder>
+      <folder>Default</folder>
       <lng>7.03676</lng>
       <lat>51.6077</lat>
       <latScale>293.715</latScale>
       <lngScale>180.625</lngScale>
       <zoom>1.00971</zoom>
       <angle>0</angle>
-      <zoomLevel>9</zoomLevel>
+      <zoomLevel>1</zoomLevel>
     </LastPosition>
-    <mapContainerCacheSize>256</mapContainerCacheSize>
-    <downloadErrorWaitTime>1</downloadErrorWaitTime>
-    <maxDownloadRetries>360</maxDownloadRetries>
   </Map>
   <Navigation>
     <locationOutdatedThreshold>120000</locationOutdatedThreshold>
     <locationSignificantlyInaccurateThreshold>100</locationSignificantlyInaccurateThreshold>
     <trackRecordingMinDistance>25</trackRecordingMinDistance>
     <recordTrack>0</recordTrack>
-    <lastRecordedTrackFilename>track-20120429-191111.gpx</lastRecordedTrackFilename>
+    <lastRecordedTrackFilename>track-20120502-203845.gpx</lastRecordedTrackFilename>
+    <Route name="essenhbf_nach_gruene_route_ruhr_start.gpx">
+      <visible>1</visible>
+      <HighlightColor>
+        <red>255</red>
+        <green>0</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </HighlightColor>
+      <blink>1</blink>
+      <NormalColor>
+        <red>255</red>
+        <green>255</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </NormalColor>
+    </Route>
+    <Route name="ddorf-runde1.gpx">
+      <visible>1</visible>
+      <HighlightColor>
+        <red>255</red>
+        <green>0</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </HighlightColor>
+      <blink>1</blink>
+      <NormalColor>
+        <red>255</red>
+        <green>255</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </NormalColor>
+    </Route>
+    <Route name="debug.gpx">
+      <visible>1</visible>
+      <HighlightColor>
+        <red>255</red>
+        <green>0</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </HighlightColor>
+      <blink>1</blink>
+      <NormalColor>
+        <red>255</red>
+        <green>255</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </NormalColor>
+    </Route>
+    <Route name="oberhausen_nach_ddorf.gpx">
+      <visible>1</visible>
+      <HighlightColor>
+        <red>255</red>
+        <green>0</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </HighlightColor>
+      <blink>1</blink>
+      <NormalColor>
+        <red>255</red>
+        <green>255</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </NormalColor>
+    </Route>
+    <Route name="Gruene_Route_Ruhr.gpx">
+      <visible>1</visible>
+      <HighlightColor>
+        <red>255</red>
+        <green>0</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </HighlightColor>
+      <blink>1</blink>
+      <NormalColor>
+        <red>255</red>
+        <green>255</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </NormalColor>
+    </Route>
+    <Route name="ddorf-duisburg.gpx">
+      <visible>1</visible>
+      <HighlightColor>
+        <red>255</red>
+        <green>0</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </HighlightColor>
+      <blink>1</blink>
+      <NormalColor>
+        <red>255</red>
+        <green>255</green>
+        <blue>0</blue>
+        <alpha>255</alpha>
+      </NormalColor>
+    </Route>
   </Navigation>
 </GDC>

@@ -790,20 +790,20 @@
 												</xsd:sequence>
 											</xsd:complexType>
 										</xsd:element>
-										<xsd:element name="filename" type="xsd:string" default="unknown.gpx">
-											<xsd:annotation>
-												<xsd:documentation>Filename of the route.</xsd:documentation>
-											</xsd:annotation>
-										</xsd:element>
-										<xsd:element name="visible" type="xsd:boolean" default="0">
+										<xsd:element name="visible" type="xsd:boolean" default="1">
 											<xsd:annotation>
 												<xsd:documentation>Route is drawn on map if ticked.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="blink" type="xsd:boolean" default="1">
+											<xsd:annotation>
+												<xsd:documentation>Route color changes between normal and highlight color if ticked.</xsd:documentation>
 											</xsd:annotation>
 										</xsd:element>
 									</xsd:sequence>
 									<xsd:attribute name="name">
 										<xsd:annotation>
-											<xsd:documentation>Name of the route.</xsd:documentation>
+											<xsd:documentation>Filename of the route.</xsd:documentation>
 										</xsd:annotation>
 									</xsd:attribute>
 								</xsd:complexType>

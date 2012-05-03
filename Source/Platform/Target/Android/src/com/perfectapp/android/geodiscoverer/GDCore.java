@@ -23,6 +23,7 @@
 package com.perfectapp.android.geodiscoverer;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -160,7 +161,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     
     lock.unlock();
   } 
-
+  
   //
   // Functions implemented by the native core
   //
