@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 import android.app.Application;
+import android.os.Environment;
+import android.widget.Toast;
 
 /* Main application class */
 public class GDApplication extends Application {
@@ -40,6 +42,14 @@ public class GDApplication extends Application {
   @Override
   public void onCreate() {
     super.onCreate();  
+
+    // Initialize the core object
+    String homeDirPath = GDApplication.getHomeDirPath();
+    if (homeDirPath.equals("")) {
+      Toast.makeText(this, String.format(String.format(getString(R.string.no_home_dir),homeDirPath)), Toast.LENGTH_LONG).show();
+    } else {
+      coreObject=new GDCore(homeDirPath);
+    }
   }
   
   /** Copies a source file to a destination file */
@@ -64,5 +74,26 @@ public class GDApplication extends Application {
         destination.close();
       }
     }
-  }    
+  }  
+  
+  /** Returns the path of the home dir */
+  public static String getHomeDirPath() {
+
+    // Create the home directory if necessary
+    //File homeDir=Environment.getExternalStorageDirectory(getString(R.string.home_directory));
+    File externalStorageDirectory=Environment.getExternalStorageDirectory(); 
+    String homeDirPath = externalStorageDirectory.getAbsolutePath() + "/GeoDiscoverer";
+    File homeDir=new File(homeDirPath);
+    if (!homeDir.exists()) {
+      try {
+        homeDir.mkdir();
+      }
+      catch (Exception e){
+        return "";
+      }
+    }
+    return homeDir.getAbsolutePath();
+    
+  }
+  
 }

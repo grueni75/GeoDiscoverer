@@ -201,6 +201,16 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="getRecordTrack") {
+    if (core->getIsInitialized()) {
+      if (core->getConfigStore()->getIntValue("Navigation","recordTrack")) {
+        result="true";
+      } else {
+        result="false";
+      }
+    }
+    cmdExecuted=true;
+  }
   if (cmdName=="createNewTrack") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->createNewTrack();

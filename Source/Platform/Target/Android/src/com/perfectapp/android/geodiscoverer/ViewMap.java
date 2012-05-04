@@ -54,13 +54,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 public class ViewMap extends GDActivity {
-  
-  // Variables for monitoring the state of the external storage
-  BroadcastReceiver externalStorageReceiver;
-  boolean externalStorageAvailable;
-  boolean externalStorageWriteable;
-  ProgressDialog externalStorageWaitDialog=null;
-  
+    
   // Request codes for calling other activities
   static final int SHOW_PREFERENCE_REQUEST = 0;
 
@@ -70,7 +64,10 @@ public class ViewMap extends GDActivity {
   int progressCurrent;
   String progressMessage;
   GDMapSurfaceView mapSurfaceView = null;
-  
+
+  /** Reference to the core object */
+  GDCore coreObject = null;
+
   // Managers
   LocationManager locationManager;
   SensorManager sensorManager;
@@ -80,29 +77,7 @@ public class ViewMap extends GDActivity {
   WakeLock wakeLock = null;
   
   // Flags
-  boolean locationWatchStarted = false;
   boolean compassWatchStarted = false;
-
-  /** Returns the path of the home dir */
-  protected String getHomeDirPath() {
-
-    // Create the home directory if necessary
-    //File homeDir=Environment.getExternalStorageDirectory(getString(R.string.home_directory));
-    File externalStorageDirectory=Environment.getExternalStorageDirectory(); 
-    String homeDirPath = externalStorageDirectory.getAbsolutePath() + "/GeoDiscoverer";
-    File homeDir=new File(homeDirPath);
-    if (!homeDir.exists()) {
-      try {
-        homeDir.mkdir();
-      }
-      catch (Exception e){
-        fatalDialog(getString(R.string.fatal_home_directory_creation));
-        return "";
-      }
-    }
-    return homeDir.getAbsolutePath();
-    
-  }
   
   /** Updates the progress dialog */
   protected void updateProgressDialog(String message, int progress) {
@@ -206,9 +181,9 @@ public class ViewMap extends GDActivity {
                 commandExecuted=true;
               }
               if (commandFunction.equals("getLastKnownLocation")) {
-                if (mapSurfaceView!=null) {
-                  mapSurfaceView.coreObject.onLocationChanged(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-                  mapSurfaceView.coreObject.onLocationChanged(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+                if (coreObject!=null) {
+                  coreObject.onLocationChanged(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+                  coreObject.onLocationChanged(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
                 }
                 commandExecuted=true;
               }
@@ -227,7 +202,7 @@ public class ViewMap extends GDActivity {
   /** Sets the screen time out */
   void updateWakeLock() {
     if (mapSurfaceView!=null) {
-      String state=mapSurfaceView.coreObject.executeCoreCommand("getWakeLock()");
+      String state=coreObject.executeCoreCommand("getWakeLock()");
       if (state.equals("true")) {
         Log.d("GDApp","wake lock enabled");
         if (!wakeLock.isHeld())
@@ -239,108 +214,12 @@ public class ViewMap extends GDActivity {
       }
     }
   }
-  
-  /** Called when the external storage state changes */
-  synchronized void handleExternalStorageState(boolean externalStorageAvailable, boolean externalStorageWritable) {
-
-    // If the external storage is not available, display a busy dialog
-    if ((!externalStorageAvailable)||(!externalStorageWritable)) {
-      if (externalStorageWaitDialog==null)
-        externalStorageWaitDialog=ProgressDialog.show(this, getTitle(), getString(R.string.busy_waiting_for_external_storage), true);      
-    }
-    
-    // If the external storage is available, start the native core
-    if ((externalStorageAvailable)&&(externalStorageWritable)) {
-      if (externalStorageWaitDialog!=null)
-        externalStorageWaitDialog.dismiss();
       
-      // Is the core not running yet?
-      if (mapSurfaceView==null) {
-                
-        // Check if the core object is already initialized
-        GDApplication app=(GDApplication)getApplication();
-        if (app.coreObject==null) {
-        
-          
-          // Check if the core object is already initialized
-          String homeDirPath = getHomeDirPath();
-          app.coreObject=new GDCore(ViewMap.this,homeDirPath);
-        }
-        
-        // Assign the opengl surface   
-        Log.d("GDApp", "creating new mapSurfaceView");
-        mapSurfaceView = new GDMapSurfaceView(ViewMap.this,app.coreObject);
-        setContentView(mapSurfaceView);
-        
-        // Start listening for location and compass updates 
-        startWatchingLocation();
-        startWatchingCompass();
-      }
-      
-    }
-    Log.w("GDApp","handling the external storage state not completly implemented!");
-  }
-  
-  /** Sets the current state of the external media */
-  void updateExternalStorageState() {
-    String state = Environment.getExternalStorageState();
-    if (Environment.MEDIA_MOUNTED.equals(state)) {
-      externalStorageAvailable = externalStorageWriteable = true;
-    } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-      externalStorageAvailable = true;
-      externalStorageWriteable = false;
-    } else {
-      externalStorageAvailable = externalStorageWriteable = false;
-    }
-    handleExternalStorageState(externalStorageAvailable,externalStorageWriteable);
-  }
-
-  /** Initiates the watching of the external storage */
-  void startWatchingExternalStorage() {
-    externalStorageReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        Log.i("GDApp", "Storage: " + intent.getData());
-        updateExternalStorageState();
-      }
-    };
-    IntentFilter filter = new IntentFilter();
-    filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-    filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-    registerReceiver(externalStorageReceiver, filter);
-    updateExternalStorageState();
-  }
-
-  /** Stops the watching of the external storage */
-  void stopWatchingExternalStorage() {
-    unregisterReceiver(externalStorageReceiver);
-    externalStorageReceiver=null;
-  }
-  
-  /** Start listening for location fixes */
-  synchronized void startWatchingLocation() {
-    if ((mapSurfaceView!=null)&&(!locationWatchStarted)) {      
-      locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mapSurfaceView.coreObject);
-      locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mapSurfaceView.coreObject);
-      locationWatchStarted=true;
-      Log.d("GDApp","location updates from gps and network started.");
-    }
-  }
-  
-  /** Stop listening for location fixes */
-  synchronized void stopWatchingLocation() {
-    if (locationWatchStarted) {
-      locationManager.removeUpdates(mapSurfaceView.coreObject);
-      locationWatchStarted=false;
-      Log.d("GDApp","location updates from gps and network stopped.");
-    }
-  }
-
   /** Start listening for compass bearing */
   synchronized void startWatchingCompass() {
     if ((mapSurfaceView!=null)&&(!compassWatchStarted)) {
-      sensorManager.registerListener(mapSurfaceView.coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),SensorManager.SENSOR_DELAY_NORMAL);
-      sensorManager.registerListener(mapSurfaceView.coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
+      sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),SensorManager.SENSOR_DELAY_NORMAL);
+      sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
       compassWatchStarted=true;
       Log.d("GDApp","compass bearing updates started.");
     }
@@ -349,7 +228,7 @@ public class ViewMap extends GDActivity {
   /** Stop listening for location fixes */
   synchronized void stopWatchingCompass() {
     if (compassWatchStarted) {
-      sensorManager.unregisterListener(mapSurfaceView.coreObject);
+      sensorManager.unregisterListener(coreObject);
       compassWatchStarted=false;
       Log.d("GDApp","compass bearing updates stopped.");
     }
@@ -361,6 +240,11 @@ public class ViewMap extends GDActivity {
     
     super.onCreate(savedInstanceState);
 
+    // Get the core object
+    GDApplication app=(GDApplication)getApplication();
+    coreObject=app.coreObject;
+    coreObject.setActivity(this);
+
     // Get important handles
     locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
     sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
@@ -369,6 +253,10 @@ public class ViewMap extends GDActivity {
     // Setup the GUI
     requestWindowFeature(Window.FEATURE_NO_TITLE);    
 
+    // Assign the opengl surface   
+    mapSurfaceView = new GDMapSurfaceView(ViewMap.this);
+    setContentView(mapSurfaceView);
+    
     // Get a wake lock
     wakeLock=powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
     if (wakeLock==null) {
@@ -408,7 +296,7 @@ public class ViewMap extends GDActivity {
       if (srcFile.exists()) {
 
         // Ask the user if the file should be copied
-        String dstFilename = getHomeDirPath() + "/Route/" + srcFile.getName();
+        String dstFilename = app.getHomeDirPath() + "/Route/" + srcFile.getName();
         final File dstFile = new File(dstFilename);
         if (!srcFile.equals(dstFile)) {
           AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -458,10 +346,11 @@ public class ViewMap extends GDActivity {
     super.onPause();
     Log.d("GDApp","onPause called by " + Thread.currentThread().getName());
     stopWatchingCompass();
-    stopWatchingLocation();
-    stopWatchingExternalStorage();
-    mapSurfaceView.coreObject.executeCoreCommand("maintenance()");
-    mapSurfaceView.coreObject.parentActivity=null;
+    coreObject.executeCoreCommand("maintenance()");
+    coreObject.setActivity(null);
+    Intent intent = new Intent(this, GDService.class);
+    intent.setAction("activityPaused");
+    startService(intent);
   }
   
   /** Called when the app resumes */
@@ -469,14 +358,12 @@ public class ViewMap extends GDActivity {
   public void onResume() {
     super.onResume();    
     Log.d("GDApp","onResume called by " + Thread.currentThread().getName());
-    startWatchingExternalStorage();
-    startWatchingLocation();
     startWatchingCompass();
     updateWakeLock();
-    if (mapSurfaceView!=null) {
-      mapSurfaceView.coreObject.parentActivity=this;
-      mapSurfaceView.coreObject.forceRedraw=true;
-    }
+    coreObject.setActivity(this);
+    Intent intent = new Intent(this, GDService.class);
+    intent.setAction("activityResumed");
+    startService(intent);
   }
 
   /** Called when the activity is destroyed */
@@ -541,6 +428,7 @@ public class ViewMap extends GDActivity {
             }
             return true;
           case R.id.exit:
+            stopService(new Intent(this, GDService.class));
             finish();
             return true;
           default:
@@ -563,7 +451,7 @@ public class ViewMap extends GDActivity {
     }
 
     protected Void doInBackground(Void... params) {
-      mapSurfaceView.coreObject.restart(resetConfig);      
+      coreObject.restart(resetConfig);      
       return null;
     }
 

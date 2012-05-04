@@ -298,16 +298,12 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     }
 
     // Store the new fix
-    //DEBUG("before location pos update",NULL);
     lockLocationPos();
     locationPos=newLocationPos;
     unlockLocationPos();
-    //DEBUG("after location pos update",NULL);
-    //DEBUG("before map location pos update",NULL);
     MapPosition *pos=core->getMapEngine()->lockLocationPos();
     *pos=locationPos;
     core->getMapEngine()->unlockLocationPos();
-    //DEBUG("after map location pos update",NULL);
 
     PROFILE_ADD("position update init");
 

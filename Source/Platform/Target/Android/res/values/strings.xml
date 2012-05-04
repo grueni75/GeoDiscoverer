@@ -29,4 +29,8 @@
 <string name="unsupported_intent">This intent is not supported (has no stream)!</string>
 <string name="cannot_copy_file">Can not copy file &lt;%1$s&gt; to &lt;%2$s&gt;!</string>
 <string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
+<string name="notification_message">Taking care of your position.</string>
+<string name="notification_title">Geo Discoverer</string>
+<string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
+<string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
 </resources>

@@ -53,7 +53,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   //
   
   /** Parent activity */
-  public ViewMap parentActivity = null;
+  public ViewMap activity = null;
     
   /** Path to the home directory */
   String homePath;
@@ -61,6 +61,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** DPI of the screen */
   int screenDPI;
   
+  /** Indicates if the core is stopped */
+  boolean coreStopped = true;
+
   /** Indicates if the core is initialized */
   boolean coreInitialized = false;
   
@@ -104,48 +107,76 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   
   /** Constructor 
    * @param screenDPI */
-  GDCore(ViewMap parent, String homePath) {
+  GDCore(String homePath) {
 
     // Copy variables
-    this.parentActivity=parent;
     this.homePath=homePath;
-
-    // Get the dpi of the screen
-    DisplayMetrics metrics = new DisplayMetrics();
-    parentActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-    this.screenDPI=metrics.densityDpi;    
+  }
+  
+  /** Sets the parent activity */
+  public void setActivity(ViewMap activity) {
+    lock.lock();
+    this.activity = activity;
+    if (activity!=null) {
+      DisplayMetrics metrics = new DisplayMetrics();
+      activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+      this.screenDPI=metrics.densityDpi;
+    }
+    lock.unlock();
   }
   
   /** Destructor */
   protected void finalize() throws Throwable
   {
     // Clean up the C++ part
-    if (coreInitialized) {
-      deinit();
+    stop();
+  } 
+
+  /** Starts the core */
+  public void start()
+  {
+    lock.lock();    
+    coreStopped=false;    
+
+    // Ensure that the screen is recreated
+    if (!changeScreenCommand.equals("")) {
+      changeScreen=true;
     }
+
+    lock.unlock();
   } 
 
   /** Deinits the core */
+  public void stop()
+  {
+    lock.lock();
+    
+    // Clean up the C++ part
+    if (coreInitialized) {
+      deinit();
+    }
+    coreInitialized=false;
+    coreStopped=true;
+    
+    lock.unlock();
+  } 
+
+  /** Deinits the core and restarts it */
   public void restart(boolean resetConfig)
   {
     lock.lock();
     
     // Clean up the C++ part
-    coreInitialized=false;
-    if (coreInitialized) {
-      deinit();
-    }
+    stop();
     
     // Remove the config if requested
     if (resetConfig) {
       File configFile = new File(homePath + "/config.xml");
       configFile.delete();
     }
-    
-    // Ensure that the screen is recreated
-    if (!changeScreenCommand.equals("")) {
-      changeScreen=true;
-    }
+
+    // Start the core
+    start();
     
     // Wait until the first frame is drawn
     boolean repeat = true;
@@ -223,14 +254,16 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Execute an command */
   public void executeAppCommand(String cmd)
   {
-    if (parentActivity!=null) {
-      Message m=Message.obtain(parentActivity.coreMessageHandler);
+    lock.lock();
+    if (activity!=null) {
+      Message m=Message.obtain(activity.coreMessageHandler);
       m.what = ViewMap.EXECUTE_COMMAND;
       Bundle b = new Bundle();
       b.putString("command", cmd);
       m.setData(b);    
-      parentActivity.coreMessageHandler.sendMessage(m);
+      activity.coreMessageHandler.sendMessage(m);
     }
+    lock.unlock();
   }
 
   //
@@ -240,7 +273,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Called when a frame needs to be drawn */
   public void onDrawFrame(GL10 gl) {
     lock.lock();
-    if (firstFrameDrawn) {
+    if ((firstFrameDrawn)&&(!coreStopped)) {
       if (!coreInitialized) {
         init(homePath,screenDPI);
         createScreen=false;
@@ -269,7 +302,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Called when the surface changes */
   public void onSurfaceChanged(GL10 gl, int width, int height) {
     lock.lock();
-    int orientationValue = parentActivity.getResources().getConfiguration().orientation;
+    int orientationValue = activity.getResources().getConfiguration().orientation;
     String orientationString="portrait";
     if (orientationValue==Configuration.ORIENTATION_LANDSCAPE)
       orientationString="landscape";
@@ -290,32 +323,30 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   public void onLocationChanged(Location location) {
     if (location!=null) {
       //Log.d("GDApp","location update received from provider <" + location.getProvider() + ">.");
-      if (coreInitialized) {
-        String cmd = "locationChanged(" + location.getProvider() + "," + location.getTime();
-        cmd += "," + location.getLongitude() + "," + location.getLatitude();
-        int t=0;
-        if (location.hasAltitude()) {
-          t=1;
-        } 
-        cmd += "," + t + "," + location.getAltitude() + ",1";
-        t=0;
-        if (location.hasBearing()) {
-          t=1;
-        }
-        cmd += "," + t + "," + location.getBearing();
-        t=0;
-        if (location.hasSpeed()) {
-          t=1;
-        }
-        cmd += "," + t + "," + location.getSpeed();
-        t=0;
-        if (location.hasAccuracy()) {
-          t=1;
-        }
-        cmd += "," + t + "," + location.getAccuracy();
-        cmd += ")";
-        executeCoreCommand(cmd);
+      String cmd = "locationChanged(" + location.getProvider() + "," + location.getTime();
+      cmd += "," + location.getLongitude() + "," + location.getLatitude();
+      int t=0;
+      if (location.hasAltitude()) {
+        t=1;
+      } 
+      cmd += "," + t + "," + location.getAltitude() + ",1";
+      t=0;
+      if (location.hasBearing()) {
+        t=1;
       }
+      cmd += "," + t + "," + location.getBearing();
+      t=0;
+      if (location.hasSpeed()) {
+        t=1;
+      }
+      cmd += "," + t + "," + location.getSpeed();
+      t=0;
+      if (location.hasAccuracy()) {
+        t=1;
+      }
+      cmd += "," + t + "," + location.getAccuracy();
+      cmd += ")";
+      executeCoreCommand(cmd);
     }
   }
 

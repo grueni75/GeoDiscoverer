@@ -33,7 +33,7 @@ import android.view.MotionEvent;
 public class GDMapSurfaceView extends GLSurfaceView {
 
   /** Interface to the native C++ core */
-  GDCore coreObject=null;
+  protected GDCore coreObject=null;
       
   /** ID of the pointer that touched the screen first */
   int firstPointerID=-1;
@@ -66,14 +66,15 @@ public class GDMapSurfaceView extends GLSurfaceView {
 
   /** Constructor 
    * @param densityDpi */
-  public GDMapSurfaceView(ViewMap parent, GDCore coreObject) {
+  public GDMapSurfaceView(ViewMap parent) {
     super(parent);
     
     // Set the framebuffer
     setEGLConfigChooser(5,6,5,0,0,0);
     
-    // Remember the core object
-    this.coreObject=coreObject;
+    // Get the core object
+    GDApplication app=(GDApplication)parent.getApplication();
+    coreObject=app.coreObject;
     
     // Set the renderer
     setRenderer(coreObject);
