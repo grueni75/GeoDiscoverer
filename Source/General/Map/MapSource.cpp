@@ -254,13 +254,23 @@ void MapSource::openProgress(std::string title, Int valueMax) {
 }
 
 // Increases the progress by one tep
-void MapSource::increaseProgress() {
+bool MapSource::increaseProgress() {
+
+  // Update the progress
   progressValue++;
   if (progressValue==progressUpdateValue) {
     core->getDialog()->updateProgress(progressDialog,progressDialogTitle,progressValue);
     progressIndex++;
     progressUpdateValue=progressIndex*progressValueMax/10;
   }
+
+  // Shall we stop?
+  if (core->getQuitCore()) {
+    return false;
+  } else {
+    return true;
+  }
+
 }
 
 // Closes the progress bar

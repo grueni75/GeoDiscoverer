@@ -119,6 +119,9 @@ public:
   // Inits dynamic data
   void init();
 
+  // Recreates all graphic
+  void graphicInvalidated();
+
   // Deinits dynamic data
   void deinit();
 

@@ -56,6 +56,9 @@ public:
   // Inits the cache
   void init();
 
+  // Resets all graphics
+  void graphicInvalidated();
+
   // Clears the cache
   void deinit();
 

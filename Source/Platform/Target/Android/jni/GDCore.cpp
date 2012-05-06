@@ -221,18 +221,6 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_updateSc
   GEODISCOVERER::core->updateScreen(forceRedraw);
 }
 
-// Creates the screen context
-JNIEXPORT jboolean JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_createScreen
-  (JNIEnv *env, jobject thiz)
-{
-  // Inform the core
-  if (!GEODISCOVERER::core->graphicInvalidated())
-    return false;
-
-  // That's it
-  return true;
-}
-
 // Sends a command to the core
 JNIEXPORT jstring JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_executeCoreCommandInt
   (JNIEnv *env, jobject thiz, jstring cmd)

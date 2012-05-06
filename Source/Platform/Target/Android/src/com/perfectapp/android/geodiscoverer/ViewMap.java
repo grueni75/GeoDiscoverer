@@ -78,6 +78,7 @@ public class ViewMap extends GDActivity {
   
   // Flags
   boolean compassWatchStarted = false;
+  boolean exitRequested = false;
   
   /** Updates the progress dialog */
   protected void updateProgressDialog(String message, int progress) {
@@ -91,7 +92,7 @@ public class ViewMap extends GDActivity {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
       progressDialog.setMessage(progressMessage);    
       progressDialog.setMax(progressMax);
-      progressDialog.setCancelable(false);
+      progressDialog.setCancelable(true);
       progressDialog.show();
     }
     //Log.d("GDApp","updating progress dialog (" + message + "," + String.valueOf(progress) + ")");
@@ -263,32 +264,64 @@ public class ViewMap extends GDActivity {
       fatalDialog("Can not obtain wake lock!");
     }
     
+  }
+    
+  /** Called when the app suspends */
+  @Override
+  public void onPause() {
+    super.onPause();
+    Log.d("GDApp","onPause called by " + Thread.currentThread().getName());
+    stopWatchingCompass();
+    coreObject.executeCoreCommand("maintenance()");
+    if (!exitRequested) {
+      Intent intent = new Intent(this, GDService.class);
+      intent.setAction("activityPaused");
+      startService(intent);
+    }
+  }
+  
+  /** Called when the app resumes */
+  @Override
+  public void onResume() {
+    super.onResume();
+    
+    // Resume all components
+    Log.d("GDApp","onResume called by " + Thread.currentThread().getName());
+    startWatchingCompass();
+    updateWakeLock();
+    Intent intent = new Intent(this, GDService.class);
+    intent.setAction("activityResumed");
+    startService(intent);
+    
     // Extract the file path from the intent
-    Intent intent = getIntent();
+    intent = getIntent();
     String srcFilename = "";
-    if (Intent.ACTION_SEND.equals(intent.getAction())) {
-      Bundle extras = intent.getExtras();
-      if (extras.containsKey(Intent.EXTRA_STREAM)) {
-        Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
+    if (intent!=null) {
+      if (Intent.ACTION_SEND.equals(intent.getAction())) {
+        Bundle extras = intent.getExtras();
+        if (extras.containsKey(Intent.EXTRA_STREAM)) {
+          Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
+          if (uri.getScheme().equals("file")) {
+            srcFilename = uri.getPath();
+          } else {
+            warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));
+          }
+        } else {
+          warningDialog(getString(R.string.unsupported_intent));        
+        }
+      }
+      if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+        Uri uri = intent.getData();
         if (uri.getScheme().equals("file")) {
           srcFilename = uri.getPath();
         } else {
-          warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));
+          warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));        
         }
-      } else {
-        warningDialog(getString(R.string.unsupported_intent));        
-      }
-    }
-    if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-      Uri uri = intent.getData();
-      if (uri.getScheme().equals("file")) {
-        srcFilename = uri.getPath();
-      } else {
-        warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));        
       }
     }
     
     // Handle the intent
+    GDApplication app=(GDApplication)getApplication();
     if (!srcFilename.equals("")) {
             
       // Ask the user if the file should be copied to the route directory
@@ -338,32 +371,16 @@ public class ViewMap extends GDActivity {
         errorDialog(getString(R.string.file_does_not_exist));
       }
     }
-  }
     
-  /** Called when the app suspends */
-  @Override
-  public void onPause() {
-    super.onPause();
-    Log.d("GDApp","onPause called by " + Thread.currentThread().getName());
-    stopWatchingCompass();
-    coreObject.executeCoreCommand("maintenance()");
-    coreObject.setActivity(null);
-    Intent intent = new Intent(this, GDService.class);
-    intent.setAction("activityPaused");
-    startService(intent);
+    // Reset intent
+    setIntent(null);
+   
   }
   
-  /** Called when the app resumes */
+  /** Called when a new intent is available */
   @Override
-  public void onResume() {
-    super.onResume();    
-    Log.d("GDApp","onResume called by " + Thread.currentThread().getName());
-    startWatchingCompass();
-    updateWakeLock();
-    coreObject.setActivity(this);
-    Intent intent = new Intent(this, GDService.class);
-    intent.setAction("activityResumed");
-    startService(intent);
+  public void onNewIntent(Intent intent) {
+    setIntent(intent);
   }
 
   /** Called when the activity is destroyed */
@@ -371,6 +388,7 @@ public class ViewMap extends GDActivity {
   public void onDestroy() {    
     super.onDestroy();
     Log.d("GDApp","onDestroy called by " + Thread.currentThread().getName());
+    coreObject.setActivity(null);
     if (wakeLock.isHeld())
       wakeLock.release();
   }
@@ -428,8 +446,9 @@ public class ViewMap extends GDActivity {
             }
             return true;
           case R.id.exit:
-            stopService(new Intent(this, GDService.class));
-            finish();
+            RestartCoreObjectTask task = new RestartCoreObjectTask();
+            task.exitOnly=true;
+            task.execute();
             return true;
           default:
               return super.onOptionsItemSelected(item);
@@ -441,22 +460,35 @@ public class ViewMap extends GDActivity {
 
     ProgressDialog progressDialog;
     public boolean resetConfig = false;
+    public boolean exitOnly = false;
 
     protected void onPreExecute() {
       progressDialog = new ProgressDialog(ViewMap.this);
       progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-      progressDialog.setMessage(getString(R.string.restarting_core_object));
+      if (exitOnly) 
+        progressDialog.setMessage(getString(R.string.stopping_core_object));
+      else
+        progressDialog.setMessage(getString(R.string.restarting_core_object));        
       progressDialog.setCancelable(false);
       progressDialog.show();
     }
 
     protected Void doInBackground(Void... params) {
-      coreObject.restart(resetConfig);      
+      if (exitOnly) {
+        coreObject.stop();
+      } else {
+        coreObject.restart(resetConfig);              
+      }
       return null;
     }
 
     protected void onPostExecute(Void result) {
       progressDialog.dismiss();
+      if (exitOnly) {
+        exitRequested = true;
+        stopService(new Intent(ViewMap.this, GDService.class));
+        finish();                
+      }
     }
   }
   
@@ -469,9 +501,7 @@ public class ViewMap extends GDActivity {
       if (resultCode==1) {
         
         // Restart the core object
-        if (mapSurfaceView!=null) {
-          new RestartCoreObjectTask().execute();
-        }
+        new RestartCoreObjectTask().execute();
         
       }
     }

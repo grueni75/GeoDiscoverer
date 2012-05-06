@@ -123,8 +123,8 @@ public:
   // Destructor
   virtual ~Font();
 
-  // Inits the font
-  void init();
+  // Recreates the graphic of the font
+  void graphicInvalidated();
 
   // Deinits the font
   void deinit();

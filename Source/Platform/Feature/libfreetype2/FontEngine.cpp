@@ -144,8 +144,6 @@ void FontEngine::setFont(std::string type) {
 
 // Cleans up the engine
 void FontEngine::deinit() {
-
-  // Deinit all fonts
   FontTypeMap::iterator i;
   for(i = fontTypeMap.begin(); i!=fontTypeMap.end(); i++) {
     std::string fontType;
@@ -153,22 +151,23 @@ void FontEngine::deinit() {
     font=i->second;
     font->deinit();
   }
-
 }
 
 // Inits the engine
 void FontEngine::init() {
 
-  // Init all fonts
+}
+
+// Recreates the graphic of the font
+void FontEngine::graphicInvalidated() {
+  deinit();
   FontTypeMap::iterator i;
   for(i = fontTypeMap.begin(); i!=fontTypeMap.end(); i++) {
     std::string fontType;
     Font *font;
     font=i->second;
-    font->init();
+    font->graphicInvalidated();
   }
-
 }
-
 
 }

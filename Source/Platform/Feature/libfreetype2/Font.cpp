@@ -115,11 +115,10 @@ void Font::deinit() {
 
 }
 
-// Inits the font
-void Font::init() {
+// Recreates the graphic of the font
+void Font::graphicInvalidated() {
 
 }
-
 
 // Creates the bitmap for the font string
 void Font::createStringBitmap(FontString *fontString) {

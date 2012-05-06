@@ -56,6 +56,13 @@ MapCache::~MapCache() {
 
 // Initializes the cache
 void MapCache::init() {
+}
+
+// Invalidate all graphics
+void MapCache::graphicInvalidated() {
+
+  // First clear everything
+  deinit();
 
   // Create texture infos
   for (int i=0;i<size;i++) {
@@ -83,8 +90,8 @@ void MapCache::init() {
 
   // Object is initialized
   isInitialized=true;
-
 }
+
 
 // Clears the cache
 void MapCache::deinit() {
@@ -231,8 +238,8 @@ void MapCache::updateMapTileImages() {
     usedTextures.push_back(m);
     currentTile=t;
     tileTextureAvailable=true;
-    //DEBUG("new texture available",NULL);
     core->tileTextureAvailable();
+    tileTextureAvailable=false;
 
     // Remove the tile from the uncached list and add it to the cached
     t->setIsCached(true);
@@ -260,7 +267,6 @@ void MapCache::setNextTileTexture()
   r->setTexture(m);
   core->getScreen()->setTextureImage(m,tileImageScratch,currentTile->getWidth(),currentTile->getHeight());
   tileTextureAvailable=false;
-  //DEBUG("texture updated",NULL);
 }
 
 // Indicates that there was a change in the map tile visibility

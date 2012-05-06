@@ -63,16 +63,16 @@ public class GDService extends Service {
   /** Reference to the core object */
   GDCore coreObject = null;
   
-  /** The notification that is displayed in the status bar */
-  Notification notification = null;  
+  // The notification that is displayed in the status bar
+  PendingIntent pendingIntent = null;
 
   // Variables for monitoring the state of the external storage
   BroadcastReceiver externalStorageReceiver;
-  boolean externalStorageAvailable;
-  boolean externalStorageWriteable;
+  boolean externalStorageAvailable = false;
+  boolean externalStorageWritable = false;
   
   /** Called when the external storage state changes */
-  synchronized void handleExternalStorageState(boolean externalStorageAvailable, boolean externalStorageWritable) {
+  synchronized void handleExternalStorageState() {
 
     // If the external storage is not available, inform the user that this will not work
     if ((!externalStorageAvailable)||(!externalStorageWritable)) {
@@ -82,7 +82,7 @@ public class GDService extends Service {
     
     // If the external storage is available, start the native core
     if ((externalStorageAvailable)&&(externalStorageWritable)) {
-      coreObject.start();
+      coreObject.homeDirAvailable();
     }
 
   }
@@ -91,14 +91,14 @@ public class GDService extends Service {
   void updateExternalStorageState() {
     String state = Environment.getExternalStorageState();
     if (Environment.MEDIA_MOUNTED.equals(state)) {
-      externalStorageAvailable = externalStorageWriteable = true;
+      externalStorageAvailable = externalStorageWritable = true;
     } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
       externalStorageAvailable = true;
-      externalStorageWriteable = false;
+      externalStorageWritable = false;
     } else {
-      externalStorageAvailable = externalStorageWriteable = false;
+      externalStorageAvailable = externalStorageWritable = false;
     }
-    handleExternalStorageState(externalStorageAvailable,externalStorageWriteable);
+    handleExternalStorageState();
   }
     
   /** Called when the service is created the first time */
@@ -123,6 +123,9 @@ public class GDService extends Service {
     GDApplication app=(GDApplication)getApplication();
     coreObject=app.coreObject;
     
+    // Get the location manager
+    locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
     // Start watching the external storage state
     externalStorageReceiver = new BroadcastReceiver() {
       @Override
@@ -136,6 +139,11 @@ public class GDService extends Service {
     filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
     registerReceiver(externalStorageReceiver, filter);
     updateExternalStorageState();
+    
+    // Prepare the notification
+    Intent notificationIntent = new Intent(this, ViewMap.class);
+    pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+    
   }
   
   /**
@@ -200,36 +208,49 @@ public class GDService extends Service {
   /** Called when the service is started */
   @Override
   public void onStart(Intent intent, int startId) {    
-    
-    // Inform the user that the service has started
-    if (notification == null) {
-      notification = new Notification(R.drawable.icon, getText(R.string.notification_message), System.currentTimeMillis());
-      Intent notificationIntent = new Intent(this, ViewMap.class);
-      PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-      notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_message), pendingIntent);
-      startForegroundCompat(R.string.notification_message, notification);
-    }
+
+    // Ignore empzty intents
+    if ((intent==null)||(intent.getAction()==null))
+      return;
     
     // Handle activity start / stop actions
     if (intent.getAction().equals("activityResumed")) {
 
+      // If the external storage is available, enable the native core
+      if ((externalStorageAvailable)&&(externalStorageWritable)) {
+        coreObject.homeDirAvailable();
+      }
+
       // Start watching the location
       if (!locationWatchStarted) {
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, coreObject);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, coreObject);
         locationWatchStarted = true;
+      } else {
+        stopForegroundCompat(R.string.notification_title);
       }
+      
+      // Inform the user
+      Notification notification = new Notification(R.drawable.icon, getText(R.string.notification_activity_active_message), System.currentTimeMillis());
+      notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_activity_active_message), pendingIntent);
+      startForegroundCompat(R.string.notification_title, notification);        
       
     }
     if (intent.getAction().equals("activityPaused")) {
       
       // Stop watching location if track recording is disabled
       String state=coreObject.executeCoreCommand("getRecordTrack()");
-      if (state.equals("false")) {
+      if (state.equals("false")||(state.equals(""))) {
         locationManager.removeUpdates(coreObject);
         locationWatchStarted = false;
         stopSelf();
+      } else {
+        
+        // Inform the user that location is watched
+        stopForegroundCompat(R.string.notification_title);
+        Notification notification = new Notification(R.drawable.icon, getText(R.string.notification_activity_inactive_message), System.currentTimeMillis());
+        notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_activity_inactive_message), pendingIntent);
+        startForegroundCompat(R.string.notification_title, notification);        
       }
 
     }
@@ -241,7 +262,7 @@ public class GDService extends Service {
   public void onDestroy() {
     
     // Hide the notification
-    stopForegroundCompat(R.string.notification_message);
+    stopForegroundCompat(R.string.notification_title);
 
     // Stop watching for external storage
     unregisterReceiver(externalStorageReceiver);

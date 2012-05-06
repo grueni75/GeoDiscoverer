@@ -58,8 +58,11 @@ public:
   WidgetEngine();
   virtual ~WidgetEngine();
 
-  // (Re)creates all widget pages from the current config
+  // Inits the object
   void init();
+
+  // (Re)creates all widget pages from the current config
+  void graphicInvalidated();
 
   // Clears all widget pages
   void deinit();

@@ -17,6 +17,7 @@
 <string name="cancel">Cancel</string>
 <string name="copying_tracks">Copying tracks from Track to Route directory</string><string name="removing_routes">Removing routes from Route directory</string>
 <string name="restarting_core_object">Restarting core</string><string name="reset">Reset</string>
+<string name="stopping_core_object">Stopping core</string><string name="reset">Reset</string>
 <string name="no">No</string>
 <string name="yes">Yes</string>
 <string name="reset_question">Are you sure that you want to reset all preferences to their default values?</string>
@@ -29,7 +30,8 @@
 <string name="unsupported_intent">This intent is not supported (has no stream)!</string>
 <string name="cannot_copy_file">Can not copy file &lt;%1$s&gt; to &lt;%2$s&gt;!</string>
 <string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
-<string name="notification_message">Taking care of your position.</string>
+<string name="notification_activity_active_message">Taking care of your position.</string>
+<string name="notification_activity_inactive_message">Continuing recording your position.</string>
 <string name="notification_title">Geo Discoverer</string>
 <string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
 <string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>

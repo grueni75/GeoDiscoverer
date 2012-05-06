@@ -206,7 +206,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
   std::stringstream s;
   bestDPI=core->getScreen()->getDPI();
   s << iconFolder << "/" << bestDPI << "dpi/" << filename;
-  DEBUG("checking existance of icon <%s>",s.str().c_str());
+  //DEBUG("checking existance of icon <%s>",s.str().c_str());
   if (access(s.str().c_str(),F_OK)==0) {
     bestIconPath=s.str();
   } else {
@@ -233,7 +233,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
 
           // Check if the icon is available in this directory
           std::string iconPath=dirpath+"/"+filename;
-          DEBUG("checking existance of icon <%s>",iconPath.c_str());
+          //DEBUG("checking existance of icon <%s>",iconPath.c_str());
           if (access(iconPath.c_str(),F_OK)==0) {
 
             // Remember the found icon if it is nearer to the screen dpi
@@ -253,7 +253,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
   }
 
   // Did we find an icon?
-  DEBUG("found the icon <%s> at the path <%s>",filename.c_str(),bestIconPath.c_str());
+  //DEBUG("found the icon <%s> at the path <%s>",filename.c_str(),bestIconPath.c_str());
   if (bestIconPath=="") {
     FATAL("can not find icon <%s>",filename.c_str());
     return NULL;

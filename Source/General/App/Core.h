@@ -104,11 +104,17 @@ protected:
   ThreadSignalInfo *mapUpdateStartSignal;
   ThreadSignalInfo *mapUpdateTileTextureProcessedSignal;
 
+  // Used to prevent deinit before init is complete
+  ThreadMutexInfo *isInitializedMutex;
+
   // Indicates if the core is initialized
   bool isInitialized;
 
   // Used to force an exit of the map update thread
   bool quitMapUpdateThread;
+
+  // Used to force an exit of the core
+  bool quitCore;
 
   // Indicates if the screen update thread is not updating the map
   bool mapUpdateStopped;
@@ -163,7 +169,7 @@ public:
   void tileTextureAvailable();
 
   // Called if the textures have been lost
-  bool graphicInvalidated();
+  void graphicInvalidated();
 
   // Does a late initialization of certain objects
   void lateInit();
@@ -272,12 +278,16 @@ public:
 
   bool getQuitMapUpdateThread() const
   {
-      return quitMapUpdateThread;
+    return quitMapUpdateThread;
+  }
+
+  bool getQuitCore() const {
+    return quitCore;
   }
 
   bool getIsInitialized() const
   {
-      return isInitialized;
+    return isInitialized;
   }
 
 };

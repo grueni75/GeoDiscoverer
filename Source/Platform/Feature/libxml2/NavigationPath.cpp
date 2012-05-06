@@ -376,10 +376,14 @@ bool NavigationPath::readGPXFile() {
         status.pop_front();
         status.push_front(progress.str());
         core->getNavigationEngine()->setStatus(status);
-        core->getThread()->reschedule();
+        if (core->getQuitCore())
+          break;
+        //core->getThread()->reschedule();
       }
       if (i!=numberOfSegments)
         addEndPosition(NavigationPath::getPathInterruptedPos());
+      if (core->getQuitCore())
+        break;
     }
   }
   if (loadRoute) {
@@ -406,7 +410,9 @@ bool NavigationPath::readGPXFile() {
       status.pop_front();
       status.push_front(progress.str());
       core->getNavigationEngine()->setStatus(status);
-      core->getThread()->reschedule();
+      if (core->getQuitCore())
+        break;
+      //core->getThread()->reschedule();
     }
   }
 

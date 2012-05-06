@@ -61,10 +61,12 @@ Core::Core(std::string homePath, Int screenDPI) {
   this->screenUpdateInterruptMutex=NULL;
   this->mapUpdateStartSignal=NULL;
   this->mapUpdateTileTextureProcessedSignal=NULL;
+  this->isInitializedMutex=NULL;
   isInitialized=false;
   quitMapUpdateThread=false;
   mapUpdateStopped=true;
   noInterruptAllowed=false;
+  quitCore=false;
   debug = NULL;
   profileEngine = NULL;
   configStore = NULL;
@@ -89,10 +91,21 @@ Core::Core(std::string homePath, Int screenDPI) {
     exit(1);
     return;
   }
+  isInitializedMutex=thread->createMutex();
+  thread->lockMutex(isInitializedMutex);
 }
 
 // Destructor of the main application
 Core::~Core() {
+
+  DEBUG("deinitializing core",NULL);
+
+  // Wait until the core is initialized
+  quitCore=true;
+  thread->lockMutex(isInitializedMutex);
+  isInitialized=false;
+  thread->unlockMutex(isInitializedMutex);
+  DEBUG("isInitialized resetted",NULL);
 
   // Wait until the late init thread has finished
   if (lateInitThreadInfo) {
@@ -114,7 +127,9 @@ Core::~Core() {
     DEBUG("requesting map update thread to quit",NULL);
     thread->issueSignal(mapUpdateStartSignal);
     thread->issueSignal(mapUpdateTileTextureProcessedSignal);
+    DEBUG("waiting until map update thread quits",NULL);
     thread->waitForThread(mapUpdateThreadInfo);
+    DEBUG("map update thread has quitted",NULL);
     thread->destroyThread(mapUpdateThreadInfo);
   }
 
@@ -292,9 +307,7 @@ bool Core::init() {
 
   // We are initialized
   continueMapUpdate();
-
-  // Output todos
-  //ERROR("Test that track recording works incl. path interruption",NULL);
+  thread->unlockMutex(isInitializedMutex);
 
   return true;
 
@@ -320,9 +333,11 @@ void Core::updateScreen(bool forceRedraw) {
 
     // Init the map engine if required
     if (!mapEngine->getIsInitialized()) {
-      mapCache->init();
+      mapCache->graphicInvalidated();
       mapEngine->initMap();
+      thread->lockMutex(isInitializedMutex);
       isInitialized=true;
+      thread->unlockMutex(isInitializedMutex);
     }
 
     // Check if a new texture is ready
@@ -387,11 +402,6 @@ void Core::updateMap() {
     thread->waitForSignal(mapUpdateStartSignal);
     //DEBUG("map update requested",NULL);
 
-    // Do the map update
-    thread->lockMutex(mapUpdateInterruptMutex);
-    mapEngine->updateMap();
-    thread->unlockMutex(mapUpdateInterruptMutex);
-
     // Shall we quit?
     // It's important to check that here to avoid deadlocks
     if (getQuitMapUpdateThread()) {
@@ -399,15 +409,17 @@ void Core::updateMap() {
       thread->exitThread();
     }
 
+    // Do the map update
+    thread->lockMutex(mapUpdateInterruptMutex);
+    mapEngine->updateMap();
+    thread->unlockMutex(mapUpdateInterruptMutex);
+
   }
 
 }
 
 // Does a late initialization of certain objects
 void Core::lateInit() {
-
-  // We are not initialized anymore
-  isInitialized=false;
 
   // Take care that the map update and screen update thread detects that objects are not initialized
   bool wait=true;
@@ -429,6 +441,10 @@ void Core::lateInit() {
     DEBUG("late initializing mapSource",NULL);
     mapSource->init();
   }
+
+  // Stop here if quit requested
+  if (quitCore)
+    return;
 
   // Initialize navigation engine if required
   if (!navigationEngine->getIsInitialized()) {
@@ -505,14 +521,10 @@ void Core::tileTextureAvailable() {
 }
 
 // Called if the textures or buffers have been lost
-bool Core::graphicInvalidated() {
+void Core::graphicInvalidated() {
 
-  // Do not invalidate textures until core is initialized
-  if (!isInitialized)
-    return false;
-
-  // Ensure that the commander is not executing something
-  commander->interruptOperation();
+  // Ensure that the core is not currently being initialized
+  thread->lockMutex(isInitializedMutex);
 
   // Wait until the map update thread is in a clean state
   bool mapUpdateThreadFinished=false;
@@ -523,7 +535,6 @@ bool Core::graphicInvalidated() {
 
     // Check if a new texture is ready
     if (mapCache->getTileTextureAvailable()) {
-      mapCache->setNextTileTexture();
       thread->issueSignal(mapUpdateTileTextureProcessedSignal);
     }
 
@@ -546,24 +557,13 @@ bool Core::graphicInvalidated() {
   // First deinit everything
   screen->setAllowDestroying(true);
   screen->graphicInvalidated();
+  fontEngine->graphicInvalidated();
+  graphicEngine->graphicInvalidated();
+  widgetEngine->graphicInvalidated();
+  if (isInitialized)
+    mapCache->graphicInvalidated();
   navigationEngine->graphicInvalidated();
-  widgetEngine->deinit();
-  mapCache->deinit();
-  fontEngine->deinit();
-  graphicEngine->deinit();
   screen->setAllowDestroying(false);
-
-  // Recreate any icon in the graphic engine
-  graphicEngine->init();
-
-  // Reset the font strings
-  fontEngine->init();
-
-  // Recreate the map cache
-  mapCache->init();
-
-  // Recreate the widgets
-  widgetEngine->init();
 
   // Trigger an update of the map
   mapEngine->setForceMapUpdate();
@@ -571,11 +571,8 @@ bool Core::graphicInvalidated() {
   // Let the map update thread continue
   continueMapUpdate();
 
-  // Let the commander continue
-  commander->continueOperation();
-
-  // That's it
-  return true;
+  // Let the init continue
+  thread->unlockMutex(isInitializedMutex);
 }
 
 // Stops the map update thread

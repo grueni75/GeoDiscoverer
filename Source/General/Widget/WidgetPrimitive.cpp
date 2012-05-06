@@ -71,4 +71,11 @@ void WidgetPrimitive::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
   isFirstTimeSelected=false;
 }
 
+// Called when the widget has changed his position
+void WidgetPrimitive::updatePosition(Int x, Int y, Int z) {
+  setX(x);
+  setY(y);
+  setZ(z);
+}
+
 }

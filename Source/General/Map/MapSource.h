@@ -107,7 +107,7 @@ public:
   void openProgress(std::string title, Int valueMax);
 
   // Increases the progress by one tep
-  void increaseProgress();
+  bool increaseProgress();
 
   // Closes the progress bar
   void closeProgress();

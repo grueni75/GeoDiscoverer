@@ -164,5 +164,10 @@ void WidgetMeter::setMeterType(WidgetMeterType meterType)
   }
 }
 
+// Called when the widget has changed its position
+void WidgetMeter::updatePosition(Int x, Int y, Int z) {
+  WidgetPrimitive::updatePosition(x,y,z);
+  nextUpdateTime=0;
+}
 
 }

@@ -86,7 +86,7 @@ void NavigationEngine::init() {
     FATAL("can not create track",NULL);
     return;
   }
-  recordedTrack->setNormalColor(c->getGraphicColorValue("Graphic/TrackColor"));
+  recordedTrack->setNormalColor(c->getGraphicColorValue("Navigation/TrackColor"));
 
   // Prepare the last recorded track if it does exist
   std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename");
@@ -102,7 +102,7 @@ void NavigationEngine::init() {
   // Set the track recording
   setRecordTrack(recordTrack, true);
 
-  // Update the route lits
+  // Update the route lists
   updateRoutes();
 
   // Prepare any routes
@@ -681,12 +681,16 @@ void NavigationEngine::backgroundLoader() {
 
   // Load the recorded track
   if (!recordedTrack->getIsInit()) {
+    if (core->getQuitCore())
+      return;
     recordedTrack->readGPXFile();
     recordedTrack->setIsInit(true);
   }
 
   // Load all routes
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    if (core->getQuitCore())
+      return;
     (*i)->readGPXFile();
     (*i)->setIsInit(true);
   }

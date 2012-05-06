@@ -110,6 +110,11 @@ bool MapSourceCalibratedPictures::init()
         char *objectData2=objectData;
         MapSourceCalibratedPictures *newMapOfflineSource=MapSourceCalibratedPictures::retrieve(cacheData,cacheSize,objectData2,objectSize,folder);
         if ((cacheSize!=0)||(objectSize!=0)||(newMapOfflineSource==NULL)) {
+          if (core->getQuitCore()) {
+            DEBUG("cache retrieve aborted because core quit requested",NULL);
+            result=false;
+            goto cleanup;
+          }
           remove(cacheFilepath.c_str());
           if (newMapOfflineSource!=NULL) {
             newMapOfflineSource->objectData=NULL;
@@ -139,12 +144,17 @@ bool MapSourceCalibratedPictures::init()
     dp = opendir( mapPath.c_str() );
     if (dp == NULL){
       ERROR("can not open map directory <%s> for reading available maps",folder.c_str());
-      return false;
+      result=false;
+      goto cleanup;
     }
     while ((dirp = readdir( dp )))
     {
       filename = std::string(dirp->d_name);
       filepath = mapPath + "/" + dirp->d_name;
+
+      // Quit loop if requested
+      if (core->getQuitCore())
+        break;
 
       // If the file is a directory (or is in some way invalid) we'll skip it
       if (stat( filepath.c_str(), &filestat )) continue;
@@ -167,8 +177,15 @@ bool MapSourceCalibratedPictures::init()
     mapFilebases.sort();
     mapFilebases.unique();
 
-    // Create the progress dialog
+    // Quit loop if requested
     core->getDialog()->closeProgress(dialog);
+    if (core->getQuitCore()) {
+      DEBUG("cache retrieve aborted because core quit requested",NULL);
+      result=false;
+      goto cleanup;
+    }
+
+    // Create the progress dialog
     title="Reading files of map " + folder;
     dialog=core->getDialog()->createProgress(title,mapFilebases.size());
 
@@ -184,6 +201,13 @@ bool MapSourceCalibratedPictures::init()
 
       std::string filebase=*i;
       std::string extension;
+
+      // Shall we stop?
+      if (core->getQuitCore()) {
+        DEBUG("cache retrieve aborted because core quit requested",NULL);
+        result=false;
+        goto cleanup;
+      }
 
       // Check which calibration file is present
       std::string supportedExtension="-";
@@ -506,7 +530,12 @@ MapSourceCalibratedPictures *MapSourceCalibratedPictures::retrieve(char *&cacheD
     }
 
     // Update the progress
-    core->getMapSource()->increaseProgress();
+    if (!core->getMapSource()->increaseProgress()) {
+      mapSource->zoomLevelSearchTrees.resize(i+1);
+      MapSourceCalibratedPictures::destruct(mapSource);
+      mapSource=NULL;
+      goto cleanup;
+    }
 
   }
   PROFILE_ADD("search tree retrieve");

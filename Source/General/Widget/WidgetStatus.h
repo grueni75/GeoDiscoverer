@@ -52,6 +52,9 @@ public:
   // Called when the widget must be drawn
   virtual void draw(Screen *screen, TimestampInMicroseconds t);
 
+  // Called when the widget has changed his position
+  virtual void updatePosition(Int x, Int y, Int z);
+
   // Getters and setters
   void setUpdateInterval(TimestampInMicroseconds updateInterval) {
     this->updateInterval = updateInterval;

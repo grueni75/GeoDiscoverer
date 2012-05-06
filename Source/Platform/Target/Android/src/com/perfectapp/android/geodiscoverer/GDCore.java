@@ -54,22 +54,25 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   
   /** Parent activity */
   public ViewMap activity = null;
-    
+
+  /** Current opengl context */
+  GL10 currentGL = null;
+  
   /** Path to the home directory */
   String homePath;
   
   /** DPI of the screen */
-  int screenDPI;
+  int screenDPI = 0;
   
-  /** Indicates if the core is stopped */
-  boolean coreStopped = true;
+  /** Indicates that the core is stopped */
+  boolean coreStopped = false;
 
   /** Indicates if the core is initialized */
   boolean coreInitialized = false;
-  
-  /** Indicates that the first frame has been drawn */
-  boolean firstFrameDrawn = false;
-  
+    
+  /** Indicates that home dir is available */
+  boolean homeDirAvailable = false;
+
   /** Indicates that the screen must be re-created */
   boolean createScreen = false;
 
@@ -94,7 +97,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   // Thread signaling
   final Lock lock = new ReentrantLock();
-  final Condition screenUpdated  = lock.newCondition(); 
     
   //
   // Constructor and destructor
@@ -132,43 +134,73 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     stop();
   } 
 
-  /** Starts the core */
-  public void start()
+  /** Indicates that the home dir is available */
+  public void homeDirAvailable()
   {
-    lock.lock();    
-    coreStopped=false;    
-
-    // Ensure that the screen is recreated
-    if (!changeScreenCommand.equals("")) {
-      changeScreen=true;
-    }
-
+    lock.lock();
+    homeDirAvailable=true;
     lock.unlock();
+  } 
+
+  /** Starts the core */
+  protected void start(boolean innerCall)
+  {
+    if (!innerCall) lock.lock();
+    boolean isInitialized=coreInitialized;
+    if (!innerCall) lock.unlock();
+    if (!isInitialized) {
+  
+      // Init the core
+      boolean initialized=false;
+      if (homeDirAvailable) {
+        init(homePath,screenDPI);    
+        initialized=true;
+      } else {
+        Log.d("GDApp","home dir not available");
+      }
+  
+      // Ensure that the screen is recreated
+      if (!innerCall) lock.lock();    
+      if (initialized) {
+        coreInitialized=true;
+        executeAppCommand("updateWakeLock()");
+      }
+      coreStopped=false;
+      if (!changeScreenCommand.equals("")) {        
+        changeScreen=true;
+      }
+      createScreen=true;
+      if (!innerCall) lock.unlock();
+
+    }
   } 
 
   /** Deinits the core */
-  public void stop()
+  protected void stop()
   {
     lock.lock();
-    
-    // Clean up the C++ part
-    if (coreInitialized) {
-      deinit();
-    }
-    coreInitialized=false;
-    coreStopped=true;
-    
+    boolean isInitialized=coreInitialized;
     lock.unlock();
+    if (isInitialized) {
+  
+      // Update flags
+      lock.lock();
+      coreInitialized=false;
+      coreStopped=true;
+      lock.unlock();
+      
+      // Deinit the core
+      deinit();
+    
+    }
   } 
 
   /** Deinits the core and restarts it */
-  public void restart(boolean resetConfig)
+  public synchronized void restart(boolean resetConfig)
   {
-    lock.lock();
-    
     // Clean up the C++ part
     stop();
-    
+
     // Remove the config if requested
     if (resetConfig) {
       File configFile = new File(homePath + "/config.xml");
@@ -176,21 +208,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     }
 
     // Start the core
-    start();
-    
-    // Wait until the first frame is drawn
-    boolean repeat = true;
-    while (repeat) {
-      try {
-        repeat = false;
-        screenUpdated.await();
-      }
-      catch (InterruptedException e) {
-        repeat = true;
-      }
-    }
-    
-    lock.unlock();
+    start(false);
   } 
   
   //
@@ -203,9 +221,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Stops the C++ part */
   protected native void deinit();
   
-  /** (Re)creates the screen */
-  protected native boolean createScreen();
-
   /** Draw a frame by the C++ part */
   protected native void updateScreen(boolean forceRedraw);
   
@@ -254,7 +269,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Execute an command */
   public void executeAppCommand(String cmd)
   {
-    lock.lock();
     if (activity!=null) {
       Message m=Message.obtain(activity.coreMessageHandler);
       m.what = ViewMap.EXECUTE_COMMAND;
@@ -263,7 +277,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       m.setData(b);    
       activity.coreMessageHandler.sendMessage(m);
     }
-    lock.unlock();
   }
 
   //
@@ -273,41 +286,46 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Called when a frame needs to be drawn */
   public void onDrawFrame(GL10 gl) {
     lock.lock();
-    if ((firstFrameDrawn)&&(!coreStopped)) {
-      if (!coreInitialized) {
-        init(homePath,screenDPI);
-        createScreen=false;
-        coreInitialized=true;
-        executeAppCommand("updateWakeLock()");
-      }
-      if (createScreen) {        
-        if (createScreen()) {
+    if (gl==currentGL) {
+      if ((!coreStopped)&&(homeDirAvailable)) {
+        if (!coreInitialized) {
+          start(true);
+        }
+        if (createScreen) {        
+          executeCoreCommand("graphicInvalidated()");
           createScreen=false;
         }
+        if (changeScreen) {
+          executeCoreCommand(changeScreenCommand);
+          changeScreen=false;
+          forceRedraw=true;
+        }
+        updateScreen(forceRedraw);
+        forceRedraw=false;
+      } else {
+        gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
       }
-      if (changeScreen) {
-        executeCoreCommand(changeScreenCommand);
-        changeScreen=false;
-        forceRedraw=true;
-      }
-      updateScreen(forceRedraw);
-      forceRedraw=false;
-      screenUpdated.signal();
-    } else {
-      firstFrameDrawn=true;
     }
     lock.unlock();
   }
-
+  
   /** Called when the surface changes */
   public void onSurfaceChanged(GL10 gl, int width, int height) {
     lock.lock();
-    int orientationValue = activity.getResources().getConfiguration().orientation;
-    String orientationString="portrait";
-    if (orientationValue==Configuration.ORIENTATION_LANDSCAPE)
-      orientationString="landscape";
-    changeScreenCommand="screenChanged(" + orientationString + "," + width + "," + height + ")";
-    changeScreen=true;
+    if (activity==null) {
+      Log.e("GDApp","onSurfaceChanged called without activity");
+    } else {
+      int orientationValue = activity.getResources().getConfiguration().orientation;
+      String orientationString="portrait";
+      if (orientationValue==Configuration.ORIENTATION_LANDSCAPE)
+        orientationString="landscape";
+      changeScreenCommand="screenChanged(" + orientationString + "," + width + "," + height + ")";
+      changeScreen=true;
+      if (gl!=currentGL) {
+        createScreen=true;
+        currentGL=gl;
+      }
+    }
     lock.unlock();
   }
 
@@ -315,7 +333,12 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   public void onSurfaceCreated(GL10 gl, EGLConfig config) {
     lock.lock();
     // Context is lost, so tell the core to recreate any textures
+    if (activity==null)
+      Log.e("GDApp","onSurfaceCreated called without activity");
     createScreen=true;
+    if (gl!=currentGL) {
+      currentGL=gl;
+    }    
     lock.unlock();
   }
 

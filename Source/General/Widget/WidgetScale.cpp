@@ -128,4 +128,10 @@ void WidgetScale::draw(Screen *screen, TimestampInMicroseconds t) {
 
 }
 
+// Called when the widget has changed its position
+void WidgetScale::updatePosition(Int x, Int y, Int z) {
+  WidgetPrimitive::updatePosition(x,y,z);
+  nextUpdateTime=0;
+}
+
 }

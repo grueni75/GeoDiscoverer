@@ -123,4 +123,10 @@ void WidgetStatus::draw(Screen *screen, TimestampInMicroseconds t) {
 
 }
 
+// Called when the widget has changed its position
+void WidgetStatus::updatePosition(Int x, Int y, Int z) {
+  WidgetPrimitive::updatePosition(x,y,z);
+  nextUpdateTime=0;
+}
+
 } /* namespace GEODISCOVERER */

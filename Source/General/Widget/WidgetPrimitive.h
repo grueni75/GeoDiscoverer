@@ -55,6 +55,9 @@ public:
   // Called when the widget is not touched anymore
   virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y);
 
+  // Called when the widget has changed his position
+  virtual void updatePosition(Int x, Int y, Int z);
+
   // Getters and setters
   bool getIsHit() const
   {

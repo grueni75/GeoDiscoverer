@@ -109,10 +109,17 @@ void WidgetEngine::addWidgetToPage(
   }
 }
 
-// (Re)creates all widget pages from the current config
+// Inits the engine
 void WidgetEngine::init() {
+}
+
+// (Re)creates all widget pages from the current config
+void WidgetEngine::graphicInvalidated() {
 
   ConfigStore *c=core->getConfigStore();
+
+  // First deinit the object
+  deinit();
 
   // Get all widget pages
   // If no exist, create the default ones
@@ -201,7 +208,7 @@ void WidgetEngine::init() {
   pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
   std::list<std::string>::iterator i;
   for(i=pageNames.begin();i!=pageNames.end();i++) {
-    DEBUG("found a widget page with name %s",(*i).c_str());
+    //DEBUG("found a widget page with name %s",(*i).c_str());
 
     // Create the page
     WidgetPage *page=new WidgetPage(*i);
@@ -359,9 +366,7 @@ void WidgetEngine::updateWidgetPositions() {
 
       // Update the position
       std::string path="Graphic/Widget/Page[@name='" + page->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/" + orientation;
-      primitive->setZ(c->getIntValue(path,"z"));
-      primitive->setX(width*c->getDoubleValue(path,"x")/100.0-width/2-primitive->getIconWidth()/2);
-      primitive->setY(height*c->getDoubleValue(path,"y")/100.0-height/2-primitive->getIconHeight()/2);
+      primitive->updatePosition(width*c->getDoubleValue(path,"x")/100.0-width/2-primitive->getIconWidth()/2,height*c->getDoubleValue(path,"y")/100.0-height/2-primitive->getIconHeight()/2,c->getIntValue(path,"z"));
       primitives.push_back(primitive);
 
     }

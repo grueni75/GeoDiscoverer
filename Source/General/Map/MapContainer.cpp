@@ -713,7 +713,10 @@ MapTile *MapContainer::retrieveSearchTree(MapContainer *mapContainer, Int &nodeN
   nodeNumber++;
 
   // Update the progress
-  core->getMapSource()->increaseProgress();
+  if (!core->getMapSource()->increaseProgress()) {
+    DEBUG("aborting search tree retrieve because core quit is requested",NULL);
+    return node;
+  }
 
   // Read the left node
   bool hasLeftNode;
@@ -808,7 +811,7 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize, char *&ob
   if (hasSearchTree) {
     Int nodeNumber=0;
     mapContainer->searchTree=retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize,objectData,objectSize);
-    if (mapContainer->searchTree==NULL) {
+    if ((mapContainer->searchTree==NULL)||(core->getQuitCore())) {
       mapContainer->mapTiles.resize(nodeNumber);
       MapContainer::destruct(mapContainer);
       return NULL;

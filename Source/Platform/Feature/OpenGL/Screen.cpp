@@ -23,10 +23,15 @@
 #include <Core.h>
 
 int frameCountBeforeTextureInvalidation=50;
+bool graphicInitialized=false;
 
 // Proxy functions
 void displayFunc()
 {
+  if (!graphicInitialized) {
+    GEODISCOVERER::core->graphicInvalidated();
+    graphicInitialized=true;
+  }
   GEODISCOVERER::core->updateScreen(false);
 }
 void keyboardFunc(GLubyte key, GLint x, GLint y)

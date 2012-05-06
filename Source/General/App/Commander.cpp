@@ -162,6 +162,10 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     core->getWidgetEngine()->updateWidgetPositions();
     cmdExecuted=true;
   }
+  if (cmdName=="graphicInvalidated") {
+    core->graphicInvalidated();
+    cmdExecuted=true;
+  }
   if (cmdName=="locationChanged") {
     if (core->getIsInitialized()) {
 

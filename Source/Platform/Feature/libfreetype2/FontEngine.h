@@ -61,6 +61,9 @@ public:
   // Inits the engine
   void init();
 
+  // Recreates the graphic of the fonts
+  void graphicInvalidated();
+
   // Deinits the engine
   void deinit();
 

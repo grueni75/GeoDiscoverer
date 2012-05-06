@@ -64,6 +64,11 @@ GraphicEngine::GraphicEngine() {
 
 // Inits dynamic data
 void GraphicEngine::init() {
+}
+
+// Recreates all graphic
+void GraphicEngine::graphicInvalidated() {
+  deinit();
   centerIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","centerIconFilename"));
   lockLocationIcon();
   locationIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","locationIconFilename"));
