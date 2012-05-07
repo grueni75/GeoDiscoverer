@@ -156,6 +156,9 @@ public:
   // Frees any internal textures or buffers
   void graphicInvalidated();
 
+  // Recreates the graphic
+  void recreateGraphic();
+
   // Getters and setters
   const GraphicTextureInfo getTextureNotDefined()
   {

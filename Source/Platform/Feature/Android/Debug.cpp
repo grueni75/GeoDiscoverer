@@ -26,6 +26,9 @@
 // Executes an command on the java side
 void GDApp_executeAppCommand(std::string command);
 
+// Adds a message on the java side
+void GDApp_addMessage(int severity, std::string tag, std::string message);
+
 namespace GEODISCOVERER {
 
 // Prints a message
@@ -35,9 +38,10 @@ void Debug::print(Verbosity verbosity, const char *file, int line, const char *f
   const char *prefix,*postfix;
   const char *relative_file;
   FILE *out=stdout;
-  android_LogPriority logPrio;
+  int severity;
   const int buffer_len=256;
   char buffer[buffer_len],buffer2[buffer_len];
+  android_LogPriority logPrio;
 
   // Remove the trailing source path from the file
   relative_file=strstr(file,SRC_ROOT);
@@ -49,29 +53,29 @@ void Debug::print(Verbosity verbosity, const char *file, int line, const char *f
   switch(verbosity) {
   case verbosityFatal:
     prefix="FATAL";
-    logPrio=ANDROID_LOG_FATAL;
     postfix="!";
     fatalOccured=true;
+    logPrio=ANDROID_LOG_FATAL;
     break;
   case verbosityError:
     prefix="ERROR";
-    logPrio=ANDROID_LOG_ERROR;
     postfix="!";
+    logPrio=ANDROID_LOG_ERROR;
     break;
   case verbosityWarning:
     prefix="WARNING";
-    logPrio=ANDROID_LOG_WARN;
     postfix="!";
+    logPrio=ANDROID_LOG_WARN;
     break;
   case verbosityInfo:
     prefix="INFO";
-    logPrio=ANDROID_LOG_INFO;
     postfix=".";
+    logPrio=ANDROID_LOG_INFO;
     break;
   case verbosityDebug:
     prefix="DEBUG";
-    logPrio=ANDROID_LOG_DEBUG;
     postfix=".";
+    logPrio=ANDROID_LOG_DEBUG;
     break;
   case verbosityTrace:
     out=tracelog;
@@ -80,8 +84,9 @@ void Debug::print(Verbosity verbosity, const char *file, int line, const char *f
     break;
   default:
     prefix="UNKNOWN";
-    logPrio=ANDROID_LOG_UNKNOWN;
     postfix="!";
+    verbosity=verbosityError;
+    logPrio=ANDROID_LOG_UNKNOWN;
     break;
   }
   va_start(argp, fmt);
@@ -95,9 +100,10 @@ void Debug::print(Verbosity verbosity, const char *file, int line, const char *f
   } else {
 
     // Output android message
+    __android_log_write(logPrio,"GDCore",buffer);
+    GDApp_addMessage(verbosity,"GDCore",buffer2);
     buffer2[0]=toupper(buffer2[0]);
     std::string message=std::string(buffer2);
-    __android_log_write(logPrio,"GDCore",buffer);
 
     // Output message to file additionally
     fprintf(messagelog,"%-7s: ",prefix);

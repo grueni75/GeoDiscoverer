@@ -42,8 +42,8 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Message;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 /** Interfaces with the C++ part */
 public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorEventListener {
@@ -73,14 +73,20 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Indicates that home dir is available */
   boolean homeDirAvailable = false;
 
-  /** Indicates that the screen must be re-created */
-  boolean createScreen = false;
+  /** Indicates that the graphic must be re-created */
+  boolean createGraphic = false;
+
+  /** Indicates that the graphic has been invalidated */
+  boolean graphicInvalidated = false;
 
   /** Indicates that the sreen properties have changed */
   boolean changeScreen = false;
   
   /** Indicates that the screen should be redrawn */
   boolean forceRedraw = false;
+  
+  /** Indicates that the last frame has been handled by the core */
+  boolean lastFrameDrawnByCore = true;
   
   /** Command to execute for changing the screen */
   String changeScreenCommand = "";
@@ -115,7 +121,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     this.homePath=homePath;
   }
   
-  /** Sets the parent activity */
+  /** Sets the view map activity */
   public void setActivity(ViewMap activity) {
     lock.lock();
     this.activity = activity;
@@ -156,7 +162,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         init(homePath,screenDPI);    
         initialized=true;
       } else {
-        Log.d("GDApp","home dir not available");
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","home dir not available");
       }
   
       // Ensure that the screen is recreated
@@ -169,7 +175,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       if (!changeScreenCommand.equals("")) {        
         changeScreen=true;
       }
-      createScreen=true;
+      createGraphic=true;
       if (!innerCall) lock.unlock();
 
     }
@@ -286,14 +292,20 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Called when a frame needs to be drawn */
   public void onDrawFrame(GL10 gl) {
     lock.lock();
+    boolean blankScreen=false;
     if (gl==currentGL) {
       if ((!coreStopped)&&(homeDirAvailable)) {
         if (!coreInitialized) {
           start(true);
         }
-        if (createScreen) {        
+        if (graphicInvalidated) {        
           executeCoreCommand("graphicInvalidated()");
-          createScreen=false;
+          graphicInvalidated=false;
+          createGraphic=false;
+        }
+        if (createGraphic) {        
+          executeCoreCommand("createGraphic()");
+          createGraphic=false;
         }
         if (changeScreen) {
           executeCoreCommand(changeScreenCommand);
@@ -302,10 +314,24 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         }
         updateScreen(forceRedraw);
         forceRedraw=false;
+        if (!lastFrameDrawnByCore) {
+          executeAppCommand("setMessageVisibility(0)");
+        }
+        lastFrameDrawnByCore=true;
       } else {
-        gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+        blankScreen=true;
       }
+    } else {
+      blankScreen=true;
     }
+    if (blankScreen) {
+      gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+      if (lastFrameDrawnByCore) {
+        executeAppCommand("setMessageVisibility(1)");
+      }
+      lastFrameDrawnByCore=false;
+    }    
     lock.unlock();
   }
   
@@ -313,18 +339,17 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   public void onSurfaceChanged(GL10 gl, int width, int height) {
     lock.lock();
     if (activity==null) {
-      Log.e("GDApp","onSurfaceChanged called without activity");
+      GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "onSurfaceChanged called without activity");
     } else {
+      if (gl!=currentGL) {
+        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "opengl context change is not supported");          
+      }
       int orientationValue = activity.getResources().getConfiguration().orientation;
       String orientationString="portrait";
       if (orientationValue==Configuration.ORIENTATION_LANDSCAPE)
         orientationString="landscape";
       changeScreenCommand="screenChanged(" + orientationString + "," + width + "," + height + ")";
       changeScreen=true;
-      if (gl!=currentGL) {
-        createScreen=true;
-        currentGL=gl;
-      }
     }
     lock.unlock();
   }
@@ -334,18 +359,16 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     lock.lock();
     // Context is lost, so tell the core to recreate any textures
     if (activity==null)
-      Log.e("GDApp","onSurfaceCreated called without activity");
-    createScreen=true;
-    if (gl!=currentGL) {
-      currentGL=gl;
-    }    
+      GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "onSurfaceCreated called without activity");
+    graphicInvalidated=true;
+    createGraphic=true;
+    currentGL=gl;
     lock.unlock();
   }
 
   /** Called when a new fix is available */  
   public void onLocationChanged(Location location) {
     if (location!=null) {
-      //Log.d("GDApp","location update received from provider <" + location.getProvider() + ">.");
       String cmd = "locationChanged(" + location.getProvider() + "," + location.getTime();
       cmd += "," + location.getLongitude() + "," + location.getLatitude();
       int t=0;
@@ -406,7 +429,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       orientation[0]=(float) (orientation[0]*180.0/Math.PI);
       if (orientation[0]<0)
         orientation[0]=360+orientation[0];
-      //Log.d("GDApp","azimuth is " + orientation[0] + " degrees");
       executeCoreCommand("compassBearingChanged(" + orientation[0] + ")");
     }
     

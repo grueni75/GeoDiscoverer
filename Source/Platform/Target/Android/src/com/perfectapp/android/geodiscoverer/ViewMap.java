@@ -32,6 +32,7 @@ import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.*;
 import android.content.res.Configuration;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
@@ -45,12 +46,21 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceScreen;
 
-import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.LayoutAnimationController;
+import android.view.animation.TranslateAnimation;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ViewMap extends GDActivity {
@@ -64,6 +74,8 @@ public class ViewMap extends GDActivity {
   int progressCurrent;
   String progressMessage;
   GDMapSurfaceView mapSurfaceView = null;
+  TextView messageView = null;
+  FrameLayout frameLayout = null;
 
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -79,6 +91,7 @@ public class ViewMap extends GDActivity {
   // Flags
   boolean compassWatchStarted = false;
   boolean exitRequested = false;
+  boolean startCoreOnNextResume = false;
   
   /** Updates the progress dialog */
   protected void updateProgressDialog(String message, int progress) {
@@ -95,7 +108,6 @@ public class ViewMap extends GDActivity {
       progressDialog.setCancelable(true);
       progressDialog.show();
     }
-    //Log.d("GDApp","updating progress dialog (" + message + "," + String.valueOf(progress) + ")");
     progressDialog.setMessage(progressMessage);    
     progressDialog.setProgress(progressCurrent);
   }
@@ -192,8 +204,28 @@ public class ViewMap extends GDActivity {
                 updateWakeLock();
                 commandExecuted=true;
               }
+              if (commandFunction.equals("updateMessages")) {
+                if (messageView!=null) {
+                  if (messageView.getVisibility()==TextView.VISIBLE) {
+                    messageView.setText(GDApplication.messages);
+                    messageView.invalidate();
+                  }
+                }
+                commandExecuted=true;
+              }
+              if (commandFunction.equals("setMessageVisibility")) {
+                if (messageView!=null) {
+                  if (commandArgs.get(0).equals("1")) {
+                    messageView.setVisibility(TextView.VISIBLE);
+                  } else {
+                    messageView.setVisibility(TextView.INVISIBLE);
+                  }
+                  messageView.invalidate();
+                }
+                commandExecuted=true;
+              }
               if (!commandExecuted) {
-                Log.e("GDApp","unknown command " + command + "received");
+                GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + "received");
               }
               break;
           }
@@ -205,11 +237,11 @@ public class ViewMap extends GDActivity {
     if (mapSurfaceView!=null) {
       String state=coreObject.executeCoreCommand("getWakeLock()");
       if (state.equals("true")) {
-        Log.d("GDApp","wake lock enabled");
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","wake lock enabled");
         if (!wakeLock.isHeld())
           wakeLock.acquire();
       } else {
-        Log.d("GDApp","wake lock disabled");
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","wake lock disabled");
         if (wakeLock.isHeld())
           wakeLock.release();
       }
@@ -222,7 +254,6 @@ public class ViewMap extends GDActivity {
       sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),SensorManager.SENSOR_DELAY_NORMAL);
       sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
       compassWatchStarted=true;
-      Log.d("GDApp","compass bearing updates started.");
     }
   }
   
@@ -231,7 +262,6 @@ public class ViewMap extends GDActivity {
     if (compassWatchStarted) {
       sensorManager.unregisterListener(coreObject);
       compassWatchStarted=false;
-      Log.d("GDApp","compass bearing updates stopped.");
     }
   }
 
@@ -242,8 +272,7 @@ public class ViewMap extends GDActivity {
     super.onCreate(savedInstanceState);
 
     // Get the core object
-    GDApplication app=(GDApplication)getApplication();
-    coreObject=app.coreObject;
+    coreObject=GDApplication.coreObject;
     coreObject.setActivity(this);
 
     // Get important handles
@@ -254,9 +283,21 @@ public class ViewMap extends GDActivity {
     // Setup the GUI
     requestWindowFeature(Window.FEATURE_NO_TITLE);    
 
-    // Assign the opengl surface   
-    mapSurfaceView = new GDMapSurfaceView(ViewMap.this);
-    setContentView(mapSurfaceView);
+    // Prepare the window contents
+    frameLayout = new FrameLayout(this);    
+    mapSurfaceView = new GDMapSurfaceView(this);
+    mapSurfaceView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
+    messageView = new TextView(this);
+    messageView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
+    messageView.setTextColor(0xFFFFFFFF);
+    messageView.setBackgroundColor(0xA0000000);
+    messageView.setTypeface(Typeface.MONOSPACE);
+    messageView.setTextSize(10);
+    messageView.setVisibility(TextView.INVISIBLE);
+    messageView.setGravity(Gravity.BOTTOM);
+    frameLayout.addView(mapSurfaceView,0);
+    frameLayout.addView(messageView,1);
+    setContentView(frameLayout);    
     
     // Get a wake lock
     wakeLock=powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
@@ -270,7 +311,7 @@ public class ViewMap extends GDActivity {
   @Override
   public void onPause() {
     super.onPause();
-    Log.d("GDApp","onPause called by " + Thread.currentThread().getName());
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onPause called by " + Thread.currentThread().getName());
     stopWatchingCompass();
     coreObject.executeCoreCommand("maintenance()");
     if (!exitRequested) {
@@ -286,12 +327,16 @@ public class ViewMap extends GDActivity {
     super.onResume();
     
     // Resume all components
-    Log.d("GDApp","onResume called by " + Thread.currentThread().getName());
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onResume called by " + Thread.currentThread().getName());
     startWatchingCompass();
     updateWakeLock();
     Intent intent = new Intent(this, GDService.class);
     intent.setAction("activityResumed");
     startService(intent);
+    if (exitRequested) {
+      coreObject.coreStopped=false;
+      exitRequested=false;
+    }
     
     // Extract the file path from the intent
     intent = getIntent();
@@ -387,7 +432,7 @@ public class ViewMap extends GDActivity {
   @Override
   public void onDestroy() {    
     super.onDestroy();
-    Log.d("GDApp","onDestroy called by " + Thread.currentThread().getName());
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onDestroy called by " + Thread.currentThread().getName());
     coreObject.setActivity(null);
     if (wakeLock.isHeld())
       wakeLock.release();
@@ -412,6 +457,11 @@ public class ViewMap extends GDActivity {
   public boolean onCreateOptionsMenu(Menu menu) {
       MenuInflater inflater = getMenuInflater();
       inflater.inflate(R.menu.view_map, menu);
+      if (messageView.getVisibility()==TextView.VISIBLE) {
+        menu.findItem(R.id.toggle_messages).setTitle(R.string.hide_messages);
+      } else {
+        menu.findItem(R.id.toggle_messages).setTitle(R.string.show_messages);
+      }
       return true;
   }
 
@@ -450,6 +500,17 @@ public class ViewMap extends GDActivity {
             task.exitOnly=true;
             task.execute();
             return true;
+          case R.id.toggle_messages:
+            if (messageView.getVisibility()==TextView.VISIBLE) {
+              messageView.setVisibility(TextView.INVISIBLE);
+              item.setTitle(R.string.show_messages);
+            } else {
+              messageView.setText(GDApplication.messages);
+              messageView.setVisibility(TextView.VISIBLE);
+              item.setTitle(R.string.hide_messages);
+            }
+            messageView.invalidate();
+            return true;
           default:
               return super.onOptionsItemSelected(item);
       }
@@ -486,6 +547,7 @@ public class ViewMap extends GDActivity {
       progressDialog.dismiss();
       if (exitOnly) {
         exitRequested = true;
+        startCoreOnNextResume = true;
         stopService(new Intent(ViewMap.this, GDService.class));
         finish();                
       }

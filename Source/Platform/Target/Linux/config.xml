@@ -490,13 +490,13 @@
     <zoomLevelLock>0</zoomLevelLock>
     <LastPosition>
       <folder>Default</folder>
-      <lng>6.72381</lng>
-      <lat>51.3493</lat>
+      <lng>6.96507</lng>
+      <lat>51.2018</lat>
       <latScale>895.559</latScale>
       <lngScale>550.739</lngScale>
-      <zoom>0.768733</zoom>
+      <zoom>1.52821</zoom>
       <angle>12</angle>
-      <zoomLevel>3</zoomLevel>
+      <zoomLevel>2</zoomLevel>
     </LastPosition>
   </Map>
   <Navigation>
@@ -504,7 +504,7 @@
     <locationSignificantlyInaccurateThreshold>100</locationSignificantlyInaccurateThreshold>
     <trackRecordingMinDistance>25</trackRecordingMinDistance>
     <recordTrack>0</recordTrack>
-    <lastRecordedTrackFilename>track-20120506-133210.gpx</lastRecordedTrackFilename>
+    <lastRecordedTrackFilename>track-20120507-211140.gpx</lastRecordedTrackFilename>
     <Route name="essenhbf_nach_gruene_route_ruhr_start.gpx">
       <visible>1</visible>
       <HighlightColor>
@@ -601,5 +601,11 @@
         <alpha>255</alpha>
       </NormalColor>
     </Route>
+    <TrackColor>
+      <red>255</red>
+      <green>127</green>
+      <blue>0</blue>
+      <alpha>255</alpha>
+    </TrackColor>
   </Navigation>
 </GDC>

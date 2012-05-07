@@ -38,7 +38,6 @@ import android.content.IntentFilter;
 import android.location.LocationManager;
 import android.os.Environment;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 public class GDService extends Service {
@@ -120,8 +119,7 @@ public class GDService extends Service {
     }  
 
     // Get the core object
-    GDApplication app=(GDApplication)getApplication();
-    coreObject=app.coreObject;
+    coreObject=GDApplication.coreObject;
     
     // Get the location manager
     locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -130,7 +128,7 @@ public class GDService extends Service {
     externalStorageReceiver = new BroadcastReceiver() {
       @Override
       public void onReceive(Context context, Intent intent) {
-        Log.i("GDApp", "Storage: " + intent.getData());
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "storage: " + intent.getData());
         updateExternalStorageState();
       }
     };
@@ -159,10 +157,10 @@ public class GDService extends Service {
         mStartForeground.invoke(this, mStartForegroundArgs);
       } catch (InvocationTargetException e) {
         // Should not happen.
-        Log.w("GDApp", "Unable to invoke startForeground", e);
+        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unable to invoke startForeground");
       } catch (IllegalAccessException e) {
         // Should not happen.
-        Log.w("GDApp", "Unable to invoke startForeground", e);
+        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unable to invoke startForeground");
       }
       return;
     }
@@ -184,10 +182,10 @@ public class GDService extends Service {
         mStopForeground.invoke(this, mStopForegroundArgs);
       } catch (InvocationTargetException e) {
         // Should not happen.
-        Log.w("GDApp", "Unable to invoke stopForeground", e);
+        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unable to invoke stopForeground");
       } catch (IllegalAccessException e) {
         // Should not happen.
-        Log.w("GDAPp", "Unable to invoke stopForeground", e);
+        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unable to invoke stopForeground");
       }
       return;
     }

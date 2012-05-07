@@ -51,6 +51,12 @@ protected:
   // Holds the coordinates for drawing the ellipse
   GraphicBufferInfo ellipseCoordinatesBuffer;
 
+  // List of cached texture infos
+  static std::list<GraphicTextureInfo> unusedTextureInfos;
+
+  // List of cached buffer infos
+  static std::list<GraphicBufferInfo> unusedBufferInfos;
+
   // Current width and height of the screen
   Int width;
   Int height;
@@ -149,6 +155,9 @@ public:
 
   // Frees any internal textures or buffers
   void graphicInvalidated();
+
+  // Recreates the graphic
+  void recreateGraphic();
 
   // Getters and setters
   const GraphicBufferInfo getBufferNotDefined()

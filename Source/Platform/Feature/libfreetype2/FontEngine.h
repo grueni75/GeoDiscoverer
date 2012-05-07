@@ -62,7 +62,7 @@ public:
   void init();
 
   // Recreates the graphic of the fonts
-  void graphicInvalidated();
+  void recreateGraphic();
 
   // Deinits the engine
   void deinit();

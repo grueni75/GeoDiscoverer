@@ -163,7 +163,11 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     cmdExecuted=true;
   }
   if (cmdName=="graphicInvalidated") {
-    core->graphicInvalidated();
+    core->updateGraphic(true);
+    cmdExecuted=true;
+  }
+  if (cmdName=="createGraphic") {
+    core->updateGraphic(false);
     cmdExecuted=true;
   }
   if (cmdName=="locationChanged") {

@@ -26,7 +26,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 import android.view.MotionEvent;
 
 /** Does the rendering with the OpenGL API */
@@ -64,8 +63,7 @@ public class GDMapSurfaceView extends GLSurfaceView {
   Method getY;
   Method getAction;
 
-  /** Constructor 
-   * @param densityDpi */
+  /** Constructor */
   public GDMapSurfaceView(ViewMap parent) {
     super(parent);
     
@@ -115,9 +113,9 @@ public class GDMapSurfaceView extends GLSurfaceView {
     }
     
     if (multitouchAvailable) {
-      Log.d("GDApp","multitouch is available");
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "multitouch is available");
     } else {
-      Log.d("GDApp","multitouch is not available");      
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "multitouch is not available");
     }
   }
 
@@ -164,7 +162,6 @@ public class GDMapSurfaceView extends GLSurfaceView {
           if (angleDiff<-Math.PI)
             angleDiff+=2*Math.PI;
           angleDiff=(double)angleDiff/Math.PI*180.0;
-          //Log.d("GDApp","angleDiff=" + angleDiff);
           coreObject.executeCoreCommand("rotate(" + angleDiff +")");
           
           // Compute change in scale
@@ -187,7 +184,7 @@ public class GDMapSurfaceView extends GLSurfaceView {
       }
     }
     catch (Throwable e) {
-      Log.e("GDApp","can not call multitouch related methods");
+      GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "can not call multitouch related methods");
       System.exit(1);
     }    
   }
@@ -202,8 +199,6 @@ public class GDMapSurfaceView extends GLSurfaceView {
       int action = event.getAction();
       int x = Math.round(event.getX());
       int y = Math.round(event.getY());
-      //Log.d("GDApp", "Action = " + action);
-      //Log.d("GDApp", "x=" + x + " y=" + y);
       
       switch(action) {
       
@@ -293,7 +288,7 @@ public class GDMapSurfaceView extends GLSurfaceView {
         }
       }
       catch (Throwable e) {
-        Log.e("GDApp","can not call multitouch related methods");
+        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "can not call multitouch related methods");
         System.exit(1);
       }
     }

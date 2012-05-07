@@ -460,8 +460,7 @@ public class Preferences extends PreferenceActivity implements
     super.onCreate(savedInstanceState);
 
     // Get the core object
-    GDApplication app = (GDApplication) getApplication();
-    coreObject = app.coreObject;
+    coreObject = GDApplication.coreObject;
 
     // Get the path to use
     String path = "";

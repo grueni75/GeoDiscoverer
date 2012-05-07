@@ -114,7 +114,7 @@ void WidgetEngine::init() {
 }
 
 // (Re)creates all widget pages from the current config
-void WidgetEngine::graphicInvalidated() {
+void WidgetEngine::recreateGraphic() {
 
   ConfigStore *c=core->getConfigStore();
 

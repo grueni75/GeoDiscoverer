@@ -30,13 +30,25 @@ import java.nio.channels.FileChannel;
 
 import android.app.Application;
 import android.os.Environment;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.Toast;
 
 /* Main application class */
 public class GDApplication extends Application {
 
   /** Interface to the native C++ core */
-  public GDCore coreObject=null;
+  public static GDCore coreObject=null;
+  
+  /** Message log */
+  public static String messages = "";
+  
+  // Severity levels for messages
+  public static final int ERROR_MSG = 0;
+  public static final int WARNING_MSG = 1;
+  public static final int INFO_MSG = 2;
+  public static final int DEBUG_MSG = 3;
+  public static final int FATAL_MSG = 4;
     
   /** Called when the application starts */
   @Override
@@ -51,7 +63,7 @@ public class GDApplication extends Application {
       coreObject=new GDCore(homeDirPath);
     }
   }
-  
+
   /** Copies a source file to a destination file */
   public static void copyFile(String srcFilename, String dstFilename) throws IOException {
     File dstFile = new File(dstFilename);
@@ -96,4 +108,20 @@ public class GDApplication extends Application {
     
   }
   
+  /** Adds a message to the log */
+  public synchronized static void addMessage(int severityNumber, String tag, String message) {
+    String severityString;
+    switch (severityNumber) {
+      case DEBUG_MSG: severityString="DEBUG"; if (!tag.equals("GDCore")) Log.d(tag, message); break;
+      case INFO_MSG: severityString="INFO";  if (!tag.equals("GDCore")) Log.i(tag, message); break;      
+      case WARNING_MSG: severityString="WARNING"; if (!tag.equals("GDCore")) Log.w(tag, message); break;
+      case ERROR_MSG: severityString="ERROR"; if (!tag.equals("GDCore")) Log.e(tag, message); break;   
+      case FATAL_MSG: severityString="FATAL"; if (!tag.equals("GDCore")) Log.e(tag, message); break;
+      default: severityString="UNKNOWN"; if (!tag.equals("GDCore")) Log.e(tag, message); break;
+    }
+    messages = messages + String.format("\n%-15s %s", severityString + "[" + tag + "]:", message);
+    if (coreObject!=null) {
+      coreObject.executeAppCommand("updateMessages()");
+    }
+  }
 }

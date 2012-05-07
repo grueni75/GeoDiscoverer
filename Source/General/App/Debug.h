@@ -75,7 +75,7 @@
 namespace GEODISCOVERER {
 
 // Verbosity levels
-enum Verbosity { verbosityError, verbosityWarning, verbosityInfo, verbosityDebug, verbosityFatal, verbosityTrace };
+enum Verbosity { verbosityError=0, verbosityWarning=1, verbosityInfo=2, verbosityDebug=3, verbosityFatal=4, verbosityTrace=5 };
 
 // Messagee macros
 #define DEBUG(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityDebug,__FILE__,__LINE__,msg,__VA_ARGS__)

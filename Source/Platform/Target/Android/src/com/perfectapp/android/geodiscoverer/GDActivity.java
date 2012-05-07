@@ -26,7 +26,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.SystemClock;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 /** Base class for all activities */
@@ -56,7 +55,7 @@ public class GDActivity extends FragmentActivity {
       if (warningToast!=null) {
         long diff=SystemClock.uptimeMillis()-lastToastTimestamp;
         if (diff<=toastDistance) {
-          Log.d("GDApp", "skipping dialog request <" + message + "> because toast is still visible");
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping dialog request <" + message + "> because toast is still visible");
           return;
         }
         warningToast.cancel();
@@ -89,7 +88,7 @@ public class GDActivity extends FragmentActivity {
         }
         alertDialog.show();
       } else {
-        Log.d("GDApp", "skipping dialog request <" + message + "> because alert dialog is already visible");
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping dialog request <" + message + "> because alert dialog is already visible");
       }
     }
   }

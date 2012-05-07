@@ -29,7 +29,7 @@ bool graphicInitialized=false;
 void displayFunc()
 {
   if (!graphicInitialized) {
-    GEODISCOVERER::core->graphicInvalidated();
+    GEODISCOVERER::core->updateGraphic(false);
     graphicInitialized=true;
   }
   GEODISCOVERER::core->updateScreen(false);
@@ -71,7 +71,7 @@ void keyboardFunc(GLubyte key, GLint x, GLint y)
 void idleFunc() {
   usleep(16666);
   if (frameCountBeforeTextureInvalidation==0) {
-    GEODISCOVERER::core->graphicInvalidated();
+    GEODISCOVERER::core->updateGraphic(false);
     frameCountBeforeTextureInvalidation--;
   } else {
     if (frameCountBeforeTextureInvalidation>0)
@@ -442,6 +442,10 @@ void Screen::setWakeLock(bool state) {
 
 // Frees any internal textures or buffers
 void Screen::graphicInvalidated() {
+}
+
+// Recreates the graphic
+void Screen::recreateGraphic() {
 }
 
 // Destructor

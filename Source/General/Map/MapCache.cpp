@@ -58,8 +58,8 @@ MapCache::~MapCache() {
 void MapCache::init() {
 }
 
-// Invalidate all graphics
-void MapCache::graphicInvalidated() {
+// Recreates all graphic
+void MapCache::recreateGraphic() {
 
   // First clear everything
   deinit();

@@ -613,8 +613,8 @@ void NavigationEngine::updateMapGraphic() {
   core->getMapSource()->unlockAccess();
 }
 
-// Indicates that textures and buffers have been invalidated
-void NavigationEngine::graphicInvalidated() {
+// Recreate all graphics
+void NavigationEngine::recreateGraphic() {
 
   // Reset the buffers used in the path object
   lockRoutes();

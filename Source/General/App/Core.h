@@ -168,8 +168,8 @@ public:
   // Indicates the map cache has prepared a new texture
   void tileTextureAvailable();
 
-  // Called if the textures have been lost
-  void graphicInvalidated();
+  // Called if the textures or buffers have been lost or must be recreated
+  void updateGraphic(bool graphicInvalidated);
 
   // Does a late initialization of certain objects
   void lateInit();

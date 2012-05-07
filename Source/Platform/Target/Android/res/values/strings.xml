@@ -35,4 +35,6 @@
 <string name="notification_title">Geo Discoverer</string>
 <string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
 <string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
+<string name="show_messages">Show messages</string>
+<string name="hide_messages">Hide messages</string>
 </resources>

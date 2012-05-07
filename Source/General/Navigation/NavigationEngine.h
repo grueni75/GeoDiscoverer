@@ -122,8 +122,8 @@ public:
   // Updates navigation-related graphic that is overlayed on the map tiles
   void updateMapGraphic();
 
-  // Indicates that textures have been invalidated
-  void graphicInvalidated();
+  // Recreate all graphics
+  void recreateGraphic();
 
   // Recreate the objects to reduce the number of graphic point buffers
   void optimizeGraphic();

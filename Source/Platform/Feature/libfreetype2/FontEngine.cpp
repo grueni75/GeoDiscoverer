@@ -159,7 +159,7 @@ void FontEngine::init() {
 }
 
 // Recreates the graphic of the font
-void FontEngine::graphicInvalidated() {
+void FontEngine::recreateGraphic() {
   deinit();
   FontTypeMap::iterator i;
   for(i = fontTypeMap.begin(); i!=fontTypeMap.end(); i++) {

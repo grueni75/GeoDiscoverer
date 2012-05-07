@@ -67,7 +67,7 @@ void GraphicEngine::init() {
 }
 
 // Recreates all graphic
-void GraphicEngine::graphicInvalidated() {
+void GraphicEngine::recreateGraphic() {
   deinit();
   centerIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","centerIconFilename"));
   lockLocationIcon();

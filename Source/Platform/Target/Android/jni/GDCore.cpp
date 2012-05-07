@@ -26,6 +26,7 @@
 
 // Prototypes
 void GDApp_executeAppCommand(std::string command);
+void GDApp_addMessage(int severity, std::string tag, std::string message);
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,6 +37,7 @@ JavaVM *virtualMachine=NULL;
 
 // References for callbacks
 jobject coreObject=NULL;
+jclass appClass=NULL;
 jclass coreClass=NULL;
 jclass bundleClass=NULL;
 jclass listClass=NULL;
@@ -43,13 +45,14 @@ jmethodID executeAppCommandMethodID=NULL;
 jmethodID bundleConstructorMethodID=NULL;
 jmethodID bundlePutStringMethodID=NULL;
 jmethodID listAddMethodID=NULL;
+jmethodID addMessageMethodID=NULL;
 
 // Called when the library is loaded
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
   JNIEnv *env;
   virtualMachine = vm;
-  __android_log_write(ANDROID_LOG_INFO,"GDCore","dynamic library intialized.");
+  __android_log_write(ANDROID_LOG_INFO,"GDCore","dynamic library initialized.");
   return JNI_VERSION_1_6;
 }
 
@@ -114,12 +117,12 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_deinit
   GEODISCOVERER::core=NULL;
 
   // Do not use the object anymore
-  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","deleting coreObject global reference.");
+  //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","deleting coreObject global reference.");
   if (coreObject) {
     env->DeleteGlobalRef(coreObject);
   }
   coreObject=NULL;
-  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","deleting coreClass global reference.");
+  //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","deleting coreClass global reference.");
   if (coreClass) {
     env->DeleteGlobalRef(coreClass);
   }
@@ -132,7 +135,7 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
 {
   std::stringstream out;
 
-  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","init called.");
+  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","creating core.");
 
   // Remember the object
   coreObject=env->NewGlobalRef(thiz);
@@ -158,6 +161,11 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find List class!");
     exit(1);
   }
+  appClass = env->FindClass("com/perfectapp/android/geodiscoverer/GDApplication");
+  if (!appClass) {
+    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find GDApplication class!");
+    exit(1);
+  }
 
   // Cache all required callback methods
   executeAppCommandMethodID=GDApp_findJavaMethod(env,"executeAppCommand","(Ljava/lang/String;)V");
@@ -180,6 +188,11 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find add method of List class!");
     exit(1);
   }
+  addMessageMethodID = env->GetStaticMethodID(appClass, "addMessage","(ILjava/lang/String;Ljava/lang/String;)V");
+  if (!addMessageMethodID) {
+    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find addMessage method of GDApplication class!");
+    exit(1);
+  }
 
   // Get the home path
   const char *homePathCStr = env->GetStringUTFChars(homePath, NULL);
@@ -190,26 +203,26 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
   }
 
   // Create the application
-  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","before object creation.");
+  //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","before object creation.");
   if (!(GEODISCOVERER::core=new GEODISCOVERER::Core(homePathCStr,screenDPI))) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create core object!");
     Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
-  __android_log_write(ANDROID_LOG_DEBUG,"GDCore",homePathCStr);
+  //__android_log_write(ANDROID_LOG_DEBUG,"GDCore",homePathCStr);
   env->ReleaseStringUTFChars(homePath,homePathCStr);
 
   // Init the application
-  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","before object initialization.");
+  //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","before object initialization.");
   if (!(GEODISCOVERER::core->init())) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not initialize core object!");
   }
 
   // Get the last known location
-  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","before get last known location.");
+  //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","before get last known location.");
   GDApp_executeAppCommand("getLastKnownLocation()");
 
-  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","init finished.");
+  //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","init finished.");
 }
 
 // Updates the screen contents
@@ -450,5 +463,35 @@ void GDApp_executeAppCommand(std::string command)
 
   // Release the env
   env->DeleteLocalRef(commandJavaString);
+  GDApp_releaseJNIEnv(env,isAttached);
+}
+
+// Adds a message to the application
+void GDApp_addMessage(int severity, std::string tag, std::string message)
+{
+  JNIEnv *env;
+  bool isAttached = false;
+
+  // Get the environment pointer
+  env=GDApp_obtainJNIEnv(isAttached);
+
+  // Construct the java string
+  jstring tagJavaString = env->NewStringUTF(tag.c_str());
+  if (!tagJavaString) {
+    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create java string!");
+    exit(1);
+  }
+  jstring messageJavaString = env->NewStringUTF(message.c_str());
+  if (!messageJavaString) {
+    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create java string!");
+    exit(1);
+  }
+
+  // Call the method
+  env->CallStaticVoidMethod(appClass, addMessageMethodID, severity, tagJavaString, messageJavaString);
+
+  // Release the env
+  env->DeleteLocalRef(tagJavaString);
+  env->DeleteLocalRef(messageJavaString);
   GDApp_releaseJNIEnv(env,isAttached);
 }

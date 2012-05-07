@@ -24,6 +24,12 @@
 
 namespace GEODISCOVERER {
 
+// List of cached texture infos
+std::list<GraphicTextureInfo> Screen::unusedTextureInfos;
+
+// List of cached buffer infos
+std::list<GraphicBufferInfo> Screen::unusedBufferInfos;
+
 // Constructor: open window and init opengl
 Screen::Screen(Int DPI) {
   this->allowDestroying=false;
@@ -42,6 +48,7 @@ void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
   DEBUG("dpi=%d width=%d height=%d",DPI,width,height);
 
   // Init display
+  glClearColor(0.0,0.0,0.0,1.0);
   glViewport(0, 0, (GLsizei) getWidth(), (GLsizei) getHeight());
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -227,17 +234,25 @@ void Screen::endScene() {
 // Creates a new texture id
 GraphicTextureInfo Screen::createTextureInfo() {
   GraphicTextureInfo i;
-  glGenTextures( 1, &i );
-  if (i==Screen::textureNotDefined) // if the texture id matches the special value, generate a new one
+  if (unusedTextureInfos.size()>0) {
+    i=unusedTextureInfos.front();
+    unusedTextureInfos.pop_front();
+    //DEBUG("reusing existing texture info",NULL);
+  } else {
+    //DEBUG("creating new texture info",NULL);
     glGenTextures( 1, &i );
-  GLenum error=glGetError();
-  if (error!=GL_NO_ERROR)
-    FATAL("can not generate texture (error=0x%08x)",error);
+    if (i==Screen::textureNotDefined) // if the texture id matches the special value, generate a new one
+      glGenTextures( 1, &i );
+    GLenum error=glGetError();
+    if (error!=GL_NO_ERROR)
+      FATAL("can not generate texture (error=0x%08x)",error);
+  }
   return i;
 }
 
 // Sets the image of a texture
 void Screen::setTextureImage(GraphicTextureInfo texture, UShort *image, Int width, Int height, GraphicTextureFormat format) {
+
   //glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,texture);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
@@ -277,10 +292,12 @@ void Screen::setTextureImage(GraphicTextureInfo texture, UShort *image, Int widt
 // Frees a texture id
 void Screen::destroyTextureInfo(GraphicTextureInfo i) {
   if (allowDestroying) {
-    glDeleteTextures(1,&i);
-    GLenum error=glGetError();
-    if (error!=GL_NO_ERROR)
-      FATAL("can not delete texture (error=0x%08x)",error);
+    for(std::list<GraphicTextureInfo>::iterator j=unusedTextureInfos.begin();j!=unusedTextureInfos.end();j++) {
+      if (i==*j) {
+        FATAL("texture 0x%08x already destroyed",i);
+      }
+    }
+    unusedTextureInfos.push_back(i);
   } else {
     FATAL("texture destroying has been disallowed",NULL);
   }
@@ -289,12 +306,19 @@ void Screen::destroyTextureInfo(GraphicTextureInfo i) {
 // Returns a new buffer id
 GraphicBufferInfo Screen::createBufferInfo() {
   GraphicBufferInfo buffer;
-  glGenBuffers( 1, &buffer );
-  if (buffer==Screen::bufferNotDefined) // if the buffer id matches the special value, generate a new one
+  if (unusedBufferInfos.size()>0) {
+    buffer=unusedBufferInfos.front();
+    unusedBufferInfos.pop_front();
+    //DEBUG("reusing existing buffer info",NULL);
+  } else {
+    //DEBUG("creating new buffer info",NULL);
     glGenBuffers( 1, &buffer );
-  GLenum error=glGetError();
-  if (error!=GL_NO_ERROR)
-    FATAL("can not generate buffer",NULL);
+    if (buffer==Screen::bufferNotDefined) // if the buffer id matches the special value, generate a new one
+      glGenBuffers( 1, &buffer );
+    GLenum error=glGetError();
+    if (error!=GL_NO_ERROR)
+      FATAL("can not generate buffer",NULL);
+  }
   //DEBUG("new buffer %d created",buffer);
   return buffer;
 }
@@ -309,10 +333,12 @@ void Screen::setArrayBufferData(GraphicBufferInfo buffer, Byte *data, Int size) 
 // Frees an buffer id
 void Screen::destroyBufferInfo(GraphicBufferInfo buffer) {
   if (allowDestroying) {
-    glDeleteBuffers(1,&buffer);
-    GLenum error=glGetError();
-    if (error!=GL_NO_ERROR)
-      FATAL("can not delete buffer (error=0x%08x)",error);
+    for(std::list<GraphicBufferInfo>::iterator i=unusedBufferInfos.begin();i!=unusedBufferInfos.end();i++) {
+      if (buffer==*i) {
+        FATAL("buffer 0x%08x already destroyed!",buffer);
+      }
+    }
+    unusedBufferInfos.push_back(buffer);
   } else {
     FATAL("buffer destroying has been disallowed",NULL);
   }
@@ -320,6 +346,17 @@ void Screen::destroyBufferInfo(GraphicBufferInfo buffer) {
 
 // Frees any internal textures or buffers
 void Screen::graphicInvalidated() {
+  if (allowDestroying) {
+    DEBUG("clearing unused texture and buffer infos",NULL);
+    unusedTextureInfos.clear();
+    unusedBufferInfos.clear();
+  } else {
+    FATAL("texture and buffer destroying has been disallowed",NULL);
+  }
+}
+
+// Recreates the graphic
+void Screen::recreateGraphic() {
   if (ellipseCoordinatesBuffer!=bufferNotDefined) {
     destroyBufferInfo(ellipseCoordinatesBuffer);
     ellipseCoordinatesBuffer=bufferNotDefined;
@@ -328,7 +365,6 @@ void Screen::graphicInvalidated() {
 
 // Destructor
 Screen::~Screen() {
-  graphicInvalidated();
 }
 
 }

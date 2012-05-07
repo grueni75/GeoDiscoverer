@@ -120,7 +120,7 @@ public:
   void init();
 
   // Recreates all graphic
-  void graphicInvalidated();
+  void recreateGraphic();
 
   // Deinits dynamic data
   void deinit();

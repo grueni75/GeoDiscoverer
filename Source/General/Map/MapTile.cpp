@@ -44,6 +44,7 @@ MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool 
   //PROFILE_ADD("basic variable copy")
   this->rectangle.setWidth(width);
   this->rectangle.setHeight(height);
+  this->rectangle.setDestroyTexture(false);
   //DEBUG("w=%d h=%d",rectangle->getWidth(),rectangle->getHeight());
   //PROFILE_ADD("rectangle variable copy")
 

@@ -333,7 +333,7 @@ void Core::updateScreen(bool forceRedraw) {
 
     // Init the map engine if required
     if (!mapEngine->getIsInitialized()) {
-      mapCache->graphicInvalidated();
+      mapCache->recreateGraphic();
       mapEngine->initMap();
       thread->lockMutex(isInitializedMutex);
       isInitialized=true;
@@ -520,8 +520,8 @@ void Core::tileTextureAvailable() {
   thread->lockMutex(mapUpdateInterruptMutex);
 }
 
-// Called if the textures or buffers have been lost
-void Core::graphicInvalidated() {
+// Called if the textures or buffers have been lost or must be recreated
+void Core::updateGraphic(bool graphicInvalidated) {
 
   // Ensure that the core is not currently being initialized
   thread->lockMutex(isInitializedMutex);
@@ -556,13 +556,15 @@ void Core::graphicInvalidated() {
 
   // First deinit everything
   screen->setAllowDestroying(true);
-  screen->graphicInvalidated();
-  fontEngine->graphicInvalidated();
-  graphicEngine->graphicInvalidated();
-  widgetEngine->graphicInvalidated();
+  if (graphicInvalidated)
+    screen->graphicInvalidated();
+  screen->recreateGraphic();
+  fontEngine->recreateGraphic();
+  graphicEngine->recreateGraphic();
+  widgetEngine->recreateGraphic();
   if (isInitialized)
-    mapCache->graphicInvalidated();
-  navigationEngine->graphicInvalidated();
+    mapCache->recreateGraphic();
+  navigationEngine->recreateGraphic();
   screen->setAllowDestroying(false);
 
   // Trigger an update of the map
