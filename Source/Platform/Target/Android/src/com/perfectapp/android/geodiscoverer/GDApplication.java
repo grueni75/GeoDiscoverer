@@ -43,6 +43,9 @@ public class GDApplication extends Application {
   /** Message log */
   public static String messages = "";
   
+  /** Maximum size of the message log */
+  final static int maxMessagesSize = 2048;
+  
   // Severity levels for messages
   public static final int ERROR_MSG = 0;
   public static final int WARNING_MSG = 1;
@@ -120,6 +123,9 @@ public class GDApplication extends Application {
       default: severityString="UNKNOWN"; if (!tag.equals("GDCore")) Log.e(tag, message); break;
     }
     messages = messages + String.format("\n%-15s %s", severityString + "[" + tag + "]:", message);
+    if (messages.length()>maxMessagesSize) {
+      messages = messages.substring(messages.length() - maxMessagesSize);
+    }
     if (coreObject!=null) {
       coreObject.executeAppCommand("updateMessages()");
     }
