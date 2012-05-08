@@ -123,7 +123,7 @@ Screen::Screen(Int DPI) {
   // Set variables
   this->allowDestroying=false;
   this->DPI=DPI;
-  this->wakeLock=core->getConfigStore()->getIntValue("Graphic","wakeLock");
+  this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock");
   setWakeLock(wakeLock);
 
   // Open window
@@ -437,7 +437,7 @@ void Screen::destroyBufferInfo(GraphicBufferInfo buffer) {
 
 // If set to one, the screen is not turned off
 void Screen::setWakeLock(bool state) {
-  core->getConfigStore()->setIntValue("Graphic","wakeLock",state);
+  core->getConfigStore()->setIntValue("General","wakeLock",state);
 }
 
 // Frees any internal textures or buffers

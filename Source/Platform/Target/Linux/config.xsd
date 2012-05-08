@@ -10,6 +10,11 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
+				<xsd:element name="expertMode" type="xsd:boolean" default="0">
+					<xsd:annotation>
+						<xsd:documentation>Shows all available preferences if ticked.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
 				<xsd:element name="General">
 					<xsd:annotation>
 						<xsd:documentation>Preferences that do not fit in any other category.</xsd:documentation>
@@ -30,6 +35,11 @@
 							<xsd:element name="maintenancePeriod" type="xsd:integer" default="60">
 								<xsd:annotation>
 									<xsd:documentation>Time in seconds between maintenance operations (storing unsaved data, optimizing data structures, ...).</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="wakeLock" type="xsd:boolean" default="0">
+								<xsd:annotation>
+									<xsd:documentation>Screen backlight is kept on if ticked.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
 						</xsd:sequence>
@@ -372,11 +382,6 @@
 										</xsd:element>
 									</xsd:sequence>
 								</xsd:complexType>
-							</xsd:element>
-							<xsd:element name="wakeLock" type="xsd:boolean" default="0">
-								<xsd:annotation>
-									<xsd:documentation>Indicates if the screen backlight is kept on.</xsd:documentation>
-								</xsd:annotation>
 							</xsd:element>
 							<xsd:element name="fadeDuration" type="xsd:integer" default="500000">
 								<xsd:annotation>

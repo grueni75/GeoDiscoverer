@@ -70,6 +70,29 @@ public class Preferences extends PreferenceActivity implements
   // Request codes for calling other activities
   static final int SHOW_PREFERENCE_SCREEN_REQUEST = 0;
 
+  /** Indicates that the route list has changed */
+  void routesHaveChanged() {
+    coreObject.executeCoreCommand("updateRoutes()");
+    setResult(1);
+    boolean useIntent = true;
+    if (coreObject.configStoreGetStringValue("", "expertMode").equals("0")) {
+      if (currentPath.equals("")) {
+        useIntent=false;
+      }
+    } else {
+      if (currentPath.equals("Navigation")) {
+        useIntent=false;
+      }        
+    }
+    if (!useIntent) {
+      updatePreferences();
+    } else {
+      Intent intent = new Intent(Preferences.this, Preferences.class);
+      intent.putExtra("ShowPreferenceScreen", "Navigation");
+      startActivityForResult(intent, SHOW_PREFERENCE_SCREEN_REQUEST);
+    }    
+  }
+  
   /** Copies tracks from the Track into the Route directory */
   private class CopyTracksTask extends AsyncTask<Void, Integer, Void> {
 
@@ -115,18 +138,8 @@ public class Preferences extends PreferenceActivity implements
       // Close the progress dialog
       progressDialog.dismiss();
 
-      // Either rebuild contents of preferences or change to it
-      coreObject.executeCoreCommand("updateRoutes()");
-      setResult(1);
-      if (currentPath.equals("Navigation")) {
-        PreferenceScreen rootScreen = getPreferenceScreen();
-        rootScreen.removeAll();
-        inflatePreferences(currentPath, rootScreen);
-      } else {
-        Intent intent = new Intent(Preferences.this, Preferences.class);
-        intent.putExtra("ShowPreferenceScreen", "Navigation");
-        startActivityForResult(intent, SHOW_PREFERENCE_SCREEN_REQUEST);
-      }
+      // Indicate a route list change
+      routesHaveChanged();
     }
   }
 
@@ -172,18 +185,8 @@ public class Preferences extends PreferenceActivity implements
       // Close the progress dialog
       progressDialog.dismiss();
 
-      // Either rebuild contents of preferences or change to it
-      coreObject.executeCoreCommand("updateRoutes()");
-      setResult(1);
-      if (currentPath.equals("Navigation")) {
-        PreferenceScreen rootScreen = getPreferenceScreen();
-        rootScreen.removeAll();
-        inflatePreferences(currentPath, rootScreen);
-      } else {
-        Intent intent = new Intent(Preferences.this, Preferences.class);
-        intent.putExtra("ShowPreferenceScreen", "Navigation");
-        startActivityForResult(intent, SHOW_PREFERENCE_SCREEN_REQUEST);
-      }
+      // Indicate a route list change
+      routesHaveChanged();
     }
   }
 
@@ -228,9 +231,215 @@ public class Preferences extends PreferenceActivity implements
       coreObject.configStoreSetStringValue(path, name, value);      
     }
     setResult(1);
+    if ((path.equals(""))&&(name.equals("expertMode"))) {
+      updatePreferences();
+    }
     return true;
   }
   
+  /** Creates the preferences entries for the given path */
+  boolean addPreference(PreferenceGroup attributeParent, PreferenceGroup containerParent, String path, String name) {
+
+    boolean attributesFound=false;
+    
+    // Get some information about the node
+    String key;
+    if (path == "") {
+      key = name;
+    } else {
+      key = path + "/" + name;
+    }
+    Bundle info = coreObject.configStoreGetNodeInfo(key);
+
+    // Do special things for special preferences
+    if (key.equals("Map/folder")) {
+      
+      // Use an enumeration of available folders
+      info.putString("type", "enumeration");
+      File dir = new File(coreObject.homePath + "/Map");
+      LinkedList<String> values = new LinkedList<String>();
+      for (File file : dir.listFiles()) {
+        if (file.isDirectory()) { 
+          values.add(file.getName());
+        }
+      }
+      String[] valuesArray = new String[values.size()];
+      values.toArray(valuesArray);
+      Arrays.sort(valuesArray);
+      for (int i=0;i<valuesArray.length;i++) {
+        info.putString(String.valueOf(i), valuesArray[i]);
+      }
+    }
+    if (key.equals("Navigation/lastRecordedTrackFilename")) {
+      
+      // Use an enumeration of available files
+      info.putString("type", "enumeration");
+      boolean currentValueFound=false;
+      String currentValue = coreObject.configStoreGetStringValue(path, name);
+      File dir = new File(coreObject.homePath + "/Track");
+      LinkedList<String> values = new LinkedList<String>();
+      for (File file : dir.listFiles()) {
+        if ((!file.isDirectory())
+            && (!file.getName().substring(file.getName().length() - 1)
+                .equals("~"))) {
+          values.add(file.getName());
+          if (file.getName().equals(currentValue))
+            currentValueFound = true;
+        }
+      }
+      if (!currentValueFound) 
+        values.add(currentValue);
+      String[] valuesArray = new String[values.size()];
+      values.toArray(valuesArray);
+      Arrays.sort(valuesArray,Collections.reverseOrder());
+      for (int i=0;i<valuesArray.length;i++) {
+        info.putString(String.valueOf(i), valuesArray[i]);
+      }
+    }
+    
+    // Prepare some variables     
+    String type = info.getString("type");
+    Preference entry = null;
+    String prettyName = info.getString("name");
+    prettyName = prettyName.substring(0, 1).toLowerCase()
+        + prettyName.substring(1);
+    String upperCaseCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (int i = 0; i < upperCaseCharacters.length(); i++) {
+      String character = upperCaseCharacters.substring(i, i + 1);
+      prettyName = prettyName.replace(character, " " + character);
+    }
+    prettyName = prettyName.substring(0, 1).toUpperCase()
+        + prettyName.substring(1);
+
+    // If the node is optional and there is no value, skip it
+    if (info.containsKey("isOptional")) {
+      if (!coreObject.configStorePathExists(key))
+        return false;
+    }      
+
+    // Container node?
+    if (type.equals("container")) {
+
+      // Check if the path is an unbounded one
+      if (info.containsKey("isUnbounded")) {
+
+        // Get all values of the iterating attribute
+        String[] values = coreObject.configStoreGetAttributeValues(key,
+            info.getString("isUnbounded"));
+        PreferenceCategory category = new PreferenceCategory(this);
+        if (key.equals("Navigation/Route")) 
+          category.setTitle(prettyName + " list (use menu to modify)");
+        else
+          category.setTitle(prettyName + " list");
+        category.setPersistent(false);
+        category.setSummary(info.getString("documentation"));
+        containerParent.addPreference(category);
+        if (values.length == 0) {
+
+          PreferenceScreen childScreen = getPreferenceManager()
+              .createPreferenceScreen(this);
+          childScreen.setTitle("No entries!");
+          childScreen.setPersistent(false);
+          category.addPreference(childScreen);
+
+        } else {
+          for (String value : values) {
+
+            // Construct the new path
+            String key2 = key + "[@" + info.getString("isUnbounded") + "='"
+                + value + "']";
+            PreferenceScreen childScreen = getPreferenceManager()
+                .createPreferenceScreen(this);
+            childScreen.setKey(key2);
+            childScreen.setTitle(value);
+            childScreen.setPersistent(false);
+            childScreen.setOnPreferenceClickListener(this);
+            category.addPreference(childScreen);
+          }
+        }
+
+      } else {
+
+        PreferenceScreen childScreen = getPreferenceManager()
+            .createPreferenceScreen(this);
+        childScreen.setOnPreferenceClickListener(this);
+        entry = childScreen;
+      }
+
+      // Color node?
+    } else if (type.equals("color")) {
+      ColorPickerPreference colorPicker = new ColorPickerPreference(this);
+      entry = colorPicker;
+      colorPicker.setAlphaSliderEnabled(true);
+      int red = Integer.valueOf(coreObject.configStoreGetStringValue(key, "red"));
+      int green = Integer.valueOf(coreObject.configStoreGetStringValue(key, "green"));
+      int blue = Integer.valueOf(coreObject.configStoreGetStringValue(key, "blue"));
+      int alpha = Integer.valueOf(coreObject.configStoreGetStringValue(key, "alpha"));
+      int color = alpha << 24 | red << 16 | green << 8 | blue;
+      entry.setDefaultValue(color);
+      entry.setOnPreferenceChangeListener(this);
+
+      // Text-based entry nodes?
+    } else if ((type.equals("string"))
+        || (type.equals("integer") || (type.equals("double")))) {
+      EditTextPreference editText = new EditTextPreference(this);
+      entry = editText;
+      entry.setDefaultValue(coreObject.configStoreGetStringValue(path, name));
+      editText.setDialogTitle("Value of \"" + prettyName + "\"");
+      if (type.equals("integer")) {
+        DigitsKeyListener listener = new DigitsKeyListener(true, false);
+        editText.getEditText().setKeyListener(listener);
+      }
+      if (type.equals("double")) {
+        DigitsKeyListener listener = new DigitsKeyListener(true, true);
+        editText.getEditText().setKeyListener(listener);
+      }
+      entry.setOnPreferenceChangeListener(this);
+
+      // Boolean node?
+    } else if (type.equals("boolean")) {
+      String value = coreObject.configStoreGetStringValue(path, name);
+      CheckBoxPreference checkBox = new CheckBoxPreference(this);
+      entry = checkBox;
+      if (value.equals("1")) {
+        entry.setDefaultValue(true);
+      } else {
+        entry.setDefaultValue(false);
+      }
+      entry.setOnPreferenceChangeListener(this);
+
+      // Enumeration node?
+    } else if (type.equals("enumeration")) {
+      ListPreference list = new ListPreference(this);
+      entry = list;
+      list.setDefaultValue(coreObject.configStoreGetStringValue(path, name));
+      list.setDialogTitle("Value of \"" + prettyName + "\"");
+      int i = 0;
+      LinkedList<String> values = new LinkedList<String>();
+      while (info.containsKey(String.valueOf(i))) {
+        values.add(info.getString(String.valueOf(i)));
+        i++;
+      }
+      String[] valuesArray = new String[values.size()];
+      values.toArray(valuesArray);
+      list.setEntries(valuesArray);
+      list.setEntryValues(valuesArray);
+      entry.setOnPreferenceChangeListener(this);
+    }
+
+    // Add the entry
+    if (entry != null) {        
+      entry.setKey(key);
+      entry.setTitle(prettyName);
+      entry.setSummary(info.getString("documentation"));
+      entry.setPersistent(false);
+      attributesFound = true;
+      attributeParent.addPreference(entry);
+    }
+    
+    // Return result
+    return attributesFound;
+  }
   
   /** Creates the preferences entries for the given path */
   void inflatePreferences(String path, PreferenceScreen screen) {
@@ -252,206 +461,45 @@ public class Preferences extends PreferenceActivity implements
     boolean attributesFound = false;
     Arrays.sort(names);
     for (String name : names) {
-
-      // Get some information about the node
-      String key;
-      if (path == "") {
-        key = name;
-      } else {
-        key = path + "/" + name;
-      }
-      Bundle info = coreObject.configStoreGetNodeInfo(key);
-
-      // Do special things for special preferences
-      if (key.equals("Map/folder")) {
-        
-        // Use an enumeration of available folders
-        info.putString("type", "enumeration");
-        File dir = new File(coreObject.homePath + "/Map");
-        LinkedList<String> values = new LinkedList<String>();
-        for (File file : dir.listFiles()) {
-          if (file.isDirectory()) { 
-            values.add(file.getName());
-          }
-        }
-        String[] valuesArray = new String[values.size()];
-        values.toArray(valuesArray);
-        Arrays.sort(valuesArray);
-        for (int i=0;i<valuesArray.length;i++) {
-          info.putString(String.valueOf(i), valuesArray[i]);
-        }
-      }
-      if (key.equals("Navigation/lastRecordedTrackFilename")) {
-        
-        // Use an enumeration of available files
-        info.putString("type", "enumeration");
-        boolean currentValueFound=false;
-        String currentValue = coreObject.configStoreGetStringValue(path, name);
-        File dir = new File(coreObject.homePath + "/Track");
-        LinkedList<String> values = new LinkedList<String>();
-        for (File file : dir.listFiles()) {
-          if ((!file.isDirectory())
-              && (!file.getName().substring(file.getName().length() - 1)
-                  .equals("~"))) {
-            values.add(file.getName());
-            if (file.getName().equals(currentValue))
-              currentValueFound = true;
-          }
-        }
-        if (!currentValueFound) 
-          values.add(currentValue);
-        String[] valuesArray = new String[values.size()];
-        values.toArray(valuesArray);
-        Arrays.sort(valuesArray,Collections.reverseOrder());
-        for (int i=0;i<valuesArray.length;i++) {
-          info.putString(String.valueOf(i), valuesArray[i]);
-        }
-      }
-      
-      // Prepare some variables     
-      String type = info.getString("type");
-      Preference entry = null;
-      String prettyName = info.getString("name");
-      prettyName = prettyName.substring(0, 1).toLowerCase()
-          + prettyName.substring(1);
-      String upperCaseCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      for (int i = 0; i < upperCaseCharacters.length(); i++) {
-        String character = upperCaseCharacters.substring(i, i + 1);
-        prettyName = prettyName.replace(character, " " + character);
-      }
-      prettyName = prettyName.substring(0, 1).toUpperCase()
-          + prettyName.substring(1);
-
-      // If the node is optional and there is no value, skip it
-      if (info.containsKey("isOptional")) {
-        if (!coreObject.configStorePathExists(key))
-          continue;
-      }      
-
-      // Container node?
-      if (type.equals("container")) {
-
-        // Check if the path is an unbounded one
-        if (info.containsKey("isUnbounded")) {
-
-          // Get all values of the iterating attribute
-          String[] values = coreObject.configStoreGetAttributeValues(key,
-              info.getString("isUnbounded"));
-          PreferenceCategory category = new PreferenceCategory(this);
-          if (key.equals("Navigation/Route")) 
-            category.setTitle(prettyName + " list (use menu to modify)");
-          else
-            category.setTitle(prettyName + " list");
-          category.setPersistent(false);
-          category.setSummary(info.getString("documentation"));
-          screen.addPreference(category);
-          if (values.length == 0) {
-
-            PreferenceScreen childScreen = getPreferenceManager()
-                .createPreferenceScreen(this);
-            childScreen.setTitle("No entries!");
-            childScreen.setPersistent(false);
-            category.addPreference(childScreen);
-
-          } else {
-            for (String value : values) {
-
-              // Construct the new path
-              String key2 = key + "[@" + info.getString("isUnbounded") + "='"
-                  + value + "']";
-              PreferenceScreen childScreen = getPreferenceManager()
-                  .createPreferenceScreen(this);
-              childScreen.setKey(key2);
-              childScreen.setTitle(value);
-              childScreen.setPersistent(false);
-              childScreen.setOnPreferenceClickListener(this);
-              category.addPreference(childScreen);
-            }
-          }
-
-        } else {
-
-          PreferenceScreen childScreen = getPreferenceManager()
-              .createPreferenceScreen(this);
-          childScreen.setOnPreferenceClickListener(this);
-          entry = childScreen;
-        }
-
-        // Color node?
-      } else if (type.equals("color")) {
-        ColorPickerPreference colorPicker = new ColorPickerPreference(this);
-        entry = colorPicker;
-        colorPicker.setAlphaSliderEnabled(true);
-        int red = Integer.valueOf(coreObject.configStoreGetStringValue(key, "red"));
-        int green = Integer.valueOf(coreObject.configStoreGetStringValue(key, "green"));
-        int blue = Integer.valueOf(coreObject.configStoreGetStringValue(key, "blue"));
-        int alpha = Integer.valueOf(coreObject.configStoreGetStringValue(key, "alpha"));
-        int color = alpha << 24 | red << 16 | green << 8 | blue;
-        entry.setDefaultValue(color);
-        entry.setOnPreferenceChangeListener(this);
-
-        // Text-based entry nodes?
-      } else if ((type.equals("string"))
-          || (type.equals("integer") || (type.equals("double")))) {
-        EditTextPreference editText = new EditTextPreference(this);
-        entry = editText;
-        entry.setDefaultValue(coreObject.configStoreGetStringValue(path, name));
-        editText.setDialogTitle("Value of \"" + prettyName + "\"");
-        if (type.equals("integer")) {
-          DigitsKeyListener listener = new DigitsKeyListener(true, false);
-          editText.getEditText().setKeyListener(listener);
-        }
-        if (type.equals("double")) {
-          DigitsKeyListener listener = new DigitsKeyListener(true, true);
-          editText.getEditText().setKeyListener(listener);
-        }
-        entry.setOnPreferenceChangeListener(this);
-
-        // Boolean node?
-      } else if (type.equals("boolean")) {
-        String value = coreObject.configStoreGetStringValue(path, name);
-        CheckBoxPreference checkBox = new CheckBoxPreference(this);
-        entry = checkBox;
-        if (value.equals("1")) {
-          entry.setDefaultValue(true);
-        } else {
-          entry.setDefaultValue(false);
-        }
-        entry.setOnPreferenceChangeListener(this);
-
-        // Enumeration node?
-      } else if (type.equals("enumeration")) {
-        ListPreference list = new ListPreference(this);
-        entry = list;
-        list.setDefaultValue(coreObject.configStoreGetStringValue(path, name));
-        list.setDialogTitle("Value of \"" + prettyName + "\"");
-        int i = 0;
-        LinkedList<String> values = new LinkedList<String>();
-        while (info.containsKey(String.valueOf(i))) {
-          values.add(info.getString(String.valueOf(i)));
-          i++;
-        }
-        String[] valuesArray = new String[values.size()];
-        values.toArray(valuesArray);
-        list.setEntries(valuesArray);
-        list.setEntryValues(valuesArray);
-        entry.setOnPreferenceChangeListener(this);
-      }
-
-      // Add the entry
-      if (entry != null) {        
-        entry.setKey(key);
-        entry.setTitle(prettyName);
-        entry.setSummary(info.getString("documentation"));
-        entry.setPersistent(false);
+      if (addPreference(attributeCategory, screen, path, name))        
         attributesFound = true;
-        attributeCategory.addPreference(entry);
-      }
     }
     
     // Remove the attribute category if no attributes were found
     if (!attributesFound)
       screen.removePreference(attributeCategory);
+  }
+
+  /** Updates the preference screen depending on expertMode */
+  void updatePreferences() {
+    PreferenceScreen rootScreen = getPreferenceScreen();    
+    rootScreen.removeAll();
+    if ((coreObject.configStoreGetStringValue("", "expertMode").equals("0"))&&(currentPath.equals(""))) {
+      PreferenceCategory generalCategory = new PreferenceCategory(this);
+      generalCategory.setTitle("General");
+      rootScreen.addPreference(generalCategory);
+      addPreference(generalCategory, generalCategory, "General", "unitSystem");
+      addPreference(generalCategory, generalCategory, "General", "wakeLock");
+      addPreference(generalCategory, generalCategory, "", "expertMode");
+      PreferenceCategory mapCategory = new PreferenceCategory(this);
+      mapCategory.setTitle("Map");
+      rootScreen.addPreference(mapCategory);
+      addPreference(mapCategory, mapCategory, "Map", "folder");
+      addPreference(mapCategory, mapCategory, "Map", "returnToLocation");
+      addPreference(mapCategory, mapCategory, "Map", "returnToLocationTimeout");
+      addPreference(mapCategory, mapCategory, "Map", "zoomLevelLock");
+      PreferenceCategory navigationCategory = new PreferenceCategory(this);
+      navigationCategory.setTitle("Track recording");
+      rootScreen.addPreference(navigationCategory);
+      addPreference(navigationCategory, navigationCategory, "Navigation", "TrackColor");
+      addPreference(navigationCategory, navigationCategory, "Navigation", "recordTrack");
+      addPreference(navigationCategory, navigationCategory, "Navigation", "lastRecordedTrackFilename");
+      PreferenceCategory routeCategory = new PreferenceCategory(this);
+      routeCategory.setTitle("Route list (use menu to modify)");
+      addPreference(rootScreen, rootScreen, "Navigation", "Route");
+    } else {
+      inflatePreferences(currentPath, rootScreen);
+    }
   }
 
   /** Called when the activity is first created. */
@@ -471,8 +519,7 @@ public class Preferences extends PreferenceActivity implements
 
     // Set the content
     addPreferencesFromResource(R.xml.preferences);
-    PreferenceScreen rootScreen = getPreferenceScreen();
-    inflatePreferences(path, rootScreen);
+    updatePreferences();
 
     // Rename the preference screen
     if (!path.equals("")) {
@@ -635,6 +682,4 @@ public class Preferences extends PreferenceActivity implements
       }
     }
   }
-  
-
 }

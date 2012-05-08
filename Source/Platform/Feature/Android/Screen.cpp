@@ -28,7 +28,7 @@ namespace GEODISCOVERER {
 void Screen::setWakeLock(int state) {
   std::stringstream out;
   wakeLock=state;
-  core->getConfigStore()->setIntValue("Graphic","wakeLock",state);
+  core->getConfigStore()->setIntValue("General","wakeLock",state);
   out << "updateWakeLock()";
   GDApp_executeAppCommand(out.str().c_str());
   if (state) {

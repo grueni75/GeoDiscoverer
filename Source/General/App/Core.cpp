@@ -105,7 +105,6 @@ Core::~Core() {
   thread->lockMutex(isInitializedMutex);
   isInitialized=false;
   thread->unlockMutex(isInitializedMutex);
-  DEBUG("isInitialized resetted",NULL);
 
   // Wait until the late init thread has finished
   if (lateInitThreadInfo) {

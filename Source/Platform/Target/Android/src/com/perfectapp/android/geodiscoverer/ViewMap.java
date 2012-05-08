@@ -91,7 +91,6 @@ public class ViewMap extends GDActivity {
   // Flags
   boolean compassWatchStarted = false;
   boolean exitRequested = false;
-  boolean startCoreOnNextResume = false;
   
   /** Updates the progress dialog */
   protected void updateProgressDialog(String message, int progress) {
@@ -272,7 +271,7 @@ public class ViewMap extends GDActivity {
     super.onCreate(savedInstanceState);
 
     // Get the core object
-    coreObject=GDApplication.coreObject;
+    coreObject=GDApplication.coreObject;    
     coreObject.setActivity(this);
 
     // Get important handles
@@ -547,7 +546,6 @@ public class ViewMap extends GDActivity {
       progressDialog.dismiss();
       if (exitOnly) {
         exitRequested = true;
-        startCoreOnNextResume = true;
         stopService(new Intent(ViewMap.this, GDService.class));
         finish();                
       }

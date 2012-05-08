@@ -159,7 +159,7 @@ void WidgetEngine::recreateGraphic() {
     parameters["uncheckedCommand"]="setWakeLock(0)";
     parameters["checkedIconFilename"]="wakeLockOn";
     parameters["checkedCommand"]="setWakeLock(1)";
-    parameters["stateConfigPath"]="Graphic";
+    parameters["stateConfigPath"]="General";
     parameters["stateConfigName"]="wakeLock";
     addWidgetToPage("Default",WidgetTypeCheckbox,"Wake Lock",           37.5, 93.0,0,7.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();

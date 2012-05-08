@@ -125,6 +125,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   public void setActivity(ViewMap activity) {
     lock.lock();
     this.activity = activity;
+    this.coreStopped = false;
     if (activity!=null) {
       DisplayMetrics metrics = new DisplayMetrics();
       activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);

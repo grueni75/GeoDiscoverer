@@ -386,7 +386,11 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
   xmlDocPtr doc = config;
   std::string value;
   xmlNodePtr node,rootNode,childNode;
-  std::string xpath="/GDC/" + path + "/" + name;
+  std::string xpath;
+  if (path=="")
+    xpath="/GDC/" + name;
+  else
+    xpath="/GDC/" + path + "/" + name;
 
   // Only one thread may enter getStringValue
   core->getThread()->lockMutex(mutex);
@@ -399,7 +403,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
     // Find the schema node
     schemaNodes=findSchemaNodes(xpath);
     if (schemaNodes.size()!=1) {
-      FATAL("could not find path <%s> in schema",path.c_str());
+      FATAL("could not find path <%s/%s> in schema",path.c_str(),name.c_str());
       core->getThread()->unlockMutex(mutex);
       return "";
     }
@@ -413,7 +417,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
       }
     }
     if (defaultValue=="") {
-      FATAL("can not find default value for config path <%s>",path.c_str());
+      FATAL("can not find default value for config path <%s/%s>",path.c_str(),name.c_str());
       core->getThread()->unlockMutex(mutex);
       return "";
     }
@@ -424,7 +428,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
     // Find it again
     configNodes=findConfigNodes(xpath);
     if (configNodes.size()==0) {
-      FATAL("could not find new node (path=%s, name=%s)",path.c_str(),name.c_str());
+      FATAL("could not find new node (%s/%s)",path.c_str(),name.c_str());
       core->getThread()->unlockMutex(mutex);
       return "";
     }
@@ -433,7 +437,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
 
   // Sanity check
   if (configNodes.size()!=1) {
-    FATAL("more than one node found (path=%s, name=%s)",path.c_str(),name.c_str());
+    FATAL("more than one node found (%s/%s)",path.c_str(),name.c_str());
     core->getThread()->unlockMutex(mutex);
     return "";
   }
@@ -455,7 +459,11 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
 {
   xmlDocPtr doc = config;
   xmlNodePtr node,rootNode;
-  std::string xpath="/GDC/" + path + "/" + name;
+  std::string xpath;
+  if (path=="")
+    xpath="/GDC/" + name;
+  else
+    xpath="/GDC/" + path + "/" + name;
 
   // Only one thread may enter setStringValue
   if (!innerCall) core->getThread()->lockMutex(mutex);

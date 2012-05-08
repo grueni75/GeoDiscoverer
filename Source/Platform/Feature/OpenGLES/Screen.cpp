@@ -34,7 +34,7 @@ std::list<GraphicBufferInfo> Screen::unusedBufferInfos;
 Screen::Screen(Int DPI) {
   this->allowDestroying=false;
   this->DPI=DPI;
-  this->wakeLock=core->getConfigStore()->getIntValue("Graphic","wakeLock");
+  this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock");
   this->ellipseCoordinatesBuffer=bufferNotDefined;
 }
 
