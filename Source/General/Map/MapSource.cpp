@@ -298,6 +298,10 @@ MapTile *MapSource::findMapTileByGeographicCoordinate(MapPosition pos, Int zoomL
   MapPosition bestPos;
   double distToNearestLngScale=-1, distToNearestLatScale=-1;
 
+  // Abort if no search tree is available
+  if (zoomLevelSearchTrees.size()==0)
+    return NULL;
+
   // Reset the zoom level if it is out of range
   if (zoomLevel>zoomLevelSearchTrees.size()-1)
     zoomLevel=0;

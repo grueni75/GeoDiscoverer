@@ -116,8 +116,7 @@ void Font::deinit() {
 }
 
 // Recreates the graphic of the font
-void Font::graphicInvalidated() {
-
+void Font::recreateGraphic() {
 }
 
 // Creates the bitmap for the font string

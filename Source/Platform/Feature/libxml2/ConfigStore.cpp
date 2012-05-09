@@ -93,7 +93,7 @@ void ConfigStore::read()
     xmlDocSetRootElement(doc, rootNode);
 
     // Create the namespaces
-    xmlNsPtr configNamespace=xmlNewNs(rootNode,BAD_CAST "http://www.perfectapp.de/GeoDiscoverer/config/1/0", BAD_CAST NULL);
+    xmlNsPtr configNamespace=xmlNewNs(rootNode,BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/config/1/0", BAD_CAST NULL);
     if (!configNamespace) {
      FATAL("can not create config namespace",NULL);
      core->getThread()->unlockMutex(mutex);
@@ -105,7 +105,7 @@ void ConfigStore::read()
      core->getThread()->unlockMutex(mutex);
      return;
     }
-    if (!xmlNewNsProp(rootNode, xmlNamespace, BAD_CAST "schemaLocation", BAD_CAST "http://www.perfectapp.de/GeoDiscoverer/config/1/0 http://www.perfectapp.de/GeoDiscoverer/config/1/0/config.xsd")) {
+    if (!xmlNewNsProp(rootNode, xmlNamespace, BAD_CAST "schemaLocation", BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/config/1/0 http://www.untouchableapps.de/GeoDiscoverer/config/1/0/config.xsd")) {
       FATAL("can not create xml property",NULL);
       core->getThread()->unlockMutex(mutex);
       return;
@@ -153,7 +153,7 @@ void ConfigStore::read()
     core->getThread()->unlockMutex(mutex);
     return;
   }
-  xmlXPathRegisterNs(xpathConfigCtx, BAD_CAST "gdc", BAD_CAST "http://www.perfectapp.de/GeoDiscoverer/config/1/0");
+  xmlXPathRegisterNs(xpathConfigCtx, BAD_CAST "gdc", BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/config/1/0");
   xpathSchemaCtx = xmlXPathNewContext(schema);
   if (xpathSchemaCtx == NULL) {
     FATAL("can not create schema xpath context",NULL);

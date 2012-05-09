@@ -2,8 +2,8 @@
 <xsd:schema
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:gpx="http://www.topografix.com/GPX/1/1"
-	xmlns="http://www.perfectapp.de/GeoDiscoverer/GPXExtensions/1/0"
-	targetNamespace="http://www.perfectapp.de/GeoDiscoverer/GPXExtensions/1/0"
+	xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0"
+	targetNamespace="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0"
 	elementFormDefault="qualified">
 
   <xsd:annotation>

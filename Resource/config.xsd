@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- edited with XMLSpy v2012 rel. 2 sp1 (http://www.altova.com) by Anna Fiedler (None) -->
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:gpx="http://www.topografix.com/GPX/1/1" xmlns="http://www.perfectapp.de/GeoDiscoverer/GPXExtensions/1/0" targetNamespace="http://www.perfectapp.de/GeoDiscoverer/GPXExtensions/1/0" elementFormDefault="qualified">
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:gpx="http://www.topografix.com/GPX/1/1" xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" targetNamespace="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" elementFormDefault="qualified">
 	<xsd:annotation>
 		<xsd:documentation>GeoDiscoverer config schema version 1.0</xsd:documentation>
 	</xsd:annotation>

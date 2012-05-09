@@ -145,6 +145,7 @@ bool MapSourceCalibratedPictures::init()
     if (dp == NULL){
       ERROR("can not open map directory <%s> for reading available maps",folder.c_str());
       result=false;
+      core->getDialog()->closeProgress(dialog);
       goto cleanup;
     }
     while ((dirp = readdir( dp )))

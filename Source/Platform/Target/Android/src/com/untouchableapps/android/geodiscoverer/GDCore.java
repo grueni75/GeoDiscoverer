@@ -20,7 +20,7 @@
 //
 //============================================================================
 
-package com.perfectapp.android.geodiscoverer;
+package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -67,6 +67,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Indicates that the core is stopped */
   boolean coreStopped = false;
 
+  /** Indicates that the core shall not update its frames */
+  boolean suspendCore = false;
+
   /** Indicates if the core is initialized */
   boolean coreInitialized = false;
     
@@ -86,7 +89,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   boolean forceRedraw = false;
   
   /** Indicates that the last frame has been handled by the core */
-  boolean lastFrameDrawnByCore = true;
+  boolean lastFrameDrawnByCore = false;
   
   /** Command to execute for changing the screen */
   String changeScreenCommand = "";
@@ -296,29 +299,31 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     boolean blankScreen=false;
     if (gl==currentGL) {
       if ((!coreStopped)&&(homeDirAvailable)) {
-        if (!coreInitialized) {
-          start(true);
+        if (!suspendCore) {
+          if (!coreInitialized) {
+            start(true);
+          }
+          if (graphicInvalidated) {        
+            executeCoreCommand("graphicInvalidated()");
+            graphicInvalidated=false;
+            createGraphic=false;
+          }
+          if (createGraphic) {        
+            executeCoreCommand("createGraphic()");
+            createGraphic=false;
+          }
+          if (changeScreen) {
+            executeCoreCommand(changeScreenCommand);
+            changeScreen=false;
+            forceRedraw=true;
+          }
+          updateScreen(forceRedraw);
+          forceRedraw=false;
+          if (!lastFrameDrawnByCore) {
+            executeAppCommand("setSplashVisibility(0)");
+          }
+          lastFrameDrawnByCore=true;
         }
-        if (graphicInvalidated) {        
-          executeCoreCommand("graphicInvalidated()");
-          graphicInvalidated=false;
-          createGraphic=false;
-        }
-        if (createGraphic) {        
-          executeCoreCommand("createGraphic()");
-          createGraphic=false;
-        }
-        if (changeScreen) {
-          executeCoreCommand(changeScreenCommand);
-          changeScreen=false;
-          forceRedraw=true;
-        }
-        updateScreen(forceRedraw);
-        forceRedraw=false;
-        if (!lastFrameDrawnByCore) {
-          executeAppCommand("setMessageVisibility(0)");
-        }
-        lastFrameDrawnByCore=true;
       } else {
         blankScreen=true;
       }
@@ -329,7 +334,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
       if (lastFrameDrawnByCore) {
-        executeAppCommand("setMessageVisibility(1)");
+        executeAppCommand("setSplashVisibility(1)");
       }
       lastFrameDrawnByCore=false;
     }    

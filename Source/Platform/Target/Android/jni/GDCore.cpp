@@ -107,7 +107,7 @@ jmethodID GDApp_findJavaMethod(JNIEnv *env, std::string methodName, std::string 
 }
 
 // Deinits the core
-JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_deinit
+JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit
   (JNIEnv *env, jobject thiz)
 {
   // Clean up
@@ -130,7 +130,7 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_deinit
 }
 
 // Inits the core
-JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
+JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_init
   (JNIEnv *env, jobject thiz, jstring homePath, jint screenDPI)
 {
   std::stringstream out;
@@ -141,7 +141,7 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
   coreObject=env->NewGlobalRef(thiz);
   if (!coreObject) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain global reference!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
 
@@ -161,7 +161,7 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find List class!");
     exit(1);
   }
-  appClass = env->FindClass("com/perfectapp/android/geodiscoverer/GDApplication");
+  appClass = env->FindClass("com/untouchableapps/android/geodiscoverer/GDApplication");
   if (!appClass) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find GDApplication class!");
     exit(1);
@@ -198,7 +198,7 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
   const char *homePathCStr = env->GetStringUTFChars(homePath, NULL);
   if (!homePathCStr) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain home path!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
 
@@ -206,7 +206,7 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
   //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","before object creation.");
   if (!(GEODISCOVERER::core=new GEODISCOVERER::Core(homePathCStr,screenDPI))) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create core object!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   //__android_log_write(ANDROID_LOG_DEBUG,"GDCore",homePathCStr);
@@ -226,7 +226,7 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_init
 }
 
 // Updates the screen contents
-JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_updateScreen
+JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_updateScreen
   (JNIEnv *env, jobject thiz, jboolean forceRedraw)
 {
   if (GEODISCOVERER::core->getDebug()->getFatalOccured())
@@ -235,13 +235,13 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_updateSc
 }
 
 // Sends a command to the core
-JNIEXPORT jstring JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_executeCoreCommandInt
+JNIEXPORT jstring JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_executeCoreCommandInt
   (JNIEnv *env, jobject thiz, jstring cmd)
 {
   const char *cmdCStr = env->GetStringUTFChars(cmd, NULL);
   if (!cmdCStr) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain cmd!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   std::string result=GEODISCOVERER::core->getCommander()->execute(cmdCStr);
@@ -250,7 +250,7 @@ JNIEXPORT jstring JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_execu
 }
 
 // Gets a string value from the config
-JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_configStoreSetStringValue
+JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_configStoreSetStringValue
   (JNIEnv *env, jobject thiz, jstring path, jstring name, jstring value)
 {
   const char *pathCStr = env->GetStringUTFChars(path, NULL);
@@ -258,7 +258,7 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_configSt
   const char *valueCStr = env->GetStringUTFChars(value, NULL);
   if ((!pathCStr)||(!nameCStr)||(!valueCStr)) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain strings!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   GEODISCOVERER::core->getConfigStore()->setStringValue(pathCStr,nameCStr,valueCStr);
@@ -268,14 +268,14 @@ JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_configSt
 }
 
 // Gets a string value from the config
-JNIEXPORT jstring JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_configStoreGetStringValue
+JNIEXPORT jstring JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_configStoreGetStringValue
   (JNIEnv *env, jobject thiz, jstring path, jstring name)
 {
   const char *pathCStr = env->GetStringUTFChars(path, NULL);
   const char *nameCStr = env->GetStringUTFChars(name, NULL);
   if ((!pathCStr)||(!nameCStr)) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain strings!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   std::string value=GEODISCOVERER::core->getConfigStore()->getStringValue(pathCStr,nameCStr);
@@ -285,14 +285,14 @@ JNIEXPORT jstring JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_confi
 }
 
 // Lists all elements for the given path in the config
-JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_configStoreGetNodeNames
+JNIEXPORT jobject JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_configStoreGetNodeNames
   (JNIEnv *env, jobject thiz, jstring path)
 {
   // Call the config method
   const char *pathCStr = env->GetStringUTFChars(path, NULL);
   if ((!pathCStr)) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain strings!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   std::list<std::string> names=GEODISCOVERER::core->getConfigStore()->getNodeNames(pathCStr);
@@ -302,7 +302,7 @@ JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_confi
   jobjectArray returnObj = env->NewObjectArray(names.size(),env->FindClass("java/lang/String"),env->NewStringUTF(""));
   if (!returnObj) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create return object array!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   int i=0;
@@ -326,14 +326,14 @@ JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_confi
 }
 
 // Returns information about the given node in the config
-JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_configStoreGetNodeInfo
+JNIEXPORT jobject JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_configStoreGetNodeInfo
   (JNIEnv *env, jobject thiz, jstring path)
 {
   // Call the config method
   const char *pathCStr = env->GetStringUTFChars(path, NULL);
   if ((!pathCStr)) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain strings!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   std::map<std::string, std::string> nodeInfo=GEODISCOVERER::core->getConfigStore()->getNodeInfo(pathCStr);
@@ -343,7 +343,7 @@ JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_confi
   jobject returnObj = env->NewObject(bundleClass, bundleConstructorMethodID);
   if ((!returnObj)) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create return object!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   for(std::map<std::string, std::string>::iterator i=nodeInfo.begin();i!=nodeInfo.end();i++) {
@@ -367,7 +367,7 @@ JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_confi
 }
 
 // Lists all values for the given attribute in the config
-JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_configStoreGetAttributeValues
+JNIEXPORT jobject JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_configStoreGetAttributeValues
   (JNIEnv *env, jobject thiz, jstring path, jstring attributeName)
 {
   // Call the config method
@@ -375,7 +375,7 @@ JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_confi
   const char *attributeNameCStr = env->GetStringUTFChars(attributeName, NULL);
   if ((!pathCStr)||(!attributeNameCStr)) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain strings!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   std::list<std::string> names=GEODISCOVERER::core->getConfigStore()->getAttributeValues(pathCStr,attributeNameCStr);
@@ -386,7 +386,7 @@ JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_confi
   jobjectArray returnObj = env->NewObjectArray(names.size(),env->FindClass("java/lang/String"),env->NewStringUTF(""));
   if (!returnObj) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create return object array!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   int i=0;
@@ -410,13 +410,13 @@ JNIEXPORT jobject JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_confi
 }
 
 // Checks if the path exists in the config
-JNIEXPORT jboolean JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_configStorePathExists
+JNIEXPORT jboolean JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_configStorePathExists
   (JNIEnv *env, jobject thiz, jstring path)
 {
   const char *pathCStr = env->GetStringUTFChars(path, NULL);
   if ((!pathCStr)) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain strings!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   bool result=GEODISCOVERER::core->getConfigStore()->pathExists(pathCStr);
@@ -425,13 +425,13 @@ JNIEXPORT jboolean JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_conf
 }
 
 // Removes the path from the config
-JNIEXPORT void JNICALL Java_com_perfectapp_android_geodiscoverer_GDCore_configStoreRemovePath
+JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_configStoreRemovePath
   (JNIEnv *env, jobject thiz, jstring path)
 {
   const char *pathCStr = env->GetStringUTFChars(path, NULL);
   if ((!pathCStr)) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not obtain strings!");
-    Java_com_perfectapp_android_geodiscoverer_GDCore_deinit(env,thiz);
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinit(env,thiz);
     exit(1);
   }
   GEODISCOVERER::core->getConfigStore()->removePath(pathCStr);

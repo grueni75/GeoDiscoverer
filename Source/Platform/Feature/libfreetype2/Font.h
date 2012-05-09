@@ -115,6 +115,9 @@ protected:
   ConversionResult convertUTF8toUTF32 (const UTF8** sourceStart, const UTF8* sourceEnd,
   UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
 
+  // Creates the bitmap for the font string
+  void createStringBitmap(FontString *fontString);
+
 public:
 
   // Constructor
@@ -124,16 +127,13 @@ public:
   virtual ~Font();
 
   // Recreates the graphic of the font
-  void graphicInvalidated();
+  void recreateGraphic();
 
   // Deinits the font
   void deinit();
 
   // Creates a string
   FontString *createString(std::string contents, Int widthLimit=-1);
-
-  // Creates the bitmap for the font string
-  void createStringBitmap(FontString *fontString);
 
   // Frees a string
   void destroyString(FontString *fontString);

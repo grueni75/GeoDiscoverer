@@ -166,7 +166,7 @@ void FontEngine::recreateGraphic() {
     std::string fontType;
     Font *font;
     font=i->second;
-    font->graphicInvalidated();
+    font->recreateGraphic();
   }
 }
 

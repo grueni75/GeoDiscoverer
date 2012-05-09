@@ -79,7 +79,7 @@ void MapPosition::writeGPX(XMLNode parentNode) {
   xmlAddChild(extensionsNode,gdNode);
 
   // Create the namespaces
-  xmlNsPtr geoDiscovererNamespace=xmlNewNs(gdNode,BAD_CAST "http://www.perfectapp.de/GeoDiscoverer/GPXExtensions/1/0", BAD_CAST NULL);
+  xmlNsPtr geoDiscovererNamespace=xmlNewNs(gdNode,BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0", BAD_CAST NULL);
   if (!geoDiscovererNamespace) {
    FATAL("can not create xml namespace",NULL);
    return;

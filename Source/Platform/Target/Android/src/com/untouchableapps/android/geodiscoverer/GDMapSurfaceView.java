@@ -20,7 +20,7 @@
 //
 //============================================================================
 
-package com.perfectapp.android.geodiscoverer;
+package com.untouchableapps.android.geodiscoverer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

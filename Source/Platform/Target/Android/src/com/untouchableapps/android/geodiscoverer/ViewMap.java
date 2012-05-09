@@ -20,7 +20,7 @@
 //
 //============================================================================
 
-package com.perfectapp.android.geodiscoverer;
+package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import android.app.ProgressDialog;
 import android.content.*;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable.Orientation;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
@@ -46,6 +47,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceScreen;
 
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,9 +59,12 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.LayoutAnimationController;
+import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,11 +80,19 @@ public class ViewMap extends GDActivity {
   String progressMessage;
   GDMapSurfaceView mapSurfaceView = null;
   TextView messageView = null;
-  FrameLayout frameLayout = null;
-
+  TextView busyTextView = null;
+  ImageView splashView = null;
+  ImageView busyCircleView = null;
+  FrameLayout rootFrameLayout = null;
+  LinearLayout messageLayout = null;
+  LinearLayout splashLinearLayout = null;
+  
   /** Reference to the core object */
   GDCore coreObject = null;
 
+  /** The current restart object */
+  RestartCoreObjectTask restartCoreObject = null;
+  
   // Managers
   LocationManager locationManager;
   SensorManager sensorManager;
@@ -111,6 +124,23 @@ public class ViewMap extends GDActivity {
     progressDialog.setProgress(progressCurrent);
   }
 
+  // Shows the splash screen
+  void setSplashVisibility(boolean isVisible) {
+    if (isVisible) {
+      splashLinearLayout.setVisibility(LinearLayout.VISIBLE);
+      messageView.setVisibility(TextView.VISIBLE);
+      /*RotateAnimation animation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+      animation.setRepeatCount(Animation.INFINITE);
+      animation.setDuration(3000);
+      busyCircleView.setAnimation(animation);*/
+    } else {
+      splashLinearLayout.setVisibility(LinearLayout.GONE);
+      //busyCircleView.setAnimation(null);                    
+      messageView.setVisibility(TextView.INVISIBLE);
+      busyTextView.setText(" " + getString(R.string.starting_core_object) + " ");
+    }
+  }
+  
   // Communication with the native core
   public static final int EXECUTE_COMMAND = 0;
   
@@ -212,14 +242,14 @@ public class ViewMap extends GDActivity {
                 }
                 commandExecuted=true;
               }
-              if (commandFunction.equals("setMessageVisibility")) {
+              if (commandFunction.equals("setSplashVisibility")) {
                 if (messageView!=null) {
                   if (commandArgs.get(0).equals("1")) {
-                    messageView.setVisibility(TextView.VISIBLE);
+                    setSplashVisibility(true);
                   } else {
-                    messageView.setVisibility(TextView.INVISIBLE);
+                    setSplashVisibility(false);
                   }
-                  messageView.invalidate();
+                  rootFrameLayout.requestLayout();
                 }
                 commandExecuted=true;
               }
@@ -264,6 +294,15 @@ public class ViewMap extends GDActivity {
     }
   }
 
+  /** Updates the configuration of views */
+  void updateViewConfiguration(Configuration configuration) {
+    if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+      messageLayout.setOrientation(LinearLayout.HORIZONTAL);
+    else 
+      messageLayout.setOrientation(LinearLayout.VERTICAL);  
+    rootFrameLayout.requestLayout();
+  }
+  
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -283,21 +322,54 @@ public class ViewMap extends GDActivity {
     requestWindowFeature(Window.FEATURE_NO_TITLE);    
 
     // Prepare the window contents
-    frameLayout = new FrameLayout(this);    
+    DisplayMetrics metrics = new DisplayMetrics();
+    getWindowManager().getDefaultDisplay().getMetrics(metrics);
+    rootFrameLayout = new FrameLayout(this);    
     mapSurfaceView = new GDMapSurfaceView(this);
     mapSurfaceView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
+    messageLayout = new LinearLayout(this);
+    messageLayout.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
     messageView = new TextView(this);
-    messageView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
+    messageView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
     messageView.setTextColor(0xFFFFFFFF);
-    messageView.setBackgroundColor(0xA0000000);
     messageView.setTypeface(Typeface.MONOSPACE);
     messageView.setTextSize(10);
+    messageView.setBackgroundColor(0xA0000000);
     messageView.setVisibility(TextView.INVISIBLE);
     messageView.setGravity(Gravity.BOTTOM);
-    frameLayout.addView(mapSurfaceView,0);
-    frameLayout.addView(messageView,1);
-    setContentView(frameLayout);    
-    
+    splashLinearLayout = new LinearLayout(this);
+    LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+    linearLayoutParams.gravity = Gravity.CENTER;
+    splashLinearLayout.setLayoutParams(linearLayoutParams);
+    splashLinearLayout.setOrientation(LinearLayout.VERTICAL);
+    splashView = new ImageView(this);
+    splashView.setImageResource(R.drawable.splash);
+    linearLayoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+    linearLayoutParams.gravity = Gravity.CENTER;
+    splashView.setLayoutParams(linearLayoutParams);
+    busyTextView = new TextView(this);
+    linearLayoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+    linearLayoutParams.gravity = Gravity.CENTER;
+    linearLayoutParams.leftMargin = (int)(5*metrics.density);
+    linearLayoutParams.rightMargin = linearLayoutParams.leftMargin;
+    linearLayoutParams.bottomMargin = (int)(10*metrics.density);
+    busyTextView.setLayoutParams(linearLayoutParams);
+    busyTextView.setTextSize(18.0f);
+    busyTextView.setTextColor(0xFFFFFFFF);
+    busyTextView.setBackgroundColor(0xA0000000);
+    busyTextView.setGravity(Gravity.CENTER);
+    splashLinearLayout.addView(splashView,0);
+    splashLinearLayout.addView(busyTextView,1);
+    messageLayout.addView(splashLinearLayout, 0);
+    messageLayout.addView(messageView, 1);    
+    rootFrameLayout.addView(mapSurfaceView,0);
+    rootFrameLayout.addView(messageLayout,1);
+    splashLinearLayout.setVisibility(LinearLayout.GONE);
+    updateViewConfiguration(getResources().getConfiguration());
+    setSplashVisibility(false);
+    setSplashVisibility(true); // to get the correct busy text
+    setContentView(rootFrameLayout);   
+
     // Get a wake lock
     wakeLock=powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
     if (wakeLock==null) {
@@ -336,7 +408,7 @@ public class ViewMap extends GDActivity {
       coreObject.coreStopped=false;
       exitRequested=false;
     }
-    
+        
     // Extract the file path from the intent
     intent = getIntent();
     String srcFilename = "";
@@ -403,7 +475,10 @@ public class ViewMap extends GDActivity {
                     errorDialog(String.format(getString(R.string.cannot_copy_file), srcFile.getPath(), dstFile.getPath()));
                   }
                   progressDialog.dismiss();
-                  new RestartCoreObjectTask().execute();
+                  if (restartCoreObject==null) {
+                    restartCoreObject = new RestartCoreObjectTask();
+                    restartCoreObject.execute();
+                  }
                 }
               });
           builder.setNegativeButton(R.string.no, null);
@@ -441,27 +516,31 @@ public class ViewMap extends GDActivity {
   public void onConfigurationChanged(Configuration newConfig) {
     
     super.onConfigurationChanged(newConfig);
-    
-    /* Recreate the progress dialog
-    if (progressDialog!=null) {
-      progressDialog.dismiss();
-      progressDialog=null;
-      updateProgressDialog(progressMessage, progressCurrent);
-    }*/
+    updateViewConfiguration(newConfig);
           
   }
   
   /** Called when a option menu shall be created */  
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-      MenuInflater inflater = getMenuInflater();
-      inflater.inflate(R.menu.view_map, menu);
-      if (messageView.getVisibility()==TextView.VISIBLE) {
-        menu.findItem(R.id.toggle_messages).setTitle(R.string.hide_messages);
-      } else {
-        menu.findItem(R.id.toggle_messages).setTitle(R.string.show_messages);
-      }
-      return true;
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.view_map, menu);
+    return true;
+  }
+
+  /** Called when a option menu shall be displayed */  
+  @Override
+  public boolean onPrepareOptionsMenu(Menu menu) {
+    if (restartCoreObject!=null) {
+      return false;
+    }
+    super.onPrepareOptionsMenu(menu);
+    if (messageView.getVisibility()==TextView.VISIBLE) {
+      menu.findItem(R.id.toggle_messages).setTitle(R.string.hide_messages);
+    } else {
+      menu.findItem(R.id.toggle_messages).setTitle(R.string.show_messages);
+    }
+    return true;
   }
 
   /** Called when an option menu item has been selected */
@@ -483,9 +562,11 @@ public class ViewMap extends GDActivity {
               builder.setPositiveButton(R.string.yes,
                   new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                      RestartCoreObjectTask task = new RestartCoreObjectTask();
-                      task.resetConfig=true;
-                      task.execute();
+                      if (restartCoreObject==null) {
+                        restartCoreObject = new RestartCoreObjectTask();
+                        restartCoreObject.resetConfig=true;
+                        restartCoreObject.execute();
+                      }
                     }
                   });
               builder.setNegativeButton(R.string.no, null);
@@ -495,9 +576,11 @@ public class ViewMap extends GDActivity {
             }
             return true;
           case R.id.exit:
-            RestartCoreObjectTask task = new RestartCoreObjectTask();
-            task.exitOnly=true;
-            task.execute();
+            if (restartCoreObject==null) {
+              restartCoreObject = new RestartCoreObjectTask();
+              restartCoreObject.exitOnly=true;
+              restartCoreObject.execute();
+            }
             return true;
           case R.id.toggle_messages:
             if (messageView.getVisibility()==TextView.VISIBLE) {
@@ -508,7 +591,7 @@ public class ViewMap extends GDActivity {
               messageView.setVisibility(TextView.VISIBLE);
               item.setTitle(R.string.hide_messages);
             }
-            messageView.invalidate();
+            rootFrameLayout.requestLayout();
             return true;
           default:
               return super.onOptionsItemSelected(item);
@@ -518,11 +601,12 @@ public class ViewMap extends GDActivity {
   /** Restarts the core object */
   private class RestartCoreObjectTask extends AsyncTask<Void, Void, Void> {
 
-    ProgressDialog progressDialog;
+    //ProgressDialog progressDialog;
     public boolean resetConfig = false;
     public boolean exitOnly = false;
 
     protected void onPreExecute() {
+      /*
       progressDialog = new ProgressDialog(ViewMap.this);
       progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
       if (exitOnly) 
@@ -531,6 +615,11 @@ public class ViewMap extends GDActivity {
         progressDialog.setMessage(getString(R.string.restarting_core_object));        
       progressDialog.setCancelable(false);
       progressDialog.show();
+       */
+      if (exitOnly) 
+        busyTextView.setText(" " + getString(R.string.stopping_core_object) + " ");
+      else
+        busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");        
     }
 
     protected Void doInBackground(Void... params) {
@@ -543,12 +632,13 @@ public class ViewMap extends GDActivity {
     }
 
     protected void onPostExecute(Void result) {
-      progressDialog.dismiss();
+      //progressDialog.dismiss();
       if (exitOnly) {
         exitRequested = true;
         stopService(new Intent(ViewMap.this, GDService.class));
         finish();                
       }
+      restartCoreObject=null;
     }
   }
   

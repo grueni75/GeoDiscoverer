@@ -28,7 +28,7 @@ namespace GEODISCOVERER {
 // Namespaces used when reading gpx files
 const char *GPX10Namespace="http://www.topografix.com/GPX/1/0";
 const char *GPX11Namespace="http://www.topografix.com/GPX/1/1";
-const char *GDNamespace="http://www.perfectapp.de/GeoDiscoverer/GPXExtensions/1/0";
+const char *GDNamespace="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0";
 
 // Writes the path contents into a gpx file
 void NavigationPath::writeGPXFile() {

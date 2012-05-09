@@ -20,7 +20,7 @@
 //
 //============================================================================
 
-package com.perfectapp.android.geodiscoverer;
+package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
 import java.io.IOException;
