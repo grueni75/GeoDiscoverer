@@ -697,5 +697,14 @@ void NavigationEngine::backgroundLoader() {
 
 }
 
+// Adds a new point of interest
+void NavigationEngine::addPointOfInterest(std::string name, std::string description, double lng, double lat) {
+  DEBUG("name=%s description=%s lng=%f lat=%f",name.c_str(),description.c_str(),lng,lat);
+  MapPosition *pos=core->getMapEngine()->lockMapPos();
+  pos->setLng(lng);
+  pos->setLat(lat);
+  core->getMapEngine()->unlockMapPos();
+  core->getMapEngine()->setForceMapUpdate();
+}
 
 }

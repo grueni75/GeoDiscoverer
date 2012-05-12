@@ -6,7 +6,6 @@
 <string name="home_directory">GeoDiscoverer</string>
 <string name="button_label_exit">Exit</string>
 <string name="fatal_gdcore_initialization">Could not initialize the native core!</string>
-
 <string name="busy_waiting_for_external_storage">Waiting for mounted and writable external storage</string>
 <string name="fatal_log_directory_creation">Could not create log directory!</string>
 <string name="log_directory">GeoDiscoverer/log</string>
@@ -16,9 +15,9 @@
 <string name="finished">Finished</string>
 <string name="cancel">Cancel</string>
 <string name="copying_tracks">Copying tracks from Track to Route directory</string><string name="removing_routes">Removing routes from Route directory</string>
-<string name="starting_core_object">Starting core...</string>
-<string name="restarting_core_object">Restarting core...</string>
-<string name="stopping_core_object">Stopping core...</string>
+<string name="starting_core_object">Starting core&#8230;</string>
+<string name="restarting_core_object">Restarting core&#8230;</string>
+<string name="stopping_core_object">Stopping core&#8230;</string>
 <string name="reset">Reset</string>
 <string name="no">No</string>
 <string name="yes">Yes</string>
@@ -28,8 +27,12 @@
 <string name="copy_route_question">Copy file &lt;%s&gt; to route directory?</string>
 <string name="overwrite_route_question">Overwrite file &lt;%s&gt; in route directory?</string>
 <string name="copying_file">Copying file &lt;%s&gt; to route directory</string>
+<string name="unsupported_path">The path &lt;%s&gt; is not supported!</string>
+<string name="unsupported_host">The host &lt;%s&gt; is not supported!</string>
 <string name="unsupported_scheme">The scheme &lt;%s&gt; is not supported!</string>
 <string name="unsupported_intent">This intent is not supported (has no stream)!</string>
+<string name="unsupported_google_map_query">The Google Maps query is not supported!</string>
+<string name="location_not_found">Can not find location &lt;%s&gt;</string>
 <string name="cannot_copy_file">Can not copy file &lt;%1$s&gt; to &lt;%2$s&gt;!</string>
 <string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
 <string name="notification_activity_active_message">Taking care of your position.</string>

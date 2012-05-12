@@ -290,11 +290,11 @@ void Screen::setTextureImage(GraphicTextureInfo texture, UShort *image, Int widt
 }
 
 // Frees a texture id
-void Screen::destroyTextureInfo(GraphicTextureInfo i) {
+void Screen::destroyTextureInfo(GraphicTextureInfo i, std::string source) {
   if (allowDestroying) {
     for(std::list<GraphicTextureInfo>::iterator j=unusedTextureInfos.begin();j!=unusedTextureInfos.end();j++) {
       if (i==*j) {
-        FATAL("texture 0x%08x already destroyed",i);
+        FATAL("texture 0x%08x already destroyed (called by %s)",i,source.c_str());
       }
     }
     unusedTextureInfos.push_back(i);

@@ -102,7 +102,7 @@ void Thread::unlockMutex(ThreadMutexInfo *mutex) {
 }
 
 // Creates a signal
-ThreadSignalInfo *Thread::createSignal() {
+ThreadSignalInfo *Thread::createSignal(bool oneTimeOnly) {
   ThreadSignalInfo *i;
   if (!(i=(ThreadSignalInfo *)malloc(sizeof(ThreadSignalInfo)))) {
     FATAL("can not reserve memory for signal structure",NULL);
@@ -111,6 +111,7 @@ ThreadSignalInfo *Thread::createSignal() {
   pthread_cond_init(&i->cv,NULL);
   pthread_mutex_init(&i->mutex,NULL);
   i->issued=false;
+  i->oneTimeOnly=oneTimeOnly;
   return i;
 }
 
@@ -135,7 +136,8 @@ void Thread::waitForSignal(ThreadSignalInfo *signal) {
   while(!signal->issued) {
     pthread_cond_wait(&signal->cv,&signal->mutex);
   }
-  signal->issued=false;
+  if (!signal->oneTimeOnly)
+    signal->issued=false;
   pthread_mutex_unlock(&signal->mutex);
 }
 

@@ -107,6 +107,9 @@ public:
   // Updates the compass
   void newCompassBearing(double bearing);
 
+  // Adds a new point of interest
+  void addPointOfInterest(std::string name, std::string description, double lng, double lat);
+
   // Saves the recorded track if required
   void backup();
 

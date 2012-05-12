@@ -50,6 +50,9 @@ public:
   // Destructor
   virtual ~WidgetCheckbox();
 
+  // Deinits the checkbox
+  virtual void deinit();
+
   // Let the button work
   virtual bool work(TimestampInMicroseconds t);
 

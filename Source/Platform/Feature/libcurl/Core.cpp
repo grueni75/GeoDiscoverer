@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : MapSourceMercatorTiles.cpp
+// Name        : Core.cpp
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -25,21 +25,18 @@
 
 namespace GEODISCOVERER {
 
-// Downloads a map image from the server
-bool MapSourceMercatorTiles::downloadMapImage(std::string url, std::string filePath) {
+// Downloads a URL
+bool Core::downloadURL(std::string url, std::string filePath, bool generateMessages) {
 
   FILE *out;
   char curlErrorBuffer[CURL_ERROR_SIZE];
-  std::string tempFilePath = getFolderPath() + "/downloadBuffer.bin";
-  Int imageWidth, imageHeight;
 
   // Open the file for writing
-  if (!(out=fopen(tempFilePath.c_str(),"w"))) {
-    if (!errorOccured) {
-      ERROR("can not create map image <%s>",filePath.c_str());
-      errorOccured=true;
-      return false;
+  if (!(out=fopen(filePath.c_str(),"w"))) {
+    if (generateMessages) {
+      ERROR("can not create file <%s>",filePath.c_str());
     }
+    return false;
   }
 
   // Download it with curl
@@ -52,7 +49,7 @@ bool MapSourceMercatorTiles::downloadMapImage(std::string url, std::string fileP
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, out);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,curlErrorBuffer);
-  DEBUG("downloading %s",url.c_str());
+  DEBUG("downloading url %s",url.c_str());
   CURLcode res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 
@@ -66,33 +63,19 @@ bool MapSourceMercatorTiles::downloadMapImage(std::string url, std::string fileP
     remove(filePath.c_str());
 
     // Output warning
-    if (!downloadWarningOccured) {
-      WARNING("can not download map image <%s>: %s",url.c_str(),curlErrorBuffer);
-      downloadWarningOccured=true;
+    if (generateMessages) {
+      WARNING("can not download url <%s>: %s",url.c_str(),curlErrorBuffer);
     }
     return false;
 
   } else {
-
-    // Check if the image can be loaded
-    if ((!core->getImage()->queryPNG(tempFilePath,imageWidth,imageHeight))&&
-       (!core->getImage()->queryJPEG(tempFilePath,imageWidth,imageHeight))) {
-
-      WARNING("downloaded map from <%s> is not a valid image",url.c_str());
-      return false;
-
-    } else {
-
-      // Move the file to its intended position
-      rename(tempFilePath.c_str(),filePath.c_str());
-      return true;
-
-    }
-
+    return true;
   }
-
 }
 
 }
+
+
+
 
 

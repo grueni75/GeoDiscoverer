@@ -554,4 +554,35 @@ void MapSourceMercatorTiles::getScales(Int zoomLevel, double &latScale, double &
   latScale=mapTileLength/(latNorth-latSouth);
 }
 
+// Downloads a map image from the server
+bool MapSourceMercatorTiles::downloadMapImage(std::string url, std::string filePath) {
+
+  std::string tempFilePath = getFolderPath() + "/mapSourceDownloadBuffer.bin";
+  Int imageWidth, imageHeight;
+
+  // Download the file
+  if (!(core->downloadURL(url,tempFilePath,!downloadWarningOccured))) {
+    downloadWarningOccured=true;
+    return false;
+  } else {
+
+    // Check if the image can be loaded
+    if ((!core->getImage()->queryPNG(tempFilePath,imageWidth,imageHeight))&&
+       (!core->getImage()->queryJPEG(tempFilePath,imageWidth,imageHeight))) {
+
+      WARNING("downloaded map from <%s> is not a valid image",url.c_str());
+      return false;
+
+    } else {
+
+      // Move the file to its intended position
+      rename(tempFilePath.c_str(),filePath.c_str());
+      return true;
+
+    }
+
+  }
+
+}
+
 } /* namespace GEODISCOVERER */

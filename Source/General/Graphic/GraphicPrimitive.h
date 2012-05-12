@@ -34,7 +34,7 @@ class GraphicPrimitive {
 
 protected:
 
-  GraphicType type;               // Type of primitive
+  GraphicType type;                         // Type of primitive
   GraphicPrimitive *animator;               // Object to use as the animator
   std::list<std::string> name;              // Multiline name of primitive
   Int x;                                    // X coordinate
@@ -65,7 +65,7 @@ public:
   virtual ~GraphicPrimitive();
 
   // Deinits the primitive
-  void deinit();
+  virtual void deinit();
 
   // Compares two primitives according to their z value
   static bool zSortPredicate(const GraphicPrimitive *lhs, const GraphicPrimitive *rhs)

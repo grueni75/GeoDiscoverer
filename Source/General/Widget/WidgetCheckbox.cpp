@@ -25,12 +25,28 @@
 
 namespace GEODISCOVERER {
 
-WidgetCheckbox::WidgetCheckbox() {
+WidgetCheckbox::WidgetCheckbox() : WidgetPrimitive() {
   widgetType=WidgetTypeCheckbox;
   firstTime=true;
+  checkedTexture=core->getScreen()->getTextureNotDefined();
+  uncheckedTexture=core->getScreen()->getTextureNotDefined();
 }
 
 WidgetCheckbox::~WidgetCheckbox() {
+  deinit();
+}
+
+// Deinits the checkbox
+void WidgetCheckbox::deinit() {
+  texture=core->getScreen()->getTextureNotDefined();
+  if ((checkedTexture!=core->getScreen()->getTextureNotDefined())&&(destroyTexture)) {
+    core->getScreen()->destroyTextureInfo(checkedTexture,"WidgetCheckbox (checked texture)");
+    checkedTexture=core->getScreen()->getTextureNotDefined();
+  }
+  if ((uncheckedTexture!=core->getScreen()->getTextureNotDefined())&&(destroyTexture)) {
+    core->getScreen()->destroyTextureInfo(uncheckedTexture,"WidgetCheckbox (unchecked texture)");
+    uncheckedTexture=core->getScreen()->getTextureNotDefined();
+  }
 }
 
 // Executed if the widget is currently touched

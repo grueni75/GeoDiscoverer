@@ -65,6 +65,7 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
   std::string cmdName=cmd.substr(0,argStart);
   //DEBUG("cmdName=%s",cmdName.c_str());
   std::string cmdArgs=cmd.substr(argStart+1,argEnd-argStart-1);
+  std::string unparsedCmdArgs=cmdArgs;
   //DEBUG("cmdArgs=%s",cmdArgs.c_str());
   std::vector<std::string> args;
   Int endPos;
@@ -260,6 +261,12 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
   if (cmdName=="updateRoutes") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->updateRoutes();
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="addPointOfInterest") {
+    if (core->getIsInitialized()) {
+      core->getNavigationEngine()->addPointOfInterest("unknown","unknown",atof(args[0].c_str()),atof(args[1].c_str()));
     }
     cmdExecuted=true;
   }

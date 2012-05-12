@@ -91,8 +91,14 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Indicates that the last frame has been handled by the core */
   boolean lastFrameDrawnByCore = false;
   
+  /** Indicates that the splash is currently shown */
+  boolean splashIsVisible = false;
+  
   /** Command to execute for changing the screen */
   String changeScreenCommand = "";
+  
+  /** Queued commands to execute if core is initialized */
+  LinkedList<String> queuedCoreCommands = new LinkedList<String>();
   
   // Sensor readings
   float[] lastAcceleration = null;
@@ -174,6 +180,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       if (initialized) {
         coreInitialized=true;
         executeAppCommand("updateWakeLock()");
+        for (String cmd : queuedCoreCommands) {
+          executeCoreCommandInt(cmd);
+        }
+        queuedCoreCommands.clear();
       }
       coreStopped=false;
       if (!changeScreenCommand.equals("")) {        
@@ -272,6 +282,18 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     return result;
   }
 
+  /** Sends an command to the core if it is initialized or remembers them for execution after core is initialized */
+  public void scheduleCoreCommand(String cmd)
+  {
+    lock.lock();
+    if (coreInitialized) {
+      executeCoreCommandInt(cmd);
+    } else {
+      queuedCoreCommands.add(cmd);
+    }
+    lock.unlock();
+  }
+
   //
   // Functions that are called by the native core
   //
@@ -319,7 +341,8 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           }
           updateScreen(forceRedraw);
           forceRedraw=false;
-          if (!lastFrameDrawnByCore) {
+          if ((!lastFrameDrawnByCore)||(splashIsVisible)) {
+            splashIsVisible = false;
             executeAppCommand("setSplashVisibility(0)");
           }
           lastFrameDrawnByCore=true;
@@ -338,6 +361,13 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       }
       lastFrameDrawnByCore=false;
     }    
+    lock.unlock();
+  }
+  
+  /** Updates the splash visibility flag */
+  public void setSplashIsVisible(boolean splashIsVisible) {
+    lock.lock();
+    this.splashIsVisible = splashIsVisible;
     lock.unlock();
   }
   

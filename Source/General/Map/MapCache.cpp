@@ -98,11 +98,11 @@ void MapCache::deinit() {
 
   // Clear all list
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
-    core->getScreen()->destroyTextureInfo(*i);
+    core->getScreen()->destroyTextureInfo(*i,"MapCache (unused texture)");
   }
   unusedTextures.clear();
   for(std::list<GraphicTextureInfo>::iterator i=usedTextures.begin();i!=usedTextures.end();i++) {
-    core->getScreen()->destroyTextureInfo(*i);
+    core->getScreen()->destroyTextureInfo(*i,"MapCache (used texture)");
   }
   usedTextures.clear();
   cachedTiles.clear();

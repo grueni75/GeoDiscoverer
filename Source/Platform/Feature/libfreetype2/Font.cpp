@@ -109,7 +109,7 @@ void Font::deinit() {
 
   // Release all textures
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
-    core->getScreen()->destroyTextureInfo(*i);
+    core->getScreen()->destroyTextureInfo(*i,"Font");
   }
   unusedTextures.clear();
 

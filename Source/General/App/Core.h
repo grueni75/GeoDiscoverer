@@ -106,6 +106,7 @@ protected:
 
   // Used to prevent deinit before init is complete
   ThreadMutexInfo *isInitializedMutex;
+  ThreadSignalInfo *isInitializedSignal;
 
   // Indicates if the core is initialized
   bool isInitialized;
@@ -179,6 +180,14 @@ public:
 
   // Continue the map update thread
   void continueMapUpdate();
+
+  // Downloads a URL
+  bool downloadURL(std::string url, std::string filePath, bool generateMessages=true);
+
+  // Waits until the core is initialized
+  void waitForInitialization() {
+    thread->waitForSignal(isInitializedSignal);
+  }
 
   // Getters and setters
   std::string getHomePath() const

@@ -34,6 +34,7 @@ typedef struct ThreadSignalInfo {
   pthread_mutex_t mutex;
   pthread_cond_t cv;
   bool issued;
+  bool oneTimeOnly;
 } ThreadSignalInfo;
 
 class Thread {
@@ -65,8 +66,9 @@ public:
   // Unlocks a mutex
   void unlockMutex(ThreadMutexInfo *mutex);
 
-  // Creates a signal
-  ThreadSignalInfo *createSignal();
+  // Creates a signal (if oneTimeOnly is set to true, signal can only be issued one time)
+  // Please note that if oneTimeOnly is false, the created signal can only be consumed by one thread only
+  ThreadSignalInfo *createSignal(bool oneTimeOnly=false);
 
   // Destroys a signal
   void destroySignal(ThreadSignalInfo *signal);

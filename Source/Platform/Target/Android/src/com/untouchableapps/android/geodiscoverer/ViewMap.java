@@ -24,7 +24,10 @@ package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import android.app.AlertDialog;
@@ -36,6 +39,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable.Orientation;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -61,6 +66,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
+import android.view.inputmethod.ExtractedTextRequest;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
@@ -129,6 +135,7 @@ public class ViewMap extends GDActivity {
     if (isVisible) {
       splashLinearLayout.setVisibility(LinearLayout.VISIBLE);
       messageView.setVisibility(TextView.VISIBLE);
+      coreObject.setSplashIsVisible(true);
       /*RotateAnimation animation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
       animation.setRepeatCount(Animation.INFINITE);
       animation.setDuration(3000);
@@ -408,7 +415,7 @@ public class ViewMap extends GDActivity {
       coreObject.coreStopped=false;
       exitRequested=false;
     }
-        
+    
     // Extract the file path from the intent
     intent = getIntent();
     String srcFilename = "";
@@ -422,6 +429,11 @@ public class ViewMap extends GDActivity {
           } else {
             warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));
           }
+        } else if (extras.containsKey(Intent.EXTRA_TEXT)) {          
+          AddressFromLocationTask task = new AddressFromLocationTask();
+          task.subject = extras.getString(Intent.EXTRA_SUBJECT);
+          task.text = extras.getString(Intent.EXTRA_TEXT);
+          task.execute();
         } else {
           warningDialog(getString(R.string.unsupported_intent));        
         }
@@ -642,6 +654,44 @@ public class ViewMap extends GDActivity {
     }
   }
   
+  /** Finds the geographic position for the given address */
+  private class AddressFromLocationTask extends AsyncTask<Void, Void, Void> {
+
+    String subject;
+    String text;
+    boolean locationFound=false;
+    
+    protected void onPreExecute() {
+    }
+
+    protected Void doInBackground(Void... params) {
+
+      // Go through all lines and treat each line as an address
+      // If the geocoder finds the address, add it as a POI
+      String[] locationLines = text.split("\n");
+      Geocoder geocoder = new Geocoder(ViewMap.this);
+      for (String locationLine : locationLines) { 
+        try {
+          List<Address> addresses = geocoder.getFromLocationName(locationLine, 1);
+          if (addresses.size()>0) {
+            Address address = addresses.get(0);
+            locationFound=true;
+            coreObject.scheduleCoreCommand("addPointOfInterest(" + address.getLongitude() + "," + address.getLatitude() + ")");
+          }
+        }
+        catch(IOException e) {
+          GDApplication.addMessage(GDApplication.WARNING_MSG, "GDApp", "Geocoding not successful: " + e.getMessage());        
+        }        
+      }
+      return null;
+    }
+
+    protected void onPostExecute(Void result) {
+      if (!locationFound) {
+        warningDialog(String.format(getString(R.string.location_not_found),text));
+      } 
+    }
+  }
   
   /** Called when a called activity finishes */
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {

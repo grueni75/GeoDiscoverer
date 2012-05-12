@@ -139,7 +139,7 @@ public:
   void setTextureImage(GraphicTextureInfo texture, UShort *image, Int width, Int height, GraphicTextureFormat format=graphicTextureFormatRGB);
 
   // Frees a texture id
-  void destroyTextureInfo(GraphicTextureInfo i);
+  void destroyTextureInfo(GraphicTextureInfo i, std::string source);
 
   // Returns a new buffer id
   GraphicBufferInfo createBufferInfo();

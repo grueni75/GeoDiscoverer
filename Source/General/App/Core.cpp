@@ -62,6 +62,7 @@ Core::Core(std::string homePath, Int screenDPI) {
   this->mapUpdateStartSignal=NULL;
   this->mapUpdateTileTextureProcessedSignal=NULL;
   this->isInitializedMutex=NULL;
+  this->isInitializedSignal=NULL;
   isInitialized=false;
   quitMapUpdateThread=false;
   mapUpdateStopped=true;
@@ -92,6 +93,7 @@ Core::Core(std::string homePath, Int screenDPI) {
     return;
   }
   isInitializedMutex=thread->createMutex();
+  isInitializedSignal=thread->createSignal(true);
   thread->lockMutex(isInitializedMutex);
 }
 
@@ -147,6 +149,12 @@ Core::~Core() {
   }
   if (mapUpdateTileTextureProcessedSignal) {
     thread->destroySignal(mapUpdateTileTextureProcessedSignal);
+  }
+  if (isInitializedMutex) {
+    thread->destroyMutex(isInitializedMutex);
+  }
+  if (isInitializedSignal) {
+    thread->destroySignal(isInitializedSignal);
   }
 
   // Delete the components
@@ -337,6 +345,7 @@ void Core::updateScreen(bool forceRedraw) {
       thread->lockMutex(isInitializedMutex);
       isInitialized=true;
       thread->unlockMutex(isInitializedMutex);
+      core->getThread()->issueSignal(isInitializedSignal);
     }
 
     // Check if a new texture is ready

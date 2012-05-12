@@ -394,7 +394,7 @@ void Screen::setTextureImage(GraphicTextureInfo texture, UShort *image, Int widt
 }
 
 // Frees a texture id
-void Screen::destroyTextureInfo(GraphicTextureInfo i) {
+void Screen::destroyTextureInfo(GraphicTextureInfo i, std::string source) {
   if (allowDestroying) {
     glDeleteTextures(1,&i);
     GLenum error=glGetError();
