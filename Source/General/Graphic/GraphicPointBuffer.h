@@ -61,7 +61,7 @@ public:
   void updateBuffer(Screen *screen);
 
   // Recreates any textures or buffers
-  void invalidate();
+  void recreate();
 
   // Getters and setters
   Int getSize() const

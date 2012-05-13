@@ -71,7 +71,7 @@ public:
   virtual bool work(TimestampInMicroseconds currentTime);
 
   // Recreates any textures or buffers
-  virtual void invalidate();
+  virtual void recreateGraphic();
 
   // Getters and setters
   GraphicPrimitiveMap *getPrimitiveMap()

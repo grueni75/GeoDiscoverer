@@ -133,11 +133,11 @@ GraphicPrimitive *GraphicObject::getPrimitive(GraphicPrimitiveKey key) {
 }
 
 // Recreates any textures or buffers
-void GraphicObject::invalidate() {
+void GraphicObject::recreateGraphic() {
   GraphicPrimitiveMap *primitiveMap=getPrimitiveMap();
   GraphicPrimitiveMap::iterator i;
   for(i = primitiveMap->begin(); i!=primitiveMap->end(); i++) {
-    i->second->invalidate();
+    i->second->recreate();
   }
 }
 

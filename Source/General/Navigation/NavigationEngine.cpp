@@ -619,12 +619,12 @@ void NavigationEngine::recreateGraphic() {
   // Reset the buffers used in the path object
   lockRoutes();
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->graphicInvalidated();
+    (*i)->recreateGraphic();
   }
   unlockRoutes();
   lockRecordedTrack();
   if (recordedTrack) {
-    recordedTrack->graphicInvalidated();
+    recordedTrack->recreateGraphic();
   }
   unlockRecordedTrack();
 }

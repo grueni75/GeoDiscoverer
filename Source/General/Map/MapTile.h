@@ -127,7 +127,7 @@ public:
   }
 
   // Called when the tile is removed from the screen
-  void graphicInvalidated();
+  void removeGraphic();
 
   // Store the contents of the object in a binary file
   void store(std::ofstream *ofs, Int &memorySize);

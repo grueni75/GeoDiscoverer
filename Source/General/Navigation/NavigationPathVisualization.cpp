@@ -85,12 +85,12 @@ NavigationPathTileInfo *NavigationPathVisualization::findTileInfo(MapTile *tile)
 }
 
 // Indicates that textures and buffers have been invalidated
-void NavigationPathVisualization::graphicInvalidated() {
+void NavigationPathVisualization::recreateGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
     GraphicLine *line=i->second->getGraphicLine();
-    if (line) line->invalidate();
+    if (line) line->recreate();
     GraphicRectangleList *rectangleList=i->second->getGraphicRectangeList();
-    if (rectangleList) rectangleList->invalidate();
+    if (rectangleList) rectangleList->recreate();
   }
 }
 

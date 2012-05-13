@@ -374,12 +374,12 @@ void NavigationPath::init() {
 }
 
 // Indicates that textures and buffers have been invalidated
-void NavigationPath::graphicInvalidated() {
+void NavigationPath::recreateGraphic() {
 
   // Invalidate all zoom levels
   core->getThread()->lockMutex(accessMutex);
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
-    (*i)->graphicInvalidated();
+    (*i)->recreateGraphic();
   }
   core->getThread()->unlockMutex(accessMutex);
 

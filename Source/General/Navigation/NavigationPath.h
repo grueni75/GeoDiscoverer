@@ -95,7 +95,7 @@ public:
   void init();
 
   // Indicates that textures and buffers have been invalidated
-  void graphicInvalidated();
+  void recreateGraphic();
 
   // Recreate the graphic objects to reduce the number of graphic point buffers
   void optimizeGraphic();

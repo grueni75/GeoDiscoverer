@@ -327,14 +327,14 @@ void MapTile::destruct(MapTile *object) {
 }
 
 // Called when the tile is removed from the screen
-void MapTile::graphicInvalidated() {
+void MapTile::removeGraphic() {
 
   // Reset visualization key
   setVisualizationKey(0);
 
   // Invalidate all graphic
   visualization.lockAccess();
-  visualization.invalidate();
+  visualization.recreateGraphic();
   visualization.unlockAccess();
 
 }

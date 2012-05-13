@@ -64,7 +64,7 @@ void MapEngine::deinitTile(MapTile *t)
 {
   map->lockAccess();
   map->removePrimitive(t->getVisualizationKey()); // Remove it from the graphic
-  t->graphicInvalidated();
+  t->removeGraphic();
   if (t->getIsDummy())   // Delete dummy tiles
     delete t;
   map->unlockAccess();
@@ -73,6 +73,8 @@ void MapEngine::deinitTile(MapTile *t)
 // Clear the current map
 void MapEngine::deinitMap()
 {
+  DEBUG("before deinit map",NULL);
+
   // Deinit all tiles
   //DEBUG("deiniting tiles",NULL);
   for (std::list<MapTile*>::const_iterator i=tiles.begin();i!=tiles.end();i++) {
@@ -120,6 +122,8 @@ void MapEngine::deinitMap()
 
   // Object is not initialized anymore
   isInitialized=false;
+
+  DEBUG("after deinit map",NULL);
 }
 
 // Initializes the map

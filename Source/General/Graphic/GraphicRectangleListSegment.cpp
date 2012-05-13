@@ -86,9 +86,9 @@ void GraphicRectangleListSegment::copy(GraphicRectangleListSegment *otherSegment
 }
 
 // Recreates any textures or buffers
-void GraphicRectangleListSegment::invalidate() {
-  triangleCoordinates->invalidate();
-  textureCoordinates->invalidate();
+void GraphicRectangleListSegment::recreate() {
+  triangleCoordinates->recreate();
+  textureCoordinates->recreate();
 }
 
 }

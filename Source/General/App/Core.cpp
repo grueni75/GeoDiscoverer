@@ -412,7 +412,6 @@ void Core::updateMap() {
 
     // Wait for an update trigger
     thread->waitForSignal(mapUpdateStartSignal);
-    DEBUG("map update requested",NULL);
 
     // Shall we quit?
     // It's important to check that here to avoid deadlocks
@@ -425,7 +424,6 @@ void Core::updateMap() {
     thread->lockMutex(mapUpdateInterruptMutex);
     mapEngine->updateMap();
     thread->unlockMutex(mapUpdateInterruptMutex);
-    DEBUG("map update finished",NULL);
 
   }
 

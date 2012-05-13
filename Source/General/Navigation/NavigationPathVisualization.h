@@ -51,7 +51,7 @@ public:
   virtual ~NavigationPathVisualization();
 
   // Indicates that textures and buffers have been invalidated
-  void graphicInvalidated();
+  void recreateGraphic();
 
   // Returns the tile info for the given tile
   NavigationPathTileInfo *findTileInfo(MapTile *tile);

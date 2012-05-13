@@ -48,7 +48,7 @@ public:
   void draw(Screen *screen, GraphicTextureInfo textureInfo);
 
   // Recreates any textures or buffers
-  virtual void invalidate();
+  virtual void recreate();
 
   // Copies the contents to an other segment
   void copy(GraphicRectangleListSegment *otherSegment);
