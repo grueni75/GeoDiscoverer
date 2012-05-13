@@ -679,6 +679,9 @@ void NavigationEngine::removeGraphics(MapContainer *container) {
 // Loads all pathes in the background
 void NavigationEngine::backgroundLoader() {
 
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+
   // Load the recorded track
   if (!recordedTrack->getIsInit()) {
     if (core->getQuitCore())

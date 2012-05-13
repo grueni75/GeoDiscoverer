@@ -44,6 +44,7 @@ import android.os.Message;
 import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.os.Process;
 
 /** Interfaces with the C++ part */
 public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorEventListener {
@@ -309,6 +310,24 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       m.setData(b);    
       activity.coreMessageHandler.sendMessage(m);
     }
+  }
+
+  /** Sets the thread priority */
+  public void setThreadPriority(int priority)
+  {
+    switch(priority) {
+      case 0:
+        Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+        break;
+      case 1:
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        break;
+      case 2:
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND+Process.THREAD_PRIORITY_LESS_FAVORABLE);
+        break;
+      default:
+        GDApplication.addMessage(GDApplication.FATAL_MSG, "GDapp", "unsupported thread priority");
+    }    
   }
 
   //

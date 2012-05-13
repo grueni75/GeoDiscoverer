@@ -423,6 +423,9 @@ void MapSourceMercatorTiles::downloadMapImages() {
 
   std::list<std::string> status;
 
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+
   // Do an endless loop
   while (1) {
 

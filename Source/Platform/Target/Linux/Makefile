@@ -15,6 +15,7 @@ PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libxml2 -name '*
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/stdout -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libfreetype2 -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libcurl -name '*.cpp')
+PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/Linux -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Target/Linux -name '*.cpp')
 GENERAL_SRCS     = $(shell find $(ROOT)/Source/General -name '*.cpp')
 CPP_SRCS         = $(subst $(ROOT)/,,$(PLATFORM_SRCS) $(GENERAL_SRCS))

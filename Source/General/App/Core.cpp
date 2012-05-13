@@ -326,7 +326,7 @@ void Core::updateScreen(bool forceRedraw) {
   bool wakeupMapUpdateThread=false;
 
   // Interrupt the map update thread
-  interruptMapUpdate();
+  //interruptMapUpdate();
 
   // Check if all objects are initialized
   if ((mapSource->getIsInitialized())&&(navigationEngine->getIsInitialized())) {
@@ -379,7 +379,7 @@ void Core::updateScreen(bool forceRedraw) {
 
   // Let the map update thread continue
   //DEBUG("before unlock of update interrupt mutex",NULL);
-  continueMapUpdate();
+  //continueMapUpdate();
   //DEBUG("after unlock of update interrupt mutex",NULL);
 
   // Check if the map update thread is still running
@@ -398,17 +398,21 @@ void Core::updateScreen(bool forceRedraw) {
       thread->issueSignal(mapUpdateStartSignal);
 
   }
+
 }
 
 // Main loop of the map update thread
 void Core::updateMap() {
+
+  // This is a background thread
+  core->getThread()->setThreadPriority(threadPriorityBackgroundHigh);
 
   // Do an endless loop
   while (1) {
 
     // Wait for an update trigger
     thread->waitForSignal(mapUpdateStartSignal);
-    //DEBUG("map update requested",NULL);
+    DEBUG("map update requested",NULL);
 
     // Shall we quit?
     // It's important to check that here to avoid deadlocks
@@ -421,6 +425,7 @@ void Core::updateMap() {
     thread->lockMutex(mapUpdateInterruptMutex);
     mapEngine->updateMap();
     thread->unlockMutex(mapUpdateInterruptMutex);
+    DEBUG("map update finished",NULL);
 
   }
 
@@ -428,6 +433,9 @@ void Core::updateMap() {
 
 // Does a late initialization of certain objects
 void Core::lateInit() {
+
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundHigh);
 
   // Take care that the map update and screen update thread detects that objects are not initialized
   bool wait=true;
@@ -460,6 +468,8 @@ void Core::lateInit() {
     navigationEngine->init();
   }
 
+  DEBUG("late initialization finished",NULL);
+
   // If you add other objects, please update also
   // the mapUpdateStopped and mapEngine init code in
   // the updateScreen method
@@ -468,6 +478,9 @@ void Core::lateInit() {
 
 // Main loop of the maintenance thread
 void Core::maintenance(bool endlessLoop) {
+
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
 
   // Do an endless loop
   while (1) {

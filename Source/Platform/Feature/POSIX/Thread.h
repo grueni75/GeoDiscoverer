@@ -36,6 +36,7 @@ typedef struct ThreadSignalInfo {
   bool issued;
   bool oneTimeOnly;
 } ThreadSignalInfo;
+enum ThreadPriority { threadPriorityForeground=0, threadPriorityBackgroundHigh=1, threadPriorityBackgroundLow=2 };
 
 class Thread {
 
@@ -44,6 +45,9 @@ public:
 
   // Creates a thread
   ThreadInfo *createThread(ThreadFunction threadFunction, void *threadArgument);
+
+  // Sets the priority of a thread
+  void setThreadPriority(ThreadPriority priority);
 
   // Destroys a thread
   void destroyThread(ThreadInfo *thread);

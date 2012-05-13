@@ -62,10 +62,12 @@ MapEngine::~MapEngine() {
 // Does all action to remove a tile from the map
 void MapEngine::deinitTile(MapTile *t)
 {
+  map->lockAccess();
   map->removePrimitive(t->getVisualizationKey()); // Remove it from the graphic
   t->graphicInvalidated();
   if (t->getIsDummy())   // Delete dummy tiles
     delete t;
+  map->unlockAccess();
 }
 
 // Clear the current map
@@ -83,6 +85,7 @@ void MapEngine::deinitMap()
   // Delete all left-over primitives that were used for debugging
   //DEBUG("deleting debug primitives",NULL);
   if (map) {
+    map->lockAccess();
     GraphicPrimitiveMap::iterator i;
     GraphicPrimitiveMap *primitiveMap = map->getPrimitiveMap();
     std::list<GraphicPrimitive*> primitives;
@@ -102,13 +105,18 @@ void MapEngine::deinitMap()
     for(std::list<GraphicPrimitive*>::const_iterator i=primitives.begin(); i != primitives.end(); i++) {
       delete *i;
     }
+    map->unlockAccess();
   }
 
   // Free graphic objects
   //DEBUG("deleting map",NULL);
-  core->getGraphicEngine()->setMap(NULL);
-  if (map) delete map;
-  map=NULL;
+  if (map) {
+    map->lockAccess();
+    core->getGraphicEngine()->setMap(NULL);
+    map->unlockAccess();
+    delete map;
+    map=NULL;
+  }
 
   // Object is not initialized anymore
   isInitialized=false;
@@ -172,7 +180,9 @@ void MapEngine::initMap()
   }
 
   // Inform the graphic engine about the new objects
+  map->lockAccess();
   core->getGraphicEngine()->setMap(map);
+  map->unlockAccess();
 
   // Force redraw
   forceMapUpdate=true;
@@ -183,6 +193,7 @@ void MapEngine::initMap()
 
 // Remove all debugging primitives
 void MapEngine::removeDebugPrimitives() {
+  map->lockAccess();
   GraphicPrimitiveMap::iterator i;
   GraphicPrimitiveMap *primitiveMap = map->getPrimitiveMap();
   std::list<GraphicPrimitive*> primitives;
@@ -203,6 +214,7 @@ void MapEngine::removeDebugPrimitives() {
   for(std::list<GraphicPrimitive*>::const_iterator i=primitives.begin(); i != primitives.end(); i++) {
     delete *i;
   }
+  map->unlockAccess();
 }
 
 // Set the fade animation
@@ -358,7 +370,9 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
         // Add the tile to the map
         tiles.push_back(tile);
         GraphicObject *v=tile->getVisualization();
+        map->lockAccess();
         tile->setVisualizationKey(map->addPrimitive(v));
+        map->unlockAccess();
 
         // Shall the position be activated immediately?
         if (activateVisPos) {
@@ -593,6 +607,10 @@ void MapEngine::updateMap() {
   bool mapChanged=false;
 
   PROFILE_START;
+
+  // Check if object is initialized
+  if (!isInitialized)
+    return;
 
   // Indicate that the map is currently updated
   updateInProgress=true;

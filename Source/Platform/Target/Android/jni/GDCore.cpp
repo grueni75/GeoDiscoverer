@@ -46,6 +46,7 @@ jmethodID bundleConstructorMethodID=NULL;
 jmethodID bundlePutStringMethodID=NULL;
 jmethodID listAddMethodID=NULL;
 jmethodID addMessageMethodID=NULL;
+jmethodID setThreadPriorityMethodID=NULL;
 
 // Called when the library is loaded
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
@@ -171,6 +172,11 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_ini
   executeAppCommandMethodID=GDApp_findJavaMethod(env,"executeAppCommand","(Ljava/lang/String;)V");
   if (!executeAppCommandMethodID) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find executeAppCommand method!");
+    exit(1);
+  }
+  setThreadPriorityMethodID=GDApp_findJavaMethod(env,"setThreadPriority","(I)V");
+  if (!setThreadPriorityMethodID) {
+    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find setThreadPriorityMethodID method!");
     exit(1);
   }
   bundleConstructorMethodID = env->GetMethodID(bundleClass, "<init>","()V");
@@ -463,6 +469,22 @@ void GDApp_executeAppCommand(std::string command)
 
   // Release the env
   env->DeleteLocalRef(commandJavaString);
+  GDApp_releaseJNIEnv(env,isAttached);
+}
+
+// Sets the thread priority
+void GDApp_setThreadPriority(int priority)
+{
+  JNIEnv *env;
+  bool isAttached = false;
+
+  // Get the environment pointer
+  env=GDApp_obtainJNIEnv(isAttached);
+
+  // Call the method
+  env->CallVoidMethod(coreObject, setThreadPriorityMethodID, priority);
+
+  // Release the env
   GDApp_releaseJNIEnv(env,isAttached);
 }
 

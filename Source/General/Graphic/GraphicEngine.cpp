@@ -126,9 +126,13 @@ void GraphicEngine::draw(bool forceRedraw) {
   }
 
   // Let the map primitives work
-  if ((map)&&(map->work(currentTime))) {
-    //DEBUG("requesting scene redraw due to map work result",NULL);
-    redrawScene=true;
+  if (map) {
+    map->lockAccess();
+    if (map->work(currentTime)) {
+      //DEBUG("requesting scene redraw due to map work result",NULL);
+      redrawScene=true;
+    }
+    map->unlockAccess();
   }
 
   // Let the path animators primitives work
@@ -187,10 +191,14 @@ void GraphicEngine::draw(bool forceRedraw) {
   unlockCompassConeIcon();
 
   // Check if the map object has changed
-  if ((map)&&(map->getIsUpdated())) {
-    //DEBUG("requesting scene redraw due to changed map object",NULL);
-    redrawScene=true;
-    map->setIsUpdated(false);
+  if (map)  {
+    map->lockAccess();
+    if (map->getIsUpdated()) {
+      //DEBUG("requesting scene redraw due to changed map object",NULL);
+      redrawScene=true;
+      map->setIsUpdated(false);
+    }
+    map->unlockAccess();
   }
 
   // Check if the paths object has changed
@@ -245,6 +253,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     // Draw all primitives of the map object
     if (map) {
 
+      map->lockAccess();
       std::list<GraphicPrimitive*> *mapDrawList=map->getDrawList();
       for(std::list<GraphicPrimitive *>::const_iterator i=mapDrawList->begin(); i != mapDrawList->end(); i++) {
 
@@ -381,6 +390,7 @@ void GraphicEngine::draw(bool forceRedraw) {
             break;
         }
       }
+      map->unlockAccess();
     }
 
     PROFILE_ADD("map drawing");
