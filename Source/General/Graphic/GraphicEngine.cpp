@@ -40,12 +40,14 @@ GraphicEngine::GraphicEngine() {
   locationAccuracyRadiusX=0;
   locationAccuracyRadiusY=0;
   locationIconMutex=core->getThread()->createMutex();
+  targetIconMutex=core->getThread()->createMutex();
   centerIconTimeout=core->getConfigStore()->getIntValue("Graphic","centerIconTimeout");
   centerIcon.setColor(GraphicColor(255,255,255,0));
-  locationIcon.setColor(GraphicColor(255,255,255,255));
+  locationIcon.setColor(GraphicColor(255,255,255,0));
   compassConeIcon.setColor(core->getConfigStore()->getGraphicColorValue("Graphic/CompassConeColor"));
   compassConeIcon.setAngle(std::numeric_limits<double>::max());
   compassConeIconMutex=core->getThread()->createMutex();
+  targetIcon.setColor(GraphicColor(255,255,255,0));
   lastCenterIconFadeStartTime=0;
   isDrawing=false;
   lastDrawingStartTime=0;
@@ -72,12 +74,14 @@ void GraphicEngine::recreateGraphic() {
   centerIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","centerIconFilename"));
   lockLocationIcon();
   locationIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","locationIconFilename"));
-  locationIcon.setColor(GraphicColor(255,255,255,0));
   unlockLocationIcon();
   pathDirectionIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathDirectionIconFilename"));
   lockCompassConeIcon();
   compassConeIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","compassConeFilename"));
   unlockCompassConeIcon();
+  lockTargetIcon();
+  targetIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","targetIconFilename"));
+  unlockTargetIcon();
 }
 
 // Deinits dynamic data
@@ -87,6 +91,7 @@ void GraphicEngine::deinit() {
   locationIcon.deinit();
   unlockLocationIcon();
   pathDirectionIcon.deinit();
+  targetIcon.deinit();
   lockCompassConeIcon();
   compassConeIcon.deinit();
   unlockCompassConeIcon();
@@ -163,6 +168,14 @@ void GraphicEngine::draw(bool forceRedraw) {
     redrawScene=true;
   }
 
+  // Let the target primitive work
+  lockTargetIcon();
+  if (targetIcon.work(currentTime)) {
+    //DEBUG("requesting scene redraw due to target icon work result",NULL);
+    redrawScene=true;
+  }
+  unlockTargetIcon();
+
   // Did the pos change?
   if (pos!=previousPosition) {
 
@@ -180,6 +193,15 @@ void GraphicEngine::draw(bool forceRedraw) {
     locationIcon.setIsUpdated(false);
   }
   unlockLocationIcon();
+
+  // Did the target icon change?
+  lockTargetIcon();
+  if (targetIcon.getIsUpdated()) {
+    //DEBUG("requesting scene redraw due to changed location icon",NULL);
+    redrawScene=true;
+    targetIcon.setIsUpdated(false);
+  }
+  unlockTargetIcon();
 
   // Did the compass cone icon change?
   lockCompassConeIcon();
@@ -290,6 +312,18 @@ void GraphicEngine::draw(bool forceRedraw) {
 
                     // Set color
                     screen->setColor(rectangle->getColor().getRed(),rectangle->getColor().getGreen(),rectangle->getColor().getBlue(),rectangle->getColor().getAlpha());
+                    /*if (rectangle->getColor().getRed()==0) {
+                      DEBUG("red component is 0",NULL);
+                    }
+                    if (rectangle->getColor().getGreen()==0) {
+                      DEBUG("green component is 0",NULL);
+                    }
+                    if (rectangle->getColor().getBlue()==0) {
+                      DEBUG("blue component is 0",NULL);
+                    }
+                    if (rectangle->getColor().getAlpha()==0) {
+                      DEBUG("alpha component is 0",NULL);
+                    }*/
 
                     // Dimm the color in debug mode
                     // This allows to differntiate the tiles
@@ -304,7 +338,7 @@ void GraphicEngine::draw(bool forceRedraw) {
                     //DEBUG("x1=%d y1=%d x2=%d y2=%d",x1,y1,x2,y2);
                     screen->drawRectangle(x1,y1,x2,y2,rectangle->getTexture(),rectangle->getFilled());
 
-                    //DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
+                    //  DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
 
                     // If the texture is not defined, draw a box around it and it's name inside the box
                     if ((primitive->getName().size()!=0)&&(rectangle->getTexture()==screen->getTextureNotDefined())||(debugMode)) {
@@ -400,7 +434,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     // Draw the location icon and the compass cone
     //DEBUG("locationIcon.getColor().getAlpha()=%d locationIcon.getX()=%d locationIcon.getY()=%d",locationIcon.getColor().getAlpha(),locationIcon.getX(),locationIcon.getY());
     lockLocationIcon();
-    if (locationIcon.getColor().getAlpha()==255) {
+    if (locationIcon.getColor().getAlpha()>=0) {
 
       // Translate to the current location
       screen->startObject();
@@ -448,6 +482,33 @@ void GraphicEngine::draw(bool forceRedraw) {
     //DEBUG("locationAccuradyRadiusX=%d locationAccuracyRadiusY=%d",locationAccuracyRadiusX,locationAccuracyRadiusY);
 
     PROFILE_ADD("location drawing");
+
+    // Draw the target icon
+    lockTargetIcon();
+    if (targetIcon.getColor().getAlpha()>0) {
+
+      // Translate to the target location
+      screen->startObject();
+      screen->translate(targetIcon.getX(),targetIcon.getY(),0);
+      screen->scale(backScale,backScale,1.0);
+
+      // Draw the target icon
+      screen->startObject();
+      screen->scale(targetIcon.getScale(),targetIcon.getScale(),1.0);
+      screen->rotate(targetIcon.getAngle(),0,0,1);
+      x1=-targetIcon.getWidth()/2;
+      y1=-targetIcon.getHeight()/2;
+      x2=x1+targetIcon.getWidth();
+      y2=y1+targetIcon.getHeight();
+      screen->rotate(targetIcon.getAngle(),0,0,1);
+      screen->setColor(targetIcon.getColor().getRed(),targetIcon.getColor().getGreen(),targetIcon.getColor().getBlue(),targetIcon.getColor().getAlpha());
+      screen->drawRectangle(x1,y1,x2,y2,targetIcon.getTexture(),true);
+      screen->endObject();
+      screen->endObject();
+    }
+    unlockTargetIcon();
+
+    PROFILE_ADD("target drawing");
 
     // End the map object
     screen->endObject();
@@ -529,6 +590,7 @@ GraphicEngine::~GraphicEngine() {
   core->getThread()->destroyMutex(posMutex);
   core->getThread()->destroyMutex(pathAnimatorsMutex);
   core->getThread()->destroyMutex(locationIconMutex);
+  core->getThread()->destroyMutex(targetIconMutex);
   core->getThread()->destroyMutex(compassConeIconMutex);
   core->getThread()->destroyMutex(statsMutex);
 }

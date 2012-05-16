@@ -124,6 +124,7 @@ void MapCache::removeTile(MapTile *tile) {
   if (i==cachedTiles.end()) {
     uncachedTiles.remove(tile);
   } else {
+    tile->getVisualization()->lockAccess();
     GraphicRectangle *r=tile->getRectangle();
     GraphicTextureInfo m=r->getTexture();
     usedTextures.remove(m);
@@ -131,6 +132,7 @@ void MapCache::removeTile(MapTile *tile) {
     cachedTiles.erase(i);
     r->setTexture(core->getScreen()->getTextureNotDefined());
     r->setZ(0);
+    tile->getVisualization()->unlockAccess();
     tile->setIsCached(false);
   }
 }
@@ -198,12 +200,14 @@ void MapCache::updateMapTileImages() {
       cachedTiles.pop_front();
       t->setIsCached(false);
       uncachedTiles.push_back(t);
+      t->getVisualization()->lockAccess();
       GraphicRectangle *r=t->getRectangle();
       GraphicTextureInfo m=r->getTexture();
       usedTextures.remove(m);
       unusedTextures.push_back(m);
       r->setTexture(core->getScreen()->getTextureNotDefined());
       r->setZ(0);
+      t->getVisualization()->unlockAccess();
     }
 
     // Do some sanity checks
@@ -227,25 +231,32 @@ void MapCache::updateMapTileImages() {
     //t->getVisualization()->setZ(1);
 
     // Update the texture
-    //DEBUG("updating tile texture",NULL);
+    /*std::list<std::string> names = t->getVisName();
+    std::string firstName = names.front();
+    names.pop_front();
+    std::string secondName = names.front();
+    DEBUG("updating texture for tile %s (%s)",firstName.c_str(),secondName.c_str());*/
+    t->getVisualization()->lockAccess();
     GraphicRectangle *r=t->getRectangle();
     if (r->getTexture()!=core->getScreen()->getTextureNotDefined()) {
       FATAL("not cached tile has a texture defined",NULL);
       break;
     }
+    t->getVisualization()->unlockAccess();
     GraphicTextureInfo m=unusedTextures.front();
     unusedTextures.pop_front();
     usedTextures.push_back(m);
     currentTile=t;
     tileTextureAvailable=true;
     core->tileTextureAvailable();
-    tileTextureAvailable=false;
 
     // Remove the tile from the uncached list and add it to the cached
     t->setIsCached(true);
+    t->getVisualization()->lockAccess();
     GraphicColor c=r->getColor();
     c.setAlpha(cachedTileAlpha);
     r->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),r->getColor(),c);
+    t->getVisualization()->unlockAccess();
     uncachedTiles.remove(t);
     cachedTiles.push_back(t);
 
@@ -263,10 +274,12 @@ void MapCache::updateMapTileImages() {
 void MapCache::setNextTileTexture()
 {
   GraphicTextureInfo m=usedTextures.back();
+  currentTile->getVisualization()->lockAccess();
   GraphicRectangle *r=currentTile->getRectangle();
   r->setTexture(m);
   core->getScreen()->setTextureImage(m,tileImageScratch,currentTile->getWidth(),currentTile->getHeight());
   tileTextureAvailable=false;
+  currentTile->getVisualization()->unlockAccess();
 }
 
 // Indicates that there was a change in the map tile visibility

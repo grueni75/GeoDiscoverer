@@ -92,7 +92,7 @@ protected:
   void createSearchTree(MapTile *parentNode, bool leftBranch, PictureBorder dimension, std::vector<Int> remainingMapTilesIndex);
 
   // Returns the map tile in which the position lies
-  MapTile *findMapTileByPictureCoordinates(MapPosition pos, MapTile *currentTile, PictureBorder currentDimension);
+  MapTile *findMapTileByPictureCoordinate(MapPosition pos, MapTile *currentTile, PictureBorder currentDimension);
 
   // Returns the map tile that lies in a given area and that is closest to the given neigbor
   MapTile *findMapTileByPictureArea(MapArea area, MapTile *preferredNeigbor, MapTile *currentTile, PictureBorder currentDimension, double &bestDistance, bool &betterTileFound, std::list<MapTile*> *foundMapTiles=NULL);
@@ -121,7 +121,7 @@ public:
   static bool calibrationFileIsSupported(std::string extension);
 
   // Returns the map tile in which the position lies
-  MapTile *findMapTileByPictureCoordinates(MapPosition pos);
+  MapTile *findMapTileByPictureCoordinate(MapPosition pos);
 
   // Returns the map tile that lies in a given area and that is closest to the given neigbor
   MapTile *findMapTileByPictureArea(MapArea area, MapTile *preferredNeigbor);

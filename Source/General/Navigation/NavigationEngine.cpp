@@ -49,6 +49,8 @@ NavigationEngine::NavigationEngine() {
   recordedTrack=NULL;
   backgroundLoaderThreadInfo=NULL;
   statusMutex=core->getThread()->createMutex();
+  targetPosMutex=core->getThread()->createMutex();
+  targetVisible=false;
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -74,10 +76,16 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(compassBearingMutex);
   core->getThread()->destroyMutex(updateGraphicsMutex);
   core->getThread()->destroyMutex(statusMutex);
+  core->getThread()->destroyMutex(targetPosMutex);
 }
 
 // Initializes the engine
 void NavigationEngine::init() {
+
+  // Set the animation of the target
+  GraphicRectangle *targetIcon = core->getGraphicEngine()->lockTargetIcon();
+  targetIcon->setRotateAnimation(0,0,360,true);
+  core->getGraphicEngine()->unlockTargetIcon();
 
   // Set the color of the recorded track
   ConfigStore *c=core->getConfigStore();
@@ -130,6 +138,11 @@ void NavigationEngine::init() {
     }
   }
   unlockRoutes();
+
+  // Prepare the target
+  if (c->getIntValue("Navigation/Target","visible")) {
+    showTarget(false);
+  }
 
   // Start the background loader
   if (!(backgroundLoaderThreadInfo=core->getThread()->createThread(navigationEngineBackgroundLoaderThread,this)))
@@ -446,7 +459,7 @@ void NavigationEngine::createNewTrack() {
 // Updates navigation-related graphic that is overlayed on the screen
 void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   Int mapDiffX, mapDiffY;
-  bool showCursor;
+  bool showCursor,showTarget;
   bool updatePosition;
   Int visPosX, visPosY, visRadiusX, visRadiusY;
   double visAngle;
@@ -577,6 +590,82 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   core->getGraphicEngine()->unlockCompassConeIcon();
   //DEBUG("after compass cone icon lock",NULL);
 
+  // Update the target icon
+  //DEBUG("before location pos lock",NULL);
+  lockTargetPos();
+  showCursor=false;
+  updatePosition=false;
+  bool updateAnimation=false;
+  if (targetPos.isValid()) {
+    showCursor=true;
+    MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
+    //DEBUG("calibrator=%08x",calibrator);
+    if (!calibrator->setPictureCoordinates(targetPos)) {
+      showCursor=false;
+    } else {
+      //DEBUG("locationPos.getX()=%d locationPos.getY()=%d",locationPos.getX(),locationPos.getY());
+      if (!Integer::add(targetPos.getX(),-mapPos.getX(),mapDiffX))
+        showCursor=false;
+      if (!Integer::add(targetPos.getY(),-mapPos.getY(),mapDiffY))
+        showCursor=false;
+      //DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
+      if (!Integer::add(displayArea.getRefPos().getX(),mapDiffX,visPosX))
+        showCursor=false;
+      if (!Integer::add(displayArea.getRefPos().getY(),-mapDiffY,visPosY))
+        showCursor=false;
+      if (showCursor) {
+        updatePosition=true;
+      }
+    }
+    if (targetPos.getIsUpdated()) {
+      updateAnimation=true;
+      targetPos.setIsUpdated(false);
+    }
+  }
+  unlockTargetPos();
+  GraphicRectangle *targetIcon=core->getGraphicEngine()->lockTargetIcon();
+  if (showCursor) {
+    if (updatePosition) {
+      if ((targetIcon->getX()!=visPosX)||((targetIcon->getY()!=visPosY))) {
+        targetIcon->setX(visPosX);
+        targetIcon->setY(visPosY);
+        targetIcon->setIsUpdated(true);
+      }
+    }
+    if (updateAnimation) {
+      GraphicColor endColor=targetIcon->getColor();
+      endColor.setAlpha(255);
+      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor);
+      std::list<GraphicScaleAnimationParameter> scaleAnimationSequence;
+      TimestampInMicroseconds startTime = core->getClock()->getMicrosecondsSinceStart();
+      GraphicScaleAnimationParameter parameter;
+      parameter.setStartFactor(core->getConfigStore()->getDoubleValue("Graphic","targetScaleMaxFactor"));
+      parameter.setEndFactor(core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor"));
+      parameter.setStartTime(startTime);
+      parameter.setDuration(core->getConfigStore()->getIntValue("Graphic","targetInitialScaleDuration"));
+      parameter.setInfinite(false);
+      scaleAnimationSequence.push_back(parameter);
+      parameter.setStartFactor(core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor"));
+      parameter.setEndFactor(core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor"));
+      parameter.setStartTime(startTime+core->getConfigStore()->getIntValue("Graphic","targetInitialScaleDuration"));
+      parameter.setDuration(core->getConfigStore()->getIntValue("Graphic","targetNormalScaleDuration"));
+      parameter.setInfinite(true);
+      scaleAnimationSequence.push_back(parameter);
+      targetIcon->setScaleAnimationSequence(scaleAnimationSequence);
+      targetIcon->setIsUpdated(true);
+    }
+    targetVisible=true;
+  } else {
+    if (targetVisible) {
+      GraphicColor endColor=targetIcon->getColor();
+      endColor.setAlpha(0);
+      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor);
+      targetIcon->setIsUpdated(true);
+      targetVisible=false;
+    }
+  }
+  core->getGraphicEngine()->unlockTargetIcon();
+
   // Unlock the drawing mutex
   core->getThread()->unlockMutex(updateGraphicsMutex);
   //DEBUG("after graphics update",NULL);
@@ -701,13 +790,50 @@ void NavigationEngine::backgroundLoader() {
 }
 
 // Adds a new point of interest
-void NavigationEngine::addPointOfInterest(std::string name, std::string description, double lng, double lat) {
+void NavigationEngine::newPointOfInterest(std::string name, std::string description, double lng, double lat) {
   DEBUG("name=%s description=%s lng=%f lat=%f",name.c_str(),description.c_str(),lng,lat);
-  MapPosition *pos=core->getMapEngine()->lockMapPos();
-  pos->setLng(lng);
-  pos->setLat(lat);
+  setTargetAtGeographicCoordinate(lng,lat,true);
+}
+
+// Sets the target to the center of the map
+void NavigationEngine::setTargetAtMapCenter() {
+  MapPosition *pos = core->getMapEngine()->lockMapPos();
+  setTargetAtGeographicCoordinate(pos->getLng(),pos->getLat(),false);
   core->getMapEngine()->unlockMapPos();
+}
+
+// Makes the target invisible
+void NavigationEngine::hideTarget() {
+  std::string path="Navigation/Target";
+  core->getConfigStore()->setIntValue(path,"visible",0);
+  lockTargetPos();
+  targetPos.invalidate();
+  unlockTargetPos();
   core->getMapEngine()->setForceMapUpdate();
+}
+
+// Shows the current target
+void NavigationEngine::showTarget(bool repositionMap) {
+  std::string path="Navigation/Target";
+  core->getConfigStore()->setIntValue(path,"visible",1);
+  double lng = core->getConfigStore()->getDoubleValue(path,"lng");
+  double lat = core->getConfigStore()->getDoubleValue(path,"lat");
+  lockTargetPos();
+  targetPos.setLng(lng);
+  targetPos.setLat(lat);
+  targetPos.setIsUpdated(true);
+  unlockTargetPos();
+  if (repositionMap)
+    core->getMapEngine()->setMapPos(targetPos);
+  core->getMapEngine()->setForceMapUpdate();
+}
+
+// Shows the current target at the given position
+void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, bool repositionMap) {
+  std::string path="Navigation/Target";
+  core->getConfigStore()->setDoubleValue(path,"lng",lng);
+  core->getConfigStore()->setDoubleValue(path,"lat",lat);
+  showTarget(repositionMap);
 }
 
 }

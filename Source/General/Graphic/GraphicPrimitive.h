@@ -34,27 +34,46 @@ class GraphicPrimitive {
 
 protected:
 
-  GraphicType type;                         // Type of primitive
-  GraphicPrimitive *animator;               // Object to use as the animator
-  std::list<std::string> name;              // Multiline name of primitive
-  Int x;                                    // X coordinate
-  Int y;                                    // Y coordinate
-  Int z;                                    // Z coordinate
-  double angle;                             // Rotation angle in degress
-  GraphicColor color;                       // Color of the primitive
-  GraphicTextureInfo texture;               // Texture of the primitive
-  TimestampInMicroseconds fadeDuration;     // Duration of a fade operation
-  TimestampInMicroseconds fadeStartTime;    // Start of the fade operation
-  TimestampInMicroseconds fadeEndTime;      // End of the fade operation
-  GraphicColor fadeStartColor;              // Start color of a fade operation
-  GraphicColor fadeEndColor;                // Stop color of a fade operation
-  TimestampInMicroseconds blinkDuration;    // Duration to show the highlight color
-  TimestampInMicroseconds blinkPeriod;      // Distance between two blinks
-  GraphicColor blinkHighlightColor;         // Color to use when blink is active
-  GraphicColor blinkOriginalColor;          // Color before the blink started
-  GraphicBlinkMode blinkMode;               // Current blink mode
-  bool isUpdated;                           // Indicates that the primitive has been changed
-  bool destroyTexture;                      // Indicates if the texture shall be destroyed if the object is deleted
+  GraphicType type;                                     // Type of primitive
+  GraphicPrimitive *animator;                           // Object to use as the animator
+  std::list<std::string> name;                          // Multiline name of primitive
+  Int x;                                                // X coordinate
+  Int y;                                                // Y coordinate
+  Int z;                                                // Z coordinate
+  double angle;                                         // Rotation angle in degress
+  double scale;                                         // Scale factor
+  GraphicColor color;                                   // Color of the primitive
+  GraphicTextureInfo texture;                           // Texture of the primitive
+  TimestampInMicroseconds fadeDuration;                 // Duration of a fade operation
+  TimestampInMicroseconds fadeStartTime;                // Start of the fade operation
+  TimestampInMicroseconds fadeEndTime;                  // End of the fade operation
+  GraphicColor fadeStartColor;                          // Start color of a fade operation
+  GraphicColor fadeEndColor;                            // Stop color of a fade operation
+  TimestampInMicroseconds blinkDuration;                // Duration to show the highlight color
+  TimestampInMicroseconds blinkPeriod;                  // Distance between two blinks
+  GraphicColor blinkHighlightColor;                     // Color to use when blink is active
+  GraphicColor blinkOriginalColor;                      // Color before the blink started
+  GraphicBlinkMode blinkMode;                           // Current blink mode
+  TimestampInMicroseconds rotateDuration;               // Duration of a rotate operation
+  TimestampInMicroseconds rotateStartTime;              // Start of the rotate operation
+  TimestampInMicroseconds rotateEndTime;                // End of the rotate operation
+  double rotateStartAngle;                              // Start angle of rotation
+  double rotateEndAngle;                                // End angle of rotation
+  bool rotateInfinite;                                  // Rotation is repeated infinitely if set
+  TimestampInMicroseconds scaleDuration;                // Duration of a scale operation
+  TimestampInMicroseconds scaleStartTime;               // Start of the scale operation
+  TimestampInMicroseconds scaleEndTime;                 // End of the scale operation
+  double scaleStartFactor;                              // Start factor of scale operation
+  double scaleEndFactor;                                // End factor of scale operation
+  bool scaleInfinite;                                   // Rotation is repeated infinitely if set
+  bool isUpdated;                                       // Indicates that the primitive has been changed
+  bool destroyTexture;                                  // Indicates if the texture shall be destroyed if the object is deleted
+
+  // List of scale animations to execute on this object
+  std::list<GraphicScaleAnimationParameter> scaleAnimationSequence;
+
+  // Sets the next scale animation step from the sequence
+  void setNextScaleAnimationStep();
 
 public:
 
@@ -74,10 +93,16 @@ public:
   }
 
   // Sets a new fade target
-  virtual void setFadeAnimation(TimestampInMicroseconds start, GraphicColor startColor, GraphicColor endColor);
+  virtual void setFadeAnimation(TimestampInMicroseconds startTime, GraphicColor startColor, GraphicColor endColor);
 
   // Activates or disactivates blinking
   void setBlinkAnimation(bool active, GraphicColor highlightColor);
+
+  // Sets a new rotation target
+  void setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite);
+
+  // Sets a new scale target
+  void setScaleAnimation(TimestampInMicroseconds startTime, double startFactor, double endFactor, bool infinite, TimestampInMicroseconds duration);
 
   // Let the primitive work
   // For example, animations are handled in this method
@@ -90,6 +115,12 @@ public:
   virtual void optimize();
 
   // Getters and setters
+  void setScaleAnimationSequence(std::list<GraphicScaleAnimationParameter> scaleAnimationSequence);
+
+  double getScale() const {
+    return scale;
+  }
+
   GraphicColor getColor() const
   {
       return color;

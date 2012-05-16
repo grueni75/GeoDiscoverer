@@ -175,6 +175,9 @@ public:
   // Does a late initialization of certain objects
   void lateInit();
 
+  // Called when the initialization is finished
+  void initComplete();
+
   // Stops the map update thread
   void interruptMapUpdate();
 
@@ -321,6 +324,8 @@ extern Core *core;
 #include <Dialog.h>
 #include <Screen.h>
 #include <GraphicPosition.h>
+#include <GraphicAnimationParameter.h>
+#include <GraphicScaleAnimationParameter.h>
 #include <GraphicPrimitive.h>
 #include <GraphicPointBuffer.h>
 #include <GraphicLine.h>
@@ -358,6 +363,7 @@ extern Core *core;
 #include <NavigationPathTileInfo.h>
 #include <NavigationPathVisualization.h>
 #include <NavigationPath.h>
+#include <NavigationTarget.h>
 #include <NavigationEngine.h>
 #include <Commander.h>
 

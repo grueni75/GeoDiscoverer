@@ -35,11 +35,17 @@ class WidgetEngine {
 
 protected:
 
-  WidgetPageMap pageMap;   // Holds all available widget pages
-  WidgetPage *currentPage; // The currently selected page
-  GraphicColor selectedWidgetColor; // Color of selected widgets
-  TimestampInMicroseconds buttonRepeatDelay; // Time to wait before dispatching repeating commands
-  TimestampInMicroseconds buttonRepeatPeriod; // Time distance between command dispatching
+  WidgetPageMap pageMap;                                // Holds all available widget pages
+  WidgetPage *currentPage;                              // The currently selected page
+  GraphicColor selectedWidgetColor;                     // Color of selected widgets
+  TimestampInMicroseconds buttonRepeatDelay;            // Time to wait before dispatching repeating commands
+  TimestampInMicroseconds buttonRepeatPeriod;           // Time distance between command dispatching
+  TimestampInMicroseconds firstStableTouchDownTime;     // Time of the first touch down
+  Int lastTouchDownX, lastTouchDownY;                   // Coordinates of the last touch down
+  bool isTouched;                                       // Indicates that the screen is currently touched
+  bool contextMenuIsShown;                              // Indicates that the context menu is currently shown
+  TimestampInMicroseconds contextMenuDelay;             // Time that must passed before the context menu is displayed
+
 
   // Adds a widget to a page
   void addWidgetToPage(
@@ -51,6 +57,9 @@ protected:
     UByte activeRed, UByte activeGreen, UByte activeBlue, UByte activeAlpha,
     UByte inactiveRed, UByte inactiveGreen, UByte inactiveBlue, UByte inactiveAlpha,
     ParameterMap parameters);
+
+  // Shows the context menu
+  void showContextMenu();
 
 public:
 

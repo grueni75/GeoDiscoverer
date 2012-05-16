@@ -90,7 +90,10 @@ void NavigationPathVisualization::recreateGraphic() {
     GraphicLine *line=i->second->getGraphicLine();
     if (line) line->recreate();
     GraphicRectangleList *rectangleList=i->second->getGraphicRectangeList();
-    if (rectangleList) rectangleList->recreate();
+    if (rectangleList) {
+      rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
+      rectangleList->recreate();
+    }
   }
 }
 

@@ -74,7 +74,7 @@ protected:
   MapContainer *findMapContainerByGeographicArea(MapArea area, MapTile *preferredNeigbor, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, double &bestDistance, MapArea &bestTranslatedArea, bool &betterMapContainerFound, std::list<MapContainer*> *foundMapContainers=NULL);
 
   // Returns the map tile in which the position lies
-  MapContainer *findMapContainerByGeographicCoordinates(MapPosition pos, MapContainer *preferredMapContainer, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, MapPosition &bestPos, double &distToNearestLngScale, double &distToNearestLatScale, bool &betterMapContainerFound);
+  MapContainer *findMapContainerByGeographicCoordinate(MapPosition pos, MapContainer *preferredMapContainer, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, MapPosition &bestPos, double &distToNearestLngScale, double &distToNearestLatScale, bool &betterMapContainerFound, std::list<MapContainer*> *foundMapContainers=NULL);
 
   // Inserts a new map container in the search tree
   void insertNodeIntoSearchTree(MapContainer *newMapContainer, Int zoomLevel, MapContainerTreeNode* prevMapContainerTreeNode, bool useRightChild, GeographicBorder currentDimension);
@@ -102,6 +102,9 @@ public:
 
   // Returns a list of map containers that overlap the given area
   std::list<MapContainer*> findMapContainersByGeographicArea(MapArea area);
+
+  // Returns a list of map containers in which the given position lies
+  std::list<MapContainer*> findMapContainersByGeographicCoordinate(MapPosition pos);
 
   // Initializes the progress bar
   void openProgress(std::string title, Int valueMax);

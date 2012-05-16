@@ -310,25 +310,25 @@ MapTile *MapSource::findMapTileByGeographicCoordinate(MapPosition pos, Int zoomL
   MapContainerTreeNode *startNode=zoomLevelSearchTrees[zoomLevel];
 
   // First find the map container matching the given position
-  MapContainer *foundMapContainer=findMapContainerByGeographicCoordinates(pos,preferredMapContainer,startNode,GeographicBorderLatNorth,bestPos,distToNearestLngScale,distToNearestLatScale,betterMapContainerFound);
+  MapContainer *foundMapContainer=findMapContainerByGeographicCoordinate(pos,preferredMapContainer,startNode,GeographicBorderLatNorth,bestPos,distToNearestLngScale,distToNearestLatScale,betterMapContainerFound);
   //DEBUG("found map container = %08x",foundMapContainer);
 
   // If no container can be found, try to fall back to zoom level 0 (all tiles)
   if ((!foundMapContainer)&&(zoomLevel!=0)&&(!lockZoomLevel)) {
     startNode=zoomLevelSearchTrees[0];
-    foundMapContainer=findMapContainerByGeographicCoordinates(pos,preferredMapContainer,startNode,GeographicBorderLatNorth,bestPos,distToNearestLngScale,distToNearestLatScale,betterMapContainerFound);
+    foundMapContainer=findMapContainerByGeographicCoordinate(pos,preferredMapContainer,startNode,GeographicBorderLatNorth,bestPos,distToNearestLngScale,distToNearestLatScale,betterMapContainerFound);
   }
 
   // Now search the closest tile in the map
   if (foundMapContainer) {
-    return foundMapContainer->findMapTileByPictureCoordinates(bestPos);
+    return foundMapContainer->findMapTileByPictureCoordinate(bestPos);
   } else {
     return NULL;
   }
 }
 
 // Returns the map tile in which the position lies
-MapContainer *MapSource::findMapContainerByGeographicCoordinates(MapPosition pos, MapContainer *preferredMapContainer, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, MapPosition &bestPos, double &distToNearestLngScale, double &distToNearestLatScale, bool &betterMapContainerFound) {
+MapContainer *MapSource::findMapContainerByGeographicCoordinate(MapPosition pos, MapContainer *preferredMapContainer, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, MapPosition &bestPos, double &distToNearestLngScale, double &distToNearestLatScale, bool &betterMapContainerFound, std::list<MapContainer*> *foundMapContainers) {
 
   MapContainer *bestMapContainer=NULL,*bestMapContainerLeft=NULL,*bestMapContainerRight=NULL;
   bool betterMapContainerFoundRight=NULL,betterMapContainerFoundLeft=NULL;
@@ -360,6 +360,11 @@ MapContainer *MapSource::findMapContainerByGeographicCoordinates(MapPosition pos
 
         double distToLngScale=fabs(currentMapContainer->getLngScale()-pos.getLngScale());
         double distToLatScale=fabs(currentMapContainer->getLatScale()-pos.getLatScale());
+
+        // Shall we return all matching containers?
+        if (foundMapContainers) {
+          foundMapContainers->push_back(currentMapContainer);
+        }
 
         // Use the map that matches the scale closest if lockScale is true
         bool newCandidateFound=false;
@@ -420,13 +425,13 @@ MapContainer *MapSource::findMapContainerByGeographicCoordinates(MapPosition pos
   distToNearestLngScaleRight=distToNearestLngScale;
   bestPosRight=bestPos;
   if (useRightChild) {
-    bestMapContainerRight=findMapContainerByGeographicCoordinates(pos,preferredMapContainer,currentMapContainerTreeNode->getRightChild(),nextDimension,bestPosRight,distToNearestLngScaleRight,distToNearestLatScaleRight,betterMapContainerFoundRight);
+    bestMapContainerRight=findMapContainerByGeographicCoordinate(pos,preferredMapContainer,currentMapContainerTreeNode->getRightChild(),nextDimension,bestPosRight,distToNearestLngScaleRight,distToNearestLatScaleRight,betterMapContainerFoundRight,foundMapContainers);
   }
   distToNearestLatScaleLeft=distToNearestLatScaleRight;
   distToNearestLngScaleLeft=distToNearestLngScaleRight;
   bestPosLeft=bestPosRight;
   if ((useLeftChild)&&(!preferredMapContainer||bestMapContainerRight!=preferredMapContainer)) {
-    bestMapContainerLeft=findMapContainerByGeographicCoordinates(pos,preferredMapContainer,currentMapContainerTreeNode->getLeftChild(),nextDimension,bestPosLeft,distToNearestLngScaleLeft,distToNearestLatScaleLeft,betterMapContainerFoundLeft);
+    bestMapContainerLeft=findMapContainerByGeographicCoordinate(pos,preferredMapContainer,currentMapContainerTreeNode->getLeftChild(),nextDimension,bestPosLeft,distToNearestLngScaleLeft,distToNearestLatScaleLeft,betterMapContainerFoundLeft,foundMapContainers);
   }
 
   // Decide on the result
@@ -658,11 +663,35 @@ std::list<MapContainer*> MapSource::findMapContainersByGeographicArea(MapArea ar
   bool betterMapContainerFound=false;
   std::list<MapContainer*> result;
 
+  // Abort if no search tree is available
+  if (zoomLevelSearchTrees.size()==0)
+    return result;
+
   // Get the search tree to use
   MapContainerTreeNode *startNode=zoomLevelSearchTrees[area.getZoomLevel()];
 
   // Find all map containers matching the given area
   findMapContainerByGeographicArea(area,NULL,startNode,GeographicBorderLatNorth,bestDistance,bestTranslatedArea,betterMapContainerFound,&result);
+  return result;
+}
+
+// Returns a list of map containers in which the given position lies
+std::list<MapContainer*> MapSource::findMapContainersByGeographicCoordinate(MapPosition pos) {
+
+  bool betterMapContainerFound=false;
+  MapPosition bestPos;
+  double distToNearestLngScale=-1, distToNearestLatScale=-1;
+  std::list<MapContainer*> result;
+
+  // Do not work if the source has no search trees
+  if (zoomLevelSearchTrees.size()==0)
+    return result;
+
+  // Get the search tree to use
+  MapContainerTreeNode *startNode=zoomLevelSearchTrees[0];
+
+  // Find all map containers matching the given area
+  findMapContainerByGeographicCoordinate(pos,NULL,startNode,GeographicBorderLatNorth,bestPos,distToNearestLngScale,distToNearestLatScale,betterMapContainerFound,&result);
   return result;
 }
 

@@ -42,4 +42,9 @@
 <string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
 <string name="show_messages">Show messages</string>
 <string name="hide_messages">Hide messages</string>
+<string name="set_target_at_map_center">Set target at map center</string>
+<string name="set_target_at_address">Set target at address</string>
+<string name="hide_target">Hide target</string>
+<string name="context_menu_title">Map actions</string>
+<string name="show_target">Show target</string>
 </resources>

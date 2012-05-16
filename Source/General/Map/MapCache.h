@@ -77,7 +77,7 @@ public:
   // Getters and setters
   bool getTileTextureAvailable() const
   {
-      return tileTextureAvailable;
+    return tileTextureAvailable;
   }
 
   void setAbortUpdate()

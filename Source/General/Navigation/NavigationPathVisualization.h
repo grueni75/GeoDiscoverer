@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-// Types for stroing the tile info
+// Types for storing the tile info
 typedef std::map<MapTile*, NavigationPathTileInfo*> NavigationPathTileInfoMap;
 typedef std::pair<MapTile*, NavigationPathTileInfo*> NavigationPathTileInfoPair;
 

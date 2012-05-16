@@ -56,6 +56,7 @@ protected:
   double latScale;                                  // Scale factor for latitude
   double lngScale;                                  // Scale factor for longitude
   std::string source;                               // Source of this position
+  bool isUpdated;                                   // Indicates that the position has been changed
 
   // Returns the text contents of a element node
   bool getText(XMLNode node, std::string &contents);
@@ -118,7 +119,18 @@ public:
   // Checks if the location is valid
   bool isValid();
 
+  // Invalidates the position
+  bool invalidate();
+
   // Getters and setters
+  bool getIsUpdated() const {
+    return isUpdated;
+  }
+
+  void setIsUpdated(bool isUpdated) {
+    this->isUpdated = isUpdated;
+  }
+
   double getDistance() const
   {
       return distance;

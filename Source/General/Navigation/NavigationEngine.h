@@ -87,6 +87,15 @@ protected:
   // Mutex for accessing the status
   ThreadMutexInfo *statusMutex;
 
+  // Current target position
+  MapPosition targetPos;
+
+  // Mutex for accessing the target position
+  ThreadMutexInfo *targetPosMutex;
+
+  // Indicates that the target is currently visible
+  bool targetVisible;
+
 public:
 
   // Constructor
@@ -108,7 +117,19 @@ public:
   void newCompassBearing(double bearing);
 
   // Adds a new point of interest
-  void addPointOfInterest(std::string name, std::string description, double lng, double lat);
+  void newPointOfInterest(std::string name, std::string description, double lng, double lat);
+
+  // Sets the target to the center of the map
+  void setTargetAtMapCenter();
+
+  // Shows the current target
+  void showTarget(bool repositionMap);
+
+  // Shows the current target at the given position
+  void setTargetAtGeographicCoordinate(double lng, double lat, bool repositionMap);
+
+  // Makes the target invisible
+  void hideTarget();
 
   // Saves the recorded track if required
   void backup();
@@ -158,6 +179,15 @@ public:
   }
   std::string getRoutePath() const {
     return core->getHomePath() + "/Route";
+  }
+  MapPosition *lockTargetPos()
+  {
+      core->getThread()->lockMutex(targetPosMutex);
+      return &targetPos;
+  }
+  void unlockTargetPos()
+  {
+      core->getThread()->unlockMutex(targetPosMutex);
   }
 
   std::list<NavigationPath*> *lockRoutes()

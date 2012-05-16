@@ -90,7 +90,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   boolean forceRedraw = false;
   
   /** Indicates that the last frame has been handled by the core */
-  boolean lastFrameDrawnByCore = false;
+  boolean lastFrameDrawnByCore = true;
   
   /** Indicates that the splash is currently shown */
   boolean splashIsVisible = false;
@@ -181,10 +181,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       if (initialized) {
         coreInitialized=true;
         executeAppCommand("updateWakeLock()");
-        for (String cmd : queuedCoreCommands) {
-          executeCoreCommandInt(cmd);
-        }
-        queuedCoreCommands.clear();
       }
       coreStopped=false;
       if (!changeScreenCommand.equals("")) {        
@@ -302,13 +298,20 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Execute an command */
   public void executeAppCommand(String cmd)
   {
-    if (activity!=null) {
-      Message m=Message.obtain(activity.coreMessageHandler);
-      m.what = ViewMap.EXECUTE_COMMAND;
-      Bundle b = new Bundle();
-      b.putString("command", cmd);
-      m.setData(b);    
-      activity.coreMessageHandler.sendMessage(m);
+    if (cmd.equals("initComplete()")) {
+      for (String queuedCmd : queuedCoreCommands) {
+        executeCoreCommandInt(queuedCmd);
+      }
+      queuedCoreCommands.clear();      
+    } else {
+      if (activity!=null) {
+        Message m=Message.obtain(activity.coreMessageHandler);
+        m.what = ViewMap.EXECUTE_COMMAND;
+        Bundle b = new Bundle();
+        b.putString("command", cmd);
+        m.setData(b);    
+        activity.coreMessageHandler.sendMessage(m);
+      }
     }
   }
 

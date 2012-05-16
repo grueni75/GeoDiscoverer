@@ -45,6 +45,9 @@ protected:
   // Location indicator icon
   GraphicRectangle locationIcon;
 
+  // Target indicator icon
+  GraphicRectangle targetIcon;
+
   // Path direction icon
   GraphicRectangle pathDirectionIcon;
 
@@ -78,6 +81,9 @@ protected:
 
   // Mutex for accessing the location icon
   ThreadMutexInfo *locationIconMutex;
+
+  // Mutex for accessing the target icon
+  ThreadMutexInfo *targetIconMutex;
 
   // Mutex for accessing the compass cone icon
   ThreadMutexInfo *compassConeIconMutex;
@@ -182,6 +188,16 @@ public:
     core->getThread()->unlockMutex(locationIconMutex);
   }
 
+  GraphicRectangle *lockTargetIcon()
+  {
+    core->getThread()->lockMutex(targetIconMutex);
+    return &targetIcon;
+  }
+
+  void unlockTargetIcon()
+  {
+    core->getThread()->unlockMutex(targetIconMutex);
+  }
 
   GraphicRectangle *lockCompassConeIcon()
   {
@@ -197,6 +213,11 @@ public:
   GraphicRectangle *getPathDirectionIcon()
   {
       return &pathDirectionIcon;
+  }
+
+  GraphicRectangle *getTargetIcon()
+  {
+      return &targetIcon;
   }
 
   Int getLocationAccuracyRadiusX() const

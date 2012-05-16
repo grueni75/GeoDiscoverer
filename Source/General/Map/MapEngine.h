@@ -36,6 +36,7 @@ protected:
   std::list<MapTile *> tiles;                     // List of tiles the map consists of
   GraphicObject *map;                             // Graphical representation of the map
   MapPosition mapPos;                             // The current position in the map
+  MapPosition requestedMapPos;                    // The position to set during the next update
   ThreadMutexInfo *mapPosMutex;                   // Mutex for accessing the map position
   MapPosition locationPos;                        // The current location of the user
   ThreadMutexInfo *locationPosMutex;              // Mutex for accessing the location position
@@ -51,8 +52,10 @@ protected:
   bool abortUpdate;                               // Indicates that the current update shall be stopped
   bool updateInProgress;                          // Indicates if the map is currently being updated
   bool forceMapUpdate;                            // Force an update of the map on the next call
+  bool forceMapRecreation;                        // Force a complete recreation of the map on the next call
   bool forceCacheUpdate;                          // Force an update of the map cache on the next call
-  ThreadMutexInfo *forceCacheUpdateMutex;         // Mutex for accessing the force map update flag
+  ThreadMutexInfo *forceMapUpdateMutex;           // Mutex for accessing the force map update flag
+  ThreadMutexInfo *forceCacheUpdateMutex;         // Mutex for accessing the force cache update flag
   ThreadMutexInfo *locationPos2visPosMutex;       // Mutex for accessing the locationPos2visPos* variables
   Int locationPos2visPosOffsetX;                  // X offset from the location pos to the visual position
   Int locationPos2visPosOffsetY;                  // Y offset from the location pos to the visual position
@@ -128,9 +131,15 @@ public:
   {
       core->getThread()->unlockMutex(compassBearingMutex);
   }
+  void setForceMapRecreation()
+  {
+    forceMapRecreation=true;
+  }
   void setForceMapUpdate()
   {
+    core->getThread()->lockMutex(forceMapUpdateMutex);
     forceMapUpdate=true;
+    core->getThread()->unlockMutex(forceMapUpdateMutex);
   }
   void setForceCacheUpdate()
   {
@@ -147,6 +156,14 @@ public:
   void unlockMapPos()
   {
       core->getThread()->unlockMutex(mapPosMutex);
+  }
+  void setMapPos(MapPosition mapPos)
+  {
+      bool updateMap = false;
+      core->getThread()->lockMutex(mapPosMutex);
+      requestedMapPos = mapPos;
+      core->getThread()->unlockMutex(mapPosMutex);
+      setForceMapUpdate();
   }
 
   MapArea *lockDisplayArea()

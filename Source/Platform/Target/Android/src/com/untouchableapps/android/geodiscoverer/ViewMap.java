@@ -148,6 +148,55 @@ public class ViewMap extends GDActivity {
     }
   }
   
+  // Shows the context menu
+  void showContextMenu() {
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setTitle(R.string.context_menu_title);
+    builder.setIcon(android.R.drawable.ic_menu_mapmode);
+    String[] items = { 
+      getString(R.string.set_target_at_map_center), 
+      getString(R.string.set_target_at_address), 
+      getString(R.string.show_target), 
+      getString(R.string.hide_target), 
+    };
+    builder.setItems(items, 
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            switch(which) {
+              case 0: coreObject.executeCoreCommand("setTargetAtMapCenter()"); break;
+              case 1: break;
+              case 2: coreObject.executeCoreCommand("showTarget()"); break;
+              case 3: coreObject.executeCoreCommand("hideTarget()"); break;
+            }
+          }
+        }
+    );
+    builder.setCancelable(true);
+    AlertDialog alert = builder.create();
+    alert.show();    
+  }
+  
+  /* Let the user update the address
+  AlertDialog.Builder builder = new AlertDialog.Builder(this);
+  builder.setTitle(R.string.address_dialog_title);
+  builder.setMessage(R.string.address_dialog_message);
+  builder.setIcon(android.R.drawable.ic_menu_mapmode);
+  builder.setItems(items, 
+      new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int which) {
+          switch(which) {
+            case 0: coreObject.executeCoreCommand("setTargetAtMapCenter()"); break;
+            case 1: break;
+            case 2: coreObject.executeCoreCommand("showTarget()"); break;
+            case 3: coreObject.executeCoreCommand("hideTarget()"); break;
+          }
+        }
+      }
+  );
+  builder.setCancelable(true);
+  AlertDialog alert = builder.create();
+  alert.show();*/    
+  
   // Communication with the native core
   public static final int EXECUTE_COMMAND = 0;
   
@@ -258,6 +307,10 @@ public class ViewMap extends GDActivity {
                   }
                   rootFrameLayout.requestLayout();
                 }
+                commandExecuted=true;
+              }
+              if (commandFunction.equals("showContextMenu")) {
+                showContextMenu();
                 commandExecuted=true;
               }
               if (!commandExecuted) {
@@ -373,8 +426,8 @@ public class ViewMap extends GDActivity {
     rootFrameLayout.addView(messageLayout,1);
     splashLinearLayout.setVisibility(LinearLayout.GONE);
     updateViewConfiguration(getResources().getConfiguration());
-    setSplashVisibility(false);
     setSplashVisibility(true); // to get the correct busy text
+    setSplashVisibility(false);
     setContentView(rootFrameLayout);   
 
     // Get a wake lock
@@ -662,6 +715,7 @@ public class ViewMap extends GDActivity {
     boolean locationFound=false;
     
     protected void onPreExecute() {
+            
     }
 
     protected Void doInBackground(Void... params) {
@@ -676,7 +730,7 @@ public class ViewMap extends GDActivity {
           if (addresses.size()>0) {
             Address address = addresses.get(0);
             locationFound=true;
-            coreObject.scheduleCoreCommand("addPointOfInterest(" + address.getLongitude() + "," + address.getLatitude() + ")");
+            coreObject.scheduleCoreCommand("newPointOfInterest(" + address.getLongitude() + "," + address.getLatitude() + ")");
           }
         }
         catch(IOException e) {

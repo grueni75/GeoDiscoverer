@@ -346,6 +346,7 @@ void Core::updateScreen(bool forceRedraw) {
       isInitialized=true;
       thread->unlockMutex(isInitializedMutex);
       core->getThread()->issueSignal(isInitializedSignal);
+      initComplete();
     }
 
     // Check if a new texture is ready
@@ -587,7 +588,7 @@ void Core::updateGraphic(bool graphicInvalidated) {
   screen->setAllowDestroying(false);
 
   // Trigger an update of the map
-  mapEngine->setForceMapUpdate();
+  mapEngine->setForceMapRecreation();
 
   // Let the map update thread continue
   continueMapUpdate();

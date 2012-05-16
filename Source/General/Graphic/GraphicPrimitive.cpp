@@ -41,6 +41,13 @@ GraphicPrimitive::GraphicPrimitive() {
   blinkMode=GraphicBlinkIdle;
   destroyTexture=true;
   animator=NULL;
+  rotateDuration=core->getConfigStore()->getIntValue("Graphic","rotateDuration");
+  rotateStartTime=0;
+  rotateEndTime=0;
+  rotateInfinite=false;
+  scaleStartTime=0;
+  scaleEndTime=0;
+  scaleInfinite=false;
 }
 
 // Destructor
@@ -78,6 +85,28 @@ void GraphicPrimitive::setFadeAnimation(TimestampInMicroseconds startTime, Graph
   fadeEndTime=startTime+duration;
   fadeStartColor=startColor;
   fadeEndColor=endColor;
+}
+
+// Sets a new rotation target
+void GraphicPrimitive::setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite) {
+  TimestampInMicroseconds rotateDiff=endAngle-startAngle;
+  TimestampInMicroseconds duration;
+  rotateStartTime=startTime;
+  duration=rotateDuration*rotateDiff/360;
+  rotateEndTime=startTime+duration;
+  rotateStartAngle=startAngle;
+  rotateEndAngle=endAngle;
+  rotateInfinite=infinite;
+}
+
+// Sets a new scale target
+void GraphicPrimitive::setScaleAnimation(TimestampInMicroseconds startTime, double startFactor, double endFactor, bool infinite, TimestampInMicroseconds duration) {
+  scaleDuration=duration;
+  scaleStartTime=startTime;
+  scaleEndTime=startTime+duration;
+  scaleStartFactor=startFactor;
+  scaleEndFactor=endFactor;
+  scaleInfinite=infinite;
 }
 
 // Activates or disactivates blinking
@@ -143,6 +172,56 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
     }*/
   }
 
+  // Infinite rotation animation required?
+  if (rotateStartTime==rotateEndTime) {
+    if (rotateInfinite) {
+      setRotateAnimation(currentTime,rotateStartAngle,rotateEndAngle,true);
+    }
+  }
+
+  // Rotate animation required?
+  if ((rotateStartTime<=currentTime)&&(rotateStartTime!=rotateEndTime)) {
+    changed=true;
+    if (currentTime<=rotateEndTime) {
+      Int elapsedTime=currentTime-rotateStartTime;
+      Int duration=rotateEndTime-rotateStartTime;
+      double angleDiff=rotateEndAngle-rotateStartAngle;
+      angle=angleDiff*elapsedTime/duration+rotateStartAngle;
+    } else {
+      angle=rotateEndAngle;
+      rotateStartTime=rotateEndTime;
+    }
+  }
+
+  // Infinite scale animation required?
+  if (scaleStartTime==scaleEndTime) {
+    if (scaleInfinite) {
+      if (scale==scaleEndFactor)
+        setScaleAnimation(currentTime,scaleEndFactor,scaleStartFactor,true,scaleDuration);
+      if (scale==scaleStartFactor)
+        setScaleAnimation(currentTime,scaleStartFactor,scaleEndFactor,true,scaleDuration);
+    } else  {
+
+      // Some more parameters in the list?
+      if (scaleAnimationSequence.size()>0) {
+        setNextScaleAnimationStep();
+      }
+    }
+  }
+
+  // Scale animation required?
+  if ((scaleStartTime<=currentTime)&&(scaleStartTime!=scaleEndTime)) {
+    changed=true;
+    if (currentTime<=scaleEndTime) {
+      Int elapsedTime=currentTime-scaleStartTime;
+      double scaleDiff=scaleEndFactor-scaleStartFactor;
+      scale=scaleDiff*elapsedTime/scaleDuration+scaleStartFactor;
+    } else {
+      scale=scaleEndFactor;
+      scaleStartTime=scaleEndTime;
+    }
+  }
+
   // If the primitive has changed, redraw it
   if (isUpdated) {
     changed=true;
@@ -158,6 +237,21 @@ void GraphicPrimitive::recreate() {
 
 // Recreates any textures or buffers
 void GraphicPrimitive::optimize() {
+}
+
+// Sets the next scale animation step from the sequence
+void GraphicPrimitive::setNextScaleAnimationStep() {
+  if (scaleAnimationSequence.size()>0) {
+    GraphicScaleAnimationParameter parameter = scaleAnimationSequence.front();
+    scaleAnimationSequence.pop_front();
+    setScaleAnimation(parameter.getStartTime(),parameter.getStartFactor(),parameter.getEndFactor(),parameter.getInfinite(),parameter.getDuration());
+  }
+}
+
+// Sets a scale animation sequence
+void GraphicPrimitive::setScaleAnimationSequence(std::list<GraphicScaleAnimationParameter> scaleAnimationSequence) {
+  this->scaleAnimationSequence=scaleAnimationSequence;
+  setNextScaleAnimationStep();
 }
 
 }

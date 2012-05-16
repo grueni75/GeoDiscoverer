@@ -36,12 +36,14 @@ MapEngine::MapEngine() {
   updateInProgress=false;
   abortUpdate=false;
   forceMapUpdate=false;
+  forceMapRecreation=false;
   locationPosMutex=core->getThread()->createMutex();
   mapPosMutex=core->getThread()->createMutex();
   compassBearingMutex=core->getThread()->createMutex();
   displayAreaMutex=core->getThread()->createMutex();
   locationPos2visPosMutex=core->getThread()->createMutex();
   forceCacheUpdateMutex=core->getThread()->createMutex();
+  forceMapUpdateMutex=core->getThread()->createMutex();
   locationPos2visPosOffsetValid=false;
   prevCompassBearing=-std::numeric_limits<double>::max();
   compassBearing=prevCompassBearing;
@@ -57,6 +59,7 @@ MapEngine::~MapEngine() {
   core->getThread()->destroyMutex(displayAreaMutex);
   core->getThread()->destroyMutex(locationPos2visPosMutex);
   core->getThread()->destroyMutex(forceCacheUpdateMutex);
+  core->getThread()->destroyMutex(forceMapUpdateMutex);
 }
 
 // Does all action to remove a tile from the map
@@ -189,7 +192,7 @@ void MapEngine::initMap()
   map->unlockAccess();
 
   // Force redraw
-  forceMapUpdate=true;
+  forceMapRecreation=true;
 
   // Object is initialized
   isInitialized=true;
@@ -223,6 +226,7 @@ void MapEngine::removeDebugPrimitives() {
 
 // Set the fade animation
 void MapEngine::setFadeAnimation(MapTile *tile) {
+  tile->getVisualization()->lockAccess();
   GraphicRectangle *r=tile->getRectangle();
   GraphicColor fadeStartColor=r->getColor();
   fadeStartColor.setAlpha(0);
@@ -233,6 +237,7 @@ void MapEngine::setFadeAnimation(MapTile *tile) {
     fadeEndColor.setAlpha(core->getMapCache()->getCachedTileAlpha());
   }
   r->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),fadeStartColor,fadeEndColor);
+  tile->getVisualization()->unlockAccess();
 }
 
 // Fills the given area with tiles
@@ -566,7 +571,7 @@ bool MapEngine::mapUpdateIsRequired(GraphicPosition &visPos, Int *diffVisX, Int 
 
   // Do not update map graphic if no change
   //DEBUG("diffVisX=%d diffVisY=%d diffZoom=%f",diffVisX,diffVisY,diffZoom);
-  if ((tmpDiffVisX==0)&&(tmpDiffVisY==0)&&(tmpDiffZoom==1.0)&&(forceMapUpdate==false)&&(forceCacheUpdate==false)) {
+  if ((tmpDiffVisX==0)&&(tmpDiffVisY==0)&&(tmpDiffZoom==1.0)&&(forceMapUpdate==false)&&(forceCacheUpdate==false)&&(forceMapRecreation==false)) {
     return false;
   } else {
     return true;
@@ -650,7 +655,14 @@ void MapEngine::updateMap() {
 
     // Use the offset to compute the new position in the map
     lockMapPos();
-    MapPosition newMapPos=mapPos;
+    MapPosition newMapPos;
+    if (requestedMapPos.isValid()) {
+      //DEBUG("using requested map position",NULL);
+      mapPos.setLng(requestedMapPos.getLng());
+      mapPos.setLat(requestedMapPos.getLat());
+      requestedMapPos.invalidate();
+    }
+    newMapPos=mapPos;
     unlockMapPos();
     newMapPos.setLngScale(newMapPos.getLngScale()*diffZoom);
     newMapPos.setLatScale(newMapPos.getLatScale()*diffZoom);
@@ -676,11 +688,12 @@ void MapEngine::updateMap() {
       dY=visPos->getY()-std::numeric_limits<Int>::min();
     }
     bool visPosResetted=false;
-    if ((dY<initDistance)||(dX<initDistance)||(forceMapUpdate)) {
+    if ((dY<initDistance)||(dX<initDistance)||(forceMapRecreation)) {
       visPos->set(0,0,visPos->getZoom(),visPos->getAngle());
       visPosResetted=true;
     }
     forceMapUpdate=false;
+    forceMapRecreation=false;
 
     PROFILE_ADD("update init");
 
@@ -688,6 +701,7 @@ void MapEngine::updateMap() {
     // Lock the zoom level if the zoom did not change
     // Search all maps if no tile can be found for given zoom level
     core->getMapSource()->lockAccess();
+    //DEBUG("lng=%f lat=%f",newMapPos.getLng(),newMapPos.getLat());
     MapTile *bestMapTile=core->getMapSource()->findMapTileByGeographicCoordinate(newMapPos,zoomLevel,zoomLevelLock);
     PROFILE_ADD("best map tile search");
     if (bestMapTile) {
@@ -868,6 +882,7 @@ void MapEngine::updateMap() {
     } else {
 
       // Reset the visual position to the previous one
+      DEBUG("no map tile found",NULL);
       *visPos=this->visPos;
       core->getGraphicEngine()->unlockPos();
       PROFILE_ADD("no tile found");

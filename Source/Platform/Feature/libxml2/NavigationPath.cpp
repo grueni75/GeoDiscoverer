@@ -371,11 +371,13 @@ bool NavigationPath::readGPXFile() {
         }
         processedPoints++;
         processedPercentage=processedPoints*100/totalNumberOfPoints;
+        if (processedPercentage>prevProcessedPercentage) {
+          progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
+          status.pop_front();
+          status.push_front(progress.str());
+          core->getNavigationEngine()->setStatus(status);
+        }
         prevProcessedPercentage=processedPercentage;
-        progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
-        status.pop_front();
-        status.push_front(progress.str());
-        core->getNavigationEngine()->setStatus(status);
         if (core->getQuitCore())
           break;
         //core->getThread()->reschedule();
@@ -405,11 +407,13 @@ bool NavigationPath::readGPXFile() {
       }
       processedPoints++;
       processedPercentage=processedPoints*100/totalNumberOfPoints;
+      if (processedPercentage>prevProcessedPercentage) {
+        progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
+        status.pop_front();
+        status.push_front(progress.str());
+        core->getNavigationEngine()->setStatus(status);
+      }
       prevProcessedPercentage=processedPercentage;
-      progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
-      status.pop_front();
-      status.push_front(progress.str());
-      core->getNavigationEngine()->setStatus(status);
       if (core->getQuitCore())
         break;
       //core->getThread()->reschedule();

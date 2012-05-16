@@ -28,7 +28,6 @@ namespace GEODISCOVERER {
 MapPosition::MapPosition(bool doNotDelete) {
   this->doNotDelete=doNotDelete;
   x=-1; y=-1;
-  lng=-std::numeric_limits<double>::max(); lat=-std::numeric_limits<double>::max();
   mapTile=NULL;
   altitude=-std::numeric_limits<double>::max();
   distance=0;
@@ -42,6 +41,8 @@ MapPosition::MapPosition(bool doNotDelete) {
   hasBearing=false;
   hasSpeed=false;
   hasAccuracy=false;
+  isUpdated=false;
+  invalidate();
   source="internal";
 }
 
@@ -297,6 +298,12 @@ bool MapPosition::isValid() {
     return false;
   else
     return true;
+}
+
+// Invalidates the position
+bool MapPosition::invalidate() {
+  lng=-std::numeric_limits<double>::max();
+  lat=-std::numeric_limits<double>::max();
 }
 
 }

@@ -144,6 +144,11 @@
 												<xsd:documentation>Time distance in microseconds between command dispatching.</xsd:documentation>
 											</xsd:annotation>
 										</xsd:element>
+										<xsd:element name="contextMenuDelay" type="xsd:integer" default="1000000">
+											<xsd:annotation>
+												<xsd:documentation>Time distance in microseconds before the context menu is shown.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
 										<xsd:element name="Page" maxOccurs="unbounded">
 											<xsd:annotation>
 												<xsd:documentation>Collection of widgets that are displayed together.</xsd:documentation>
@@ -387,6 +392,36 @@
 									<xsd:documentation>Time in microseconds that a fade animation lasts.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
+							<xsd:element name="rotateDuration" type="xsd:integer" default="5000000">
+								<xsd:annotation>
+									<xsd:documentation>Time in microseconds that a rotate animation (full turn) lasts.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="targetInitialScaleDuration" type="xsd:integer" default="800000">
+								<xsd:annotation>
+									<xsd:documentation>Time in microseconds that the initial target scale animation lasts.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="targetNormalScaleDuration" type="xsd:integer" default="1000000">
+								<xsd:annotation>
+									<xsd:documentation>Time in microseconds that the normal target scale animation lasts.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>							
+							<xsd:element name="targetScaleMinFactor" type="xsd:double" default="0.125">
+								<xsd:annotation>
+									<xsd:documentation>Minimum factor to use in a target scale animation.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="targetScaleNormalFactor" type="xsd:double" default="0.25">
+								<xsd:annotation>
+									<xsd:documentation>Minimum factor to use in a target scale animation.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="targetScaleMaxFactor" type="xsd:double" default="4">
+								<xsd:annotation>
+									<xsd:documentation>Maximum factor to use in a target scale animation.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
 							<xsd:element name="blinkDuration" type="xsd:integer" default="250000">
 								<xsd:annotation>
 									<xsd:documentation>Duration in microseconds to show the highlight color.</xsd:documentation>
@@ -507,6 +542,11 @@
 							<xsd:element name="locationIconFilename" type="xsd:string" default="location">
 								<xsd:annotation>
 									<xsd:documentation>Image of the location cursor.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="targetIconFilename" type="xsd:string" default="target">
+								<xsd:annotation>
+									<xsd:documentation>Image of the target cursor.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
 							<xsd:element name="pathDirectionIconFilename" type="xsd:string" default="pathDirection">
@@ -729,6 +769,30 @@
 								<xsd:annotation>
 									<xsd:documentation>Filename of the last recorded track.</xsd:documentation>
 								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="Target">
+								<xsd:annotation>
+									<xsd:documentation>Point to navigate to.</xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="lng" type="xsd:double" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Longitude in degrees.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="lat" type="xsd:double" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Latitude in degrees.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+										<xsd:element name="visible" type="xsd:boolean" default="0">
+											<xsd:annotation>
+												<xsd:documentation>Target is drawn if ticked.</xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
 							</xsd:element>
 							<xsd:element name="Route" maxOccurs="unbounded">
 								<xsd:annotation>

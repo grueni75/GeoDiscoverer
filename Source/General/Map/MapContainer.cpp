@@ -87,12 +87,12 @@ void MapContainer::addTile(MapTile *tile)
 }
 
 // Returns the map tile in which the position lies
-MapTile *MapContainer::findMapTileByPictureCoordinates(MapPosition pos) {
-  return findMapTileByPictureCoordinates(pos,searchTree,PictureBorderTop);
+MapTile *MapContainer::findMapTileByPictureCoordinate(MapPosition pos) {
+  return findMapTileByPictureCoordinate(pos,searchTree,PictureBorderTop);
 }
 
 // Returns the map tile in which the position lies
-MapTile *MapContainer::findMapTileByPictureCoordinates(MapPosition pos, MapTile *currentTile, PictureBorder currentDimension) {
+MapTile *MapContainer::findMapTileByPictureCoordinate(MapPosition pos, MapTile *currentTile, PictureBorder currentDimension) {
   MapTile *bestTileLeft=NULL,*bestTileRight=NULL,*bestTile=NULL;
   PictureBorder nextDimension;
   bool useRightChild=true,useLeftChild=true;
@@ -141,11 +141,11 @@ MapTile *MapContainer::findMapTileByPictureCoordinates(MapPosition pos, MapTile 
   // Get the best tiles from the left and the right branch
   if (useRightChild) {
     //DEBUG("search for better matching tile in right branch",NULL);
-    bestTileRight=findMapTileByPictureCoordinates(pos,currentTile->getRightChild(),nextDimension);
+    bestTileRight=findMapTileByPictureCoordinate(pos,currentTile->getRightChild(),nextDimension);
   }
   if ((useLeftChild)&&(!bestTileRight)) {
     //DEBUG("search for better matching tile in left branch",NULL);
-    bestTileLeft=findMapTileByPictureCoordinates(pos,currentTile->getLeftChild(),nextDimension);
+    bestTileLeft=findMapTileByPictureCoordinate(pos,currentTile->getLeftChild(),nextDimension);
   }
   if (bestTileRight)
     bestTile=bestTileRight;
@@ -289,7 +289,6 @@ std::list<MapTile*> MapContainer::findMapTilesByPictureArea(MapArea area) {
   findMapTileByPictureArea(area,NULL,searchTree,PictureBorderTop,bestDistance,betterTileFound,&result);
   return result;
 }
-
 
 // Gets the next field in a semicolon seperated list
 std::string MapContainer::getNextSemicolonField(std::string list, Int &start) {

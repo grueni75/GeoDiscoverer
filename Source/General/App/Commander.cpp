@@ -264,9 +264,33 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     }
     cmdExecuted=true;
   }
-  if (cmdName=="addPointOfInterest") {
+  if (cmdName=="newPointOfInterest") {
     if (core->getIsInitialized()) {
-      core->getNavigationEngine()->addPointOfInterest("unknown","unknown",atof(args[0].c_str()),atof(args[1].c_str()));
+      core->getNavigationEngine()->newPointOfInterest("unknown","unknown",atof(args[0].c_str()),atof(args[1].c_str()));
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="hideTarget") {
+    if (core->getIsInitialized()) {
+      core->getNavigationEngine()->hideTarget();
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="showTarget") {
+    if (core->getIsInitialized()) {
+      core->getNavigationEngine()->showTarget(true);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="setTargetAtMapCenter") {
+    if (core->getIsInitialized()) {
+      core->getNavigationEngine()->setTargetAtMapCenter();
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="setTargetAtGeographicCoordinate") {
+    if (core->getIsInitialized()) {
+      core->getNavigationEngine()->setTargetAtGeographicCoordinate(atof(args[0].c_str()),atof(args[1].c_str()),true);
     }
     cmdExecuted=true;
   }

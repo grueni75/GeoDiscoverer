@@ -33,6 +33,9 @@ WidgetEngine::WidgetEngine() {
   selectedWidgetColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/SelectedColor");
   buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay");
   buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod");
+  contextMenuDelay=c->getIntValue("Graphic/Widget","contextMenuDelay");
+  isTouched=false;
+  contextMenuIsShown=false;
 
   // Init the rest
   init();
@@ -394,11 +397,40 @@ void WidgetEngine::deinit() {
 
 // Called when the screen is touched
 bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
-  return currentPage->onTouchDown(t,x,y);
+
+  // First check if a widget on the page was touched
+  if (currentPage->onTouchDown(t,x,y)) {
+    return true;
+  } else {
+
+    // Check if we should show the context menu
+    if (isTouched) {
+      if ((lastTouchDownX==x)&&(lastTouchDownY==y)) {
+        if (t-firstStableTouchDownTime >= contextMenuDelay) {
+          if (!contextMenuIsShown) {
+            showContextMenu();
+            contextMenuIsShown=true;
+          }
+        }
+      } else {
+        firstStableTouchDownTime=t;
+      }
+    } else {
+      isTouched=true;
+      lastTouchDownX=x;
+      lastTouchDownY=y;
+      firstStableTouchDownTime=t;
+    }
+
+    return false;
+
+  }
 }
 
 // Called when the screen is untouched
 bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
+  isTouched=false;
+  contextMenuIsShown=false;
   return currentPage->onTouchUp(t,x,y);
 }
 
