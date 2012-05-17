@@ -434,7 +434,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     // Draw the location icon and the compass cone
     //DEBUG("locationIcon.getColor().getAlpha()=%d locationIcon.getX()=%d locationIcon.getY()=%d",locationIcon.getColor().getAlpha(),locationIcon.getX(),locationIcon.getY());
     lockLocationIcon();
-    if (locationIcon.getColor().getAlpha()>=0) {
+    if (locationIcon.getColor().getAlpha()>0) {
 
       // Translate to the current location
       screen->startObject();
