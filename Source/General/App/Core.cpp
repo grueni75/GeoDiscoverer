@@ -131,6 +131,9 @@ Core::~Core() {
     DEBUG("waiting until map update thread quits",NULL);
     thread->waitForThread(mapUpdateThreadInfo);
     DEBUG("map update thread has quitted",NULL);
+    if (mapEngine->getUpdateInProgress()) {
+      FATAL("something is wrong: map update thread should have quit but map engine still indicates update of map",NULL);
+    }
     thread->destroyThread(mapUpdateThreadInfo);
   }
 
@@ -328,6 +331,9 @@ void Core::updateScreen(bool forceRedraw) {
   // Interrupt the map update thread
   //interruptMapUpdate();
 
+  // Allow texture allocation
+  screen->setAllowAllocation(true);
+
   // Check if all objects are initialized
   if ((mapSource->getIsInitialized())&&(navigationEngine->getIsInitialized())) {
     mapUpdateStopped=false;
@@ -400,6 +406,8 @@ void Core::updateScreen(bool forceRedraw) {
 
   }
 
+  // Disallow texture allocation
+  screen->setAllowAllocation(false);
 }
 
 // Main loop of the map update thread
@@ -576,6 +584,7 @@ void Core::updateGraphic(bool graphicInvalidated) {
 
   // First deinit everything
   screen->setAllowDestroying(true);
+  screen->setAllowAllocation(true);
   if (graphicInvalidated)
     screen->graphicInvalidated();
   screen->recreateGraphic();
@@ -585,6 +594,7 @@ void Core::updateGraphic(bool graphicInvalidated) {
   if (isInitialized)
     mapCache->recreateGraphic();
   navigationEngine->recreateGraphic();
+  screen->setAllowAllocation(false);
   screen->setAllowDestroying(false);
 
   // Trigger an update of the map

@@ -55,8 +55,11 @@ protected:
   // Value indicating that no buffer is available
   const static GraphicBufferInfo bufferNotDefined = 0;
 
-  // Decides if texture/buffer destroying is allowed
+  // Decides if resource destroying is allowed
   bool allowDestroying;
+
+  // Decides if resource allocation is allowed
+  bool allowAllocation;
 
 public:
 
@@ -183,6 +186,11 @@ public:
   void setAllowDestroying(bool allowDestroying)
   {
       this->allowDestroying=allowDestroying;
+  }
+
+  void setAllowAllocation(bool allowAllocation)
+  {
+      this->allowAllocation=allowAllocation;
   }
 
 };

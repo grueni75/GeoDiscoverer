@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import android.opengl.GLSurfaceView;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 /** Does the rendering with the OpenGL API */
@@ -292,8 +293,8 @@ public class GDMapSurfaceView extends GLSurfaceView {
         System.exit(1);
       }
     }
-        
+     
     return true;
   }
-
+  
 }

@@ -400,6 +400,7 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
   // First check if a widget on the page was touched
   if (currentPage->onTouchDown(t,x,y)) {
+    isTouched=false;
     return true;
   } else {
 
@@ -413,6 +414,8 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
           }
         }
       } else {
+        lastTouchDownX=x;
+        lastTouchDownY=y;
         firstStableTouchDownTime=t;
       }
     } else {

@@ -43,8 +43,12 @@
 <string name="show_messages">Show messages</string>
 <string name="hide_messages">Hide messages</string>
 <string name="set_target_at_map_center">Set target at map center</string>
-<string name="set_target_at_address">Set target at address</string>
+<string name="set_target_at_location">Set target at location</string>
 <string name="hide_target">Hide target</string>
 <string name="context_menu_title">Map actions</string>
 <string name="show_target">Show target</string>
+<string name="manually_entered_location">Manually entered location</string>
+<string name="location_dialog_title">Enter the location to find</string>
+<string name="finished">Finished</string>
+<string name="location_dialog_message">Please note: The location must be entered in a single line.</string>
 </resources>

@@ -52,8 +52,10 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceScreen;
 
+import android.sax.TextElementListener;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -67,6 +69,7 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageView;
@@ -98,6 +101,10 @@ public class ViewMap extends GDActivity {
 
   /** The current restart object */
   RestartCoreObjectTask restartCoreObject = null;
+  
+  // Info about the last location entered
+  String lastLocationSubject;
+  String lastLocationText = "";
   
   // Managers
   LocationManager locationManager;
@@ -155,7 +162,7 @@ public class ViewMap extends GDActivity {
     builder.setIcon(android.R.drawable.ic_menu_mapmode);
     String[] items = { 
       getString(R.string.set_target_at_map_center), 
-      getString(R.string.set_target_at_address), 
+      getString(R.string.set_target_at_location), 
       getString(R.string.show_target), 
       getString(R.string.hide_target), 
     };
@@ -164,7 +171,7 @@ public class ViewMap extends GDActivity {
           public void onClick(DialogInterface dialog, int which) {
             switch(which) {
               case 0: coreObject.executeCoreCommand("setTargetAtMapCenter()"); break;
-              case 1: break;
+              case 1: askForLocation(getString(R.string.manually_entered_location),lastLocationText); break;
               case 2: coreObject.executeCoreCommand("showTarget()"); break;
               case 3: coreObject.executeCoreCommand("hideTarget()"); break;
             }
@@ -175,27 +182,6 @@ public class ViewMap extends GDActivity {
     AlertDialog alert = builder.create();
     alert.show();    
   }
-  
-  /* Let the user update the address
-  AlertDialog.Builder builder = new AlertDialog.Builder(this);
-  builder.setTitle(R.string.address_dialog_title);
-  builder.setMessage(R.string.address_dialog_message);
-  builder.setIcon(android.R.drawable.ic_menu_mapmode);
-  builder.setItems(items, 
-      new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialog, int which) {
-          switch(which) {
-            case 0: coreObject.executeCoreCommand("setTargetAtMapCenter()"); break;
-            case 1: break;
-            case 2: coreObject.executeCoreCommand("showTarget()"); break;
-            case 3: coreObject.executeCoreCommand("hideTarget()"); break;
-          }
-        }
-      }
-  );
-  builder.setCancelable(true);
-  AlertDialog alert = builder.create();
-  alert.show();*/    
   
   // Communication with the native core
   public static final int EXECUTE_COMMAND = 0;
@@ -363,6 +349,29 @@ public class ViewMap extends GDActivity {
     rootFrameLayout.requestLayout();
   }
   
+  /** Asks the user for confirmation of the address */
+  void askForLocation(final String subject, final String text) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    final EditText editText = new EditText(this);
+    editText.setText(text);
+    builder.setTitle(R.string.location_dialog_title);
+    builder.setMessage(R.string.location_dialog_message);
+    builder.setIcon(android.R.drawable.ic_menu_mapmode);
+    builder.setView(editText);
+    builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {  
+      public void onClick(DialogInterface dialog, int whichButton) {  
+        AddressFromLocationTask task = new AddressFromLocationTask();
+        task.subject = subject;
+        task.text = editText.getText().toString();
+        task.execute();
+      }  
+    });
+    builder.setNegativeButton(R.string.cancel, null);
+    builder.setCancelable(true);
+    AlertDialog alert = builder.create();
+    alert.show();                
+  }
+  
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -482,11 +491,8 @@ public class ViewMap extends GDActivity {
           } else {
             warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));
           }
-        } else if (extras.containsKey(Intent.EXTRA_TEXT)) {          
-          AddressFromLocationTask task = new AddressFromLocationTask();
-          task.subject = extras.getString(Intent.EXTRA_SUBJECT);
-          task.text = extras.getString(Intent.EXTRA_TEXT);
-          task.execute();
+        } else if (extras.containsKey(Intent.EXTRA_TEXT)) {
+          askForLocation(extras.getString(Intent.EXTRA_SUBJECT), extras.getString(Intent.EXTRA_TEXT));
         } else {
           warningDialog(getString(R.string.unsupported_intent));        
         }
@@ -715,7 +721,6 @@ public class ViewMap extends GDActivity {
     boolean locationFound=false;
     
     protected void onPreExecute() {
-            
     }
 
     protected Void doInBackground(Void... params) {
@@ -730,7 +735,7 @@ public class ViewMap extends GDActivity {
           if (addresses.size()>0) {
             Address address = addresses.get(0);
             locationFound=true;
-            coreObject.scheduleCoreCommand("newPointOfInterest(" + address.getLongitude() + "," + address.getLatitude() + ")");
+            coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate(" + address.getLongitude() + "," + address.getLatitude() + ")");
           }
         }
         catch(IOException e) {
@@ -744,6 +749,8 @@ public class ViewMap extends GDActivity {
       if (!locationFound) {
         warningDialog(String.format(getString(R.string.location_not_found),text));
       } 
+      lastLocationSubject=subject;
+      lastLocationText=text;
     }
   }
   
@@ -759,6 +766,15 @@ public class ViewMap extends GDActivity {
         
       }
     }
+  }
+
+  /** Called when a key is pressed */ 
+  public boolean onKeyUp (int keyCode, KeyEvent event) {
+    if (keyCode==KeyEvent.KEYCODE_DPAD_CENTER) {
+      coreObject.executeCoreCommand("showContextMenu()");
+      return true;
+    }
+    return false;
   }
 
 }

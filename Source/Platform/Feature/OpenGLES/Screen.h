@@ -70,8 +70,11 @@ protected:
   // Orientation of the screen
   GraphicScreenOrientation orientation;
 
-  // Decides if texture destorying is allowed
+  // Decides if resource destroying is allowed
   bool allowDestroying;
+
+  // Decides if resource allocation is allowed
+  bool allowAllocation;
 
 public:
 
@@ -198,6 +201,11 @@ public:
   void setAllowDestroying(bool allowDestroying)
   {
       this->allowDestroying=allowDestroying;
+  }
+
+  void setAllowAllocation(bool allowAllocation)
+  {
+      this->allowAllocation=allowAllocation;
   }
 
 };

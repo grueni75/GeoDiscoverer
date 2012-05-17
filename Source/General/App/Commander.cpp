@@ -294,6 +294,10 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="showContextMenu") {
+    core->getWidgetEngine()->showContextMenu();
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

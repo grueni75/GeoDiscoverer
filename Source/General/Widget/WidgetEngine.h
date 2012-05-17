@@ -58,9 +58,6 @@ protected:
     UByte inactiveRed, UByte inactiveGreen, UByte inactiveBlue, UByte inactiveAlpha,
     ParameterMap parameters);
 
-  // Shows the context menu
-  void showContextMenu();
-
 public:
 
   // Constructors and destructor
@@ -104,6 +101,9 @@ public:
   bool getWidgetsActive() const {
     return currentPage->getWidgetsActive();
   }
+
+  // Shows the context menu
+  void showContextMenu();
 };
 
 }

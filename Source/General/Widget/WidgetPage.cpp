@@ -115,6 +115,8 @@ bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
   // Next touch is not the first one
   firstTouch=false;
+
+  return true;
 }
 
 // Called when the page is not touched anymore

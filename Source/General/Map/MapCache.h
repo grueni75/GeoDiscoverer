@@ -43,6 +43,7 @@ protected:
   bool abortUpdate;                               // Indicates that the current cache update shall be stopped
   bool updateInProgress;                          // Indicates if an update is currently ongoing
   bool isInitialized;                             // Indicates if the map cache is initialized
+  ThreadMutexInfo *accessMutex;                   // Mutex for modifying the object
 
   // Updates the map images of tiles
   void updateMapTileImages();

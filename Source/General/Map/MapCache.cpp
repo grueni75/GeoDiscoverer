@@ -32,6 +32,7 @@ MapCache::MapCache() {
   notCachedTileAlpha=core->getConfigStore()->getIntValue("Graphic","notCachedTileAlpha");
   cachedTileAlpha=255;
   abortUpdate=false;
+  accessMutex=core->getThread()->createMutex();
 
   // Reserve the memory for preparing a tile image
   //DEBUG("sizeof(*tileImageScratch)=%d",sizeof(*tileImageScratch));
@@ -52,6 +53,7 @@ MapCache::~MapCache() {
   deinit();
   if (tileImageScratch)
     free(tileImageScratch);
+  core->getThread()->destroyMutex(accessMutex);
 }
 
 // Initializes the cache
@@ -63,6 +65,9 @@ void MapCache::recreateGraphic() {
 
   // First clear everything
   deinit();
+
+  // Ensure that only one thread is executing this
+  core->getThread()->lockMutex(accessMutex);
 
   // Create texture infos
   for (int i=0;i<size;i++) {
@@ -90,11 +95,16 @@ void MapCache::recreateGraphic() {
 
   // Object is initialized
   isInitialized=true;
-}
 
+  // Let the other threads continue
+  core->getThread()->unlockMutex(accessMutex);
+}
 
 // Clears the cache
 void MapCache::deinit() {
+
+  // Ensure that only one thread is executing this
+  core->getThread()->lockMutex(accessMutex);
 
   // Clear all list
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
@@ -111,46 +121,64 @@ void MapCache::deinit() {
   // Object is not initialized anymore
   isInitialized=false;
 
+  // Let the other threads continue
+  core->getThread()->unlockMutex(accessMutex);
+
 }
 
 // Adds a new tile to the cache
 void MapCache::addTile(MapTile *tile) {
+  core->getThread()->lockMutex(accessMutex);
   uncachedTiles.push_back(tile);
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Removes a tile from the cache
 void MapCache::removeTile(MapTile *tile) {
+  if (tile->isDrawn()) {
+    FATAL("can not remove tile because it is currently drawn",NULL);
+  }
+  core->getThread()->lockMutex(accessMutex);
   std::list<MapTile*>::iterator i = std::find(cachedTiles.begin(), cachedTiles.end(), tile);
   if (i==cachedTiles.end()) {
     uncachedTiles.remove(tile);
+    core->getThread()->unlockMutex(accessMutex);
   } else {
+    core->getThread()->unlockMutex(accessMutex);
     tile->getVisualization()->lockAccess();
     GraphicRectangle *r=tile->getRectangle();
     GraphicTextureInfo m=r->getTexture();
-    usedTextures.remove(m);
-    unusedTextures.push_back(m);
-    cachedTiles.erase(i);
     r->setTexture(core->getScreen()->getTextureNotDefined());
     r->setZ(0);
     tile->getVisualization()->unlockAccess();
+    core->getThread()->lockMutex(accessMutex);
+    usedTextures.remove(m);
+    unusedTextures.push_back(m);
+    cachedTiles.erase(i);
     tile->setIsCached(false);
+    core->getThread()->unlockMutex(accessMutex);
   }
 }
 
 // Updates the map images of tiles
 void MapCache::updateMapTileImages() {
 
+  // Ensure that only one thread is executing this
+
   // Check that all visible tile are cached
   // If not, add them to the load list
   std::list<MapTile *> mapTileLoadList;
+  core->getThread()->lockMutex(accessMutex);
   for (std::list<MapTile*>::const_iterator i=uncachedTiles.begin();i!=uncachedTiles.end();i++) {
     MapTile *t=*i;
     if ((t->isDrawn())&&(t->getParentMapContainer()->getDownloadComplete())) {
       mapTileLoadList.push_back(t);
     }
   }
-  if (mapTileLoadList.size()==0)
+  core->getThread()->unlockMutex(accessMutex);
+  if (mapTileLoadList.size()==0) {
     return; // Nothing to do
+  }
 
   // Update has started
   updateInProgress=true;
@@ -195,19 +223,23 @@ void MapCache::updateMapTileImages() {
 
     // Remove the oldest tile from the cached list if it has already its max length
     if (cachedTiles.size()>=size) {
+      core->getThread()->lockMutex(accessMutex);
       cachedTiles.sort(MapTile::lastAccessSortPredicate);
       MapTile *t=cachedTiles.front();
       cachedTiles.pop_front();
       t->setIsCached(false);
       uncachedTiles.push_back(t);
+      core->getThread()->unlockMutex(accessMutex);
       t->getVisualization()->lockAccess();
       GraphicRectangle *r=t->getRectangle();
       GraphicTextureInfo m=r->getTexture();
-      usedTextures.remove(m);
-      unusedTextures.push_back(m);
       r->setTexture(core->getScreen()->getTextureNotDefined());
       r->setZ(0);
       t->getVisualization()->unlockAccess();
+      core->getThread()->lockMutex(accessMutex);
+      usedTextures.remove(m);
+      unusedTextures.push_back(m);
+      core->getThread()->unlockMutex(accessMutex);
     }
 
     // Do some sanity checks
@@ -243,9 +275,11 @@ void MapCache::updateMapTileImages() {
       break;
     }
     t->getVisualization()->unlockAccess();
+    core->getThread()->lockMutex(accessMutex);
     GraphicTextureInfo m=unusedTextures.front();
     unusedTextures.pop_front();
     usedTextures.push_back(m);
+    core->getThread()->unlockMutex(accessMutex);
     currentTile=t;
     tileTextureAvailable=true;
     core->tileTextureAvailable();
@@ -257,8 +291,10 @@ void MapCache::updateMapTileImages() {
     c.setAlpha(cachedTileAlpha);
     r->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),r->getColor(),c);
     t->getVisualization()->unlockAccess();
+    core->getThread()->lockMutex(accessMutex);
     uncachedTiles.remove(t);
     cachedTiles.push_back(t);
+    core->getThread()->unlockMutex(accessMutex);
 
   }
 
@@ -267,7 +303,6 @@ void MapCache::updateMapTileImages() {
     free(currentImage);
   updateInProgress=false;
   abortUpdate=false;
-
 }
 
 // Updates the currently waiting texture

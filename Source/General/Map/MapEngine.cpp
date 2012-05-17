@@ -657,9 +657,37 @@ void MapEngine::updateMap() {
     lockMapPos();
     MapPosition newMapPos;
     if (requestedMapPos.isValid()) {
-      //DEBUG("using requested map position",NULL);
-      mapPos.setLng(requestedMapPos.getLng());
-      mapPos.setLat(requestedMapPos.getLat());
+
+      // First check if the new position lies within the previous display area
+      // If it lies within the area, set the difference in pixels
+      // If not, force a recreation of the map
+      if (mapPos.getMapTile()) {
+        if (mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator()->setPictureCoordinates(requestedMapPos)) {
+          //DEBUG("refX=%d refY=%d newX=%d newY=%d",mapPos.getX(),mapPos.getY(),requestedMapPos.getX(),requestedMapPos.getY());
+          diffVisX=requestedMapPos.getX()-mapPos.getX();
+          diffVisY=mapPos.getY()-requestedMapPos.getY();
+          Int newX = displayArea.getRefPos().getX()+diffVisX;
+          Int newY = displayArea.getRefPos().getY()-diffVisY;
+          if (newX>displayArea.getXEast())
+            forceMapRecreation=true;
+          if (newX<displayArea.getXWest())
+            forceMapRecreation=true;
+          if (newY>displayArea.getYNorth())
+            forceMapRecreation=true;
+          if (newY<displayArea.getYSouth())
+            forceMapRecreation=true;
+        } else {
+          forceMapRecreation=true;
+        }
+      } else {
+        forceMapRecreation=true;
+      }
+      if (forceMapRecreation) {
+        mapPos.setLng(requestedMapPos.getLng());
+        mapPos.setLat(requestedMapPos.getLat());
+        diffVisX=0;
+        diffVisY=0;
+      }
       requestedMapPos.invalidate();
     }
     newMapPos=mapPos;

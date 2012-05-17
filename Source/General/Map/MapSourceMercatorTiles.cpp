@@ -442,10 +442,12 @@ void MapSourceMercatorTiles::downloadMapImages() {
 
       // Get the next container from the queue
       MapContainer *mapContainer=NULL;
+      Int totalLeft;
       core->getThread()->lockMutex(downloadQueueMutex);
       if (!downloadQueue.empty()) {
 
         // Prefer visible map containers
+        totalLeft=downloadQueue.size();
         for (std::list<MapContainer*>::iterator i=downloadQueue.begin();i!=downloadQueue.end();i++) {
           MapContainer *c=*i;
           if (c->isDrawn()) {
@@ -464,7 +466,13 @@ void MapSourceMercatorTiles::downloadMapImages() {
         break;
 
       // Change the status
-      status.push_back("Downloading map image:");
+      std::stringstream s;
+      s << "Downloading " << totalLeft;
+      if (totalLeft==1)
+        s << " tile:";
+      else
+        s << " tiles:";
+      status.push_back(s.str());
       status.push_back(mapContainer->getImageFileName());
       setStatus(status);
 
@@ -522,7 +530,7 @@ void MapSourceMercatorTiles::downloadMapImages() {
       status.clear();
       setStatus(status);
 
-        // Shall we quit?
+      // Shall we quit?
       if (quitMapImageDownloadThread) {
         core->getThread()->exitThread();
       }

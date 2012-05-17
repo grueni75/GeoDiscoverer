@@ -144,7 +144,7 @@
 												<xsd:documentation>Time distance in microseconds between command dispatching.</xsd:documentation>
 											</xsd:annotation>
 										</xsd:element>
-										<xsd:element name="contextMenuDelay" type="xsd:integer" default="1000000">
+										<xsd:element name="contextMenuDelay" type="xsd:integer" default="500000">
 											<xsd:annotation>
 												<xsd:documentation>Time distance in microseconds before the context menu is shown.</xsd:documentation>
 											</xsd:annotation>

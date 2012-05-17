@@ -33,6 +33,7 @@ std::list<GraphicBufferInfo> Screen::unusedBufferInfos;
 // Constructor: open window and init opengl
 Screen::Screen(Int DPI) {
   this->allowDestroying=false;
+  this->allowAllocation=false;
   this->DPI=DPI;
   this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock");
   this->ellipseCoordinatesBuffer=bufferNotDefined;
@@ -233,21 +234,26 @@ void Screen::endScene() {
 
 // Creates a new texture id
 GraphicTextureInfo Screen::createTextureInfo() {
-  GraphicTextureInfo i;
-  if (unusedTextureInfos.size()>0) {
-    i=unusedTextureInfos.front();
-    unusedTextureInfos.pop_front();
-    //DEBUG("reusing existing texture info",NULL);
-  } else {
-    //DEBUG("creating new texture info",NULL);
-    glGenTextures( 1, &i );
-    if (i==Screen::textureNotDefined) // if the texture id matches the special value, generate a new one
+  if (allowAllocation) {
+    GraphicTextureInfo i;
+    if (unusedTextureInfos.size()>0) {
+      i=unusedTextureInfos.front();
+      unusedTextureInfos.pop_front();
+      //DEBUG("reusing existing texture info",NULL);
+    } else {
+      //DEBUG("creating new texture info",NULL);
       glGenTextures( 1, &i );
-    GLenum error=glGetError();
-    if (error!=GL_NO_ERROR)
-      FATAL("can not generate texture (error=0x%08x)",error);
+      if (i==Screen::textureNotDefined) // if the texture id matches the special value, generate a new one
+        glGenTextures( 1, &i );
+      GLenum error=glGetError();
+      if (error!=GL_NO_ERROR)
+        FATAL("can not generate texture (error=0x%08x)",error);
+    }
+    return i;
+  } else {
+    FATAL("texture allocation has been disallowed",NULL);
+    return textureNotDefined;
   }
-  return i;
 }
 
 // Sets the image of a texture
@@ -305,22 +311,27 @@ void Screen::destroyTextureInfo(GraphicTextureInfo i, std::string source) {
 
 // Returns a new buffer id
 GraphicBufferInfo Screen::createBufferInfo() {
-  GraphicBufferInfo buffer;
-  if (unusedBufferInfos.size()>0) {
-    buffer=unusedBufferInfos.front();
-    unusedBufferInfos.pop_front();
-    //DEBUG("reusing existing buffer info",NULL);
-  } else {
-    //DEBUG("creating new buffer info",NULL);
-    glGenBuffers( 1, &buffer );
-    if (buffer==Screen::bufferNotDefined) // if the buffer id matches the special value, generate a new one
+  if (allowAllocation) {
+    GraphicBufferInfo buffer;
+    if (unusedBufferInfos.size()>0) {
+      buffer=unusedBufferInfos.front();
+      unusedBufferInfos.pop_front();
+      //DEBUG("reusing existing buffer info",NULL);
+    } else {
+      //DEBUG("creating new buffer info",NULL);
       glGenBuffers( 1, &buffer );
-    GLenum error=glGetError();
-    if (error!=GL_NO_ERROR)
-      FATAL("can not generate buffer",NULL);
+      if (buffer==Screen::bufferNotDefined) // if the buffer id matches the special value, generate a new one
+        glGenBuffers( 1, &buffer );
+      GLenum error=glGetError();
+      if (error!=GL_NO_ERROR)
+        FATAL("can not generate buffer",NULL);
+    }
+    //DEBUG("new buffer %d created",buffer);
+    return buffer;
+  } else {
+    FATAL("buffer allocation has been disallowed",NULL);
+    return bufferNotDefined;
   }
-  //DEBUG("new buffer %d created",buffer);
-  return buffer;
 }
 
 // Sets the data of an array buffer

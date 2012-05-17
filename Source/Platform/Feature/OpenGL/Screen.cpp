@@ -122,6 +122,7 @@ Screen::Screen(Int DPI) {
 
   // Set variables
   this->allowDestroying=false;
+  this->allowAllocation=false;
   this->DPI=DPI;
   this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock");
   setWakeLock(wakeLock);
@@ -346,14 +347,19 @@ void Screen::endScene() {
 
 // Creates a new texture id
 GraphicTextureInfo Screen::createTextureInfo() {
-  GraphicTextureInfo i;
-  glGenTextures( 1, &i );
-  if (i==Screen::textureNotDefined) // if the texture id matches the special value, generate a new one
-    FATAL("texture info generated that matches the special textureNotDefined info",NULL);
-  GLenum error=glGetError();
-  if (error!=GL_NO_ERROR)
-    FATAL("can not generate texture",NULL);
-  return i;
+  if (allowAllocation) {
+    GraphicTextureInfo i;
+    glGenTextures( 1, &i );
+    if (i==Screen::textureNotDefined) // if the texture id matches the special value, generate a new one
+      FATAL("texture info generated that matches the special textureNotDefined info",NULL);
+    GLenum error=glGetError();
+    if (error!=GL_NO_ERROR)
+      FATAL("can not generate texture",NULL);
+    return i;
+  } else {
+    FATAL("texture allocation has been disallowed",NULL);
+    return textureNotDefined;
+  }
 }
 
 // Sets the image of a texture
@@ -407,14 +413,19 @@ void Screen::destroyTextureInfo(GraphicTextureInfo i, std::string source) {
 
 // Returns a new buffer id
 GraphicBufferInfo Screen::createBufferInfo() {
-  GraphicBufferInfo buffer;
-  glGenBuffers( 1, &buffer );
-  if (buffer==Screen::bufferNotDefined) // if the buffer id matches the special value, generate a new one
-    FATAL("buffer info generated that matches the special textureNotDefined info",NULL);
-  GLenum error=glGetError();
-  if (error!=GL_NO_ERROR)
-    FATAL("can not generate buffer",NULL);
-  return buffer;
+  if (allowAllocation) {
+    GraphicBufferInfo buffer;
+    glGenBuffers( 1, &buffer );
+    if (buffer==Screen::bufferNotDefined) // if the buffer id matches the special value, generate a new one
+      FATAL("buffer info generated that matches the special textureNotDefined info",NULL);
+    GLenum error=glGetError();
+    if (error!=GL_NO_ERROR)
+      FATAL("can not generate buffer",NULL);
+    return buffer;
+  } else {
+    FATAL("buffer allocation has been disallowed",NULL);
+    return textureNotDefined;
+  }
 }
 
 // Sets the data of an array buffer
