@@ -45,6 +45,10 @@
 #include <limits>
 #include <unistd.h>
 #include <algorithm>
+#include <signal.h>
+#ifdef TARGET_LINUX
+#include <execinfo.h>
+#endif
 
 // Mandatory application includes for the core class
 #include <Types.h>
@@ -326,6 +330,8 @@ extern Core *core;
 #include <GraphicPosition.h>
 #include <GraphicAnimationParameter.h>
 #include <GraphicScaleAnimationParameter.h>
+#include <GraphicTranslateAnimationParameter.h>
+#include <GraphicRotateAnimationParameter.h>
 #include <GraphicPrimitive.h>
 #include <GraphicPointBuffer.h>
 #include <GraphicLine.h>

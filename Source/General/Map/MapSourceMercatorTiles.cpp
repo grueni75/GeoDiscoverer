@@ -54,8 +54,9 @@ MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
 MapSourceMercatorTiles::~MapSourceMercatorTiles() {
 
   // Wait until the download thread has finished
-  quitMapImageDownloadThread=true;
-  core->getThread()->issueSignal(downloadStartSignal);
+  //quitMapImageDownloadThread=true;
+  //core->getThread()->issueSignal(downloadStartSignal);
+  core->getThread()->cancelThread(mapImageDownloadThreadInfo);
   core->getThread()->waitForThread(mapImageDownloadThreadInfo);
   core->getThread()->destroyThread(mapImageDownloadThreadInfo);
 
@@ -326,6 +327,8 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   // Request the navigation engine to add overlays to the new tile
   core->getNavigationEngine()->addGraphics(mapContainer);
 
+  //DEBUG("tile %s created",mapTile->getVisName().front().c_str());
+
   // Return the tile
   return mapTile;
 }
@@ -371,7 +374,11 @@ MapTile *MapSourceMercatorTiles::findMapTileByGeographicArea(MapArea area, MapTi
       area.setLngWest(-lngBound);
 
     // No, let's fetch it from the server or disk
-    return fetchMapTile(area.getCenterPos(),area.getZoomLevel());
+    MapPosition pos=area.getCenterPos();
+    if (preferredNeigbor) {
+      preferredNeigbor->getNeighborPos(area,pos);
+    }
+    return fetchMapTile(pos,area.getZoomLevel());
 
   } else {
     return result;
@@ -426,11 +433,16 @@ void MapSourceMercatorTiles::downloadMapImages() {
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
 
+  // This thread can be cancelled at any time
+  core->getThread()->setThreadCancable();
+
   // Do an endless loop
   while (1) {
 
     // Wait for an update trigger
+    DEBUG("waiting for start signal",NULL);
     core->getThread()->waitForSignal(downloadStartSignal);
+    DEBUG("start signal received",NULL);
 
     // Shall we quit?
     if (quitMapImageDownloadThread) {

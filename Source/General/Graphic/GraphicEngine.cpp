@@ -48,6 +48,8 @@ GraphicEngine::GraphicEngine() {
   compassConeIcon.setAngle(std::numeric_limits<double>::max());
   compassConeIconMutex=core->getThread()->createMutex();
   targetIcon.setColor(GraphicColor(255,255,255,0));
+  arrowIconMutex=core->getThread()->createMutex();
+  arrowIcon.setColor(GraphicColor(255,255,255,0));
   lastCenterIconFadeStartTime=0;
   isDrawing=false;
   lastDrawingStartTime=0;
@@ -82,6 +84,9 @@ void GraphicEngine::recreateGraphic() {
   lockTargetIcon();
   targetIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","targetIconFilename"));
   unlockTargetIcon();
+  lockArrowIcon();
+  arrowIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","arrowIconFilename"));
+  unlockArrowIcon();
 }
 
 // Deinits dynamic data
@@ -91,10 +96,16 @@ void GraphicEngine::deinit() {
   locationIcon.deinit();
   unlockLocationIcon();
   pathDirectionIcon.deinit();
+  lockTargetIcon();
   targetIcon.deinit();
+  unlockTargetIcon();
+  lockArrowIcon();
+  arrowIcon.deinit();
+  unlockArrowIcon();
   lockCompassConeIcon();
   compassConeIcon.deinit();
   unlockCompassConeIcon();
+
   GraphicPointBuffer::destroyBuffers();
 }
 
@@ -176,6 +187,14 @@ void GraphicEngine::draw(bool forceRedraw) {
   }
   unlockTargetIcon();
 
+  // Let the arrow primitive work
+  lockArrowIcon();
+  if (arrowIcon.work(currentTime)) {
+    //DEBUG("requesting scene redraw due to arrow icon work result",NULL);
+    redrawScene=true;
+  }
+  unlockArrowIcon();
+
   // Did the pos change?
   if (pos!=previousPosition) {
 
@@ -202,6 +221,15 @@ void GraphicEngine::draw(bool forceRedraw) {
     targetIcon.setIsUpdated(false);
   }
   unlockTargetIcon();
+
+  // Did the arrow icon change?
+  lockArrowIcon();
+  if (arrowIcon.getIsUpdated()) {
+    //DEBUG("requesting scene redraw due to changed location icon",NULL);
+    redrawScene=true;
+    arrowIcon.setIsUpdated(false);
+  }
+  unlockArrowIcon();
 
   // Did the compass cone icon change?
   lockCompassConeIcon();
@@ -500,7 +528,6 @@ void GraphicEngine::draw(bool forceRedraw) {
       y1=-targetIcon.getHeight()/2;
       x2=x1+targetIcon.getWidth();
       y2=y1+targetIcon.getHeight();
-      screen->rotate(targetIcon.getAngle(),0,0,1);
       screen->setColor(targetIcon.getColor().getRed(),targetIcon.getColor().getGreen(),targetIcon.getColor().getBlue(),targetIcon.getColor().getAlpha());
       screen->drawRectangle(x1,y1,x2,y2,targetIcon.getTexture(),true);
       screen->endObject();
@@ -508,7 +535,31 @@ void GraphicEngine::draw(bool forceRedraw) {
     }
     unlockTargetIcon();
 
-    PROFILE_ADD("target drawing");
+    // Draw the arrow icon
+    lockArrowIcon();
+    if (arrowIcon.getColor().getAlpha()>0) {
+
+      // Translate to the target location
+      screen->startObject();
+      screen->translate(arrowIcon.getX(),arrowIcon.getY(),0);
+      screen->scale(backScale,backScale,1.0);
+
+      // Draw the target icon
+      screen->startObject();
+      screen->scale(arrowIcon.getScale(),arrowIcon.getScale(),1.0);
+      screen->rotate(arrowIcon.getAngle(),0,0,1);
+      x1=-arrowIcon.getWidth()/2;
+      y1=-arrowIcon.getHeight()/2;
+      x2=x1+arrowIcon.getWidth();
+      y2=y1+arrowIcon.getHeight();
+      screen->setColor(arrowIcon.getColor().getRed(),arrowIcon.getColor().getGreen(),arrowIcon.getColor().getBlue(),arrowIcon.getColor().getAlpha());
+      screen->drawRectangle(x1,y1,x2,y2,arrowIcon.getTexture(),true);
+      screen->endObject();
+      screen->endObject();
+    }
+    unlockArrowIcon();
+
+    PROFILE_ADD("arrow drawing");
 
     // End the map object
     screen->endObject();
@@ -582,7 +633,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   // Everything done
   isDrawing=false;
 
-  //PROFILE_END;
+  PROFILE_END;
 }
 
 // Destructor
@@ -591,6 +642,7 @@ GraphicEngine::~GraphicEngine() {
   core->getThread()->destroyMutex(pathAnimatorsMutex);
   core->getThread()->destroyMutex(locationIconMutex);
   core->getThread()->destroyMutex(targetIconMutex);
+  core->getThread()->destroyMutex(arrowIconMutex);
   core->getThread()->destroyMutex(compassConeIconMutex);
   core->getThread()->destroyMutex(statsMutex);
 }

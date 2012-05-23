@@ -237,6 +237,7 @@ bool Core::init() {
     FATAL("can not create config object",NULL);
     return false;
   }
+  debug->init(); // open the trace and debug log
   DEBUG("initializing image",NULL);
   if (!(image=new Image())) {
     FATAL("can not create image object",NULL);
@@ -563,6 +564,7 @@ void Core::updateGraphic(bool graphicInvalidated) {
 
     // Check if a new texture is ready
     if (mapCache->getTileTextureAvailable()) {
+      mapCache->setNextTileTexture();
       thread->issueSignal(mapUpdateTileTextureProcessedSignal);
     }
 

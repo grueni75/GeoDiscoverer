@@ -56,10 +56,6 @@ protected:
   bool forceCacheUpdate;                          // Force an update of the map cache on the next call
   ThreadMutexInfo *forceMapUpdateMutex;           // Mutex for accessing the force map update flag
   ThreadMutexInfo *forceCacheUpdateMutex;         // Mutex for accessing the force cache update flag
-  ThreadMutexInfo *locationPos2visPosMutex;       // Mutex for accessing the locationPos2visPos* variables
-  Int locationPos2visPosOffsetX;                  // X offset from the location pos to the visual position
-  Int locationPos2visPosOffsetY;                  // Y offset from the location pos to the visual position
-  bool locationPos2visPosOffsetValid;             // Indicates that the offset is valid
   TimestampInMicroseconds returnToLocationTimeout; // Time that must elapse before the map is repositioned to the current location
   bool returnToLocation;                          // Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed
   bool zoomLevelLock;                             // Indicates if the zoom level of the map shall not be changed when zooming
@@ -74,9 +70,6 @@ protected:
 
   // Remove all debugging primitives
   void removeDebugPrimitives();
-
-  // Set the fade animation
-  void setFadeAnimation(MapTile *tile);
 
 public:
 
@@ -189,30 +182,6 @@ public:
   void setReturnToLocation(bool returnToLocation);
 
   void setZoomLevelLock(bool zoomLevelLock);
-
-  void lockLocationPos2visPosOffset()
-  {
-      core->getThread()->lockMutex(locationPos2visPosMutex);
-  }
-  void unlockLocationPos2visPosOffset()
-  {
-      core->getThread()->unlockMutex(locationPos2visPosMutex);
-  }
-
-  void setLocationPos2visPosOffsetValid(bool locationPos2visPosOffsetValid)
-  {
-      this->locationPos2visPosOffsetValid = locationPos2visPosOffsetValid;
-  }
-
-  void setLocationPos2visPosOffsetX(Int locationPos2visPosOffsetX)
-  {
-      this->locationPos2visPosOffsetX = locationPos2visPosOffsetX;
-  }
-
-  void setLocationPos2visPosOffsetY(Int locationPos2visPosOffsetY)
-  {
-      this->locationPos2visPosOffsetY = locationPos2visPosOffsetY;
-  }
 
 };
 

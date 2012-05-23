@@ -54,6 +54,9 @@ public:
   MapCache();
   virtual ~MapCache();
 
+  // Set the fade animation depending on the cached status
+  void setFadeAnimation(MapTile *tile, bool innerCall=false);
+
   // Inits the cache
   void init();
 
@@ -87,16 +90,6 @@ public:
         this->abortUpdate = true;
         core->getImage()->setAbortLoad();
       }
-  }
-
-  UByte getCachedTileAlpha() const
-  {
-      return cachedTileAlpha;
-  }
-
-  UByte getNotCachedTileAlpha() const
-  {
-      return notCachedTileAlpha;
   }
 
   bool getUpdateInProgress() const

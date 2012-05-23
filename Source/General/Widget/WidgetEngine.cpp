@@ -203,7 +203,7 @@ void WidgetEngine::recreateGraphic() {
     parameters["iconFilename"]="statusBackground";
     parameters["updateInterval"]="100000";
     parameters["labelWidth"]="255";
-    addWidgetToPage("Default",WidgetTypeStatus,"Status",                50.0, 9.0,1,50.0, 14.0,1,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeStatus,"Status",                35.0, 81.0,1,37.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
     pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
   }
 

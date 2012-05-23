@@ -25,6 +25,14 @@
 
 namespace GEODISCOVERER {
 
+// Quits the thread immediately
+void threadExitHandler(int sig)
+{
+    //DEBUG("received signal %d", sig);
+    if (sig==SIGABRT)
+      pthread_exit(0);
+}
+
 // Constructor
 Thread::Thread() {
 }
@@ -150,6 +158,28 @@ void Thread::exitThread() {
 void Thread::reschedule() {
   sched_yield();
   //usleep(0);
+}
+
+// Allow cancellation of the thread
+void Thread::setThreadCancable() {
+  //pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+  //pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  struct sigaction actions;
+  memset(&actions, 0, sizeof(actions));
+  sigemptyset(&actions.sa_mask);
+  actions.sa_flags = 0;
+  actions.sa_handler = threadExitHandler;
+  if (sigaction(SIGABRT,&actions,NULL)!=0)
+    FATAL("can not set exit handler for thread",NULL);
+}
+
+// Cancel the thread
+void Thread::cancelThread(ThreadInfo *thread) {
+  //pthread_cancel(*thread);
+  //DEBUG("signaling thread %d",*thread);
+  if (pthread_kill(*thread, SIGABRT) != 0) {
+    FATAL("can not kill thread",NULL);
+  }
 }
 
 // Destructor

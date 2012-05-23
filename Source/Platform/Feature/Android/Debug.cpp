@@ -95,8 +95,11 @@ void Debug::print(Verbosity verbosity, const char *file, int line, const char *f
   snprintf(buffer2,buffer_len,"%s%s",buffer,postfix);
   snprintf(buffer,buffer_len,"%s [%s:%d,%s]",buffer2,relative_file,line,core->getClock()->getXMLDate().c_str());
   if (out!=stdout) {
-    fprintf(out,"%-7s: ",prefix);
-    fprintf(out,"%s\n",buffer);
+    if (out) {
+      fprintf(out,"%-7s: ",prefix);
+      fprintf(out,"%s\n",buffer);
+      fflush(out);
+    }
   } else {
 
     // Output android message
@@ -106,9 +109,11 @@ void Debug::print(Verbosity verbosity, const char *file, int line, const char *f
     std::string message=std::string(buffer2);
 
     // Output message to file additionally
-    fprintf(messagelog,"%-7s: ",prefix);
-    fprintf(messagelog,"%s\n",buffer);
-    fflush(messagelog);
+    if (messagelog) {
+      fprintf(messagelog,"%-7s: ",prefix);
+      fprintf(messagelog,"%s\n",buffer);
+      fflush(messagelog);
+    }
 
     // Create dialog if required
     switch(verbosity) {

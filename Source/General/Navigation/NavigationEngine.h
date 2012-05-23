@@ -96,6 +96,29 @@ protected:
   // Indicates that the target is currently visible
   bool targetVisible;
 
+  // Indicates that the arrow is currently visible
+  bool arrowVisible;
+
+  // Diameter of the arrow icon
+  double arrowDiameter;
+
+  // Position of the arrow icon
+  Int arrowX;
+  Int arrowY;
+  double arrowAngle;
+
+  // Parameters for the arrow animation
+  TimestampInMicroseconds arrowInitialTranslateDuration;
+  TimestampInMicroseconds arrowNormalTranslateDuration;
+
+  // Parameters for the target animation
+  TimestampInMicroseconds targetInitialScaleDuration;
+  TimestampInMicroseconds targetNormalScaleDuration;
+  TimestampInMicroseconds targetRotateDuration;
+  double targetScaleMaxFactor;
+  double targetScaleMinFactor;
+  double targetScaleNormalFactor;
+
 public:
 
   // Constructor

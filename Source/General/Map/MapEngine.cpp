@@ -41,10 +41,8 @@ MapEngine::MapEngine() {
   mapPosMutex=core->getThread()->createMutex();
   compassBearingMutex=core->getThread()->createMutex();
   displayAreaMutex=core->getThread()->createMutex();
-  locationPos2visPosMutex=core->getThread()->createMutex();
   forceCacheUpdateMutex=core->getThread()->createMutex();
   forceMapUpdateMutex=core->getThread()->createMutex();
-  locationPos2visPosOffsetValid=false;
   prevCompassBearing=-std::numeric_limits<double>::max();
   compassBearing=prevCompassBearing;
   isInitialized=false;
@@ -57,7 +55,6 @@ MapEngine::~MapEngine() {
   core->getThread()->destroyMutex(mapPosMutex);
   core->getThread()->destroyMutex(compassBearingMutex);
   core->getThread()->destroyMutex(displayAreaMutex);
-  core->getThread()->destroyMutex(locationPos2visPosMutex);
   core->getThread()->destroyMutex(forceCacheUpdateMutex);
   core->getThread()->destroyMutex(forceMapUpdateMutex);
 }
@@ -224,22 +221,6 @@ void MapEngine::removeDebugPrimitives() {
   map->unlockAccess();
 }
 
-// Set the fade animation
-void MapEngine::setFadeAnimation(MapTile *tile) {
-  tile->getVisualization()->lockAccess();
-  GraphicRectangle *r=tile->getRectangle();
-  GraphicColor fadeStartColor=r->getColor();
-  fadeStartColor.setAlpha(0);
-  GraphicColor fadeEndColor=r->getColor();
-  if (!tile->getIsCached()) {
-    fadeEndColor.setAlpha(core->getMapCache()->getNotCachedTileAlpha());
-  } else {
-    fadeEndColor.setAlpha(core->getMapCache()->getCachedTileAlpha());
-  }
-  r->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),fadeStartColor,fadeEndColor);
-  tile->getVisualization()->unlockAccess();
-}
-
 // Fills the given area with tiles
 void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, bool activateVisPos) {
 
@@ -260,7 +241,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   if (tiles.size()>=maxTiles)
     return;
 
-  /*Visualize the search area
+  /* Visualize the search area
   if (core->getGraphicEngine()->getDebugMode()) {
     removeDebugPrimitives();
     GraphicRectangle *r;
@@ -376,18 +357,11 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
         //DEBUG("tile is not visible,adding it to map",NULL);
 
-        // Add the tile to the map
-        tiles.push_back(tile);
-        GraphicObject *v=tile->getVisualization();
-        map->lockAccess();
-        tile->setVisualizationKey(map->addPrimitive(v));
-        map->unlockAccess();
-
         // Shall the position be activated immediately?
         if (activateVisPos) {
 
           // Set the fade animation
-          setFadeAnimation(tile);
+          core->getMapCache()->setFadeAnimation(tile);
 
         } else {
 
@@ -395,6 +369,13 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
           tile->setIsHidden(true);
 
         }
+
+        // Add the tile to the map
+        tiles.push_back(tile);
+        GraphicObject *v=tile->getVisualization();
+        map->lockAccess();
+        tile->setVisualizationKey(map->addPrimitive(v));
+        map->unlockAccess();
 
         /* For debugging
         if (core->getGraphicEngine()->getDebugMode()) {
@@ -405,8 +386,11 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
       }
 
       // Activate the new visual position?
-      if (activateVisPos)
+      if (activateVisPos) {
+        tile->getVisualization()->lockAccess();
         tile->activateVisPos();
+        tile->getVisualization()->unlockAccess();
+      }
 
       // Tile has been processed
       tile->setIsProcessed(true);
@@ -550,11 +534,14 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 bool MapEngine::mapUpdateIsRequired(GraphicPosition &visPos, Int *diffVisX, Int *diffVisY, double *diffZoom, bool checkLocationPos) {
 
   // Check if it is time to reset the visual position to the gps position
-  if ((locationPos2visPosOffsetValid)&&(checkLocationPos)&&(returnToLocation)) {
+  //if ((locationPos2visPosOffsetValid)&&(checkLocationPos)&&(returnToLocation)) {
+  if ((checkLocationPos)&&(returnToLocation)) {
     TimestampInMicroseconds diff=core->getClock()->getMicrosecondsSinceStart()-visPos.getLastUserModification();
     //DEBUG("locationPos2visPosOffsetValid=%d diff=%d returnToLocationTimeout=%d locationPos2visPosOffsetX=%d locationPos2visPosOffsetY=%d",locationPos2visPosOffsetValid,diff,returnToLocationTimeout,locationPos2visPosOffsetX,locationPos2visPosOffsetY);
     if ((diff>returnToLocationTimeout)||(returnToLocationOneTime)) {
-      visPos.set(visPos.getX()+locationPos2visPosOffsetX,visPos.getY()+locationPos2visPosOffsetY,visPos.getZoom(),visPos.getAngle());
+      setMapPos(*(core->getNavigationEngine()->lockLocationPos()));
+      core->getNavigationEngine()->unlockLocationPos();
+      //visPos.set(visPos.getX()+locationPos2visPosOffsetX,visPos.getY()+locationPos2visPosOffsetY,visPos.getZoom(),visPos.getAngle());
     }
   }
 
@@ -688,6 +675,8 @@ void MapEngine::updateMap() {
         diffVisX=0;
         diffVisY=0;
       }
+      //DEBUG("diffVisX=%d diffVisY=%d lng=%f lat=%f forceMapRecreation=%d",diffVisX,diffVisY,mapPos.getLng(),mapPos.getLat(),forceMapRecreation);
+      visPos->updateLastUserModification();
       requestedMapPos.invalidate();
     }
     newMapPos=mapPos;
@@ -892,13 +881,15 @@ void MapEngine::updateMap() {
           if (!abortUpdate) {
 
             // Activate the new position
+            t->getVisualization()->lockAccess();
             t->activateVisPos();
 
             // If the tile is hidden: make it visible
             if (t->getIsHidden()) {
               t->setIsHidden(false);
-              setFadeAnimation(t);
+              core->getMapCache()->setFadeAnimation(t,true);
             }
+            t->getVisualization()->unlockAccess();
           }
         }
         PROFILE_ADD("tile list update");

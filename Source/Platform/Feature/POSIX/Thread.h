@@ -89,6 +89,12 @@ public:
   // Exits a thead (has to be called by thread itself)
   void exitThread();
 
+  // Allow cancellation of the thread
+  void setThreadCancable();
+
+  // Cancel the thread
+  void cancelThread(ThreadInfo *thread);
+
   // Destructor
   virtual ~Thread();
 };

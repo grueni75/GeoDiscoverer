@@ -51,6 +51,19 @@ NavigationEngine::NavigationEngine() {
   statusMutex=core->getThread()->createMutex();
   targetPosMutex=core->getThread()->createMutex();
   targetVisible=false;
+  arrowVisible=false;
+  arrowX=std::numeric_limits<Int>::min();
+  arrowY=std::numeric_limits<Int>::min();
+  arrowAngle=-1;
+  arrowDiameter=0;
+  arrowInitialTranslateDuration=core->getConfigStore()->getIntValue("Graphic","arrowInitialTranslateDuration");
+  arrowNormalTranslateDuration=core->getConfigStore()->getIntValue("Graphic","arrowNormalTranslateDuration");
+  targetInitialScaleDuration=core->getConfigStore()->getIntValue("Graphic","targetInitialScaleDuration");
+  targetNormalScaleDuration=core->getConfigStore()->getIntValue("Graphic","targetNormalScaleDuration");
+  targetRotateDuration=core->getConfigStore()->getIntValue("Graphic","targetRotateDuration");
+  targetScaleMaxFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMaxFactor");
+  targetScaleMinFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor");
+  targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor");
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -84,7 +97,7 @@ void NavigationEngine::init() {
 
   // Set the animation of the target
   GraphicRectangle *targetIcon = core->getGraphicEngine()->lockTargetIcon();
-  targetIcon->setRotateAnimation(0,0,360,true);
+  targetIcon->setRotateAnimation(0,0,360,true,targetRotateDuration);
   core->getGraphicEngine()->unlockTargetIcon();
 
   // Set the color of the recorded track
@@ -463,7 +476,6 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   bool updatePosition;
   Int visPosX, visPosY, visRadiusX, visRadiusY;
   double visAngle;
-  GraphicPosition visPos;
   MapPosition mapPos;
   MapEngine *mapEngine=core->getMapEngine();
 
@@ -487,6 +499,10 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   MapArea displayArea=*(mapEngine->lockDisplayArea());
   mapEngine->unlockDisplayArea();
   //DEBUG("after display area lock",NULL);
+
+  // Copy the current visual position
+  GraphicPosition visPos=*(core->getGraphicEngine()->lockPos());
+  core->getGraphicEngine()->unlockPos();
 
   // Update the location icon
   //DEBUG("before location pos lock",NULL);
@@ -534,17 +550,6 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     }
   }
   unlockLocationPos();
-  //DEBUG("after location pos lock",NULL);
-  //DEBUG("before location pos to vis pos lock",NULL);
-  mapEngine->lockLocationPos2visPosOffset();
-  if (showCursor) {
-    mapEngine->setLocationPos2visPosOffsetValid(true);
-    mapEngine->setLocationPos2visPosOffsetX(mapDiffX);
-    mapEngine->setLocationPos2visPosOffsetY(-mapDiffY);
-  } else {
-    mapEngine->setLocationPos2visPosOffsetValid(false);
-  }
-  mapEngine->unlockLocationPos2visPosOffset();
   //DEBUG("after location pos to vis pos lock",NULL);
   //DEBUG("before location icon lock",NULL);
   GraphicRectangle *locationIcon=core->getGraphicEngine()->lockLocationIcon();
@@ -594,8 +599,13 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   //DEBUG("before location pos lock",NULL);
   lockTargetPos();
   showCursor=false;
+  double targetIconPosValid=false;
   updatePosition=false;
   bool updateAnimation=false;
+  double screenZoom=visPos.getZoom();
+  Int zoomedScreenWidth=floor(((double)core->getScreen()->getWidth())/screenZoom);
+  Int zoomedScreenHeight=floor(((double)core->getScreen()->getHeight())/screenZoom);
+  //DEBUG("screenZoom=%f zoomedScreenWidth=%d zoomedScreenHeight=%d",screenZoom,zoomedScreenWidth,zoomedScreenHeight);
   if (targetPos.isValid()) {
     showCursor=true;
     MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
@@ -613,6 +623,14 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
         showCursor=false;
       if (!Integer::add(displayArea.getRefPos().getY(),-mapDiffY,visPosY))
         showCursor=false;
+      //DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
+      if (showCursor) {
+        targetIconPosValid=true;
+        if (abs(mapDiffX)>zoomedScreenWidth/2)
+          showCursor=false;
+        if (abs(mapDiffY)>zoomedScreenHeight/2)
+          showCursor=false;
+      }
       if (showCursor) {
         updatePosition=true;
       }
@@ -624,6 +642,25 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   }
   unlockTargetPos();
   GraphicRectangle *targetIcon=core->getGraphicEngine()->lockTargetIcon();
+  if (updateAnimation) {
+    std::list<GraphicScaleAnimationParameter> scaleAnimationSequence;
+    TimestampInMicroseconds startTime = core->getClock()->getMicrosecondsSinceStart();
+    GraphicScaleAnimationParameter parameter;
+    parameter.setStartFactor(targetScaleMaxFactor);
+    parameter.setEndFactor(targetScaleMinFactor);
+    parameter.setStartTime(startTime);
+    parameter.setDuration(targetInitialScaleDuration);
+    parameter.setInfinite(false);
+    scaleAnimationSequence.push_back(parameter);
+    parameter.setStartFactor(targetScaleMinFactor);
+    parameter.setEndFactor(targetScaleNormalFactor);
+    parameter.setStartTime(startTime+targetInitialScaleDuration);
+    parameter.setDuration(targetNormalScaleDuration);
+    parameter.setInfinite(true);
+    scaleAnimationSequence.push_back(parameter);
+    targetIcon->setScaleAnimationSequence(scaleAnimationSequence);
+    targetIcon->setIsUpdated(true);
+  }
   if (showCursor) {
     if (updatePosition) {
       if ((targetIcon->getX()!=visPosX)||((targetIcon->getY()!=visPosY))) {
@@ -632,26 +669,10 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
         targetIcon->setIsUpdated(true);
       }
     }
-    if (updateAnimation) {
+    if (!targetVisible) {
       GraphicColor endColor=targetIcon->getColor();
       endColor.setAlpha(255);
       targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor);
-      std::list<GraphicScaleAnimationParameter> scaleAnimationSequence;
-      TimestampInMicroseconds startTime = core->getClock()->getMicrosecondsSinceStart();
-      GraphicScaleAnimationParameter parameter;
-      parameter.setStartFactor(core->getConfigStore()->getDoubleValue("Graphic","targetScaleMaxFactor"));
-      parameter.setEndFactor(core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor"));
-      parameter.setStartTime(startTime);
-      parameter.setDuration(core->getConfigStore()->getIntValue("Graphic","targetInitialScaleDuration"));
-      parameter.setInfinite(false);
-      scaleAnimationSequence.push_back(parameter);
-      parameter.setStartFactor(core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor"));
-      parameter.setEndFactor(core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor"));
-      parameter.setStartTime(startTime+core->getConfigStore()->getIntValue("Graphic","targetInitialScaleDuration"));
-      parameter.setDuration(core->getConfigStore()->getIntValue("Graphic","targetNormalScaleDuration"));
-      parameter.setInfinite(true);
-      scaleAnimationSequence.push_back(parameter);
-      targetIcon->setScaleAnimationSequence(scaleAnimationSequence);
       targetIcon->setIsUpdated(true);
     }
     targetVisible=true;
@@ -665,6 +686,118 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     }
   }
   core->getGraphicEngine()->unlockTargetIcon();
+
+  // Update the arrow icon
+  //DEBUG("before location pos lock",NULL);
+  lockTargetPos();
+  updateAnimation=false;
+  showCursor=false;
+  Int translateEndX, translateEndY;
+  if ((targetIconPosValid)&&(!showCursor)) {
+    if (!targetVisible) {
+      showCursor=true;
+      if (!arrowVisible)
+        updateAnimation=true;
+
+      // Compute the angle to the target
+      visAngle = - mapPos.computeBearing(targetPos) - mapPos.getMapTile()->getNorthAngle();
+      double alpha = - FloatingPoint::degree2rad(visAngle);
+      double l1 = fabs(zoomedScreenHeight/2 / cos(alpha));
+      double l2 = fabs(zoomedScreenWidth/2 / sin(alpha));
+      double l;
+      if (l1>l2) {
+        l=l2;
+      } else {
+        l=l1;
+      }
+      double arrowRadiusZoomed=((double)arrowDiameter)/screenZoom/2;
+      //DEBUG("arowDiameterZoomed=%f",arrowDiameterZoomed);
+      l-=arrowRadiusZoomed;
+      visPosX = displayArea.getRefPos().getX() + l * sin(alpha);
+      visPosY = displayArea.getRefPos().getY() + l * cos(alpha);
+      translateEndX = displayArea.getRefPos().getX() + (l-arrowRadiusZoomed) * sin(alpha);
+      translateEndY = displayArea.getRefPos().getY() + (l-arrowRadiusZoomed) * cos(alpha);
+    } else {
+      showCursor=false;
+      if (arrowVisible)
+        updateAnimation=true;
+    }
+  } else {
+    updateAnimation=true;
+    showCursor=false;
+  }
+  unlockTargetPos();
+  GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon();
+  if (showCursor) {
+    if ((arrowX!=visPosX)||((arrowY!=visPosY))||(arrowAngle!=visAngle)) {
+      arrowX=visPosX;
+      arrowY=visPosY;
+      arrowAngle=visAngle;
+      if (scaleHasChanged) {
+        arrowIcon->setX(visPosX);
+        arrowIcon->setY(visPosY);
+        arrowIcon->setAngle(visAngle);
+        arrowIcon->setIsUpdated(true);
+        arrowIcon->setTranslateAnimationSequence(std::list<GraphicTranslateAnimationParameter>());
+        arrowIcon->setTranslateAnimation(core->getClock()->getMicrosecondsSinceStart(),visPosX,visPosY,translateEndX,translateEndY,true,arrowNormalTranslateDuration);
+      } else {
+        std::list<GraphicTranslateAnimationParameter> translateAnimationSequence = arrowIcon->getTranslateAnimationSequence();
+        TimestampInMicroseconds startTime = core->getClock()->getMicrosecondsSinceStart();
+        if (translateAnimationSequence.size()>0) {
+          translateAnimationSequence.pop_back(); // remove the last inifinite translation
+        }
+        if (translateAnimationSequence.size()>0) {
+          startTime=translateAnimationSequence.back().getStartTime()+translateAnimationSequence.back().getDuration();
+        }
+        GraphicTranslateAnimationParameter translateParameter;
+        translateParameter.setStartTime(startTime);
+        translateParameter.setStartX(arrowIcon->getX());
+        translateParameter.setStartY(arrowIcon->getY());
+        translateParameter.setEndX(visPosX);
+        translateParameter.setEndY(visPosY);
+        translateParameter.setDuration(arrowInitialTranslateDuration);
+        translateParameter.setInfinite(false);
+        translateAnimationSequence.push_back(translateParameter);
+        translateParameter.setStartTime(startTime+arrowInitialTranslateDuration);
+        translateParameter.setStartX(visPosX);
+        translateParameter.setStartY(visPosY);
+        translateParameter.setEndX(translateEndX);
+        translateParameter.setEndY(translateEndY);
+        translateParameter.setDuration(arrowNormalTranslateDuration);
+        translateParameter.setInfinite(true);
+        translateAnimationSequence.push_back(translateParameter);
+        arrowIcon->setTranslateAnimationSequence(translateAnimationSequence);
+        std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = arrowIcon->getRotateAnimationSequence();
+        GraphicRotateAnimationParameter rotateParameter;
+        rotateParameter.setStartTime(startTime);
+        rotateParameter.setStartAngle(arrowIcon->getAngle());
+        rotateParameter.setEndAngle(visAngle);
+        rotateParameter.setDuration(arrowInitialTranslateDuration);
+        rotateParameter.setInfinite(false);
+        rotateAnimationSequence.push_back(rotateParameter);
+        arrowIcon->setRotateAnimationSequence(rotateAnimationSequence);
+      }
+      arrowIcon->setIsUpdated(true);
+    }
+    if (updateAnimation) {
+      GraphicColor endColor=arrowIcon->getColor();
+      endColor.setAlpha(255);
+      arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor);
+      arrowIcon->setIsUpdated(true);
+    }
+    arrowVisible=true;
+  } else {
+    if (arrowVisible) {
+      if (updateAnimation) {
+        GraphicColor endColor=arrowIcon->getColor();
+        endColor.setAlpha(0);
+        arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor);
+        arrowIcon->setIsUpdated(true);
+      }
+      arrowVisible=false;
+    }
+  }
+  core->getGraphicEngine()->unlockArrowIcon();
 
   // Unlock the drawing mutex
   core->getThread()->unlockMutex(updateGraphicsMutex);
@@ -704,6 +837,11 @@ void NavigationEngine::updateMapGraphic() {
 
 // Recreate all graphics
 void NavigationEngine::recreateGraphic() {
+
+  // Get the radius of the arrow icon
+  GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon();
+  arrowDiameter=sqrt((double)(arrowIcon->getIconWidth()*arrowIcon->getIconWidth()+arrowIcon->getIconHeight()*arrowIcon->getIconHeight()));
+  core->getGraphicEngine()->unlockArrowIcon();
 
   // Reset the buffers used in the path object
   lockRoutes();

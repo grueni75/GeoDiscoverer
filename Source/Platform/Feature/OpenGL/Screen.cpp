@@ -22,7 +22,7 @@
 
 #include <Core.h>
 
-int frameCountBeforeTextureInvalidation=50;
+int frameCountBeforeTextureInvalidation=30;
 bool graphicInitialized=false;
 
 // Proxy functions

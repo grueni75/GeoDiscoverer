@@ -48,6 +48,9 @@ protected:
   // Target indicator icon
   GraphicRectangle targetIcon;
 
+  // Arrow icon
+  GraphicRectangle arrowIcon;
+
   // Path direction icon
   GraphicRectangle pathDirectionIcon;
 
@@ -84,6 +87,9 @@ protected:
 
   // Mutex for accessing the target icon
   ThreadMutexInfo *targetIconMutex;
+
+  // Mutex for accessing the arrow icon
+  ThreadMutexInfo *arrowIconMutex;
 
   // Mutex for accessing the compass cone icon
   ThreadMutexInfo *compassConeIconMutex;
@@ -197,6 +203,17 @@ public:
   void unlockTargetIcon()
   {
     core->getThread()->unlockMutex(targetIconMutex);
+  }
+
+  GraphicRectangle *lockArrowIcon()
+  {
+    core->getThread()->lockMutex(arrowIconMutex);
+    return &arrowIcon;
+  }
+
+  void unlockArrowIcon()
+  {
+    core->getThread()->unlockMutex(arrowIconMutex);
   }
 
   GraphicRectangle *lockCompassConeIcon()

@@ -29,8 +29,8 @@ namespace GEODISCOVERER {
 typedef enum { PictureBorderTop, PictureBorderBottom, PictureBorderRight, PictureBorderLeft } PictureBorder;
 
 class MapContainer;
-
 class MapPosition;
+class MapArea;
 
 class MapTile {
 
@@ -134,6 +134,9 @@ public:
 
   // Reads the contents of the object from a binary file
   static MapTile *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, MapContainer *parent);
+
+  // Checks if the area is a neighbor of the tile and computes the center position of the neighbor
+  bool getNeighborPos(MapArea area, MapPosition &neighborPos);
 
   // Checks if t is located at the upper left of this tile
   bool isNorthWestNeighbor(MapTile *t) const {

@@ -27,40 +27,10 @@ namespace GEODISCOVERER {
 // Constructor
 Debug::Debug() {
 
-  struct stat st;
-  std::string logPath;
-
   // Init variables
   fatalOccured=false;
-
-  // Set the log directory
-  logPath=core->getHomePath() + "/Log";
-
-  // Check if the log directory exists
-  if (stat(logPath.c_str(), &st) != 0)
-  {
-    if (mkdir(logPath.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
-      puts("FATAL: can not create log directory!");
-      exit(1);
-    }
-  }
-
-  // Open the trace log
-  std::string timestamp = core->getClock()->getFormattedDate();
-  std::string tracelog_filename = logPath + "/trace-" + timestamp  + ".log";
-  //std::string tracelog_filename = logPath + "/trace-" + "" + ".log";
-  if (!(tracelog=fopen(tracelog_filename.c_str(),"w"))) {
-    puts("FATAL: can not open trace log for writing!");
-    exit(1);
-  }
-
-  // Open the message log
-  std::string messagelog_filename = logPath + "/message-" + timestamp + ".log";
-  //std::string tracelog_filename = logPath + "/trace-" + "" + ".log";
-  if (!(messagelog=fopen(messagelog_filename.c_str(),"w"))) {
-    puts("FATAL: can not open message log for writing!");
-    exit(1);
-  }
+  tracelog=NULL;
+  messagelog=NULL;
 }
 
 // Replays a trace log
@@ -94,18 +64,60 @@ void Debug::replayTrace(std::string filename) {
   in.close();
 }
 
+// Opens the necessary files
+void Debug::init() {
+
+  // Set the log directory
+  std::string logPath=core->getHomePath() + "/Log";
+  std::string timestamp = core->getClock()->getFormattedDate();
+
+  // Check if the log directory exists
+  struct stat st;
+  if (stat(logPath.c_str(), &st) != 0)
+  {
+    if (mkdir(logPath.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
+      puts("FATAL: can not create log directory!");
+      exit(1);
+    }
+  }
+
+  // Open the trace log
+  if (core->getConfigStore()->getIntValue("General","createTraceLog")) {
+    std::string tracelog_filename = logPath + "/trace-" + timestamp  + ".log";
+    //std::string tracelog_filename = logPath + "/trace-" + "" + ".log";
+    if (!(tracelog=fopen(tracelog_filename.c_str(),"w"))) {
+      puts("FATAL: can not open trace log for writing!");
+      exit(1);
+    }
+  }
+
+  // Open the message log
+  if (core->getConfigStore()->getIntValue("General","createMessageLog")) {
+    std::string messagelog_filename = logPath + "/message-" + timestamp + ".log";
+    //std::string tracelog_filename = logPath + "/trace-" + "" + ".log";
+    if (!(messagelog=fopen(messagelog_filename.c_str(),"w"))) {
+      puts("FATAL: can not open message log for writing!");
+      exit(1);
+    }
+  }
+}
+
+
 // Writes a message to a file
 void Debug::write(FILE *out, const char *prefix, const char *postfix, const char *relative_file, int line, const char *timestamp, const char *fmt, va_list argp) {
-  fprintf(out,"%-7s: ",prefix);
-  vfprintf(out,fmt, argp);
-  fprintf(out,"%s [%s:%d,%s]\n",postfix,relative_file,line,timestamp);
+  if (out) {
+    fprintf(out,"%-7s: ",prefix);
+    vfprintf(out,fmt, argp);
+    fprintf(out,"%s [%s:%d,%s]\n",postfix,relative_file,line,timestamp);
+  }
 }
 
 // Destructor
 Debug::~Debug() {
 
   // Close the log files
-  fclose(tracelog);
+  if (tracelog)
+    fclose(tracelog);
   if (messagelog)
     fclose(messagelog);
 }

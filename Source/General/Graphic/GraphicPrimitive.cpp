@@ -33,6 +33,7 @@ GraphicPrimitive::GraphicPrimitive() {
   setY(0);
   setZ(0);
   setAngle(0);
+  setScale(1.0);
   fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration");
   fadeEndTime=0;
   fadeStartTime=0;
@@ -41,13 +42,15 @@ GraphicPrimitive::GraphicPrimitive() {
   blinkMode=GraphicBlinkIdle;
   destroyTexture=true;
   animator=NULL;
-  rotateDuration=core->getConfigStore()->getIntValue("Graphic","rotateDuration");
   rotateStartTime=0;
   rotateEndTime=0;
   rotateInfinite=false;
   scaleStartTime=0;
   scaleEndTime=0;
   scaleInfinite=false;
+  translateStartTime=0;
+  translateEndTime=0;
+  translateInfinite=false;
 }
 
 // Destructor
@@ -88,11 +91,9 @@ void GraphicPrimitive::setFadeAnimation(TimestampInMicroseconds startTime, Graph
 }
 
 // Sets a new rotation target
-void GraphicPrimitive::setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite) {
-  TimestampInMicroseconds rotateDiff=endAngle-startAngle;
-  TimestampInMicroseconds duration;
+void GraphicPrimitive::setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite, TimestampInMicroseconds duration) {
+  rotateDuration=duration;
   rotateStartTime=startTime;
-  duration=rotateDuration*rotateDiff/360;
   rotateEndTime=startTime+duration;
   rotateStartAngle=startAngle;
   rotateEndAngle=endAngle;
@@ -107,6 +108,18 @@ void GraphicPrimitive::setScaleAnimation(TimestampInMicroseconds startTime, doub
   scaleStartFactor=startFactor;
   scaleEndFactor=endFactor;
   scaleInfinite=infinite;
+}
+
+// Sets a new translate target
+void GraphicPrimitive::setTranslateAnimation(TimestampInMicroseconds startTime, Int startX, Int startY, Int endX, Int endY, bool infinite, TimestampInMicroseconds duration) {
+  translateDuration=duration;
+  translateStartTime=startTime;
+  translateEndTime=startTime+duration;
+  translateStartX=startX;
+  translateStartY=startY;
+  translateEndX=endX;
+  translateEndY=endY;
+  translateInfinite=infinite;
 }
 
 // Activates or disactivates blinking
@@ -175,7 +188,13 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
   // Infinite rotation animation required?
   if (rotateStartTime==rotateEndTime) {
     if (rotateInfinite) {
-      setRotateAnimation(currentTime,rotateStartAngle,rotateEndAngle,true);
+      setRotateAnimation(currentTime,rotateStartAngle,rotateEndAngle,true,rotateDuration);
+    }  else {
+
+      // Some more parameters in the list?
+      if (rotateAnimationSequence.size()>0) {
+        setNextRotateAnimationStep();
+      }
     }
   }
 
@@ -222,6 +241,40 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
     }
   }
 
+  // Infinite translate animation required?
+  if (translateStartTime==translateEndTime) {
+    if (translateInfinite) {
+      if ((x==translateEndX)&&(y==translateEndY))
+        setTranslateAnimation(currentTime,translateEndX,translateEndY,translateStartX,translateStartY,true,translateDuration);
+      if ((x==translateStartX)&&(y==translateStartY))
+        setTranslateAnimation(currentTime,translateStartX,translateStartY,translateEndX,translateEndY,true,translateDuration);
+    } else  {
+
+      // Some more parameters in the list?
+      if (translateAnimationSequence.size()>0) {
+        setNextTranslateAnimationStep();
+      }
+    }
+  }
+
+  // Translate animation required?
+  if ((translateStartTime<=currentTime)&&(translateStartTime!=translateEndTime)) {
+    changed=true;
+    if (currentTime<=translateEndTime) {
+      Int elapsedTime=currentTime-translateStartTime;
+      Int translateDiff=translateEndX-translateStartX;
+      double factor=(double)elapsedTime/(double)translateDuration;
+      x=(Int)((double)translateDiff*factor)+translateStartX;
+      //DEBUG("translateDiff=%d factor=%f x=%d",translateDiff,factor,x);
+      translateDiff=translateEndY-translateStartY;
+      y=(Int)((double)translateDiff*factor)+translateStartY;
+    } else {
+      x=translateEndX;
+      y=translateEndY;
+      translateStartTime=translateEndTime;
+    }
+  }
+
   // If the primitive has changed, redraw it
   if (isUpdated) {
     changed=true;
@@ -239,6 +292,7 @@ void GraphicPrimitive::recreate() {
 void GraphicPrimitive::optimize() {
 }
 
+
 // Sets the next scale animation step from the sequence
 void GraphicPrimitive::setNextScaleAnimationStep() {
   if (scaleAnimationSequence.size()>0) {
@@ -248,10 +302,42 @@ void GraphicPrimitive::setNextScaleAnimationStep() {
   }
 }
 
+
+// Sets the next translate animation step from the sequence
+void GraphicPrimitive::setNextTranslateAnimationStep() {
+  if (translateAnimationSequence.size()>0) {
+    GraphicTranslateAnimationParameter parameter = translateAnimationSequence.front();
+    translateAnimationSequence.pop_front();
+    setTranslateAnimation(parameter.getStartTime(),parameter.getStartX(),parameter.getStartY(),parameter.getEndX(),parameter.getEndY(),parameter.getInfinite(),parameter.getDuration());
+  }
+}
+
+// Sets the next rotate animation step from the sequence
+void GraphicPrimitive::setNextRotateAnimationStep() {
+  if (rotateAnimationSequence.size()>0) {
+    GraphicRotateAnimationParameter parameter = rotateAnimationSequence.front();
+    rotateAnimationSequence.pop_front();
+    setRotateAnimation(parameter.getStartTime(),parameter.getStartAngle(),parameter.getEndAngle(),parameter.getInfinite(),parameter.getDuration());
+  }
+}
+
 // Sets a scale animation sequence
 void GraphicPrimitive::setScaleAnimationSequence(std::list<GraphicScaleAnimationParameter> scaleAnimationSequence) {
   this->scaleAnimationSequence=scaleAnimationSequence;
   setNextScaleAnimationStep();
+}
+
+
+// Sets a translate animation sequence
+void GraphicPrimitive::setTranslateAnimationSequence(std::list<GraphicTranslateAnimationParameter> translateAnimationSequence) {
+  this->translateAnimationSequence=translateAnimationSequence;
+  setNextTranslateAnimationStep();
+}
+
+// Sets a rotate animation sequence
+void GraphicPrimitive::setRotateAnimationSequence(std::list<GraphicRotateAnimationParameter> rotateAnimationSequence) {
+  this->rotateAnimationSequence=rotateAnimationSequence;
+  setNextRotateAnimationStep();
 }
 
 }

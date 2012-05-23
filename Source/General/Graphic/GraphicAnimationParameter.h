@@ -25,13 +25,16 @@
 
 namespace GEODISCOVERER {
 
-typedef enum { GraphicAnimationParameterTypeScale } GraphicAnimationParameterType;
+typedef enum { GraphicAnimationParameterTypeScale, GraphicAnimationParameterTypeTranslate, GraphicAnimationParameterTypeRotate } GraphicAnimationParameterType;
 
 class GraphicAnimationParameter {
 
 protected:
 
   GraphicAnimationParameterType type;           // Type of animation parameter
+  TimestampInMicroseconds duration;             // Duration of the animation
+  TimestampInMicroseconds startTime;            // Start of the animation
+  bool infinite;                                // Indicates that this animation shall last forever
 
 public:
 
@@ -44,6 +47,30 @@ public:
   // Getters and setters
   GraphicAnimationParameterType getType() const {
     return type;
+  }
+
+  TimestampInMicroseconds getDuration() const {
+    return duration;
+  }
+
+  void setDuration(TimestampInMicroseconds duration) {
+    this->duration = duration;
+  }
+
+  bool getInfinite() const {
+    return infinite;
+  }
+
+  void setInfinite(bool infinite) {
+    this->infinite = infinite;
+  }
+
+  TimestampInMicroseconds getStartTime() const {
+    return startTime;
+  }
+
+  void setStartTime(TimestampInMicroseconds startTime) {
+    this->startTime = startTime;
   }
 
 };

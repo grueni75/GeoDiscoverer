@@ -231,7 +231,7 @@ MapTile *MapTile::retrieve(char *&cacheData, Int &cacheSize, char *&objectData, 
   // Check if the class has changed
   Int size=sizeof(MapTile);
 #ifdef TARGET_LINUX
-  if (size!=968) {
+  if (size!=1128) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return NULL;
   }
@@ -336,6 +336,86 @@ void MapTile::removeGraphic() {
   visualization.lockAccess();
   visualization.recreateGraphic();
   visualization.unlockAccess();
+
+}
+
+// Checks if the area is a neighbor of the tile and computes the center position of the neighbor
+bool MapTile::getNeighborPos(MapArea area, MapPosition &neighborPos) {
+
+  MapPosition pos;
+
+  // Prepare variables
+  double lngLen = lngEastMax-lngWestMin;
+  double latLen = latNorthMax-latSouthMin;
+  double latCenter = latSouthMin+latLen/2;
+  double lngCenter = lngWestMin+lngLen/2;
+
+  // North neighbor?
+  pos.setLng(lngCenter);
+  pos.setLat(latCenter+latLen);
+  if (area.containsGeographicCoordinate(pos)) {
+    neighborPos=pos;
+    return true;
+  }
+
+  // North east neighbor?
+  pos.setLng(lngCenter+lngLen);
+  pos.setLat(latCenter+latLen);
+  if (area.containsGeographicCoordinate(pos)) {
+    neighborPos=pos;
+    return true;
+  }
+
+  // East neighbor?
+  pos.setLng(lngCenter+lngLen);
+  pos.setLat(latCenter);
+  if (area.containsGeographicCoordinate(pos)) {
+    neighborPos=pos;
+    return true;
+  }
+
+  // South east neighbor?
+  pos.setLng(lngCenter+lngLen);
+  pos.setLat(latCenter-latLen);
+  if (area.containsGeographicCoordinate(pos)) {
+    neighborPos=pos;
+    return true;
+  }
+
+  // South neighbor?
+  pos.setLng(lngCenter);
+  pos.setLat(latCenter-latLen);
+  if (area.containsGeographicCoordinate(pos)) {
+    neighborPos=pos;
+    return true;
+  }
+
+  // South west neighbor?
+  pos.setLng(lngCenter-lngLen);
+  pos.setLat(latCenter-latLen);
+  if (area.containsGeographicCoordinate(pos)) {
+    neighborPos=pos;
+    return true;
+  }
+
+  // West neighbor?
+  pos.setLng(lngCenter-lngLen);
+  pos.setLat(latCenter);
+  if (area.containsGeographicCoordinate(pos)) {
+    neighborPos=pos;
+    return true;
+  }
+
+  // North west neighbor?
+  pos.setLng(lngCenter-lngLen);
+  pos.setLat(latCenter+latLen);
+  if (area.containsGeographicCoordinate(pos)) {
+    neighborPos=pos;
+    return true;
+  }
+
+  // No neighbor found
+  return false;
 
 }
 

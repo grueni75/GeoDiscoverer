@@ -47,6 +47,9 @@ public:
   MapArea();
   virtual ~MapArea();
 
+  // Checks if the given position is contained in the area
+  bool containsGeographicCoordinate(MapPosition pos);
+
   // Operators
   bool operator==(const MapArea &rhs);
   bool operator!=(const MapArea &rhs);

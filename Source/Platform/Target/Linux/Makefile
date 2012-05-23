@@ -12,7 +12,6 @@ PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/OpenGL -name '*.
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libjpeg -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libpng -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libxml2 -name '*.cpp')
-PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/stdout -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libfreetype2 -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libcurl -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/Linux -name '*.cpp')
@@ -25,8 +24,9 @@ PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/OpenGL -name '*
 PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/libjpeg -name '*.h')
 PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/libpng -name '*.h')
 PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/libxml2 -name '*.h')
-PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/stdout -name '*.h')
 PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/libfreetype2 -name '*.h')
+PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/libcurl -name '*.h')
+PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/Linux -name '*.h')
 GENERAL_HEADERS   = $(shell find $(ROOT)/Source/General -name '*.h')
 HEADERS           = $(PLATFORM_HEADERS) $(GENERAL_HEADERS)
 
@@ -37,9 +37,9 @@ OBJS          = $(addprefix $(OBJDIR)/,$(CPP_OBJS))
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/POSIX
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/OpenGL
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/libxml2
-INCLUDES += -I$(ROOT)/Source/Platform/Feature/stdout
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/libfreetype2
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/libcurl
+INCLUDES += -I$(ROOT)/Source/Platform/Feature/Linux
 INCLUDES += -I/usr/include/freetype2
 INCLUDES += -I$(ROOT)/Source/General/App
 INCLUDES += -I$(ROOT)/Source/General/Map
@@ -56,7 +56,7 @@ LIBS += -lstdc++ -lglut -lpthread -lGLU -ljpeg -lxml2 -lfreetype -lpng -lcurl
 CXXFLAGS += -DSRC_ROOT='"$(ROOT)/Source"' -DTARGET_LINUX -Wnon-virtual-dtor
 #debug: CXXFLAGS += -g -DDMALLOC -DDMALLOC_FUNC_CHECK  
 #debug: LIBS += -ldmalloccxx
-debug: CXXFLAGS += -g -O0
+debug: CXXFLAGS += -g -O0 -rdynamic
 
 # General dependencies:
 

@@ -49,7 +49,7 @@ bool Core::downloadURL(std::string url, std::string filePath, bool generateMessa
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, out);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,curlErrorBuffer);
-  DEBUG("downloading url %s",url.c_str());
+  //DEBUG("downloading url %s",url.c_str());
   CURLcode res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 

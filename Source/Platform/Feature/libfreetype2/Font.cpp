@@ -509,6 +509,7 @@ void Font::destroyString(FontString *fontString) {
 
   // Delete the oldest entry from the cache if it has reached its size
   if (cachedStringMap.size()>=core->getFontEngine()->getStringCacheSize()) {
+    //DEBUG("reducing font cache",NULL);
     TimestampInSeconds oldestFontStringAccess=std::numeric_limits<TimestampInSeconds>::max();
     FontString *oldestFontString;
     for(FontStringMap::iterator i=cachedStringMap.begin(); i!=cachedStringMap.end(); i++) {

@@ -85,6 +85,20 @@ enum Verbosity { verbosityError=0, verbosityWarning=1, verbosityInfo=2, verbosit
 #define FATAL(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityFatal,__FILE__,__LINE__,msg,__VA_ARGS__)
 #define TRACE(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityTrace,__FILE__,__LINE__,msg,__VA_ARGS__)
 
+// Stacktrace macro
+#define TRACESTACK(result) \
+{ \
+  result=""; \
+  char **strings; \
+  void *array[10]; \
+  size_t size; \
+  size = backtrace (array, 10); \
+  strings = backtrace_symbols (array, size); \
+  for (int i = 0; i < size; i++) { \
+    result += std::string(strings[i]) + "\n"; \
+  } \
+}
+
 // Debug class
 class Debug {
 
@@ -99,10 +113,16 @@ protected:
   // Indicates if a fatal message has occured
   bool fatalOccured;
 
+  // Indicates if a trace log file shall be created
+  bool createTraceFile;
+
 public:
 
   // Constructor
   Debug();
+
+  // Opens the necessary files
+  void init();
 
   // Prints out a message
   void print(Verbosity verbosity, const char *file, int line, const char *fmt, ...);

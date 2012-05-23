@@ -41,6 +41,16 @@
 									<xsd:documentation>Screen backlight is kept on if ticked.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
+							<xsd:element name="createTraceLog" type="xsd:boolean" default="0">
+								<xsd:annotation>
+									<xsd:documentation>Writes trace messages into a file in the log directory if ticked. The trace file allows a replay of the session for debugging purposes.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="createMessageLog" type="xsd:boolean" default="0">
+								<xsd:annotation>
+									<xsd:documentation>Writes messages into a file in the log directory if ticked.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
 						</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>
@@ -61,7 +71,7 @@
 												<xsd:documentation>Width of the stroke behind font letters (12 pt) in pixel for better contrast on black background.</xsd:documentation>
 											</xsd:annotation>
 										</xsd:element>
-										<xsd:element name="stringCacheSize" type="xsd:integer" default="16">
+										<xsd:element name="stringCacheSize" type="xsd:integer" default="64">
 											<xsd:annotation>
 												<xsd:documentation>Maximum size of the string map cache.</xsd:documentation>
 											</xsd:annotation>
@@ -144,7 +154,7 @@
 												<xsd:documentation>Time distance in microseconds between command dispatching.</xsd:documentation>
 											</xsd:annotation>
 										</xsd:element>
-										<xsd:element name="contextMenuDelay" type="xsd:integer" default="500000">
+										<xsd:element name="contextMenuDelay" type="xsd:integer" default="1000000">
 											<xsd:annotation>
 												<xsd:documentation>Time distance in microseconds before the context menu is shown.</xsd:documentation>
 											</xsd:annotation>
@@ -392,9 +402,9 @@
 									<xsd:documentation>Time in microseconds that a fade animation lasts.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
-							<xsd:element name="rotateDuration" type="xsd:integer" default="5000000">
+							<xsd:element name="targetRotateDuration" type="xsd:integer" default="5000000">
 								<xsd:annotation>
-									<xsd:documentation>Time in microseconds that a rotate animation (full turn) lasts.</xsd:documentation>
+									<xsd:documentation>Time in microseconds that target rotate animation (full turn) lasts.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
 							<xsd:element name="targetInitialScaleDuration" type="xsd:integer" default="800000">
@@ -420,6 +430,16 @@
 							<xsd:element name="targetScaleMaxFactor" type="xsd:double" default="4">
 								<xsd:annotation>
 									<xsd:documentation>Maximum factor to use in a target scale animation.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="arrowNormalTranslateDuration" type="xsd:integer" default="800000">
+								<xsd:annotation>
+									<xsd:documentation>Time in microseconds that the normal arrow movement lasts.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="arrowInitialTranslateDuration" type="xsd:integer" default="200000">
+								<xsd:annotation>
+									<xsd:documentation>Time in microseconds that the initial arrow movement lasts.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
 							<xsd:element name="blinkDuration" type="xsd:integer" default="250000">
@@ -549,6 +569,11 @@
 									<xsd:documentation>Image of the target cursor.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
+							<xsd:element name="arrowIconFilename" type="xsd:string" default="arrow">
+								<xsd:annotation>
+									<xsd:documentation>Image of the arrow indicating the direction to the target.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
 							<xsd:element name="pathDirectionIconFilename" type="xsd:string" default="pathDirection">
 								<xsd:annotation>
 									<xsd:documentation>Image of the path arrow that indicates the direction.</xsd:documentation>
@@ -623,7 +648,7 @@
 									<xsd:documentation>Distance in pixel to the max/min values of integer that triggers a initialization of the map to avoid overflows.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
-							<xsd:element name="maxTiles" type="xsd:integer" default="32">
+							<xsd:element name="maxTiles" type="xsd:integer" default="48">
 								<xsd:annotation>
 									<xsd:documentation>Maximum number of tiles to show.</xsd:documentation>
 								</xsd:annotation>

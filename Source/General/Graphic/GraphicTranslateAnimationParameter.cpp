@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicScaleAnimationParameter.h
+// Name        : GraphicTranslateAnimationParameter.cpp
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -20,42 +20,17 @@
 //
 //============================================================================
 
-#ifndef GRAPHICSCALEANIMATIONPARAMETER_H_
-#define GRAPHICSCALEANIMATIONPARAMETER_H_
+#include <Core.h>
 
 namespace GEODISCOVERER {
 
-class GraphicScaleAnimationParameter : public GraphicAnimationParameter {
+// Constructor
+GraphicTranslateAnimationParameter::GraphicTranslateAnimationParameter() : GraphicAnimationParameter() {
+  type=GraphicAnimationParameterTypeTranslate;
+}
 
-  double startFactor;                       // Start factor of scale operation
-  double endFactor;                         // End factor of scale operation
-
-public:
-
-  // Constructor
-  GraphicScaleAnimationParameter();
-
-  // Destructor
-  virtual ~GraphicScaleAnimationParameter();
-
-  // Getters and setters
-  double getEndFactor() const {
-    return endFactor;
-  }
-
-  void setEndFactor(double endFactor) {
-    this->endFactor = endFactor;
-  }
-
-  double getStartFactor() const {
-    return startFactor;
-  }
-
-  void setStartFactor(double startFactor) {
-    this->startFactor = startFactor;
-  }
-
-};
+// Destructor
+GraphicTranslateAnimationParameter::~GraphicTranslateAnimationParameter() {
+}
 
 } /* namespace GEODISCOVERER */
-#endif /* GRAPHICSCALEANIMATIONPARAMETER_H_ */

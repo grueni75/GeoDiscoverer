@@ -54,14 +54,14 @@ void *debugThread(void *args) {
   GEODISCOVERER::core->getCommander()->execute("compassBearingChanged(345.3542)");
 
   // Set an example target
-  sleep(5);
-  GEODISCOVERER::core->getCommander()->execute("newPointOfInterest(6.70,51.2)");
-  sleep(5);
-  GEODISCOVERER::core->getCommander()->execute("newPointOfInterest(6.75,51.0)");
+  //sleep(5);
+  //GEODISCOVERER::core->getCommander()->execute("newPointOfInterest(6.70,51.2)");
+  //sleep(5);
+  //GEODISCOVERER::core->getCommander()->execute("newPointOfInterest(6.75,51.0)");
 
   // Hide the target
-  sleep(5);
-  GEODISCOVERER::core->getCommander()->execute("hideTarget()");
+  //sleep(5);
+  //GEODISCOVERER::core->getCommander()->execute("hideTarget()");
 
   // Use the replay log if it exists
   GEODISCOVERER::core->getDebug()->replayTrace("replay.log");

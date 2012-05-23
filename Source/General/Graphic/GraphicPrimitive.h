@@ -66,14 +66,34 @@ protected:
   double scaleStartFactor;                              // Start factor of scale operation
   double scaleEndFactor;                                // End factor of scale operation
   bool scaleInfinite;                                   // Rotation is repeated infinitely if set
+  TimestampInMicroseconds translateDuration;            // Duration of a translate operation
+  TimestampInMicroseconds translateStartTime;           // Start of the translate operation
+  TimestampInMicroseconds translateEndTime;             // End of the translate operation
+  Int translateStartX;                                  // Start x coordinate of translate operation
+  Int translateStartY;                                  // Start y coordinate of translate operation
+  Int translateEndX;                                    // End x coordinate of translate operation
+  Int translateEndY;                                    // End y coordinate of translate operation
+  bool translateInfinite;                               // Translation is repeated infinitely if set
   bool isUpdated;                                       // Indicates that the primitive has been changed
   bool destroyTexture;                                  // Indicates if the texture shall be destroyed if the object is deleted
 
   // List of scale animations to execute on this object
   std::list<GraphicScaleAnimationParameter> scaleAnimationSequence;
 
+  // List of translate animations to execute on this object
+  std::list<GraphicTranslateAnimationParameter> translateAnimationSequence;
+
+  // List of rotate animations to execute on this object
+  std::list<GraphicRotateAnimationParameter> rotateAnimationSequence;
+
   // Sets the next scale animation step from the sequence
   void setNextScaleAnimationStep();
+
+  // Sets the next translate animation step from the sequence
+  void setNextTranslateAnimationStep();
+
+  // Sets the next rotate animation step from the sequence
+  void setNextRotateAnimationStep();
 
 public:
 
@@ -99,10 +119,13 @@ public:
   void setBlinkAnimation(bool active, GraphicColor highlightColor);
 
   // Sets a new rotation target
-  void setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite);
+  void setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite, TimestampInMicroseconds duration);
 
   // Sets a new scale target
   void setScaleAnimation(TimestampInMicroseconds startTime, double startFactor, double endFactor, bool infinite, TimestampInMicroseconds duration);
+
+  // Sets a new translate target
+  void setTranslateAnimation(TimestampInMicroseconds startTime, Int startX, Int startY, Int endX, Int endY, bool infinite, TimestampInMicroseconds duration);
 
   // Let the primitive work
   // For example, animations are handled in this method
@@ -116,6 +139,22 @@ public:
 
   // Getters and setters
   void setScaleAnimationSequence(std::list<GraphicScaleAnimationParameter> scaleAnimationSequence);
+
+  void setTranslateAnimationSequence(std::list<GraphicTranslateAnimationParameter> scaleAnimationSequence);
+
+  void setRotateAnimationSequence(std::list<GraphicRotateAnimationParameter> rotateAnimationSequence);
+
+  std::list<GraphicRotateAnimationParameter> getRotateAnimationSequence() const {
+    return rotateAnimationSequence;
+  }
+
+  std::list<GraphicScaleAnimationParameter> getScaleAnimationSequence() const {
+    return scaleAnimationSequence;
+  }
+
+  std::list<GraphicTranslateAnimationParameter> getTranslateAnimationSequence() const {
+    return translateAnimationSequence;
+  }
 
   double getScale() const {
     return scale;
@@ -209,6 +248,11 @@ public:
   void setAngle(double angle)
   {
       this->angle = angle;
+  }
+
+  void setScale(double scale)
+  {
+      this->scale = scale;
   }
 
   void setDestroyTexture(bool destroyTexture)

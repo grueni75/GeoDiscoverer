@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicScaleAnimationParameter.h
+// Name        : GraphicRotateAnimationParameter.h
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -20,42 +20,44 @@
 //
 //============================================================================
 
-#ifndef GRAPHICSCALEANIMATIONPARAMETER_H_
-#define GRAPHICSCALEANIMATIONPARAMETER_H_
+#ifndef GRAPHICROTATEANIMATIONPARAMETER_H_
+#define GRAPHICROTATEANIMATIONPARAMETER_H_
+
+#include <Core.h>
 
 namespace GEODISCOVERER {
 
-class GraphicScaleAnimationParameter : public GraphicAnimationParameter {
+class GraphicRotateAnimationParameter: public GEODISCOVERER::GraphicAnimationParameter {
 
-  double startFactor;                       // Start factor of scale operation
-  double endFactor;                         // End factor of scale operation
+  double startAngle;                       // Start factor of scale operation
+  double endAngle;                         // End factor of scale operation
 
 public:
 
   // Constructor
-  GraphicScaleAnimationParameter();
+  GraphicRotateAnimationParameter();
 
   // Destructor
-  virtual ~GraphicScaleAnimationParameter();
+  virtual ~GraphicRotateAnimationParameter();
 
   // Getters and setters
-  double getEndFactor() const {
-    return endFactor;
+  double getEndAngle() const {
+    return endAngle;
   }
 
-  void setEndFactor(double endFactor) {
-    this->endFactor = endFactor;
+  void setEndAngle(double endAngle) {
+    this->endAngle = endAngle;
   }
 
-  double getStartFactor() const {
-    return startFactor;
+  double getStartAngle() const {
+    return startAngle;
   }
 
-  void setStartFactor(double startFactor) {
-    this->startFactor = startFactor;
+  void setStartAngle(double startAngle) {
+    this->startAngle = startAngle;
   }
 
 };
 
 } /* namespace GEODISCOVERER */
-#endif /* GRAPHICSCALEANIMATIONPARAMETER_H_ */
+#endif /* GRAPHICROTATEANIMATIONPARAMETER_H_ */
