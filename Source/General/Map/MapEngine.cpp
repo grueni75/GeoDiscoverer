@@ -29,14 +29,16 @@ MapEngine::MapEngine() {
   initDistance=core->getConfigStore()->getIntValue("Map","initDistance");
   maxTiles=core->getConfigStore()->getIntValue("Map","maxTiles");
   returnToLocationTimeout=core->getConfigStore()->getIntValue("Map","returnToLocationTimeout");
+  returnToLocationOneTime=false;
+  returnToLocation=false;
   setReturnToLocation(core->getConfigStore()->getIntValue("Map","returnToLocation"));
   setZoomLevelLock(core->getConfigStore()->getIntValue("Map","zoomLevelLock"));
-  returnToLocationOneTime=false;
   map=NULL;
   updateInProgress=false;
   abortUpdate=false;
   forceMapUpdate=false;
   forceMapRecreation=false;
+  forceCacheUpdate=false;
   locationPosMutex=core->getThread()->createMutex();
   mapPosMutex=core->getThread()->createMutex();
   compassBearingMutex=core->getThread()->createMutex();
@@ -534,14 +536,30 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 bool MapEngine::mapUpdateIsRequired(GraphicPosition &visPos, Int *diffVisX, Int *diffVisY, double *diffZoom, bool checkLocationPos) {
 
   // Check if it is time to reset the visual position to the gps position
-  //if ((locationPos2visPosOffsetValid)&&(checkLocationPos)&&(returnToLocation)) {
   if ((checkLocationPos)&&(returnToLocation)) {
     TimestampInMicroseconds diff=core->getClock()->getMicrosecondsSinceStart()-visPos.getLastUserModification();
     //DEBUG("locationPos2visPosOffsetValid=%d diff=%d returnToLocationTimeout=%d locationPos2visPosOffsetX=%d locationPos2visPosOffsetY=%d",locationPos2visPosOffsetValid,diff,returnToLocationTimeout,locationPos2visPosOffsetX,locationPos2visPosOffsetY);
     if ((diff>returnToLocationTimeout)||(returnToLocationOneTime)) {
-      setMapPos(*(core->getNavigationEngine()->lockLocationPos()));
-      core->getNavigationEngine()->unlockLocationPos();
-      //visPos.set(visPos.getX()+locationPos2visPosOffsetX,visPos.getY()+locationPos2visPosOffsetY,visPos.getZoom(),visPos.getAngle());
+      MapPosition newPos,oldPos;
+      lockLocationPos();
+      newPos=locationPos;
+      unlockLocationPos();
+      lockMapPos();
+      oldPos=mapPos;
+      unlockMapPos();
+      if ((newPos.isValid())&&(mapPos.isValid())) {
+        if (oldPos.getMapTile()) {
+          double diffX = floor(fabs(newPos.getLng()-oldPos.getLng()) * oldPos.getMapTile()->getLngScale());
+          double diffY = floor(fabs(newPos.getLat()-oldPos.getLat()) * oldPos.getMapTile()->getLatScale());
+          if ((diffX>=1)||(diffY>=1)) {
+            setMapPos(locationPos);
+          }
+        } else {
+          if ((newPos.getLat()!=oldPos.getLat())||(newPos.getLng()!=oldPos.getLng())) {
+            setMapPos(locationPos);
+          }
+        }
+      }
     }
   }
 
@@ -672,11 +690,13 @@ void MapEngine::updateMap() {
       if (forceMapRecreation) {
         mapPos.setLng(requestedMapPos.getLng());
         mapPos.setLat(requestedMapPos.getLat());
+        mapPos.setMapTile(NULL);
         diffVisX=0;
         diffVisY=0;
+      } else {
+        visPos->set(visPos->getX()+diffVisX,visPos->getY()+diffVisY,visPos->getZoom(),visPos->getAngle());
       }
       //DEBUG("diffVisX=%d diffVisY=%d lng=%f lat=%f forceMapRecreation=%d",diffVisX,diffVisY,mapPos.getLng(),mapPos.getLat(),forceMapRecreation);
-      visPos->updateLastUserModification();
       requestedMapPos.invalidate();
     }
     newMapPos=mapPos;

@@ -433,6 +433,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
     fontString->setHeight(k->second->getHeight());
     fontString->setBaselineOffsetY(k->second->getBaselineOffsetY());
     fontString->setWidthLimit(k->second->getWidthLimit());
+    //DEBUG("using string from used cache",NULL);
     return fontString;
 
   }
@@ -445,11 +446,13 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
     cachedStringMap.erase(k);
     FontStringPair p=FontStringPair(key.str(),fontString);
     usedStringMap.insert(p);
+    //DEBUG("using string from unused cache",NULL);
     return fontString;
 
   }
 
   // Create a new font string
+  //DEBUG("creating new string",NULL);
   if (!(fontString=new FontString())) {
     FATAL("can not create font string object",NULL);
     return NULL;
@@ -485,6 +488,7 @@ void Font::destroyString(FontString *fontString) {
   std::stringstream key;
   key << fontString->getContents()  << "[" << fontString->getWidthLimit() << "]";
   k=usedStringMap.find(key.str());
+  //DEBUG("usedStringMap.size=%d",usedStringMap.size());
   if (k!=usedStringMap.end()) {
 
     // Destroy the handed over string if it is not from the map
@@ -503,7 +507,7 @@ void Font::destroyString(FontString *fontString) {
     }
 
   } else {
-    FATAL("can not erase font string in used string map",NULL);
+    FATAL("can not erase font string that is not in the used string map",NULL);
     return;
   }
 

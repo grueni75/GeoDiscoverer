@@ -25,7 +25,7 @@
 namespace GEODISCOVERER {
 
 // List of cached texture infos
-std::list<GraphicTextureInfo> Screen::unusedTextureInfos;
+std::list<TextureDebugInfo> Screen::unusedTextureInfos;
 
 // List of cached buffer infos
 std::list<GraphicBufferInfo> Screen::unusedBufferInfos;
@@ -237,7 +237,7 @@ GraphicTextureInfo Screen::createTextureInfo() {
   if (allowAllocation) {
     GraphicTextureInfo i;
     if (unusedTextureInfos.size()>0) {
-      i=unusedTextureInfos.front();
+      i=unusedTextureInfos.front().textureInfo;
       unusedTextureInfos.pop_front();
       //DEBUG("reusing existing texture info",NULL);
     } else {
@@ -298,12 +298,15 @@ void Screen::setTextureImage(GraphicTextureInfo texture, UShort *image, Int widt
 // Frees a texture id
 void Screen::destroyTextureInfo(GraphicTextureInfo i, std::string source) {
   if (allowDestroying) {
-    for(std::list<GraphicTextureInfo>::iterator j=unusedTextureInfos.begin();j!=unusedTextureInfos.end();j++) {
-      if (i==*j) {
-        FATAL("texture 0x%08x already destroyed (called by %s)",i,source.c_str());
+    for(std::list<TextureDebugInfo>::iterator j=unusedTextureInfos.begin();j!=unusedTextureInfos.end();j++) {
+      if (i==(*j).textureInfo) {
+        FATAL("texture 0x%08x already destroyed (first destroy by %s, second destroy by %s)",i,(*j).source.c_str(),source.c_str());
       }
     }
-    unusedTextureInfos.push_back(i);
+    TextureDebugInfo t;
+    t.textureInfo=i;
+    t.source=source;
+    unusedTextureInfos.push_back(t);
   } else {
     FATAL("texture destroying has been disallowed",NULL);
   }

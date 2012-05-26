@@ -33,6 +33,10 @@ typedef GLuint GraphicTextureInfo;
 typedef GLuint GraphicBufferInfo;
 enum GraphicTextureFormat { graphicTextureFormatRGB, graphicTextureFormatRGBA1, graphicTextureFormatRGBA4  };
 enum GraphicScreenOrientation { graphicScreenOrientationProtrait, graphicScreenOrientationLandscape  };
+typedef struct {
+  GraphicTextureInfo textureInfo;
+  std::string source;
+} TextureDebugInfo;
 
 // Manages access to the screen
 class Screen {
@@ -52,7 +56,7 @@ protected:
   GraphicBufferInfo ellipseCoordinatesBuffer;
 
   // List of cached texture infos
-  static std::list<GraphicTextureInfo> unusedTextureInfos;
+  static std::list<TextureDebugInfo> unusedTextureInfos;
 
   // List of cached buffer infos
   static std::list<GraphicBufferInfo> unusedBufferInfos;

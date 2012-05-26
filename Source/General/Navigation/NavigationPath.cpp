@@ -35,6 +35,7 @@ NavigationPath::NavigationPath() {
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength");
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance");
   pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth");
+  isInit=false;
 
   // Do the dynamic initialization
   init();

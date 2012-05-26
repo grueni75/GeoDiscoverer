@@ -174,13 +174,13 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
     return false;
   }
   iss.str((char*)text); iss.clear(); iss >> lat;
-  xmlFree(text);
+  if (text) xmlFree(text);
   if (!(text=xmlGetProp(wptNode,BAD_CAST "lon"))) {
     error="contains a waypoint that has no longitude";
     return false;
   }
   iss.str((char*)text); iss.clear(); iss >> lng;
-  xmlFree(text);
+  if (text) xmlFree(text);
 
   // If there are no children stop here
   if (!wptNode->children)

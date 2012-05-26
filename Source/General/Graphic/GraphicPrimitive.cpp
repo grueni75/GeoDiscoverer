@@ -51,6 +51,7 @@ GraphicPrimitive::GraphicPrimitive() {
   translateStartTime=0;
   translateEndTime=0;
   translateInfinite=false;
+  isUpdated=false;
 }
 
 // Destructor

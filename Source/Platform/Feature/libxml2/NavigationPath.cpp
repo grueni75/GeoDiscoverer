@@ -177,6 +177,7 @@ void NavigationPath::writeGPXFile() {
     return;
   }
   rename(tempFilepath.c_str(),filepath.c_str());
+  //DEBUG("path storing is complete",NULL);
 
   // Cleanup
   xmlFreeDoc(doc);

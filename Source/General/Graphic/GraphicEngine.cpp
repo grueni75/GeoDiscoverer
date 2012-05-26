@@ -119,7 +119,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   Screen *screen = core->getScreen();
   double scale,backScale;
 
-  PROFILE_START;
+  //PROFILE_START;
 
   // Start measuring of drawing time and utilization
   currentTime=core->getClock()->getMicrosecondsSinceStart();
@@ -271,7 +271,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     noChangeFrameCount=0;
   }
 
-  PROFILE_ADD("drawing check");
+  //PROFILE_ADD("drawing check");
 
   // Redraw required?
   if (redrawScene) {
@@ -298,13 +298,16 @@ void GraphicEngine::draw(bool forceRedraw) {
     // Set translation factors
     screen->translate(-pos.getX(),-pos.getY(),0);
 
-    PROFILE_ADD("drawing init");
+    //PROFILE_ADD("drawing init");
 
     // Draw all primitives of the map object
     if (map) {
 
+      //PROFILE_START;
+
       map->lockAccess();
       std::list<GraphicPrimitive*> *mapDrawList=map->getDrawList();
+      //DEBUG("tile count = %d",mapDrawList->size());
       for(std::list<GraphicPrimitive *>::const_iterator i=mapDrawList->begin(); i != mapDrawList->end(); i++) {
 
         //DEBUG("inside primitive draw",NULL);
@@ -365,33 +368,47 @@ void GraphicEngine::draw(bool forceRedraw) {
                     y2=(GLfloat)(rectangle->getHeight()+y1);
                     //DEBUG("x1=%d y1=%d x2=%d y2=%d",x1,y1,x2,y2);
                     screen->drawRectangle(x1,y1,x2,y2,rectangle->getTexture(),rectangle->getFilled());
+                    //PROFILE_ADD("map tile contents drawing");
 
                     //  DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
 
                     // If the texture is not defined, draw a box around it and it's name inside the box
+                    //PROFILE_START;
                     if ((primitive->getName().size()!=0)&&(rectangle->getTexture()==screen->getTextureNotDefined())||(debugMode)) {
 
                       // Draw the name of the tile
                       //std::string name=".";
-                      core->getFontEngine()->setFont("sansSmall");
-                      std::list<std::string> name=rectangle->getName();
-                      FontEngine *fontEngine=core->getFontEngine();
-                      Int nameHeight=name.size()*fontEngine->getLineHeight();
-                      Int lineNr=name.size()-1;
-                      for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
-                        FontString *fontString=fontEngine->createString(*i);
-                        fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
-                        fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
-                        fontString->draw(screen,currentTime);
-                        fontEngine->destroyString(fontString);
-                        lineNr--;
+                      if (debugMode) {
+                        core->getFontEngine()->setFont("sansSmall");
+                        std::list<std::string> name=rectangle->getName();
+                        FontEngine *fontEngine=core->getFontEngine();
+                        Int nameHeight=name.size()*fontEngine->getLineHeight();
+                        Int lineNr=name.size()-1;
+                        //PROFILE_START;
+                        for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
+                          FontString *fontString=fontEngine->createString(*i);
+                          //PROFILE_ADD("create string");
+                          fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
+                          fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
+                          //PROFILE_ADD("set string coordinate");
+                          fontString->draw(screen,currentTime);
+                          //PROFILE_ADD("draw string");
+                          fontEngine->destroyString(fontString);
+                          //PROFILE_ADD("destroy string");
+                          lineNr--;
+                        }
+                        //PROFILE_END;
                       }
+                      //PROFILE_ADD("map tile name drawing");
 
                       // Draw the borders of the tile
                       screen->setColor(255,255,255,255);
                       screen->setLineWidth(1);
                       screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
+                      //PROFILE_ADD("map tile border drawing");
                     }
+                    //PROFILE_ADD("map tile name drawing");
+                    //PROFILE_END;
                     break;
                   }
 
@@ -404,6 +421,7 @@ void GraphicEngine::draw(bool forceRedraw) {
                     screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
                     line->draw(screen);
                     screen->setColorModeAlpha();
+                    //PROFILE_ADD("map overlay line drawing");
                     break;
                   }
 
@@ -414,6 +432,7 @@ void GraphicEngine::draw(bool forceRedraw) {
                     GraphicColor color=rectangleList->getAnimator()->getColor();
                     screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
                     rectangleList->draw(screen);
+                    //PROFILE_ADD("map overlay icon drawing");
                     break;
                   }
 
@@ -444,6 +463,7 @@ void GraphicEngine::draw(bool forceRedraw) {
             screen->setLineWidth(1);
             screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
             screen->endObject();
+            //PROFILE_ADD("map rectangle drawing");
             break;
           }
 
@@ -455,7 +475,9 @@ void GraphicEngine::draw(bool forceRedraw) {
       map->unlockAccess();
     }
 
-    PROFILE_ADD("map drawing");
+    //PROFILE_END;
+
+    //PROFILE_ADD("map drawing");
 
     //DEBUG("after path draw",NULL);
 
@@ -509,7 +531,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     //WARNING("enable location icon",NULL);
     //DEBUG("locationAccuradyRadiusX=%d locationAccuracyRadiusY=%d",locationAccuracyRadiusX,locationAccuracyRadiusY);
 
-    PROFILE_ADD("location drawing");
+    //PROFILE_ADD("location drawing");
 
     // Draw the target icon
     lockTargetIcon();
@@ -559,7 +581,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     }
     unlockArrowIcon();
 
-    PROFILE_ADD("arrow drawing");
+    //PROFILE_ADD("arrow drawing");
 
     // End the map object
     screen->endObject();
@@ -576,7 +598,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     screen->drawRectangle(x1,y1,x2,y2,centerIcon.getTexture(),true);
     screen->endObject();
 
-    PROFILE_ADD("cursor drawing");
+    //PROFILE_ADD("cursor drawing");
 
     //DEBUG("after cursor icon draw",NULL);
 
@@ -596,7 +618,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     }
     //DEBUG("after widget draw",NULL);
 
-    PROFILE_ADD("widget drawing");
+    //PROFILE_ADD("widget drawing");
 
     // Finish the drawing
     screen->endScene();
@@ -633,7 +655,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   // Everything done
   isDrawing=false;
 
-  PROFILE_END;
+  //PROFILE_END;
 }
 
 // Destructor

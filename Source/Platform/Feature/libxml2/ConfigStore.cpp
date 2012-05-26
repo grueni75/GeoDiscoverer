@@ -136,12 +136,13 @@ void ConfigStore::read()
   }
 
   // Version handling
-  std::string version=(char *)xmlGetProp(rootNode,BAD_CAST "version");
-  if (version!="1.0") {
+  xmlChar *text = xmlGetProp(rootNode,BAD_CAST "version");
+  if (strcmp((char*)text,"1.0")!=0) {
     FATAL("config file <%s> has unknown version",configFilepath.c_str());
     core->getThread()->unlockMutex(mutex);
     return;
   }
+  xmlFree(text);
 
   // Remember the config
   config=doc;
@@ -506,7 +507,9 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
       if (!innerCall) core->getThread()->unlockMutex(mutex);
       return;
     }
-    xmlNodeSetContent(node->children,xmlEncodeSpecialChars(doc,(const xmlChar *)value.c_str()));
+    xmlChar *valueEncoded = xmlEncodeSpecialChars(doc,(const xmlChar *)value.c_str());
+    xmlNodeSetContent(node->children,valueEncoded);
+    xmlFree(valueEncoded);
   }
   write();
   if (!innerCall) core->getThread()->unlockMutex(mutex);

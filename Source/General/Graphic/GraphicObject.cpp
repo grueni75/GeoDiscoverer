@@ -73,11 +73,12 @@ void GraphicObject::removePrimitive(GraphicPrimitiveKey key, bool deletePrimitiv
   GraphicPrimitiveMap::iterator i;
   i=primitiveMap.find(key);
   if (i!=primitiveMap.end()) {
+    GraphicPrimitive *primitive = i->second;
     drawList.remove(i->second);
     primitiveMap.erase(key);
     isUpdated=true;
     if (deletePrimitive)
-      delete i->second;
+      delete primitive;
   }
 }
 

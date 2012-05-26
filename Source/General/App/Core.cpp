@@ -117,8 +117,11 @@ Core::~Core() {
   // Wait until the maintenance thread has finished
   maintenance(false);
   thread->lockMutex(maintenanceMutex);
-  if (maintenanceThreadInfo)
-    thread->destroyThread(maintenanceThreadInfo);
+  if (maintenanceThreadInfo) {
+    core->getThread()->cancelThread(maintenanceThreadInfo);
+    core->getThread()->waitForThread(maintenanceThreadInfo);
+    core->getThread()->destroyThread(maintenanceThreadInfo);
+  }
 
   // Wait until the map update thread has finished
   interruptMapUpdate();
@@ -487,8 +490,11 @@ void Core::lateInit() {
 // Main loop of the maintenance thread
 void Core::maintenance(bool endlessLoop) {
 
-  // Set the priority
-  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+  // If this is called in an endless loop, set the thread parameters
+  if (endlessLoop) {
+    core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+    core->getThread()->setThreadCancable();
+  }
 
   // Do an endless loop
   while (1) {
@@ -590,6 +596,7 @@ void Core::updateGraphic(bool graphicInvalidated) {
   if (graphicInvalidated)
     screen->graphicInvalidated();
   screen->recreateGraphic();
+  widgetEngine->deinit();            // widget engine must return font strings first
   fontEngine->recreateGraphic();
   graphicEngine->recreateGraphic();
   widgetEngine->recreateGraphic();

@@ -279,18 +279,27 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
   if (cmdName=="showTarget") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->showTarget(true);
+      GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
+      visPos->updateLastUserModification();
+      core->getGraphicEngine()->unlockPos();
     }
     cmdExecuted=true;
   }
   if (cmdName=="setTargetAtMapCenter") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->setTargetAtMapCenter();
+      GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
+      visPos->updateLastUserModification();
+      core->getGraphicEngine()->unlockPos();
     }
     cmdExecuted=true;
   }
   if (cmdName=="setTargetAtGeographicCoordinate") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->setTargetAtGeographicCoordinate(atof(args[0].c_str()),atof(args[1].c_str()),true);
+      GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
+      visPos->updateLastUserModification();
+      core->getGraphicEngine()->unlockPos();
     }
     cmdExecuted=true;
   }

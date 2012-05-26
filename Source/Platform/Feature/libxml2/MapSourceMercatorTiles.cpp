@@ -50,6 +50,7 @@ bool MapSourceMercatorTiles::readGDSInfo()
   std::string infoFilePath=getFolderPath() + "/info.gds";
   bool minZoomLevelFound,maxZoomLevelFound;
   std::stringstream in;
+  xmlChar *text;
 
   // Read the XML file
   doc = xmlReadFile(infoFilePath.c_str(), NULL, 0);
@@ -64,11 +65,12 @@ bool MapSourceMercatorTiles::readGDSInfo()
   }
 
   // Check the version
-  version=std::string((char*)xmlGetProp(rootNode,BAD_CAST "version"));
-  if (version!="1.0") {
-    ERROR("the version (%s) of the GDS file <%s> is not supported",version.c_str(),infoFilePath.c_str());
+  text = xmlGetProp(rootNode,BAD_CAST "version");
+  if (strcmp((char*)text,"1.0")!=0) {
+    ERROR("the version (%s) of the GDS file <%s> is not supported",text,infoFilePath.c_str());
     goto cleanup;
   }
+  xmlFree(text);
 
   // Find the GDS node
   gdsNode=NULL;

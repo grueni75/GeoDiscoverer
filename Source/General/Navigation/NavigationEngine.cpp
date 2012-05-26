@@ -64,6 +64,8 @@ NavigationEngine::NavigationEngine() {
   targetScaleMaxFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMaxFactor");
   targetScaleMinFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor");
   targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor");
+  backgroundLoaderThreadInfo=NULL;
+  backgroundLoaderFinished=false;
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -113,8 +115,10 @@ void NavigationEngine::init() {
   std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename");
   std::string filepath=recordedTrack->getGpxFilefolder()+"/"+lastRecordedTrackFilename;
   if ((lastRecordedTrackFilename!="")&&(access(filepath.c_str(),F_OK)==0)) {
+    //DEBUG("track gpx file exists, using it",NULL);
     recordedTrack->setGpxFilename(lastRecordedTrackFilename);
   } else {
+    //DEBUG("track gpx file does not exist, starting new track",NULL);
     c->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename());
     recordedTrack->setIsInit(true);
   }
@@ -197,6 +201,7 @@ void NavigationEngine::updateRoutes() {
     // Add the found route
     routes.push_back(filename);
   }
+  closedir(dp);
 
   // Go through all routes in the config and remove the ones that do not exist anymore
   std::list<std::string> routeNames = core->getConfigStore()->getAttributeValues("Navigation/Route", "name");
@@ -222,9 +227,14 @@ void NavigationEngine::updateRoutes() {
 // Deinitializes the engine
 void NavigationEngine::deinit() {
 
-  // Wait for the background loader thread to complete
-  if (backgroundLoaderThreadInfo)
-    core->getThread()->waitForThread(backgroundLoaderThreadInfo);
+  // Finish the background thread
+  if (backgroundLoaderThreadInfo) {
+    if (!backgroundLoaderFinished) {
+      core->getThread()->cancelThread(backgroundLoaderThreadInfo);
+      core->getThread()->waitForThread(backgroundLoaderThreadInfo);
+    }
+    core->getThread()->destroyThread(backgroundLoaderThreadInfo);
+  }
 
   // Save the track first
   lockRecordedTrack();
@@ -343,7 +353,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
 
   }
 
-  //PROFILE_END;
+  PROFILE_END;
 
 }
 
@@ -909,6 +919,9 @@ void NavigationEngine::backgroundLoader() {
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
 
+  // This thread can be cancelled
+  core->getThread()->setThreadCancable();
+
   // Load the recorded track
   if (!recordedTrack->getIsInit()) {
     if (core->getQuitCore())
@@ -925,6 +938,8 @@ void NavigationEngine::backgroundLoader() {
     (*i)->setIsInit(true);
   }
 
+  // Thread is finished
+  backgroundLoaderFinished=true;
 }
 
 // Adds a new point of interest

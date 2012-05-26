@@ -39,6 +39,12 @@ WidgetMeter::WidgetMeter() : WidgetPrimitive() {
 
 // Destructor
 WidgetMeter::~WidgetMeter() {
+  core->getFontEngine()->setFont("sansNormal");
+  if (unitFontString) core->getFontEngine()->destroyString(unitFontString);
+  core->getFontEngine()->setFont("sansBoldNormal");
+  if (labelFontString) core->getFontEngine()->destroyString(labelFontString);
+  core->getFontEngine()->setFont("sansLarge");
+  if (valueFontString) core->getFontEngine()->destroyString(valueFontString);
 }
 
 // Executed every time the graphic engine checks if drawing is required

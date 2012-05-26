@@ -250,6 +250,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
         }
       }
     }
+    closedir(dp);
   }
 
   // Did we find an icon?

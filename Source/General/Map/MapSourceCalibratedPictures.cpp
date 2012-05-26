@@ -173,6 +173,7 @@ bool MapSourceCalibratedPictures::init()
       // Remember the basename of the file
       mapFilebases.push_back(filebase);
     }
+    closedir(dp);
 
     // Remove duplicates
     mapFilebases.sort();

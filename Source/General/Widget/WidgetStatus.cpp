@@ -37,7 +37,9 @@ WidgetStatus::WidgetStatus() : WidgetPrimitive() {
 
 // Destructor
 WidgetStatus::~WidgetStatus() {
-  // TODO Auto-generated destructor stub
+  core->getFontEngine()->setFont("sansSmall");
+  if (firstStatusFontString) core->getFontEngine()->destroyString(firstStatusFontString);
+  if (secondStatusFontString) core->getFontEngine()->destroyString(secondStatusFontString);
 }
 
 // Executed every time the graphic engine checks if drawing is required

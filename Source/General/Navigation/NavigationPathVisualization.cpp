@@ -35,12 +35,13 @@ NavigationPathVisualization::NavigationPathVisualization() {
 NavigationPathVisualization::~NavigationPathVisualization() {
 
   // Remove all visualizations from the tiles
-  for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
+  while (tileInfoMap.size()>0) {
+    NavigationPathTileInfoMap::iterator i = tileInfoMap.begin();
     MapTile *mapTile=i->first;
+    NavigationPathTileInfo *tileInfo=i->second;
     removeTileInfo(mapTile);
-    delete i->second;
+    delete tileInfo;
   }
-
 }
 
 // Removes the tile from the visualization

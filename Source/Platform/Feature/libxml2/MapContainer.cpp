@@ -166,6 +166,7 @@ bool MapContainer::readGDMCalibrationFile()
   MapPosition pos;
   MapCalibratorType calibratorType=MapCalibratorTypeLinear;
   std::list<MapPosition> calibrationPoints;
+  xmlChar *text;
 
   // Init
   //xmlInitParser(); // already done by config store
@@ -183,11 +184,12 @@ bool MapContainer::readGDMCalibrationFile()
   }
 
   // Check the version
-  version=std::string((char*)xmlGetProp(rootNode,BAD_CAST "version"));
-  if (version!="1.0") {
-    ERROR("the version (%s) of the GDM file <%s> is not supported",version.c_str(),calibrationFilePath.c_str());
+  text = xmlGetProp(rootNode,BAD_CAST "version");
+  if (strcmp((char*)text,"1.0")!=0) {
+    ERROR("the version (%s) of the GDM file <%s> is not supported",text,calibrationFilePath.c_str());
     goto cleanup;
   }
+  xmlFree(text);
 
   // Find the GDM node
   gdmNode=NULL;

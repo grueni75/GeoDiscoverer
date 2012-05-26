@@ -121,9 +121,6 @@ void WidgetEngine::recreateGraphic() {
 
   ConfigStore *c=core->getConfigStore();
 
-  // First deinit the object
-  deinit();
-
   // Get all widget pages
   // If no exist, create the default ones
   std::list<std::string> pageNames=c->getAttributeValues("Graphic/Widget/Page","name");

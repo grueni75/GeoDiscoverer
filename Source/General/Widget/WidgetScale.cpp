@@ -41,6 +41,11 @@ WidgetScale::WidgetScale() : WidgetPrimitive() {
 
 // Destructor
 WidgetScale::~WidgetScale() {
+  core->getFontEngine()->setFont("sansNormal");
+  if (mapNameFontString) core->getFontEngine()->destroyString(mapNameFontString);
+  for(Int i=0;i<4;i++) {
+    if (scaledNumberFontString[i]) core->getFontEngine()->destroyString(scaledNumberFontString[i]);
+  }
 }
 
 // Executed every time the graphic engine checks if drawing is required

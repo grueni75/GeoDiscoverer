@@ -119,6 +119,9 @@ protected:
   double targetScaleMinFactor;
   double targetScaleNormalFactor;
 
+  // Indicates that the background thread has quit
+  bool backgroundLoaderFinished;
+
 public:
 
   // Constructor
