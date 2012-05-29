@@ -70,9 +70,13 @@ GraphicEngine::GraphicEngine() {
 void GraphicEngine::init() {
 }
 
-// Recreates all graphic
-void GraphicEngine::recreateGraphic() {
+// Clears all graphic
+void GraphicEngine::destroyGraphic() {
   deinit();
+}
+
+// Creates all graphic
+void GraphicEngine::createGraphic() {
   centerIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","centerIconFilename"));
   lockLocationIcon();
   locationIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","locationIconFilename"));
@@ -105,7 +109,6 @@ void GraphicEngine::deinit() {
   lockCompassConeIcon();
   compassConeIcon.deinit();
   unlockCompassConeIcon();
-
   GraphicPointBuffer::destroyBuffers();
 }
 

@@ -27,7 +27,10 @@ namespace GEODISCOVERER {
 // Inits the data
 void ConfigStore::init()
 {
-  xmlInitParser();
+  if (!ConfigStore::parserInitialized) {
+    xmlInitParser();
+    ConfigStore::parserInitialized=true;
+  }
   xmlKeepBlanksDefault(0);
 }
 
@@ -46,7 +49,13 @@ void ConfigStore::deinit()
   xpathSchemaCtx=NULL;
   config=NULL;
   schema=NULL;
+}
+
+// Called when the core is unloaded (process is killed)
+void ConfigStore::unload()
+{
   xmlCleanupParser();
+  ConfigStore::parserInitialized=false;
 }
 
 // Reads the config

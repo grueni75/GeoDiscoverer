@@ -56,7 +56,7 @@ public:
   void draw(Screen *screen);
 
   // Recreates any textures or buffers
-  virtual void recreate();
+  virtual void invalidate();
 
   // Reduce the number of point buffers required
   virtual void optimize();

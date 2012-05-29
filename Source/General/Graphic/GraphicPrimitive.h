@@ -132,7 +132,7 @@ public:
   virtual bool work(TimestampInMicroseconds currentTime);
 
   // Recreates any textures or buffers
-  virtual void recreate();
+  virtual void invalidate();
 
   // Reduce the number of buffers required
   virtual void optimize();

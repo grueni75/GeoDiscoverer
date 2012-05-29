@@ -155,6 +155,9 @@ public:
   Core(std::string homePath, Int screenDPI);
   virtual ~Core();
 
+  // Called when the process is killed
+  static void unload();
+
   // Initializes the application
   bool init();
 

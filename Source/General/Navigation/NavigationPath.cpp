@@ -257,7 +257,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
 
     // Get the calibrator for this point
     core->getMapSource()->lockAccess();
-    bool deleteCalibrator;
+    bool deleteCalibrator=false;
     MapCalibrator *calibrator=NULL;
     if (pos!=NavigationPath::getPathInterruptedPos())
       calibrator=visualization->findCalibrator(pos,deleteCalibrator);
@@ -374,13 +374,25 @@ void NavigationPath::init() {
   core->getMapSource()->unlockAccess();
 }
 
-// Indicates that textures and buffers have been invalidated
-void NavigationPath::recreateGraphic() {
+// Indicates that textures and buffers have been cleared
+void NavigationPath::destroyGraphic() {
 
   // Invalidate all zoom levels
   core->getThread()->lockMutex(accessMutex);
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
-    (*i)->recreateGraphic();
+    (*i)->destroyGraphic();
+  }
+  core->getThread()->unlockMutex(accessMutex);
+
+}
+
+// Indicates that textures and buffers shall be created
+void NavigationPath::createGraphic() {
+
+  // Invalidate all zoom levels
+  core->getThread()->lockMutex(accessMutex);
+  for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
+    (*i)->createGraphic();
   }
   core->getThread()->unlockMutex(accessMutex);
 

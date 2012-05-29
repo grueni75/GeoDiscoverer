@@ -98,9 +98,6 @@ public class ViewMap extends GDActivity {
   
   /** Reference to the core object */
   GDCore coreObject = null;
-
-  /** The current restart object */
-  RestartCoreObjectTask restartCoreObject = null;
   
   // Info about the last location entered
   String lastLocationSubject;
@@ -299,6 +296,13 @@ public class ViewMap extends GDActivity {
                 showContextMenu();
                 commandExecuted=true;
               }
+              if (commandFunction.equals("exitActivity")) {
+                exitRequested = true;
+                stopService(new Intent(ViewMap.this, GDService.class));
+                finish();                
+                commandExecuted=true;
+              } 
+              
               if (!commandExecuted) {
                 GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + "received");
               }
@@ -473,10 +477,12 @@ public class ViewMap extends GDActivity {
     Intent intent = new Intent(this, GDService.class);
     intent.setAction("activityResumed");
     startService(intent);
-    if (exitRequested) {
-      coreObject.coreStopped=false;
-      exitRequested=false;
+    if (coreObject.coreStopped) {
+      Message m=Message.obtain(coreObject.messageHandler);
+      m.what = GDCore.START_CORE;
+      coreObject.messageHandler.sendMessage(m);      
     }
+    exitRequested=false;
     
     // Extract the file path from the intent
     intent = getIntent();
@@ -546,10 +552,13 @@ public class ViewMap extends GDActivity {
                     errorDialog(String.format(getString(R.string.cannot_copy_file), srcFile.getPath(), dstFile.getPath()));
                   }
                   progressDialog.dismiss();
-                  if (restartCoreObject==null) {
-                    restartCoreObject = new RestartCoreObjectTask();
-                    restartCoreObject.execute();
-                  }
+                  busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
+                  Message m=Message.obtain(coreObject.messageHandler);
+                  m.what = GDCore.RESTART_CORE;
+                  Bundle b = new Bundle();
+                  b.putBoolean("resetConfig", false);
+                  m.setData(b);    
+                  coreObject.messageHandler.sendMessage(m);
                 }
               });
           builder.setNegativeButton(R.string.no, null);
@@ -602,9 +611,6 @@ public class ViewMap extends GDActivity {
   /** Called when a option menu shall be displayed */  
   @Override
   public boolean onPrepareOptionsMenu(Menu menu) {
-    if (restartCoreObject!=null) {
-      return false;
-    }
     super.onPrepareOptionsMenu(menu);
     if (messageView.getVisibility()==TextView.VISIBLE) {
       menu.findItem(R.id.toggle_messages).setTitle(R.string.hide_messages);
@@ -633,11 +639,13 @@ public class ViewMap extends GDActivity {
               builder.setPositiveButton(R.string.yes,
                   new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                      if (restartCoreObject==null) {
-                        restartCoreObject = new RestartCoreObjectTask();
-                        restartCoreObject.resetConfig=true;
-                        restartCoreObject.execute();
-                      }
+                      busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
+                      Message m=Message.obtain(coreObject.messageHandler);
+                      m.what = GDCore.RESTART_CORE;
+                      Bundle b = new Bundle();
+                      b.putBoolean("resetConfig", true);
+                      m.setData(b);    
+                      coreObject.messageHandler.sendMessage(m);
                     }
                   });
               builder.setNegativeButton(R.string.no, null);
@@ -647,11 +655,10 @@ public class ViewMap extends GDActivity {
             }
             return true;
           case R.id.exit:
-            if (restartCoreObject==null) {
-              restartCoreObject = new RestartCoreObjectTask();
-              restartCoreObject.exitOnly=true;
-              restartCoreObject.execute();
-            }
+            busyTextView.setText(" " + getString(R.string.stopping_core_object) + " ");
+            Message m=Message.obtain(coreObject.messageHandler);
+            m.what = GDCore.STOP_CORE;
+            coreObject.messageHandler.sendMessage(m);
             return true;
           case R.id.toggle_messages:
             if (messageView.getVisibility()==TextView.VISIBLE) {
@@ -668,50 +675,6 @@ public class ViewMap extends GDActivity {
               return super.onOptionsItemSelected(item);
       }
   }  
-
-  /** Restarts the core object */
-  private class RestartCoreObjectTask extends AsyncTask<Void, Void, Void> {
-
-    //ProgressDialog progressDialog;
-    public boolean resetConfig = false;
-    public boolean exitOnly = false;
-
-    protected void onPreExecute() {
-      /*
-      progressDialog = new ProgressDialog(ViewMap.this);
-      progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-      if (exitOnly) 
-        progressDialog.setMessage(getString(R.string.stopping_core_object));
-      else
-        progressDialog.setMessage(getString(R.string.restarting_core_object));        
-      progressDialog.setCancelable(false);
-      progressDialog.show();
-       */
-      if (exitOnly) 
-        busyTextView.setText(" " + getString(R.string.stopping_core_object) + " ");
-      else
-        busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");        
-    }
-
-    protected Void doInBackground(Void... params) {
-      if (exitOnly) {
-        coreObject.stop();
-      } else {
-        coreObject.restart(resetConfig);              
-      }
-      return null;
-    }
-
-    protected void onPostExecute(Void result) {
-      //progressDialog.dismiss();
-      if (exitOnly) {
-        exitRequested = true;
-        stopService(new Intent(ViewMap.this, GDService.class));
-        finish();                
-      }
-      restartCoreObject=null;
-    }
-  }
   
   /** Finds the geographic position for the given address */
   private class AddressFromLocationTask extends AsyncTask<Void, Void, Void> {
@@ -762,7 +725,13 @@ public class ViewMap extends GDActivity {
       if (resultCode==1) {
         
         // Restart the core object
-        new RestartCoreObjectTask().execute();
+        busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");        
+        Message m=Message.obtain(coreObject.messageHandler);
+        m.what = GDCore.RESTART_CORE;
+        Bundle b = new Bundle();
+        b.putBoolean("resetConfig", false);
+        m.setData(b);    
+        coreObject.messageHandler.sendMessage(m);
         
       }
     }

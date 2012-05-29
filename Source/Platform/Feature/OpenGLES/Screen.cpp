@@ -361,16 +361,29 @@ void Screen::destroyBufferInfo(GraphicBufferInfo buffer) {
 // Frees any internal textures or buffers
 void Screen::graphicInvalidated() {
   if (allowDestroying) {
-    DEBUG("clearing unused texture and buffer infos",NULL);
+    //DEBUG("unusedTextureInfos.size()=%d",unusedTextureInfos.size());
+    for(std::list<TextureDebugInfo>::iterator i=unusedTextureInfos.begin();i!=unusedTextureInfos.end();i++) {
+      GraphicTextureInfo textureInfo=(*i).textureInfo;
+      glDeleteTextures(1,&textureInfo);
+    }
     unusedTextureInfos.clear();
+    //DEBUG("unusedBufferInfos.size()=%d",unusedBufferInfos.size());
+    for(std::list<GraphicBufferInfo>::iterator i=unusedBufferInfos.begin();i!=unusedBufferInfos.end();i++) {
+      GraphicBufferInfo bufferInfo=*i;
+      glDeleteBuffers(1,&bufferInfo);
+    }
     unusedBufferInfos.clear();
   } else {
     FATAL("texture and buffer destroying has been disallowed",NULL);
   }
 }
 
-// Recreates the graphic
-void Screen::recreateGraphic() {
+// Creates the graphic
+void Screen::createGraphic() {
+}
+
+// Destroys the graphic
+void Screen::destroyGraphic() {
   if (ellipseCoordinatesBuffer!=bufferNotDefined) {
     destroyBufferInfo(ellipseCoordinatesBuffer);
     ellipseCoordinatesBuffer=bufferNotDefined;

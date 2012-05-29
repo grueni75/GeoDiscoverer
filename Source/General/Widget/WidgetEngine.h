@@ -67,8 +67,11 @@ public:
   // Inits the object
   void init();
 
-  // (Re)creates all widget pages from the current config
-  void recreateGraphic();
+  // Creates all widget pages from the current config
+  void createGraphic();
+
+  // Clears all widget pages
+  void destroyGraphic();
 
   // Clears all widget pages
   void deinit();

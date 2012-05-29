@@ -144,47 +144,47 @@ MapPosition *MapPosition::retrieve(char *& cacheData, Int & cacheSize, char *& o
     // Check if the class has changed
     Int size = sizeof (MapPosition);
     // Read the size of the object and check with current size
-size=0;
-Storage::retrieveInt(cacheData,cacheSize,size);
-if (size!=sizeof(MapPosition)) {
-DEBUG("stored size of object does not match implemented object size, aborting retrieve",NULL);
-return NULL;
-}
-//PROFILE_ADD("sanity check");
+    size=0;
+    Storage::retrieveInt(cacheData,cacheSize,size);
+    if (size!=sizeof(MapPosition)) {
+      DEBUG("stored size of object does not match implemented object size, aborting retrieve",NULL);
+      return NULL;
+    }
+    //PROFILE_ADD("sanity check");
 
-// Create a new map container object
-MapPosition *mapPosition=NULL;
-objectSize-=sizeof(MapPosition);
-if (objectSize<0) {
-DEBUG("can not create map position object",NULL);
-return NULL;
-}
-mapPosition=new(objectData) MapPosition(true);
-objectData+=sizeof(MapPosition);
-//PROFILE_ADD("object creation");
+    // Create a new map container object
+    MapPosition *mapPosition=NULL;
+    objectSize-=sizeof(MapPosition);
+    if (objectSize<0) {
+      DEBUG("can not create map position object",NULL);
+      return NULL;
+    }
+    mapPosition=new(objectData) MapPosition(true);
+    objectData+=sizeof(MapPosition);
+    //PROFILE_ADD("object creation");
 
-// Read the fields
-Storage::retrieveInt(cacheData,cacheSize,mapPosition->x);
-Storage::retrieveInt(cacheData,cacheSize,mapPosition->y);
-Storage::retrieveDouble(cacheData,cacheSize,mapPosition->lng);
-Storage::retrieveDouble(cacheData,cacheSize,mapPosition->lat);
-Storage::retrieveBool(cacheData,cacheSize,mapPosition->hasAltitude);
-Storage::retrieveDouble(cacheData,cacheSize,mapPosition->altitude);
-Storage::retrieveBool(cacheData,cacheSize,mapPosition->hasBearing);
-Storage::retrieveDouble(cacheData,cacheSize,mapPosition->bearing);
-Storage::retrieveBool(cacheData,cacheSize,mapPosition->hasSpeed);
-Storage::retrieveDouble(cacheData,cacheSize,mapPosition->speed);
-Storage::retrieveBool(cacheData,cacheSize,mapPosition->hasAccuracy);
-Storage::retrieveDouble(cacheData,cacheSize,mapPosition->accuracy);
-Storage::retrieveDouble(cacheData,cacheSize,mapPosition->distance);
-Storage::retrieveTimestampInMilliseconds(cacheData,cacheSize,mapPosition->timestamp);
-Storage::retrieveDouble(cacheData,cacheSize,mapPosition->latScale);
-Storage::retrieveDouble(cacheData,cacheSize,mapPosition->lngScale);
-Storage::retrieveString(cacheData,cacheSize,mapPosition->source);
-//PROFILE_ADD("field retrieve");
+    // Read the fields
+    Storage::retrieveInt(cacheData,cacheSize,mapPosition->x);
+    Storage::retrieveInt(cacheData,cacheSize,mapPosition->y);
+    Storage::retrieveDouble(cacheData,cacheSize,mapPosition->lng);
+    Storage::retrieveDouble(cacheData,cacheSize,mapPosition->lat);
+    Storage::retrieveBool(cacheData,cacheSize,mapPosition->hasAltitude);
+    Storage::retrieveDouble(cacheData,cacheSize,mapPosition->altitude);
+    Storage::retrieveBool(cacheData,cacheSize,mapPosition->hasBearing);
+    Storage::retrieveDouble(cacheData,cacheSize,mapPosition->bearing);
+    Storage::retrieveBool(cacheData,cacheSize,mapPosition->hasSpeed);
+    Storage::retrieveDouble(cacheData,cacheSize,mapPosition->speed);
+    Storage::retrieveBool(cacheData,cacheSize,mapPosition->hasAccuracy);
+    Storage::retrieveDouble(cacheData,cacheSize,mapPosition->accuracy);
+    Storage::retrieveDouble(cacheData,cacheSize,mapPosition->distance);
+    Storage::retrieveTimestampInMilliseconds(cacheData,cacheSize,mapPosition->timestamp);
+    Storage::retrieveDouble(cacheData,cacheSize,mapPosition->latScale);
+    Storage::retrieveDouble(cacheData,cacheSize,mapPosition->lngScale);
+    Storage::retrieveString(cacheData,cacheSize,mapPosition->source);
+    //PROFILE_ADD("field retrieve");
 
-// Return result
-return mapPosition;
+    // Return result
+    return mapPosition;
 }
 
 // Destructs the objects correctly (i.e., if memory has not been allocated by new)

@@ -94,8 +94,11 @@ public:
   // Clears all points and sets a new gpx filname
   void init();
 
-  // Indicates that textures and buffers have been invalidated
-  void recreateGraphic();
+  // Indicates that textures and buffers should be cleared
+  void destroyGraphic();
+
+  // Indicates that textures and buffers should be recreated
+  void createGraphic();
 
   // Recreate the graphic objects to reduce the number of graphic point buffers
   void optimizeGraphic();

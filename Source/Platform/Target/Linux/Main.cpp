@@ -98,5 +98,6 @@ int main(int argc, char **argv)
   GEODISCOVERER::core->getThread()->destroyThread(debug);
   GEODISCOVERER::core->getThread()->destroyThread(main);
   delete GEODISCOVERER::core;
+  GEODISCOVERER::Core::unload();
 }
 

@@ -34,6 +34,9 @@ class ConfigStore {
 
 protected:
 
+  // Indicates that the xml parser is initialized
+  static bool parserInitialized;
+
   // Name of the config file
   std::string configFilepath;
 
@@ -78,6 +81,9 @@ protected:
   std::list<XMLNode> findSchemaNodes(std::string path, std::string extension="");
 
 public:
+
+  // Called when the core is unloaded (process is killed)
+  static void unload();
 
   // Constructor
   ConfigStore();

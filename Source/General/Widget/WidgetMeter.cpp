@@ -28,13 +28,13 @@ namespace GEODISCOVERER {
 // Constructor
 WidgetMeter::WidgetMeter() : WidgetPrimitive() {
   widgetType=WidgetTypeMeter;
+  valueFontString=NULL;
+  unitFontString=NULL;
+  labelFontString=NULL;
   setMeterType(WidgetMeterTypeAltitude);
   nextUpdateTime=0;
   lastWorkTime=0;
   updateInterval=1*1000*1000;
-  valueFontString=NULL;
-  unitFontString=NULL;
-  labelFontString=NULL;
 }
 
 // Destructor
@@ -154,6 +154,10 @@ void WidgetMeter::setMeterType(WidgetMeterType meterType)
 
   // Set the label
   fontEngine->setFont("sansBoldNormal");
+  if (labelFontString) {
+    fontEngine->destroyString(labelFontString);
+    labelFontString=NULL;
+  }
   switch(meterType) {
     case WidgetMeterTypeAltitude:
       labelFontString=fontEngine->createString("Altitude");

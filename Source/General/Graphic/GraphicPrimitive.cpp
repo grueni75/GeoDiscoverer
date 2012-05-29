@@ -286,7 +286,7 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
 }
 
 // Recreates any textures or buffers
-void GraphicPrimitive::recreate() {
+void GraphicPrimitive::invalidate() {
 }
 
 // Recreates any textures or buffers

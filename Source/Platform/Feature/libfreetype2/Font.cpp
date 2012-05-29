@@ -115,8 +115,13 @@ void Font::deinit() {
 
 }
 
+// Destroys the graphic of the font
+void Font::destroyGraphic() {
+  deinit();
+}
+
 // Recreates the graphic of the font
-void Font::recreateGraphic() {
+void Font::createGraphic() {
 }
 
 // Creates the bitmap for the font string

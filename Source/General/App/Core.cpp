@@ -350,7 +350,7 @@ void Core::updateScreen(bool forceRedraw) {
 
     // Init the map engine if required
     if (!mapEngine->getIsInitialized()) {
-      mapCache->recreateGraphic();
+      mapCache->createGraphic();
       mapEngine->initMap();
       thread->lockMutex(isInitializedMutex);
       isInitialized=true;
@@ -502,6 +502,8 @@ void Core::maintenance(bool endlessLoop) {
     // Ensure that only one thread is executing this at most
     thread->lockMutex(maintenanceMutex);
 
+    DEBUG("performing maintenance",NULL);
+
     // Do the backup
     if (navigationEngine->getIsInitialized())
       navigationEngine->backup();
@@ -588,23 +590,34 @@ void Core::updateGraphic(bool graphicInvalidated) {
   }
   while (!mapUpdateThreadFinished);
 
-  DEBUG("recreating graphic textures and buffers",NULL);
+  if (graphicInvalidated) {
+    DEBUG("recreating graphic textures and buffers with graphic invalidation",NULL);
+  } else {
+    DEBUG("recreating graphic textures and buffers without graphic invalidation",NULL);
+  }
 
   // First deinit everything
   screen->setAllowDestroying(true);
-  screen->setAllowAllocation(true);
-  if (graphicInvalidated)
-    screen->graphicInvalidated();
-  screen->recreateGraphic();
-  widgetEngine->deinit();            // widget engine must return font strings first
-  fontEngine->recreateGraphic();
-  graphicEngine->recreateGraphic();
-  widgetEngine->recreateGraphic();
+  navigationEngine->destroyGraphic();
   if (isInitialized)
-    mapCache->recreateGraphic();
-  navigationEngine->recreateGraphic();
-  screen->setAllowAllocation(false);
+    mapCache->destroyGraphic();
+  widgetEngine->destroyGraphic();
+  graphicEngine->destroyGraphic();
+  fontEngine->destroyGraphic();
+  screen->destroyGraphic();
+  if (graphicInvalidated) {
+    screen->graphicInvalidated();
+  }
   screen->setAllowDestroying(false);
+  screen->setAllowAllocation(true);
+  screen->createGraphic();
+  fontEngine->createGraphic();
+  graphicEngine->createGraphic();
+  widgetEngine->createGraphic();
+  if (isInitialized)
+    mapCache->createGraphic();
+  navigationEngine->createGraphic();
+  screen->setAllowAllocation(false);
 
   // Trigger an update of the map
   mapEngine->setForceMapRecreation();
@@ -626,6 +639,11 @@ void Core::interruptMapUpdate() {
 void Core::continueMapUpdate() {
   noInterruptAllowed=false;
   thread->unlockMutex(mapUpdateInterruptMutex);
+}
+
+// Called when the process is killed
+void Core::unload() {
+  ConfigStore::unload();
 }
 
 }

@@ -40,6 +40,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
@@ -47,72 +49,73 @@ import android.widget.TextView;
 import android.os.Process;
 
 /** Interfaces with the C++ part */
-public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorEventListener {
+public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorEventListener, Runnable {
 
   //
   // Variables
   //
   
   /** Parent activity */
-  public ViewMap activity = null;
+  protected ViewMap activity = null;
 
   /** Current opengl context */
-  GL10 currentGL = null;
+  protected GL10 currentGL = null;
   
   /** Path to the home directory */
-  String homePath;
+  protected String homePath;
   
   /** DPI of the screen */
-  int screenDPI = 0;
+  protected int screenDPI = 0;
   
   /** Indicates that the core is stopped */
-  boolean coreStopped = false;
+  protected boolean coreStopped = true;
 
   /** Indicates that the core shall not update its frames */
   boolean suspendCore = false;
 
   /** Indicates if the core is initialized */
-  boolean coreInitialized = false;
+  protected boolean coreInitialized = false;
     
   /** Indicates that home dir is available */
-  boolean homeDirAvailable = false;
+  protected boolean homeDirAvailable = false;
 
   /** Indicates that the graphic must be re-created */
-  boolean createGraphic = false;
+  protected boolean createGraphic = false;
 
   /** Indicates that the graphic has been invalidated */
-  boolean graphicInvalidated = false;
+  protected boolean graphicInvalidated = false;
 
   /** Indicates that the sreen properties have changed */
-  boolean changeScreen = false;
+  protected boolean changeScreen = false;
   
   /** Indicates that the screen should be redrawn */
-  boolean forceRedraw = false;
+  protected boolean forceRedraw = false;
   
   /** Indicates that the last frame has been handled by the core */
-  boolean lastFrameDrawnByCore = true;
+  protected boolean lastFrameDrawnByCore = false;
   
   /** Indicates that the splash is currently shown */
-  boolean splashIsVisible = false;
+  protected boolean splashIsVisible = false;
   
   /** Command to execute for changing the screen */
-  String changeScreenCommand = "";
+  protected String changeScreenCommand = "";
   
   /** Queued commands to execute if core is initialized */
-  LinkedList<String> queuedCoreCommands = new LinkedList<String>();
+  protected LinkedList<String> queuedCoreCommands = new LinkedList<String>();
   
   // Sensor readings
-  float[] lastAcceleration = null;
-  float[] lastMagneticField = null;
+  protected float[] lastAcceleration = null;
+  protected float[] lastMagneticField = null;
 
   // Arrays used to compute the orientation
-  float[] R = new float[16];
-  float[] correctedR = new float[16];
-  float[] I = new float[16];
-  float[] orientation = new float[3];
+  protected float[] R = new float[16];
+  protected float[] correctedR = new float[16];
+  protected float[] I = new float[16];
+  protected float[] orientation = new float[3];
 
   // Thread signaling
-  final Lock lock = new ReentrantLock();
+  protected final Lock lock = new ReentrantLock();
+  protected final Condition threadInitialized = lock.newCondition();
     
   //
   // Constructor and destructor
@@ -129,13 +132,105 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
     // Copy variables
     this.homePath=homePath;
+    
+    // Prepare the JNI part
+    initJNI();
+
+    // Start the thread that handles the starting and stopping
+    thread = new Thread(this);
+    thread.start(); 
+    
+    // Wait until the thread is initialized
+    lock.lock();
+    try {
+      while (messageHandler==null)
+      {           
+        threadInitialized.await();
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } finally {
+      lock.unlock();
+    }    
   }
   
+  /** Destructor */
+  protected void finalize() throws Throwable
+  {
+    // Clean up the C++ part
+    stop();
+    
+    // Clean up the JNI part
+    deinitJNI();
+  } 
+
+  //
+  // Thread that handles the starting and stoppingg of the core
+  //
+  
+  protected Thread thread = null;
+  public Handler messageHandler = null;
+
+  // Types of messages
+  public static final int START_CORE = 0;  
+  public static final int STOP_CORE = 1;  
+  public static final int RESTART_CORE = 2;  
+  public static final int HOME_DIR_AVAILABLE = 3;  
+  public static final int HOME_DIR_NOT_AVAILABLE = 4;  
+
+  // Handler thread
+  public void run() {
+    
+    lock.lock();
+
+    // This is a background thread
+    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        
+    // Process messages
+    Looper.prepare();
+    messageHandler = new Handler() {
+
+      /** Called when there is a message for the core */
+      @Override
+      public void handleMessage(Message msg) {  
+        Bundle b=msg.getData();
+        switch(msg.what) {
+          case START_CORE:
+            start();
+            break;
+          case RESTART_CORE:
+            restart(b.getBoolean("resetConfig"));
+            break;
+          case STOP_CORE:
+            stop();
+            executeAppCommand("exitActivity()");
+            break;
+          case HOME_DIR_AVAILABLE:
+            homeDirAvailable=true;
+            start();
+            break;
+          case HOME_DIR_NOT_AVAILABLE:
+            homeDirAvailable=false;
+            stop();
+            break;
+          default:
+            GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown message received");
+        }
+      }      
+    };
+    threadInitialized.signal();
+    lock.unlock();
+    Looper.loop();
+  }
+  
+  //
+  // Support functions
+  //
+
   /** Sets the view map activity */
   public void setActivity(ViewMap activity) {
     lock.lock();
     this.activity = activity;
-    this.coreStopped = false;
     if (activity!=null) {
       DisplayMetrics metrics = new DisplayMetrics();
       activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -144,56 +239,41 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     lock.unlock();
   }
   
-  /** Destructor */
-  protected void finalize() throws Throwable
-  {
-    // Clean up the C++ part
-    stop();
-  } 
-
-  /** Indicates that the home dir is available */
-  public void homeDirAvailable()
+  /** Starts the core */
+  protected synchronized void start()
   {
     lock.lock();
-    homeDirAvailable=true;
-    lock.unlock();
-  } 
-
-  /** Starts the core */
-  protected void start(boolean innerCall)
-  {
-    if (!innerCall) lock.lock();
     boolean isInitialized=coreInitialized;
-    if (!innerCall) lock.unlock();
+    lock.unlock();
     if (!isInitialized) {
   
       // Init the core
       boolean initialized=false;
       if (homeDirAvailable) {
-        init(homePath,screenDPI);    
+        initCore(homePath,screenDPI);    
         initialized=true;
       } else {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","home dir not available");
       }
   
       // Ensure that the screen is recreated
-      if (!innerCall) lock.lock();    
+      lock.lock();    
       if (initialized) {
         coreInitialized=true;
         executeAppCommand("updateWakeLock()");
+        coreStopped=false;
+        if (!changeScreenCommand.equals("")) {        
+          changeScreen=true;
+        }
+        createGraphic=true;
       }
-      coreStopped=false;
-      if (!changeScreenCommand.equals("")) {        
-        changeScreen=true;
-      }
-      createGraphic=true;
-      if (!innerCall) lock.unlock();
+      lock.unlock();
 
     }
   } 
 
   /** Deinits the core */
-  protected void stop()
+  protected synchronized void stop()
   {
     lock.lock();
     boolean isInitialized=coreInitialized;
@@ -207,13 +287,13 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       lock.unlock();
       
       // Deinit the core
-      deinit();
+      deinitCore();
     
     }
   } 
 
   /** Deinits the core and restarts it */
-  public synchronized void restart(boolean resetConfig)
+  protected void restart(boolean resetConfig)
   {
     // Clean up the C++ part
     stop();
@@ -225,18 +305,24 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     }
 
     // Start the core
-    start(false);
+    start();
   } 
   
   //
   // Functions implemented by the native core
   //
   
+  /** Prepares the java native interface */
+  protected native void initJNI();
+  
+  /** Cleans up the java native interfacet */
+  protected native void deinitJNI();
+
   /** Starts the C++ part */
-  protected native void init(String homePath, int DPI);
+  protected native void initCore(String homePath, int DPI);
   
   /** Stops the C++ part */
-  protected native void deinit();
+  protected native void deinitCore();
   
   /** Draw a frame by the C++ part */
   protected native void updateScreen(boolean forceRedraw);
@@ -344,9 +430,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     if (gl==currentGL) {
       if ((!coreStopped)&&(homeDirAvailable)) {
         if (!suspendCore) {
-          if (!coreInitialized) {
-            start(true);
-          }
           if (graphicInvalidated) {        
             executeCoreCommand("graphicInvalidated()");
             graphicInvalidated=false;

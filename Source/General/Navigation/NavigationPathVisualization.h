@@ -50,8 +50,11 @@ public:
   // Destructor
   virtual ~NavigationPathVisualization();
 
-  // Indicates that textures and buffers have been invalidated
-  void recreateGraphic();
+  // Indicates that textures and buffers have been cleared
+  void destroyGraphic();
+
+  // Indicates that textures and buffers shall be created
+  void createGraphic();
 
   // Returns the tile info for the given tile
   NavigationPathTileInfo *findTileInfo(MapTile *tile);

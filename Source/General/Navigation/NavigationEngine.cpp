@@ -64,7 +64,6 @@ NavigationEngine::NavigationEngine() {
   targetScaleMaxFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMaxFactor");
   targetScaleMinFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor");
   targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor");
-  backgroundLoaderThreadInfo=NULL;
   backgroundLoaderFinished=false;
 
   // Create the track directory if it does not exist
@@ -845,23 +844,39 @@ void NavigationEngine::updateMapGraphic() {
   core->getMapSource()->unlockAccess();
 }
 
-// Recreate all graphics
-void NavigationEngine::recreateGraphic() {
+// Destroys all graphics
+void NavigationEngine::destroyGraphic() {
+
+  // Clear the buffers used in the path object
+  lockRoutes();
+  for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    (*i)->destroyGraphic();
+  }
+  unlockRoutes();
+  lockRecordedTrack();
+  if (recordedTrack) {
+    recordedTrack->destroyGraphic();
+  }
+  unlockRecordedTrack();
+}
+
+// Creates all graphics
+void NavigationEngine::createGraphic() {
 
   // Get the radius of the arrow icon
   GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon();
   arrowDiameter=sqrt((double)(arrowIcon->getIconWidth()*arrowIcon->getIconWidth()+arrowIcon->getIconHeight()*arrowIcon->getIconHeight()));
   core->getGraphicEngine()->unlockArrowIcon();
 
-  // Reset the buffers used in the path object
+  // Creates the buffers used in the path object
   lockRoutes();
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->recreateGraphic();
+    (*i)->createGraphic();
   }
   unlockRoutes();
   lockRecordedTrack();
   if (recordedTrack) {
-    recordedTrack->recreateGraphic();
+    recordedTrack->createGraphic();
   }
   unlockRecordedTrack();
 }

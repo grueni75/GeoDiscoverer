@@ -210,9 +210,9 @@ void GraphicLine::draw(Screen *screen) {
 }
 
 // Recreates any textures or buffers
-void GraphicLine::recreate() {
+void GraphicLine::invalidate() {
   for (std::list<GraphicPointBuffer*>::iterator i=segments.begin();i!=segments.end();i++) {
-    (*i)->recreate();
+    (*i)->invalidate();
   }
 }
 

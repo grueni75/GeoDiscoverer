@@ -163,8 +163,11 @@ public:
   // Frees any internal textures or buffers
   void graphicInvalidated();
 
-  // Recreates the graphic
-  void recreateGraphic();
+  // Creates the graphic
+  void createGraphic();
+
+  // Destroys the graphic
+  void destroyGraphic();
 
   // Getters and setters
   const GraphicBufferInfo getBufferNotDefined()

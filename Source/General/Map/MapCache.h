@@ -60,8 +60,11 @@ public:
   // Inits the cache
   void init();
 
-  // Resets all graphics
-  void recreateGraphic();
+  // Creates all graphics
+  void createGraphic();
+
+  // Clears all graphics
+  void destroyGraphic();
 
   // Clears the cache
   void deinit();

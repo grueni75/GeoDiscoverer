@@ -116,8 +116,13 @@ void WidgetEngine::addWidgetToPage(
 void WidgetEngine::init() {
 }
 
+// Clears all widget pages
+void WidgetEngine::destroyGraphic() {
+  deinit();
+}
+
 // (Re)creates all widget pages from the current config
-void WidgetEngine::recreateGraphic() {
+void WidgetEngine::createGraphic() {
 
   ConfigStore *c=core->getConfigStore();
 

@@ -131,8 +131,11 @@ public:
   // Inits dynamic data
   void init();
 
-  // Recreates all graphic
-  void recreateGraphic();
+  // Clears all graphic
+  void destroyGraphic();
+
+  // Creates all graphic
+  void createGraphic();
 
   // Deinits dynamic data
   void deinit();

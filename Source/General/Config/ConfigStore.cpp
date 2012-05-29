@@ -25,6 +25,9 @@
 
 namespace GEODISCOVERER {
 
+// Indicates that the xml parser is initialized
+bool ConfigStore::parserInitialized = false;
+
 // Constructor
 ConfigStore::ConfigStore() {
   configFilepath=core->getHomePath() + "/config.xml";

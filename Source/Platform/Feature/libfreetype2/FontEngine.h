@@ -61,8 +61,11 @@ public:
   // Inits the engine
   void init();
 
-  // Recreates the graphic of the fonts
-  void recreateGraphic();
+  // Creates the graphic of the fonts
+  void createGraphic();
+
+  // Clears the graphic of the fonts
+  void destroyGraphic();
 
   // Deinits the engine
   void deinit();

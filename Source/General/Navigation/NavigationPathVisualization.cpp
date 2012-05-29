@@ -85,15 +85,24 @@ NavigationPathTileInfo *NavigationPathVisualization::findTileInfo(MapTile *tile)
 
 }
 
-// Indicates that textures and buffers have been invalidated
-void NavigationPathVisualization::recreateGraphic() {
+// Indicates that textures and buffers have been cleared
+void NavigationPathVisualization::destroyGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
     GraphicLine *line=i->second->getGraphicLine();
-    if (line) line->recreate();
+    if (line) line->invalidate();
+    GraphicRectangleList *rectangleList=i->second->getGraphicRectangeList();
+    if (rectangleList) {
+      rectangleList->invalidate();
+    }
+  }
+}
+
+// Indicates that textures and buffers shall be created
+void NavigationPathVisualization::createGraphic() {
+  for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
     GraphicRectangleList *rectangleList=i->second->getGraphicRectangeList();
     if (rectangleList) {
       rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
-      rectangleList->recreate();
     }
   }
 }

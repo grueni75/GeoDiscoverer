@@ -36,6 +36,10 @@ protected:
   // Mutex to ensure that only one thread is executing a command at a time
   ThreadMutexInfo *accessMutex;
 
+  // Coordinates of the last touched point
+  Int lastTouchedX;
+  Int lastTouchedY;
+
 public:
 
   // Constructor and destructor

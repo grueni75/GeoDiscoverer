@@ -455,8 +455,12 @@ void Screen::setWakeLock(bool state) {
 void Screen::graphicInvalidated() {
 }
 
-// Recreates the graphic
-void Screen::recreateGraphic() {
+// Creates the graphic
+void Screen::createGraphic() {
+}
+
+// Destroys the graphic
+void Screen::destroyGraphic() {
 }
 
 // Destructor

@@ -42,7 +42,7 @@ GraphicPointBuffer::GraphicPointBuffer(Int numberOfPoints) {
 
 // Destructor
 GraphicPointBuffer::~GraphicPointBuffer() {
-  recreate();
+  invalidate();
   free(points);
 }
 
@@ -102,7 +102,7 @@ void GraphicPointBuffer::destroyBuffers() {
 }
 
 // Recreates any textures or buffers
-void GraphicPointBuffer::recreate() {
+void GraphicPointBuffer::invalidate() {
   bufferOutdated=true;
   if (buffer!=core->getScreen()->getBufferNotDefined()) {
     unusedBuffers.push_back(buffer);

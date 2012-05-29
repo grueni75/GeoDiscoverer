@@ -138,7 +138,7 @@ void GraphicObject::recreateGraphic() {
   GraphicPrimitiveMap *primitiveMap=getPrimitiveMap();
   GraphicPrimitiveMap::iterator i;
   for(i = primitiveMap->begin(); i!=primitiveMap->end(); i++) {
-    i->second->recreate();
+    i->second->invalidate();
   }
 }
 

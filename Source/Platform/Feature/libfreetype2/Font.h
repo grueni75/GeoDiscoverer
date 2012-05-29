@@ -126,8 +126,11 @@ public:
   // Destructor
   virtual ~Font();
 
-  // Recreates the graphic of the font
-  void recreateGraphic();
+  // Creates the graphic of the font
+  void createGraphic();
+
+  // Destroy the graphic of the font
+  void destroyGraphic();
 
   // Deinits the font
   void deinit();

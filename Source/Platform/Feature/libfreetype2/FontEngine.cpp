@@ -149,7 +149,7 @@ void FontEngine::deinit() {
     std::string fontType;
     Font *font;
     font=i->second;
-    font->deinit();
+    font->destroyGraphic();
   }
 }
 
@@ -158,15 +158,19 @@ void FontEngine::init() {
 
 }
 
-// Recreates the graphic of the font
-void FontEngine::recreateGraphic() {
+// Clears the graphic of the font
+void FontEngine::destroyGraphic() {
   deinit();
+}
+
+// Creates the graphic of the font
+void FontEngine::createGraphic() {
   FontTypeMap::iterator i;
   for(i = fontTypeMap.begin(); i!=fontTypeMap.end(); i++) {
     std::string fontType;
     Font *font;
     font=i->second;
-    font->recreateGraphic();
+    font->createGraphic();
   }
 }
 

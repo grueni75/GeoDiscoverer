@@ -94,9 +94,9 @@ void GraphicRectangleList::draw(Screen *screen) {
 }
 
 // Recreates any textures or buffers
-void GraphicRectangleList::recreate() {
+void GraphicRectangleList::invalidate() {
   for (std::list<GraphicRectangleListSegment*>::iterator i=segments.begin();i!=segments.end();i++) {
-    (*i)->recreate();
+    (*i)->invalidate();
   }
 }
 

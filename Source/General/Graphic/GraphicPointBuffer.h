@@ -60,8 +60,8 @@ public:
   // Updates the buffer contents
   void updateBuffer(Screen *screen);
 
-  // Recreates any textures or buffers
-  void recreate();
+  // Invalidates any textures or buffers
+  void invalidate();
 
   // Getters and setters
   Int getSize() const

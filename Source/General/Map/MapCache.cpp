@@ -60,11 +60,13 @@ MapCache::~MapCache() {
 void MapCache::init() {
 }
 
-// Recreates all graphic
-void MapCache::recreateGraphic() {
-
-  // First clear everything
+// Clears all graphic
+void MapCache::destroyGraphic() {
   deinit();
+}
+
+// Creates all graphic
+void MapCache::createGraphic() {
 
   // Ensure that only one thread is executing this
   core->getThread()->lockMutex(accessMutex);

@@ -29,6 +29,8 @@ namespace GEODISCOVERER {
 Commander::Commander() {
   pos=NULL;
   accessMutex=core->getThread()->createMutex();
+  lastTouchedX=0;
+  lastTouchedY=0;
 }
 
 // Destructor
@@ -112,7 +114,6 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     core->getGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
-  static Int lastTouchedX, lastTouchedY;
   if (cmdName.substr(0,5)=="touch") {
     Int x,y;
     x=atoi(args[0].c_str());

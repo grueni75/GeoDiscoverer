@@ -172,8 +172,11 @@ public:
   // Updates navigation-related graphic that is overlayed on the map tiles
   void updateMapGraphic();
 
-  // Recreate all graphics
-  void recreateGraphic();
+  // Creates all graphics
+  void createGraphic();
+
+  // Destroys all graphics
+  void destroyGraphic();
 
   // Recreate the objects to reduce the number of graphic point buffers
   void optimizeGraphic();
