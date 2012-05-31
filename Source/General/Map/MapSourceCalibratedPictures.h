@@ -30,9 +30,9 @@ class MapSourceCalibratedPictures  : public MapSource {
 
 protected:
 
-  bool isScratchOnly;                       // Indicates that the object should not be deinited
-  bool doNotDelete;                         // Indicates if the object has been alloacted by an own memory handler
-  char *objectData;                         // Memory that holds all the sub objects if retrieve was used
+  // Memory that holds all the sub objects if retrieve was used
+  char *objectData;
+  char *cacheData;
 
   // Stores the contents of the search tree in a binary file
   void storeSearchTree(std::ofstream *ofs, MapContainerTreeNode *node, Int &memorySize);
@@ -43,11 +43,11 @@ protected:
 public:
 
   // Constructurs and destructor
-  MapSourceCalibratedPictures(bool isScratchOnly=false, bool doNotDelete=false);
+  MapSourceCalibratedPictures();
   virtual ~MapSourceCalibratedPictures();
 
-  // Destructs the objects correctly (i.e., if memory has not been allocated by new)
-  static void destruct(MapSourceCalibratedPictures *object);
+  // Operators
+  MapSourceCalibratedPictures &operator=(const MapSourceCalibratedPictures &rhs);
 
   // Initialzes the source
   virtual bool init();
@@ -59,7 +59,7 @@ public:
   void store(std::ofstream *ofs, Int &memorySize);
 
   // Reads the contents of the object from a binary file
-  static MapSourceCalibratedPictures *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, std::string folder);
+  static bool retrieve(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, std::string folder);
 
   // Finds the calibrator for the given position
   virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator);

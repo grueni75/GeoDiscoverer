@@ -34,12 +34,12 @@ class MapContainer {
 protected:
 
   bool                doNotDelete;          // Indicates if the object has been alloacted by an own memory handler
-  std::string         mapFileFolder;        // Folder in which the picture and calibration data of the map is stored
-  std::string         imageFileName;        // Filename of the picture of the map
-  std::string         imageFilePath;        // Complete path to the picture of the map
+  char                *mapFileFolder;       // Folder in which the picture and calibration data of the map is stored
+  char                *imageFileName;       // Filename of the picture of the map
+  char                *imageFilePath;       // Complete path to the picture of the map
   ImageType           imageType;            // File format of the image
-  std::string         calibrationFileName;  // Filename of the calibration data of the map
-  std::string         calibrationFilePath;  // Complete path to the calibration data of the map
+  char                *calibrationFileName; // Filename of the calibration data of the map
+  char                *calibrationFilePath; // Complete path to the calibration data of the map
   Int                 x;                    // X coordinate
   Int                 y;                    // Y coordinate
   Int                 zoomLevel;            // Zoom level of the map
@@ -107,9 +107,13 @@ public:
 
   // Constructor
   MapContainer(bool doNotDelete=false);
+  MapContainer(const MapContainer &src);
 
   // Destructor
   virtual ~MapContainer();
+
+  // Operators
+  MapContainer &operator=(const MapContainer &rhs);
 
   // Destructs the objects correctly (i.e., if memory has not been allocated by new)
   static void destruct(MapContainer *object);
@@ -171,7 +175,7 @@ public:
 
   std::string getImageFilePath() const
   {
-      return imageFilePath;
+      return std::string(imageFilePath);
   }
 
   MapCalibrator *getMapCalibrator() const
@@ -181,12 +185,12 @@ public:
 
   std::string getImageFileFolder() const
   {
-      return mapFileFolder;
+      return std::string(mapFileFolder);
   }
 
   std::string getImageFileName() const
   {
-      return imageFileName;
+      return std::string(imageFileName);
   }
 
   std::vector<MapTile*> *getMapTiles() {
@@ -306,8 +310,19 @@ public:
   }
 
   void setCalibrationFileName(std::string calibrationFileName) {
-    this->calibrationFileName = calibrationFileName;
-    this->calibrationFilePath = mapFileFolder + "/" + calibrationFileName;
+    if (doNotDelete) {
+      FATAL("can not set new calibration file name because memory is statically allocated",NULL);
+    } else {
+      if (this->calibrationFileName) free(this->calibrationFileName);
+      if (!(this->calibrationFileName=strdup(calibrationFileName.c_str()))) {
+        FATAL("can not create string",NULL);
+      }
+      std::string path = std::string(mapFileFolder) + "/" + calibrationFileName;
+      if (this->calibrationFilePath) free(this->calibrationFilePath);
+      if (!(this->calibrationFilePath=strdup(path.c_str()))) {
+        FATAL("can not create string",NULL);
+      }
+    }
   }
 
   void setImageType(ImageType imageType) {
@@ -315,12 +330,30 @@ public:
   }
 
   void setImageFileName(std::string imageFileName) {
-    this->imageFileName = imageFileName;
-    this->imageFilePath = mapFileFolder+"/"+imageFileName;
+    if (doNotDelete) {
+      FATAL("can not set new image file name because memory is statically allocated",NULL);
+    } else {
+      if (this->imageFileName) free(this->imageFileName);
+      if (!(this->imageFileName=strdup(imageFileName.c_str()))) {
+        FATAL("can not create string",NULL);
+      }
+      std::string path = std::string(mapFileFolder) + "/" + imageFileName;
+      if (this->imageFilePath) free(this->imageFilePath);
+      if (!(this->imageFilePath=strdup(path.c_str()))) {
+        FATAL("can not create string",NULL);
+      }
+    }
   }
 
   void setMapFileFolder(std::string mapFileFolder) {
-    this->mapFileFolder = mapFileFolder;
+    if (doNotDelete) {
+      FATAL("can not set new map file folder because memory is statically allocated",NULL);
+    } else {
+      if (this->mapFileFolder) free(this->mapFileFolder);
+      if (!(this->mapFileFolder=strdup(mapFileFolder.c_str()))) {
+        FATAL("can not create string",NULL);
+      }
+    }
   }
 
 };

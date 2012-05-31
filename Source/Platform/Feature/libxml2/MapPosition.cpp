@@ -91,10 +91,12 @@ void MapPosition::writeGPX(XMLNode parentNode) {
   }
 
   // Add the remaining information
-  node=xmlNewTextChild(gdNode, NULL, BAD_CAST "source", BAD_CAST source.c_str());
-  if (!node) {
-   FATAL("can not create xml node",NULL);
-   return;
+  if (source) {
+    node=xmlNewTextChild(gdNode, NULL, BAD_CAST "source", BAD_CAST source);
+    if (!node) {
+     FATAL("can not create xml node",NULL);
+     return;
+    }
   }
   if (hasBearing) {
     out.str(""); out << bearing;
@@ -238,7 +240,7 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
           iss.str(text);
           iss.clear();
           if (name == "source") {
-            source=text;
+            setSource(text.c_str());
           }
           if (name == "bearing") {
             hasBearing=true;

@@ -36,6 +36,7 @@ class MapPosition {
 protected:
 
   bool doNotDelete;                                 // Indicates if the object has been alloacted by an own memory handler
+  static const char *unknownSource;                 // String indicating that the source is unknown
   static const double earthRadius = 6.371 * 1e6;    // Radius of earh in meter
   MapTile *mapTile;                                 // Tile this position belongs to
   Int x;                                            // X position
@@ -55,7 +56,7 @@ protected:
   TimestampInMilliseconds timestamp;                // Time when this position was generated
   double latScale;                                  // Scale factor for latitude
   double lngScale;                                  // Scale factor for longitude
-  std::string source;                               // Source of this position
+  char *source;                                     // Source of this position
   bool isUpdated;                                   // Indicates that the position has been changed
 
   // Returns the text contents of a element node
@@ -71,14 +72,16 @@ public:
 
   // Constructors and destructor
   MapPosition(bool doNotDelete=false);
+  MapPosition(const MapPosition &pos);
   virtual ~MapPosition();
 
   // Destructs the objects correctly (i.e., if memory has not been allocated by new)
   static void destruct(MapPosition *object);
 
   // Operators
-  bool operator ==(const MapPosition & rhs);
-  bool operator !=(const MapPosition & rhs);
+  bool operator ==(const MapPosition &rhs);
+  bool operator !=(const MapPosition &rhs);
+  MapPosition &operator=(const MapPosition &rhs);
 
   // Computes the destination point from the given bearing and distance
   MapPosition computeTarget(double bearing, double distance);
@@ -102,10 +105,10 @@ public:
   }
 
   // Store the contents of the object in a binary file
-  void store(std::ofstream *ofs, Int &memorySize);
+  void store(std::ofstream *ofs, Int &memorySize, bool memoryRequired=true);
 
   // Reads the contents of the object from a binary file
-  static MapPosition *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize);
+  static MapPosition *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, bool skipObjectCreation=false);
 
   // Converts WGS84 height to height above mean sea level
   void toMSLHeight();
@@ -278,7 +281,14 @@ public:
 
   void setSource(std::string source)
   {
-      this->source = source;
+    if (doNotDelete) {
+      FATAL("can not set new source because memory is statically allocated",NULL);
+    } else {
+      if ((this->source)&&(this->source!=unknownSource)) free(this->source);
+      if (!(this->source=strdup(source.c_str()))) {
+        FATAL("can not create string",NULL);
+      }
+    }
   }
 
   bool getHasAccuracy() const

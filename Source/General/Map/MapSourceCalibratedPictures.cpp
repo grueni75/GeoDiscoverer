@@ -24,19 +24,27 @@
 
 namespace GEODISCOVERER {
 
-MapSourceCalibratedPictures::MapSourceCalibratedPictures(bool isScratchOnly, bool doNotDelete)  : MapSource() {
+MapSourceCalibratedPictures::MapSourceCalibratedPictures()  : MapSource() {
   type=MapSourceTypeCalibratedPictures;
-  this->isScratchOnly=isScratchOnly;
-  this->doNotDelete=doNotDelete;
   objectData=NULL;
+  cacheData=NULL;
+  WARNING("replace all other unrequired copies during retrieve",NULL);
 }
 
 MapSourceCalibratedPictures::~MapSourceCalibratedPictures() {
-  if (!isScratchOnly) {
-    deinit();
-    if (objectData)
-        free(objectData);
+  deinit();
+  if (objectData) {
+    free(objectData);
   }
+  if (cacheData) {
+    free(cacheData);
+  }
+}
+
+// Operators
+MapSourceCalibratedPictures &MapSourceCalibratedPictures::operator=(const MapSourceCalibratedPictures &rhs)
+{
+  FATAL("this object can not be copied",NULL);
 }
 
 // Clear the source
@@ -86,7 +94,6 @@ bool MapSourceCalibratedPictures::init()
       } else {
 
         // Load the complete file into memory
-        char *cacheData;
         if (!(cacheData=(char*)malloc(mapCacheStat.st_size+1))) {
           FATAL("can not allocate memory for cache",NULL);
           return false;
@@ -108,25 +115,20 @@ bool MapSourceCalibratedPictures::init()
 
         // Retrieve the objects
         char *objectData2=objectData;
-        MapSourceCalibratedPictures *newMapOfflineSource=MapSourceCalibratedPictures::retrieve(cacheData,cacheSize,objectData2,objectSize,folder);
-        if ((cacheSize!=0)||(objectSize!=0)||(newMapOfflineSource==NULL)) {
+        char *cacheData2=cacheData;
+        bool success = MapSourceCalibratedPictures::retrieve(this,cacheData2,cacheSize,objectData2,objectSize,folder);
+        if ((cacheSize!=0)||(objectSize!=0)||(!success)) {
+          remove(cacheFilepath.c_str());
+          deinit();
+          free(objectData);
+          objectData=NULL;
           if (core->getQuitCore()) {
             DEBUG("cache retrieve aborted because core quit requested",NULL);
             result=false;
             goto cleanup;
           }
-          remove(cacheFilepath.c_str());
-          if (newMapOfflineSource!=NULL) {
-            newMapOfflineSource->objectData=NULL;
-            newMapOfflineSource->isScratchOnly=false;
-            MapSourceCalibratedPictures::destruct(newMapOfflineSource);
-          }
-          free(objectData);
-          objectData=NULL;
           WARNING("falling back to full map read because cache is corrupted",NULL);
         } else {
-          *this=*newMapOfflineSource;
-          this->isScratchOnly=false;
           cacheRetrieved=true;
         }
       }
@@ -137,7 +139,7 @@ bool MapSourceCalibratedPictures::init()
   if (!cacheRetrieved) {
 
     // Create a new progress dialog if required
-    std::string title="Collecting files of map " + folder;
+    std::string title="Collecting files of map " + std::string(folder);
     DialogKey dialog=core->getDialog()->createProgress(title,0);
 
     // Go through all calibration files in the map directory
@@ -188,7 +190,7 @@ bool MapSourceCalibratedPictures::init()
     }
 
     // Create the progress dialog
-    title="Reading files of map " + folder;
+    title="Reading files of map " + std::string(folder);
     dialog=core->getDialog()->createProgress(title,mapFilebases.size());
 
     // Init variables
@@ -199,6 +201,7 @@ bool MapSourceCalibratedPictures::init()
     Int progress=1;
     Int maxZoomLevel=std::numeric_limits<Int>::min();
     Int minZoomLevel=std::numeric_limits<Int>::max();
+    DEBUG("mapContainers.size()=%d",mapContainers.size());
     for (std::list<std::string>::const_iterator i=mapFilebases.begin();i!=mapFilebases.end();i++) {
 
       std::string filebase=*i;
@@ -291,7 +294,7 @@ bool MapSourceCalibratedPictures::init()
     createSearchDataStructures(true);
 
     // Store the map source contents for fast retrieval later
-    title="Writing cache for map " + folder;
+    title="Writing cache for map " + std::string(folder);
     dialog=core->getDialog()->createProgress(title,0);
     ofs.open(cacheFilepath.c_str(),std::ios::binary);
     if (ofs.fail()) {
@@ -314,7 +317,6 @@ bool MapSourceCalibratedPictures::init()
 
   result=true;
 cleanup:
-  if (dp) closedir(dp);
   isInitialized=true;
   return result;
 }
@@ -362,17 +364,12 @@ void MapSourceCalibratedPictures::store(std::ofstream *ofs, Int &memorySize) {
 
   Int totalTileCount=0;
 
-  // Calculate the required memory
-  memorySize+=sizeof(*this);
-
   // Write the size of the object for detecting changes later
   Int size=sizeof(*this);
   Storage::storeInt(ofs,size);
 
   // Store all relevant fields
-  Storage::storeString(ofs,folder);
-  centerPosition.store(ofs,memorySize);
-  currentPosition.store(ofs,memorySize);
+  centerPosition.store(ofs,memorySize,false);
 
   // Store all container objects
   Storage::storeInt(ofs,mapContainers.size());
@@ -396,7 +393,7 @@ void MapSourceCalibratedPictures::store(std::ofstream *ofs, Int &memorySize) {
   // Store the size for the progress dialog
   Int progressValueMax=totalTileCount+zoomLevelSearchTrees.size();
   Storage::storeInt(ofs,progressValueMax);
-  DEBUG("progressValueMax=%d",progressValueMax);
+  //DEBUG("progressValueMax=%d",progressValueMax);
 }
 
 // Reads the contents of the search tree from a binary file
@@ -436,16 +433,17 @@ MapContainerTreeNode *MapSourceCalibratedPictures::retrieveSearchTree(MapSourceC
 }
 
 // Reads the contents of the object from a binary file
-MapSourceCalibratedPictures *MapSourceCalibratedPictures::retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, std::string folder) {
+bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, std::string folder) {
 
   PROFILE_START;
+  bool success=true;
 
   // Check if the class has changed
   Int size=sizeof(MapSourceCalibratedPictures);
 #ifdef TARGET_LINUX
-  if (size!=576) {
+  if (size!=416) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
-    return NULL;
+    return false;
   }
 #endif
 
@@ -454,44 +452,20 @@ MapSourceCalibratedPictures *MapSourceCalibratedPictures::retrieve(char *&cacheD
   Storage::retrieveInt(cacheData,cacheSize,size);
   if (size!=sizeof(MapSourceCalibratedPictures)) {
     DEBUG("stored size of object does not match implemented object size, aborting retrieve",NULL);
-    return NULL;
+    return false;
   }
   PROFILE_ADD("sanity check");
-
-  // Create a new map source object
-  MapSourceCalibratedPictures *mapSource=NULL;
-  objectSize-=sizeof(MapSourceCalibratedPictures);
-  if (objectSize<0) {
-    DEBUG("can not create map source object",NULL);
-    goto cleanup;
-  }
-  mapSource=new(objectData) MapSourceCalibratedPictures(true,true);
-  mapSource->objectData=objectData;
-  objectData+=sizeof(MapSourceCalibratedPictures);
-  PROFILE_ADD("object creation");
 
   // Create a busy dialog
   core->getMapSource()->openProgress("Reading cache of map " + folder, *((Int*)&cacheData[cacheSize-sizeof(Int)]));
 
   // Read the fields
-  Storage::retrieveString(cacheData,cacheSize,mapSource->folder);
-  MapPosition *p;
-  p=MapPosition::retrieve(cacheData,cacheSize,objectData,objectSize);
-  if (p==NULL) {
-    MapSourceCalibratedPictures::destruct(mapSource);
-    mapSource=NULL;
+  char *objectDataTemp=(char*)&mapSource->centerPosition;
+  int objectSizeTemp=0;
+  if (MapPosition::retrieve(cacheData,cacheSize,objectDataTemp,objectSizeTemp,true)==NULL) {
+    success=false;
     goto cleanup;
   }
-  mapSource->centerPosition=*p;
-  MapPosition::destruct(p);
-  p=MapPosition::retrieve(cacheData,cacheSize,objectData,objectSize);
-  if (p==NULL) {
-    MapSourceCalibratedPictures::destruct(mapSource);
-    mapSource=NULL;
-    goto cleanup;
-  }
-  mapSource->currentPosition=*p;
-  MapPosition::destruct(p);
   PROFILE_ADD("position retrieve");
 
   // Read the map containers
@@ -503,8 +477,7 @@ MapSourceCalibratedPictures *MapSourceCalibratedPictures::retrieve(char *&cacheD
     MapContainer *c=MapContainer::retrieve(cacheData,cacheSize,objectData,objectSize);
     if (c==NULL) {
       mapSource->mapContainers.resize(i);
-      MapSourceCalibratedPictures::destruct(mapSource);
-      mapSource=NULL;
+      success=false;
       goto cleanup;
     }
     mapSource->mapContainers[i]=c;
@@ -524,8 +497,7 @@ MapSourceCalibratedPictures *MapSourceCalibratedPictures::retrieve(char *&cacheD
       MapContainerTreeNode *n=retrieveSearchTree(mapSource,cacheData,cacheSize,objectData,objectSize);
       if (n==NULL) {
         mapSource->zoomLevelSearchTrees.resize(i);
-        MapSourceCalibratedPictures::destruct(mapSource);
-        mapSource=NULL;
+        success=false;
         goto cleanup;
       }
       mapSource->zoomLevelSearchTrees[i]=n;
@@ -534,8 +506,7 @@ MapSourceCalibratedPictures *MapSourceCalibratedPictures::retrieve(char *&cacheD
     // Update the progress
     if (!core->getMapSource()->increaseProgress()) {
       mapSource->zoomLevelSearchTrees.resize(i+1);
-      MapSourceCalibratedPictures::destruct(mapSource);
-      mapSource=NULL;
+      success=false;
       goto cleanup;
     }
 
@@ -557,16 +528,7 @@ cleanup:
   PROFILE_END;
 
   // Return result
-  return mapSource;
-}
-
-// Destructs the objects correctly (i.e., if memory has not been allocated by new)
-void MapSourceCalibratedPictures::destruct(MapSourceCalibratedPictures *object) {
-  if (object->doNotDelete) {
-    object->~MapSourceCalibratedPictures();
-  } else {
-    delete object;
-  }
+  return success;
 }
 
 // Finds the calibrator for the given position

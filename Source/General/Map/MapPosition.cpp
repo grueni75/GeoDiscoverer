@@ -25,6 +25,8 @@
 
 namespace GEODISCOVERER {
 
+const char * MapPosition::unknownSource = "unknown";
+
 MapPosition::MapPosition(bool doNotDelete) {
   this->doNotDelete=doNotDelete;
   x=-1; y=-1;
@@ -43,10 +45,19 @@ MapPosition::MapPosition(bool doNotDelete) {
   hasAccuracy=false;
   isUpdated=false;
   invalidate();
-  source="internal";
+  source=(char*)unknownSource;
+}
+
+MapPosition::MapPosition(const MapPosition &pos) {
+  source=NULL;
+  doNotDelete=pos.doNotDelete;
+  *this=pos;
 }
 
 MapPosition::~MapPosition() {
+  if (!doNotDelete) {
+    if ((source)&&(source!=unknownSource)) free(source);
+  }
 }
 
 // Operators
@@ -66,6 +77,22 @@ bool MapPosition::operator==(const MapPosition &rhs)
 bool MapPosition::operator!=(const MapPosition &rhs)
 {
   return !(*this==rhs);
+}
+MapPosition &MapPosition::operator=(const MapPosition &rhs)
+{
+  if (!this->doNotDelete) {
+    if ((this->source)&&(this->source!=unknownSource)) {
+      free(source);
+    }
+  }
+  memcpy(this,&rhs,sizeof(MapPosition));
+  this->source=(char*)unknownSource;
+  if (!this->doNotDelete) {
+    if (this->source!=unknownSource) {
+      source=NULL;
+      this->setSource(rhs.source);
+    }
+  }
 }
 
 // Computes the destination point from the given bearing and distance
@@ -105,15 +132,16 @@ double MapPosition::computeDistance(MapPosition target)
 }
 
 // Store the contents of the object in a binary file
-void MapPosition::store(std::ofstream *ofs, Int & memorySize)
+void MapPosition::store(std::ofstream *ofs, Int & memorySize, bool memoryRequired)
 {
     // Calculate memory
-    memorySize += sizeof (*this);
+    if (memoryRequired)
+      memorySize += sizeof (*this);
     // Write the size of the object for detecting changes later
     Int size = sizeof (*this);
     Storage::storeInt(ofs, size);
     // Sanity checks
-    if(mapTile != NULL){
+    if (mapTile != NULL) {
         FATAL("storing map positions with tile reference is not supported", NULL);
         return;
     }
@@ -138,7 +166,7 @@ void MapPosition::store(std::ofstream *ofs, Int & memorySize)
 }
 
 // Reads the contents of the object from a binary file
-MapPosition *MapPosition::retrieve(char *& cacheData, Int & cacheSize, char *& objectData, Int & objectSize)
+MapPosition *MapPosition::retrieve(char *& cacheData, Int & cacheSize, char *& objectData, Int & objectSize, bool skipObjectCreation)
 {
     //PROFILE_START;
     // Check if the class has changed
@@ -154,13 +182,18 @@ MapPosition *MapPosition::retrieve(char *& cacheData, Int & cacheSize, char *& o
 
     // Create a new map container object
     MapPosition *mapPosition=NULL;
-    objectSize-=sizeof(MapPosition);
-    if (objectSize<0) {
-      DEBUG("can not create map position object",NULL);
-      return NULL;
+    if (skipObjectCreation) {
+      mapPosition=(MapPosition*)objectData;
+      mapPosition->doNotDelete=true;
+    } else {
+      objectSize-=sizeof(MapPosition);
+      if (objectSize<0) {
+        DEBUG("can not create map position object",NULL);
+        return NULL;
+      }
+      mapPosition=new(objectData) MapPosition(true);
+      objectData+=sizeof(MapPosition);
     }
-    mapPosition=new(objectData) MapPosition(true);
-    objectData+=sizeof(MapPosition);
     //PROFILE_ADD("object creation");
 
     // Read the fields
@@ -180,7 +213,7 @@ MapPosition *MapPosition::retrieve(char *& cacheData, Int & cacheSize, char *& o
     Storage::retrieveTimestampInMilliseconds(cacheData,cacheSize,mapPosition->timestamp);
     Storage::retrieveDouble(cacheData,cacheSize,mapPosition->latScale);
     Storage::retrieveDouble(cacheData,cacheSize,mapPosition->lngScale);
-    Storage::retrieveString(cacheData,cacheSize,mapPosition->source);
+    Storage::retrieveString(cacheData,cacheSize,&mapPosition->source);
     //PROFILE_ADD("field retrieve");
 
     // Return result

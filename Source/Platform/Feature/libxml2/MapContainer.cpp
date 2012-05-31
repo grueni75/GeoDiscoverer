@@ -72,7 +72,7 @@ void MapContainer::writeCalibrationFile()
   }
 
   // Add the image file name
-  if (!xmlNewChild(rootNode,NULL,BAD_CAST "imageFileName",BAD_CAST imageFileName.c_str())) {
+  if (!xmlNewChild(rootNode,NULL,BAD_CAST "imageFileName",BAD_CAST imageFileName)) {
     FATAL("can not create xml child node",NULL);
     return;
   }
@@ -120,11 +120,11 @@ void MapContainer::writeCalibrationFile()
   }
 
   // Write the file
-  std::string tempFilePath = calibrationFilePath + "+";
+  std::string tempFilePath = std::string(calibrationFilePath) + "+";
   if (xmlSaveFormatFileEnc(tempFilePath.c_str(), doc, "UTF-8", 1)==-1) {
-    ERROR("can not create native map calibration file <%s>",calibrationFilePath.c_str());
+    ERROR("can not create native map calibration file <%s>",calibrationFilePath);
   }
-  rename(tempFilePath.c_str(),calibrationFilePath.c_str());
+  rename(tempFilePath.c_str(),calibrationFilePath);
 
   // Clean up
   xmlFreeDoc(doc);
@@ -172,9 +172,9 @@ bool MapContainer::readGDMCalibrationFile()
   //xmlInitParser(); // already done by config store
 
   // Read the XML file
-  doc = xmlReadFile(calibrationFilePath.c_str(), NULL, 0);
+  doc = xmlReadFile(calibrationFilePath, NULL, 0);
   if (!doc) {
-    ERROR("can not open file <%s> for reading map calibration",calibrationFilePath.c_str());
+    ERROR("can not open file <%s> for reading map calibration",calibrationFilePath);
     goto cleanup;
   }
   rootNode = xmlDocGetRootElement(doc);
@@ -186,7 +186,7 @@ bool MapContainer::readGDMCalibrationFile()
   // Check the version
   text = xmlGetProp(rootNode,BAD_CAST "version");
   if (strcmp((char*)text,"1.0")!=0) {
-    ERROR("the version (%s) of the GDM file <%s> is not supported",text,calibrationFilePath.c_str());
+    ERROR("the version (%s) of the GDM file <%s> is not supported",text,calibrationFilePath);
     goto cleanup;
   }
   xmlFree(text);
@@ -203,7 +203,7 @@ bool MapContainer::readGDMCalibrationFile()
     }
   }
   if (!gdmNode) {
-    ERROR("can not find GDM node in <%s>",calibrationFilePath.c_str());
+    ERROR("can not find GDM node in <%s>",calibrationFilePath);
     goto cleanup;
   }
 
@@ -215,8 +215,7 @@ bool MapContainer::readGDMCalibrationFile()
       name=std::string((char*)n->name);
       if (name=="imageFileName") {
         imageFileNameFound=true;
-        imageFileName=getNodeText(n);
-        setImageFileName(imageFileName);
+        setImageFileName(getNodeText(n));
       }
       if (name=="mapProjection") {
         std::string mapProjection=getNodeText(n);
@@ -225,7 +224,7 @@ bool MapContainer::readGDMCalibrationFile()
         } else if (mapProjection=="mercator") {
           calibratorType=MapCalibratorTypeMercator;
         } else {
-          ERROR("map projection <%s> defined in <%s> not supported",mapProjection.c_str(),calibrationFilePath.c_str());
+          ERROR("map projection <%s> defined in <%s> not supported",mapProjection.c_str(),calibrationFilePath);
           goto cleanup;
         }
       }
@@ -262,7 +261,7 @@ bool MapContainer::readGDMCalibrationFile()
           }
         }
         if ((!xFound)||(!yFound)||(!longitudeFound)||(!latitudeFound)) {
-          ERROR("calibration point defined in <%s> does not contain all fields",calibrationFilePath.c_str());
+          ERROR("calibration point defined in <%s> does not contain all fields",calibrationFilePath);
           goto cleanup;
         }
         pos.setX(x);
@@ -274,11 +273,11 @@ bool MapContainer::readGDMCalibrationFile()
     }
   }
   if (!imageFileNameFound) {
-    ERROR("image file name not found in <%s>",calibrationFilePath.c_str());
+    ERROR("image file name not found in <%s>",calibrationFilePath);
     goto cleanup;
   }
   if (!zoomLevelFound) {
-    ERROR("zoom level not found in <%s>",calibrationFilePath.c_str());
+    ERROR("zoom level not found in <%s>",calibrationFilePath);
     goto cleanup;
   }
   result=true;

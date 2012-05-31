@@ -38,6 +38,7 @@ NavigationEngine::NavigationEngine() {
   locationOutdatedThreshold=core->getConfigStore()->getIntValue("Navigation","locationOutdatedThreshold");
   locationSignificantlyInaccurateThreshold=core->getConfigStore()->getIntValue("Navigation","locationSignificantlyInaccurateThreshold");
   trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance");
+  backgroundLoaderFinishedMutex=core->getThread()->createMutex();
   recordedTrackMutex=core->getThread()->createMutex();
   routesMutex=core->getThread()->createMutex();
   locationPosMutex=core->getThread()->createMutex();
@@ -91,6 +92,7 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(updateGraphicsMutex);
   core->getThread()->destroyMutex(statusMutex);
   core->getThread()->destroyMutex(targetPosMutex);
+  core->getThread()->destroyMutex(backgroundLoaderFinishedMutex);
 }
 
 // Initializes the engine
@@ -228,10 +230,13 @@ void NavigationEngine::deinit() {
 
   // Finish the background thread
   if (backgroundLoaderThreadInfo) {
+    core->getThread()->lockMutex(backgroundLoaderFinishedMutex);
     if (!backgroundLoaderFinished) {
+      WARNING("free memory used by thread",NULL);
       core->getThread()->cancelThread(backgroundLoaderThreadInfo);
       core->getThread()->waitForThread(backgroundLoaderThreadInfo);
     }
+    core->getThread()->unlockMutex(backgroundLoaderFinishedMutex);
     core->getThread()->destroyThread(backgroundLoaderThreadInfo);
   }
 
@@ -954,7 +959,9 @@ void NavigationEngine::backgroundLoader() {
   }
 
   // Thread is finished
+  core->getThread()->lockMutex(backgroundLoaderFinishedMutex);
   backgroundLoaderFinished=true;
+  core->getThread()->unlockMutex(backgroundLoaderFinishedMutex);
 }
 
 // Adds a new point of interest

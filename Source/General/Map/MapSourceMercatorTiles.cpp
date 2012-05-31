@@ -56,6 +56,7 @@ MapSourceMercatorTiles::~MapSourceMercatorTiles() {
   // Wait until the download thread has finished
   //quitMapImageDownloadThread=true;
   //core->getThread()->issueSignal(downloadStartSignal);
+  WARNING("free all memory used by thread",NULL);
   core->getThread()->cancelThread(mapImageDownloadThreadInfo);
   core->getThread()->waitForThread(mapImageDownloadThreadInfo);
   core->getThread()->destroyThread(mapImageDownloadThreadInfo);

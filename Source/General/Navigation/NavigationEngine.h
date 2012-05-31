@@ -122,6 +122,9 @@ protected:
   // Indicates that the background thread has quit
   bool backgroundLoaderFinished;
 
+  // Mutex for access the backgroundLoaderFinished variable
+  ThreadMutexInfo *backgroundLoaderFinishedMutex;
+
 public:
 
   // Constructor

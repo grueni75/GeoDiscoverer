@@ -32,12 +32,11 @@ class MapSource {
 
 protected:
 
-  MapSourceType type;                      // Type of source
+  MapSourceType type;                       // Type of source
   std::string folder;                       // Folder that contains calibrated maps
   double neighborPixelTolerance ;           // Maximum allowed difference in pixels to classify a tile as a neighbor
   std::vector<MapContainer*> mapContainers; // Vector of all maps
   MapPosition centerPosition;               // Center position of the map
-  MapPosition currentPosition;              // Current position in the map
   bool isInitialized;                       // Indicates if the object is initialized
   Int mapTileLength;                        // Default length of a tile
   Int progressValue;                        // Current progress value of the retrieve

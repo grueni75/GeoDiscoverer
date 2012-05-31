@@ -41,7 +41,7 @@ public:
   static void storeString(std::ofstream *ofs, std::string string);
 
   // Read string from file
-  static void retrieveString(char *&cacheData, Int &cacheSize, std::string &string);
+  static void retrieveString(char *&cacheData, Int &cacheSize, char **string);
 
   // Write an integer array into file
   static void storeVectorOfInt(std::ofstream *ofs, std::vector<Int> vector);

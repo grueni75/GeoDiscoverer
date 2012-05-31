@@ -37,10 +37,11 @@ void Storage::storeString(std::ofstream *ofs, std::string string) {
 }
 
 // Read string from file
-void Storage::retrieveString(char *&cacheData, Int &cacheSize, std::string &string) {
-  string=std::string(cacheData);
-  cacheSize-=string.size()+1;
-  cacheData+=string.size()+1;
+void Storage::retrieveString(char *&cacheData, Int &cacheSize, char **string) {
+  *string=cacheData;
+  Int len=strlen(*string);
+  cacheSize-=len+1;
+  cacheData+=len+1;
 }
 
 

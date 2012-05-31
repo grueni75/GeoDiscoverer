@@ -97,7 +97,9 @@ int main(int argc, char **argv)
   // And destruct core object
   GEODISCOVERER::core->getThread()->destroyThread(debug);
   GEODISCOVERER::core->getThread()->destroyThread(main);
+  puts("Deleting core object");
   delete GEODISCOVERER::core;
+  puts("Unloading core class");
   GEODISCOVERER::Core::unload();
 }
 

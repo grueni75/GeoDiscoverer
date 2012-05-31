@@ -38,23 +38,22 @@ MapSource::~MapSource() {
   core->getThread()->destroyMutex(statusMutex);
 }
 
+
 // Clear the source
 void MapSource::deinit()
 {
-  if (isInitialized) {
-    for (std::vector<MapContainer*>::const_iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
-      MapContainer::destruct(*i);
-    }
-    mapContainers.clear();
-    centerPosition=MapPosition();
-    isInitialized=false;
-    for(std::vector<MapContainerTreeNode*>::iterator i=zoomLevelSearchTrees.begin();i!=zoomLevelSearchTrees.end();i++) {
-      MapContainerTreeNode *t=*i;
-      if (t)
-        MapContainerTreeNode::destruct(t);
-    }
-    zoomLevelSearchTrees.clear();
+  for (std::vector<MapContainer*>::const_iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
+    MapContainer::destruct(*i);
   }
+  mapContainers.clear();
+  centerPosition=MapPosition();
+  for(std::vector<MapContainerTreeNode*>::iterator i=zoomLevelSearchTrees.begin();i!=zoomLevelSearchTrees.end();i++) {
+    MapContainerTreeNode *t=*i;
+    if (t)
+      MapContainerTreeNode::destruct(t);
+  }
+  zoomLevelSearchTrees.clear();
+  isInitialized=false;
 }
 
 // Sorts the list associated with the given border

@@ -43,7 +43,21 @@ MapContainer::MapContainer(bool doNotDelete) {
   this->y=0;
   this->overlayGraphicInvalid=false;
   this->downloadRetries=0;
+  this->mapFileFolder=NULL;
+  this->imageFileName=NULL;
+  this->imageFilePath=NULL;
+  this->calibrationFileName=NULL;
+  this->calibrationFilePath=NULL;
 
+}
+
+MapContainer::MapContainer(const MapContainer &src) {
+  FATAL("this object can not be copied",NULL);
+}
+
+MapContainer &MapContainer::operator=(const MapContainer &rhs)
+{
+  FATAL("this object can not be copied",NULL);
 }
 
 // Destructor
@@ -51,6 +65,13 @@ MapContainer::~MapContainer() {
   if (mapCalibrator) MapCalibrator::destruct(mapCalibrator);
   for(std::vector<MapTile *>::const_iterator i=mapTiles.begin(); i != mapTiles.end(); i++) {
     MapTile::destruct(*i);
+  }
+  if (!doNotDelete) {
+    if (mapFileFolder) free(mapFileFolder);
+    if (imageFileName) free(imageFileName);
+    if (imageFilePath) free(imageFilePath);
+    if (calibrationFileName) free(calibrationFileName);
+    if (calibrationFilePath) free(calibrationFilePath);
   }
 }
 
@@ -398,7 +419,7 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
   Int imageHeight;
 
   // Set some variables
-  mapFileFolder=fileFolder;
+  setMapFileFolder(fileFolder);
   setCalibrationFileName(fileBasename + "." + fileExtension);
 
   /* GPS Tuner file format?
@@ -423,7 +444,7 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
 
   // Check if we have enough calibration points
   if (mapCalibrator->numberOfCalibrationPoints()<3) {
-    ERROR("at least three calibration points must be specified in <%s>",calibrationFilePath.c_str());
+    ERROR("at least three calibration points must be specified in <%s>",calibrationFilePath);
     return false;
   }
 
@@ -433,17 +454,17 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
   } else if (core->getImage()->queryJPEG(imageFilePath,imageWidth,imageHeight)) {
     imageType=ImageTypeJPEG;
   } else {
-    ERROR("file format of image <%s> not supported",imageFilePath.c_str());
+    ERROR("file format of image <%s> not supported",imageFilePath);
     return false;
   }
 
   // Find out how many number of tiles are required to hold this image
   Int tileCountX=imageWidth/tileWidth;
   if (imageWidth%tileWidth!=0)
-    WARNING("some part of the right border of image <%s> is not used because image width is not a multiple of <%d>",imageFileName.c_str(),tileWidth);
+    WARNING("some part of the right border of image <%s> is not used because image width is not a multiple of <%d>",imageFileName,tileWidth);
   Int tileCountY=imageHeight/tileHeight;
   if (imageHeight%tileHeight!=0)
-    WARNING("some part of the bottom border of image <%s> is not used because image height is not a multiple of <%d>",imageFileName.c_str(),tileHeight);
+    WARNING("some part of the bottom border of image <%s> is not used because image height is not a multiple of <%d>",imageFileName,tileHeight);
 
   // Update some variables
   width=tileCountX*tileWidth;
@@ -470,8 +491,9 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
 
   // Create a new calibration file if the used one was not the native one
   if (fileExtension!="gdm") {
-    calibrationFileName=fileBasename + "." + "gdm";
-    calibrationFilePath=mapFileFolder + "/" + calibrationFileName;
+    std::string t=fileBasename + "." + "gdm";
+    t=std::string(mapFileFolder) + "/" + t;
+    setCalibrationFileName(t);
     writeCalibrationFile();
   }
 
@@ -771,15 +793,15 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize, char *&ob
   //PROFILE_ADD("object creation");
 
   // Read the fields
-  Storage::retrieveString(cacheData,cacheSize,mapContainer->mapFileFolder);
-  Storage::retrieveString(cacheData,cacheSize,mapContainer->imageFileName);
-  Storage::retrieveString(cacheData,cacheSize,mapContainer->imageFilePath);
+  Storage::retrieveString(cacheData,cacheSize,&mapContainer->mapFileFolder);
+  Storage::retrieveString(cacheData,cacheSize,&mapContainer->imageFileName);
+  Storage::retrieveString(cacheData,cacheSize,&mapContainer->imageFilePath);
   Storage::retrieveInt(cacheData,cacheSize,mapContainer->zoomLevel);
   Int t;
   Storage::retrieveInt(cacheData,cacheSize,t);
   mapContainer->imageType=(ImageType)t;
-  Storage::retrieveString(cacheData,cacheSize,mapContainer->calibrationFileName);
-  Storage::retrieveString(cacheData,cacheSize,mapContainer->calibrationFilePath);
+  Storage::retrieveString(cacheData,cacheSize,&mapContainer->calibrationFileName);
+  Storage::retrieveString(cacheData,cacheSize,&mapContainer->calibrationFilePath);
   //PROFILE_ADD("field read part one");
   mapContainer->mapCalibrator=MapCalibrator::retrieve(cacheData,cacheSize,objectData,objectSize);
   if (mapContainer->mapCalibrator==NULL) {
