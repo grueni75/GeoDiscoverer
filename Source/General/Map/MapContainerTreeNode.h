@@ -30,9 +30,6 @@ class MapContainerTreeNode {
 
 protected:
 
-  // Indicates if the object has been alloacted by an own memory handler
-  bool doNotDelete;
-
   // Current node
   MapContainer *contents;
 
@@ -45,13 +42,10 @@ protected:
 public:
 
   // Constructor
-  MapContainerTreeNode(bool doNotDelete=false);
+  MapContainerTreeNode();
 
   // Destructor
   virtual ~MapContainerTreeNode();
-
-  // Destructs the objects correctly (i.e., if memory has not been allocated by new)
-  static void destruct(MapContainerTreeNode *object);
 
   // Setters and getters
   MapContainerTreeNode *getLeftChild() const

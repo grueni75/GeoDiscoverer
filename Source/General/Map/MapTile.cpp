@@ -193,38 +193,24 @@ Int MapTile::getMapBorder(PictureBorder border)
 }
 
 // Store the contents of the object in a binary file
-void MapTile::store(std::ofstream *ofs, Int &memorySize) {
-
-  // Calculate memory
-  memorySize+=sizeof(*this);
+void MapTile::store(std::ofstream *ofs) {
 
   // Write the size of the object for detecting changes later
   Int size=sizeof(*this);
   Storage::storeInt(ofs,size);
 
   // Store all relevant fields
-  Storage::storeInt(ofs,mapX[0]);
-  Storage::storeInt(ofs,mapY[0]);
-  Storage::storeDouble(ofs,lngX[0]);
-  Storage::storeDouble(ofs,lngX[1]);
-  Storage::storeDouble(ofs,latY[0]);
-  Storage::storeDouble(ofs,latY[1]);
-  Storage::storeDouble(ofs,latNorthMax);
-  Storage::storeDouble(ofs,latNorthMin);
-  Storage::storeDouble(ofs,latSouthMax);
-  Storage::storeDouble(ofs,latSouthMin);
-  Storage::storeDouble(ofs,lngWestMax);
-  Storage::storeDouble(ofs,lngWestMin);
-  Storage::storeDouble(ofs,lngEastMax);
-  Storage::storeDouble(ofs,lngEastMin);
-  Storage::storeDouble(ofs,northAngle);
-  Storage::storeDouble(ofs,lngScale);
-  Storage::storeDouble(ofs,latScale);
-
+  MapTile *leftChild=this->leftChild;
+  MapTile *rightChild=this->rightChild;
+  this->leftChild=NULL;
+  this->rightChild=NULL;
+  Storage::storeMem(ofs,(char*)this,sizeof(MapTile));
+  this->leftChild=leftChild;
+  this->rightChild=rightChild;
 }
 
 // Reads the contents of the object from a binary file
-MapTile *MapTile::retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, MapContainer *parent) {
+MapTile *MapTile::retrieve(char *&cacheData, Int &cacheSize, MapContainer *parent) {
 
   //PROFILE_START;
 
@@ -246,39 +232,16 @@ MapTile *MapTile::retrieve(char *&cacheData, Int &cacheSize, char *&objectData, 
   }
   //PROFILE_ADD("sanity check");
 
-  // Read the position of the tile
-  Int x,y;
-  Storage::retrieveInt(cacheData,cacheSize,x);
-  Storage::retrieveInt(cacheData,cacheSize,y);
-  //PROFILE_ADD("field read");
-
   // Create a new object
-  MapTile *mapTile=NULL;
-  objectSize-=sizeof(MapTile);
-  if (objectSize<0) {
+  cacheSize-=sizeof(MapTile);
+  if (cacheSize<0) {
     DEBUG("can not create map tile object",NULL);
     return NULL;
   }
-  mapTile=new(objectData) MapTile(x,y,parent,true,true);
-  objectData+=sizeof(MapTile);
+  MapTile *mapTile=(MapTile*)cacheData;
+  mapTile=new(cacheData) MapTile(mapTile->mapX[0],mapTile->mapY[0],parent,true,true);
+  cacheData+=sizeof(MapTile);
   //PROFILE_ADD("object creation");
-
-  // Retrieve the remaining fields
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->lngX[0]);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->lngX[1]);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->latY[0]);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->latY[1]);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->latNorthMax);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->latNorthMin);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->latSouthMax);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->latSouthMin);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->lngWestMax);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->lngWestMin);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->lngEastMax);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->lngEastMin);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->northAngle);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->lngScale);
-  Storage::retrieveDouble(cacheData,cacheSize,mapTile->latScale);
 
   // Return result
   return mapTile;

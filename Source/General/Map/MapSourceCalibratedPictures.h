@@ -31,14 +31,13 @@ class MapSourceCalibratedPictures  : public MapSource {
 protected:
 
   // Memory that holds all the sub objects if retrieve was used
-  char *objectData;
   char *cacheData;
 
   // Stores the contents of the search tree in a binary file
-  void storeSearchTree(std::ofstream *ofs, MapContainerTreeNode *node, Int &memorySize);
+  void storeSearchTree(std::ofstream *ofs, MapContainerTreeNode *node);
 
   // Reads the contents of the search tree from a binary file
-  static MapContainerTreeNode *retrieveSearchTree(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize);
+  static MapContainerTreeNode *retrieveSearchTree(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize);
 
 public:
 
@@ -56,10 +55,10 @@ public:
   virtual void deinit();
 
   // Store the contents of the object in a binary file
-  void store(std::ofstream *ofs, Int &memorySize);
+  void store(std::ofstream *ofs);
 
   // Reads the contents of the object from a binary file
-  static bool retrieve(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, std::string folder);
+  static bool retrieve(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, std::string folder);
 
   // Finds the calibrator for the given position
   virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator);

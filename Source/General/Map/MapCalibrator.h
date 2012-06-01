@@ -46,7 +46,7 @@ public:
   static MapCalibrator *newMapCalibrator(MapCalibratorType type);
 
   // Creates a new map calibrator of the given type by using given memory
-  static MapCalibrator *newMapCalibrator(MapCalibratorType type, char *&objectData, Int &objectSize);
+  static MapCalibrator *newMapCalibrator(MapCalibratorType type, char *&cacheData, Int &cacheSize);
 
   // Constructors and destructor
   MapCalibrator(bool doNotDelete=false);
@@ -74,10 +74,10 @@ public:
   }
 
   // Store the contents of the object in a binary file
-  void store(std::ofstream *ofs, Int &memorySize);
+  void store(std::ofstream *ofs);
 
   // Reads the contents of the object from a binary file
-  static MapCalibrator *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize);
+  static MapCalibrator *retrieve(char *&cacheData, Int &cacheSize);
 
   // Getters and setters
   std::list<MapPosition*> *getCalibrationPoints()

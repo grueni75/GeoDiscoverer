@@ -26,8 +26,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-MapContainerTreeNode::MapContainerTreeNode(bool doNotDelete) {
-  this->doNotDelete=doNotDelete;
+MapContainerTreeNode::MapContainerTreeNode() {
   contents=NULL;
   leftChild=NULL;
   rightChild=NULL;
@@ -36,18 +35,9 @@ MapContainerTreeNode::MapContainerTreeNode(bool doNotDelete) {
 // Destructor
 MapContainerTreeNode::~MapContainerTreeNode() {
   if (leftChild)
-    MapContainerTreeNode::destruct(leftChild);
+    delete leftChild;
   if (rightChild)
-    MapContainerTreeNode::destruct(rightChild);
-}
-
-// Destructs the objects correctly (i.e., if memory has not been allocated by new)
-void MapContainerTreeNode::destruct(MapContainerTreeNode *object) {
-  if (object->doNotDelete) {
-    object->~MapContainerTreeNode();
-  } else {
-    delete object;
-  }
+    delete rightChild;
 }
 
 }

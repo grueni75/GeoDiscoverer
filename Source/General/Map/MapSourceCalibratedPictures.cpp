@@ -26,16 +26,11 @@ namespace GEODISCOVERER {
 
 MapSourceCalibratedPictures::MapSourceCalibratedPictures()  : MapSource() {
   type=MapSourceTypeCalibratedPictures;
-  objectData=NULL;
   cacheData=NULL;
-  WARNING("replace all other unrequired copies during retrieve",NULL);
 }
 
 MapSourceCalibratedPictures::~MapSourceCalibratedPictures() {
   deinit();
-  if (objectData) {
-    free(objectData);
-  }
   if (cacheData) {
     free(cacheData);
   }
@@ -105,23 +100,12 @@ bool MapSourceCalibratedPictures::init()
         cacheData[mapCacheStat.st_size]=0; // to prevent that strings never end
         Int cacheSize=mapCacheStat.st_size;
 
-        // Reserve memory for the required objects
-        Int objectSize=*((Int*)&cacheData[cacheSize-sizeof(Int)]);
-        cacheSize-=sizeof(Int);
-        if (!(objectData=(char*)malloc(objectSize))) {
-          FATAL("can not allocate memory for objects",NULL);
-          return false;
-        }
-
         // Retrieve the objects
-        char *objectData2=objectData;
         char *cacheData2=cacheData;
-        bool success = MapSourceCalibratedPictures::retrieve(this,cacheData2,cacheSize,objectData2,objectSize,folder);
-        if ((cacheSize!=0)||(objectSize!=0)||(!success)) {
+        bool success = MapSourceCalibratedPictures::retrieve(this,cacheData2,cacheSize,folder);
+        if ((cacheSize!=0)||(!success)) {
           remove(cacheFilepath.c_str());
           deinit();
-          free(objectData);
-          objectData=NULL;
           if (core->getQuitCore()) {
             DEBUG("cache retrieve aborted because core quit requested",NULL);
             result=false;
@@ -301,9 +285,7 @@ bool MapSourceCalibratedPictures::init()
       WARNING("can not open <%s> for writing",cacheFilepath.c_str());
       remove(cacheFilepath.c_str());
     } else {
-      Int memorySize=0;
-      store(&ofs,memorySize);
-      Storage::storeInt(&ofs,memorySize);  // for computing the required memory
+      store(&ofs);
       if (ofs.bad()) {
         WARNING("can not store object into <%s>",cacheFilepath.c_str());
         remove(cacheFilepath.c_str());
@@ -322,10 +304,7 @@ cleanup:
 }
 
 // Stores the contents of the search tree in a binary file
-void MapSourceCalibratedPictures::storeSearchTree(std::ofstream *ofs, MapContainerTreeNode *node, Int &memorySize) {
-
-  // Calculate the required memory
-  memorySize+=sizeof(*node);
+void MapSourceCalibratedPictures::storeSearchTree(std::ofstream *ofs, MapContainerTreeNode *node) {
 
   // Write the node index
   bool found=false;
@@ -346,7 +325,7 @@ void MapSourceCalibratedPictures::storeSearchTree(std::ofstream *ofs, MapContain
     Storage::storeBool(ofs,false);
   } else {
     Storage::storeBool(ofs,true);
-    storeSearchTree(ofs,node->getLeftChild(),memorySize);
+    storeSearchTree(ofs,node->getLeftChild());
   }
 
   // Store the right node
@@ -354,13 +333,13 @@ void MapSourceCalibratedPictures::storeSearchTree(std::ofstream *ofs, MapContain
     Storage::storeBool(ofs,false);
   } else {
     Storage::storeBool(ofs,true);
-    storeSearchTree(ofs,node->getRightChild(),memorySize);
+    storeSearchTree(ofs,node->getRightChild());
   }
 
 }
 
 // Store the contents of the object in a binary file
-void MapSourceCalibratedPictures::store(std::ofstream *ofs, Int &memorySize) {
+void MapSourceCalibratedPictures::store(std::ofstream *ofs) {
 
   Int totalTileCount=0;
 
@@ -369,12 +348,12 @@ void MapSourceCalibratedPictures::store(std::ofstream *ofs, Int &memorySize) {
   Storage::storeInt(ofs,size);
 
   // Store all relevant fields
-  centerPosition.store(ofs,memorySize,false);
+  centerPosition.store(ofs);
 
   // Store all container objects
   Storage::storeInt(ofs,mapContainers.size());
   for (int i=0;i<mapContainers.size();i++) {
-    mapContainers[i]->store(ofs,memorySize);
+    mapContainers[i]->store(ofs);
     totalTileCount+=mapContainers[i]->getTileCount();
   }
 
@@ -384,7 +363,7 @@ void MapSourceCalibratedPictures::store(std::ofstream *ofs, Int &memorySize) {
     MapContainerTreeNode *startNode=zoomLevelSearchTrees[i];
     if (startNode) {
       Storage::storeBool(ofs,true);
-      storeSearchTree(ofs,startNode,memorySize);
+      storeSearchTree(ofs,startNode);
     } else {
       Storage::storeBool(ofs,false);
     }
@@ -397,17 +376,14 @@ void MapSourceCalibratedPictures::store(std::ofstream *ofs, Int &memorySize) {
 }
 
 // Reads the contents of the search tree from a binary file
-MapContainerTreeNode *MapSourceCalibratedPictures::retrieveSearchTree(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize) {
+MapContainerTreeNode *MapSourceCalibratedPictures::retrieveSearchTree(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize) {
 
   // Create a new map container tree node object
-  MapContainerTreeNode *mapContainerTreeNode=NULL;
-  objectSize-=sizeof(MapContainerTreeNode);
-  if (objectSize<0) {
+  MapContainerTreeNode *mapContainerTreeNode=new MapContainerTreeNode();
+  if (!mapContainerTreeNode) {
     DEBUG("can not create map container tree node object",NULL);
     return NULL;
   }
-  mapContainerTreeNode=new(objectData) MapContainerTreeNode(true);
-  objectData+=sizeof(MapContainerTreeNode);
 
   // Read the current node index and update the contents of the tree node
   Int index;
@@ -418,14 +394,14 @@ MapContainerTreeNode *MapSourceCalibratedPictures::retrieveSearchTree(MapSourceC
   bool hasLeftNode;
   Storage::retrieveBool(cacheData,cacheSize,hasLeftNode);
   if (hasLeftNode) {
-    mapContainerTreeNode->setLeftChild(retrieveSearchTree(mapSource,cacheData,cacheSize,objectData,objectSize));
+    mapContainerTreeNode->setLeftChild(retrieveSearchTree(mapSource,cacheData,cacheSize));
   }
 
   // Read the right node
   bool hasRightNode;
   Storage::retrieveBool(cacheData,cacheSize,hasRightNode);
   if (hasRightNode) {
-    mapContainerTreeNode->setRightChild(retrieveSearchTree(mapSource,cacheData,cacheSize,objectData,objectSize));
+    mapContainerTreeNode->setRightChild(retrieveSearchTree(mapSource,cacheData,cacheSize));
   }
 
   // Return the node
@@ -433,7 +409,7 @@ MapContainerTreeNode *MapSourceCalibratedPictures::retrieveSearchTree(MapSourceC
 }
 
 // Reads the contents of the object from a binary file
-bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, std::string folder) {
+bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, std::string folder) {
 
   PROFILE_START;
   bool success=true;
@@ -441,7 +417,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Check if the class has changed
   Int size=sizeof(MapSourceCalibratedPictures);
 #ifdef TARGET_LINUX
-  if (size!=416) {
+  if (size!=408) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return false;
   }
@@ -462,7 +438,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Read the fields
   char *objectDataTemp=(char*)&mapSource->centerPosition;
   int objectSizeTemp=0;
-  if (MapPosition::retrieve(cacheData,cacheSize,objectDataTemp,objectSizeTemp,true)==NULL) {
+  if (MapPosition::retrieve(cacheData,cacheSize)==NULL) {
     success=false;
     goto cleanup;
   }
@@ -474,7 +450,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   for (int i=0;i<size;i++) {
 
     // Retrieve the map container
-    MapContainer *c=MapContainer::retrieve(cacheData,cacheSize,objectData,objectSize);
+    MapContainer *c=MapContainer::retrieve(cacheData,cacheSize);
     if (c==NULL) {
       mapSource->mapContainers.resize(i);
       success=false;
@@ -494,7 +470,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
     bool hasSearchTree;
     Storage::retrieveBool(cacheData,cacheSize,hasSearchTree);
     if (hasSearchTree) {
-      MapContainerTreeNode *n=retrieveSearchTree(mapSource,cacheData,cacheSize,objectData,objectSize);
+      MapContainerTreeNode *n=retrieveSearchTree(mapSource,cacheData,cacheSize);
       if (n==NULL) {
         mapSource->zoomLevelSearchTrees.resize(i);
         success=false;

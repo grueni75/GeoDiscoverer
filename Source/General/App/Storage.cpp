@@ -50,6 +50,11 @@ void Storage::storeInt(std::ofstream *ofs, Int value) {
   ofs->write((char*)&value,sizeof(value));
 }
 
+// Writes a piece of memory into file
+void Storage::storeMem(std::ofstream *ofs, char *mem, Int size) {
+  ofs->write(mem,size);
+}
+
 // Read integer from file
 void Storage::retrieveInt(char *&cacheData, Int &cacheSize, Int &value) {
   if (cacheSize>=sizeof(value)) {

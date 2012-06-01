@@ -67,6 +67,9 @@ public:
   // Read a timestamp from file
   static void retrieveTimestampInMilliseconds(char *&cacheData, Int &cacheSize, TimestampInMilliseconds &value);
 
+  // Writes a piece of memory into file
+  static void storeMem(std::ofstream *ofs, char *mem, Int size);
+
 };
 
 }

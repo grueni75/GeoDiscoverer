@@ -50,7 +50,7 @@ void MapSource::deinit()
   for(std::vector<MapContainerTreeNode*>::iterator i=zoomLevelSearchTrees.begin();i!=zoomLevelSearchTrees.end();i++) {
     MapContainerTreeNode *t=*i;
     if (t)
-      MapContainerTreeNode::destruct(t);
+      delete t;
   }
   zoomLevelSearchTrees.clear();
   isInitialized=false;
@@ -747,7 +747,7 @@ void MapSource::createSearchDataStructures(bool showProgressDialog) {
   for(std::vector<MapContainerTreeNode*>::iterator i=zoomLevelSearchTrees.begin();i!=zoomLevelSearchTrees.end();i++) {
     MapContainerTreeNode *t=*i;
     if (t)
-      MapContainerTreeNode::destruct(t);
+      delete t;
     *i=NULL;
   }
 

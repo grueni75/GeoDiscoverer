@@ -130,10 +130,10 @@ public:
   void removeGraphic();
 
   // Store the contents of the object in a binary file
-  void store(std::ofstream *ofs, Int &memorySize);
+  void store(std::ofstream *ofs);
 
   // Reads the contents of the object from a binary file
-  static MapTile *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, MapContainer *parent);
+  static MapTile *retrieve(char *&cacheData, Int &cacheSize, MapContainer *parent);
 
   // Checks if the area is a neighbor of the tile and computes the center position of the neighbor
   bool getNeighborPos(MapArea area, MapPosition &neighborPos);

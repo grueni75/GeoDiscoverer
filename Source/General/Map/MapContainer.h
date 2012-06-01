@@ -98,16 +98,16 @@ protected:
   MapTile *findMapTileByPictureArea(MapArea area, MapTile *preferredNeigbor, MapTile *currentTile, PictureBorder currentDimension, double &bestDistance, bool &betterTileFound, std::list<MapTile*> *foundMapTiles=NULL);
 
   // Stores the contents of the search tree in a binary file
-  void storeSearchTree(std::ofstream *ofs, MapTile *node, Int &memorySize);
+  void storeSearchTree(std::ofstream *ofs, MapTile *node);
 
   // Reads the contents of the search tree from a binary file
-  static MapTile *retrieveSearchTree(MapContainer *mapContainer, Int &nodeNumber, char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize);
+  static MapTile *retrieveSearchTree(MapContainer *mapContainer, Int &nodeNumber, char *&cacheData, Int &cacheSize);
 
 public:
 
   // Constructor
   MapContainer(bool doNotDelete=false);
-  MapContainer(const MapContainer &src);
+  MapContainer(const MapContainer &pos);
 
   // Destructor
   virtual ~MapContainer();
@@ -140,10 +140,10 @@ public:
   void writeCalibrationFile();
 
   // Store the contents of the object in a binary file
-  void store(std::ofstream *ofs, Int &memorySize);
+  void store(std::ofstream *ofs);
 
   // Reads the contents of the object from a binary file
-  static MapContainer *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize);
+  static MapContainer *retrieve(char *&cacheData, Int &cacheSize);
 
   // Checks if the container contains tiles that are currently used for screen drawing
   bool isDrawn();

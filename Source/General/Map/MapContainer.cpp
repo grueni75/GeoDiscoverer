@@ -30,33 +30,35 @@ MapContainer::MapContainer(bool doNotDelete) {
 
   // Set variables
   this->doNotDelete=doNotDelete;
-  this->mapCalibrator=NULL;
-  this->latNorth=-std::numeric_limits<double>::max();
-  this->latSouth=+std::numeric_limits<double>::max();
-  this->lngEast=-std::numeric_limits<double>::max();
-  this->lngWest=+std::numeric_limits<double>::max();
-  this->searchTree=NULL;
-  this->leftChild=NULL;
-  this->rightChild=NULL;
-  this->downloadComplete=true;
-  this->x=0;
-  this->y=0;
-  this->overlayGraphicInvalid=false;
-  this->downloadRetries=0;
-  this->mapFileFolder=NULL;
-  this->imageFileName=NULL;
-  this->imageFilePath=NULL;
-  this->calibrationFileName=NULL;
-  this->calibrationFilePath=NULL;
-
+  if (doNotDelete) {
+    new(&this->mapTiles) std::vector<MapTile*>();
+    new(&this->mapTilesIndexByMapTop) std::vector<Int>();
+    new(&this->mapTilesIndexByMapBottom) std::vector<Int>();
+    new(&this->mapTilesIndexByMapLeft) std::vector<Int>();
+    new(&this->mapTilesIndexByMapRight) std::vector<Int>();
+  } else {
+    this->mapCalibrator=NULL;
+    this->latNorth=-std::numeric_limits<double>::max();
+    this->latSouth=+std::numeric_limits<double>::max();
+    this->lngEast=-std::numeric_limits<double>::max();
+    this->lngWest=+std::numeric_limits<double>::max();
+    this->searchTree=NULL;
+    this->leftChild=NULL;
+    this->rightChild=NULL;
+    this->downloadComplete=true;
+    this->x=0;
+    this->y=0;
+    this->overlayGraphicInvalid=false;
+    this->downloadRetries=0;
+    this->mapFileFolder=NULL;
+    this->imageFileName=NULL;
+    this->imageFilePath=NULL;
+    this->calibrationFileName=NULL;
+    this->calibrationFilePath=NULL;
+  }
 }
 
-MapContainer::MapContainer(const MapContainer &src) {
-  FATAL("this object can not be copied",NULL);
-}
-
-MapContainer &MapContainer::operator=(const MapContainer &rhs)
-{
+MapContainer::MapContainer(const MapContainer &pos) {
   FATAL("this object can not be copied",NULL);
 }
 
@@ -73,6 +75,12 @@ MapContainer::~MapContainer() {
     if (calibrationFileName) free(calibrationFileName);
     if (calibrationFilePath) free(calibrationFilePath);
   }
+}
+
+// Operators
+MapContainer &MapContainer::operator=(const MapContainer &rhs)
+{
+  FATAL("this object can not be copied",NULL);
 }
 
 // Adds a tile to the map
@@ -657,17 +665,17 @@ double MapContainer::getBorder(GeographicBorder border)
 }
 
 // Stores the contents of the search tree in a binary file
-void MapContainer::storeSearchTree(std::ofstream *ofs, MapTile *node, Int &memorySize) {
+void MapContainer::storeSearchTree(std::ofstream *ofs, MapTile *node) {
 
   // Write the contents of the node
-  node->store(ofs,memorySize);
+  node->store(ofs);
 
   // Store the left node
   if (node->getLeftChild()==NULL) {
     Storage::storeBool(ofs,false);
   } else {
     Storage::storeBool(ofs,true);
-    storeSearchTree(ofs,node->getLeftChild(),memorySize);
+    storeSearchTree(ofs,node->getLeftChild());
   }
 
   // Store the right node
@@ -675,48 +683,41 @@ void MapContainer::storeSearchTree(std::ofstream *ofs, MapTile *node, Int &memor
     Storage::storeBool(ofs,false);
   } else {
     Storage::storeBool(ofs,true);
-    storeSearchTree(ofs,node->getRightChild(),memorySize);
+    storeSearchTree(ofs,node->getRightChild());
   }
 
 }
 
 // Store the contents of the object in a binary file
-void MapContainer::store(std::ofstream *ofs, Int &memorySize) {
-
-  // Calculate memory
-  memorySize+=sizeof(*this);
+void MapContainer::store(std::ofstream *ofs) {
 
   // Write the size of the object for detecting changes later
   Int size=sizeof(*this);
   Storage::storeInt(ofs,size);
 
   // Store all relevant fields
+  MapContainer *leftChild=this->leftChild;
+  MapContainer *rightChild=this->rightChild;
+  MapTile *searchTree=this->searchTree;
+  this->leftChild=NULL;
+  this->rightChild=NULL;
+  this->searchTree=NULL;
+  Storage::storeMem(ofs,(char*)this,sizeof(MapContainer));
+  this->leftChild=leftChild;
+  this->rightChild=rightChild;
+  this->searchTree=searchTree;
   Storage::storeString(ofs,mapFileFolder);
   Storage::storeString(ofs,imageFileName);
   Storage::storeString(ofs,imageFilePath);
-  Storage::storeInt(ofs,zoomLevel);
-  Storage::storeInt(ofs,imageType);
   Storage::storeString(ofs,calibrationFileName);
   Storage::storeString(ofs,calibrationFilePath);
-  mapCalibrator->store(ofs,memorySize);
-  Storage::storeInt(ofs,width);
-  Storage::storeInt(ofs,height);
-  Storage::storeDouble(ofs,latNorth);
-  Storage::storeDouble(ofs,latSouth);
-  Storage::storeDouble(ofs,lngEast);
-  Storage::storeDouble(ofs,lngWest);
-  Storage::storeDouble(ofs,lngScale);
-  Storage::storeDouble(ofs,latScale);
-  //Storage::storeVectorOfInt(ofs,mapTilesIndexByMapTop);
-  //Storage::storeVectorOfInt(ofs,mapTilesIndexByMapBottom);
-  //Storage::storeVectorOfInt(ofs,mapTilesIndexByMapLeft);
-  //Storage::storeVectorOfInt(ofs,mapTilesIndexByMapRight);
+  mapCalibrator->store(ofs);
 
   // Store the search tree
   Storage::storeInt(ofs,mapTiles.size());
   if (searchTree) {
     Storage::storeBool(ofs,true);
-    storeSearchTree(ofs,searchTree,memorySize);
+    storeSearchTree(ofs,searchTree);
   } else {
     Storage::storeBool(ofs,false);
   }
@@ -724,10 +725,10 @@ void MapContainer::store(std::ofstream *ofs, Int &memorySize) {
 }
 
 // Reads the contents of the search tree from a binary file
-MapTile *MapContainer::retrieveSearchTree(MapContainer *mapContainer, Int &nodeNumber, char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize) {
+MapTile *MapContainer::retrieveSearchTree(MapContainer *mapContainer, Int &nodeNumber, char *&cacheData, Int &cacheSize) {
 
   // Read the current node
-  MapTile *node=MapTile::retrieve(cacheData,cacheSize,objectData,objectSize,mapContainer);
+  MapTile *node=MapTile::retrieve(cacheData,cacheSize,mapContainer);
   if (node==NULL)
     return NULL;
   mapContainer->mapTiles[nodeNumber]=node;
@@ -743,14 +744,14 @@ MapTile *MapContainer::retrieveSearchTree(MapContainer *mapContainer, Int &nodeN
   bool hasLeftNode;
   Storage::retrieveBool(cacheData,cacheSize,hasLeftNode);
   if (hasLeftNode) {
-    node->setLeftChild(retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize,objectData,objectSize));
+    node->setLeftChild(retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize));
   }
 
   // Read the right node
   bool hasRightNode;
   Storage::retrieveBool(cacheData,cacheSize,hasRightNode);
   if (hasRightNode) {
-    node->setRightChild(retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize,objectData,objectSize));
+    node->setRightChild(retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize));
   }
 
   // Return the node
@@ -758,7 +759,7 @@ MapTile *MapContainer::retrieveSearchTree(MapContainer *mapContainer, Int &nodeN
 }
 
 // Reads the contents of the object from a binary file
-MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize) {
+MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize) {
 
   //PROFILE_START;
 
@@ -782,47 +783,29 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize, char *&ob
 
   // Create a new map container object
   //PROFILE_ADD("map container init");
-  MapContainer *mapContainer=NULL;
-  objectSize-=sizeof(MapContainer);
-  if (objectSize<0) {
+  cacheSize-=sizeof(MapContainer);
+  if (cacheSize<0) {
     DEBUG("can not create map container object",NULL);
     return NULL;
   }
-  mapContainer=new(objectData) MapContainer(true);
-  objectData+=sizeof(MapContainer);
+  MapContainer *mapContainer=(MapContainer*)cacheData;
+  mapContainer=new(cacheData) MapContainer(true);
+  cacheData+=sizeof(MapContainer);
   //PROFILE_ADD("object creation");
 
   // Read the fields
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->mapFileFolder);
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->imageFileName);
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->imageFilePath);
-  Storage::retrieveInt(cacheData,cacheSize,mapContainer->zoomLevel);
-  Int t;
-  Storage::retrieveInt(cacheData,cacheSize,t);
-  mapContainer->imageType=(ImageType)t;
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->calibrationFileName);
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->calibrationFilePath);
-  //PROFILE_ADD("field read part one");
-  mapContainer->mapCalibrator=MapCalibrator::retrieve(cacheData,cacheSize,objectData,objectSize);
+  //PROFILE_ADD("field read"");
+  mapContainer->mapCalibrator=MapCalibrator::retrieve(cacheData,cacheSize);
   if (mapContainer->mapCalibrator==NULL) {
     MapContainer::destruct(mapContainer);
     return NULL;
   }
   //PROFILE_ADD("map calibrator retrieve");
-  Storage::retrieveInt(cacheData,cacheSize,mapContainer->width);
-  Storage::retrieveInt(cacheData,cacheSize,mapContainer->height);
-  Storage::retrieveDouble(cacheData,cacheSize,mapContainer->latNorth);
-  Storage::retrieveDouble(cacheData,cacheSize,mapContainer->latSouth);
-  Storage::retrieveDouble(cacheData,cacheSize,mapContainer->lngEast);
-  Storage::retrieveDouble(cacheData,cacheSize,mapContainer->lngWest);
-  Storage::retrieveDouble(cacheData,cacheSize,mapContainer->lngScale);
-  Storage::retrieveDouble(cacheData,cacheSize,mapContainer->latScale);
-  //Storage::retrieveVectorOfInt(cacheData,cacheSize,mapContainer->mapTilesIndexByMapTop);
-  //Storage::retrieveVectorOfInt(cacheData,cacheSize,mapContainer->mapTilesIndexByMapBottom);
-  //Storage::retrieveVectorOfInt(cacheData,cacheSize,mapContainer->mapTilesIndexByMapLeft);
-  //Storage::retrieveVectorOfInt(cacheData,cacheSize,mapContainer->mapTilesIndexByMapRight);
-  //Storage::retrieveInt(cacheData,cacheSize,size);
-  //PROFILE_ADD("field read part two");
 
   // Read the search tree
   Storage::retrieveInt(cacheData,cacheSize,size);
@@ -831,7 +814,7 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize, char *&ob
   Storage::retrieveBool(cacheData,cacheSize,hasSearchTree);
   if (hasSearchTree) {
     Int nodeNumber=0;
-    mapContainer->searchTree=retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize,objectData,objectSize);
+    mapContainer->searchTree=retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize);
     if ((mapContainer->searchTree==NULL)||(core->getQuitCore())) {
       mapContainer->mapTiles.resize(nodeNumber);
       MapContainer::destruct(mapContainer);

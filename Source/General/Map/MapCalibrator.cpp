@@ -28,6 +28,9 @@ namespace GEODISCOVERER {
 // Constructor
 MapCalibrator::MapCalibrator(bool doNotDelete) {
   this->doNotDelete=doNotDelete;
+  if (doNotDelete) {
+    new(&this->calibrationPoints) std::list<MapPosition*>();
+  }
   this->accessMutex=core->getThread()->createMutex();
 }
 
@@ -75,10 +78,7 @@ void MapCalibrator::sortCalibrationPoints(MapPosition &pos, bool usePictureCoord
 }
 
 // Store the contents of the object in a binary file
-void MapCalibrator::store(std::ofstream *ofs, Int &memorySize) {
-
-  // Calculate memory
-  memorySize+=sizeof(*this);
+void MapCalibrator::store(std::ofstream *ofs) {
 
   // Write the size of the object for detecting changes later
   Storage::storeInt(ofs,type);
@@ -86,15 +86,27 @@ void MapCalibrator::store(std::ofstream *ofs, Int &memorySize) {
   Storage::storeInt(ofs,size);
 
   // Store all relevant fields
+  switch(type) {
+    case MapCalibratorTypeLinear:
+      size=sizeof(MapCalibratorLinear);
+      break;
+    case MapCalibratorTypeMercator:
+      size=sizeof(MapCalibratorMercator);
+      break;
+    default:
+      FATAL("map calibrator type not supported",NULL);
+      break;
+  }
+  Storage::storeMem(ofs,(char*)this,size);
   Storage::storeInt(ofs,calibrationPoints.size());
   for(std::list<MapPosition*>::iterator i=calibrationPoints.begin();i!=calibrationPoints.end();i++) {
-    (*i)->store(ofs,memorySize);
+    (*i)->store(ofs);
   }
 
 }
 
 // Reads the contents of the object from a binary file
-MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize) {
+MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize) {
 
   //PROFILE_START;
 
@@ -140,13 +152,13 @@ MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize, char *&
   //PROFILE_ADD("sanity check");
 
   // Create a new map container object
-  MapCalibrator *mapCalibrator=MapCalibrator::newMapCalibrator(type,objectData,objectSize);
+  MapCalibrator *mapCalibrator=MapCalibrator::newMapCalibrator(type,cacheData,cacheSize);
   //PROFILE_ADD("object creation");
 
   // Read the fields
   Storage::retrieveInt(cacheData,cacheSize,size);
   for (Int i=0;i<size;i++) {
-    MapPosition *p=MapPosition::retrieve(cacheData,cacheSize,objectData,objectSize);
+    MapPosition *p=MapPosition::retrieve(cacheData,cacheSize);
     if (p==NULL) {
       MapCalibrator::destruct(mapCalibrator);
       return NULL;
@@ -187,35 +199,33 @@ MapCalibrator *MapCalibrator::newMapCalibrator(MapCalibratorType type) {
 }
 
 // Creates a new map calibrator of the given type by using given memory
-MapCalibrator *MapCalibrator::newMapCalibrator(MapCalibratorType type, char *&objectData, Int &objectSize) {
+MapCalibrator *MapCalibrator::newMapCalibrator(MapCalibratorType type, char *&cacheData, Int &cacheSize) {
   MapCalibrator *mapCalibrator=NULL;
+  MapCalibratorLinear *linear;
+  MapCalibratorMercator *mercator;
   Int size;
   switch(type) {
     case MapCalibratorTypeLinear:
-      objectSize-=sizeof(MapCalibratorLinear);
-      if (objectSize<0) {
-        DEBUG("can not create linear map calibrator object",NULL);
-        return NULL;
-      }
-      mapCalibrator=new(objectData) MapCalibratorLinear(true);
-      objectData+=sizeof(MapCalibrator);
-      return mapCalibrator;
+      size=sizeof(MapCalibratorLinear);
+      mapCalibrator=new(cacheData) MapCalibratorLinear(true);
       break;
     case MapCalibratorTypeMercator:
-      objectSize-=sizeof(MapCalibratorMercator);
-      if (objectSize<0) {
-        DEBUG("can not create mercator map calibrator object",NULL);
-        return NULL;
-      }
-      mapCalibrator=new(objectData) MapCalibratorMercator(true);
-      objectData+=sizeof(MapCalibrator);
-      return mapCalibrator;
+      size=sizeof(MapCalibratorMercator);
+      mapCalibrator=new(cacheData) MapCalibratorMercator(true);
       break;
     default:
       FATAL("unsupported map calibration type",NULL);
+      return NULL;
       break;
   }
-  return NULL;
+  cacheSize-=size;
+  if (cacheSize<0) {
+    DEBUG("can not create map calibrator object",NULL);
+    return NULL;
+  }
+  //mapCalibrator=(MapCalibrator*)cacheData;
+  cacheData+=size;
+  return mapCalibrator;
 }
 
 // Compute the distance in pixels for the given points

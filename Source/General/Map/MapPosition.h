@@ -105,10 +105,10 @@ public:
   }
 
   // Store the contents of the object in a binary file
-  void store(std::ofstream *ofs, Int &memorySize, bool memoryRequired=true);
+  void store(std::ofstream *ofs);
 
   // Reads the contents of the object from a binary file
-  static MapPosition *retrieve(char *&cacheData, Int &cacheSize, char *&objectData, Int &objectSize, bool skipObjectCreation=false);
+  static MapPosition *retrieve(char *&cacheData, Int &cacheSize);
 
   // Converts WGS84 height to height above mean sea level
   void toMSLHeight();
