@@ -90,10 +90,9 @@ MapPosition &MapPosition::operator=(const MapPosition &rhs)
     }
   }
   memcpy(this,&rhs,sizeof(MapPosition));
-  this->source=(char*)unknownSource;
   if (!this->doNotDelete) {
-    if (this->source!=unknownSource) {
-      source=NULL;
+    this->source=(char*)unknownSource;
+    if (rhs.source!=unknownSource) {
       this->setSource(rhs.source);
     }
   }

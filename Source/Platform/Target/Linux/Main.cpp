@@ -57,7 +57,7 @@ void *debugThread(void *args) {
   //sleep(5);
   //GEODISCOVERER::core->getCommander()->execute("newPointOfInterest(6.70,51.2)");
   //sleep(5);
-  //GEODISCOVERER::core->getCommander()->execute("newPointOfInterest(6.75,51.0)");
+  GEODISCOVERER::core->getCommander()->execute("setTargetAtGeographicCoordinate(6.75,51.0)");
 
   // Hide the target
   //sleep(5);
@@ -97,9 +97,7 @@ int main(int argc, char **argv)
   // And destruct core object
   GEODISCOVERER::core->getThread()->destroyThread(debug);
   GEODISCOVERER::core->getThread()->destroyThread(main);
-  puts("Deleting core object");
   delete GEODISCOVERER::core;
-  puts("Unloading core class");
   GEODISCOVERER::Core::unload();
 }
 
