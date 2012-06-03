@@ -141,6 +141,7 @@ Screen::Screen(Int DPI) {
   glutMotionFunc(motionFunc);
 
   // Init display
+  glClearColor(0.0f,0.0f,0.0f,0.0f);
   glViewport(0, 0, (GLsizei) getWidth(), (GLsizei) getHeight());
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();

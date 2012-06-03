@@ -81,9 +81,9 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
       // Start fade animation if the status was not displayed before
       if ((color.getAlpha()==0)&&(fadeStartTime==fadeEndTime)) {
         if (core->getWidgetEngine()->getWidgetsActive())
-          setFadeAnimation(t,color,this->activeColor);
+          setFadeAnimation(t,color,this->activeColor,false,core->getGraphicEngine()->getFadeDuration());
         else
-          setFadeAnimation(t,color,this->inactiveColor);
+          setFadeAnimation(t,color,this->inactiveColor,false,core->getGraphicEngine()->getFadeDuration());
       }
       isHidden=false;
 
@@ -91,7 +91,7 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
 
       // Start fade animation if the status was not displayed before
       if ((color.getAlpha()!=0)&&(fadeStartTime==fadeEndTime)) {
-        setFadeAnimation(t,color,GraphicColor(255,255,255,0));
+        setFadeAnimation(t,color,GraphicColor(255,255,255,0),false,core->getGraphicEngine()->getFadeDuration());
       }
       isHidden=true;
     }

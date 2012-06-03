@@ -28,8 +28,6 @@ namespace GEODISCOVERER {
 
 typedef enum {GraphicTypePrimitive, GraphicTypeRectangle, GraphicTypeRectangleList, GraphicTypeText, GraphicTypeWidget, GraphicTypeLine, GraphicTypeObject } GraphicType;
 
-typedef enum {GraphicBlinkIdle, GraphicBlinkFadeToHighlightColor, GraphicBlinkFadeToOriginalColor} GraphicBlinkMode;
-
 class GraphicPrimitive {
 
 protected:
@@ -44,16 +42,18 @@ protected:
   double scale;                                         // Scale factor
   GraphicColor color;                                   // Color of the primitive
   GraphicTextureInfo texture;                           // Texture of the primitive
+  TimestampInMicroseconds textureDuration;              // Duration of a texture animation
+  TimestampInMicroseconds textureStartTime;             // Start of the texture animation
+  TimestampInMicroseconds textureEndTime;               // End of the texture animation
+  GraphicTextureInfo textureStartInfo;                  // Start texture of the texture animation
+  GraphicTextureInfo textureEndInfo;                    // Stop texture of the texture animation
+  bool textureInfinite;                                 // Texture animation is repeated infinitely if set
   TimestampInMicroseconds fadeDuration;                 // Duration of a fade operation
   TimestampInMicroseconds fadeStartTime;                // Start of the fade operation
   TimestampInMicroseconds fadeEndTime;                  // End of the fade operation
   GraphicColor fadeStartColor;                          // Start color of a fade operation
   GraphicColor fadeEndColor;                            // Stop color of a fade operation
-  TimestampInMicroseconds blinkDuration;                // Duration to show the highlight color
-  TimestampInMicroseconds blinkPeriod;                  // Distance between two blinks
-  GraphicColor blinkHighlightColor;                     // Color to use when blink is active
-  GraphicColor blinkOriginalColor;                      // Color before the blink started
-  GraphicBlinkMode blinkMode;                           // Current blink mode
+  bool fadeInfinite;                                    // Fade is repeated infinitely if set
   TimestampInMicroseconds rotateDuration;               // Duration of a rotate operation
   TimestampInMicroseconds rotateStartTime;              // Start of the rotate operation
   TimestampInMicroseconds rotateEndTime;                // End of the rotate operation
@@ -77,6 +77,12 @@ protected:
   bool isUpdated;                                       // Indicates that the primitive has been changed
   bool destroyTexture;                                  // Indicates if the texture shall be destroyed if the object is deleted
 
+  // List of texture animations to execute on this object
+  std::list<GraphicTextureAnimationParameter> textureAnimationSequence;
+
+  // List of fade animations to execute on this object
+  std::list<GraphicFadeAnimationParameter> fadeAnimationSequence;
+
   // List of scale animations to execute on this object
   std::list<GraphicScaleAnimationParameter> scaleAnimationSequence;
 
@@ -85,6 +91,12 @@ protected:
 
   // List of rotate animations to execute on this object
   std::list<GraphicRotateAnimationParameter> rotateAnimationSequence;
+
+  // Sets the next texture animation step from the sequence
+  void setNextTextureAnimationStep();
+
+  // Sets the next fade animation step from the sequence
+  void setNextFadeAnimationStep();
 
   // Sets the next scale animation step from the sequence
   void setNextScaleAnimationStep();
@@ -112,11 +124,11 @@ public:
     return lhs->getZ() > rhs->getZ();
   }
 
-  // Sets a new fade target
-  virtual void setFadeAnimation(TimestampInMicroseconds startTime, GraphicColor startColor, GraphicColor endColor);
+  // Sets a new texture target
+  void setTextureAnimation(TimestampInMicroseconds startTime, GraphicTextureInfo startTexture, GraphicTextureInfo endTexture, bool infinite, TimestampInMicroseconds duration);
 
-  // Activates or disactivates blinking
-  void setBlinkAnimation(bool active, GraphicColor highlightColor);
+  // Sets a new fade target
+  virtual void setFadeAnimation(TimestampInMicroseconds startTime, GraphicColor startColor, GraphicColor endColor, bool infinite, TimestampInMicroseconds duration);
 
   // Sets a new rotation target
   void setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite, TimestampInMicroseconds duration);
@@ -138,11 +150,23 @@ public:
   virtual void optimize();
 
   // Getters and setters
+  void setTextureAnimationSequence(std::list<GraphicTextureAnimationParameter> fadeAnimationSequence);
+
+  void setFadeAnimationSequence(std::list<GraphicFadeAnimationParameter> fadeAnimationSequence);
+
   void setScaleAnimationSequence(std::list<GraphicScaleAnimationParameter> scaleAnimationSequence);
 
   void setTranslateAnimationSequence(std::list<GraphicTranslateAnimationParameter> scaleAnimationSequence);
 
   void setRotateAnimationSequence(std::list<GraphicRotateAnimationParameter> rotateAnimationSequence);
+
+  std::list<GraphicTextureAnimationParameter> getTextureAnimationSequence() const {
+    return textureAnimationSequence;
+  }
+
+  std::list<GraphicFadeAnimationParameter> getFadeAnimationSequence() const {
+    return fadeAnimationSequence;
+  }
 
   std::list<GraphicRotateAnimationParameter> getRotateAnimationSequence() const {
     return rotateAnimationSequence;

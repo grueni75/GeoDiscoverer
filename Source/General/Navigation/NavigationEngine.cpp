@@ -146,8 +146,8 @@ void NavigationEngine::init() {
       }
       GraphicColor highlightColor = c->getGraphicColorValue(routePath + "/HighlightColor");
       route->setHighlightColor(highlightColor);
-      route->setBlinkMode(c->getIntValue(routePath,"blink"));
       route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor"));
+      route->setBlinkMode(c->getIntValue(routePath,"blink"));
       route->setName(*i);
       route->setDescription("route number " + *i);
       route->setGpxFilefolder(getRoutePath());
@@ -523,7 +523,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   lockLocationPos();
   showCursor=false;
   updatePosition=false;
-  if (locationPos.isValid()) {
+  if ((locationPos.isValid())&&(mapPos.getMapTile())) {
     showCursor=true;
     MapPosition newLocationPos=locationPos;
     MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
@@ -620,7 +620,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   Int zoomedScreenWidth=floor(((double)core->getScreen()->getWidth())/screenZoom);
   Int zoomedScreenHeight=floor(((double)core->getScreen()->getHeight())/screenZoom);
   //DEBUG("screenZoom=%f zoomedScreenWidth=%d zoomedScreenHeight=%d",screenZoom,zoomedScreenWidth,zoomedScreenHeight);
-  if (targetPos.isValid()) {
+  if ((targetPos.isValid())&&(mapPos.getMapTile())) {
     showCursor=true;
     MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
     //DEBUG("calibrator=%08x",calibrator);
@@ -686,7 +686,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (!targetVisible) {
       GraphicColor endColor=targetIcon->getColor();
       endColor.setAlpha(255);
-      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor);
+      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getGraphicEngine()->getFadeDuration());
       targetIcon->setIsUpdated(true);
     }
     targetVisible=true;
@@ -694,7 +694,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (targetVisible) {
       GraphicColor endColor=targetIcon->getColor();
       endColor.setAlpha(0);
-      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor);
+      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getGraphicEngine()->getFadeDuration());
       targetIcon->setIsUpdated(true);
       targetVisible=false;
     }
@@ -796,7 +796,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (updateAnimation) {
       GraphicColor endColor=arrowIcon->getColor();
       endColor.setAlpha(255);
-      arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor);
+      arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getGraphicEngine()->getFadeDuration());
       arrowIcon->setIsUpdated(true);
     }
     arrowVisible=true;
@@ -805,7 +805,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       if (updateAnimation) {
         GraphicColor endColor=arrowIcon->getColor();
         endColor.setAlpha(0);
-        arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor);
+        arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getGraphicEngine()->getFadeDuration());
         arrowIcon->setIsUpdated(true);
       }
       arrowVisible=false;

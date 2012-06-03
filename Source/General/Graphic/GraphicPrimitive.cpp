@@ -34,14 +34,11 @@ GraphicPrimitive::GraphicPrimitive() {
   setZ(0);
   setAngle(0);
   setScale(1.0);
-  fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration");
-  fadeEndTime=0;
-  fadeStartTime=0;
-  blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration");
-  blinkPeriod=core->getConfigStore()->getIntValue("Graphic","blinkPeriod");
-  blinkMode=GraphicBlinkIdle;
   destroyTexture=true;
   animator=NULL;
+  fadeEndTime=0;
+  fadeStartTime=0;
+  fadeInfinite=false;
   rotateStartTime=0;
   rotateEndTime=0;
   rotateInfinite=false;
@@ -51,6 +48,9 @@ GraphicPrimitive::GraphicPrimitive() {
   translateStartTime=0;
   translateEndTime=0;
   translateInfinite=false;
+  textureStartTime=0;
+  textureEndTime=0;
+  textureInfinite=false;
   isUpdated=false;
 }
 
@@ -69,26 +69,28 @@ void GraphicPrimitive::deinit() {
   }
 }
 
+// Sets a new texture target
+void GraphicPrimitive::setTextureAnimation(TimestampInMicroseconds startTime, GraphicTextureInfo startTexture, GraphicTextureInfo endTexture, bool infinite, TimestampInMicroseconds duration) {
+  textureDuration=duration;
+  textureStartTime=startTime;
+  textureEndTime=startTime+duration;
+  textureStartInfo=startTexture;
+  textureEndInfo=endTexture;
+  if (duration==0)
+    texture=endTexture;
+  fadeInfinite=infinite;
+}
+
 // Sets a new fade target
-void GraphicPrimitive::setFadeAnimation(TimestampInMicroseconds startTime, GraphicColor startColor, GraphicColor endColor) {
-  TimestampInMicroseconds redDiff=abs(endColor.getRed()-startColor.getRed());
-  TimestampInMicroseconds greenDiff=abs(endColor.getGreen()-startColor.getGreen());
-  TimestampInMicroseconds blueDiff=abs(endColor.getBlue()-startColor.getBlue());
-  TimestampInMicroseconds alphaDiff=abs(endColor.getAlpha()-startColor.getAlpha());
-  TimestampInMicroseconds duration;
+void GraphicPrimitive::setFadeAnimation(TimestampInMicroseconds startTime, GraphicColor startColor, GraphicColor endColor, bool infinite, TimestampInMicroseconds duration) {
+  fadeDuration=duration;
   fadeStartTime=startTime;
-  if (redDiff>greenDiff)
-    duration=redDiff;
-  else
-    duration=greenDiff;
-  if (blueDiff>duration)
-    duration=blueDiff;
-  if (alphaDiff>duration)
-    duration=alphaDiff;
-  duration=fadeDuration*duration/std::numeric_limits<UByte>::max();
   fadeEndTime=startTime+duration;
   fadeStartColor=startColor;
   fadeEndColor=endColor;
+  if (duration==0)
+    color=endColor;
+  fadeInfinite=infinite;
 }
 
 // Sets a new rotation target
@@ -98,6 +100,8 @@ void GraphicPrimitive::setRotateAnimation(TimestampInMicroseconds startTime, dou
   rotateEndTime=startTime+duration;
   rotateStartAngle=startAngle;
   rotateEndAngle=endAngle;
+  if (duration==0)
+    angle=endAngle;
   rotateInfinite=infinite;
 }
 
@@ -108,6 +112,8 @@ void GraphicPrimitive::setScaleAnimation(TimestampInMicroseconds startTime, doub
   scaleEndTime=startTime+duration;
   scaleStartFactor=startFactor;
   scaleEndFactor=endFactor;
+  if (duration==0)
+    scale=endFactor;
   scaleInfinite=infinite;
 }
 
@@ -120,38 +126,29 @@ void GraphicPrimitive::setTranslateAnimation(TimestampInMicroseconds startTime, 
   translateStartY=startY;
   translateEndX=endX;
   translateEndY=endY;
-  translateInfinite=infinite;
-}
-
-// Activates or disactivates blinking
-void GraphicPrimitive::setBlinkAnimation(bool active, GraphicColor highlightColor) {
-  if (active) {
-    blinkHighlightColor=highlightColor;
-    blinkMode=GraphicBlinkFadeToHighlightColor;
-  } else {
-    blinkMode=GraphicBlinkIdle;
+  if (duration==0) {
+    x=endX;
+    y=endY;
   }
-  fadeStartTime=fadeEndTime;
+  translateInfinite=infinite;
 }
 
 // Lets the primitive work (e.g., animation)
 bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
   bool changed=false;
 
-  // Blink animation required?
+  // Infinite fade animation required?
   if (fadeStartTime==fadeEndTime) {
-    switch(blinkMode) {
-      case GraphicBlinkFadeToHighlightColor:
-        blinkOriginalColor=this->color;
-        setFadeAnimation(currentTime+blinkPeriod,blinkOriginalColor,blinkHighlightColor);
-        blinkMode=GraphicBlinkFadeToOriginalColor;
-        //DEBUG("primitive=0x%08x blinkMode=fadeToHighlightColor t=%llu fadeStartTime=%llu fadeEndTime=%llu",this,currentTime,fadeStartTime,fadeEndTime);
-        break;
-      case GraphicBlinkFadeToOriginalColor:
-        setFadeAnimation(currentTime+blinkDuration,blinkHighlightColor,blinkOriginalColor);
-        blinkMode=GraphicBlinkFadeToHighlightColor;
-        //DEBUG("primitive=0x%08x blinkMode=fadeToOriginalColor t=%llu fadeStartTime=%llu fadeEndTime=%llu",this,currentTime,fadeStartTime,fadeEndTime);
-        break;
+    if (fadeInfinite) {
+      if (color==fadeStartColor)
+        setFadeAnimation(currentTime,fadeStartColor,fadeEndColor,true,fadeDuration);
+      if (color==fadeEndColor)
+        setFadeAnimation(currentTime,fadeEndColor,fadeStartColor,true,fadeDuration);
+    }  else {
+        // Some more parameters in the list?
+        if (fadeAnimationSequence.size()>0) {
+          setNextFadeAnimationStep();
+        }
     }
   }
 
@@ -161,29 +158,53 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
     if (currentTime<=fadeEndTime) {
       Int elapsedTime=currentTime-fadeStartTime;
       Int duration=fadeEndTime-fadeStartTime;
+      double factor=(double)elapsedTime/(double)duration;
       Int redDiff=(Int)fadeEndColor.getRed()-(Int)fadeStartColor.getRed();
-      Int red=redDiff*elapsedTime/duration+fadeStartColor.getRed();
+      Int red=redDiff*factor+fadeStartColor.getRed();
       color.setRed((UByte)red);
       Int greenDiff=(Int)fadeEndColor.getGreen()-(Int)fadeStartColor.getGreen();
-      Int green=greenDiff*elapsedTime/duration+fadeStartColor.getGreen();
+      Int green=greenDiff*factor+fadeStartColor.getGreen();
       color.setGreen((UByte)green);
       Int blueDiff=(Int)fadeEndColor.getBlue()-(Int)fadeStartColor.getBlue();
-      Int blue=blueDiff*elapsedTime/duration+fadeStartColor.getBlue();
+      Int blue=blueDiff*factor+fadeStartColor.getBlue();
       color.setBlue((UByte)blue);
       Int alphaDiff=(Int)fadeEndColor.getAlpha()-(Int)fadeStartColor.getAlpha();
-      Int alpha=alphaDiff*elapsedTime/duration+fadeStartColor.getAlpha();
+      Int alpha=alphaDiff*factor+fadeStartColor.getAlpha();
       color.setAlpha((UByte)alpha);
     } else {
       color=fadeEndColor;
       fadeStartTime=fadeEndTime;
     }
-  } else {
-    /*if ((blinkMode==GraphicBlinkFadeToHighlightColor)) {
-      DEBUG("primitive=0x%08x blinkMode=fadeToHighlightColor t=%llu fadeStartTime=%llu fadeEndTime=%llu",this,currentTime,fadeStartTime,fadeEndTime);
+  }
+
+  // Infinite texture animation required?
+  if (textureStartTime==textureEndTime) {
+    if (textureInfinite) {
+      if (texture==textureEndInfo)
+        setTextureAnimation(currentTime,textureEndInfo,textureStartInfo,true,textureDuration);
+      if (texture==textureStartInfo)
+        setTextureAnimation(currentTime,textureStartInfo,textureEndInfo,true,textureDuration);
+    }  else {
+
+      // Some more parameters in the list?
+      if (textureAnimationSequence.size()>0) {
+        setNextTextureAnimationStep();
+      }
     }
-    if ((blinkMode==GraphicBlinkFadeToOriginalColor)) {
-      DEBUG("primitive=0x%08x blinkMode=fadeToOriginalColor t=%llu fadeStartTime=%llu fadeEndTime=%llu",this,currentTime,fadeStartTime,fadeEndTime);
-    }*/
+  }
+
+  // Texture animation required?
+  if ((textureStartTime<=currentTime)&&(textureStartTime!=textureEndTime)) {
+    if (currentTime<textureEndTime) {
+      if (texture!=textureStartInfo) {
+        texture=textureStartInfo;
+        changed=true;
+      }
+    } else {
+      texture=textureEndInfo;
+      textureStartTime=textureEndTime;
+      changed=true;
+    }
   }
 
   // Infinite rotation animation required?
@@ -205,8 +226,9 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
     if (currentTime<=rotateEndTime) {
       Int elapsedTime=currentTime-rotateStartTime;
       Int duration=rotateEndTime-rotateStartTime;
+      double factor=(double)elapsedTime/(double)duration;
       double angleDiff=rotateEndAngle-rotateStartAngle;
-      angle=angleDiff*elapsedTime/duration+rotateStartAngle;
+      angle=angleDiff*factor+rotateStartAngle;
     } else {
       angle=rotateEndAngle;
       rotateStartTime=rotateEndTime;
@@ -234,8 +256,9 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
     changed=true;
     if (currentTime<=scaleEndTime) {
       Int elapsedTime=currentTime-scaleStartTime;
+      double factor=(double)elapsedTime/(double)scaleDuration;
       double scaleDiff=scaleEndFactor-scaleStartFactor;
-      scale=scaleDiff*elapsedTime/scaleDuration+scaleStartFactor;
+      scale=scaleDiff*factor+scaleStartFactor;
     } else {
       scale=scaleEndFactor;
       scaleStartTime=scaleEndTime;
@@ -322,6 +345,24 @@ void GraphicPrimitive::setNextRotateAnimationStep() {
   }
 }
 
+// Sets the next fade animation step from the sequence
+void GraphicPrimitive::setNextFadeAnimationStep() {
+  if (fadeAnimationSequence.size()>0) {
+    GraphicFadeAnimationParameter parameter = fadeAnimationSequence.front();
+    fadeAnimationSequence.pop_front();
+    setFadeAnimation(parameter.getStartTime(),parameter.getStartColor(),parameter.getEndColor(),parameter.getInfinite(),parameter.getDuration());
+  }
+}
+
+// Sets the next texture animation step from the sequence
+void GraphicPrimitive::setNextTextureAnimationStep() {
+  if (textureAnimationSequence.size()>0) {
+    GraphicTextureAnimationParameter parameter = textureAnimationSequence.front();
+    textureAnimationSequence.pop_front();
+    setTextureAnimation(parameter.getStartTime(),parameter.getStartTexture(),parameter.getEndTexture(),parameter.getInfinite(),parameter.getDuration());
+  }
+}
+
 // Sets a scale animation sequence
 void GraphicPrimitive::setScaleAnimationSequence(std::list<GraphicScaleAnimationParameter> scaleAnimationSequence) {
   this->scaleAnimationSequence=scaleAnimationSequence;
@@ -339,6 +380,18 @@ void GraphicPrimitive::setTranslateAnimationSequence(std::list<GraphicTranslateA
 void GraphicPrimitive::setRotateAnimationSequence(std::list<GraphicRotateAnimationParameter> rotateAnimationSequence) {
   this->rotateAnimationSequence=rotateAnimationSequence;
   setNextRotateAnimationStep();
+}
+
+// Sets a fade animation sequence
+void GraphicPrimitive::setFadeAnimationSequence(std::list<GraphicFadeAnimationParameter> fadeAnimationSequence) {
+  this->fadeAnimationSequence=fadeAnimationSequence;
+  setNextFadeAnimationStep();
+}
+
+// Sets a texture animation sequence
+void GraphicPrimitive::setTextureAnimationSequence(std::list<GraphicTextureAnimationParameter> textureAnimationSequence) {
+  this->textureAnimationSequence=textureAnimationSequence;
+  setNextTextureAnimationStep();
 }
 
 }

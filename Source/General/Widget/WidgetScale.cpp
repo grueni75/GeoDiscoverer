@@ -68,7 +68,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
 
     // Compute the scale in meters
     MapPosition *pos=core->getMapEngine()->lockMapPos();
-    if (pos->getLngScale()>0) {
+    if ((pos->getLngScale()>0)&&(pos->getMapTile())) {
       MapPosition pos2=*pos;
       pos2.setLng(pos->getLng()+(iconWidth/3)/pos->getLngScale());
       metersPerTick=pos->computeDistance(pos2);

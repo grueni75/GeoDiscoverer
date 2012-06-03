@@ -49,7 +49,7 @@ void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
   DEBUG("dpi=%d width=%d height=%d",DPI,width,height);
 
   // Init display
-  glClearColor(0.0,0.0,0.0,1.0);
+  glClearColor(0.0f,0.0f,0.0f,1.0f);
   glViewport(0, 0, (GLsizei) getWidth(), (GLsizei) getHeight());
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();

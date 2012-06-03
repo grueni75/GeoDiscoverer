@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicAnimationParameter.cpp
+// Name        : GraphicFadeAnimationParameter.h
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -20,19 +20,44 @@
 //
 //============================================================================
 
+#ifndef GRAPHICFADEANIMATIONPARAMETER_H_
+#define GRAPHICFADEANIMATIONPARAMETER_H_
+
 #include <Core.h>
 
 namespace GEODISCOVERER {
 
-// Constructor
-GraphicAnimationParameter::GraphicAnimationParameter() {
-  duration=0;
-  infinite=false;
-  startTime=0;
-}
+class GraphicFadeAnimationParameter: public GEODISCOVERER::GraphicAnimationParameter {
 
-// Destructor
-GraphicAnimationParameter::~GraphicAnimationParameter() {
-}
+  GraphicColor startColor;      // Start color of fade operation
+  GraphicColor endColor;        // End color of fade operation
+
+public:
+
+  // Constructor
+  GraphicFadeAnimationParameter();
+
+  // Destructor
+  virtual ~GraphicFadeAnimationParameter();
+
+  // Getters and setters
+  GraphicColor getEndColor() const {
+    return endColor;
+  }
+
+  void setEndColor(GraphicColor endColor) {
+    this->endColor = endColor;
+  }
+
+  GraphicColor getStartColor() const {
+    return startColor;
+  }
+
+  void setStartColor(GraphicColor startColor) {
+    this->startColor = startColor;
+  }
+
+};
 
 } /* namespace GEODISCOVERER */
+#endif /* GRAPHICFADEANIMATIONPARAMETER_H_ */

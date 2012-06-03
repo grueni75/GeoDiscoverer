@@ -29,8 +29,6 @@ MapCache::MapCache() {
 
   // Get some configuration
   size=core->getConfigStore()->getIntValue("Map","tileCacheSize");
-  notCachedTileAlpha=core->getConfigStore()->getIntValue("Graphic","notCachedTileAlpha");
-  cachedTileAlpha=255;
   abortUpdate=false;
   accessMutex=core->getThread()->createMutex();
 
@@ -91,10 +89,7 @@ void MapCache::createGraphic() {
     for (std::vector<MapTile*>::const_iterator j=(*tiles).begin();j!=(*tiles).end();j++) {
       MapTile *t=*j;
       //DEBUG("adding tile at position <%d,%d> to uncached tile list",t->getMapX(),t->getMapY());
-      t->setIsCached(false);
-      t->getVisualization()->lockAccess();
-      t->getRectangle()->setTexture(core->getScreen()->getTextureNotDefined());
-      t->getVisualization()->unlockAccess();
+      t->setIsCached(false,core->getScreen()->getTextureNotDefined(),false);
       uncachedTiles.push_back(t);
     }
   }
@@ -108,22 +103,6 @@ void MapCache::createGraphic() {
   core->getThread()->unlockMutex(accessMutex);
 }
 
-// Set the fade animation
-void MapCache::setFadeAnimation(MapTile *tile, bool alreadyLocked) {
-  if (!alreadyLocked) tile->getVisualization()->lockAccess();
-  GraphicRectangle *r=tile->getRectangle();
-  GraphicColor fadeStartColor=r->getColor();
-  fadeStartColor.setAlpha(0);
-  GraphicColor fadeEndColor=r->getColor();
-  if (!tile->getIsCached()) {
-    fadeEndColor.setAlpha(notCachedTileAlpha);
-  } else {
-    fadeEndColor.setAlpha(cachedTileAlpha);
-  }
-  r->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),fadeStartColor,fadeEndColor);
-  if (!alreadyLocked) tile->getVisualization()->unlockAccess();
-}
-
 // Clears the cache
 void MapCache::deinit() {
 
@@ -133,11 +112,7 @@ void MapCache::deinit() {
   // Clear all list
   for(std::list<MapTile*>::iterator i=cachedTiles.begin();i!=cachedTiles.end();i++) {
     MapTile *t=*i;
-    t->setIsCached(false);
-    t->getVisualization()->lockAccess();
-    t->getRectangle()->setTexture(core->getScreen()->getTextureNotDefined());
-    setFadeAnimation(t,true);
-    t->getVisualization()->unlockAccess();
+    t->getRectangle()->setTextureAnimation(0,core->getScreen()->getTextureNotDefined(),core->getScreen()->getTextureNotDefined(),false,0);
   }
   cachedTiles.clear();
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
@@ -161,10 +136,7 @@ void MapCache::deinit() {
 // Adds a new tile to the cache
 void MapCache::addTile(MapTile *tile) {
   core->getThread()->lockMutex(accessMutex);
-  tile->getVisualization()->lockAccess();
-  if (tile->getRectangle()->getTexture()!=core->getScreen()->getTextureNotDefined())
-    FATAL("tile has already a texture defined",NULL);
-  tile->getVisualization()->unlockAccess();
+  tile->setIsCached(false);
   uncachedTiles.push_back(tile);
   core->getThread()->unlockMutex(accessMutex);
 }
@@ -212,6 +184,7 @@ void MapCache::updateMapTileImages() {
     }
   }
   core->getThread()->unlockMutex(accessMutex);
+  //return;
   if (mapTileLoadList.size()==0) {
     return; // Nothing to do
   }
@@ -263,15 +236,14 @@ void MapCache::updateMapTileImages() {
       cachedTiles.sort(MapTile::lastAccessSortPredicate);
       MapTile *t=cachedTiles.front();
       cachedTiles.pop_front();
-      t->setIsCached(false);
       uncachedTiles.push_back(t);
       core->getThread()->unlockMutex(accessMutex);
+      GraphicTextureInfo m=t->getEndTexture();
       t->getVisualization()->lockAccess();
       GraphicRectangle *r=t->getRectangle();
-      GraphicTextureInfo m=r->getTexture();
-      r->setTexture(core->getScreen()->getTextureNotDefined());
       r->setZ(0);
       t->getVisualization()->unlockAccess();
+      t->setIsCached(false);
       core->getThread()->lockMutex(accessMutex);
       usedTextures.remove(m);
       unusedTextures.push_back(m);
@@ -304,13 +276,6 @@ void MapCache::updateMapTileImages() {
     names.pop_front();
     std::string secondName = names.front();
     DEBUG("updating texture for tile %s (%s)",firstName.c_str(),secondName.c_str());*/
-    t->getVisualization()->lockAccess();
-    GraphicRectangle *r=t->getRectangle();
-    if (r->getTexture()!=core->getScreen()->getTextureNotDefined()) {
-      FATAL("not cached tile %s has a texture defined",t->getVisName().front().c_str());
-      break;
-    }
-    t->getVisualization()->unlockAccess();
     core->getThread()->lockMutex(accessMutex);
     GraphicTextureInfo m=unusedTextures.front();
     unusedTextures.pop_front();
@@ -322,12 +287,7 @@ void MapCache::updateMapTileImages() {
     tileTextureAvailable=false;
 
     // Remove the tile from the uncached list and add it to the cached
-    t->setIsCached(true);
-    t->getVisualization()->lockAccess();
-    GraphicColor c=r->getColor();
-    c.setAlpha(cachedTileAlpha);
-    r->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),r->getColor(),c);
-    t->getVisualization()->unlockAccess();
+    t->setIsCached(true,usedTextures.back());
     core->getThread()->lockMutex(accessMutex);
     uncachedTiles.remove(t);
     cachedTiles.push_back(t);
@@ -346,12 +306,8 @@ void MapCache::updateMapTileImages() {
 void MapCache::setNextTileTexture()
 {
   GraphicTextureInfo m=usedTextures.back();
-  currentTile->getVisualization()->lockAccess();
-  GraphicRectangle *r=currentTile->getRectangle();
-  r->setTexture(m);
   core->getScreen()->setTextureImage(m,tileImageScratch,currentTile->getWidth(),currentTile->getHeight());
   tileTextureAvailable=false;
-  currentTile->getVisualization()->unlockAccess();
 }
 
 // Indicates that there was a change in the map tile visibility

@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicAnimationParameter.cpp
+// Name        : GraphicTextureAnimationParameter.h
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -20,19 +20,47 @@
 //
 //============================================================================
 
+#ifndef GRAPHICTEXTUREANIMATIONPARAMETER_H_
+#define GRAPHICTEXTUREANIMATIONPARAMETER_H_
+
 #include <Core.h>
 
 namespace GEODISCOVERER {
 
-// Constructor
-GraphicAnimationParameter::GraphicAnimationParameter() {
-  duration=0;
-  infinite=false;
-  startTime=0;
-}
+class GraphicTextureAnimationParameter: public GEODISCOVERER::GraphicAnimationParameter {
 
-// Destructor
-GraphicAnimationParameter::~GraphicAnimationParameter() {
-}
+  GraphicTextureInfo startTexture;    // Start texture of the animation
+  GraphicTextureInfo endTexture;      // End texture of the animation
+
+public:
+
+  // Constructor
+  GraphicTextureAnimationParameter();
+
+  // Destructor
+  virtual ~GraphicTextureAnimationParameter();
+
+  // Getters and setters
+  GraphicTextureInfo getEndTexture() const
+  {
+    return endTexture;
+  }
+
+  void setEndTexture(GraphicTextureInfo endTexture)
+  {
+    this->endTexture = endTexture;
+  }
+
+  GraphicTextureInfo getStartTexture() const
+  {
+    return startTexture;
+  }
+
+  void setStartTexture(GraphicTextureInfo startTexture)
+  {
+    this->startTexture = startTexture;
+  }
+};
 
 } /* namespace GEODISCOVERER */
+#endif /* GRAPHICTEXTUREANIMATIONPARAMETER_H_ */

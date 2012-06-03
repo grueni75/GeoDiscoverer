@@ -72,6 +72,8 @@ MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool 
   this->visX=visualization.getX();
   this->visY=visualization.getY();
   this->visZ=visualization.getZ();
+  endTexture=core->getScreen()->getTextureNotDefined();
+  visualization.setColor(GraphicColor(255,255,255,0));
 
   // Init the remaining object
   if (!doNotInit)
@@ -217,7 +219,7 @@ MapTile *MapTile::retrieve(char *&cacheData, Int &cacheSize, MapContainer *paren
   // Check if the class has changed
   Int size=sizeof(MapTile);
 #ifdef TARGET_LINUX
-  if (size!=1128) {
+  if (size!=1184) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return NULL;
   }
@@ -266,18 +268,6 @@ void MapTile::activateVisPos()
   visualization.setX(visX);
   visualization.setY(visY);
   visualization.setZ(visZ);
-}
-
-// Decides if the tile is drawn on screen
-void MapTile::setIsHidden(bool isHidden) {
-  this->isHidden=isHidden;
-  GraphicColor c=visualization.getColor();
-  if (isHidden) {
-    c.setAlpha(0);
-  } else {
-    c.setAlpha(255);
-  }
-  visualization.setColor(c);
 }
 
 // Destructs the objects correctly (i.e., if memory has not been allocated by new)
@@ -380,6 +370,72 @@ bool MapTile::getNeighborPos(MapArea area, MapPosition &neighborPos) {
   // No neighbor found
   return false;
 
+}
+
+// Decides if the tile is drawn on screen
+void MapTile::setIsHidden(bool isHidden, bool fadeOutAnimation) {
+  this->isHidden=isHidden;
+  visualization.lockAccess();
+  GraphicColor startColor=visualization.getColor();
+  startColor.setAlpha(0);
+  GraphicColor endColor=startColor;
+  endColor.setAlpha(255);
+  if (isHidden) {
+    visualization.setColor(startColor);
+  } else {
+    visualization.setColor(endColor);
+    if ((isDrawn())&&(fadeOutAnimation)) {
+      if (rectangle.getTexture()==endTexture) {
+        rectangle.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),startColor,endColor,false,core->getGraphicEngine()->getFadeDuration());
+        rectangle.setFadeAnimationSequence(std::list<GraphicFadeAnimationParameter>());
+        rectangle.setTextureAnimationSequence(std::list<GraphicTextureAnimationParameter>());
+      } else {
+        std::list<GraphicFadeAnimationParameter> fadeAnimationSequence;
+        GraphicFadeAnimationParameter fadeAnimationParameter;
+        std::list<GraphicTextureAnimationParameter> textureAnimationSequence;
+        GraphicTextureAnimationParameter textureAnimationParameter;
+        fadeAnimationParameter.setStartTime(core->getClock()->getMicrosecondsSinceStart());
+        textureAnimationParameter.setStartTime(fadeAnimationParameter.getStartTime());
+        TimestampInMicroseconds duration=rectangle.getColor().getAlpha()*core->getGraphicEngine()->getFadeDuration()/255;
+        fadeAnimationParameter.setDuration(duration);
+        textureAnimationParameter.setDuration(duration);
+        fadeAnimationParameter.setStartColor(rectangle.getColor());
+        textureAnimationParameter.setStartTexture(rectangle.getTexture());
+        fadeAnimationParameter.setEndColor(startColor);
+        textureAnimationParameter.setEndTexture(endTexture);
+        fadeAnimationSequence.push_back(fadeAnimationParameter);
+        textureAnimationSequence.push_back(textureAnimationParameter);
+        fadeAnimationParameter.setStartTime(fadeAnimationParameter.getStartTime()+duration);
+        fadeAnimationParameter.setStartColor(startColor);
+        fadeAnimationParameter.setEndColor(endColor);
+        fadeAnimationParameter.setDuration(core->getGraphicEngine()->getFadeDuration());
+        fadeAnimationSequence.push_back(fadeAnimationParameter);
+        rectangle.setFadeAnimationSequence(fadeAnimationSequence);
+        rectangle.setTextureAnimationSequence(textureAnimationSequence);
+      }
+    } else {
+      rectangle.setTexture(endTexture);
+      rectangle.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),endColor,endColor,false,0);
+      rectangle.setFadeAnimationSequence(std::list<GraphicFadeAnimationParameter>());
+      rectangle.setTextureAnimationSequence(std::list<GraphicTextureAnimationParameter>());
+    }
+  }
+  visualization.unlockAccess();
+}
+
+// Updates the cache status
+void MapTile::setIsCached(bool isCached, GraphicTextureInfo texture, bool fadeOutAnimation)
+{
+  this->isCached = isCached;
+  if (!isCached) {
+    if (this->getParentMapContainer()->getDownloadComplete())
+      endTexture=core->getGraphicEngine()->getNotCachedTileImage()->getTexture();
+    else
+      endTexture=core->getGraphicEngine()->getNotCachedTileImage()->getTexture();
+  } else {
+    endTexture=texture;
+  }
+  setIsHidden(isHidden, fadeOutAnimation);
 }
 
 }

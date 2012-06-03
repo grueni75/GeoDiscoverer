@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicAnimationParameter.cpp
+// Name        : GraphicFadeAnimationParameter.cpp
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -24,15 +24,12 @@
 
 namespace GEODISCOVERER {
 
-// Constructor
-GraphicAnimationParameter::GraphicAnimationParameter() {
-  duration=0;
-  infinite=false;
-  startTime=0;
+GraphicFadeAnimationParameter::GraphicFadeAnimationParameter() : GraphicAnimationParameter() {
+  type=GraphicAnimationParameterTypeFade;
 }
 
-// Destructor
-GraphicAnimationParameter::~GraphicAnimationParameter() {
+GraphicFadeAnimationParameter::~GraphicFadeAnimationParameter() {
+  // TODO Auto-generated destructor stub
 }
 
 } /* namespace GEODISCOVERER */

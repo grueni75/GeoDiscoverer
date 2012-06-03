@@ -59,12 +59,12 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
       if (!primitive->getIsHidden()) {
         if (widgetsActive) {
           if (primitive==selectedWidget)
-            primitive->setFadeAnimation(t,primitive->getColor(),core->getWidgetEngine()->getSelectedWidgetColor());
+            primitive->setFadeAnimation(t,primitive->getColor(),core->getWidgetEngine()->getSelectedWidgetColor(),false,core->getGraphicEngine()->getFadeDuration());
           else
-            primitive->setFadeAnimation(t,primitive->getColor(),primitive->getActiveColor());
+            primitive->setFadeAnimation(t,primitive->getColor(),primitive->getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
           //primitive->setColor(primitive->getActiveColor());
         } else {
-          primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor());
+          primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor(),false,core->getGraphicEngine()->getFadeDuration());
           //primitive->setColor(primitive->getInactiveColor());
         }
       }
@@ -93,10 +93,10 @@ bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
   }
   if (previousSelectedWidget!=selectedWidget) {
     if (previousSelectedWidget) {
-      previousSelectedWidget->setFadeAnimation(t,previousSelectedWidget->getColor(),previousSelectedWidget->getActiveColor());
+      previousSelectedWidget->setFadeAnimation(t,previousSelectedWidget->getColor(),previousSelectedWidget->getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
     }
     if (selectedWidget) {
-      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),core->getWidgetEngine()->getSelectedWidgetColor());
+      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),core->getWidgetEngine()->getSelectedWidgetColor(),false,core->getGraphicEngine()->getFadeDuration());
     }
   }
 
@@ -130,7 +130,7 @@ bool WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
       primitive->onTouchUp(t,x,y);
     }
     if (selectedWidget) {
-      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),selectedWidget->getActiveColor());
+      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),selectedWidget->getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
     }
     selectedWidget=NULL;
   }

@@ -178,8 +178,12 @@ bool MapSourceCalibratedPictures::init()
     dialog=core->getDialog()->createProgress(title,mapFilebases.size());
 
     // Init variables
-    centerPosition.setLatScale(std::numeric_limits<double>::max());
-    centerPosition.setLngScale(std::numeric_limits<double>::max());
+    centerPosition=new MapPosition();
+    if (!centerPosition) {
+      FATAL("can not create map position object",NULL);
+    }
+    centerPosition->setLatScale(std::numeric_limits<double>::max());
+    centerPosition->setLngScale(std::numeric_limits<double>::max());
 
     // Go through all found maps
     Int progress=1;
@@ -234,9 +238,9 @@ bool MapSourceCalibratedPictures::init()
       mapContainers.push_back(mapContainer);
 
       // Remember the map with the lowest scale
-      if ((mapContainer->getLatScale()<centerPosition.getLatScale())&&(mapContainer->getLngScale()<centerPosition.getLngScale())) {
-        centerPosition.setLatScale(mapContainer->getLatScale());
-        centerPosition.setLngScale(mapContainer->getLngScale());
+      if ((mapContainer->getLatScale()<centerPosition->getLatScale())&&(mapContainer->getLngScale()<centerPosition->getLngScale())) {
+        centerPosition->setLatScale(mapContainer->getLatScale());
+        centerPosition->setLngScale(mapContainer->getLngScale());
       }
 
       // Remember the minimum and maximum zoom levels
@@ -257,8 +261,8 @@ bool MapSourceCalibratedPictures::init()
     }
 
     // Set the center position
-    centerPosition.setLng(lngWest+(lngEast-lngWest)/2);
-    centerPosition.setLat(latSouth+(latNorth-latSouth)/2);
+    centerPosition->setLng(lngWest+(lngEast-lngWest)/2);
+    centerPosition->setLat(latSouth+(latNorth-latSouth)/2);
 
     // Normalize the zoom levels
     maxZoomLevel-=minZoomLevel;
@@ -348,7 +352,7 @@ void MapSourceCalibratedPictures::store(std::ofstream *ofs) {
   Storage::storeInt(ofs,size);
 
   // Store all relevant fields
-  centerPosition.store(ofs);
+  centerPosition->store(ofs);
 
   // Store all container objects
   Storage::storeInt(ofs,mapContainers.size());
@@ -417,7 +421,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Check if the class has changed
   Int size=sizeof(MapSourceCalibratedPictures);
 #ifdef TARGET_LINUX
-  if (size!=408) {
+  if (size!=256) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return false;
   }
@@ -436,9 +440,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   core->getMapSource()->openProgress("Reading cache of map " + folder, *((Int*)&cacheData[cacheSize-sizeof(Int)]));
 
   // Read the fields
-  char *objectDataTemp=(char*)&mapSource->centerPosition;
-  int objectSizeTemp=0;
-  if (MapPosition::retrieve(cacheData,cacheSize)==NULL) {
+  if ((mapSource->centerPosition=MapPosition::retrieve(cacheData,cacheSize))==NULL) {
     success=false;
     goto cleanup;
   }

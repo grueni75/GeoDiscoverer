@@ -61,6 +61,10 @@ GraphicEngine::GraphicEngine() {
   totalIdleTime=0;
   statsMutex=core->getThread()->createMutex();
   frameCount=0;
+  tileImageNotCachedImage.setColor(GraphicColor(255,255,255,0));
+  tileImageNotDownloadedFilename.setColor(GraphicColor(255,255,255,0));
+  fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration");
+  blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration");
 
   // Init the dynamic data
   init();
@@ -91,6 +95,8 @@ void GraphicEngine::createGraphic() {
   lockArrowIcon();
   arrowIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","arrowIconFilename"));
   unlockArrowIcon();
+  tileImageNotCachedImage.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","tileImageNotCachedFilename"));
+  tileImageNotDownloadedFilename.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","tileImageNotDownloadedFilename"));
 }
 
 // Deinits dynamic data
@@ -109,6 +115,8 @@ void GraphicEngine::deinit() {
   lockCompassConeIcon();
   compassConeIcon.deinit();
   unlockCompassConeIcon();
+  tileImageNotCachedImage.deinit();
+  tileImageNotDownloadedFilename.deinit();
   GraphicPointBuffer::destroyBuffers();
 }
 
@@ -172,7 +180,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   TimestampInMicroseconds fadeStartTime=pos.getLastUserModification()+centerIconTimeout;
   if (fadeStartTime!=lastCenterIconFadeStartTime) {
     centerIcon.setColor(GraphicColor(255,255,255,255));
-    centerIcon.setFadeAnimation(fadeStartTime,centerIcon.getColor(),GraphicColor(255,255,255,0));
+    centerIcon.setFadeAnimation(fadeStartTime,centerIcon.getColor(),GraphicColor(255,255,255,0),false,core->getGraphicEngine()->getFadeDuration());
   }
   lastCenterIconFadeStartTime=fadeStartTime;
 

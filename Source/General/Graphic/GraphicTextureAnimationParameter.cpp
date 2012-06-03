@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicAnimationParameter.cpp
+// Name        : GraphicTextureAnimationParameter.cpp
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -24,15 +24,11 @@
 
 namespace GEODISCOVERER {
 
-// Constructor
-GraphicAnimationParameter::GraphicAnimationParameter() {
-  duration=0;
-  infinite=false;
-  startTime=0;
+GraphicTextureAnimationParameter::GraphicTextureAnimationParameter() : GraphicAnimationParameter() {
+  type=GraphicAnimationParameterTypeTexture;
 }
 
-// Destructor
-GraphicAnimationParameter::~GraphicAnimationParameter() {
+GraphicTextureAnimationParameter::~GraphicTextureAnimationParameter() {
 }
 
 } /* namespace GEODISCOVERER */

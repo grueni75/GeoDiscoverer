@@ -220,8 +220,10 @@ public:
   {
       this->highlightColor = highlightColor;
       core->getGraphicEngine()->lockPathAnimators();
-      animator.setColor(normalColor);
-      animator.setBlinkAnimation(blinkMode,highlightColor);
+      if (blinkMode)
+        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getGraphicEngine()->getBlinkDuration());
+      else
+        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
       core->getGraphicEngine()->unlockPathAnimators();
   }
 
@@ -229,8 +231,10 @@ public:
   {
       this->normalColor = normalColor;
       core->getGraphicEngine()->lockPathAnimators();
-      animator.setColor(normalColor);
-      animator.setBlinkAnimation(blinkMode,highlightColor);
+      if (blinkMode)
+        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getGraphicEngine()->getBlinkDuration());
+      else
+        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
       core->getGraphicEngine()->unlockPathAnimators();
   }
 
@@ -238,8 +242,10 @@ public:
   {
       this->blinkMode = blinkMode;
       core->getGraphicEngine()->lockPathAnimators();
-      animator.setColor(normalColor);
-      animator.setBlinkAnimation(blinkMode,highlightColor);
+      if (blinkMode)
+        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getGraphicEngine()->getBlinkDuration());
+      else
+        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
       core->getGraphicEngine()->unlockPathAnimators();
   }
 

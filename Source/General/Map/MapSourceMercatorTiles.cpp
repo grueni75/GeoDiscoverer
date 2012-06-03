@@ -83,10 +83,14 @@ bool MapSourceMercatorTiles::init() {
     return false;
 
   // Init the center position
-  centerPosition.setLat(0);
-  centerPosition.setLng(0);
-  centerPosition.setLatScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::latBound);
-  centerPosition.setLngScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::lngBound);
+  centerPosition=new MapPosition();
+  if (!centerPosition) {
+    FATAL("can not create map position object",NULL);
+  }
+  centerPosition->setLat(0);
+  centerPosition->setLng(0);
+  centerPosition->setLatScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::latBound);
+  centerPosition->setLngScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::lngBound);
 
   // Init the zoom levels
   for (int z=0;z<(maxZoomLevel-minZoomLevel)+2;z++) {
@@ -441,9 +445,7 @@ void MapSourceMercatorTiles::downloadMapImages() {
   while (1) {
 
     // Wait for an update trigger
-    DEBUG("waiting for start signal",NULL);
     core->getThread()->waitForSignal(downloadStartSignal);
-    DEBUG("start signal received",NULL);
 
     // Shall we quit?
     if (quitMapImageDownloadThread) {
@@ -518,7 +520,6 @@ void MapSourceMercatorTiles::downloadMapImages() {
         else {
           WARNING("aborting download of <%s>",url.c_str());
         }
-
 
         // Update the map cache
         lockAccess();

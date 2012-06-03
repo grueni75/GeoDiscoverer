@@ -52,6 +52,7 @@ protected:
   bool                isProcessed;              // Indicates that the tile has already been used during tile search
   bool                isHidden;                 // Indicates if the tile is not visible
   TimestampInSeconds  lastAccess;               // Time of last access
+  GraphicTextureInfo  endTexture;               // Texture to finally set
 
   // Generated variables
   GraphicRectangle  rectangle;            // Rectangle used for drawing the tile
@@ -112,15 +113,6 @@ public:
   bool isDrawn() const
   {
     if (getVisualizationKey()!=0)
-      return true;
-    else
-      return false;
-  }
-
-  // Checks if the tile has a texture
-  bool hasTexture()
-  {
-    if (rectangle.getTexture()!=core->getScreen()->getTextureNotDefined())
       return true;
     else
       return false;
@@ -337,6 +329,8 @@ public:
       this->isProcessed = isProcessed;
   }
 
+  void setIsCached(bool isCached, GraphicTextureInfo texture=core->getScreen()->getTextureNotDefined(), bool fadeOutAnimation=true);
+
   double getLatNorthMax() const
 {
     return latNorthMax;
@@ -392,7 +386,11 @@ public:
     return lngWestMin+(lngEastMax-lngWestMin)/2;
   }
 
-  void setIsHidden(bool isHidden);
+  void setIsHidden(bool isHidden, bool fadeOutAnimation=true);
+
+  GraphicTextureInfo getEndTexture() const {
+    return endTexture;
+  }
 
   TimestampInSeconds getLastAccess() const
   {
@@ -417,11 +415,6 @@ public:
   bool getIsCached() const
   {
       return isCached;
-  }
-
-  void setIsCached(bool isCached)
-  {
-      this->isCached = isCached;
   }
 
   MapTile *getLeftChild() const

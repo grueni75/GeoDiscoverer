@@ -335,6 +335,8 @@ extern Core *core;
 #include <GraphicScaleAnimationParameter.h>
 #include <GraphicTranslateAnimationParameter.h>
 #include <GraphicRotateAnimationParameter.h>
+#include <GraphicFadeAnimationParameter.h>
+#include <GraphicTextureAnimationParameter.h>
 #include <GraphicPrimitive.h>
 #include <GraphicPointBuffer.h>
 #include <GraphicLine.h>

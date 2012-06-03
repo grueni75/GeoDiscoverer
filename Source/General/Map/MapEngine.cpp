@@ -159,7 +159,7 @@ void MapEngine::initMap()
     }
   } else {
     lockMapPos();
-    mapPos=core->getMapSource()->getCenterPosition();
+    mapPos=*(core->getMapSource()->getCenterPosition());
     unlockMapPos();
   }
   if (lastMapFolder==core->getMapSource()->getFolder()) {
@@ -359,11 +359,18 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
         //DEBUG("tile is not visible,adding it to map",NULL);
 
+        // Add the tile to the map
+        tiles.push_back(tile);
+        GraphicObject *v=tile->getVisualization();
+        map->lockAccess();
+        tile->setVisualizationKey(map->addPrimitive(v));
+        map->unlockAccess();
+
         // Shall the position be activated immediately?
         if (activateVisPos) {
 
-          // Set the fade animation
-          core->getMapCache()->setFadeAnimation(tile);
+          // Tell the tile that it's visibility has changed
+          tile->setIsHidden(false);
 
         } else {
 
@@ -371,13 +378,6 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
           tile->setIsHidden(true);
 
         }
-
-        // Add the tile to the map
-        tiles.push_back(tile);
-        GraphicObject *v=tile->getVisualization();
-        map->lockAccess();
-        tile->setVisualizationKey(map->addPrimitive(v));
-        map->unlockAccess();
 
         /* For debugging
         if (core->getGraphicEngine()->getDebugMode()) {
@@ -761,6 +761,9 @@ void MapEngine::updateMap() {
 
         // Reset the visual position to the previous one
         //DEBUG("resetting visPos",NULL);
+        lockMapPos();
+        mapPos.setMapTile(NULL);
+        unlockMapPos();
         *visPos=this->visPos;
         core->getGraphicEngine()->unlockPos();
         PROFILE_ADD("negative map tile existance check");
@@ -903,13 +906,12 @@ void MapEngine::updateMap() {
             // Activate the new position
             t->getVisualization()->lockAccess();
             t->activateVisPos();
+            t->getVisualization()->unlockAccess();
 
             // If the tile is hidden: make it visible
             if (t->getIsHidden()) {
               t->setIsHidden(false);
-              core->getMapCache()->setFadeAnimation(t,true);
             }
-            t->getVisualization()->unlockAccess();
           }
         }
         PROFILE_ADD("tile list update");
@@ -922,6 +924,9 @@ void MapEngine::updateMap() {
 
       // Reset the visual position to the previous one
       DEBUG("no map tile found",NULL);
+      lockMapPos();
+      mapPos.setMapTile(NULL);
+      unlockMapPos();
       *visPos=this->visPos;
       core->getGraphicEngine()->unlockPos();
       PROFILE_ADD("no tile found");

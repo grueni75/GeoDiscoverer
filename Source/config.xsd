@@ -397,7 +397,7 @@
 									</xsd:sequence>
 								</xsd:complexType>
 							</xsd:element>
-							<xsd:element name="fadeDuration" type="xsd:integer" default="500000">
+							<xsd:element name="fadeDuration" type="xsd:integer" default="250000">
 								<xsd:annotation>
 									<xsd:documentation>Time in microseconds that a fade animation lasts.</xsd:documentation>
 								</xsd:annotation>
@@ -442,14 +442,9 @@
 									<xsd:documentation>Time in microseconds that the initial arrow movement lasts.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
-							<xsd:element name="blinkDuration" type="xsd:integer" default="250000">
+							<xsd:element name="blinkDuration" type="xsd:integer" default="750000">
 								<xsd:annotation>
 									<xsd:documentation>Duration in microseconds to show the highlight color.</xsd:documentation>
-								</xsd:annotation>
-							</xsd:element>
-							<xsd:element name="blinkPeriod" type="xsd:integer" default="500000">
-								<xsd:annotation>
-									<xsd:documentation>Distance in microseconds between two blinks.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
 							<xsd:element name="debugMode" type="xsd:boolean" default="0">
@@ -584,9 +579,14 @@
 									<xsd:documentation>Image of the compass cone.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
-							<xsd:element name="notCachedTileAlpha" type="xsd:integer" default="64">
+							<xsd:element name="tileImageNotCachedFilename" type="xsd:string" default="tileImageNotCached">
 								<xsd:annotation>
-									<xsd:documentation>Alpha value of a tile whose image is not cached.</xsd:documentation>
+									<xsd:documentation>Image of a not yet cached tile.</xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+							<xsd:element name="tileImageNotDownloadedFilename" type="xsd:string" default="tileImageNotDownloaded">
+								<xsd:annotation>
+									<xsd:documentation>Image of a not yet downloaded tile.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
 							<xsd:element name="pathMinSegmentLength" type="xsd:integer" default="8">

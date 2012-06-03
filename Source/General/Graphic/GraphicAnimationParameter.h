@@ -25,7 +25,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum { GraphicAnimationParameterTypeScale, GraphicAnimationParameterTypeTranslate, GraphicAnimationParameterTypeRotate } GraphicAnimationParameterType;
+typedef enum { GraphicAnimationParameterTypeTexture, GraphicAnimationParameterTypeFade, GraphicAnimationParameterTypeScale, GraphicAnimationParameterTypeTranslate, GraphicAnimationParameterTypeRotate } GraphicAnimationParameterType;
 
 class GraphicAnimationParameter {
 

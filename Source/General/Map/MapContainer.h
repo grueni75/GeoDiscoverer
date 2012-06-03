@@ -295,6 +295,9 @@ public:
 
   void setDownloadComplete(bool downloadComplete) {
     this->downloadComplete = downloadComplete;
+    for(std::vector<MapTile *>::const_iterator i=mapTiles.begin(); i != mapTiles.end(); i++) {
+      (*i)->setIsCached(false); // update the texture
+    }
   }
 
   void setMapCalibrator(MapCalibrator* mapCalibrator) {

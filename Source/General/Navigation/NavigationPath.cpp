@@ -352,8 +352,7 @@ void NavigationPath::init() {
 
   // Configure the animator
   core->getGraphicEngine()->lockPathAnimators();
-  animator.setColor(normalColor);
-  animator.setBlinkAnimation(blinkMode,highlightColor);
+  animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
   core->getGraphicEngine()->unlockPathAnimators();
 
   // Create a visualization object for each zoom level

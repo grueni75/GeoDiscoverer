@@ -31,6 +31,7 @@ MapSource::MapSource() {
   statusMutex=core->getThread()->createMutex();
   isInitialized=false;
   contentsChanged=false;
+  centerPosition=NULL;
 }
 
 MapSource::~MapSource() {
@@ -46,7 +47,10 @@ void MapSource::deinit()
     MapContainer::destruct(*i);
   }
   mapContainers.clear();
-  centerPosition=MapPosition();
+  if (centerPosition) {
+    MapPosition::destruct(centerPosition);
+    centerPosition=NULL;
+  }
   for(std::vector<MapContainerTreeNode*>::iterator i=zoomLevelSearchTrees.begin();i!=zoomLevelSearchTrees.end();i++) {
     MapContainerTreeNode *t=*i;
     if (t)

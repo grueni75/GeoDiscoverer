@@ -31,8 +31,6 @@ class MapCache {
 protected:
 
   Int size;                                       // Number of tiles to cache
-  UByte notCachedTileAlpha;                       // Alpha value of a tile that is not cached
-  UByte cachedTileAlpha;                          // Alpha value of a tile that is cached
   UShort *tileImageScratch;                       // Holds the image of one tile for handover to the graphic system
   MapTile *currentTile;                           // Tile that is currently processed
   std::list<MapTile *> cachedTiles;               // List of tiles that are currently cached
@@ -53,9 +51,6 @@ public:
   // Constructors and destructor
   MapCache();
   virtual ~MapCache();
-
-  // Set the fade animation depending on the cached status
-  void setFadeAnimation(MapTile *tile, bool innerCall=false);
 
   // Inits the cache
   void init();

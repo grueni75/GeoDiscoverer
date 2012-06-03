@@ -57,6 +57,12 @@ protected:
   // Compass cone icon
   GraphicRectangle compassConeIcon;
 
+  // Not cached tile image
+  GraphicRectangle tileImageNotCachedImage;
+
+  // Not downloaded tile image
+  GraphicRectangle tileImageNotDownloadedFilename;
+
   // Radiuses of the accuracy ellipse
   Int locationAccuracyRadiusX;
   Int locationAccuracyRadiusY;
@@ -112,6 +118,12 @@ protected:
   // The start time of the last drawing operation
   TimestampInMicroseconds lastDrawingStartTime;
 
+  // Default duration of a fade animation
+  TimestampInMicroseconds fadeDuration;
+
+  // Default duration of a blink animation
+  TimestampInMicroseconds blinkDuration;
+
   // Statistical infos
   double minDrawingTime;
   double maxDrawingTime;
@@ -147,6 +159,14 @@ public:
   void outputStats();
 
   // Getters and setters
+  TimestampInMicroseconds getBlinkDuration() const {
+    return blinkDuration;
+  }
+
+  TimestampInMicroseconds getFadeDuration() const {
+    return fadeDuration;
+  }
+
   bool getIsDrawing() const
   {
       return isDrawing;
@@ -259,6 +279,17 @@ public:
   {
       this->locationAccuracyRadiusY = locationAccuracyRadiusY;
   }
+
+  GraphicRectangle *getNotCachedTileImage()
+  {
+      return &tileImageNotCachedImage;
+  }
+
+  GraphicRectangle *getNotDownloadedTileImage()
+  {
+      return &tileImageNotDownloadedFilename;
+  }
+
 };
 
 }
