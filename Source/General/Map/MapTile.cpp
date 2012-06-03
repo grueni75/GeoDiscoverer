@@ -431,7 +431,7 @@ void MapTile::setIsCached(bool isCached, GraphicTextureInfo texture, bool fadeOu
     if (this->getParentMapContainer()->getDownloadComplete())
       endTexture=core->getGraphicEngine()->getNotCachedTileImage()->getTexture();
     else
-      endTexture=core->getGraphicEngine()->getNotCachedTileImage()->getTexture();
+      endTexture=core->getGraphicEngine()->getNotDownloadedTileImage()->getTexture();
   } else {
     endTexture=texture;
   }

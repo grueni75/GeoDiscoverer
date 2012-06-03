@@ -156,7 +156,7 @@ void MapCache::removeTile(MapTile *tile) {
     tile->getVisualization()->lockAccess();
     GraphicRectangle *r=tile->getRectangle();
     GraphicTextureInfo m=r->getTexture();
-    r->setTexture(core->getScreen()->getTextureNotDefined());
+    r->setTextureAnimation(0,core->getScreen()->getTextureNotDefined(),core->getScreen()->getTextureNotDefined(),false,0);
     r->setZ(0);
     tile->getVisualization()->unlockAccess();
     core->getThread()->lockMutex(accessMutex);
