@@ -112,6 +112,10 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     pos->rotate(atof(args[0].c_str()));
     pos->updateLastUserModification();
     core->getGraphicEngine()->unlockPos();
+    // Map is not update if rotation only, so we need to update screen graphic of navigation engine here
+    if (core->getIsInitialized()) {
+      core->getNavigationEngine()->updateScreenGraphic(false);
+    }
     cmdExecuted=true;
   }
   if (cmdName.substr(0,5)=="touch") {

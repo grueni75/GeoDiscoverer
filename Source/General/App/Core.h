@@ -49,6 +49,7 @@
 #ifdef TARGET_LINUX
 #include <execinfo.h>
 #endif
+#include <libgen.h>
 
 // Mandatory application includes for the core class
 #include <Types.h>

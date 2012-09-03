@@ -617,6 +617,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   updatePosition=false;
   bool updateAnimation=false;
   double screenZoom=visPos.getZoom();
+  double screenAngle=FloatingPoint::degree2rad(visPos.getAngle());
   Int zoomedScreenWidth=floor(((double)core->getScreen()->getWidth())/screenZoom);
   Int zoomedScreenHeight=floor(((double)core->getScreen()->getHeight())/screenZoom);
   //DEBUG("screenZoom=%f zoomedScreenWidth=%d zoomedScreenHeight=%d",screenZoom,zoomedScreenWidth,zoomedScreenHeight);
@@ -716,8 +717,8 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       // Compute the angle to the target
       visAngle = - mapPos.computeBearing(targetPos) - mapPos.getMapTile()->getNorthAngle();
       double alpha = - FloatingPoint::degree2rad(visAngle);
-      double l1 = fabs(zoomedScreenHeight/2 / cos(alpha));
-      double l2 = fabs(zoomedScreenWidth/2 / sin(alpha));
+      double l1 = fabs(zoomedScreenHeight/2 / cos(alpha-screenAngle));
+      double l2 = fabs(zoomedScreenWidth/2 / sin(alpha-screenAngle));
       double l;
       if (l1>l2) {
         l=l2;
@@ -731,6 +732,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       visPosY = displayArea.getRefPos().getY() + l * cos(alpha);
       translateEndX = displayArea.getRefPos().getX() + (l-arrowRadiusZoomed) * sin(alpha);
       translateEndY = displayArea.getRefPos().getY() + (l-arrowRadiusZoomed) * cos(alpha);
+
     } else {
       showCursor=false;
       if (arrowVisible)

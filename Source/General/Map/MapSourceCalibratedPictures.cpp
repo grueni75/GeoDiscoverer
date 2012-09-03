@@ -48,13 +48,58 @@ void MapSourceCalibratedPictures::deinit()
   MapSource::deinit();
 }
 
+// Loads all calibrated pictures in the given directory
+bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::list<std::string> &mapFilebases)
+{
+  DIR *dp=NULL;
+  struct dirent *dirp;
+  std::string filepath, filename;
+  struct stat filestat;
+
+  // Go through all calibration files in the map directory
+  dp = opendir(directory.c_str());
+  if (dp == NULL){
+    ERROR("can not open map directory <%s> for reading available maps",folder.c_str());
+    return false;
+  }
+  while ((dirp = readdir( dp )))
+  {
+    filename = std::string(dirp->d_name);
+    filepath = directory + "/" + filename;
+
+    // Quit loop if requested
+    if (core->getQuitCore())
+      break;
+
+    // If the file is a directory, read the files recursively
+    if (stat( filepath.c_str(), &filestat )) continue;
+    if (S_ISDIR( filestat.st_mode )) {
+      if ((strcmp(dirp->d_name,".")!=0)&&(strcmp(dirp->d_name,"..")!=0)) {
+        collectMapTiles(filepath,mapFilebases);
+      }
+      continue;
+    }
+
+    // If this file is not a calibration file, skip it
+    Int pos=filepath.find_last_of(".");
+    std::string extension=filepath.substr(pos+1);
+    std::string filebase=filepath.substr(0,pos);
+
+    // Check for supported extensions
+    if (!MapContainer::calibrationFileIsSupported(extension))
+      continue;
+
+    // Remember the basename of the file
+    DEBUG("filebase=%s",filebase.c_str());
+    mapFilebases.push_back(filebase);
+  }
+  closedir(dp);
+  return true;
+}
+
 // Initializes the source
 bool MapSourceCalibratedPictures::init()
 {
-  std::string filepath, filename;
-  DIR *dp=NULL;
-  struct dirent *dirp;
-  struct stat filestat;
   double latNorth=-std::numeric_limits<double>::max(), latSouth=+std::numeric_limits<double>::max();
   double lngWest=+std::numeric_limits<double>::max(), lngEast=-std::numeric_limits<double>::max();;
   MapContainer *mapContainer;
@@ -127,39 +172,11 @@ bool MapSourceCalibratedPictures::init()
     DialogKey dialog=core->getDialog()->createProgress(title,0);
 
     // Go through all calibration files in the map directory
-    dp = opendir( mapPath.c_str() );
-    if (dp == NULL){
-      ERROR("can not open map directory <%s> for reading available maps",folder.c_str());
+    if (!collectMapTiles(mapPath,mapFilebases)) {
       result=false;
-      core->getDialog()->closeProgress(dialog);
       goto cleanup;
     }
-    while ((dirp = readdir( dp )))
-    {
-      filename = std::string(dirp->d_name);
-      filepath = mapPath + "/" + dirp->d_name;
-
-      // Quit loop if requested
-      if (core->getQuitCore())
-        break;
-
-      // If the file is a directory (or is in some way invalid) we'll skip it
-      if (stat( filepath.c_str(), &filestat )) continue;
-      if (S_ISDIR( filestat.st_mode ))         continue;
-
-      // If this file is not a calibration file, skip it
-      Int pos=filename.find_last_of(".");
-      std::string extension=filename.substr(pos+1);
-      std::string filebase=filename.substr(0,pos);
-
-      // Check for supported extensions
-      if (!MapContainer::calibrationFileIsSupported(extension))
-        continue;
-
-      // Remember the basename of the file
-      mapFilebases.push_back(filebase);
-    }
-    closedir(dp);
+    DEBUG("mapFilebases.size()=%d",mapFilebases.size());
 
     // Remove duplicates
     mapFilebases.sort();
@@ -189,7 +206,7 @@ bool MapSourceCalibratedPictures::init()
     Int progress=1;
     Int maxZoomLevel=std::numeric_limits<Int>::min();
     Int minZoomLevel=std::numeric_limits<Int>::max();
-    DEBUG("mapContainers.size()=%d",mapContainers.size());
+    //DEBUG("mapContainers.size()=%d",mapContainers.size());
     for (std::list<std::string>::const_iterator i=mapFilebases.begin();i!=mapFilebases.end();i++) {
 
       std::string filebase=*i;
@@ -204,12 +221,11 @@ bool MapSourceCalibratedPictures::init()
 
       // Check which calibration file is present
       std::string supportedExtension="-";
-      std::string filepath,filename;
+      std::string filepath;
       for (Int i=0;supportedExtension!="";i++) {
         supportedExtension=MapContainer::getCalibrationFileExtension(i);
         if (supportedExtension!="") {
-          filename=filebase + "." + supportedExtension;
-          filepath=mapPath + "/" + filename;
+          filepath=filebase + "." + supportedExtension;
           if (access(filepath.c_str(),F_OK)==0) {
             extension=supportedExtension;
             break;
@@ -230,7 +246,7 @@ bool MapSourceCalibratedPictures::init()
         result=false;
         goto cleanup;
       }
-      if (!(mapContainer->readCalibrationFile(mapPath,filebase,extension))) {
+      if (!(mapContainer->readCalibrationFile(std::string(dirname((char*)filebase.c_str())),std::string(basename((char*)filebase.c_str())),extension))) {
         result=false;
         delete mapContainer;
         goto cleanup;

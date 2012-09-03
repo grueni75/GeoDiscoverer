@@ -57,7 +57,7 @@ void *debugThread(void *args) {
   //sleep(5);
   //GEODISCOVERER::core->getCommander()->execute("newPointOfInterest(6.70,51.2)");
   //sleep(5);
-  GEODISCOVERER::core->getCommander()->execute("setTargetAtGeographicCoordinate(6.75,51.0)");
+  //GEODISCOVERER::core->getCommander()->execute("setTargetAtGeographicCoordinate(6.75,51.0)");
 
   // Hide the target
   //sleep(5);

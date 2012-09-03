@@ -39,6 +39,9 @@ protected:
   // Reads the contents of the search tree from a binary file
   static MapContainerTreeNode *retrieveSearchTree(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize);
 
+  // Loads all calibrated pictures in the given directory
+  bool collectMapTiles(std::string directory, std::list<std::string> &mapFilebases);
+
 public:
 
   // Constructurs and destructor
