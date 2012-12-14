@@ -549,8 +549,8 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   public void onSensorChanged(SensorEvent event) {
     
     // Drop the event if it is unreliable
-    if (event.accuracy==SensorManager.SENSOR_STATUS_UNRELIABLE)
-      return;
+    //if (event.accuracy==SensorManager.SENSOR_STATUS_UNRELIABLE)
+    //  return;
 
     // Remember the last sensor readings
     switch (event.sensor.getType()) {
@@ -559,6 +559,8 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         break;
       case Sensor.TYPE_ACCELEROMETER:
         lastAcceleration = event.values.clone();
+        break;
+      default:
         break;
     }
     

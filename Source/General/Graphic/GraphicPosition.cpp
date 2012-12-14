@@ -37,12 +37,13 @@ GraphicPosition::~GraphicPosition() {
 // Changes the rotation
 void GraphicPosition::rotate(double degree) {
   valueAngle+=degree;
-  while (valueAngle>359.0) {
+  while (valueAngle>=360.0) {
     valueAngle=valueAngle-360.0;
   }
   while (valueAngle<0.0) {
     valueAngle=360.0+valueAngle;
   }
+  //DEBUG("degree=%f valueAngle=%f",degree,valueAngle);
   changed=true;
 }
 

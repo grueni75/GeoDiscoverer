@@ -185,6 +185,10 @@ GraphicScreenOrientation Screen::getOrientation() {
 
 // Inits the screen
 void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
+
+  // Compute the maximum tiles to show
+  core->getMapEngine()->setMaxTiles();
+
 }
 
 void Screen::clear() {

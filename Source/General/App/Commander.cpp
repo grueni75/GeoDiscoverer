@@ -118,6 +118,24 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="twoFingerGesture") {
+    Int x,y;
+    x=atoi(args[0].c_str());
+    y=atoi(args[1].c_str());
+    x=x-core->getScreen()->getWidth()/2;
+    y=core->getScreen()->getHeight()/2-1-y;
+    Int dX=lastTouchedX-x;
+    Int dY=lastTouchedY-y;
+    pos=core->getGraphicEngine()->lockPos();
+    pos->rotate(atof(args[2].c_str()));
+    pos->zoom(atof(args[3].c_str()));
+    pos->pan(dX,dY);
+    pos->updateLastUserModification();
+    core->getGraphicEngine()->unlockPos();
+    lastTouchedX=x;
+    lastTouchedY=y;
+    cmdExecuted=true;
+  }
   if (cmdName.substr(0,5)=="touch") {
     Int x,y;
     x=atoi(args[0].c_str());

@@ -431,7 +431,7 @@ MapContainerTreeNode *MapSourceCalibratedPictures::retrieveSearchTree(MapSourceC
 // Reads the contents of the object from a binary file
 bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, std::string folder) {
 
-  PROFILE_START;
+  //PROFILE_START;
   bool success=true;
 
   // Check if the class has changed
@@ -450,7 +450,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
     DEBUG("stored size of object does not match implemented object size, aborting retrieve",NULL);
     return false;
   }
-  PROFILE_ADD("sanity check");
+  //PROFILE_ADD("sanity check");
 
   // Create a busy dialog
   core->getMapSource()->openProgress("Reading cache of map " + folder, *((Int*)&cacheData[cacheSize-sizeof(Int)]));
@@ -460,7 +460,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
     success=false;
     goto cleanup;
   }
-  PROFILE_ADD("position retrieve");
+  //PROFILE_ADD("position retrieve");
 
   // Read the map containers
   Storage::retrieveInt(cacheData,cacheSize,size);
@@ -477,7 +477,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
     mapSource->mapContainers[i]=c;
 
   }
-  PROFILE_ADD("map tile retrieve");
+  //PROFILE_ADD("map tile retrieve");
 
   // Read the search trees
   Storage::retrieveInt(cacheData,cacheSize,size);
@@ -505,7 +505,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
     }
 
   }
-  PROFILE_ADD("search tree retrieve");
+  //PROFILE_ADD("search tree retrieve");
 
   // The progress value was already consumed
   cacheSize-=sizeof(Int);
@@ -517,9 +517,9 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Close the dialog
 cleanup:
   core->getMapSource()->closeProgress();
-  PROFILE_ADD("cleanup");
+  //PROFILE_ADD("cleanup");
 
-  PROFILE_END;
+  //PROFILE_END;
 
   // Return result
   return success;

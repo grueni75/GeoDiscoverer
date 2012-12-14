@@ -124,14 +124,14 @@ void NavigationTarget::removeVisualization(MapContainer* mapContainer) {
   std::vector<MapTile*> *mapTiles=mapContainer->getMapTiles();
   for(std::vector<MapTile*>::iterator i=mapTiles->begin();i!=mapTiles->end();i++) {
     MapTile *tile = *i;
-    NavigationTargetTileInfoMap::iterator i;
-    i=tileInfoMap.find(tile);
-    if (i!=tileInfoMap.end()) {
+    NavigationTargetTileInfoMap::iterator j;
+    j=tileInfoMap.find(tile);
+    if (j!=tileInfoMap.end()) {
       GraphicObject *tileVisualization=tile->getVisualization();
       tileVisualization->lockAccess();
-      tile->getVisualization()->removePrimitive(i->second);
+      tile->getVisualization()->removePrimitive(j->second);
       tileVisualization->unlockAccess();
-      tileInfoMap.erase(i);
+      tileInfoMap.erase(j);
     }
   }
 }

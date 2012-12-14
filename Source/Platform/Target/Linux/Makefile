@@ -51,7 +51,7 @@ INCLUDES += -I$(ROOT)/Source/General/Math
 INCLUDES += -I$(ROOT)/Source/General/Config
 INCLUDES += -I$(ROOT)/Source/General/Profile
 
-LIBS += -lstdc++ -lglut -lpthread -lGLU -ljpeg -lxml2 -lfreetype -lpng -lcurl
+LIBS += -lstdc++ -lglut -lpthread -lGLU -ljpeg -lxml2 -lfreetype -lpng -lcurl -lGL
 
 CXXFLAGS += -DSRC_ROOT='"$(ROOT)/Source"' -DTARGET_LINUX -Wnon-virtual-dtor
 #debug: CXXFLAGS += -g -DDMALLOC -DDMALLOC_FUNC_CHECK  

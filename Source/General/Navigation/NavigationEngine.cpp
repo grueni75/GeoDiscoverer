@@ -267,7 +267,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
   bool updatePos=false;
   bool isNewer=false;
 
-  PROFILE_START;
+  //PROFILE_START;
 
   // Check if the new fix is older or newer
   if (newLocationPos.getTimestamp()>locationPos.getTimestamp()) {
@@ -311,7 +311,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     }
   }
 
-  PROFILE_ADD("position check");
+  //PROFILE_ADD("position check");
 
   // Update the position
   if (updatePos) {
@@ -345,19 +345,19 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     *pos=locationPos;
     core->getMapEngine()->unlockLocationPos();
 
-    PROFILE_ADD("position update init");
+    //PROFILE_ADD("position update init");
 
     // Update the current track
     updateTrack();
-    PROFILE_ADD("track update");
+    //PROFILE_ADD("track update");
 
     // Update the graphics
     updateScreenGraphic(false);
-    PROFILE_ADD("graphics update");
+    //PROFILE_ADD("graphics update");
 
   }
 
-  PROFILE_END;
+  //PROFILE_END;
 
 }
 

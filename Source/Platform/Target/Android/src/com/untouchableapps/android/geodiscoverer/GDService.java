@@ -249,7 +249,7 @@ public class GDService extends Service {
         stopForegroundCompat(R.string.notification_title);
         //notificationManager.cancel(R.string.notification_title);
       }
-      notification = new Notification(R.drawable.icon, getText(R.string.notification_activity_active_message), System.currentTimeMillis());
+      notification = new Notification(R.drawable.status, getText(R.string.notification_activity_active_message), System.currentTimeMillis());
       notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_activity_active_message), pendingIntent);
       startForegroundCompat(R.string.notification_title, notification);
       
@@ -266,7 +266,7 @@ public class GDService extends Service {
         
         stopForegroundCompat(R.string.notification_title);
         //notificationManager.cancel(R.string.notification_title);
-        notification = new Notification(R.drawable.icon, getText(R.string.notification_activity_inactive_message), System.currentTimeMillis());
+        notification = new Notification(R.drawable.status, getText(R.string.notification_activity_inactive_message), System.currentTimeMillis());
         notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_activity_inactive_message), pendingIntent);
         startForegroundCompat(R.string.notification_title, notification);
       }

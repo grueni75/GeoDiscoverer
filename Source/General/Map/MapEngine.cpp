@@ -27,7 +27,7 @@ namespace GEODISCOVERER {
 // Constructor
 MapEngine::MapEngine() {
   initDistance=core->getConfigStore()->getIntValue("Map","initDistance");
-  maxTiles=core->getConfigStore()->getIntValue("Map","maxTiles");
+  maxTiles=0;
   returnToLocationTimeout=core->getConfigStore()->getIntValue("Map","returnToLocationTimeout");
   returnToLocationOneTime=false;
   returnToLocation=false;
@@ -75,8 +75,6 @@ void MapEngine::deinitTile(MapTile *t)
 // Clear the current map
 void MapEngine::deinitMap()
 {
-  DEBUG("before deinit map",NULL);
-
   // Deinit all tiles
   //DEBUG("deiniting tiles",NULL);
   for (std::list<MapTile*>::const_iterator i=tiles.begin();i!=tiles.end();i++) {
@@ -124,8 +122,6 @@ void MapEngine::deinitMap()
 
   // Object is not initialized anymore
   isInitialized=false;
-
-  DEBUG("after deinit map",NULL);
 }
 
 // Initializes the map
@@ -620,7 +616,7 @@ void MapEngine::updateMap() {
   Int zoomLevel=0;
   bool mapChanged=false;
 
-  PROFILE_START;
+  //PROFILE_START;
 
   // Check if object is initialized
   if (!isInitialized)
@@ -644,7 +640,7 @@ void MapEngine::updateMap() {
   //DEBUG("diffVisX=%d diffVisY=%d diffZoom=%f",diffVisX,diffVisY,diffZoom);
   if (!mapUpdateIsRequired(*visPos,&diffVisX,&diffVisY,&diffZoom)) {
     core->getGraphicEngine()->unlockPos();
-    PROFILE_ADD("no update required");
+    //PROFILE_ADD("no update required");
   } else {
 
     // Output some status
@@ -732,7 +728,7 @@ void MapEngine::updateMap() {
     forceMapUpdate=false;
     forceMapRecreation=false;
 
-    PROFILE_ADD("update init");
+    //PROFILE_ADD("update init");
 
     // Find the map tile that closest matches the position
     // Lock the zoom level if the zoom did not change
@@ -740,7 +736,7 @@ void MapEngine::updateMap() {
     core->getMapSource()->lockAccess();
     //DEBUG("lng=%f lat=%f",newMapPos.getLng(),newMapPos.getLat());
     MapTile *bestMapTile=core->getMapSource()->findMapTileByGeographicCoordinate(newMapPos,zoomLevel,zoomLevelLock);
-    PROFILE_ADD("best map tile search");
+    //PROFILE_ADD("best map tile search");
     if (bestMapTile) {
 
       // Compute the new geo position
@@ -754,7 +750,7 @@ void MapEngine::updateMap() {
       newMapPos.setY(newMapPos.getY()-diffVisY);
       calibrator->setGeographicCoordinates(newMapPos);
       //DEBUG("newMapPos.getX()=%d newMapPos.getY()=%d",newMapPos.getX(),newMapPos.getY());
-      PROFILE_ADD("position update");
+      //PROFILE_ADD("position update");
 
       // Check that there is a tile at the new geo position
       if (!core->getMapSource()->findMapTileByGeographicCoordinate(newMapPos,zoomLevel,zoomLevelLock)) {
@@ -766,11 +762,11 @@ void MapEngine::updateMap() {
         unlockMapPos();
         *visPos=this->visPos;
         core->getGraphicEngine()->unlockPos();
-        PROFILE_ADD("negative map tile existance check");
+        //PROFILE_ADD("negative map tile existance check");
 
       } else {
 
-        PROFILE_ADD("positive map tile existance check");
+        //PROFILE_ADD("positive map tile existance check");
 
         // If the scale has changed, fill the complete screen with new tiles
         bool removeAllTiles=false;
@@ -865,12 +861,12 @@ void MapEngine::updateMap() {
         this->displayArea=newDisplayArea;
         unlockDisplayArea();
 
-        PROFILE_ADD("display area computation");
+        //PROFILE_ADD("display area computation");
 
         // Update the overlaying graphic
         //DEBUG("before updateOverlays",NULL);
         core->getNavigationEngine()->updateScreenGraphic(scaleHasChanged);
-        PROFILE_ADD("overlay graphic update");
+        //PROFILE_ADD("overlay graphic update");
 
         // Remove all tiles that are not visible anymore in the new display area
         std::list<MapTile*> visibleTiles=tiles;
@@ -884,13 +880,13 @@ void MapEngine::updateMap() {
             deinitTile(t);
           }
         }
-        PROFILE_ADD("invisible tile remove");
+        //PROFILE_ADD("invisible tile remove");
 
         // Fill the complete area
         //DEBUG("starting area fill",NULL);
         MapArea searchArea=newDisplayArea;
         fillGeographicAreaWithTiles(searchArea,NULL,(tiles.size()==0) ? true : false);
-        PROFILE_ADD("tile fill");
+        //PROFILE_ADD("tile fill");
 
         // Update the access time of the tile and copy the visual position
         TimestampInSeconds currentTime=core->getClock()->getSecondsSinceEpoch();
@@ -914,7 +910,7 @@ void MapEngine::updateMap() {
             }
           }
         }
-        PROFILE_ADD("tile list update");
+        //PROFILE_ADD("tile list update");
 
         // Request cache and map tile overlay graphic update
         mapChanged=true;
@@ -929,7 +925,7 @@ void MapEngine::updateMap() {
       unlockMapPos();
       *visPos=this->visPos;
       core->getGraphicEngine()->unlockPos();
-      PROFILE_ADD("no tile found");
+      //PROFILE_ADD("no tile found");
 
     }
     core->getMapSource()->unlockAccess();
@@ -980,6 +976,14 @@ void MapEngine::backup() {
   core->getConfigStore()->setDoubleValue("Map/LastPosition","zoomLevel",displayArea.getZoomLevel());
 }
 
+// Sets the maximum number of tiles to show
+void MapEngine::setMaxTiles() {
+  int len=core->getScreen()->getHeight();
+  if (core->getScreen()->getWidth()>len)
+    len=core->getScreen()->getWidth();
+  maxTiles=ceil(((double)len)/((double)core->getMapSource()->getMapTileLength())*((double)core->getConfigStore()->getIntValue("Map","visibleTileLimit")));
+  maxTiles=maxTiles*maxTiles;
+}
 
 
 

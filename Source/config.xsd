@@ -638,9 +638,9 @@
 									<xsd:documentation>Width and height of a tile in pixel.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
-							<xsd:element name="tileCacheSize" type="xsd:integer" default="128">
+							<xsd:element name="tileCacheSizeFactor" type="xsd:integer" default="2">
 								<xsd:annotation>
-									<xsd:documentation>Number of map tiles to cache.</xsd:documentation>
+									<xsd:documentation>Determines the number of map tiles to cache. The maximum number of visible tiles is multiplied by this factor.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
 							<xsd:element name="initDistance" type="xsd:integer" default="65536">
@@ -648,9 +648,9 @@
 									<xsd:documentation>Distance in pixel to the max/min values of integer that triggers a initialization of the map to avoid overflows.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
-							<xsd:element name="maxTiles" type="xsd:integer" default="48">
+							<xsd:element name="visibleTileLimit" type="xsd:integer" default="3">
 								<xsd:annotation>
-									<xsd:documentation>Maximum number of tiles to show.</xsd:documentation>
+									<xsd:documentation>Determines the maximum number of visible Tiles. The screen length in pixels is divided by the tile length. The result is multiplied by this factor.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
 							<xsd:element name="returnToLocationTimeout" type="xsd:integer" default="20000000">

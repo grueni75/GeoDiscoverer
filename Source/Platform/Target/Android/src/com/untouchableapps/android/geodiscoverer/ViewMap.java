@@ -38,6 +38,8 @@ import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable.Orientation;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -299,7 +301,7 @@ public class ViewMap extends GDActivity {
               if (commandFunction.equals("exitActivity")) {
                 exitRequested = true;
                 stopService(new Intent(ViewMap.this, GDService.class));
-                finish();                
+                finish();
                 commandExecuted=true;
               } 
               
@@ -330,8 +332,8 @@ public class ViewMap extends GDActivity {
   /** Start listening for compass bearing */
   synchronized void startWatchingCompass() {
     if ((mapSurfaceView!=null)&&(!compassWatchStarted)) {
-      sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),SensorManager.SENSOR_DELAY_NORMAL);
       sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
+      sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),SensorManager.SENSOR_DELAY_NORMAL);
       compassWatchStarted=true;
     }
   }
@@ -536,31 +538,31 @@ public class ViewMap extends GDActivity {
           builder.setMessage(message);              
           builder.setCancelable(true);
           builder.setPositiveButton(R.string.yes,
-              new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                  ProgressDialog progressDialog = new ProgressDialog(ViewMap.this);
-                  progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                  String message = getString(R.string.copying_file);
-                  message = String.format(message, srcFile.getName());
-                  progressDialog.setMessage(message);
-                  progressDialog.setCancelable(false);
-                  progressDialog.show();
-                  try {
-                    GDApplication.copyFile(srcFile.getPath(), dstFile.getPath());
-                  }
-                  catch (IOException e) {
-                    errorDialog(String.format(getString(R.string.cannot_copy_file), srcFile.getPath(), dstFile.getPath()));
-                  }
-                  progressDialog.dismiss();
-                  busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
-                  Message m=Message.obtain(coreObject.messageHandler);
-                  m.what = GDCore.RESTART_CORE;
-                  Bundle b = new Bundle();
-                  b.putBoolean("resetConfig", false);
-                  m.setData(b);    
-                  coreObject.messageHandler.sendMessage(m);
+            new DialogInterface.OnClickListener() {
+              public void onClick(DialogInterface dialog, int which) {
+                ProgressDialog progressDialog = new ProgressDialog(ViewMap.this);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                String message = getString(R.string.copying_file);
+                message = String.format(message, srcFile.getName());
+                progressDialog.setMessage(message);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+                try {
+                  GDApplication.copyFile(srcFile.getPath(), dstFile.getPath());
                 }
-              });
+                catch (IOException e) {
+                  errorDialog(String.format(getString(R.string.cannot_copy_file), srcFile.getPath(), dstFile.getPath()));
+                }
+                progressDialog.dismiss();
+                busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
+                Message m=Message.obtain(coreObject.messageHandler);
+                m.what = GDCore.RESTART_CORE;
+                Bundle b = new Bundle();
+                b.putBoolean("resetConfig", false);
+                m.setData(b);    
+                coreObject.messageHandler.sendMessage(m);
+              }
+            });
           builder.setNegativeButton(R.string.no, null);
           builder.setIcon(android.R.drawable.ic_dialog_info);
           AlertDialog alert = builder.create();
@@ -590,6 +592,8 @@ public class ViewMap extends GDActivity {
     coreObject.setActivity(null);
     if (wakeLock.isHeld())
       wakeLock.release();
+    if (exitRequested) 
+      System.exit(0);
   }
 
   /** Called when a configuration change (e.g., caused by a screen rotation) has occured */
@@ -745,5 +749,5 @@ public class ViewMap extends GDActivity {
     }
     return false;
   }
-
+ 
 }

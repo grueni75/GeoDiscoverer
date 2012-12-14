@@ -179,6 +179,13 @@ public:
       return isInitialized;
   }
 
+  int getMaxTiles() const
+  {
+      return maxTiles;
+  }
+
+  void setMaxTiles();
+
   void setReturnToLocation(bool returnToLocation);
 
   void setZoomLevelLock(bool zoomLevelLock);

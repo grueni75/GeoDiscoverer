@@ -108,10 +108,16 @@ bool GraphicObject::work(TimestampInMicroseconds currentTime) {
   bool redrawScene=false;
   for(std::list<GraphicPrimitive*>::iterator i=drawList.begin();i!=drawList.end();i++) {
     GraphicPrimitive *p=*i;
+    GraphicObject *o=NULL;
+    if (p->getType()==GraphicTypeObject) {
+      o=(GraphicObject*)p;
+    }
+    if (o) o->lockAccess();
     if (p->work(currentTime)) {
       //DEBUG("requesting scene redraw due to animation",NULL);
       redrawScene=true;
     }
+    if (o) o->unlockAccess();
   }
   return redrawScene;
 }

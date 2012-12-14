@@ -28,7 +28,7 @@ namespace GEODISCOVERER {
 MapCache::MapCache() {
 
   // Get some configuration
-  size=core->getConfigStore()->getIntValue("Map","tileCacheSize");
+  size=0;
   abortUpdate=false;
   accessMutex=core->getThread()->createMutex();
 
@@ -68,6 +68,10 @@ void MapCache::createGraphic() {
 
   // Ensure that only one thread is executing this
   core->getThread()->lockMutex(accessMutex);
+
+  // Determine size of cache
+  size=core->getConfigStore()->getIntValue("Map","tileCacheSizeFactor");
+  size*=core->getMapEngine()->getMaxTiles();
 
   // Ensure that no update is ongoing
   if (updateInProgress)
@@ -287,7 +291,9 @@ void MapCache::updateMapTileImages() {
     tileTextureAvailable=false;
 
     // Remove the tile from the uncached list and add it to the cached
+    //DEBUG("before setIsCached",NULL);
     t->setIsCached(true,usedTextures.back());
+    //DEBUG("after setIsCached",NULL);
     core->getThread()->lockMutex(accessMutex);
     uncachedTiles.remove(t);
     cachedTiles.push_back(t);

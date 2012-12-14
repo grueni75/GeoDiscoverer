@@ -143,6 +143,8 @@ void GraphicEngine::draw(bool forceRedraw) {
   isDrawing=true;
 
   // Copy the current position
+  //lockPos()->setAngle(this->pos.getAngle()+0.1);
+  //unlockPos();
   pos=*(lockPos());
   unlockPos();
 
@@ -297,6 +299,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     screen->startObject();
 
     // Set rotation factor
+    //DEBUG("pos.getAngle()=%f",pos.getAngle());
     screen->rotate(pos.getAngle(),0,0,1);
 
     // Set scaling factor

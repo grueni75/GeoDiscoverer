@@ -64,6 +64,9 @@ void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
   glEnable (GL_BLEND);
   setColorModeAlpha();
 
+  // Compute the maximum tiles to show
+  core->getMapEngine()->setMaxTiles();
+
   /*for (int index=0;index<ellipseSegments;index++) {
     DEBUG("ellipseSegmentPoints[%d]=%f",index,this->ellipseSegmentPoints[index]);
   }*/

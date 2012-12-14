@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
@@ -57,6 +58,7 @@ public class GDMapSurfaceView extends GLSurfaceView {
   int ACTION_DOWN;
   int ACTION_MOVE;
   int ACTION_UP;
+  int ACTION_CANCEL;
   Method findPointerIndex;
   Method getPointerId;
   Method getPointerCount;
@@ -102,6 +104,8 @@ public class GDMapSurfaceView extends GLSurfaceView {
       ACTION_UP=f.getInt(null);
       f = motionEventClass.getDeclaredField("ACTION_MOVE");
       ACTION_MOVE=f.getInt(null);
+      f = motionEventClass.getDeclaredField("ACTION_CANCEL");
+      ACTION_CANCEL=f.getInt(null);
       findPointerIndex=motionEventClass.getMethod("findPointerIndex", int.class);
       getPointerId=motionEventClass.getMethod("getPointerId", int.class);
       getPointerCount=motionEventClass.getMethod("getPointerCount");
@@ -124,11 +128,14 @@ public class GDMapSurfaceView extends GLSurfaceView {
   protected void updateTwoFingerGesture(MotionEvent event, boolean moveAction) {
     if (firstPointerID==-1)
       return;
-    try {      
+    try {
       if (secondPointerID==-1) {
   
         // Update the core object
         int pointerIndex=(Integer)findPointerIndex.invoke(event,firstPointerID);
+        if (pointerIndex==-1) {
+          return;
+        }
         int x = Math.round((Float)getX.invoke(event,pointerIndex));
         int y = Math.round((Float)getY.invoke(event,pointerIndex));
         if (moveAction) {
@@ -141,9 +148,15 @@ public class GDMapSurfaceView extends GLSurfaceView {
         
         // Compute new angle, distance and position
         int firstPointerIndex=(Integer)findPointerIndex.invoke(event, firstPointerID);
+        if (firstPointerIndex==-1) {
+          return;
+        }
         float firstX = (Float)getX.invoke(event,firstPointerIndex);
         float firstY = (Float)getY.invoke(event,firstPointerIndex);
         int secondPointerIndex=(Integer)findPointerIndex.invoke(event, secondPointerID);
+        if (secondPointerIndex==-1) {
+          return;
+        }
         float secondX = (Float)getX.invoke(event,secondPointerIndex);
         float secondY = (Float)getY.invoke(event,secondPointerIndex);
         double distX=secondX-firstX;
@@ -158,19 +171,30 @@ public class GDMapSurfaceView extends GLSurfaceView {
           
           // Compute change in angle        
           double angleDiff=angle-prevAngle;
-          if (angleDiff>Math.PI)
+          if (angleDiff>=Math.PI)
             angleDiff-=2*Math.PI;
-          if (angleDiff<-Math.PI)
+          if (angleDiff<=-Math.PI)
             angleDiff+=2*Math.PI;
           angleDiff=(double)angleDiff/Math.PI*180.0;
-          coreObject.executeCoreCommand("rotate(" + angleDiff +")");
+          //Log.d("GDApp","angleDiff=" + angleDiff);
+          //coreObject.executeCoreCommand("rotate(" + angleDiff +")");
+          /*if (angleDiff>0) {
+            for (int i=0;i<100;i++) {
+              coreObject.executeCoreCommand("rotate(0.5)");
+              Thread.sleep(10);
+            }          
+          }*/
           
           // Compute change in scale
           double scaleDiff=distance/prevDistance;
-          coreObject.executeCoreCommand("zoom(" + scaleDiff +")");
+          //coreObject.executeCoreCommand("zoom(" + scaleDiff +")");
           
           // Set new position
-          coreObject.executeCoreCommand("touchMove(" + x + "," + y + ")");        
+          //coreObject.executeCoreCommand("touchMove(" + x + "," + y + ")");    
+          
+          // Set new position
+          coreObject.executeCoreCommand("twoFingerGesture(" + x + "," + y + "," + angleDiff + "," + scaleDiff + ")");    
+          
                   
         } else {
           
@@ -185,9 +209,9 @@ public class GDMapSurfaceView extends GLSurfaceView {
       }
     }
     catch (Throwable e) {
-      GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "can not call multitouch related methods");
+      GDApplication.addMessage(GDApplication.WARNING_MSG, "GDApp", "can not call multitouch related methods");
       System.exit(1);
-    }    
+    }   
   }
   
   /** Called if the surface is touched */
@@ -241,12 +265,13 @@ public class GDMapSurfaceView extends GLSurfaceView {
         }
         
         // All pointers have left?
-        if (action==ACTION_UP) {
+        if ((action==ACTION_UP)||(action==ACTION_CANCEL)) {
           pointerIndex=(Integer)findPointerIndex.invoke(event,firstPointerID);
           x = Math.round((Float)getX.invoke(event,pointerIndex));
           y = Math.round((Float)getY.invoke(event,pointerIndex));          
           coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");
           firstPointerID=-1;
+          secondPointerID=-1;
         }
   
         // New pointer touched screen? 
@@ -290,7 +315,6 @@ public class GDMapSurfaceView extends GLSurfaceView {
       }
       catch (Throwable e) {
         GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "can not call multitouch related methods");
-        System.exit(1);
       }
     }
      
