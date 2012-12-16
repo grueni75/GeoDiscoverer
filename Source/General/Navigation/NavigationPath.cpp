@@ -199,7 +199,17 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
             rectangleList->setCutHeight((*k)->getHeight());
             Int arrowWidth=core->getGraphicEngine()->getPathDirectionIcon()->getWidth();
             Int arrowHeight=core->getGraphicEngine()->getPathDirectionIcon()->getHeight();
-            rectangleList->setRadius(sqrt((double)(arrowWidth*arrowWidth/4+arrowHeight*arrowHeight/4)));
+            Int arrowXToCenter=arrowWidth/2-core->getGraphicEngine()->getPathDirectionIcon()->getIconWidth()/2;
+            Int arrowYToCenter=arrowHeight/2-core->getGraphicEngine()->getPathDirectionIcon()->getIconHeight()/2;
+            double totalRadius=sqrt((double)(arrowWidth*arrowWidth/4+arrowHeight*arrowHeight/4));
+            double distanceToCenter=sqrt((double)(arrowXToCenter*arrowXToCenter+arrowYToCenter*arrowYToCenter));
+            double angleToCenter;
+            if (arrowXToCenter==0) {
+              angleToCenter=M_PI/2;
+            } else {
+              angleToCenter=atan((double)arrowYToCenter/(double)arrowXToCenter);
+            }
+            rectangleList->setParameter(totalRadius,distanceToCenter,angleToCenter);
             info->setGraphicRectangleList(rectangleList);
             info->setGraphicRectangleListKey(tileVisualization->addPrimitive(rectangleList));
           }

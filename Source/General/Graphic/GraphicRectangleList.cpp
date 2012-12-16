@@ -64,6 +64,10 @@ void GraphicRectangleList::addRectangle(double x, double y, double angle) {
       return;
   }
 
+  // Compute the center position from the rectangle point of view
+  x=x+distanceToCenter*cos(angleToCenter+angle);
+  y=y+distanceToCenter*sin(angleToCenter+angle);
+
   // Compute the edge points
   Short rx[4],ry[4];
   rx[0]=round(x+radius*cos(angle-M_PI/2-M_PI/4));

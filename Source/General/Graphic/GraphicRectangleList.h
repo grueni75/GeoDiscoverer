@@ -37,6 +37,8 @@ protected:
   Int cutWidth;                                       // Cut the line that it is within the given width
   Int cutHeight;                                      // Cut the line that it is within the given height
   double radius;                                      // Radius to the edge points of the rectangle
+  double distanceToCenter;                            // Distance from the icon center to the rectangle center
+  double angleToCenter;                               // Angle from the icon center to the rectangle center
 
 public:
 
@@ -77,9 +79,11 @@ public:
       this->cutWidth = cutWidth;
   }
 
-  void setRadius(double radius)
+  void setParameter(double radius, double distanceToCenter, double angleToCenter)
   {
       this->radius = radius;
+      this->distanceToCenter=distanceToCenter;
+      this->angleToCenter=angleToCenter;
   }
 };
 

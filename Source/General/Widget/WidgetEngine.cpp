@@ -34,6 +34,7 @@ WidgetEngine::WidgetEngine() {
   buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay");
   buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod");
   contextMenuDelay=c->getIntValue("Graphic/Widget","contextMenuDelay");
+  contextMenuAllowedPixelJitter=c->getIntValue("Graphic/Widget","contextMenuAllowedPixelJitter");
   isTouched=false;
   contextMenuIsShown=false;
 
@@ -408,7 +409,7 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
     // Check if we should show the context menu
     if (isTouched) {
-      if ((lastTouchDownX==x)&&(lastTouchDownY==y)) {
+      if ((abs(lastTouchDownX-x)<=contextMenuAllowedPixelJitter)&&(abs(lastTouchDownY-y)<=contextMenuAllowedPixelJitter)) {
         if (t-firstStableTouchDownTime >= contextMenuDelay) {
           if (!contextMenuIsShown) {
             showContextMenu();
@@ -416,17 +417,14 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
           }
         }
       } else {
-        lastTouchDownX=x;
-        lastTouchDownY=y;
         firstStableTouchDownTime=t;
       }
     } else {
       isTouched=true;
-      lastTouchDownX=x;
-      lastTouchDownY=y;
       firstStableTouchDownTime=t;
     }
-
+    lastTouchDownX=x;
+    lastTouchDownY=y;
     return false;
 
   }

@@ -45,7 +45,7 @@ protected:
   bool isTouched;                                       // Indicates that the screen is currently touched
   bool contextMenuIsShown;                              // Indicates that the context menu is currently shown
   TimestampInMicroseconds contextMenuDelay;             // Time that must passed before the context menu is displayed
-
+  Int contextMenuAllowedPixelJitter;                    // Allowed pixel jitter when checking if a context menu shall be displayed
 
   // Adds a widget to a page
   void addWidgetToPage(

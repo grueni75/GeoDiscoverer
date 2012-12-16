@@ -514,8 +514,8 @@ void GraphicEngine::draw(bool forceRedraw) {
 
       // Draw the location icon
       screen->startObject();
-      x1=-locationIcon.getWidth()/2;
-      y1=-locationIcon.getHeight()/2;
+      x1=-locationIcon.getIconWidth()/2;
+      y1=-locationIcon.getIconHeight()/2;
       x2=x1+locationIcon.getWidth();
       y2=y1+locationIcon.getHeight();
       screen->rotate(locationIcon.getAngle(),0,0,1);
@@ -529,7 +529,7 @@ void GraphicEngine::draw(bool forceRedraw) {
       if (compassConeIcon.getAngle()!=std::numeric_limits<double>::max()) {
         screen->startObject();
         screen->setColor(compassConeIcon.getColor().getRed(),compassConeIcon.getColor().getGreen(),compassConeIcon.getColor().getBlue(),compassConeIcon.getColor().getAlpha());
-        x1=-compassConeIcon.getWidth()/2;
+        x1=-compassConeIcon.getIconWidth()/2;
         y1=0;
         x2=x1+compassConeIcon.getWidth();
         y2=y1+compassConeIcon.getHeight();
@@ -560,8 +560,8 @@ void GraphicEngine::draw(bool forceRedraw) {
       screen->startObject();
       screen->scale(targetIcon.getScale(),targetIcon.getScale(),1.0);
       screen->rotate(targetIcon.getAngle(),0,0,1);
-      x1=-targetIcon.getWidth()/2;
-      y1=-targetIcon.getHeight()/2;
+      x1=-targetIcon.getIconWidth()/2;
+      y1=-targetIcon.getIconHeight()/2;
       x2=x1+targetIcon.getWidth();
       y2=y1+targetIcon.getHeight();
       screen->setColor(targetIcon.getColor().getRed(),targetIcon.getColor().getGreen(),targetIcon.getColor().getBlue(),targetIcon.getColor().getAlpha());
@@ -584,8 +584,8 @@ void GraphicEngine::draw(bool forceRedraw) {
       screen->startObject();
       screen->scale(arrowIcon.getScale(),arrowIcon.getScale(),1.0);
       screen->rotate(arrowIcon.getAngle(),0,0,1);
-      x1=-arrowIcon.getWidth()/2;
-      y1=-arrowIcon.getHeight()/2;
+      x1=-arrowIcon.getIconWidth()/2;
+      y1=-arrowIcon.getIconHeight()/2;
       x2=x1+arrowIcon.getWidth();
       y2=y1+arrowIcon.getHeight();
       screen->setColor(arrowIcon.getColor().getRed(),arrowIcon.getColor().getGreen(),arrowIcon.getColor().getBlue(),arrowIcon.getColor().getAlpha());
@@ -605,9 +605,9 @@ void GraphicEngine::draw(bool forceRedraw) {
     // Draw the cursor
     screen->startObject();
     screen->setColor(centerIcon.getColor().getRed(),centerIcon.getColor().getGreen(),centerIcon.getColor().getBlue(),centerIcon.getColor().getAlpha());
-    x1=-centerIcon.getWidth()/2;
+    x1=-centerIcon.getIconWidth()/2;
     x2=x1+centerIcon.getWidth();
-    y1=-centerIcon.getHeight()/2;
+    y1=-centerIcon.getIconHeight()/2;
     y2=y1+centerIcon.getHeight();
     screen->drawRectangle(x1,y1,x2,y2,centerIcon.getTexture(),true);
     screen->endObject();
