@@ -317,6 +317,8 @@ bool MapSourceCalibratedPictures::init()
     core->getDialog()->closeProgress(dialog);
   }
 
+  //DEBUG("centerPosition.lng=%e centerPosition.lat=%e",centerPosition->getLng(),centerPosition->getLat());
+
   result=true;
 cleanup:
   isInitialized=true;

@@ -137,6 +137,7 @@ void MapEngine::initMap()
 
   // Set the current position
   std::string lastMapFolder=core->getConfigStore()->getStringValue("Map/LastPosition","folder");
+  //DEBUG("lastMapFolder=%s",lastMapFolder.c_str());
   if (lastMapFolder!="*unknown*") {
     lockMapPos();
     mapPos.setLng(core->getConfigStore()->getDoubleValue("Map/LastPosition","lng"));
@@ -147,22 +148,28 @@ void MapEngine::initMap()
     core->getMapSource()->lockAccess();
     MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
     core->getMapSource()->unlockAccess();
+    //DEBUG("tile=%08x",tile);
     if (tile==NULL) {
       DEBUG("could not find tile, using center position of map",NULL);
       lockMapPos();
-      mapPos=core->getMapSource()->getCenterPosition();
+      mapPos=*(core->getMapSource()->getCenterPosition());
       unlockMapPos();
+      lastMapFolder="*unknown*";
+      core->getConfigStore()->setStringValue("Map/LastPosition","folder",lastMapFolder);
     }
   } else {
     lockMapPos();
     mapPos=*(core->getMapSource()->getCenterPosition());
     unlockMapPos();
   }
+  lockDisplayArea();
+  displayArea.setZoomLevel(0);
+  unlockDisplayArea();
   if (lastMapFolder==core->getMapSource()->getFolder()) {
     visPos.setZoom(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoom"));
     visPos.setAngle(core->getConfigStore()->getDoubleValue("Map/LastPosition","angle"));
     lockDisplayArea();
-    displayArea.setZoomLevel(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoomLevel"));
+    displayArea.setZoomLevel(core->getConfigStore()->getIntValue("Map/LastPosition","zoomLevel"));
     unlockDisplayArea();
   }
 
@@ -725,7 +732,9 @@ void MapEngine::updateMap() {
       visPos->set(0,0,visPos->getZoom(),visPos->getAngle());
       visPosResetted=true;
     }
+    core->getThread()->lockMutex(forceMapUpdateMutex);
     forceMapUpdate=false;
+    core->getThread()->unlockMutex(forceMapUpdateMutex);
     forceMapRecreation=false;
 
     //PROFILE_ADD("update init");
@@ -737,6 +746,7 @@ void MapEngine::updateMap() {
     //DEBUG("lng=%f lat=%f",newMapPos.getLng(),newMapPos.getLat());
     MapTile *bestMapTile=core->getMapSource()->findMapTileByGeographicCoordinate(newMapPos,zoomLevel,zoomLevelLock);
     //PROFILE_ADD("best map tile search");
+    //DEBUG("bestMapTile=%08x",bestMapTile);
     if (bestMapTile) {
 
       // Compute the new geo position
@@ -794,9 +804,12 @@ void MapEngine::updateMap() {
           double newLatZoom=newMapPos.getLatScale()/bestMapTile->getLatScale();
           newZoom=(newLngZoom+newLatZoom)/2;
           visPos->setZoom(newZoom);
+          //DEBUG("zoom level changed",NULL);
         } else {
           newZoom=visPos->getZoom();
+          //DEBUG("zoom level not changed",NULL);
         }
+        //DEBUG("newZoom=%f",newZoom);
 
         // Compute the required display length
         //DEBUG("screenHeight=%d screenWidth=%d",core->getScreen()->getHeight(),core->getScreen()->getWidth());
@@ -911,6 +924,14 @@ void MapEngine::updateMap() {
           }
         }
         //PROFILE_ADD("tile list update");
+
+        // If no tile has been found for whatever reason, reset the map
+        //DEBUG("tiles.size()=%d",tiles.size());
+        if ((tiles.size()==0)||(zoomedScreenWidth<=1)) {
+        	DEBUG("resetting map",NULL);
+          core->getConfigStore()->setStringValue("Map/LastPosition","folder","*unknown*");
+          initMap();
+        }
 
         // Request cache and map tile overlay graphic update
         mapChanged=true;
