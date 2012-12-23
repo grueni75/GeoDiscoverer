@@ -230,6 +230,8 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
         result="true";
       else
         result="false";
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -246,6 +248,8 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
   if (cmdName=="createNewTrack") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->createNewTrack();
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -290,12 +294,16 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
   if (cmdName=="newPointOfInterest") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->newPointOfInterest("unknown","unknown",atof(args[0].c_str()),atof(args[1].c_str()));
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
   if (cmdName=="hideTarget") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->hideTarget();
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -305,6 +313,8 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
       GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
       visPos->updateLastUserModification();
       core->getGraphicEngine()->unlockPos();
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -314,6 +324,8 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
       GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
       visPos->updateLastUserModification();
       core->getGraphicEngine()->unlockPos();
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -323,6 +335,8 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
       GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
       visPos->updateLastUserModification();
       core->getGraphicEngine()->unlockPos();
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
