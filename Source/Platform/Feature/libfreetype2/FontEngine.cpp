@@ -39,6 +39,9 @@ FontEngine::FontEngine() {
   stringCacheSize=core->getConfigStore()->getIntValue("Graphic/Font","stringCacheSize");
   fadeOutOffset=core->getConfigStore()->getIntValue("Graphic/Font","fadeOutOffset");
 
+  // Init the mutex
+  accessMutex=core->getThread()->createMutex();
+
   // Load the supported fonts
   std::string fontBaseDir = core->getHomePath() + "/Font/";
   std::string sansFontFilename = fontBaseDir + core->getConfigStore()->getStringValue("Graphic/Font","sansFilename");
@@ -86,6 +89,9 @@ FontEngine::~FontEngine() {
     font=i->second;
     delete font;
   }
+
+  // Free the mutex
+  core->getThread()->destroyMutex(accessMutex);
 
   // Close the library
   FT_Done_FreeType(freeTypeLib);
@@ -136,7 +142,11 @@ void FontEngine::destroyString(FontString *fontString) {
 }
 
 // Sets the current font to use
-void FontEngine::setFont(std::string type) {
+void FontEngine::lockFont(std::string type) {
+
+  // Lock access
+  core->getThread()->lockMutex(accessMutex);
+
   // Lookup the font
   if (!(currentFont=findFont(type)))
     return;
@@ -149,7 +159,7 @@ void FontEngine::deinit() {
     std::string fontType;
     Font *font;
     font=i->second;
-    font->destroyGraphic();
+    font->deinit();
   }
 }
 
@@ -160,7 +170,13 @@ void FontEngine::init() {
 
 // Clears the graphic of the font
 void FontEngine::destroyGraphic() {
-  deinit();
+  FontTypeMap::iterator i;
+  for(i = fontTypeMap.begin(); i!=fontTypeMap.end(); i++) {
+    std::string fontType;
+    Font *font;
+    font=i->second;
+    font->destroyGraphic();
+  }
 }
 
 // Creates the graphic of the font

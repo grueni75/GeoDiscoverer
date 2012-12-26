@@ -372,19 +372,26 @@ void GraphicEngine::draw(bool forceRedraw) {
 
                     // Dimm the color in debug mode
                     // This allows to differntiate the tiles
-                    if ((debugMode)&&(primitive->getName().size()!=0))
-                      screen->setColor(rectangle->getColor().getRed()/2,rectangle->getColor().getGreen()/2,rectangle->getColor().getBlue()/2,rectangle->getColor().getAlpha());
+                    GraphicColor originalColor;
+                    if ((debugMode)&&(primitive->getName().size()!=0)) {
+                      originalColor=rectangle->getColor();
+                      GraphicColor modifiedColor=originalColor;
+                      modifiedColor.setRed(originalColor.getRed()/2);
+                      modifiedColor.setGreen(originalColor.getGreen()/2);
+                      modifiedColor.setBlue(originalColor.getBlue()/2);
+                      rectangle->setColor(modifiedColor);
+                    }
 
-                    // Draw a rectangle if primitive matches
-                    x1=rectangle->getX();
-                    y1=rectangle->getY();
-                    x2=(GLfloat)(rectangle->getWidth()+x1);
-                    y2=(GLfloat)(rectangle->getHeight()+y1);
-                    //DEBUG("x1=%d y1=%d x2=%d y2=%d",x1,y1,x2,y2);
-                    screen->drawRectangle(x1,y1,x2,y2,rectangle->getTexture(),rectangle->getFilled());
-                    //PROFILE_ADD("map tile contents drawing");
+                    // Draw the rectangle
+                    rectangle->draw(screen,currentTime);
 
-                    //  DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
+                    // Restore the color
+                    if ((debugMode)&&(primitive->getName().size()!=0)) {
+                      originalColor=rectangle->getColor();
+                      rectangle->setColor(originalColor);
+                    }
+
+                    //DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
 
                     // If the texture is not defined, draw a box around it and it's name inside the box
                     //PROFILE_START;
@@ -393,9 +400,9 @@ void GraphicEngine::draw(bool forceRedraw) {
                       // Draw the name of the tile
                       //std::string name=".";
                       if (debugMode) {
-                        core->getFontEngine()->setFont("sansSmall");
                         std::list<std::string> name=rectangle->getName();
                         FontEngine *fontEngine=core->getFontEngine();
+                        fontEngine->lockFont("sansSmall");
                         Int nameHeight=name.size()*fontEngine->getLineHeight();
                         Int lineNr=name.size()-1;
                         //PROFILE_START;
@@ -411,6 +418,7 @@ void GraphicEngine::draw(bool forceRedraw) {
                           //PROFILE_ADD("destroy string");
                           lineNr--;
                         }
+                        fontEngine->unlockFont();
                         //PROFILE_END;
                       }
                       //PROFILE_ADD("map tile name drawing");

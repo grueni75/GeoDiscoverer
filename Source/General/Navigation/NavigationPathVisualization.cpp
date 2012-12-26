@@ -61,7 +61,6 @@ void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
   }
 }
 
-
 // Returns the tile info for the given tile
 NavigationPathTileInfo *NavigationPathVisualization::findTileInfo(MapTile *tile) {
 
@@ -88,9 +87,10 @@ NavigationPathTileInfo *NavigationPathVisualization::findTileInfo(MapTile *tile)
 // Indicates that textures and buffers have been cleared
 void NavigationPathVisualization::destroyGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
-    GraphicLine *line=i->second->getGraphicLine();
+    NavigationPathTileInfo *tileInfo=i->second;
+    GraphicLine *line=tileInfo->getGraphicLine();
     if (line) line->invalidate();
-    GraphicRectangleList *rectangleList=i->second->getGraphicRectangeList();
+    GraphicRectangleList *rectangleList=tileInfo->getGraphicRectangeList();
     if (rectangleList) {
       rectangleList->invalidate();
     }
@@ -100,7 +100,8 @@ void NavigationPathVisualization::destroyGraphic() {
 // Indicates that textures and buffers shall be created
 void NavigationPathVisualization::createGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
-    GraphicRectangleList *rectangleList=i->second->getGraphicRectangeList();
+    NavigationPathTileInfo *tileInfo=i->second;
+    GraphicRectangleList *rectangleList=tileInfo->getGraphicRectangeList();
     if (rectangleList) {
       rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
     }

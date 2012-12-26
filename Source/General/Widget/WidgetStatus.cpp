@@ -37,9 +37,10 @@ WidgetStatus::WidgetStatus() : WidgetPrimitive() {
 
 // Destructor
 WidgetStatus::~WidgetStatus() {
-  core->getFontEngine()->setFont("sansSmall");
+  core->getFontEngine()->lockFont("sansSmall");
   if (firstStatusFontString) core->getFontEngine()->destroyString(firstStatusFontString);
   if (secondStatusFontString) core->getFontEngine()->destroyString(secondStatusFontString);
+  core->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
@@ -66,7 +67,7 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
     if (status.size()!=0) {
 
       // Compute the graphical representation of the status
-      fontEngine->setFont("sansSmall");
+      fontEngine->lockFont("sansSmall");
       fontEngine->updateString(&firstStatusFontString,status.front(),labelWidth);
       textY=y+(iconHeight/2)+fontEngine->getLineHeight()/2-fontEngine->getFontHeight()/3;
       textX=x+(iconWidth/2)-(firstStatusFontString->getIconWidth())/2;
@@ -77,6 +78,7 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
       textX=x+(iconWidth/2)-(secondStatusFontString->getIconWidth())/2;
       secondStatusFontString->setX(textX);
       secondStatusFontString->setY(textY);
+      core->getFontEngine()->unlockFont();
 
       // Start fade animation if the status was not displayed before
       if ((color.getAlpha()==0)&&(fadeStartTime==fadeEndTime)) {

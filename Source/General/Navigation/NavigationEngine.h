@@ -274,6 +274,7 @@ public:
     this->status = status;
     core->getThread()->unlockMutex(statusMutex);
   }
+
 };
 
 }

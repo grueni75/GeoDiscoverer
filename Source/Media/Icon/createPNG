@@ -2,7 +2,7 @@
 #for dpi in 120 160 240 320
 for dpi in 240 320
 do
-  rm -rf $dpi
+  rm -rf ${dpi}dpi
   mkdir ${dpi}dpi 
   for file in *.svg 
   do

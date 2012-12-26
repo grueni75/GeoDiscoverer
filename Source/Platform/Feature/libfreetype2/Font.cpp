@@ -94,7 +94,7 @@ Font::~Font() {
 // Cleans up the engine
 void Font::deinit() {
 
-  Screen *screen=core->getScreen();
+  destroyGraphic();
 
   // Release the strings
   FontStringMap::iterator j;
@@ -107,17 +107,23 @@ void Font::deinit() {
   }
   cachedStringMap.clear();
 
+}
+
+// Destroys the graphic of the font
+void Font::destroyGraphic() {
+  FontStringMap::iterator j;
+  for(j = usedStringMap.begin(); j!=usedStringMap.end(); j++) {
+    j->second->deinit();
+  }
+  for(j = cachedStringMap.begin(); j!=cachedStringMap.end(); j++) {
+    j->second->deinit();
+  }
+
   // Release all textures
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
     core->getScreen()->destroyTextureInfo(*i,"Font");
   }
   unusedTextures.clear();
-
-}
-
-// Destroys the graphic of the font
-void Font::destroyGraphic() {
-  deinit();
 }
 
 // Recreates the graphic of the font
@@ -144,6 +150,17 @@ void Font::createStringBitmap(FontString *fontString) {
   Int textureWidth,textureHeight;
   Int fadeOutOffset=core->getFontEngine()->getFadeOutOffset();
 
+  // Get the texture from the unused texture list
+  // If the unused texture list is empty, create a new texture
+	if (fontString->getTexture()==core->getScreen()->getTextureNotDefined()) {
+	  if (unusedTextures.size()>0) {
+  	  fontString->setTexture(unusedTextures.front());
+    	unusedTextures.pop_front();
+	  } else {
+  	  fontString->setTexture(core->getScreen()->createTextureInfo());
+  	}	
+	}
+	
   // Reset variables
   top=std::numeric_limits<Int>::min();
   left=std::numeric_limits<Int>::max();
@@ -426,12 +443,11 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
     k->second->increaseUseCount();
 
     // Copy the contents from the used font string (you also need to update the cache code in createString if you change this)
-    if (!(fontString=new FontString())) {
+    if (!(fontString=new FontString(this,k->second))) {
       FATAL("can not create font string object",NULL);
       return NULL;
     }
     fontString->setContents(contents);
-    fontString->setTexture(k->second->getTexture());
     fontString->setIconWidth(k->second->getIconWidth());
     fontString->setIconHeight(k->second->getIconHeight());
     fontString->setWidth(k->second->getWidth());
@@ -458,7 +474,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
 
   // Create a new font string
   //DEBUG("creating new string",NULL);
-  if (!(fontString=new FontString())) {
+  if (!(fontString=new FontString(this,NULL))) {
     FATAL("can not create font string object",NULL);
     return NULL;
   }
@@ -467,18 +483,6 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
   fontString->increaseUseCount();
   FontStringPair p=FontStringPair(key.str(),fontString);
   usedStringMap.insert(p);
-
-  // Get the texture from the unused texture list
-  // If the unused texture list is empty, create a new texture
-  if (unusedTextures.size()>0) {
-    fontString->setTexture(unusedTextures.front());
-    unusedTextures.pop_front();
-  } else {
-    fontString->setTexture(core->getScreen()->createTextureInfo());
-  }
-
-  // Set the bitmnap
-  createStringBitmap(fontString);
 
   // Return the result
   return fontString;
@@ -533,7 +537,7 @@ void Font::destroyString(FontString *fontString) {
       FATAL("can not erase font string in cached string map",NULL);
       return;
     }
-    unusedTextures.push_back(oldestFontString->getTexture());
+		unusedTextures.push_back(oldestFontString->getTexture());
     oldestFontString->setTexture(core->getScreen()->getTextureNotDefined());
     delete oldestFontString;
   }

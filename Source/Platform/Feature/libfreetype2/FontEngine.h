@@ -43,6 +43,7 @@ protected:
   Int backgroundStrokeWidth;  // Width of the stroke (for 12 pt font) behind the font letters for better contrast on black background
   Int stringCacheSize;        // Maximum size of the cache string map
   Int fadeOutOffset;          // Distance to the right border when to start fading out the character
+  ThreadMutexInfo *accessMutex; // Mutex to access the font engine
 
   // Loads a font
   bool loadFont(std::string fontType, std::string fontFilename, Int fontSize);
@@ -71,7 +72,12 @@ public:
   void deinit();
 
   // Sets the current font to use
-  void setFont(std::string type);
+  void lockFont(std::string type);
+
+  // Unlocks the current font
+  void unlockFont() const {
+    core->getThread()->unlockMutex(accessMutex);
+  }
 
   // Returns the height of the current font
   Int getFontHeight();

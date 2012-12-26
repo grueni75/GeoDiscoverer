@@ -39,12 +39,15 @@ WidgetMeter::WidgetMeter() : WidgetPrimitive() {
 
 // Destructor
 WidgetMeter::~WidgetMeter() {
-  core->getFontEngine()->setFont("sansNormal");
+  core->getFontEngine()->lockFont("sansNormal");
   if (unitFontString) core->getFontEngine()->destroyString(unitFontString);
-  core->getFontEngine()->setFont("sansBoldNormal");
+  core->getFontEngine()->unlockFont();
+  core->getFontEngine()->lockFont("sansBoldNormal");
   if (labelFontString) core->getFontEngine()->destroyString(labelFontString);
-  core->getFontEngine()->setFont("sansLarge");
+  core->getFontEngine()->unlockFont();
+  core->getFontEngine()->lockFont("sansLarge");
   if (valueFontString) core->getFontEngine()->destroyString(valueFontString);
+  core->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
@@ -109,12 +112,14 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
     changed=true;
 
     // Update the font string objects
-    fontEngine->setFont("sansNormal");
+    fontEngine->lockFont("sansNormal");
     fontEngine->updateString(&unitFontString,unit);
+    fontEngine->unlockFont();
     unitFontString->setX(x+(iconWidth-unitFontString->getIconWidth())/2);
     unitFontString->setY(y+unitY);
-    fontEngine->setFont("sansLarge");
+    fontEngine->lockFont("sansLarge");
     fontEngine->updateString(&valueFontString,value);
+    fontEngine->unlockFont();
     valueFontString->setX(x+(iconWidth-valueFontString->getIconWidth())/2);
     valueFontString->setY(y+valueY);
     labelFontString->setX(x+(iconWidth-labelFontString->getIconWidth())/2);
@@ -153,7 +158,7 @@ void WidgetMeter::setMeterType(WidgetMeterType meterType)
   this->meterType=meterType;
 
   // Set the label
-  fontEngine->setFont("sansBoldNormal");
+  fontEngine->lockFont("sansBoldNormal");
   if (labelFontString) {
     fontEngine->destroyString(labelFontString);
     labelFontString=NULL;
@@ -172,6 +177,7 @@ void WidgetMeter::setMeterType(WidgetMeterType meterType)
       FATAL("meter type not supported",NULL);
       return;
   }
+  fontEngine->unlockFont();
 }
 
 // Called when the widget has changed its position

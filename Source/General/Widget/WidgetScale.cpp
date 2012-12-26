@@ -41,8 +41,9 @@ WidgetScale::WidgetScale() : WidgetPrimitive() {
 
 // Destructor
 WidgetScale::~WidgetScale() {
-  core->getFontEngine()->setFont("sansNormal");
+  core->getFontEngine()->lockFont("sansNormal");
   if (mapNameFontString) core->getFontEngine()->destroyString(mapNameFontString);
+  core->getFontEngine()->unlockFont();
   for(Int i=0;i<4;i++) {
     if (scaledNumberFontString[i]) core->getFontEngine()->destroyString(scaledNumberFontString[i]);
   }
@@ -79,7 +80,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     changed=true;
 
     // Compute the scale numbers
-    fontEngine->setFont("sansNormal");
+    fontEngine->lockFont("sansNormal");
     textY=y-fontEngine->getFontHeight();
     std::string lockedUnit="";
     for (Int i=0;i<4;i++) {
@@ -98,6 +99,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
       t->setY(textY);
       scaledNumberFontString[i]=t;
     }
+    core->getFontEngine()->unlockFont();
 
     // Compute the map name
     fontEngine->updateString(&mapNameFontString,mapName);

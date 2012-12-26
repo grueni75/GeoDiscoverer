@@ -26,7 +26,9 @@
 namespace GEODISCOVERER {
 
 // Constructor
-FontString::FontString() : GraphicRectangle() {
+FontString::FontString(Font *font, FontString *fontStringReference) : GraphicRectangle() {
+  this->font=font;
+  this->fontStringReference=fontStringReference;
   lastAccess=0;
   color.setRed(255);
   color.setGreen(255);
@@ -40,5 +42,23 @@ FontString::FontString() : GraphicRectangle() {
 FontString::~FontString() {
 }
 
+// Called when the font must be drawn
+void FontString::draw(Screen *screen, TimestampInMicroseconds t) {
+
+  // Create the text if it is not yet created
+  FontString *s=this;
+  if (fontStringReference)
+    s=fontStringReference;
+  if (s->getTexture()==core->getScreen()->getTextureNotDefined()) {
+    font->createStringBitmap(s);
+  }
+  if (fontStringReference) {
+    setTexture(s->getTexture());
+  }
+
+  // Call parent function
+  GraphicRectangle::draw(screen,t);
+
+}
 
 }
