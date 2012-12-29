@@ -39,6 +39,7 @@ protected:
   Int widthLimit;                  // Maximum allowed width
   Int baselineOffsetY;             // Vertical offset to the baseline
   Int useCount;                    // Number of objects that use the string bitmap
+  UShort *textureBitmap;           // Pointer to the texture bitmap
 
 public:
 
@@ -108,6 +109,9 @@ public:
     this->widthLimit = widthLimit;
   }
 
+  void setTextureBitmap(UShort* textureBitmap) {
+    this->textureBitmap = textureBitmap;
+  }
 };
 
 }

@@ -141,6 +141,9 @@ public:
   // Frees a string
   void destroyString(FontString *fontString);
 
+  // Sets a new texture
+  void setTexture(FontString *fontString);
+
   // Getters and setters
   Int getHeight() const
   {

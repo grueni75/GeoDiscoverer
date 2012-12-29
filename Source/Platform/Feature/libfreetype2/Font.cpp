@@ -130,6 +130,22 @@ void Font::destroyGraphic() {
 void Font::createGraphic() {
 }
 
+// Sets a new texture
+void Font::setTexture(FontString *fontString) {
+
+  // Get the texture from the unused texture list
+  // If the unused texture list is empty, create a new texture
+  if (fontString->getTexture()==core->getScreen()->getTextureNotDefined()) {
+    if (unusedTextures.size()>0) {
+      fontString->setTexture(unusedTextures.front());
+      unusedTextures.pop_front();
+    } else {
+      fontString->setTexture(core->getScreen()->createTextureInfo());
+    }
+  }
+
+}
+
 // Creates the bitmap for the font string
 void Font::createStringBitmap(FontString *fontString) {
 
@@ -149,17 +165,6 @@ void Font::createStringBitmap(FontString *fontString) {
   Int top,left,bottom,right,width,height;
   Int textureWidth,textureHeight;
   Int fadeOutOffset=core->getFontEngine()->getFadeOutOffset();
-
-  // Get the texture from the unused texture list
-  // If the unused texture list is empty, create a new texture
-	if (fontString->getTexture()==core->getScreen()->getTextureNotDefined()) {
-	  if (unusedTextures.size()>0) {
-  	  fontString->setTexture(unusedTextures.front());
-    	unusedTextures.pop_front();
-	  } else {
-  	  fontString->setTexture(core->getScreen()->createTextureInfo());
-  	}	
-	}
 	
   // Reset variables
   top=std::numeric_limits<Int>::min();
@@ -409,7 +414,8 @@ void Font::createStringBitmap(FontString *fontString) {
   }
 
   // Update the font string object (you also need to update the cache code in createString if you change this)
-  core->getScreen()->setTextureImage(fontString->getTexture(),textureBitmap,textureWidth,textureHeight,graphicTextureFormatRGBA4);
+  fontString->setTextureBitmap(textureBitmap);
+  textureBitmap=NULL;
   fontString->setIconWidth(width);
   fontString->setIconHeight(height);
   fontString->setWidth(textureWidth);
@@ -483,6 +489,9 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
   fontString->increaseUseCount();
   FontStringPair p=FontStringPair(key.str(),fontString);
   usedStringMap.insert(p);
+
+  // Update the bitmap
+  createStringBitmap(fontString);
 
   // Return the result
   return fontString;
