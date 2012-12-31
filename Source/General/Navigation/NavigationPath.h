@@ -49,12 +49,14 @@ protected:
   bool isNew;                                     // Indicates if the path has just been created
   bool isStored;                                  // Indicates if the path has been written to disk
   bool hasBeenLoaded;                             // Indicates if the path has just been read from disk
+  bool reverse;                                   // Indicates that the path shall be inversed during loading
   Int pathMinSegmentLength;                       // Minimum segment length of tracks, routes and other paths
   Int pathMinDirectionDistance;                   // Minimum distance between two direction arrows of tracks, routes and other paths
   Int pathWidth;                                  // Width of tracks, routes and other paths
   double length;                                  // Current length of the track in meters
   ThreadMutexInfo *isInitMutex;                   // Mutex for accessing the isInit variable
   bool isInit;                                    // Indicates if the track is initialized
+  double minDistanceToRouteWayPoint;              // Minimum distance to a point on the route to consider it as the target for navigation
 
   // Visualization of the path for each zoom level
   std::vector<NavigationPathVisualization*> zoomLevelVisualizations;
@@ -114,6 +116,9 @@ public:
 
   // Loads the path in the background
   void backgroundLoader();
+
+  // Computes navigation details for the given location
+  void computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, double &distance);
 
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)
@@ -263,6 +268,13 @@ public:
     core->getThread()->unlockMutex(isInitMutex);
   }
 
+  bool getReverse() const {
+    return reverse;
+  }
+
+  void setReverse(bool reverse) {
+    this->reverse = reverse;
+  }
 };
 
 }

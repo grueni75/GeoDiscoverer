@@ -296,6 +296,17 @@ public class Preferences extends PreferenceActivity implements
         info.putString(String.valueOf(i), valuesArray[i]);
       }
     }
+    if (key.equals("Navigation/activeRoute")) {
+      
+      // Use an enumeration of available routes
+      info.putString("type", "enumeration");
+      String[] valuesArray = coreObject.configStoreGetAttributeValues("Navigation/Route", "name");
+      Arrays.sort(valuesArray);
+      info.putString("0","none");
+      for (int i=0;i<valuesArray.length;i++) {
+        info.putString(String.valueOf(i+1), valuesArray[i]);
+      }
+    }
     
     // Prepare some variables     
     String type = info.getString("type");
@@ -504,6 +515,10 @@ public class Preferences extends PreferenceActivity implements
       PreferenceCategory routeCategory = new PreferenceCategory(this);
       routeCategory.setTitle("Route list (use menu to modify)");
       addPreference(rootScreen, rootScreen, "Navigation", "Route");
+      PreferenceCategory routeNavigationCategory = new PreferenceCategory(this);
+      routeNavigationCategory.setTitle("Route navigation");
+      rootScreen.addPreference(routeNavigationCategory);
+      addPreference(routeNavigationCategory, routeNavigationCategory, "Navigation", "activeRoute");
     } else {
       inflatePreferences(currentPath, rootScreen);
     }

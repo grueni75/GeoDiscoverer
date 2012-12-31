@@ -51,7 +51,7 @@
 									<xsd:documentation>Writes messages into a file in the log directory if ticked.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
-              <xsd:element name="activateMetaWatchApp" type="xsd:boolean" default="1">
+              <xsd:element name="activateMetaWatchApp" type="xsd:boolean" default="0">
                 <xsd:annotation>
                   <xsd:documentation>Activates the meta watch dashboard app.</xsd:documentation>
                 </xsd:annotation>
@@ -898,14 +898,14 @@
 												</xsd:sequence>
 											</xsd:complexType>
 										</xsd:element>
+                    <xsd:element name="reverse" type="xsd:boolean" default="0">
+                      <xsd:annotation>
+                        <xsd:documentation>Route is reversed if ticked.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
 										<xsd:element name="visible" type="xsd:boolean" default="1">
 											<xsd:annotation>
 												<xsd:documentation>Route is drawn on map if ticked.</xsd:documentation>
-											</xsd:annotation>
-										</xsd:element>
-										<xsd:element name="blink" type="xsd:boolean" default="1">
-											<xsd:annotation>
-												<xsd:documentation>Route color changes between normal and highlight color if ticked.</xsd:documentation>
 											</xsd:annotation>
 										</xsd:element>
 									</xsd:sequence>
@@ -916,6 +916,16 @@
 									</xsd:attribute>
 								</xsd:complexType>
 							</xsd:element>
+              <xsd:element name="activeRoute" type="xsd:string" default="none">
+                <xsd:annotation>
+                  <xsd:documentation>Name of the route to navigate along.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="minDistanceToRouteWayPoint" type="xsd:double" default="1000">
+                <xsd:annotation>
+                  <xsd:documentation>Minimum distance in meters to a point on the route to consider it as the target for navigation.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
 						</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>

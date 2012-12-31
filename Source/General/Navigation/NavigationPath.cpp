@@ -35,7 +35,9 @@ NavigationPath::NavigationPath() {
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength");
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance");
   pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth");
+  minDistanceToRouteWayPoint=core->getConfigStore()->getIntValue("Navigation","minDistanceToRouteWayPoint");
   isInit=false;
+  reverse=false;
 
   // Do the dynamic initialization
   init();
@@ -215,6 +217,14 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           }
 
           // Add the arrow
+          if (reverse) {
+            Int t=x1;
+            x1=x2;
+            x2=t;
+            t=y1;
+            y1=y2;
+            y2=t;
+          }
           Int distX=x2-x1;
           Int distY=y2-y1;
           double dist=sqrt((double)(distX*distX+distY*distY));
@@ -491,6 +501,68 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
   }
   core->getThread()->unlockMutex(accessMutex);
 
+}
+
+// Computes navigation details for the given location
+void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, double &distance) {
+
+  // Ensure that only one thread is executing this code
+  core->getThread()->lockMutex(accessMutex);
+
+  // Do not calculate if path is not initialized
+  if (!isInit) {
+    core->getThread()->unlockMutex(accessMutex);
+    return;
+  }
+
+  // Find the nearest point on the route
+  double minDistance=std::numeric_limits<double>::max();
+  std::list<MapPosition>::iterator nearestIterator;
+  for (std::list<MapPosition>::iterator i=mapPositions.begin();i!=mapPositions.end();i++) {
+    double distance = (*i).computeDistance(locationPos);
+    if (distance<minDistance)  {
+      minDistance=distance;
+      nearestIterator=i;
+    }
+  }
+
+  // From the nearest point, find the point at the predefined distance
+  bool wayPointSet = false;
+  distance=minDistance;
+  MapPosition pos;
+  MapPosition lastValidPos=NavigationPath::getPathInterruptedPos();
+  MapPosition prevPos=NavigationPath::getPathInterruptedPos();
+  std::list<MapPosition>::iterator forwardIterator=std::list<MapPosition>::iterator(nearestIterator);
+  std::list<MapPosition>::reverse_iterator backwardIterator=std::list<MapPosition>::reverse_iterator(nearestIterator);
+  while (reverse ? backwardIterator!=mapPositions.rend() : forwardIterator!=mapPositions.end()) {
+    pos = reverse ? *backwardIterator : *forwardIterator;
+    if (pos!=NavigationPath::getPathInterruptedPos()) {
+      lastValidPos=pos;
+      double distanceFromLocation = pos.computeDistance(locationPos);
+      if ((!wayPointSet)&&(distanceFromLocation>minDistanceToRouteWayPoint)) {
+        wayPoint=pos;
+        wayPointSet=true;
+      }
+      if (prevPos!=NavigationPath::getPathInterruptedPos()) {
+        distance+=prevPos.computeDistance(pos);
+      }
+      //core->getNavigationEngine()->setTargetAtGeographicCoordinate(pos.getLng(),pos.getLat(),false);
+    }
+    prevPos=pos;
+    if (reverse)
+      backwardIterator++;
+    else
+      forwardIterator++;
+  }
+  if (!wayPointSet) {
+    if (lastValidPos!=NavigationPath::getPathInterruptedPos())
+      wayPoint=pos;
+    else
+      wayPoint.invalidate();
+  }
+
+  // That's it!
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 }

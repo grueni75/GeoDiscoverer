@@ -60,6 +60,9 @@ protected:
   // Routes
   std::list<NavigationPath*> routes;
 
+  // Active route that is for navigation
+  NavigationPath *activeRoute;
+
   // Mutex for accessing the routes
   ThreadMutexInfo *routesMutex;
 

@@ -167,27 +167,29 @@ public class MetaWatchApp {
     //matrix.setRotate(-directionBearing,48,48);
     //c.drawBitmap(compass, matrix, null);
     c.drawCircle(48, 48, 42, compassPaint);
-    float alpha = -directionBearing;
-    for (int i=0;i<8;i++) {
-      radius = 33;
-      x = 48 + radius * (float)Math.sin(Math.toRadians(alpha));
-      y = 48 - radius * (float)Math.cos(Math.toRadians(alpha)) + smallFontRealSize/2;
-      if (i==0) 
-        c.drawText("N", x, y, smallFontPaint);
-      if (i==2) 
-        c.drawText("E", x, y, smallFontPaint);
-      if (i==4) 
-        c.drawText("S", x, y, smallFontPaint);
-      if (i==6) 
-        c.drawText("W", x, y, smallFontPaint);
-      radius = 42;
-      x = 48 + radius * (float)Math.sin(Math.toRadians(alpha));
-      y = 48 - radius * (float)Math.cos(Math.toRadians(alpha));
-      radius = 37;
-      x2 = 48 + radius * (float)Math.sin(Math.toRadians(alpha));
-      y2 = 48 - radius * (float)Math.cos(Math.toRadians(alpha));
-      c.drawLine(x, y, x2, y2, compassPaint);
-      alpha += 360/8;
+    if (!infos[0].equals("-")) {
+      float alpha = -directionBearing;
+      for (int i=0;i<8;i++) {
+        radius = 33;
+        x = 48 + radius * (float)Math.sin(Math.toRadians(alpha));
+        y = 48 - radius * (float)Math.cos(Math.toRadians(alpha)) + smallFontRealSize/2;
+        if (i==0) 
+          c.drawText("N", x, y, smallFontPaint);
+        if (i==2) 
+          c.drawText("E", x, y, smallFontPaint);
+        if (i==4) 
+          c.drawText("S", x, y, smallFontPaint);
+        if (i==6) 
+          c.drawText("W", x, y, smallFontPaint);
+        radius = 42;
+        x = 48 + radius * (float)Math.sin(Math.toRadians(alpha));
+        y = 48 - radius * (float)Math.cos(Math.toRadians(alpha));
+        radius = 37;
+        x2 = 48 + radius * (float)Math.sin(Math.toRadians(alpha));
+        y2 = 48 - radius * (float)Math.cos(Math.toRadians(alpha));
+        c.drawLine(x, y, x2, y2, compassPaint);
+        alpha += 360/8;
+      }
     }
     
     // Draw the target
@@ -196,13 +198,19 @@ public class MetaWatchApp {
       x = 48 + radius * (float)Math.sin(Math.toRadians(targetBearing)) - target.getWidth()/2;
       y = 48 - radius * (float)Math.cos(Math.toRadians(targetBearing)) - target.getHeight()/2;
       c.drawBitmap(target, x, y, null);
-      x = 48;
-      y = 35;
+    }
+    
+    // Draw the first line
+    x = 48;
+    y = 35;
+    if (!infos[2].equals("-")) {
       c.drawText(infos[2],x,y,smallFontPaint);
       y += bigFontRealSize+2;
       c.drawText(infos[3],x,y,bigFontPaint);
-      c.drawLine(20, 51, 76, 51, smallFontPaint);
       y += smallFontRealSize+7;
+    }
+    c.drawLine(20, 51, 76, 51, smallFontPaint);
+    if (!infos[4].equals("-")) {
       c.drawText(infos[4],x,y,smallFontPaint);
       y += bigFontRealSize+2;
       c.drawText(infos[5],x,y,bigFontPaint);

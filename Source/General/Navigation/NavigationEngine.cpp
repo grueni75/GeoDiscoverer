@@ -48,6 +48,7 @@ NavigationEngine::NavigationEngine() {
   compassBearing=0;
   isInitialized=false;
   recordedTrack=NULL;
+  activeRoute=NULL;
   backgroundLoaderThreadInfo=NULL;
   statusMutex=core->getThread()->createMutex();
   targetPosMutex=core->getThread()->createMutex();
@@ -136,9 +137,12 @@ void NavigationEngine::init() {
   std::string path="Navigation/Route";
   std::list<std::string> routeNames=c->getAttributeValues(path,"name");
   std::list<std::string>::iterator j;
+  std::string activeRouteName = c->getStringValue("Navigation","activeRoute");
   for(std::list<std::string>::iterator i=routeNames.begin();i!=routeNames.end();i++) {
     std::string routePath=path + "[@name='" + *i + "']";
     if (c->getIntValue(routePath,"visible")) {
+
+      // Create the route
       NavigationPath *route=new NavigationPath();
       if (!route) {
         FATAL("can not create route",NULL);
@@ -147,12 +151,20 @@ void NavigationEngine::init() {
       GraphicColor highlightColor = c->getGraphicColorValue(routePath + "/HighlightColor");
       route->setHighlightColor(highlightColor);
       route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor"));
-      route->setBlinkMode(c->getIntValue(routePath,"blink"));
+      route->setBlinkMode(false);
+      route->setReverse(c->getIntValue(routePath,"reverse"));
       route->setName(*i);
       route->setDescription("route number " + *i);
       route->setGpxFilefolder(getRoutePath());
       route->setGpxFilename(*i);
       routes.push_back(route);
+
+      // Check if it is selected for navigation
+      if (activeRouteName==route->getName()) {
+        activeRoute=route;
+        activeRoute->setBlinkMode(true);
+      }
+
     }
   }
   unlockRoutes();
@@ -960,6 +972,9 @@ void NavigationEngine::backgroundLoader() {
     (*i)->setIsInit(true);
   }
 
+  // Set the active route
+
+
   // Thread is finished
   core->getThread()->lockMutex(backgroundLoaderFinishedMutex);
   backgroundLoaderFinished=true;
@@ -1016,6 +1031,8 @@ void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, b
 // Returns information for the dashboard
 std::string NavigationEngine::getDashboardInfos() {
   std::stringstream infos;
+
+  // Copy data
   lockLocationPos();
   /*if (!this->locationPos.getHasBearing()) {
     this->locationPos.setHasBearing(true);
@@ -1032,34 +1049,72 @@ std::string NavigationEngine::getDashboardInfos() {
   lockTargetPos();
   MapPosition targetPos=this->targetPos;
   unlockTargetPos();
-  if (locationPos.getHasBearing()) {
-    infos << locationPos.getBearing();
-    if (targetPos.isValid()) {
-      infos << ";" << locationPos.computeBearing(targetPos);
-      double distance = locationPos.computeDistance(targetPos);
-      std::string value,unit;
-      core->getUnitConverter()->formatMeters(distance,value,unit);
-      infos << ";Distance;" << value << " " << unit;
-      double speed = 0;
-      if (locationPos.getHasSpeed()) {
-        //DEBUG("jo",NULL);
-        speed=locationPos.getSpeed();
-      }
-      //DEBUG("speed=%e",speed);
-      infos << ";Duration;";
-      if (speed>0) {
-        double duration = distance / speed;
-        core->getUnitConverter()->formatTime(duration,value,unit,0);
-        infos << value << " " << unit;
-      } else {
-        infos << "infinite";
-      }
-    } else {
-      infos << ";-";
+
+  // If a route is active, compute the details for the given route
+  double locationBearing=999.0;
+  double targetBearing=999.0;
+  double distance=-1;
+  double duration=-1;
+  double speed=0;
+  if (locationPos.isValid()) {
+    if (locationPos.getHasBearing()) {
+      locationBearing=locationPos.getBearing();
     }
-  } else {
-    infos << "-;-";
+    if (locationPos.getHasSpeed()) {
+      speed=locationPos.getSpeed();
+    }
+    if (activeRoute) {
+
+      // Compute the navigation details for the given route
+      lockRoutes();
+      activeRoute->computeNavigationInfos(locationPos,targetPos,distance);
+      unlockRoutes();
+      if (targetPos.isValid()) {
+        //setTargetAtGeographicCoordinate(targetPos.getLng(),targetPos.getLat(),false);
+        if (locationBearing!=999.0)
+          targetBearing=locationPos.computeBearing(targetPos);
+      }
+
+    } else {
+
+      // If a target is active, compute the details for the given target
+      if (targetPos.isValid()) {
+        if (locationBearing!=999.0)
+          targetBearing=locationPos.computeBearing(targetPos);
+        distance = locationPos.computeDistance(targetPos);
+      }
+    }
   }
+  if (speed>0) {
+    duration = distance / speed;
+  }
+
+  // Update the data
+  std::string value,unit;
+  if (locationBearing!=999.0)
+    infos << locationBearing;
+  else
+    infos << "-";
+  if (targetBearing!=999.0)
+    infos << ";" << targetBearing;
+  else
+    infos << ";-";
+  infos << ";Distance;";
+  if (distance!=-1) {
+    core->getUnitConverter()->formatMeters(distance,value,unit);
+    infos << value << " " << unit;
+  } else {
+    infos << "infinite";
+  }
+  infos << ";Duration;";
+  if (duration!=-1) {
+    core->getUnitConverter()->formatTime(duration,value,unit);
+    infos << value << " " << unit;
+  } else {
+    infos << "move!";
+  }
+
+  // Return result
   DEBUG("infos=%s",infos.str().c_str());
   return infos.str();
 }
