@@ -41,6 +41,7 @@ FontString::FontString(Font *font, FontString *fontStringReference) : GraphicRec
 
 // Destructor
 FontString::~FontString() {
+  if (textureBitmap) free(textureBitmap);
 }
 
 // Called when the font must be drawn
@@ -52,10 +53,7 @@ void FontString::draw(Screen *screen, TimestampInMicroseconds t) {
     s=fontStringReference;
   if (s->getTexture()==core->getScreen()->getTextureNotDefined()) {
     font->setTexture(s);
-  }
-  if (s->textureBitmap) {
     screen->setTextureImage(s->texture,s->textureBitmap,s->width,s->height,graphicTextureFormatRGBA4);
-    s->textureBitmap=NULL;
   }
   if (getTexture()==core->getScreen()->getTextureNotDefined()) {
     setTexture(s->getTexture());
