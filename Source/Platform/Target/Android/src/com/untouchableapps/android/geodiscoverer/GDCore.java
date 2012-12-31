@@ -31,6 +31,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -74,7 +76,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   boolean suspendCore = false;
 
   /** Indicates if the core is initialized */
-  protected boolean coreInitialized = false;
+  boolean coreInitialized = false;
     
   /** Indicates that home dir is available */
   protected boolean homeDirAvailable = false;
@@ -260,6 +262,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       lock.lock();    
       if (initialized) {
         coreInitialized=true;
+        executeAppCommand("coreInitialized()");
         executeAppCommand("updateWakeLock()");
         coreStopped=false;
         if (!changeScreenCommand.equals("")) {        

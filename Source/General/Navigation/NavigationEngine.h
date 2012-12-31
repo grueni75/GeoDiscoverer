@@ -78,9 +78,6 @@ protected:
   // Information about the background loader thread
   ThreadInfo *backgroundLoaderThreadInfo;
 
-  // Updates the currently recorded track
-  void updateTrack();
-
   // Status of the navigation engine
   std::list<std::string> status;
 
@@ -139,6 +136,9 @@ public:
   // Deinitializes the engine
   void deinit();
 
+  // Updates the currently recorded track
+  void updateTrack();
+
   // Updates the current location
   void newLocationFix(MapPosition newLocationPos);
 
@@ -195,6 +195,9 @@ public:
 
   // Updates the route list (remove stale ones, add new ones)
   void updateRoutes();
+
+  // Returns information for the dashboard
+  std::string getDashboardInfos();
 
   // Getters and setters
   NavigationPath *lockRecordedTrack()

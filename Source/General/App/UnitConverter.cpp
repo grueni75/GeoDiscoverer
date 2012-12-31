@@ -108,4 +108,29 @@ void UnitConverter::formatMetersPerSecond(double speedInMetersPerSecond, std::st
   value=s.str();
 }
 
+// Converts a speed in meters per second to the selected unit system and formats it for displaying purposes
+void UnitConverter::formatTime(double timeInSeconds, std::string &value, std::string &unit, Int precision) {
+
+  double time;
+
+  // Convert the value and set the unit
+  if ((timeInSeconds/60.0/60.0)>=1.0) {
+    time=timeInSeconds/60.0/60.0;
+    unit="h";
+  } else if ((timeInSeconds/60.0)>=1.0) {
+    time=timeInSeconds/60.0;
+    unit="m";
+  } else {
+    time=timeInSeconds;
+    unit="s";
+  }
+
+  // Format the value
+  std::stringstream s;
+  s.precision(precision);
+  s.setf(std::ios_base::fixed);
+  s<<time;
+  value=s.str();
+}
+
 }

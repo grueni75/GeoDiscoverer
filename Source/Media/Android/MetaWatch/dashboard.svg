@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="96"
+   height="96"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="dashboard.svg"
+   inkscape:export-filename="/home/grueni/Apps/GeoDiscoverer/Source/Media/Android/MetaWatch/dashboard.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 48 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="96 : 48 : 1"
+       inkscape:persp3d-origin="48 : 32 : 1"
+       id="perspective4233" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="5.6568542"
+     inkscape:cx="15.465006"
+     inkscape:cy="41.743143"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1048"
+     inkscape:window-x="-8"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2985"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-956.36218)">
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.93808317px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 37,981.36218 c 11,-8 11,-8 11,-8 l 11,8 z"
+       id="path4249"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:MetaWatch Small caps 8pt;-inkscape-font-specification:MetaWatch Small caps 8pt"
+       x="28"
+       y="991.36218"
+       id="text3081"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3083"
+         x="28"
+         y="991.36218">DISTANCE</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:MetaWatch Large 16pt;-inkscape-font-specification:MetaWatch Large 16pt"
+       x="30"
+       y="1005.3622"
+       id="text3093"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3095"
+         x="30"
+         y="1005.3622">80 km</tspan></text>
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#000000;stroke-width:2.89195919;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path2987"
+       sodipodi:cx="47"
+       sodipodi:cy="47"
+       sodipodi:rx="42"
+       sodipodi:ry="41"
+       d="M 89,47 A 42,41 0 1 1 5,47 42,41 0 1 1 89,47 z"
+       transform="matrix(1.0249324,0,0,1.0499364,-0.1719381,955.01505)" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:3.99992514;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 47.999963,1048.3622 c 7.4e-5,-6.0001 7.4e-5,-6.0001 7.4e-5,-6.0001 l 0,0"
+       id="use4160"
+       inkscape:connector-curvature="0"
+       inkscape:transform-center-y="40.99997" />
+    <text
+       xml:space="preserve"
+       style="font-size:15.24358082px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:MetaWatch Large 16pt;-inkscape-font-specification:MetaWatch Large 16pt"
+       x="-29.645863"
+       y="995.89862"
+       id="text3019"
+       sodipodi:linespacing="125%"
+       transform="scale(0.99999732,1.0000027)"><tspan
+         sodipodi:role="line"
+         id="tspan3021"
+         x="-29.645863"
+         y="995.89862" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:8px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:MetaWatch Small caps 8pt;-inkscape-font-specification:MetaWatch Small caps 8pt"
+       x="28"
+       y="1019.3622"
+       id="text3081-4"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3083-1"
+         x="28"
+         y="1019.3622">DURATION</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:MetaWatch Large 16pt;-inkscape-font-specification:MetaWatch Large 16pt"
+       x="36"
+       y="1033.3622"
+       id="text3093-1"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3095-2"
+         x="36"
+         y="1033.3622">1.5 h</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.00001788;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 69.499973,1009.8622 -2.326554,0 -40.67341,0"
+       id="path3140"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccc" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#use4160"
+       inkscape:transform-center-y="28.991358"
+       id="use3874"
+       transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,-696.13243,328.112)"
+       width="96"
+       height="96"
+       inkscape:transform-center-x="-28.991359" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#use3874"
+       inkscape:transform-center-x="-40.999975"
+       id="use3876"
+       transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,-696.13243,328.112)"
+       width="96"
+       height="96" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#use3876"
+       inkscape:transform-center-x="-28.991363"
+       id="use3878"
+       transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,-696.13243,328.112)"
+       width="96"
+       height="96"
+       inkscape:transform-center-y="-28.991359" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#use3878"
+       inkscape:transform-center-y="-40.999975"
+       id="use3880"
+       transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,-696.13243,328.112)"
+       width="96"
+       height="96" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#use3880"
+       inkscape:transform-center-y="-28.991363"
+       id="use3882"
+       transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,-696.13243,328.112)"
+       width="96"
+       height="96"
+       inkscape:transform-center-x="28.991359" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#use3882"
+       inkscape:transform-center-x="40.999975"
+       id="use3884"
+       transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,-696.13243,328.112)"
+       width="96"
+       height="96" />
+    <use
+       x="0"
+       y="0"
+       xlink:href="#use3884"
+       inkscape:transform-center-x="28.991364"
+       id="use3886"
+       transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,-696.13243,328.112)"
+       width="96"
+       height="96"
+       inkscape:transform-center-y="28.991359" />
+  </g>
+</svg>

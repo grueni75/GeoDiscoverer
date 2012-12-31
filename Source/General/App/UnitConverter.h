@@ -48,6 +48,9 @@ public:
   // Converts a speed in meters per second to the selected unit system and formats it for displaying purposes
   void formatMetersPerSecond(double speedInMetersPerSecond, std::string &value, std::string &unit, Int precision=2);
 
+  // Converts a time in seconds to the selected unit system and formats it for displaying purposes
+  void formatTime(double timeInSeconds, std::string &value, std::string &unit, Int precision=2);
+
 };
 
 }

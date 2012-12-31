@@ -1013,4 +1013,56 @@ void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, b
   showTarget(repositionMap);
 }
 
+// Returns information for the dashboard
+std::string NavigationEngine::getDashboardInfos() {
+  std::stringstream infos;
+  lockLocationPos();
+  /*if (!this->locationPos.getHasBearing()) {
+    this->locationPos.setHasBearing(true);
+    this->locationPos.setBearing(0);
+  }
+  if (!this->locationPos.getHasSpeed()) {
+    this->locationPos.setHasSpeed(true);
+    this->locationPos.setSpeed(0);
+  }
+  this->locationPos.setBearing(this->locationPos.getBearing()+4);
+  this->locationPos.setSpeed(this->locationPos.getSpeed()+1);*/
+  MapPosition locationPos=this->locationPos;
+  unlockLocationPos();
+  lockTargetPos();
+  MapPosition targetPos=this->targetPos;
+  unlockTargetPos();
+  if (locationPos.getHasBearing()) {
+    infos << locationPos.getBearing();
+    if (targetPos.isValid()) {
+      infos << ";" << locationPos.computeBearing(targetPos);
+      double distance = locationPos.computeDistance(targetPos);
+      std::string value,unit;
+      core->getUnitConverter()->formatMeters(distance,value,unit);
+      infos << ";Distance;" << value << " " << unit;
+      double speed = 0;
+      if (locationPos.getHasSpeed()) {
+        //DEBUG("jo",NULL);
+        speed=locationPos.getSpeed();
+      }
+      //DEBUG("speed=%e",speed);
+      infos << ";Duration;";
+      if (speed>0) {
+        double duration = distance / speed;
+        core->getUnitConverter()->formatTime(duration,value,unit,0);
+        infos << value << " " << unit;
+      } else {
+        infos << "infinite";
+      }
+    } else {
+      infos << ";-";
+    }
+  } else {
+    infos << "-;-";
+  }
+  DEBUG("infos=%s",infos.str().c_str());
+  return infos.str();
 }
+
+}
+

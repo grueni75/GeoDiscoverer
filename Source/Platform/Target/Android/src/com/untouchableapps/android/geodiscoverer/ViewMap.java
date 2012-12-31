@@ -270,6 +270,12 @@ public class ViewMap extends GDActivity {
                 }
                 commandExecuted=true;
               }
+              if (commandFunction.equals("coreInitialized")) {
+                Intent intent = new Intent(ViewMap.this, GDService.class);
+                intent.setAction("coreInitialized");
+                startService(intent);             
+                commandExecuted=true;
+              }
               if (commandFunction.equals("updateWakeLock")) {
                 updateWakeLock();
                 commandExecuted=true;

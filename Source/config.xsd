@@ -51,6 +51,16 @@
 									<xsd:documentation>Writes messages into a file in the log directory if ticked.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
+              <xsd:element name="activateMetaWatchApp" type="xsd:boolean" default="1">
+                <xsd:annotation>
+                  <xsd:documentation>Activates the meta watch dashboard app.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="metaWatchAppPeriod" type="xsd:integer" default="10000">
+                <xsd:annotation>
+                  <xsd:documentation>Time in milliseconds between meta watch app updates.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
 						</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>
