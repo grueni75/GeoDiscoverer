@@ -753,7 +753,7 @@ public class ViewMap extends GDActivity {
       coreObject.executeCoreCommand("showContextMenu()");
       return true;
     }
-    return false;
+    return super.onKeyUp(keyCode, event);
   }
  
 }
