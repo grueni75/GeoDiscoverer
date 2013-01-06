@@ -36,6 +36,9 @@ NavigationPath::NavigationPath() {
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance");
   pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth");
   minDistanceToRouteWayPoint=core->getConfigStore()->getIntValue("Navigation","minDistanceToRouteWayPoint");
+  minTurnAngle=core->getConfigStore()->getIntValue("Navigation","minTurnAngle");
+  minDistanceToTurn=core->getConfigStore()->getIntValue("Navigation","minDistanceToTurn");
+  turnDetectionDistance=core->getConfigStore()->getIntValue("Navigation","turnDetectionDistance");
   isInit=false;
   reverse=false;
 
@@ -532,21 +535,55 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
   MapPosition pos;
   MapPosition lastValidPos=NavigationPath::getPathInterruptedPos();
   MapPosition prevPos=NavigationPath::getPathInterruptedPos();
+  MapPosition turnPos=NavigationPath::getPathInterruptedPos();
   std::list<MapPosition>::iterator forwardIterator=std::list<MapPosition>::iterator(nearestIterator);
   std::list<MapPosition>::reverse_iterator backwardIterator=std::list<MapPosition>::reverse_iterator(nearestIterator);
   while (reverse ? backwardIterator!=mapPositions.rend() : forwardIterator!=mapPositions.end()) {
     pos = reverse ? *backwardIterator : *forwardIterator;
     if (pos!=NavigationPath::getPathInterruptedPos()) {
       lastValidPos=pos;
+
+      // Determine the way point for target computation
       double distanceFromLocation = pos.computeDistance(locationPos);
       if ((!wayPointSet)&&(distanceFromLocation>minDistanceToRouteWayPoint)) {
         wayPoint=pos;
         wayPointSet=true;
       }
+
+      // Compute the distance
       if (prevPos!=NavigationPath::getPathInterruptedPos()) {
         distance+=prevPos.computeDistance(pos);
       }
       //core->getNavigationEngine()->setTargetAtGeographicCoordinate(pos.getLng(),pos.getLat(),false);
+
+      /* Turn detection
+      std::list<MapPosition>::iterator turnForwardIterator=forwardIterator;
+      std::list<MapPosition>::reverse_iterator turnBackwardIterator=backwardIterator;
+      turnPos=NavigationPath::getPathInterruptedPos();
+      while (true) {
+        MapPosition pos2 = reverse ? *turnBackwardIterator : *turnForwardIterator;
+        if (pos2==NavigationPath::getPathInterruptedPos()) {
+          break;
+        } else {
+          turnPos=pos2;
+          if (pos.computeDistance(turnPos)>turnLookaheadDistance)
+            break;
+        }
+        if (reverse) {
+          turnBackwardIterator++;
+          if (turnBackwardIterator==mapPositions.rend())
+            break;
+        } else {
+          turnForwardIterator++;
+          if (turnForwardIterator==mapPositions.end())
+            break;
+        }
+      }
+      if (turnPos!=NavigationPath::getPathInterruptedPos()) {
+      }
+
+      FATAL("How to detect turn point?",NULL);*/
+
     }
     prevPos=pos;
     if (reverse)

@@ -57,6 +57,9 @@ protected:
   ThreadMutexInfo *isInitMutex;                   // Mutex for accessing the isInit variable
   bool isInit;                                    // Indicates if the track is initialized
   double minDistanceToRouteWayPoint;              // Minimum distance to a point on the route to consider it as the target for navigation
+  double minDistanceToTurn;                       // Minimum distance in meters to a turn before it is indicated
+  double minTurnAngle;                            // Minimum angle at which a turn in the path is detected
+  double turnDetectionDistance;                   // Distance in meters to look forward and back for detecting a turn
 
   // Visualization of the path for each zoom level
   std::vector<NavigationPathVisualization*> zoomLevelVisualizations;
