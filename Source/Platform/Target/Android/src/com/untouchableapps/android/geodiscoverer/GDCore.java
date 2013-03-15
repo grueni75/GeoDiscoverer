@@ -25,6 +25,8 @@ package com.untouchableapps.android.geodiscoverer;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -32,6 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.app.Application;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
@@ -56,6 +59,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   //
   // Variables
   //
+  
+  /** Parent application */
+  protected Application application = null;
   
   /** Parent activity */
   protected ViewMap activity = null;
@@ -130,9 +136,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   
   /** Constructor 
    * @param screenDPI */
-  GDCore(String homePath) {
+  GDCore(Application application, String homePath) {
 
     // Copy variables
+    this.application=application;
     this.homePath=homePath;
     
     // Prepare the JNI part
@@ -179,6 +186,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   public static final int RESTART_CORE = 2;  
   public static final int HOME_DIR_AVAILABLE = 3;  
   public static final int HOME_DIR_NOT_AVAILABLE = 4;  
+
+  // Variables for handling the metwatch app
+  boolean metawWatchAppActive = false;
 
   // Handler thread
   public void run() {
@@ -289,6 +299,13 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       coreStopped=true;
       lock.unlock();
       
+      // Stop the metawatch app
+      if (metawWatchAppActive) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Stopping meta watch app");
+        MetaWatchApp.stop(application);
+        metawWatchAppActive = false;
+      }
+          
       // Deinit the core
       deinitCore();
     
@@ -387,12 +404,31 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Execute an command */
   public void executeAppCommand(String cmd)
   {
+    boolean cmdExecuted = false;
     if (cmd.equals("initComplete()")) {
       for (String queuedCmd : queuedCoreCommands) {
         executeCoreCommandInt(queuedCmd);
       }
-      queuedCoreCommands.clear();      
-    } else {
+      queuedCoreCommands.clear();
+      if (configStoreGetStringValue("General", "activateMetaWatchApp").equals("1")) {
+        if (!metawWatchAppActive) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Starting meta watch app");
+          metawWatchAppActive = true;
+          MetaWatchApp.announce(application);      
+          MetaWatchApp.start(application);
+        }
+      }
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("updateNavigationInfos(")) {
+      if (metawWatchAppActive) {
+        String infos = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", infos);
+        MetaWatchApp.update(application,infos,false);
+      }
+      cmdExecuted=true;
+    }
+    if (!cmdExecuted) {
       if (activity!=null) {
         Message m=Message.obtain(activity.coreMessageHandler);
         m.what = ViewMap.EXECUTE_COMMAND;

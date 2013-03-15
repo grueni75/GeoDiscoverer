@@ -183,8 +183,7 @@ public:
   // Does a late initialization of certain objects
   void lateInit();
 
-  // Called when the initialization is finished
-  void initComplete();
+  // Called
 
   // Stops the map update thread
   void interruptMapUpdate();

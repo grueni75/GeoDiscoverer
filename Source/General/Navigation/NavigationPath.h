@@ -57,7 +57,7 @@ protected:
   ThreadMutexInfo *isInitMutex;                   // Mutex for accessing the isInit variable
   bool isInit;                                    // Indicates if the track is initialized
   double minDistanceToRouteWayPoint;              // Minimum distance to a point on the route to consider it as the target for navigation
-  double minDistanceToTurn;                       // Minimum distance in meters to a turn before it is indicated
+  double maxDistanceToTurnWayPoint;               // Maximum distance in meters to a turn before it is indicated
   double minTurnAngle;                            // Minimum angle at which a turn in the path is detected
   double turnDetectionDistance;                   // Distance in meters to look forward and back for detecting a turn
 
@@ -121,7 +121,7 @@ public:
   void backgroundLoader();
 
   // Computes navigation details for the given location
-  void computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, double &distance);
+  void computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, MapPosition &turnPoint, double &turnAngle, double &distanceToTurnPoint, double &distanceToRouteEnd);
 
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)

@@ -114,12 +114,14 @@ MapPosition MapPosition::computeTarget(double bearing, double distance) {
 double MapPosition::computeBearing(MapPosition target) {
   double latDist = target.getLatRad()-getLatRad();
   double lngDist = target.getLngRad()-getLngRad();
+  if ((latDist==0)&&(lngDist==0))
+    return 0;
   double y = sin(lngDist)*cos(target.getLatRad());
   double x = cos(getLatRad())*sin(target.getLatRad()) -
              sin(getLatRad())*cos(target.getLatRad())*cos(lngDist);
   double bearing = FloatingPoint::rad2degree(atan2(y,x));
   bearing += 360;
-  if (bearing > 360)
+  if (bearing >= 360)
     bearing -= 360;
   return bearing;
 }

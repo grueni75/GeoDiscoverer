@@ -356,7 +356,7 @@ void Core::updateScreen(bool forceRedraw) {
       isInitialized=true;
       thread->unlockMutex(isInitializedMutex);
       core->getThread()->issueSignal(isInitializedSignal);
-      initComplete();
+      core->getCommander()->dispatch("initComplete()");
     }
 
     // Check if a new texture is ready

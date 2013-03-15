@@ -344,10 +344,8 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     core->getWidgetEngine()->showContextMenu();
     cmdExecuted=true;
   }
-  if (cmdName=="getDashboardInfos") {
-    if (core->getIsInitialized()) {
-      result = core->getNavigationEngine()->getDashboardInfos();
-    }
+  if ((cmdName=="newNavigationInfos")||(cmdName=="initComplete")) {
+    core->getWidgetEngine()->showContextMenu();
     cmdExecuted=true;
   }
 

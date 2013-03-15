@@ -56,9 +56,9 @@
                   <xsd:documentation>Activates the meta watch dashboard app.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="metaWatchAppPeriod" type="xsd:integer" default="10000">
+              <xsd:element name="metaWatchAppMinUpdatePeriod" type="xsd:integer" default="30000">
                 <xsd:annotation>
-                  <xsd:documentation>Time in milliseconds between meta watch app updates.</xsd:documentation>
+                  <xsd:documentation>Minimum time in milliseconds between meta watch app updates.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
 						</xsd:sequence>
@@ -840,7 +840,7 @@
 								</xsd:annotation>
 								<xsd:complexType>
 									<xsd:sequence>
-										<xsd:element name="HighlightColor">
+										<xsd:element name="NormalColor">
 											<xsd:annotation>
 												<xsd:documentation>Highlight color of the route. If set, the route color will be periodically change between normal color and highlight color (blink mode).</xsd:documentation>
 											</xsd:annotation>
@@ -869,7 +869,7 @@
 												</xsd:sequence>
 											</xsd:complexType>
 										</xsd:element>
-										<xsd:element name="NormalColor">
+										<xsd:element name="HighlightColor">
 											<xsd:annotation>
 												<xsd:documentation>Normal color of the route.</xsd:documentation>
 											</xsd:annotation>
@@ -926,22 +926,27 @@
                   <xsd:documentation>Minimum distance in meters to a point on the route to consider it as the target for navigation.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="minDistanceToTurn" type="xsd:double" default="200">
+              <xsd:element name="maxDistanceToTurnWayPoint" type="xsd:double" default="200">
                 <xsd:annotation>
-                  <xsd:documentation>Minimum distance in meters to a turn before it is indicated.</xsd:documentation>
+                  <xsd:documentation>Maximum distance in meters to a turn before it is indicated.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="minTurnAngle" type="xsd:double" default="60">
+              <xsd:element name="minTurnAngle" type="xsd:double" default="45">
                 <xsd:annotation>
-                  <xsd:documentation>Minimum angle at which a turn in the path is detected.</xsd:documentation>
+                  <xsd:documentation>Maximum angle at which a turn in the path is detected.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="turnDetectionDistance" type="xsd:double" default="50">
+              <xsd:element name="turnDetectionDistance" type="xsd:double" default="25">
                 <xsd:annotation>
                   <xsd:documentation>Distance in meters to look forward and back for detecting a turn.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-						</xsd:sequence>
+              <xsd:element name="minDistanceToNavigationUpdate" type="xsd:double" default="5">
+                <xsd:annotation>
+                  <xsd:documentation>Minimum distance that need to be travelled before the navigation information is updated.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+    				</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>
 			</xsd:sequence>

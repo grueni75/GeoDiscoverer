@@ -67,6 +67,11 @@ NavigationEngine::NavigationEngine() {
   targetScaleMinFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor");
   targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor");
   backgroundLoaderFinished=false;
+  navigationLocationBearing=999.0;
+  navigationTargetBearing=999.0;
+  navigationDistance=-1;
+  navigationDuration=-1;
+  minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate");
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -359,6 +364,9 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
 
     //PROFILE_ADD("position update init");
 
+    // Update the navigation infos
+    updateNavigationInfos();
+
     // Update the current track
     updateTrack();
     //PROFILE_ADD("track update");
@@ -426,9 +434,9 @@ void NavigationEngine::updateTrack() {
     }
   }
 
-  // Add the new point if it meeets the criterias
+  // Add the new point if it meets the criterias
   if (pointMeetsCriterias) {
-    //DEBUG("adding new point (%f,%f): distance=%.2f pointMeetsCriterias=%d",locationPos.getLat(),locationPos.getLng(),distance,pointMeetsCriterias);
+    //DEBUG("adding new point (%f,%f): navigationDistance=%.2f pointMeetsCriterias=%d",locationPos.getLat(),locationPos.getLng(),navigationDistance,pointMeetsCriterias);
     recordedTrack->addEndPosition(locationPos);
   }
 
@@ -1028,11 +1036,11 @@ void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, b
   showTarget(repositionMap);
 }
 
-// Returns information for the dashboard
-std::string NavigationEngine::getDashboardInfos() {
+// Updates the navigation infos
+void NavigationEngine::updateNavigationInfos() {
   std::stringstream infos;
 
-  // Copy data
+  // Copy location pos
   lockLocationPos();
   /*if (!this->locationPos.getHasBearing()) {
     this->locationPos.setHasBearing(true);
@@ -1046,19 +1054,33 @@ std::string NavigationEngine::getDashboardInfos() {
   this->locationPos.setSpeed(this->locationPos.getSpeed()+1);*/
   MapPosition locationPos=this->locationPos;
   unlockLocationPos();
+
+  // Use the last bearing if the new location has no bearing
+
+  // Check if the infos need to be updated
+  if (lastNavigationLocationPos.isValid()) {
+    double travelledDistance = locationPos.computeDistance(lastNavigationLocationPos);
+    if ((travelledDistance < minDistanceToNavigationUpdate))
+      return;
+  }
+  lastNavigationLocationPos=locationPos;
+
+  // Copy target pos
   lockTargetPos();
   MapPosition targetPos=this->targetPos;
   unlockTargetPos();
 
   // If a route is active, compute the details for the given route
-  double locationBearing=999.0;
-  double targetBearing=999.0;
-  double distance=-1;
-  double duration=-1;
+  navigationLocationBearing=999.0;
+  navigationTargetBearing=999.0;
+  navigationDistance=-1;
+  navigationDuration=-1;
+  turnDistance=-1;
+  turnAngle=360;
   double speed=0;
   if (locationPos.isValid()) {
     if (locationPos.getHasBearing()) {
-      locationBearing=locationPos.getBearing();
+      navigationLocationBearing=locationPos.getBearing();
     }
     if (locationPos.getHasSpeed()) {
       speed=locationPos.getSpeed();
@@ -1066,57 +1088,70 @@ std::string NavigationEngine::getDashboardInfos() {
     if (activeRoute) {
 
       // Compute the navigation details for the given route
+      MapPosition turnPos;
+      static MapPosition prevTurnPos;
       lockRoutes();
-      activeRoute->computeNavigationInfos(locationPos,targetPos,distance);
+      activeRoute->computeNavigationInfos(locationPos,targetPos,turnPos,turnAngle,turnDistance,navigationDistance);
       unlockRoutes();
+      //WARNING("enable route locking",NULL);
       if (targetPos.isValid()) {
         //setTargetAtGeographicCoordinate(targetPos.getLng(),targetPos.getLat(),false);
-        if (locationBearing!=999.0)
-          targetBearing=locationPos.computeBearing(targetPos);
+        if (navigationLocationBearing!=999.0)
+          navigationTargetBearing=locationPos.computeBearing(targetPos);
       }
+      if (turnPos.isValid()) {
+        if (turnAngle>0) {
+          DEBUG("turn to the left in %f meters",turnDistance);
+        } else {
+          DEBUG("turn to the right in %f meters",turnDistance);
+        }
+        /*if ((!prevTurnPos.isValid())||(prevTurnPos!=turnPos)) {
+          setTargetAtGeographicCoordinate(turnPos.getLng(),turnPos.getLat(),false);
+          sleep(1);
+          DEBUG("new target set",NULL);
+        }*/
+      }
+      prevTurnPos=turnPos;
 
     } else {
 
       // If a target is active, compute the details for the given target
       if (targetPos.isValid()) {
-        if (locationBearing!=999.0)
-          targetBearing=locationPos.computeBearing(targetPos);
-        distance = locationPos.computeDistance(targetPos);
+        if (navigationLocationBearing!=999.0)
+          navigationTargetBearing=locationPos.computeBearing(targetPos);
+        navigationDistance = locationPos.computeDistance(targetPos);
       }
     }
   }
   if (speed>0) {
-    duration = distance / speed;
+    navigationDuration = navigationDistance / speed;
   }
 
-  // Update the data
+  // Update the parent app
   std::string value,unit;
-  if (locationBearing!=999.0)
-    infos << locationBearing;
+  if (navigationLocationBearing!=999.0)
+    infos << navigationLocationBearing;
   else
     infos << "-";
-  if (targetBearing!=999.0)
-    infos << ";" << targetBearing;
+  if (navigationTargetBearing!=999.0)
+    infos << ";" << navigationTargetBearing;
   else
     infos << ";-";
   infos << ";Distance;";
-  if (distance!=-1) {
-    core->getUnitConverter()->formatMeters(distance,value,unit);
+  if (navigationDistance!=-1) {
+    core->getUnitConverter()->formatMeters(navigationDistance,value,unit);
     infos << value << " " << unit;
   } else {
     infos << "infinite";
   }
   infos << ";Duration;";
-  if (duration!=-1) {
-    core->getUnitConverter()->formatTime(duration,value,unit);
+  if (navigationDuration!=-1) {
+    core->getUnitConverter()->formatTime(navigationDuration,value,unit);
     infos << value << " " << unit;
   } else {
     infos << "move!";
   }
-
-  // Return result
-  DEBUG("infos=%s",infos.str().c_str());
-  return infos.str();
+  core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
 }
 
 }

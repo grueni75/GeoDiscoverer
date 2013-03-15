@@ -59,6 +59,9 @@ public:
   // Execute a command
   std::string execute(std::string cmd, bool innerCall=false);
 
+  // Dispatch a command to the parent app
+  void dispatch(std::string cmd);
+
 };
 
 }

@@ -69,7 +69,7 @@ protected:
   // Mutex for accessing the drawing function
   ThreadMutexInfo *updateGraphicsMutex;
 
-  // Required minimum distance in meter to the last track point such that the point is added to the track
+  // Required minimum navigationDistance in meter to the last track point such that the point is added to the track
   double trackRecordingMinDistance;
 
   // List of containers that need a graphic update
@@ -124,6 +124,21 @@ protected:
 
   // Mutex for access the backgroundLoaderFinished variable
   ThreadMutexInfo *backgroundLoaderFinishedMutex;
+
+  // Parameters when to update the navigation information
+  MapPosition lastNavigationLocationPos;
+  double minDistanceToNavigationUpdate;
+
+  // Navigation information
+  double navigationLocationBearing;
+  double navigationTargetBearing;
+  double navigationDistance;
+  double navigationDuration;
+  double turnDistance;
+  double turnAngle;
+
+  // Updates the navigation infos
+  void updateNavigationInfos();
 
 public:
 
@@ -198,9 +213,6 @@ public:
 
   // Updates the route list (remove stale ones, add new ones)
   void updateRoutes();
-
-  // Returns information for the dashboard
-  std::string getDashboardInfos();
 
   // Getters and setters
   NavigationPath *lockRecordedTrack()

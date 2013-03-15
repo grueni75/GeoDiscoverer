@@ -24,13 +24,15 @@ package com.untouchableapps.android.geodiscoverer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
+
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Typeface;
@@ -41,6 +43,15 @@ public class MetaWatchApp {
   // Identifies the meta watch app
   final public static String id = "com.untouchableapps.android.geodiscoverer.MetaWatchApp";
   final static String name = "Geo Discoverer";
+  
+  // Minimum time that must pass between updates
+  static int minUpdatePeriod;
+
+  // Last time the watch was updated
+  static long lastUpdate;
+  
+  // Last infos used for updating
+  static String lastInfos = "";
   
   // Holds the current bitmap
   static Bitmap bitmap = null;
@@ -86,6 +97,9 @@ public class MetaWatchApp {
 
   public static void announce(Context context) {
 
+    // Init parameters
+    minUpdatePeriod = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("General", "metaWatchAppMinUpdatePeriod"));
+    
     // Load bitmaps
     background = loadBitmapFromAssets(context, "MetaWatchApp/background.png");
     compass = loadBitmapFromAssets(context, "MetaWatchApp/compass.png");
@@ -134,26 +148,28 @@ public class MetaWatchApp {
     b.putString("name", name);
     intent.putExtras(b);
     context.sendBroadcast(intent);
-    update(context);
+    lastUpdate = 0;
+    update(context,null,true);
+    lastUpdate = 0;
   }
   
-  private static void refreshApp(Context context) {
+  private static void refreshApp(Context context, String infosAsSSV) {
     
     float radius,x,y,x2,y2;
-    
+        
     // Create a new bitmap
     bitmap = Bitmap.createBitmap(96, 96, Bitmap.Config.RGB_565);
-    Canvas c = new Canvas(bitmap);
+    Canvas c = new Canvas(bitmap); 
     c.drawColor(Color.WHITE);
     
     // Draw the background
     c.drawBitmap(background,0,0,null);
+    c.drawCircle(48, 48, 42, compassPaint);
 
     // Obtain the dashboard infos
-    String t = GDApplication.coreObject.executeCoreCommand("getDashboardInfos()");
-    if (t.equals(""))
+    if (infosAsSSV.equals(""))
       return;
-    String[] infos = t.split(";");
+    String[] infos = infosAsSSV.split(";");
     float directionBearing=0;
     if (!infos[0].equals("-"))
       directionBearing = Float.parseFloat(infos[0]);
@@ -166,7 +182,6 @@ public class MetaWatchApp {
     //Matrix matrix = new Matrix();
     //matrix.setRotate(-directionBearing,48,48);
     //c.drawBitmap(compass, matrix, null);
-    c.drawCircle(48, 48, 42, compassPaint);
     if (!infos[0].equals("-")) {
       float alpha = -directionBearing;
       for (int i=0;i<8;i++) {
@@ -217,16 +232,33 @@ public class MetaWatchApp {
     }
   }
   
-  public static void update(Context context) {
-    refreshApp(context);
+  public static void update(Context context, String infos, boolean forceUpdate) {
     
+    // Use the last infos if no infos given
+    if (infos == null) {
+      infos = lastInfos;
+    }
+    lastInfos = infos;
+    
+    // Check if the info is updated too fast
+    if ((!forceUpdate)&&((Calendar.getInstance().getTimeInMillis() - lastUpdate) < minUpdatePeriod)) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Skipped update because last update was too recent");
+      return;
+    }
+        
+    // Draw the bitmap
+    refreshApp(context,infos);
+    
+    // Inform metawatch app
     Intent intent = new Intent("org.metawatch.manager.APPLICATION_UPDATE");
     Bundle b = new Bundle();
     b.putString("id", id);
     b.putIntArray("array", makeSendableArray(bitmap));
     intent.putExtras(b);
-
     context.sendBroadcast(intent);
+
+    // Remember when was updated
+    lastUpdate = Calendar.getInstance().getTimeInMillis();
   }
   
   public static void stop(Context context) {
@@ -239,6 +271,7 @@ public class MetaWatchApp {
   }
   
   public static void button(Context context, int button, int type) {
-    update(context);
+    //update(context,"");
   }
+
 }

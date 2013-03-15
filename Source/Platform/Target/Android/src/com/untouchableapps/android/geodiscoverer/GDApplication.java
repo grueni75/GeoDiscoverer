@@ -63,7 +63,7 @@ public class GDApplication extends Application {
     if (homeDirPath.equals("")) {
       Toast.makeText(this, String.format(String.format(getString(R.string.no_home_dir),homeDirPath)), Toast.LENGTH_LONG).show();
     } else {
-      coreObject=new GDCore(homeDirPath);
+      coreObject=new GDCore(this, homeDirPath);
     }
   }
 

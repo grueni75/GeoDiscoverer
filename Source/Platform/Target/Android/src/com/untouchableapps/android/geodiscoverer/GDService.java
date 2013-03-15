@@ -75,14 +75,14 @@ public class GDService extends Service {
   Notification notification = null;
 
   // Variables for monitoring the state of the external storage
-  BroadcastReceiver externalStorageReceiver;
+  BroadcastReceiver externalStorageReceiver = null;
   boolean externalStorageAvailable = false;
   boolean externalStorageWritable = false;  
+      
+  // Variables for handling the metwatch
+  BroadcastReceiver metaWatchAppReceiver = null;
+  boolean metaWatchAppActive = false;
   
-  // Variables for handling the metwatch app
-  boolean metawWatchAppActive = false;
-  Timer metaWatchUpdater = null;
-    
   /** Called when the external storage state changes */
   synchronized void handleExternalStorageState() {
 
@@ -163,6 +163,26 @@ public class GDService extends Service {
     // Prepare the notification
     Intent notificationIntent = new Intent(this, ViewMap.class);
     pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);    
+    
+    // Register metawatch broadcast receiver
+    metaWatchAppReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        if (metaWatchAppActive) {
+          if (intent.getAction()=="org.metawatch.manager.BUTTON_PRESS") {
+            MetaWatchApp.update(coreObject.application, null, true);
+          }
+          if (intent.getAction()=="org.metawatch.manager.APPLICATION_DISCOVERY") {
+            MetaWatchApp.announce(coreObject.application);
+            MetaWatchApp.start(coreObject.application);
+          }
+        }
+      }
+    };
+    filter = new IntentFilter();
+    filter.addAction("org.metawatch.manager.BUTTON_PRESS");
+    filter.addAction("org.metawatch.manager.APPLICATION_DISCOVERY");
+    registerReceiver(metaWatchAppReceiver, filter);
   }
   
   /**
@@ -258,36 +278,8 @@ public class GDService extends Service {
       notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_activity_active_message), pendingIntent);
       startForegroundCompat(R.string.notification_title, notification);
     }
-    if (intent.getAction().equals("coreInitialized")||(intent.getAction().equals("activityResumed"))) {
-
-      // Start the Metawatch application
-      if (coreObject.coreInitialized) {
-        if (coreObject.configStoreGetStringValue("General", "activateMetaWatchApp").equals("1")) {
-          if (!metawWatchAppActive) {
-            int period = Integer.parseInt(coreObject.configStoreGetStringValue("General", "metaWatchAppPeriod"));
-            metawWatchAppActive = true;
-            MetaWatchApp.announce(this);      
-            MetaWatchApp.start(this);
-            metaWatchUpdater = new Timer();
-            metaWatchUpdater.scheduleAtFixedRate(
-                new TimerTask() {
-                  public void run(){
-                    MetaWatchApp.update(GDService.this);
-                  }
-                }, 
-                period, 
-                period
-            );
-          }
-        } else {
-          if (metawWatchAppActive) {
-            metaWatchUpdater.cancel();
-            MetaWatchApp.stop(this);
-            metaWatchUpdater = null;
-            metawWatchAppActive = false;
-          }
-        }
-      }
+    if (intent.getAction().equals("coreInitialized")) {
+      metaWatchAppActive = coreObject.configStoreGetStringValue("General", "activateMetaWatchApp").equals("1");
     }
     if (intent.getAction().equals("activityPaused")) {
       
@@ -296,7 +288,7 @@ public class GDService extends Service {
       String state=coreObject.executeCoreCommand("getRecordTrack()");
       if (state.equals("false")||state.equals(""))
           recordingPosition = false;
-      if ((!metawWatchAppActive)&&(!recordingPosition)) {
+      if ((!metaWatchAppActive)&&(!recordingPosition)) {
         locationManager.removeUpdates(coreObject);
         locationWatchStarted = false;
         stopSelf();
@@ -304,9 +296,9 @@ public class GDService extends Service {
         stopForegroundCompat(R.string.notification_title);
         //notificationManager.cancel(R.string.notification_title);
         CharSequence message;
-        if ((metawWatchAppActive)&&(recordingPosition))
+        if ((metaWatchAppActive)&&(recordingPosition))
           message = getText(R.string.notification_activity_inactive_recording_and_metawatch_message);
-        else if (metawWatchAppActive)
+        else if (metaWatchAppActive)
           message = getText(R.string.notification_activity_inactive_metawatch_message);
         else
           message = getText(R.string.notification_activity_inactive_recording_message);
@@ -334,11 +326,10 @@ public class GDService extends Service {
     // Stop watching location
     locationManager.removeUpdates(coreObject);
     
-    // Stop the metawatch app
-    if (metawWatchAppActive) {
-      MetaWatchApp.stop(this);
-      metawWatchAppActive = false;
-    }
+    // Stop watch meta watch updates
+    unregisterReceiver(metaWatchAppReceiver);
+    metaWatchAppReceiver=null;
+    
   }
   
   
