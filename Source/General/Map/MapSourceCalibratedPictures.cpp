@@ -51,49 +51,37 @@ void MapSourceCalibratedPictures::deinit()
 // Loads all calibrated pictures in the given directory
 bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::list<std::string> &mapFilebases)
 {
-  DIR *dp=NULL;
-  struct dirent *dirp;
-  std::string filepath, filename;
-  struct stat filestat;
+  std::string filename;
 
-  // Go through all calibration files in the map directory
-  dp = opendir(directory.c_str());
-  if (dp == NULL){
-    ERROR("can not open map directory <%s> for reading available maps",folder.c_str());
-    return false;
-  }
-  while ((dirp = readdir( dp )))
-  {
-    filename = std::string(dirp->d_name);
-    filepath = directory + "/" + filename;
+  // Go through all archives
+  core->getMapSource()->lockMapArchives();
+  for (std::list<ZipArchive*>::iterator i=mapArchives.begin();i!=mapArchives.end();i++) {
 
-    // Quit loop if requested
-    if (core->getQuitCore())
-      break;
+    // Go through all entries in the archive
+    for (Int j=0;j<(*i)->getEntryCount();j++) {
 
-    // If the file is a directory, read the files recursively
-    if (stat( filepath.c_str(), &filestat )) continue;
-    if (S_ISDIR( filestat.st_mode )) {
-      if ((strcmp(dirp->d_name,".")!=0)&&(strcmp(dirp->d_name,"..")!=0)) {
-        collectMapTiles(filepath,mapFilebases);
-      }
-      continue;
+      // Quit loop if requested
+      if (core->getQuitCore())
+        break;
+
+      // Get the file name of the entry
+      filename = (*i)->getEntryFilename(j);
+
+      // If this file is not a calibration file, skip it
+      Int pos=filename.find_last_of(".");
+      std::string extension=filename.substr(pos+1);
+      std::string filebase=filename.substr(0,pos);
+
+      // Check for supported extensions
+      if (!MapContainer::calibrationFileIsSupported(extension))
+        continue;
+
+      // Remember the basename of the file
+      mapFilebases.push_back(filebase);
     }
-
-    // If this file is not a calibration file, skip it
-    Int pos=filepath.find_last_of(".");
-    std::string extension=filepath.substr(pos+1);
-    std::string filebase=filepath.substr(0,pos);
-
-    // Check for supported extensions
-    if (!MapContainer::calibrationFileIsSupported(extension))
-      continue;
-
-    // Remember the basename of the file
-    DEBUG("filebase=%s",filebase.c_str());
-    mapFilebases.push_back(filebase);
   }
-  closedir(dp);
+  unlockMapArchives();
+
   return true;
 }
 
@@ -113,6 +101,22 @@ bool MapSourceCalibratedPictures::init()
   std::string title;
   std::string mapPath=getFolderPath();
   std::string cacheFilepath=mapPath+"/cache.bin";
+  ZipArchive *mapArchive;
+
+  // Open the zip archive that contains the maps
+  lockMapArchives();
+  if (!(mapArchive=new ZipArchive(mapPath,"tiles.zip"))) {
+    FATAL("can not create zip archive object",NULL);
+    result=false;
+    goto cleanup;
+  }
+  if (!mapArchive->init()) {
+    ERROR("can not open tiles.zip in map directory <%s>",folder.c_str());
+    result=false;
+    goto cleanup;
+  }
+  mapArchives.push_back(mapArchive);
+  unlockMapArchives();
 
   // Check if we can use the cache
   cacheRetrieved=false;
@@ -176,7 +180,7 @@ bool MapSourceCalibratedPictures::init()
       result=false;
       goto cleanup;
     }
-    DEBUG("mapFilebases.size()=%d",mapFilebases.size());
+    //DEBUG("mapFilebases.size()=%d",mapFilebases.size());
 
     // Remove duplicates
     mapFilebases.sort();
@@ -226,10 +230,8 @@ bool MapSourceCalibratedPictures::init()
         supportedExtension=MapContainer::getCalibrationFileExtension(i);
         if (supportedExtension!="") {
           filepath=filebase + "." + supportedExtension;
-          if (access(filepath.c_str(),F_OK)==0) {
-            extension=supportedExtension;
-            break;
-          }
+          extension=supportedExtension;
+          break;
         }
       }
 
@@ -439,7 +441,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Check if the class has changed
   Int size=sizeof(MapSourceCalibratedPictures);
 #ifdef TARGET_LINUX
-  if (size!=256) {
+  if (size!=280) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return false;
   }

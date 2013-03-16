@@ -326,6 +326,7 @@ extern Core *core;
 #include <ProfileEngine.h>
 #include <ConfigStore.h>
 #include <UnitConverter.h>
+#include <ZipArchive.h>
 #include <Image.h>
 #include <Storage.h>
 #include <Dialog.h>

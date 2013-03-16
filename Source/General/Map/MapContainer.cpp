@@ -456,10 +456,20 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
     return false;
   }
 
+  // Extract the image
+  std::string tempImageFilePath = core->getMapSource()->getFolderPath() + "/tile.bin";
+  std::list<ZipArchive*> *mapArchives = core->getMapSource()->lockMapArchives();
+  for (std::list<ZipArchive*>::iterator i=mapArchives->begin();i!=mapArchives->end();i++) {
+    if ((*i)->getEntrySize(imageFilePath)>0) {
+      (*i)->exportEntry(imageFilePath,tempImageFilePath);
+    }
+  }
+  core->getMapSource()->unlockMapArchives();
+
   // Check the type and dimension of the image
-  if (core->getImage()->queryPNG(imageFilePath,imageWidth,imageHeight)) {
+  if (core->getImage()->queryPNG(tempImageFilePath,imageWidth,imageHeight)) {
     imageType=ImageTypePNG;
-  } else if (core->getImage()->queryJPEG(imageFilePath,imageWidth,imageHeight)) {
+  } else if (core->getImage()->queryJPEG(tempImageFilePath,imageWidth,imageHeight)) {
     imageType=ImageTypeJPEG;
   } else {
     ERROR("file format of image <%s> not supported",imageFilePath);

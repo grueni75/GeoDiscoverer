@@ -56,7 +56,7 @@
                   <xsd:documentation>Activates the meta watch dashboard app.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="metaWatchAppMinUpdatePeriod" type="xsd:integer" default="3000">
+              <xsd:element name="metaWatchAppMinUpdatePeriod" type="xsd:integer" default="30000">
                 <xsd:annotation>
                   <xsd:documentation>Minimum time in milliseconds between meta watch app updates.</xsd:documentation>
                 </xsd:annotation>
@@ -747,6 +747,11 @@
 									<xsd:documentation>Maximum number of retries before a download is aborted.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
+              <xsd:element name="maxMapArchiveSize" type="xsd:integer" default="1048580">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum size a zip file with tile images shall have before switching to a new one.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
 						</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>
@@ -941,7 +946,7 @@
                   <xsd:documentation>Distance in meters to look forward and back for detecting a turn.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="minDistanceToNavigationUpdate" type="xsd:double" default="25">
+              <xsd:element name="minDistanceToNavigationUpdate" type="xsd:double" default="5">
                 <xsd:annotation>
                   <xsd:documentation>Minimum distance that need to be travelled before the navigation information is updated.</xsd:documentation>
                 </xsd:annotation>

@@ -31,6 +31,8 @@ void MapContainer::writeCalibrationFile()
   xmlDocPtr doc = NULL;
   xmlNodePtr rootNode = NULL, node;
   std::stringstream out;
+  xmlChar *buffer;
+  Int size;
 
   // Init
   //xmlInitParser(); // already done by config store
@@ -120,11 +122,12 @@ void MapContainer::writeCalibrationFile()
   }
 
   // Write the file
-  std::string tempFilePath = std::string(calibrationFilePath) + "+";
-  if (xmlSaveFormatFileEnc(tempFilePath.c_str(), doc, "UTF-8", 1)==-1) {
-    ERROR("can not create native map calibration file <%s>",calibrationFilePath);
+  xmlDocDumpFormatMemoryEnc(doc, &buffer, &size, "UTF-8", 1);
+  std::list<ZipArchive*> *mapArchives=core->getMapSource()->lockMapArchives();
+  if (!mapArchives->back()->addEntry(calibrationFilePath,(void *)buffer,size)) {
+    ERROR("can not add calibration file <%s> to map archive",calibrationFilePath);
   }
-  rename(tempFilePath.c_str(),calibrationFilePath);
+  core->getMapSource()->unlockMapArchives();
 
   // Clean up
   xmlFreeDoc(doc);
@@ -167,14 +170,38 @@ bool MapContainer::readGDMCalibrationFile()
   MapCalibratorType calibratorType=MapCalibratorTypeLinear;
   std::list<MapPosition> calibrationPoints;
   xmlChar *text;
+  void *buffer;
+  Int size;
+  std::list<ZipArchive*> *mapArchives;
 
   // Init
   //xmlInitParser(); // already done by config store
 
+  // Get the contents of the XML file
+  mapArchives = core->getMapSource()->lockMapArchives();
+  for (std::list<ZipArchive*>::iterator i=mapArchives->begin();i!=mapArchives->end();i++) {
+    size = (*i)->getEntrySize(calibrationFilePath);
+    if (size>0) {
+      if (!(buffer=malloc(size))) {
+        FATAL("can not allocate memory",NULL);
+        goto cleanup;
+      }
+      ZipArchiveEntry entry;
+      if (!(entry=(*i)->openEntry(calibrationFilePath))) {
+        ERROR("can not open file <%s> in map archive for reading map calibration",calibrationFilePath);
+        goto cleanup;
+      }
+      (*i)->readEntry(entry,buffer,size);
+      (*i)->closeEntry(entry);
+    }
+  }
+  core->getMapSource()->unlockMapArchives();
+
   // Read the XML file
-  doc = xmlReadFile(calibrationFilePath, NULL, 0);
+  doc = xmlReadMemory((const char *)buffer,size,calibrationFilePath,NULL,0);
+  free(buffer);
   if (!doc) {
-    ERROR("can not open file <%s> for reading map calibration",calibrationFilePath);
+    ERROR("can not decode file <%s> for reading map calibration",calibrationFilePath);
     goto cleanup;
   }
   rootNode = xmlDocGetRootElement(doc);

@@ -32,11 +32,13 @@ MapSource::MapSource() {
   isInitialized=false;
   contentsChanged=false;
   centerPosition=NULL;
+  mapArchivesMutex=core->getThread()->createMutex();
 }
 
 MapSource::~MapSource() {
   deinit();
   core->getThread()->destroyMutex(statusMutex);
+  core->getThread()->destroyMutex(mapArchivesMutex);
 }
 
 
@@ -57,6 +59,10 @@ void MapSource::deinit()
       delete t;
   }
   zoomLevelSearchTrees.clear();
+  for(std::list<ZipArchive*>::iterator i=mapArchives.begin();i!=mapArchives.end();i++) {
+    delete *i;
+  }
+  mapArchives.clear();
   isInitialized=false;
 }
 
@@ -700,7 +706,6 @@ std::list<MapContainer*> MapSource::findMapContainersByGeographicCoordinate(MapP
 
 // Performs maintenance tasks
 void MapSource::maintenance() {
-
 }
 
 // Recreates the search data structures

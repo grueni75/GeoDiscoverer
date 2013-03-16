@@ -387,7 +387,6 @@ void GraphicEngine::draw(bool forceRedraw) {
 
                     // Restore the color
                     if ((debugMode)&&(primitive->getName().size()!=0)) {
-                      originalColor=rectangle->getColor();
                       rectangle->setColor(originalColor);
                     }
 
@@ -405,8 +404,13 @@ void GraphicEngine::draw(bool forceRedraw) {
                         fontEngine->lockFont("sansSmall");
                         Int nameHeight=name.size()*fontEngine->getLineHeight();
                         Int lineNr=name.size()-1;
+                        x1=rectangle->getX();
+                        y1=rectangle->getY();
+                        x2=x1+rectangle->getWidth();
+                        y2=y1+rectangle->getHeight();
                         //PROFILE_START;
                         for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
+                          //DEBUG("text=%s",(*i).c_str());
                           FontString *fontString=fontEngine->createString(*i);
                           //PROFILE_ADD("create string");
                           fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);

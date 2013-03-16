@@ -39,7 +39,7 @@ MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool 
   this->mapX[0]=mapX;
   this->mapY[0]=mapY;
   this->parent=parent;
-  this->isHidden=false;
+  this->isHidden=true;
   //DEBUG("width=%d height=%d",width,height);
   //PROFILE_ADD("basic variable copy")
   this->rectangle.setWidth(width);
@@ -382,6 +382,7 @@ void MapTile::setIsHidden(bool isHidden, bool fadeOutAnimation) {
   endColor.setAlpha(255);
   if (isHidden) {
     visualization.setColor(startColor);
+    rectangle.setTexture(endTexture);
   } else {
     visualization.setColor(endColor);
     if ((isDrawn())&&(fadeOutAnimation)) {

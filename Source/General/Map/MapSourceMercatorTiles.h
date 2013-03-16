@@ -30,6 +30,7 @@ class MapSourceMercatorTiles : public MapSource {
 protected:
 
   ThreadMutexInfo *accessMutex;                     // Mutex for accessing the map source object
+  Int maxMapArchiveSize;                            // Maximum size a map archive shall have
   std::string tileServerURL;                        // URL of the tile server to use
   Int minZoomLevel;                                 // Minimum zoom value
   Int maxZoomLevel;                                 // Maximum zoom value
@@ -48,9 +49,6 @@ protected:
 
   // Replaces a variable in a string
   bool replaceVariableInTileServerURL(std::string &url, std::string variableName, std::string variableValue);
-
-  // Creates a directory in the map folder
-  bool createMapFolder(std::string path);
 
   // Downloads a map image from the server
   bool downloadMapImage(std::string url, std::string filePath);

@@ -66,9 +66,6 @@ void *debugThread(void *args) {
   // Use the replay log if it exists
   GEODISCOVERER::core->getDebug()->replayTrace("replay.log");
 
-  // Get some dashboard infos
-  GEODISCOVERER::core->getNavigationEngine()->getDashboardInfos();
-
   // Exit the thread
   GEODISCOVERER::core->getThread()->exitThread();
 }

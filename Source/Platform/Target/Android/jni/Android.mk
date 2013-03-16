@@ -256,6 +256,86 @@ LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngerror.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngpread.c)
 include $(BUILD_STATIC_LIBRARY)
 
+# Build the zip library
+include $(CLEAR_VARS)
+LOCAL_MODULE := gdzip
+MY_ZIP_PATH := libzip-0.10.1/lib
+LOCAL_CFLAGS := -I$(MY_ZIP_PATH) -I$(MY_ZIP_PATH)/.. -DHAVE_CONFIG_H
+LOCAL_LDLIBS := 
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_add.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_add_dir.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_close.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_delete.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_dirent.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_entry_free.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_entry_new.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_err_str.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_error.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_error_clear.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_error_get.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_error_get_sys_type.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_error_strerror.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_error_to_str.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_fclose.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_fdopen.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_file_error_clear.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_file_error_get.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_file_get_offset.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_file_strerror.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_filerange_crc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_fopen.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_fopen_encrypted.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_fopen_index.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_fopen_index_encrypted.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_fread.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_free.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_get_archive_comment.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_get_archive_flag.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_get_compression_implementation.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_get_encryption_implementation.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_get_file_comment.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_get_file_extra.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_get_num_entries.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_get_num_files.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_get_name.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_memdup.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_name_locate.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_new.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_open.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_rename.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_replace.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_set_archive_comment.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_set_archive_flag.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_set_default_password.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_set_file_comment.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_set_file_extra.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_buffer.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_close.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_crc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_deflate.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_error.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_file.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_filep.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_free.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_function.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_layered.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_open.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_pkware.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_pop.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_read.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_stat.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_source_zip.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_set_name.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_stat.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_stat_index.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_stat_init.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_strerror.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange_all.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange_archive.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange_data.c)
+include $(BUILD_STATIC_LIBRARY)
+
 # Build the application core
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdcore
@@ -268,6 +348,7 @@ MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libxml
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libfreetype2 -name '*.cpp')
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libpng -name '*.cpp')
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libcurl -name '*.cpp')
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libzip -name '*.cpp')
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/Android -name '*.cpp')
 MY_GD_GENERAL_SRCS += $(shell find $(MY_GD_ROOT)/Source/General -name '*.cpp')
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/POSIX
@@ -277,6 +358,7 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libxml2
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libfreetype2
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libpng
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libcurl
+MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libzip
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/Android
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/App
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Map
@@ -287,9 +369,9 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Widget
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Math
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Config
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Profile
-LOCAL_CFLAGS += $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ilibxml2-2.7.7/include -Ifreetype-2.4.2/include -Ijpeg-8b -Ilibpng-1.4.4 -Icurl-7.24.0/include -DSRC_ROOT='"$(MY_GD_ABS_ROOT)/Source"' 
+LOCAL_CFLAGS += $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ilibxml2-2.7.7/include -Ifreetype-2.4.2/include -Ijpeg-8b -Ilibpng-1.4.4 -Icurl-7.24.0/include -Ilibzip-0.10.1/lib -DSRC_ROOT='"$(MY_GD_ABS_ROOT)/Source"' 
 LOCAL_LDLIBS += -lz -dl -llog -lGLESv1_CM
 LOCAL_SRC_FILES := GDCore.cpp $(MY_GD_PLATFORM_SRCS) $(MY_GD_GENERAL_SRCS)
-LOCAL_STATIC_LIBRARIES := gdjpeg gdxml gdfreetype gdpng gdcurl
+LOCAL_STATIC_LIBRARIES := gdjpeg gdxml gdfreetype gdpng gdcurl gdzip
 LOCAL_SHARED_LIBRARIES := 
 include $(BUILD_SHARED_LIBRARY)

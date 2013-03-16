@@ -320,7 +320,11 @@ public:
       if (!(this->calibrationFileName=strdup(calibrationFileName.c_str()))) {
         FATAL("can not create string",NULL);
       }
-      std::string path = std::string(mapFileFolder) + "/" + calibrationFileName;
+      std::string path;
+      if (strcmp(mapFileFolder,".")==0)
+        path=calibrationFileName;
+      else
+        path=std::string(mapFileFolder) + "/" + calibrationFileName;
       if (this->calibrationFilePath) free(this->calibrationFilePath);
       if (!(this->calibrationFilePath=strdup(path.c_str()))) {
         FATAL("can not create string",NULL);
@@ -340,7 +344,11 @@ public:
       if (!(this->imageFileName=strdup(imageFileName.c_str()))) {
         FATAL("can not create string",NULL);
       }
-      std::string path = std::string(mapFileFolder) + "/" + imageFileName;
+      std::string path;
+      if (strcmp(mapFileFolder,".")==0)
+        path = imageFileName;
+      else
+        path = std::string(mapFileFolder) + "/" + imageFileName;
       if (this->imageFilePath) free(this->imageFilePath);
       if (!(this->imageFilePath=strdup(path.c_str()))) {
         FATAL("can not create string",NULL);

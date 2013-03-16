@@ -156,16 +156,18 @@ void MapCache::removeTile(MapTile *tile) {
     uncachedTiles.remove(tile);
     core->getThread()->unlockMutex(accessMutex);
   } else {
+    if (!tile->getIsCached()) {
+      FATAL("tile found in cached list but not marked as cached",NULL);
+    }
     core->getThread()->unlockMutex(accessMutex);
     tile->getVisualization()->lockAccess();
     GraphicRectangle *r=tile->getRectangle();
-    GraphicTextureInfo m=r->getTexture();
     r->setTextureAnimation(0,core->getScreen()->getTextureNotDefined(),core->getScreen()->getTextureNotDefined(),false,0);
     r->setZ(0);
     tile->getVisualization()->unlockAccess();
     core->getThread()->lockMutex(accessMutex);
-    usedTextures.remove(m);
-    unusedTextures.push_back(m);
+    usedTextures.remove(tile->getEndTexture());
+    unusedTextures.push_back(tile->getEndTexture());
     cachedTiles.erase(i);
     tile->setIsCached(false);
     core->getThread()->unlockMutex(accessMutex);
@@ -210,18 +212,35 @@ void MapCache::updateMapTileImages() {
     // Load the new map if required
     if (currentContainer!=t->getParentMapContainer()) {
 
+      // Prepare data
       if (currentImage)
         free(currentImage);
       currentImage=NULL;
       currentContainer=t->getParentMapContainer();
       //DEBUG("loading tiles from image <%s>",currentContainer->getImageFileName().c_str());
-      if (access(currentContainer->getImageFilePath().c_str(),F_OK)==0) {
+
+      // Check if the image exists in the map archive
+      ZipArchive *mapArchive=NULL;
+      std::list<ZipArchive*> *mapArchives = core->getMapSource()->lockMapArchives();
+      for (std::list<ZipArchive*>::iterator i=mapArchives->begin();i!=mapArchives->end();i++) {
+        if ((*i)->getEntrySize(currentContainer->getImageFilePath())>0) {
+          mapArchive=*i;
+          break;
+        }
+      }
+      if (mapArchive) {
+
+        // Create a temporary file that contains the image data
+        std::string tempImageFilePath = core->getMapSource()->getFolderPath() + "/tile.bin";
+        mapArchive->exportEntry(currentContainer->getImageFilePath(),tempImageFilePath);
+
+        // Get the image from the temporary file
         switch(currentContainer->getImageType()) {
           case ImageTypeJPEG:
-            currentImage=core->getImage()->loadJPEG(currentContainer->getImageFilePath(),currentImageWidth,currentImageHeight,currentImagePixelSize);
+            currentImage=core->getImage()->loadJPEG(tempImageFilePath,currentImageWidth,currentImageHeight,currentImagePixelSize);
             break;
           case ImageTypePNG:
-            currentImage=core->getImage()->loadPNG(currentContainer->getImageFilePath(),currentImageWidth,currentImageHeight,currentImagePixelSize);
+            currentImage=core->getImage()->loadPNG(tempImageFilePath,currentImageWidth,currentImageHeight,currentImagePixelSize);
             break;
           default:
             FATAL("unsupported image type",NULL);
@@ -229,6 +248,7 @@ void MapCache::updateMapTileImages() {
             break;
         }
       }
+      core->getMapSource()->unlockMapArchives();
       if (!currentImage)
         continue; // Do not continue in case of error
 
@@ -284,6 +304,11 @@ void MapCache::updateMapTileImages() {
     GraphicTextureInfo m=unusedTextures.front();
     unusedTextures.pop_front();
     usedTextures.push_back(m);
+    for(std::list<MapTile*>::iterator i=cachedTiles.begin();i!=cachedTiles.end();i++) {
+      MapTile *t=*i;
+      if (t->getRectangle()->getTexture()==m)
+        FATAL("cached tile uses textures that is marked as unused",NULL);
+    }
     core->getThread()->unlockMutex(accessMutex);
     currentTile=t;
     tileTextureAvailable=true;

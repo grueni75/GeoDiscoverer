@@ -40,6 +40,7 @@ MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize");
   downloadErrorWaitTime=core->getConfigStore()->getIntValue("Map","downloadErrorWaitTime");
   maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries");
+  maxMapArchiveSize=core->getConfigStore()->getIntValue("Map","maxMapArchiveSize");
   mapTileLength=256;
   accessMutex=core->getThread()->createMutex();
   errorOccured=false;
@@ -77,10 +78,67 @@ void MapSourceMercatorTiles::deinit() {
 bool MapSourceMercatorTiles::init() {
 
   std::string mapPath=getFolderPath();
+  ZipArchive *mapArchive;
 
   // Read the information from the config file
   if (!readGDSInfo())
     return false;
+
+  // Open the zip archive that contains the maps
+  lockMapArchives();
+  if (!(mapArchive=new ZipArchive(mapPath,"tiles.zip"))) {
+    FATAL("can not create zip archive object",NULL);
+    return false;
+  }
+  if (!mapArchive->init()) {
+    ERROR("can not open tiles.zip in map directory <%s>",folder.c_str());
+    return false;
+  }
+  mapArchives.push_back(mapArchive);
+
+  // Merge all tiles from the previous session
+  std::string title="Merging tiles from last session with map " + folder;
+  DialogKey dialog=core->getDialog()->createProgress(title,0);
+  struct dirent *dp;
+  DIR *dfd;
+  dfd=opendir(mapPath.c_str());
+  if (dfd==NULL) {
+    FATAL("can not read directory <%s>",mapPath.c_str());
+    return false;
+  }
+  while ((dp = readdir(dfd)) != NULL)
+  {
+    Int nr;
+
+    // Copy files if this is a valid archive
+    if (sscanf(dp->d_name,"tiles%d.zip",&nr)==1) {
+      ZipArchive *archive = new ZipArchive(mapPath,dp->d_name);
+      if ((archive)&&(archive->init())) {
+        for (Int index=0;index<=archive->getEntryCount();index++) {
+          std::string entryName = archive->getEntryFilename(index);
+          ZipArchiveEntry entry = archive->openEntry(entryName);
+          Int bufferSize = archive->getEntrySize(entryName);
+          void *buffer = malloc(bufferSize);
+          if ((entry)&&(buffer)) {
+            archive->readEntry(entry,buffer,bufferSize);
+            mapArchive->addEntry(entryName,buffer,bufferSize);
+            archive->closeEntry(entry);
+          }
+        }
+        mapArchive->writeChanges();
+        remove(std::string(mapPath + "/" + dp->d_name).c_str());
+      }
+    }
+
+    // Remove any left over write tries
+    std::string filename(dp->d_name);
+    if ((filename.find(".zip.")!=std::string::npos)&&(filename.find("tiles")!=std::string::npos)) {
+      remove((mapPath + "/" + filename).c_str());
+    }
+  }
+  closedir(dfd);
+  core->getDialog()->closeProgress(dialog);
+  unlockMapArchives();
 
   // Init the center position
   centerPosition=new MapPosition();
@@ -112,21 +170,6 @@ bool MapSourceMercatorTiles::replaceVariableInTileServerURL(std::string &url, st
     return false;
   }
   url.replace(pos,variableName.size(),variableValue);
-  return true;
-}
-
-// Creates a directory in the map folder
-bool MapSourceMercatorTiles::createMapFolder(std::string path) {
-  if (access(path.c_str(), F_OK) != 0)
-  {
-    if (mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
-      if (!errorOccured) {
-        ERROR("can not create map directory <%s>",path.c_str());
-        errorOccured=true;
-      }
-      return false;
-    }
-  }
   return true;
 }
 
@@ -244,7 +287,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
 #endif
 
   // Prepare the filenames
-  std::stringstream imageFileFolder; imageFileFolder << getFolderPath() << "/" << z << "/" << x;
+  std::stringstream imageFileFolder; imageFileFolder << z << "/" << x;
   std::stringstream imageFileBase; imageFileBase << z << "_" << x << "_" << y;
   std::string imageFileExtension = tileServerURL.substr(tileServerURL.find_last_of(".")+1);
   std::string imageFileName = imageFileBase.str() + "." + imageFileExtension;
@@ -307,7 +350,17 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   mapContainer->createSearchTree();
 
   // Check if the tile has already been saved to disk
-  if (access(imageFilePath.c_str(),F_OK)) {
+  lockMapArchives();
+  bool found=false;
+  for(std::list<ZipArchive*>::iterator i=mapArchives.begin();i!=mapArchives.end();i++) {
+    ZipArchive *mapArchive = *i;
+    if (mapArchive->getEntrySize(imageFilePath)>0) {
+      found=true;
+      break;
+    }
+  }
+  unlockMapArchives();
+  if (!found) {
 
     // Flag that the image of the map container is not yet there
     mapContainer->setDownloadComplete(false);
@@ -317,7 +370,6 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
     downloadQueue.push_back(mapContainer);
     core->getThread()->unlockMutex(downloadQueueMutex);
     core->getThread()->issueSignal(downloadStartSignal);
-
   }
 
   // Store the new map container and indicate that a search data structure is required
@@ -496,12 +548,6 @@ void MapSourceMercatorTiles::downloadMapImages() {
       std::stringstream z; z << mapContainer->getZoomLevel()+minZoomLevel-1;
       std::stringstream x; x << mapContainer->getX();
       std::stringstream y; y << mapContainer->getY();
-      t << getFolderPath() << "/" << z.str();
-      if (!createMapFolder(t.str()))
-        continue;
-      t << "/" << x.str();
-      if (!createMapFolder(t.str()))
-        continue;
 
       // Prepare the url
       std::string url=tileServerURL;
@@ -515,9 +561,12 @@ void MapSourceMercatorTiles::downloadMapImages() {
       if (downloadSuccess||maxRetriesReached) {
 
         // Write the gdm file
-        if (downloadSuccess)
+        if (downloadSuccess) {
           mapContainer->writeCalibrationFile();
-        else {
+          lockMapArchives();
+          mapArchives.back()->writeChanges();
+          unlockMapArchives();
+        } else {
           WARNING("aborting download of <%s>",url.c_str());
         }
 
@@ -582,7 +631,7 @@ void MapSourceMercatorTiles::getScales(Int zoomLevel, double &latScale, double &
 // Downloads a map image from the server
 bool MapSourceMercatorTiles::downloadMapImage(std::string url, std::string filePath) {
 
-  std::string tempFilePath = getFolderPath() + "/mapSourceDownloadBuffer.bin";
+  std::string tempFilePath = getFolderPath() + "/download.bin";
   Int imageWidth, imageHeight;
 
   // Download the file
@@ -600,9 +649,42 @@ bool MapSourceMercatorTiles::downloadMapImage(std::string url, std::string fileP
 
     } else {
 
-      // Move the file to its intended position
-      rename(tempFilePath.c_str(),filePath.c_str());
-      return true;
+      // Add the file to the map archive
+      struct stat stat_buffer;
+      bool result=false;
+      if (stat(tempFilePath.c_str(),&stat_buffer)==0) {
+        UByte *file_buffer = (UByte *)malloc(stat_buffer.st_size);
+        if (file_buffer) {
+          FILE *in;
+          if ((in=fopen(tempFilePath.c_str(),"r"))) {
+            fread(file_buffer,stat_buffer.st_size,1,in);
+            fclose(in);
+            lockMapArchives();
+            ZipArchive *mapArchive=mapArchives.back();
+            if (mapArchive->getUnchangedSize()>maxMapArchiveSize) {
+              std::stringstream newFilename;
+              if (mapArchive->getArchiveName()=="tiles.zip")
+                newFilename << "tiles2.zip";
+              else {
+                Int nr;
+                sscanf(mapArchive->getArchiveName().c_str(),"tiles%d.zip",&nr);
+                newFilename << "tiles" << nr+1 << ".zip";
+              }
+              mapArchive=new ZipArchive(mapArchive->getArchiveFolder(),newFilename.str());
+              if ((mapArchive==NULL)||(!mapArchive->init()))
+                FATAL("can not create zip archive object",NULL);
+              mapArchives.push_back(mapArchive);
+            }
+            mapArchive->addEntry(filePath,file_buffer,stat_buffer.st_size);
+            unlockMapArchives();
+            result=true;
+          }
+        }
+      }
+      if (!result) {
+        WARNING("downloaded map from <%s> could not be added to map archive",url.c_str());
+      }
+      return result;
 
     }
 

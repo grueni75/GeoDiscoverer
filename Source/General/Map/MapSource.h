@@ -33,7 +33,9 @@ class MapSource {
 protected:
 
   MapSourceType type;                       // Type of source
-  std::string folder;                       // Folder that contains calibrated maps
+  std::string folder;                       // Folder that contains the map data
+  std::list<ZipArchive*> mapArchives;       // Zip archives that contain the calibrated maps
+  ThreadMutexInfo *mapArchivesMutex;        // Mutex to access the map archives
   double neighborPixelTolerance ;           // Maximum allowed difference in pixels to classify a tile as a neighbor
   std::vector<MapContainer*> mapContainers; // Vector of all maps
   MapPosition *centerPosition;              // Center position of the map
@@ -193,6 +195,14 @@ public:
     core->getThread()->unlockMutex(statusMutex);
   }
 
+  std::list<ZipArchive*> *lockMapArchives() {
+    core->getThread()->lockMutex(mapArchivesMutex);
+    return &mapArchives;
+  }
+
+  void unlockMapArchives() {
+    core->getThread()->unlockMutex(mapArchivesMutex);
+  }
 };
 
 }
