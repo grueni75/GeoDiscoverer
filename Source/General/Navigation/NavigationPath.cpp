@@ -685,11 +685,11 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
     turnAngle=360;
     distanceToTurnPoint=-1;
   } else {
-    if (turnAngle>0) {
+    /*if (turnAngle>0) {
       DEBUG("turn to the left in %f meters",distanceToTurnPoint);
     } else {
       DEBUG("turn to the right in %f meters",distanceToTurnPoint);
-    }
+    }*/
   }
 
   // That's it!

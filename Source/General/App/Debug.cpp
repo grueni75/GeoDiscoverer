@@ -60,6 +60,9 @@ void Debug::replayTrace(std::string filename) {
     // And execute it
     core->getCommander()->execute(cmd);
 
+    // Sleep a little bit
+    usleep(10000);
+
   }
   in.close();
 }

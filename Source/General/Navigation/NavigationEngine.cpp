@@ -1078,6 +1078,7 @@ void NavigationEngine::updateNavigationInfos() {
   turnDistance=-1;
   turnAngle=360;
   double speed=0;
+  MapPosition turnPos;
   if (locationPos.isValid()) {
     if (locationPos.getHasBearing()) {
       navigationLocationBearing=locationPos.getBearing();
@@ -1088,8 +1089,7 @@ void NavigationEngine::updateNavigationInfos() {
     if (activeRoute) {
 
       // Compute the navigation details for the given route
-      MapPosition turnPos;
-      static MapPosition prevTurnPos;
+      //static MapPosition prevTurnPos;
       lockRoutes();
       activeRoute->computeNavigationInfos(locationPos,targetPos,turnPos,turnAngle,turnDistance,navigationDistance);
       unlockRoutes();
@@ -1111,7 +1111,7 @@ void NavigationEngine::updateNavigationInfos() {
           DEBUG("new target set",NULL);
         }*/
       }
-      prevTurnPos=turnPos;
+      //prevTurnPos=turnPos;
 
     } else {
 
@@ -1150,6 +1150,13 @@ void NavigationEngine::updateNavigationInfos() {
     infos << value << " " << unit;
   } else {
     infos << "move!";
+  }
+  if (turnPos.isValid()) {
+    infos << ";" << turnAngle;
+    core->getUnitConverter()->formatMeters(turnDistance,value,unit);
+    infos << ";" << value << " " << unit;
+  } else {
+    infos << ";-;-";
   }
   core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
 }
