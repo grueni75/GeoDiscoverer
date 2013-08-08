@@ -457,6 +457,20 @@ public class ViewMap extends GDActivity {
       fatalDialog("Can not obtain wake lock!");
     }
     
+    /* Start test thread
+    new Thread(new Runnable() {
+      public void run() {
+        while(true) {
+          coreObject.executeAppCommand("updateNavigationInfos(0.0;0.0;Distance;1 km;Duration;5 m;135;50 m)");
+          try {
+            Thread.sleep(1000);
+          } 
+          catch (Exception e) {
+          }
+        }
+      }
+    }).start();*/
+    
   }
     
   /** Called when the app suspends */

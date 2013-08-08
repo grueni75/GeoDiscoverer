@@ -35,6 +35,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
+import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.os.Bundle;
 
@@ -52,6 +54,10 @@ public class MetaWatchApp {
   
   // Last infos used for updating
   static String lastInfos = "";
+  
+  // Distance to turn
+  static String currentTurnDistance="-";
+  static String lastTurnDistance="-";
   
   // Holds the current bitmap
   static Bitmap bitmap = null;
@@ -71,12 +77,11 @@ public class MetaWatchApp {
   static int smallFontRealSize = 5;
   
   // Bitmaps
-  static Bitmap background = null;
-  static Bitmap compass = null;
   static Bitmap target = null;
   
   // Paints
   static Paint compassPaint = null;
+  static Paint filledPaint = null;
   
   static Bitmap loadBitmapFromAssets(Context context, String path) {
     try {
@@ -101,8 +106,6 @@ public class MetaWatchApp {
     minUpdatePeriod = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("General", "metaWatchAppMinUpdatePeriod"));
     
     // Load bitmaps
-    background = loadBitmapFromAssets(context, "MetaWatchApp/background.png");
-    compass = loadBitmapFromAssets(context, "MetaWatchApp/compass.png");
     target = loadBitmapFromAssets(context, "MetaWatchApp/target.png");
 
     // Load fonts
@@ -130,7 +133,9 @@ public class MetaWatchApp {
     compassPaint.setColor(Color.BLACK);
     compassPaint.setStrokeWidth(2);
     compassPaint.setStyle(Paint.Style.STROKE);
-    
+    filledPaint = new Paint();
+    filledPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
     // Inform metawatch about this app
     Intent intent = new Intent("org.metawatch.manager.APPLICATION_ANNOUNCE");
     Bundle b = new Bundle();
@@ -153,6 +158,16 @@ public class MetaWatchApp {
     lastUpdate = 0;
   }
   
+  private static void drawTriangle(Canvas c, Point p1, Point p2, Point p3) {
+    Path path = new Path();
+    path.setFillType(Path.FillType.EVEN_ODD);
+    path.moveTo(p1.x, p1.y);
+    path.lineTo(p2.x, p2.y);
+    path.lineTo(p3.x, p3.y);
+    path.close();
+    c.drawPath(path, filledPaint);
+  }
+  
   private static void refreshApp(Context context, String infosAsSSV) {
     
     float radius,x,y,x2,y2;
@@ -163,7 +178,6 @@ public class MetaWatchApp {
     c.drawColor(Color.WHITE);
     
     // Draw the background
-    c.drawBitmap(background,0,0,null);
     c.drawCircle(48, 48, 42, compassPaint);
 
     // Obtain the dashboard infos
@@ -178,6 +192,10 @@ public class MetaWatchApp {
       targetBearing = (Float.parseFloat(infos[1]) - directionBearing);
     }
     
+    // Draw the direction indicator
+    if (infos[6].equals("-"))
+      drawTriangle(c,new Point(39,26),new Point(57,26),new Point(48,18));
+
     // Draw the compass
     //Matrix matrix = new Matrix();
     //matrix.setRotate(-directionBearing,48,48);
@@ -215,21 +233,90 @@ public class MetaWatchApp {
       c.drawBitmap(target, x, y, null);
     }
     
-    // Draw the first line
-    x = 48;
-    y = 35;
-    if (!infos[2].equals("-")) {
-      c.drawText(infos[2],x,y,smallFontPaint);
-      y += bigFontRealSize+2;
-      c.drawText(infos[3],x,y,bigFontPaint);
-      y += smallFontRealSize+7;
+    // Is a turn coming?
+    if (!infos[6].equals("-")) {
+      
+    	// Draw the turn
+    	float turnAngle = Float.parseFloat(infos[6]);
+    	int mirror;
+    	if (turnAngle<0) {
+    	  turnAngle=-turnAngle;
+    	  mirror=1;
+    	} else {
+    	  mirror=-1;
+    	}
+    	String turnDistance = infos[7];
+    	float sinOfTurnAngle = (float)Math.sin(Math.toRadians(turnAngle));
+    	float cosOfTurnAngle = (float)Math.cos(Math.toRadians(turnAngle));
+    	int turnLineWidth = 10;
+      int turnLineArrowOverhang = 6;
+      int turnLineArrowHeight = 10;
+    	int turnLineStartHeight = 17;
+      int turnLineMiddleHeight = 7;
+    	int turnLineStartX = 48;
+    	int turnLineStartY = 56;
+      Point p1 = new Point(turnLineStartX-turnLineWidth/2,turnLineStartY);
+      Point p2 = new Point(turnLineStartX+turnLineWidth/2,turnLineStartY);
+      Point p3 = new Point(
+          p2.x,
+          p2.y-turnLineStartHeight);
+      Point p4 = new Point(
+          p1.x,
+          p1.y-turnLineStartHeight);
+      Point pm;
+      if (mirror>0) {
+        pm=p4;
+      } else {
+        pm=p3;
+      }
+      Point p5 = new Point(
+          pm.x+mirror*(int)(turnLineWidth*cosOfTurnAngle),
+          pm.y-(int)(turnLineWidth*sinOfTurnAngle));
+      Point p10 = new Point(
+          pm.x+mirror*(int)(turnLineWidth/2*cosOfTurnAngle),
+          pm.y-(int)(turnLineWidth/2*sinOfTurnAngle));
+      p10.x = p10.x-mirror*(int)((turnLineMiddleHeight+turnLineArrowHeight)*sinOfTurnAngle);
+      p10.y = p10.y-(int)((turnLineMiddleHeight+turnLineArrowHeight)*cosOfTurnAngle);
+      Point p6 = new Point(
+          p5.x-mirror*(int)(turnLineMiddleHeight*sinOfTurnAngle),
+          p5.y-(int)(turnLineMiddleHeight*cosOfTurnAngle));
+      Point p7 = new Point(
+          p6.x-mirror*(int)(turnLineWidth*cosOfTurnAngle),
+          p6.y+(int)(turnLineWidth*sinOfTurnAngle));
+      Point p8 = new Point(
+          p7.x-mirror*(int)(turnLineArrowOverhang*cosOfTurnAngle),
+          p7.y+(int)(turnLineArrowOverhang*sinOfTurnAngle));
+      Point p9 = new Point(
+          p6.x+mirror*(int)(turnLineArrowOverhang*cosOfTurnAngle),
+          p6.y-(int)(turnLineArrowOverhang*sinOfTurnAngle));
+      drawTriangle(c,p1,p2,p3);
+      drawTriangle(c,p3,p1,p4);      
+      drawTriangle(c,p4,p3,p5);      
+      drawTriangle(c,pm,p5,p6);      
+      drawTriangle(c,pm,p6,p7);      
+      drawTriangle(c,p8,p9,p10);      
+      c.drawText(turnDistance,48,70,bigFontPaint);
+    	
+    } else {
+    
+	    // Draw the two lines of information
+	    x = 48;
+	    y = 35;
+	    if (!infos[2].equals("-")) {
+	      c.drawText(infos[2],x,y,smallFontPaint);
+	      y += bigFontRealSize+2;
+	      c.drawText(infos[3],x,y,bigFontPaint);
+	      y += smallFontRealSize+7;
+	    }
+	    c.drawLine(20, 51, 76, 51, smallFontPaint);
+	    if (!infos[4].equals("-")) {
+	      c.drawText(infos[4],x,y,smallFontPaint);
+	      y += bigFontRealSize+2;
+	      c.drawText(infos[5],x,y,bigFontPaint);
+	    }
     }
-    c.drawLine(20, 51, 76, 51, smallFontPaint);
-    if (!infos[4].equals("-")) {
-      c.drawText(infos[4],x,y,smallFontPaint);
-      y += bigFontRealSize+2;
-      c.drawText(infos[5],x,y,bigFontPaint);
-    }
+    lastTurnDistance=currentTurnDistance;
+    currentTurnDistance=infos[7];
   }
   
   public static void update(Context context, String infos, boolean forceUpdate) {
@@ -256,6 +343,17 @@ public class MetaWatchApp {
     b.putIntArray("array", makeSendableArray(bitmap));
     intent.putExtras(b);
     context.sendBroadcast(intent);
+
+    // Send vibrate request if the turn appears the first time
+    if ((!currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals(currentTurnDistance))) {
+      intent = new Intent("org.metawatch.manager.VIBRATE");
+      b = new Bundle();
+      b.putInt("vibrate_on", 500);
+      b.putInt("vibrate_off", 500);
+      b.putInt("vibrate_cycles", 2);
+      intent.putExtras(b);
+      context.sendBroadcast(intent);      
+    }
 
     // Remember when was updated
     lastUpdate = Calendar.getInstance().getTimeInMillis();
