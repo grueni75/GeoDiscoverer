@@ -1,5 +1,10 @@
 Build/
 GeoDiscoverer
-/config.xml
-/Track
-/config.xsd
+config.xml
+Track/
+config.xsd
+Map/OpenCycleMap/download.bin
+Map/OpenCycleMap/tile.bin
+Map/OpenCycleMap/tiles.zip
+
+
