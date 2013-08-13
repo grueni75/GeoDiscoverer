@@ -1086,40 +1086,43 @@ void NavigationEngine::updateNavigationInfos() {
     if (locationPos.getHasSpeed()) {
       speed=locationPos.getSpeed();
     }
-    if (activeRoute) {
 
-      // Compute the navigation details for the given route
-      //static MapPosition prevTurnPos;
-      lockRoutes();
-      activeRoute->computeNavigationInfos(locationPos,targetPos,turnPos,turnAngle,turnDistance,navigationDistance);
-      unlockRoutes();
-      //WARNING("enable route locking",NULL);
-      if (targetPos.isValid()) {
-        //setTargetAtGeographicCoordinate(targetPos.getLng(),targetPos.getLat(),false);
-        if (navigationLocationBearing!=999.0)
-          navigationTargetBearing=locationPos.computeBearing(targetPos);
-      }
-      if (turnPos.isValid()) {
-        if (turnAngle>0) {
-          DEBUG("turn to the left in %f meters",turnDistance);
-        } else {
-          DEBUG("turn to the right in %f meters",turnDistance);
-        }
-        /*if ((!prevTurnPos.isValid())||(prevTurnPos!=turnPos)) {
-          setTargetAtGeographicCoordinate(turnPos.getLng(),turnPos.getLat(),false);
-          sleep(1);
-          DEBUG("new target set",NULL);
-        }*/
-      }
-      //prevTurnPos=turnPos;
-
+    // If a target is active, compute the details for the given target
+    if (targetPos.isValid()) {
+      if (navigationLocationBearing!=999.0)
+        navigationTargetBearing=locationPos.computeBearing(targetPos);
+      navigationDistance = locationPos.computeDistance(targetPos);
     } else {
 
-      // If a target is active, compute the details for the given target
-      if (targetPos.isValid()) {
-        if (navigationLocationBearing!=999.0)
-          navigationTargetBearing=locationPos.computeBearing(targetPos);
-        navigationDistance = locationPos.computeDistance(targetPos);
+      if (activeRoute) {
+
+        // Compute the navigation details for the given route
+        //static MapPosition prevTurnPos;
+        lockRoutes();
+        activeRoute->computeNavigationInfos(locationPos,targetPos,turnPos,navigationDistance);
+        unlockRoutes();
+        //WARNING("enable route locking",NULL);
+        if (targetPos.isValid()) {
+          //setTargetAtGeographicCoordinate(targetPos.getLng(),targetPos.getLat(),false);
+          if (navigationLocationBearing!=999.0)
+            navigationTargetBearing=locationPos.computeBearing(targetPos);
+        }
+        if (turnPos.isValid()) {
+          turnDistance=locationPos.computeDistance(turnPos);
+          turnAngle=locationPos.computeBearing(turnPos);
+          if (turnAngle>0) {
+            DEBUG("turn to the left by %f°in %f meters",turnAngle,turnDistance);
+          } else {
+            DEBUG("turn to the right by %f° in %f meters",turnAngle,turnDistance);
+          }
+          /*if ((!prevTurnPos.isValid())||(prevTurnPos!=turnPos)) {
+            setTargetAtGeographicCoordinate(turnPos.getLng(),turnPos.getLat(),false);
+            sleep(1);
+            DEBUG("new target set",NULL);
+          }*/
+        }
+        //prevTurnPos=turnPos;
+
       }
     }
   }
@@ -1158,6 +1161,7 @@ void NavigationEngine::updateNavigationInfos() {
   } else {
     infos << ";-;-";
   }
+  DEBUG("updateNavigationInfos(%s)",infos.str().c_str());
   core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
 }
 

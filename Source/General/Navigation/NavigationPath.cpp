@@ -507,7 +507,7 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
 }
 
 // Computes navigation details for the given location
-void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, MapPosition &turnPoint, double &turnAngle, double &distanceToTurnPoint, double &distanceToRouteEnd) {
+void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, MapPosition &turnPoint, double &distanceToRouteEnd) {
 
   // Ensure that only one thread is executing this code
   core->getThread()->lockMutex(accessMutex);
@@ -538,6 +538,7 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
   std::list<MapPosition>::iterator iterator=std::list<MapPosition>::iterator(nearestIterator);
   bool turnPointSet = false;
   bool prevPointWasTurnPoint = true;
+  double turnAngle;
   while (true) {
     pos = *iterator;
     if (pos!=NavigationPath::getPathInterruptedPos()) {
@@ -630,14 +631,12 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
           if (!turnPointSet) {
             turnPoint=pos;
             turnAngle=angle;
-            distanceToTurnPoint=distanceToRouteEnd;
             //DEBUG("candidate set",NULL);
           } else {
             if (turnAngle<0) {
               if ((angle<0)&&(angle<turnAngle)) {
                 turnPoint=pos;
                 turnAngle=angle;
-                distanceToTurnPoint=distanceToRouteEnd;
                 //DEBUG("candidate set",NULL);
               } else {
                 prevPointWasTurnPoint=false;
@@ -646,7 +645,6 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
               if ((angle>0)&&(angle>turnAngle)) {
                 turnPoint=pos;
                 turnAngle=angle;
-                distanceToTurnPoint=distanceToRouteEnd;
                 //DEBUG("candidate set",NULL);
               } else {
                 prevPointWasTurnPoint=false;
@@ -679,11 +677,10 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
     else
       wayPoint.invalidate();
   }
-  if ((!turnPointSet)||(distanceToTurnPoint>maxDistanceToTurnWayPoint)) {
+  if ((!turnPointSet)||(locationPos.computeDistance(turnPoint)>maxDistanceToTurnWayPoint)) {
   //if ((!turnPointSet)) {
     turnPoint.invalidate();
     turnAngle=360;
-    distanceToTurnPoint=-1;
   } else {
     /*if (turnAngle>0) {
       DEBUG("turn to the left in %f meters",distanceToTurnPoint);
