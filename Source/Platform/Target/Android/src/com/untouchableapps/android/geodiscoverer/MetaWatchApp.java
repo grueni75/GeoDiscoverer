@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -47,13 +46,17 @@ public class MetaWatchApp {
   final static String name = "Geo Discoverer";
   
   // Minimum time that must pass between updates
-  static int minUpdatePeriod;
+  static int minUpdatePeriodNormal;
+  static int minUpdatePeriodTurn;
+  
+  // Time in milliseconds to sleep before vibrating
+  static int waitTimeBeforeVibrate;
 
   // Last time the watch was updated
   static long lastUpdate;
   
   // Last infos used for updating
-  static String lastInfos = "";
+  static String lastInfosAsSSV = "";
   
   // Distance to turn
   static String currentTurnDistance="-";
@@ -103,7 +106,9 @@ public class MetaWatchApp {
   public static void announce(Context context) {
 
     // Init parameters
-    minUpdatePeriod = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("General", "metaWatchAppMinUpdatePeriod"));
+    minUpdatePeriodNormal = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "minUpdatePeriodNormal"));
+    minUpdatePeriodTurn = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "minUpdatePeriodTurn"));
+    waitTimeBeforeVibrate = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "waitTimeBeforeVibrate"));
     
     // Load bitmaps
     target = loadBitmapFromAssets(context, "MetaWatchApp/target.png");
@@ -168,7 +173,7 @@ public class MetaWatchApp {
     c.drawPath(path, filledPaint);
   }
   
-  private static void refreshApp(Context context, String infosAsSSV) {
+  private static void refreshApp(Context context, String[] infos) {
     
     float radius,x,y,x2,y2;
         
@@ -181,9 +186,6 @@ public class MetaWatchApp {
     c.drawCircle(48, 48, 42, compassPaint);
 
     // Obtain the dashboard infos
-    if (infosAsSSV.equals(""))
-      return;
-    String[] infos = infosAsSSV.split(";");
     float directionBearing=0;
     if (!infos[0].equals("-"))
       directionBearing = Float.parseFloat(infos[0]);
@@ -238,19 +240,17 @@ public class MetaWatchApp {
       
     	// Draw the turn
     	float turnAngle = Float.parseFloat(infos[6]);
-    	int mirror;
+    	int mirror=1;
     	if (turnAngle<0) {
     	  turnAngle=-turnAngle;
-    	  mirror=1;
-    	} else {
     	  mirror=-1;
     	}
     	String turnDistance = infos[7];
     	float sinOfTurnAngle = (float)Math.sin(Math.toRadians(turnAngle));
     	float cosOfTurnAngle = (float)Math.cos(Math.toRadians(turnAngle));
-    	int turnLineWidth = 10;
+    	int turnLineWidth = 12;
       int turnLineArrowOverhang = 6;
-      int turnLineArrowHeight = 10;
+      int turnLineArrowHeight = 12;
     	int turnLineStartHeight = 17;
       int turnLineMiddleHeight = 7;
     	int turnLineStartX = 48;
@@ -294,7 +294,9 @@ public class MetaWatchApp {
       drawTriangle(c,p4,p3,p5);      
       drawTriangle(c,pm,p5,p6);      
       drawTriangle(c,pm,p6,p7);      
-      drawTriangle(c,p8,p9,p10);      
+      drawTriangle(c,p8,p7,p10);      
+      drawTriangle(c,p7,p6,p10);      
+      drawTriangle(c,p6,p9,p10);      
       c.drawText(turnDistance,48,70,bigFontPaint);
     	
     } else {
@@ -315,20 +317,36 @@ public class MetaWatchApp {
 	      c.drawText(infos[5],x,y,bigFontPaint);
 	    }
     }
-    lastTurnDistance=currentTurnDistance;
-    currentTurnDistance=infos[7];
   }
   
-  public static void update(Context context, String infos, boolean forceUpdate) {
+  public static void update(final Context context, String infosAsSSV, boolean forceUpdate) {
     
     // Use the last infos if no infos given
-    if (infos == null) {
-      infos = lastInfos;
+    if (infosAsSSV == null) {
+      infosAsSSV = lastInfosAsSSV;
     }
-    lastInfos = infos;
+    lastInfosAsSSV = infosAsSSV;
+
+    // Obtain the dashboard infos
+    if (infosAsSSV.equals(""))
+      return;
+    String[] infos = infosAsSSV.split(";");
+    currentTurnDistance=infos[7];
+    
+    // If the turn has appeared or disapperas, force an update
+    if ((currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals("-")))
+      forceUpdate=true;
+    if ((!currentTurnDistance.equals("-"))&&(lastTurnDistance.equals("-")))
+      forceUpdate=true;
     
     // Check if the info is updated too fast
-    if ((!forceUpdate)&&((Calendar.getInstance().getTimeInMillis() - lastUpdate) < minUpdatePeriod)) {
+    long minUpdatePeriod;
+    if (currentTurnDistance.equals("-"))
+      minUpdatePeriod = minUpdatePeriodNormal;
+    else
+      minUpdatePeriod = minUpdatePeriodTurn;
+    long diffToLastUpdate = Calendar.getInstance().getTimeInMillis() - lastUpdate;
+    if ((!forceUpdate)&&(diffToLastUpdate < minUpdatePeriod)) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Skipped update because last update was too recent");
       return;
     }
@@ -344,19 +362,41 @@ public class MetaWatchApp {
     intent.putExtras(b);
     context.sendBroadcast(intent);
 
-    // Send vibrate request if the turn appears the first time
-    if ((!currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals(currentTurnDistance))) {
-      intent = new Intent("org.metawatch.manager.VIBRATE");
+    // Vibrate if the turn appears the first time
+    if ((!currentTurnDistance.equals("-"))&&(lastTurnDistance.equals("-"))) {
+      
+      // Ensure that the app is shown
+      intent = new Intent("org.metawatch.manager.APPLICATION_START");
       b = new Bundle();
-      b.putInt("vibrate_on", 500);
-      b.putInt("vibrate_off", 500);
-      b.putInt("vibrate_cycles", 2);
+      b.putString("id", id);
+      b.putString("name", name);
       intent.putExtras(b);
-      context.sendBroadcast(intent);      
+      context.sendBroadcast(intent);
+      
+      // Delay the vibrate to ensure that watch shows the turn
+      new Thread(new Runnable() {
+        public void run() {
+          while(true) {
+            try {
+              Thread.sleep(waitTimeBeforeVibrate);
+            } 
+            catch (Exception e) {
+            }
+            Intent intent = new Intent("org.metawatch.manager.VIBRATE");
+            Bundle b = new Bundle();
+            b.putInt("vibrate_on", 500);
+            b.putInt("vibrate_off", 500);
+            b.putInt("vibrate_cycles", 2);
+            intent.putExtras(b);
+            context.sendBroadcast(intent);
+          }
+        }
+      }).start();      
     }
 
     // Remember when was updated
     lastUpdate = Calendar.getInstance().getTimeInMillis();
+    lastTurnDistance=currentTurnDistance;
   }
   
   public static void stop(Context context) {

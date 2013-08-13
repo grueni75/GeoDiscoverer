@@ -461,11 +461,15 @@ public class ViewMap extends GDActivity {
     new Thread(new Runnable() {
       public void run() {
         while(true) {
-          coreObject.executeAppCommand("updateNavigationInfos(0.0;0.0;Distance;1 km;Duration;5 m;135;50 m)");
-          try {
-            Thread.sleep(1000);
-          } 
-          catch (Exception e) {
+          for (int angle=-180;angle<=180;angle++) {
+            //angle=0;
+            //coreObject.executeAppCommand("updateNavigationInfos(0.0;0.0;Distance;1 km;Duration;5 m;" + Integer.toString(angle)+ ";50 m)");
+            coreObject.executeAppCommand("updateNavigationInfos(0.0;0.0;Distance;1 km;Duration;5 m;-;-)");
+            try {
+              Thread.sleep(500);
+            } 
+            catch (Exception e) {
+            }
           }
         }
       }
