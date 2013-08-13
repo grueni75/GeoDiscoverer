@@ -546,7 +546,8 @@ void Font::destroyString(FontString *fontString) {
       FATAL("can not erase font string in cached string map",NULL);
       return;
     }
-		unusedTextures.push_back(oldestFontString->getTexture());
+		if (oldestFontString->getTexture()!=core->getScreen()->getTextureNotDefined())
+		  unusedTextures.push_back(oldestFontString->getTexture());
     oldestFontString->setTexture(core->getScreen()->getTextureNotDefined());
     delete oldestFontString;
   }
