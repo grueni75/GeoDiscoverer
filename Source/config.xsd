@@ -51,19 +51,38 @@
 									<xsd:documentation>Writes messages into a file in the log directory if ticked.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+        <xsd:element name="MetaWatch">
+          <xsd:annotation>
+            <xsd:documentation>Preferences related to the metawatch app.</xsd:documentation>
+          </xsd:annotation>
+          <xsd:complexType>
+            <xsd:sequence>
               <xsd:element name="activateMetaWatchApp" type="xsd:boolean" default="0">
                 <xsd:annotation>
                   <xsd:documentation>Activates the meta watch dashboard app.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="metaWatchAppMinUpdatePeriod" type="xsd:integer" default="30000">
+              <xsd:element name="minUpdatePeriodNormal" type="xsd:integer" default="3000">
                 <xsd:annotation>
-                  <xsd:documentation>Minimum time in milliseconds between meta watch app updates.</xsd:documentation>
+                  <xsd:documentation>Minimum time in milliseconds between meta watch app updates if no turn is shown.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-						</xsd:sequence>
-					</xsd:complexType>
-				</xsd:element>
+              <xsd:element name="minUpdatePeriodTurn" type="xsd:integer" default="1000">
+                <xsd:annotation>
+                  <xsd:documentation>Minimum time in milliseconds between meta watch app updates if a turn is shown.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="waitTimeBeforeVibrate" type="xsd:integer" default="2000">
+                <xsd:annotation>
+                  <xsd:documentation>Time in milliseconds to wait before vibrating to ensure that watch display is updated.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
 				<xsd:element name="Graphic">
 					<xsd:annotation>
 						<xsd:documentation>Preferences related to the graphic engine.</xsd:documentation>

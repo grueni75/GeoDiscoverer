@@ -491,7 +491,7 @@ public class Preferences extends PreferenceActivity implements
       rootScreen.addPreference(generalCategory);
       addPreference(generalCategory, generalCategory, "General", "unitSystem");
       addPreference(generalCategory, generalCategory, "General", "wakeLock");
-      addPreference(generalCategory, generalCategory, "General", "activateMetaWatchApp");
+      addPreference(generalCategory, generalCategory, "MetaWatch", "activateMetaWatchApp");
       addPreference(generalCategory, generalCategory, "", "expertMode");
       PreferenceCategory mapCategory = new PreferenceCategory(this);
       mapCategory.setTitle("Map");

@@ -410,7 +410,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         executeCoreCommandInt(queuedCmd);
       }
       queuedCoreCommands.clear();
-      if (configStoreGetStringValue("General", "activateMetaWatchApp").equals("1")) {
+      if (configStoreGetStringValue("MetaWatch", "activateMetaWatchApp").equals("1")) {
         if (!metawWatchAppActive) {
           GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Starting meta watch app");
           metawWatchAppActive = true;

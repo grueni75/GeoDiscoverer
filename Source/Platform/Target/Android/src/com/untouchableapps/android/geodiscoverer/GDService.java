@@ -279,7 +279,7 @@ public class GDService extends Service {
       startForegroundCompat(R.string.notification_title, notification);
     }
     if (intent.getAction().equals("coreInitialized")) {
-      metaWatchAppActive = coreObject.configStoreGetStringValue("General", "activateMetaWatchApp").equals("1");
+      metaWatchAppActive = coreObject.configStoreGetStringValue("MetaWatch", "activateMetaWatchApp").equals("1");
     }
     if (intent.getAction().equals("activityPaused")) {
       
