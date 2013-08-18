@@ -507,7 +507,7 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
 }
 
 // Computes navigation details for the given location
-void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, MapPosition &turnPoint, double &distanceToRouteEnd) {
+void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, MapPosition &turnPoint, double &turnAngle, double &turnDistance, double &distanceToRouteEnd) {
 
   // Ensure that only one thread is executing this code
   core->getThread()->lockMutex(accessMutex);
@@ -535,10 +535,10 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
   MapPosition pos;
   MapPosition lastValidPos=NavigationPath::getPathInterruptedPos();
   MapPosition prevPos=NavigationPath::getPathInterruptedPos();
+  MapPosition bestTurnLookForwardPos;
   std::list<MapPosition>::iterator iterator=std::list<MapPosition>::iterator(nearestIterator);
   bool turnPointSet = false;
   bool prevPointWasTurnPoint = true;
-  double turnAngle;
   while (true) {
     pos = *iterator;
     if (pos!=NavigationPath::getPathInterruptedPos()) {
@@ -617,6 +617,8 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
       double angle=turnLookForwardAngle-turnLookBackAngle;
       if (angle<0)
         angle+=360;
+      if (angle>360)
+        angle-=360;
       angle=180-angle;
       /*if ((!turnPointSet)||(prevPointWasTurnPoint)) {
         DEBUG("lookBackAngle=%f loockForwardAngle=%f angle=%f",turnLookBackAngle,turnLookForwardAngle,angle);
@@ -630,12 +632,14 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
           //DEBUG("turn point candidate found: lat=%f, lng=%f, angle=%f",pos.getLat(),pos.getLng(),angle);
           if (!turnPointSet) {
             turnPoint=pos;
+            bestTurnLookForwardPos=turnLookForwardPos;
             turnAngle=angle;
             //DEBUG("candidate set",NULL);
           } else {
             if (turnAngle<0) {
               if ((angle<0)&&(angle<turnAngle)) {
                 turnPoint=pos;
+                bestTurnLookForwardPos=turnLookForwardPos;
                 turnAngle=angle;
                 //DEBUG("candidate set",NULL);
               } else {
@@ -644,6 +648,7 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
             } else {
               if ((angle>0)&&(angle>turnAngle)) {
                 turnPoint=pos;
+                bestTurnLookForwardPos=turnLookForwardPos;
                 turnAngle=angle;
                 //DEBUG("candidate set",NULL);
               } else {
@@ -677,11 +682,20 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
     else
       wayPoint.invalidate();
   }
-  if ((!turnPointSet)||(locationPos.computeDistance(turnPoint)>maxDistanceToTurnWayPoint)) {
-  //if ((!turnPointSet)) {
+  turnDistance=locationPos.computeDistance(turnPoint);
+  if ((!turnPointSet)||(turnDistance>maxDistanceToTurnWayPoint)) {
     turnPoint.invalidate();
     turnAngle=360;
+    turnDistance=-1;
   } else {
+    double turnLookBackAngle=turnPoint.computeBearing(locationPos);
+    double turnLookForwardAngle=turnPoint.computeBearing(bestTurnLookForwardPos);
+    turnAngle=turnLookForwardAngle-turnLookBackAngle;
+    if (turnAngle<0)
+      turnAngle+=360;
+    if (turnAngle>360)
+      turnAngle-=360;
+    turnAngle=180-turnAngle;
     /*if (turnAngle>0) {
       DEBUG("turn to the left in %f meters",distanceToTurnPoint);
     } else {

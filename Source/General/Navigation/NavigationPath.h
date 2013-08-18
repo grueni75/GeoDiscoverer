@@ -121,7 +121,7 @@ public:
   void backgroundLoader();
 
   // Computes navigation details for the given location
-  void computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, MapPosition &turnPoint, double &distanceToRouteEnd);
+  void computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, MapPosition &turnPoint, double &turnAngle, double &turnDistance, double &distanceToRouteEnd);
 
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)

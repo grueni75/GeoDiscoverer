@@ -110,7 +110,7 @@ MapPosition MapPosition::computeTarget(double bearing, double distance) {
   return target;
 }
 
-// Computes the bearing in degrees to the given destination point
+// Computes the bearing in degrees clockwise from north (0°) to the given destination point
 double MapPosition::computeBearing(MapPosition target) {
   double latDist = target.getLatRad()-getLatRad();
   double lngDist = target.getLngRad()-getLngRad();

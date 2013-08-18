@@ -1099,7 +1099,7 @@ void NavigationEngine::updateNavigationInfos() {
         // Compute the navigation details for the given route
         //static MapPosition prevTurnPos;
         lockRoutes();
-        activeRoute->computeNavigationInfos(locationPos,targetPos,turnPos,navigationDistance);
+        activeRoute->computeNavigationInfos(locationPos,targetPos,turnPos,turnAngle,turnDistance,navigationDistance);
         unlockRoutes();
         //WARNING("enable route locking",NULL);
         if (targetPos.isValid()) {
@@ -1108,8 +1108,6 @@ void NavigationEngine::updateNavigationInfos() {
             navigationTargetBearing=locationPos.computeBearing(targetPos);
         }
         if (turnPos.isValid()) {
-          turnDistance=locationPos.computeDistance(turnPos);
-          turnAngle=locationPos.computeBearing(turnPos);
           if (turnAngle>0) {
             DEBUG("turn to the left by %f°in %f meters",turnAngle,turnDistance);
           } else {

@@ -86,7 +86,7 @@ public:
   // Computes the destination point from the given bearing and distance
   MapPosition computeTarget(double bearing, double distance);
 
-  // Computes the bearing in degrees to the given destination point
+  // Computes the bearing in degrees clockwise from north (0°) to the given destination point
   double computeBearing(MapPosition target);
 
   // Computes the distance in meters to the given destination point
