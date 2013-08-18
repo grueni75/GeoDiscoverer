@@ -75,7 +75,7 @@
                   <xsd:documentation>Minimum time in milliseconds between meta watch app updates if a turn is shown.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="waitTimeBeforeVibrate" type="xsd:integer" default="2000">
+              <xsd:element name="waitTimeBeforeVibrate" type="xsd:integer" default="4000">
                 <xsd:annotation>
                   <xsd:documentation>Time in milliseconds to wait before vibrating to ensure that watch display is updated.</xsd:documentation>
                 </xsd:annotation>

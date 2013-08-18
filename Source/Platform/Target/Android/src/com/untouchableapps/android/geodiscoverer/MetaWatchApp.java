@@ -376,20 +376,18 @@ public class MetaWatchApp {
       // Delay the vibrate to ensure that watch shows the turn
       new Thread(new Runnable() {
         public void run() {
-          while(true) {
-            try {
-              Thread.sleep(waitTimeBeforeVibrate);
-            } 
-            catch (Exception e) {
-            }
-            Intent intent = new Intent("org.metawatch.manager.VIBRATE");
-            Bundle b = new Bundle();
-            b.putInt("vibrate_on", 500);
-            b.putInt("vibrate_off", 500);
-            b.putInt("vibrate_cycles", 2);
-            intent.putExtras(b);
-            context.sendBroadcast(intent);
+          try {
+            Thread.sleep(waitTimeBeforeVibrate);
+          } 
+          catch (Exception e) {
           }
+          Intent intent = new Intent("org.metawatch.manager.VIBRATE");
+          Bundle b = new Bundle();
+          b.putInt("vibrate_on", 500);
+          b.putInt("vibrate_off", 500);
+          b.putInt("vibrate_cycles", 2);
+          intent.putExtras(b);
+          context.sendBroadcast(intent);
         }
       }).start();      
     }

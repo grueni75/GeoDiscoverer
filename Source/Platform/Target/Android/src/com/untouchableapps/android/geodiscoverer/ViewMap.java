@@ -463,8 +463,7 @@ public class ViewMap extends GDActivity {
         while(true) {
           for (int angle=-180;angle<=180;angle++) {
             //angle=0;
-            //coreObject.executeAppCommand("updateNavigationInfos(0.0;0.0;Distance;1 km;Duration;5 m;" + Integer.toString(angle)+ ";50 m)");
-            coreObject.executeAppCommand("updateNavigationInfos(0.0;0.0;Distance;1 km;Duration;5 m;-;-)");
+            coreObject.executeAppCommand("updateNavigationInfos(0.0;0.0;Distance;1 km;Duration;5 m;" + Integer.toString(angle)+ ";50 m)");
             try {
               Thread.sleep(500);
             } 
