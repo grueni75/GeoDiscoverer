@@ -83,9 +83,8 @@ cleanup:
   return result;
 }
 
-
 // Loads a png
-ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &pixelSize) {
+ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread) {
 
   png_byte header[8]; // 8 is the maximum size that can be checked
   ImagePixel *image=NULL;
@@ -118,7 +117,7 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
     goto cleanup;
   }
   if (setjmp(png_jmpbuf(png_ptr))) {
-    ERROR("can not set position in png image <%s>",filepath.c_str());
+    ERROR("error while reading png image <%s>",filepath.c_str());
     goto cleanup;
   }
   png_init_io(png_ptr, fp);
@@ -166,28 +165,25 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
   }
 
   // Read the image
-  if (setjmp(png_jmpbuf(png_ptr))) {
-    ERROR("png image <%s> can not be read",filepath.c_str());
-    goto cleanup;
-  }
-  for (Int i=0;(i<number_of_passes)&&(!abortLoad);i++) {
-    for (Int y=0;(y<height)&&(!abortLoad);y++) {
+  for (Int i=0;(i<number_of_passes)&&((!calledByMapUpdateThread)||(!abortLoad));i++) {
+    for (Int y=0;(y<height)&&((!calledByMapUpdateThread)||(!abortLoad));y++) {
       png_read_row(png_ptr, &image[pixelSize*width*y], NULL);
-      core->interruptAllowedHere();
+      if (calledByMapUpdateThread)
+        core->interruptAllowedHere();
     }
   }
-  if (!abortLoad)
+  if (((!calledByMapUpdateThread)||(!abortLoad)))
     png_read_end(png_ptr, info_ptr);
 
 cleanup:
 
   // Deinit
-  if (abortLoad) {
+  if (calledByMapUpdateThread&&abortLoad) {
     if (image) free(image);
     image=NULL;
     abortLoad=false;
   }
-  if (png_ptr) {
+  if ((png_ptr)||(info_ptr)) {
     png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
   }
   if (fp)
@@ -261,7 +257,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
   }
 
   // Load the icon
-  ImagePixel *icon=loadPNG(bestIconPath,imageWidth,imageHeight,pixelSize);
+  ImagePixel *icon=loadPNG(bestIconPath,imageWidth,imageHeight,pixelSize,false);
   if (!icon)
     return NULL;
 
@@ -272,6 +268,72 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
   return icon;
 }
 
+// Writes a png
+bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize) {
+
+  png_structp png_ptr=NULL;
+  png_infop info_ptr=NULL;
+  bool result=false;
+  Int color_type = -1;
+  Int y;
+  png_bytepp rows;
+
+  // Open the file
+  FILE *fp = fopen(filepath.c_str(), "wb");
+  if (!fp) {
+    ERROR("can not open <%s> for writing",filepath.c_str());
+    goto cleanup;
+  }
+
+  // Initialize the library for writing this image
+  png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!png_ptr) {
+    FATAL("can not create png write struct",NULL);
+    goto cleanup;
+  }
+  info_ptr = png_create_info_struct(png_ptr);
+  if (!info_ptr) {
+    FATAL("can not create png info struct",NULL);
+    goto cleanup;
+  }
+  if (setjmp(png_jmpbuf(png_ptr))) {
+    ERROR("error while writing png image <%s>",filepath.c_str());
+    goto cleanup;
+  }
+  png_init_io(png_ptr, fp);
+
+  // Tell the library what to write
+  if (pixelSize==getRGBPixelSize())
+    color_type=PNG_COLOR_TYPE_RGB;
+  if (pixelSize==getRGBAPixelSize())
+    color_type=PNG_COLOR_TYPE_RGB_ALPHA;
+  png_set_IHDR(png_ptr,info_ptr,width,height,8,color_type,PNG_INTERLACE_NONE,
+  PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
+
+  // Set the image data
+  if (!(rows=(png_bytepp)malloc(sizeof(*rows)*height))) {
+    FATAL("can not reserve memory for the row pointers",NULL);
+    goto cleanup;
+  }
+  for (y=0;y<height;y++) {
+    rows[y]=&image[y*width*pixelSize];
+  }
+  png_set_rows(png_ptr,info_ptr,rows);
+
+  // Write the image
+  png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+  free(rows);
+
+cleanup:
+
+  // Deinit
+  if ((png_ptr)||(info_ptr)) {
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+  }
+  if (fp)
+    fclose(fp);
+  return result;
+}
 
 }
 

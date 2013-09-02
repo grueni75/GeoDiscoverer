@@ -83,7 +83,7 @@ cleanup:
 }
 
 // Loads a jpeg
-ImagePixel *Image::loadJPEG(std::string filepath, Int &width, Int &height, UInt &pixelSize) {
+ImagePixel *Image::loadJPEG(std::string filepath, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread) {
 
   FILE *file;
   struct jpeg_decompress_struct cinfo;
@@ -142,16 +142,17 @@ ImagePixel *Image::loadJPEG(std::string filepath, Int &width, Int &height, UInt 
 
   // Do the decompression
   y=0;
-  while( cinfo.output_scanline < cinfo.output_height && !abortLoad ) {
+  while( cinfo.output_scanline < cinfo.output_height && ((!calledByMapUpdateThread)||(!abortLoad)) ) {
     //DEBUG("output_scanline: %d output_height: %d",cinfo.output_scanline,cinfo.output_height);
     jpeg_read_scanlines(&cinfo, &scanline, 1);
     memcpy(&image[y*scanlineSize], scanline, scanlineSize);
     y++;
-    core->interruptAllowedHere();
+    if (calledByMapUpdateThread)
+      core->interruptAllowedHere();
   }
 
 cleanup:
-  if (abortLoad) {
+  if (calledByMapUpdateThread&&abortLoad) {
     jpeg_abort_decompress(&cinfo);
     if (image) free(image);
     image=NULL;

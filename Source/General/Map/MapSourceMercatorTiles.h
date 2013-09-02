@@ -30,28 +30,14 @@ class MapSourceMercatorTiles : public MapSource {
 protected:
 
   ThreadMutexInfo *accessMutex;                     // Mutex for accessing the map source object
-  Int maxMapArchiveSize;                            // Maximum size a map archive shall have
-  std::string tileServerURL;                        // URL of the tile server to use
   Int minZoomLevel;                                 // Minimum zoom value
   Int maxZoomLevel;                                 // Maximum zoom value
   Int mapContainerCacheSize;                        // Number of map containers to hold in the cache
-  Int downloadErrorWaitTime;                        // Time in seconds to wait after a download error before starting a new download
-  Int maxDownloadRetries;                           // Maximum number of retries before a download is aborted
   bool errorOccured;                                // Indicates that an error has occured
   bool downloadWarningOccured;                      // Indicates that a warning has occured
   static const double latBound;                     // Maximum allowed latitude value
   static const double lngBound;                     // Maximum allowed longitude value
-  std::list<MapContainer*> downloadQueue;           // Queue of map containers that must be downloaded from the server
-  ThreadMutexInfo *downloadQueueMutex;              // Mutex for accessing the download queue
-  ThreadSignalInfo *downloadStartSignal;            // Signal that triggers the download thread
-  bool quitMapImageDownloadThread;                  // Indicates that the map download image thread shall exit
-  ThreadInfo *mapImageDownloadThreadInfo;           // Thread for downloading the map images
-
-  // Replaces a variable in a string
-  bool replaceVariableInTileServerURL(std::string &url, std::string variableName, std::string variableValue);
-
-  // Downloads a map image from the server
-  bool downloadMapImage(std::string url, std::string filePath);
+  MapDownloader *mapDownloader;                     // Downlads missing tiles from the tileserver
 
   // Fetches the map tile in which the given position lies from disk or server
   MapTile *fetchMapTile(MapPosition pos, Int zoomLevel);
@@ -89,9 +75,6 @@ public:
   // Performs maintenance (e.g., recreate degraded search tree)
   virtual void maintenance();
 
-  // Downloads map tiles from the tile server
-  void downloadMapImages();
-
   // Returns the scale values for the given zoom level
   void getScales(Int zoomLevel, double &latScale, double &lngScale);
 
@@ -110,6 +93,29 @@ public:
     core->getThread()->unlockMutex(accessMutex);
   }
 
+  bool getDownloadWarningOccured() const {
+    return downloadWarningOccured;
+  }
+
+  void setDownloadWarningOccured(bool downloadWarningOccured) {
+    this->downloadWarningOccured = downloadWarningOccured;
+  }
+
+  bool getErrorOccured() const {
+    return errorOccured;
+  }
+
+  void setErrorOccured(bool errorOccured) {
+    this->errorOccured = errorOccured;
+  }
+
+  Int getMaxZoomLevel() const {
+    return maxZoomLevel;
+  }
+
+  Int getMinZoomLevel() const {
+    return minZoomLevel;
+  }
 };
 
 } /* namespace GEODISCOVERER */

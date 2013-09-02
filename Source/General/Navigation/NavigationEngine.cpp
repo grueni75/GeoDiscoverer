@@ -249,7 +249,6 @@ void NavigationEngine::deinit() {
   if (backgroundLoaderThreadInfo) {
     core->getThread()->lockMutex(backgroundLoaderFinishedMutex);
     if (!backgroundLoaderFinished) {
-      WARNING("free memory used by thread",NULL);
       core->getThread()->cancelThread(backgroundLoaderThreadInfo);
       core->getThread()->waitForThread(backgroundLoaderThreadInfo);
     }
@@ -966,24 +965,26 @@ void NavigationEngine::backgroundLoader() {
 
   // Load the recorded track
   if (!recordedTrack->getIsInit()) {
-    if (core->getQuitCore())
-      return;
+    if (core->getQuitCore()) {
+      goto exitThread;
+    }
     recordedTrack->readGPXFile();
     recordedTrack->setIsInit(true);
   }
 
   // Load all routes
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    if (core->getQuitCore())
-      return;
+    if (core->getQuitCore()) {
+      goto exitThread;
+    }
     (*i)->readGPXFile();
     (*i)->setIsInit(true);
   }
 
   // Set the active route
 
-
   // Thread is finished
+exitThread:
   core->getThread()->lockMutex(backgroundLoaderFinishedMutex);
   backgroundLoaderFinished=true;
   core->getThread()->unlockMutex(backgroundLoaderFinishedMutex);

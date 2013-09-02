@@ -45,7 +45,7 @@ bool MapSourceMercatorTiles::readGDSInfo()
   xmlNodePtr rootNode,gdsNode,n;
   bool result=false;
   std::string version;
-  bool tileServerURLFound=false;
+  bool tileServerFound=false;
   std::string name;
   std::string infoFilePath=getFolderPath() + "/info.gds";
   bool minZoomLevelFound,maxZoomLevelFound;
@@ -89,7 +89,7 @@ bool MapSourceMercatorTiles::readGDSInfo()
   }
 
   // Loop over the root node to extract the information
-  tileServerURLFound=false;
+  tileServerFound=false;
   minZoomLevelFound=false;
   maxZoomLevelFound=false;
   for (n = gdsNode; n; n = n->next) {
@@ -97,9 +97,36 @@ bool MapSourceMercatorTiles::readGDSInfo()
       name=std::string((char*)n->name);
       in.str(getNodeText(n));
       in.clear();
-      if (name=="tileServerURL") {
-        tileServerURLFound=true;
-        tileServerURL=getNodeText(n);
+      if (name=="TileServer") {
+        std::string serverURL;
+        bool serverURLFound=false;
+        double overlayAlpha;
+        bool overlayAlphaFound=false;
+        for (xmlNodePtr m = n->children; m; m = m->next) {
+          if (m->type == XML_ELEMENT_NODE) {
+            std::string name=std::string((char*)m->name);
+            in.str(getNodeText(m));
+            in.clear();
+            if (name=="serverURL") {
+              serverURL=getNodeText(m);
+              serverURLFound=true;
+            }
+            if (name=="overlayAlpha") {
+              in >> overlayAlpha;
+              overlayAlphaFound=true;
+            }
+          }
+        }
+        if (!serverURLFound) {
+          ERROR("one TileServer element has no serverURL element in <%s>",infoFilePath.c_str());
+          goto cleanup;
+        }
+        if (!overlayAlphaFound) {
+          ERROR("one TileServer element has no overlayAlpha element in <%s>",infoFilePath.c_str());
+          goto cleanup;
+        }
+        mapDownloader->addTileServer(serverURL,overlayAlpha);
+        tileServerFound=true;
       }
       if (name=="minZoomLevel") {
         minZoomLevelFound=true;
@@ -111,8 +138,8 @@ bool MapSourceMercatorTiles::readGDSInfo()
       }
     }
   }
-  if (!tileServerURLFound) {
-    ERROR("tileServerURL not found in <%s>",infoFilePath.c_str());
+  if (!tileServerFound) {
+    ERROR("no tileServer element found in <%s>",infoFilePath.c_str());
     goto cleanup;
   }
   if (!minZoomLevelFound) {

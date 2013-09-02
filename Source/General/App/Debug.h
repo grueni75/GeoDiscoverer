@@ -85,8 +85,8 @@ enum Verbosity { verbosityError=0, verbosityWarning=1, verbosityInfo=2, verbosit
 #define FATAL(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityFatal,__FILE__,__LINE__,msg,__VA_ARGS__)
 #define TRACE(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityTrace,__FILE__,__LINE__,msg,__VA_ARGS__)
 
-// Stacktrace macro
-#define TRACESTACK(result) \
+// Callstack macro
+#define CALLSTACK(result) \
 { \
   result=""; \
   char **strings; \

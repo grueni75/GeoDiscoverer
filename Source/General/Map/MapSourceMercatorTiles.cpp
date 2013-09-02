@@ -28,50 +28,34 @@ namespace GEODISCOVERER {
 const double MapSourceMercatorTiles::latBound = 85.0511287798;
 const double MapSourceMercatorTiles::lngBound = 180.0;
 
-// Map download thread
-void *mapSourceMercatorTilesDownloadThread(void *args) {
-  ((MapSourceMercatorTiles*)args)->downloadMapImages();
-  return NULL;
-}
-
 // Constructor
 MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   type=MapSourceTypeMercatorTiles;
   mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize");
-  downloadErrorWaitTime=core->getConfigStore()->getIntValue("Map","downloadErrorWaitTime");
-  maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries");
-  maxMapArchiveSize=core->getConfigStore()->getIntValue("Map","maxMapArchiveSize");
   mapTileLength=256;
   accessMutex=core->getThread()->createMutex();
   errorOccured=false;
   downloadWarningOccured=false;
-  downloadQueueMutex=core->getThread()->createMutex();
-  downloadStartSignal=core->getThread()->createSignal();
-  quitMapImageDownloadThread=false;
-  mapImageDownloadThreadInfo=core->getThread()->createThread(mapSourceMercatorTilesDownloadThread,this);
+  mapDownloader=new MapDownloader(this);
+  if (mapDownloader==NULL)
+    FATAL("can not create map downloader object",NULL);
 }
 
 // Destructor
 MapSourceMercatorTiles::~MapSourceMercatorTiles() {
 
-  // Wait until the download thread has finished
-  //quitMapImageDownloadThread=true;
-  //core->getThread()->issueSignal(downloadStartSignal);
-  WARNING("free all memory used by thread",NULL);
-  core->getThread()->cancelThread(mapImageDownloadThreadInfo);
-  core->getThread()->waitForThread(mapImageDownloadThreadInfo);
-  core->getThread()->destroyThread(mapImageDownloadThreadInfo);
+  // Stop the map downloader object
+  delete mapDownloader;
 
   // Free everything else
   deinit();
   core->getThread()->destroyMutex(accessMutex);
-  core->getThread()->destroyMutex(downloadQueueMutex);
-  core->getThread()->destroySignal(downloadStartSignal);
 }
 
 // Deinitializes the map source
 void MapSourceMercatorTiles::deinit() {
   MapSource::deinit();
+  mapDownloader->deinit();
 }
 
 // Initializes the map source
@@ -95,50 +79,11 @@ bool MapSourceMercatorTiles::init() {
     return false;
   }
   mapArchives.push_back(mapArchive);
-
-  // Merge all tiles from the previous session
-  std::string title="Merging tiles from last session with map " + folder;
-  DialogKey dialog=core->getDialog()->createProgress(title,0);
-  struct dirent *dp;
-  DIR *dfd;
-  dfd=opendir(mapPath.c_str());
-  if (dfd==NULL) {
-    FATAL("can not read directory <%s>",mapPath.c_str());
-    return false;
-  }
-  while ((dp = readdir(dfd)) != NULL)
-  {
-    Int nr;
-
-    // Copy files if this is a valid archive
-    if (sscanf(dp->d_name,"tiles%d.zip",&nr)==1) {
-      ZipArchive *archive = new ZipArchive(mapPath,dp->d_name);
-      if ((archive)&&(archive->init())) {
-        for (Int index=0;index<=archive->getEntryCount();index++) {
-          std::string entryName = archive->getEntryFilename(index);
-          ZipArchiveEntry entry = archive->openEntry(entryName);
-          Int bufferSize = archive->getEntrySize(entryName);
-          void *buffer = malloc(bufferSize);
-          if ((entry)&&(buffer)) {
-            archive->readEntry(entry,buffer,bufferSize);
-            mapArchive->addEntry(entryName,buffer,bufferSize);
-            archive->closeEntry(entry);
-          }
-        }
-        mapArchive->writeChanges();
-        remove(std::string(mapPath + "/" + dp->d_name).c_str());
-      }
-    }
-
-    // Remove any left over write tries
-    std::string filename(dp->d_name);
-    if ((filename.find(".zip.")!=std::string::npos)&&(filename.find("tiles")!=std::string::npos)) {
-      remove((mapPath + "/" + filename).c_str());
-    }
-  }
-  closedir(dfd);
-  core->getDialog()->closeProgress(dialog);
   unlockMapArchives();
+
+  // Init the map downloader
+  if (!mapDownloader->init())
+    return false;
 
   // Init the center position
   centerPosition=new MapPosition();
@@ -157,19 +102,6 @@ bool MapSourceMercatorTiles::init() {
 
   // Finished
   isInitialized=true;
-  return true;
-}
-
-// Replaces a variable in a string
-bool MapSourceMercatorTiles::replaceVariableInTileServerURL(std::string &url, std::string variableName, std::string variableValue) {
-  size_t pos;
-  pos=url.find(variableName);
-  if (pos==std::string::npos) {
-    ERROR("variable %s not found in tile server URL <%s>",variableName.c_str(),tileServerURL.c_str());
-    errorOccured=true;
-    return false;
-  }
-  url.replace(pos,variableName.size(),variableValue);
   return true;
 }
 
@@ -289,27 +221,12 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   // Prepare the filenames
   std::stringstream imageFileFolder; imageFileFolder << z << "/" << x;
   std::stringstream imageFileBase; imageFileBase << z << "_" << x << "_" << y;
-  std::string imageFileExtension = tileServerURL.substr(tileServerURL.find_last_of(".")+1);
+  std::string imageFileExtension = "png";
+  ImageType imageType = ImageTypePNG;
   std::string imageFileName = imageFileBase.str() + "." + imageFileExtension;
   std::string imageFilePath = imageFileFolder.str() + "/" + imageFileName;
   std::string calibrationFileName = imageFileBase.str() + ".gdm";
   std::string calibrationFilePath = imageFileFolder.str() + "/" + calibrationFileName;
-
-  // Check if the image is supported
-  ImageType imageType;
-  std::string imageFileExtensionLC=imageFileExtension;
-  std::transform(imageFileExtensionLC.begin(),imageFileExtensionLC.end(),imageFileExtensionLC.begin(),::tolower);
-  if (imageFileExtensionLC=="png") {
-    imageType=ImageTypePNG;
-  } else if (imageFileExtensionLC=="jpg") {
-    imageType=ImageTypeJPEG;
-  } else if (imageFileExtensionLC=="jpeg") {
-    imageType=ImageTypeJPEG;
-  } else {
-    ERROR("unsupported image file extension <%s> in tile server url %s",imageFileExtension.c_str(),tileServerURL.c_str());
-    errorOccured=true;
-    return NULL;
-  }
 
   // Create a new map container
   MapContainer *mapContainer=new MapContainer();
@@ -361,15 +278,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   }
   unlockMapArchives();
   if (!found) {
-
-    // Flag that the image of the map container is not yet there
-    mapContainer->setDownloadComplete(false);
-
-    // Request the download thread to fetch this image
-    core->getThread()->lockMutex(downloadQueueMutex);
-    downloadQueue.push_back(mapContainer);
-    core->getThread()->unlockMutex(downloadQueueMutex);
-    core->getThread()->issueSignal(downloadStartSignal);
+    mapDownloader->queueMapContainerDownload(mapContainer);
   }
 
   // Store the new map container and indicate that a search data structure is required
@@ -482,125 +391,6 @@ void MapSourceMercatorTiles::maintenance() {
   unlockAccess();
 }
 
-// Downloads map tiles from the tile server
-void MapSourceMercatorTiles::downloadMapImages() {
-
-  std::list<std::string> status;
-
-  // Set the priority
-  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
-
-  // This thread can be cancelled at any time
-  core->getThread()->setThreadCancable();
-
-  // Do an endless loop
-  while (1) {
-
-    // Wait for an update trigger
-    core->getThread()->waitForSignal(downloadStartSignal);
-
-    // Shall we quit?
-    if (quitMapImageDownloadThread) {
-      core->getThread()->exitThread();
-    }
-
-    // Loop until the queue is empty
-    while (1) {
-
-      // Get the next container from the queue
-      MapContainer *mapContainer=NULL;
-      Int totalLeft;
-      core->getThread()->lockMutex(downloadQueueMutex);
-      if (!downloadQueue.empty()) {
-
-        // Prefer visible map containers
-        totalLeft=downloadQueue.size();
-        for (std::list<MapContainer*>::iterator i=downloadQueue.begin();i!=downloadQueue.end();i++) {
-          MapContainer *c=*i;
-          if (c->isDrawn()) {
-            mapContainer=c;
-            downloadQueue.erase(i);
-            break;
-          }
-        }
-        if (!mapContainer) {
-          mapContainer=downloadQueue.front();
-          downloadQueue.pop_front();
-        }
-      }
-      core->getThread()->unlockMutex(downloadQueueMutex);
-      if (!mapContainer)
-        break;
-
-      // Change the status
-      std::stringstream s;
-      s << "Downloading " << totalLeft;
-      if (totalLeft==1)
-        s << " tile:";
-      else
-        s << " tiles:";
-      status.push_back(s.str());
-      status.push_back(mapContainer->getImageFileName());
-      setStatus(status);
-
-      // Prepare the directory
-      std::stringstream t;
-      std::stringstream z; z << mapContainer->getZoomLevel()+minZoomLevel-1;
-      std::stringstream x; x << mapContainer->getX();
-      std::stringstream y; y << mapContainer->getY();
-
-      // Prepare the url
-      std::string url=tileServerURL;
-      replaceVariableInTileServerURL(url,"${z}",z.str());
-      replaceVariableInTileServerURL(url,"${x}",x.str());
-      replaceVariableInTileServerURL(url,"${y}",y.str());
-
-      // Download the image
-      bool downloadSuccess=downloadMapImage(url,mapContainer->getImageFilePath());
-      bool maxRetriesReached=(mapContainer->getDownloadRetries()>=maxDownloadRetries);
-      if (downloadSuccess||maxRetriesReached) {
-
-        // Write the gdm file
-        if (downloadSuccess) {
-          mapContainer->writeCalibrationFile();
-          lockMapArchives();
-          mapArchives.back()->writeChanges();
-          unlockMapArchives();
-        } else {
-          WARNING("aborting download of <%s>",url.c_str());
-        }
-
-        // Update the map cache
-        lockAccess();
-        mapContainer->setDownloadComplete(true);
-        unlockAccess();
-        core->getMapEngine()->setForceCacheUpdate();
-
-      } else {
-
-        // Put the container back in the queue if the retry count is not reached
-        core->getThread()->lockMutex(downloadQueueMutex);
-        downloadQueue.push_back(mapContainer);
-        core->getThread()->unlockMutex(downloadQueueMutex);
-        mapContainer->setDownloadRetries(mapContainer->getDownloadRetries()+1);
-
-        // Wait some time before downloading again
-        sleep(downloadErrorWaitTime);
-
-      }
-
-      // Change the status
-      status.clear();
-      setStatus(status);
-
-      // Shall we quit?
-      if (quitMapImageDownloadThread) {
-        core->getThread()->exitThread();
-      }
-    }
-  }
-}
-
 // Finds the calibrator for the given position
 MapCalibrator *MapSourceMercatorTiles::findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator) {
   deleteCalibrator=false;
@@ -626,70 +416,6 @@ void MapSourceMercatorTiles::getScales(Int zoomLevel, double &latScale, double &
   pos.computeMercatorTileBounds(zoomLevel-1+minZoomLevel,latNorth,latSouth,lngWest,lngEast);
   lngScale=mapTileLength/(lngEast-lngWest);
   latScale=mapTileLength/(latNorth-latSouth);
-}
-
-// Downloads a map image from the server
-bool MapSourceMercatorTiles::downloadMapImage(std::string url, std::string filePath) {
-
-  std::string tempFilePath = getFolderPath() + "/download.bin";
-  Int imageWidth, imageHeight;
-
-  // Download the file
-  if (!(core->downloadURL(url,tempFilePath,!downloadWarningOccured))) {
-    downloadWarningOccured=true;
-    return false;
-  } else {
-
-    // Check if the image can be loaded
-    if ((!core->getImage()->queryPNG(tempFilePath,imageWidth,imageHeight))&&
-       (!core->getImage()->queryJPEG(tempFilePath,imageWidth,imageHeight))) {
-
-      WARNING("downloaded map from <%s> is not a valid image",url.c_str());
-      return false;
-
-    } else {
-
-      // Add the file to the map archive
-      struct stat stat_buffer;
-      bool result=false;
-      if (stat(tempFilePath.c_str(),&stat_buffer)==0) {
-        UByte *file_buffer = (UByte *)malloc(stat_buffer.st_size);
-        if (file_buffer) {
-          FILE *in;
-          if ((in=fopen(tempFilePath.c_str(),"r"))) {
-            fread(file_buffer,stat_buffer.st_size,1,in);
-            fclose(in);
-            lockMapArchives();
-            ZipArchive *mapArchive=mapArchives.back();
-            if (mapArchive->getUnchangedSize()>maxMapArchiveSize) {
-              std::stringstream newFilename;
-              if (mapArchive->getArchiveName()=="tiles.zip")
-                newFilename << "tiles2.zip";
-              else {
-                Int nr;
-                sscanf(mapArchive->getArchiveName().c_str(),"tiles%d.zip",&nr);
-                newFilename << "tiles" << nr+1 << ".zip";
-              }
-              mapArchive=new ZipArchive(mapArchive->getArchiveFolder(),newFilename.str());
-              if ((mapArchive==NULL)||(!mapArchive->init()))
-                FATAL("can not create zip archive object",NULL);
-              mapArchives.push_back(mapArchive);
-            }
-            mapArchive->addEntry(filePath,file_buffer,stat_buffer.st_size);
-            unlockMapArchives();
-            result=true;
-          }
-        }
-      }
-      if (!result) {
-        WARNING("downloaded map from <%s> could not be added to map archive",url.c_str());
-      }
-      return result;
-
-    }
-
-  }
-
 }
 
 } /* namespace GEODISCOVERER */

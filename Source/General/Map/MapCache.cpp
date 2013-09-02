@@ -237,10 +237,10 @@ void MapCache::updateMapTileImages() {
         // Get the image from the temporary file
         switch(currentContainer->getImageType()) {
           case ImageTypeJPEG:
-            currentImage=core->getImage()->loadJPEG(tempImageFilePath,currentImageWidth,currentImageHeight,currentImagePixelSize);
+            currentImage=core->getImage()->loadJPEG(tempImageFilePath,currentImageWidth,currentImageHeight,currentImagePixelSize,true);
             break;
           case ImageTypePNG:
-            currentImage=core->getImage()->loadPNG(tempImageFilePath,currentImageWidth,currentImageHeight,currentImagePixelSize);
+            currentImage=core->getImage()->loadPNG(tempImageFilePath,currentImageWidth,currentImageHeight,currentImagePixelSize,true);
             break;
           default:
             FATAL("unsupported image type",NULL);

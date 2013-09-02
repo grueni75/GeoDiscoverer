@@ -71,11 +71,15 @@ class WidgetEngine;
 class MapCache;
 class MapEngine;
 class MapSource;
+class MapSourceMercatorTiles;
 class UnitConverter;
 class Image;
 class Dialog;
 class NavigationEngine;
 class Commander;
+
+// Error types for downloads
+typedef enum { DownloadResultSuccess, DownloadResultFileNotFound, DownloadResultOtherFail } DownloadResult;
 
 class Core {
 
@@ -192,7 +196,7 @@ public:
   void continueMapUpdate();
 
   // Downloads a URL
-  bool downloadURL(std::string url, std::string filePath, bool generateMessages=true);
+  DownloadResult downloadURL(std::string url, std::string filePath, bool generateMessages=true, bool ignoreFileNotFoundErrors=false);
 
   // Waits until the core is initialized
   void waitForInitialization() {
@@ -369,6 +373,8 @@ extern Core *core;
 #include <MapContainerTreeNode.h>
 #include <MapCache.h>
 #include <MapEngine.h>
+#include <MapTileServer.h>
+#include <MapDownloader.h>
 #include <MapSource.h>
 #include <MapSourceCalibratedPictures.h>
 #include <MapSourceMercatorTiles.h>

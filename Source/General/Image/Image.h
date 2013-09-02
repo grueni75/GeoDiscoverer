@@ -60,17 +60,20 @@ public:
   bool queryJPEG(std::string filepath, Int &width, Int &height);
 
   // Loads a jpeg
-  ImagePixel *loadJPEG(std::string filepath, Int &width, Int &height, UInt &pixelSize);
+  ImagePixel *loadJPEG(std::string filepath, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread);
 
   // Queries the dimension of the png without loading it
   bool queryPNG(std::string filepath, Int &width, Int &height);
 
   // Loads a png
-  ImagePixel *loadPNG(std::string filepath, Int &width, Int &height,UInt &pixelSize);
+  ImagePixel *loadPNG(std::string filepath, Int &width, Int &height,UInt &pixelSize, bool calledByMapUpdateThread);
 
   // Loads an PNG based icon
   // The correct file is determined from the screen dpi
   ImagePixel *loadPNGIcon(std::string filename, Int &imageWidth, Int &imageHeight, double &dpiScale, UInt &pixelSize);
+
+  // Writes a png
+  bool writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize);
 
   // Aborts the current jpeg image loading
   void setAbortLoad()
