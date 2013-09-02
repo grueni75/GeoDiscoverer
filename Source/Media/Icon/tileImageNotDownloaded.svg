@@ -17,7 +17,7 @@
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
    sodipodi:docname="tileImageNotDownloaded.svg"
-   inkscape:export-filename="/home/grueni/Apps/GeoDiscoverer/Source/Media/tileImageNotDownloaded.png"
+   inkscape:export-filename="/home/grueni/Apps/GeoDiscoverer/Source/Media/tileImageNotCached.png"
    inkscape:export-xdpi="360"
    inkscape:export-ydpi="360">
   <defs
@@ -1056,59 +1056,6 @@
        r="31" />
     <radialGradient
        inkscape:collect="always"
-       xlink:href="#linearGradient6339"
-       id="radialGradient4576"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.454579,-0.103027,0.118439,1.802414,-328.325,-918.4274)"
-       cx="406.20645"
-       cy="1189.2123"
-       fx="406.20645"
-       fy="1189.2123"
-       r="88.938736" />
-    <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient13206"
-       id="radialGradient4578"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.150346,0,0,1.150346,-16.1173,-74.46758)"
-       cx="107.20115"
-       cy="495.30679"
-       fx="107.20115"
-       fy="495.30679"
-       r="405.35715" />
-    <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient5142"
-       id="radialGradient4580"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.971416,0.433793,-0.445445,3.041429,176.2001,-314.492)"
-       cx="209.15753"
-       cy="407.22339"
-       fx="209.15753"
-       fy="407.22339"
-       r="55.703125" />
-    <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient4437"
-       id="radialGradient4582"
-       gradientUnits="userSpaceOnUse"
-       cx="136.1499"
-       cy="504.90085"
-       fx="136.1499"
-       fy="504.90085"
-       r="406.37308" />
-    <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient5046"
-       id="radialGradient4584"
-       gradientUnits="userSpaceOnUse"
-       cx="32"
-       cy="32"
-       fx="32"
-       fy="32"
-       r="31" />
-    <radialGradient
-       inkscape:collect="always"
        xlink:href="#linearGradient4485"
        id="radialGradient4493"
        cx="31.930691"
@@ -1135,9 +1082,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.94606159"
-     inkscape:cx="-10.715546"
-     inkscape:cy="153.75498"
+     inkscape:zoom="3.3671876"
+     inkscape:cx="128.08313"
+     inkscape:cy="128.00914"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:document-units="px"
@@ -1145,9 +1092,9 @@
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:snap-global="true"
-     inkscape:window-width="1280"
-     inkscape:window-height="688"
-     inkscape:window-x="-8"
+     inkscape:window-width="1920"
+     inkscape:window-height="1048"
+     inkscape:window-x="1432"
      inkscape:window-y="-3"
      inkscape:window-maximized="1"
      inkscape:snap-grids="true"
@@ -1172,7 +1119,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1182,7 +1129,7 @@
      inkscape:groupmode="layer"
      transform="translate(0,192)">
     <rect
-       style="fill:#808080;fill-opacity:0.50196078;stroke:#f00000;stroke-width:2.01574039;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:0;stroke-dasharray:none;filter:url(#filter3637)"
+       style="fill:#808080;fill-opacity:0.50196078;stroke:#ffffff;stroke-width:2.01574039;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;filter:url(#filter3637)"
        id="rect3727"
        width="253.98425"
        height="253.98425"
@@ -1204,7 +1151,7 @@
          sodipodi:role="line" /><tspan
          id="tspan5362"
          style="font-size:24px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:4;stroke-opacity:1"
-         y="45.34726"
+         y="45.347267"
          x="128.08018"
          sodipodi:role="line">yet downloaded</tspan></text>
     <text
@@ -1221,7 +1168,7 @@
          style="font-size:32px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none" /><tspan
          sodipodi:role="line"
          x="128.08018"
-         y="45.34726"
+         y="45.347267"
          style="font-size:24px;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none"
          id="tspan4148-8">yet downloaded</tspan></text>
     <text
