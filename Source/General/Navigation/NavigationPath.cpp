@@ -37,6 +37,7 @@ NavigationPath::NavigationPath() {
   pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth");
   minDistanceToRouteWayPoint=core->getConfigStore()->getIntValue("Navigation","minDistanceToRouteWayPoint");
   minTurnAngle=core->getConfigStore()->getIntValue("Navigation","minTurnAngle");
+  minDistanceToTurnWayPoint=core->getConfigStore()->getIntValue("Navigation","minDistanceToTurnWayPoint");
   maxDistanceToTurnWayPoint=core->getConfigStore()->getIntValue("Navigation","maxDistanceToTurnWayPoint");
   turnDetectionDistance=core->getConfigStore()->getIntValue("Navigation","turnDetectionDistance");
   isInit=false;
@@ -683,7 +684,7 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
       wayPoint.invalidate();
   }
   turnDistance=locationPos.computeDistance(turnPoint);
-  if ((!turnPointSet)||(turnDistance>maxDistanceToTurnWayPoint)) {
+  if ((!turnPointSet)||(turnDistance>maxDistanceToTurnWayPoint)||(turnDistance<minDistanceToTurnWayPoint)) {
     turnPoint.invalidate();
     turnAngle=360;
     turnDistance=-1;

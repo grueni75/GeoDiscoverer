@@ -950,7 +950,12 @@
                   <xsd:documentation>Minimum distance in meters to a point on the route to consider it as the target for navigation.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="maxDistanceToTurnWayPoint" type="xsd:double" default="100">
+              <xsd:element name="minDistanceToTurnWayPoint" type="xsd:double" default="10">
+                <xsd:annotation>
+                  <xsd:documentation>Minimum distance in meters to a turn up to it is indicated.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="maxDistanceToTurnWayPoint" type="xsd:double" default="150">
                 <xsd:annotation>
                   <xsd:documentation>Maximum distance in meters to a turn before it is indicated.</xsd:documentation>
                 </xsd:annotation>
