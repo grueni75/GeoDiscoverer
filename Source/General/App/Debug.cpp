@@ -58,10 +58,11 @@ void Debug::replayTrace(std::string filename) {
     cmd=cmd.substr(0,cmd.size()-1);
 
     // And execute it
-    core->getCommander()->execute(cmd);
+    if (cmd!="createGraphic()")
+      core->getCommander()->execute(cmd);
 
     // Sleep a little bit
-    usleep(10000);
+    //usleep(10000);
 
   }
   in.close();
