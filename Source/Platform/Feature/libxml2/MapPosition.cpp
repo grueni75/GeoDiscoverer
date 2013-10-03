@@ -50,7 +50,7 @@ void MapPosition::writeGPX(XMLNode parentNode) {
     FATAL("can not create xml property",NULL);
     return;
   }
-  node=xmlNewChild(pointNode, NULL, BAD_CAST "time", BAD_CAST core->getClock()->getXMLDate(timestamp/1000).c_str());
+  node=xmlNewChild(pointNode, NULL, BAD_CAST "time", BAD_CAST core->getClock()->getXMLDate(timestamp/1000,false).c_str());
   if (!node) {
    FATAL("can not create xml node",NULL);
    return;
@@ -203,7 +203,7 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
         }
         if (name == "time") {
           //DEBUG("before conversion: %s",text.c_str());
-          timestamp=core->getClock()->getXMLDate(text);
+          timestamp=core->getClock()->getXMLDate(text,false);
           timestamp*=1000;
           //DEBUG("after conversion: %s",core->getClock()->getXMLDate(timestamp/1000).c_str());
         }

@@ -49,10 +49,10 @@ public:
   std::string getFormattedDate();
 
   // Returns a formatted date string suitable for XML files
-  std::string getXMLDate(TimestampInSeconds timestamp=0);
+  std::string getXMLDate(TimestampInSeconds timestamp=0, bool asLocalTime=true);
 
   // Returns a timestamp from a given XML date string
-  TimestampInSeconds getXMLDate(std::string timestamp);
+  TimestampInSeconds getXMLDate(std::string timestamp, bool asLocalTime=true);
 
   // Returns the current time in microseconds since epoch
   TimestampInMicroseconds getMicrosecondsSinceStart();

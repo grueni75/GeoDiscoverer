@@ -54,25 +54,47 @@ std::string Clock::getFormattedDate() {
 }
 
 // Returns a formatted date string suitable for XML files
-std::string Clock::getXMLDate(TimestampInSeconds timestamp) {
+std::string Clock::getXMLDate(TimestampInSeconds timestamp, bool asLocalTime) {
   const int buffer_len=256;
   char date[buffer_len];
   time_t t;
+  struct tm *tmp;
   if (timestamp!=0)
     t=timestamp;
   else
     t=time(NULL);
-  strftime(date,buffer_len,"%Y-%m-%dT%H:%M:%S",localtime(&t));
+  if (asLocalTime)
+    tmp=localtime(&t);
+  else
+    tmp=gmtime(&t);
+  strftime(date,buffer_len,"%Y-%m-%dT%H:%M:%S",tmp);
   std::string result=date;
+  //WARNING("XML Date: %s",result.c_str());
   return result;
 }
 
 // Returns a timestamp from a given XML date string
-TimestampInSeconds Clock::getXMLDate(std::string timestamp) {
+TimestampInSeconds Clock::getXMLDate(std::string timestamp, bool asLocalTime) {
   struct tm tm;
+  char *tz;
+  time_t ret;
   memset(&tm,0,sizeof(struct tm));
   strptime(timestamp.c_str(),"%Y-%m-%dT%H:%M:%S",&tm);
-  return (TimestampInSeconds)mktime(&tm);
+  if (!asLocalTime) {
+    tz = getenv("TZ");
+    //DEBUG("tz=%s",tz);
+    setenv("TZ", "", 1);
+    tzset();
+  }
+  ret = mktime(&tm);
+  if (!asLocalTime) {
+    if (tz)
+      setenv("TZ", tz, 1);
+    else
+      unsetenv("TZ");
+    tzset();
+  }
+  return (TimestampInSeconds)ret;
 }
 
 // Returns the current time in microseconds since epoch

@@ -114,7 +114,8 @@ void NavigationPath::writeGPXFile() {
     FATAL("can not create xml node",NULL);
     return;
   }
-  node=xmlNewChild(metadataNode, NULL, BAD_CAST "time", BAD_CAST core->getClock()->getXMLDate().c_str());
+  //WARNING("current XML date = %s",core->getClock()->getXMLDate().c_str());
+  node=xmlNewChild(metadataNode, NULL, BAD_CAST "time", BAD_CAST core->getClock()->getXMLDate(0,false).c_str());
   if (!node) {
     FATAL("can not create xml node",NULL);
     return;
