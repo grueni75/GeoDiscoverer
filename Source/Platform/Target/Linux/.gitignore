@@ -3,8 +3,8 @@ GeoDiscoverer
 config.xml
 Track/
 config.xsd
-Map/OpenCycleMap/download.bin
-Map/OpenCycleMap/tile.bin
+Map/OpenCycleMap/*.bin
 Map/OpenCycleMap/tiles.zip
-
-
+Map/Default/*.bin
+Map/HikeMap/*.bin
+Map/HikeMap/tiles.zip
