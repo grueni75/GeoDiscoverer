@@ -1160,7 +1160,7 @@ void NavigationEngine::updateNavigationInfos() {
   } else {
     infos << ";-;-";
   }
-  DEBUG("updateNavigationInfos(%s)",infos.str().c_str());
+  //DEBUG("updateNavigationInfos(%s)",infos.str().c_str());
   core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
 }
 
