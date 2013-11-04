@@ -540,6 +540,7 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
   std::list<MapPosition>::iterator iterator=std::list<MapPosition>::iterator(nearestIterator);
   bool turnPointSet = false;
   bool prevPointWasTurnPoint = true;
+  bool firstFrontPosFound = false;
   if (minDistance!=std::numeric_limits<double>::max()) {
     while (true) {
       pos = *iterator;
@@ -554,7 +555,10 @@ void NavigationPath::computeNavigationInfos(MapPosition locationPos, MapPosition
 
         // Ignore points that lie behind the current bearing for way point and turn point computation
         double bearing = locationPos.computeBearing(pos);
-        if (fabs(bearing-locationPos.getBearing())<90.0) {
+        if ((fabs(bearing-locationPos.getBearing())<90.0)||(firstFrontPosFound)) {
+
+          // Do check all positions from the first front pos onwards
+          firstFrontPosFound=true;
 
           // Determine the way point for target computation
           double distanceFromLocation = pos.computeDistance(locationPos);
