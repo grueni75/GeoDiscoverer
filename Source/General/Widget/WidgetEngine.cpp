@@ -315,7 +315,7 @@ void WidgetEngine::createGraphic() {
       }
       if (widgetType=="status") {
         status->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
-        status->setLabelWidth(c->getIntValue(widgetPath,"labelWidth"));
+        status->setLabelWidth(c->getDoubleValue(widgetPath,"labelWidth")*status->getIconWidth()/100.0);
         GraphicColor c=status->getColor();
         c.setAlpha(0);
         status->setColor(c);
