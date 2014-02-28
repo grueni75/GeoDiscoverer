@@ -41,6 +41,11 @@
 									<xsd:documentation>Screen backlight is kept on if ticked.</xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
+              <xsd:element name="backButtonTurnsScreenOff" type="xsd:boolean" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Turns off the screen if the back button is pressed.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
 							<xsd:element name="createTraceLog" type="xsd:boolean" default="0">
 								<xsd:annotation>
 									<xsd:documentation>Writes trace messages into a file in the log directory if ticked. The trace file allows a replay of the session for debugging purposes.</xsd:documentation>
@@ -407,9 +412,9 @@
 																		<xsd:documentation>Vertical offset for the map label in percent of the widget height.</xsd:documentation>
 																	</xsd:annotation>
 																</xsd:element>
-																<xsd:element name="labelWidth" type="xsd:integer" default="255" minOccurs="0">
+																<xsd:element name="labelWidth" type="xsd:double" default="90" minOccurs="0">
 																	<xsd:annotation>
-																		<xsd:documentation>Width of the text in pixeel.</xsd:documentation>
+																		<xsd:documentation>Width of the text in percent of the widget width.</xsd:documentation>
 																	</xsd:annotation>
 																</xsd:element>
 															</xsd:sequence>

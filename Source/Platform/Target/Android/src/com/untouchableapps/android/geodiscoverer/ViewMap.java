@@ -33,6 +33,7 @@ import java.util.Vector;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.ProgressDialog;
+import android.app.admin.DevicePolicyManager;
 import android.content.*;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
@@ -109,6 +110,7 @@ public class ViewMap extends GDActivity {
   LocationManager locationManager;
   SensorManager sensorManager;
   PowerManager powerManager;
+  DevicePolicyManager devicePolicyManager;
   
   // Wake lock
   WakeLock wakeLock = null;
@@ -398,7 +400,8 @@ public class ViewMap extends GDActivity {
     locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
     sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
     powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-    
+    devicePolicyManager = (DevicePolicyManager)this.getSystemService(Context.DEVICE_POLICY_SERVICE);
+
     // Setup the GUI
     requestWindowFeature(Window.FEATURE_NO_TITLE);    
 
@@ -764,7 +767,26 @@ public class ViewMap extends GDActivity {
     }
   }
 
-  /** Called when a key is pressed */ 
+  
+  /** Called when a key is pressed */
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if (keyCode == KeyEvent.KEYCODE_BACK) {
+      if (coreObject!=null) {
+        if (Integer.parseInt(coreObject.configStoreGetStringValue("General", "backButtonTurnsScreenOff"))!=0) {
+          try {
+            devicePolicyManager.lockNow();
+          } 
+          catch (SecurityException e) {
+            Toast.makeText(this, getString(R.string.device_admin_not_enabled), Toast.LENGTH_LONG).show();
+          }
+          return true;
+        }
+      }
+    }
+    return super.onKeyDown(keyCode,event);
+  }
+  
+  /** Called when a key is released */ 
   public boolean onKeyUp (int keyCode, KeyEvent event) {
     if (keyCode==KeyEvent.KEYCODE_DPAD_CENTER) {
       coreObject.executeCoreCommand("showContextMenu()");

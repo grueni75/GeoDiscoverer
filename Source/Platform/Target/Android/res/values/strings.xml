@@ -51,6 +51,7 @@
 <string name="show_target">Show target</string>
 <string name="manually_entered_location">Manually entered location</string>
 <string name="location_dialog_title">Enter the location to find</string>
-<string name="finished">Finished</string>
 <string name="location_dialog_message">Please note: The location must be entered in a single line.</string>
+<string name="device_admin_description">Allows Geo Discoverer to turn off the screen by locking it.</string>
+<string name="device_admin_not_enabled">Screen can not be locked: Please allow GeoDiscoverer to act as a device admin in the system settings.</string>
 </resources>
