@@ -1,6 +1,6 @@
 #!/bin/bash
 #for dpi in 120 160 240 320
-for dpi in 240 320
+for dpi in 120 160 240 320 480 640
 do
   rm -rf ${dpi}dpi
   mkdir ${dpi}dpi 
