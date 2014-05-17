@@ -63,9 +63,9 @@ debug: CXXFLAGS += -g -O0 -rdynamic
 
 # General dependencies:
 
-release: $(PRGNAME)
+release: $(PRGNAME) xsd icons
 .PHONY: release
-debug:   $(PRGNAME)
+debug:   $(PRGNAME) xsd icons
 .PHONY: debug
 all:    release
 .PHONY: all
@@ -81,6 +81,14 @@ $(OBJDIR)/%.o: $(ROOT)/%.cpp $(HEADERS)
 $(PRGNAME): $(OBJS)
 	@echo "$(OBJS)"
 	$(LINK_PREFIX) $(CXX) $(CXXFLAGS) $(OBJS) $(STATIC_OBJS) $(LIBS) $(LIBDIRS) -o $(PRGNAME)
+
+# XML schema for configuration
+xsd:
+	cd $(ROOT)/Source && make linux
+
+# Iconss
+icons:
+	cd $(ROOT)/Source/Media/Icon && make linux
 
 # Cleaning the project
 

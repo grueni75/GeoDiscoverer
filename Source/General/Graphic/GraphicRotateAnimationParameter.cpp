@@ -26,6 +26,7 @@ namespace GEODISCOVERER {
 
 GraphicRotateAnimationParameter::GraphicRotateAnimationParameter() : GraphicAnimationParameter() {
   type=GraphicAnimationParameterTypeRotate;
+  animationType=GraphicRotateAnimationTypeLinear;
 }
 
 GraphicRotateAnimationParameter::~GraphicRotateAnimationParameter() {

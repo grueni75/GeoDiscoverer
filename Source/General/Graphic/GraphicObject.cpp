@@ -104,6 +104,9 @@ void GraphicObject::deinit(bool deletePrimitives) {
 // Updates all primitives contained in the object
 bool GraphicObject::work(TimestampInMicroseconds currentTime) {
 
+  // Let this object work
+  GraphicPrimitive::work(currentTime);
+
   // Let the primitives work
   bool redrawScene=false;
   for(std::list<GraphicPrimitive*>::iterator i=drawList.begin();i!=drawList.end();i++) {

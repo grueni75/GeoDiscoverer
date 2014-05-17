@@ -61,6 +61,7 @@ protected:
   double minDistanceToTurnWayPoint;               // Minimum distance in meters to a turn before it is indicated
   double minTurnAngle;                            // Minimum angle at which a turn in the path is detected
   double turnDetectionDistance;                   // Distance in meters to look forward and back for detecting a turn
+  double minDistanceToBeOffRoute;                 // Minimum distance from nearest route point such that navigation considers location to be off route
 
   // Visualization of the path for each zoom level
   std::vector<NavigationPathVisualization*> zoomLevelVisualizations;
@@ -122,7 +123,7 @@ public:
   void backgroundLoader();
 
   // Computes navigation details for the given location
-  void computeNavigationInfos(MapPosition locationPos, MapPosition &wayPoint, MapPosition &turnPoint, double &turnAngle, double &turnDistance, double &distanceToRouteEnd);
+  void computeNavigationInfo(MapPosition locationPos, MapPosition &wayPoint, NavigationInfo &navigationInfo);
 
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)

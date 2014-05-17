@@ -61,6 +61,11 @@ FontEngine::FontEngine() {
     return;
   if (!loadFont("sansBoldSmall",sansBoldFontFilename,sansSmallSize))
     return;
+  Int sansTinySize = core->getConfigStore()->getIntValue("Graphic/Font","sansTinySize");
+  if (!loadFont("sansTiny",sansFontFilename,sansTinySize))
+    return;
+  if (!loadFont("sansBoldTiny",sansBoldFontFilename,sansTinySize))
+    return;
 }
 
 // Loads a font

@@ -126,7 +126,7 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
     labelFontString->setY(y+labelY);
 
     // Set the next update time
-    nextUpdateTime+=updateInterval;
+    nextUpdateTime=t+updateInterval;
 
   }
 

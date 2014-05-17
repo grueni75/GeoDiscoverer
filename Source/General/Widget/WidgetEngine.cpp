@@ -67,6 +67,7 @@ void WidgetEngine::addWidgetToPage(
     case WidgetTypeMeter: widgetTypeString="meter"; break;
     case WidgetTypeScale: widgetTypeString="scale"; break;
     case WidgetTypeStatus: widgetTypeString="status"; break;
+    case WidgetTypeNavigation: widgetTypeString="navigation"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
   c->setStringValue(path,"type",widgetTypeString);
@@ -78,38 +79,17 @@ void WidgetEngine::addWidgetToPage(
   c->setIntValue(path + "/Landscape","z",landscapeZ);
   c->setGraphicColorValue(path + "/ActiveColor",GraphicColor(activeRed,activeGreen,activeBlue,activeAlpha));
   c->setGraphicColorValue(path + "/InactiveColor",GraphicColor(inactiveRed,inactiveGreen,inactiveBlue,inactiveAlpha));
-  switch(widgetType) {
-    case WidgetTypeButton:
-      c->setStringValue(path,"iconFilename",parameters["iconFilename"]);
-      c->setStringValue(path,"command",parameters["command"]);
-      break;
-    case WidgetTypeCheckbox:
-      c->setStringValue(path,"checkedIconFilename",parameters["checkedIconFilename"]);
-      c->setStringValue(path,"checkedCommand",parameters["checkedCommand"]);
-      c->setStringValue(path,"uncheckedIconFilename",parameters["uncheckedIconFilename"]);
-      c->setStringValue(path,"uncheckedCommand",parameters["uncheckedCommand"]);
-      c->setStringValue(path,"stateConfigPath",parameters["stateConfigPath"]);
-      c->setStringValue(path,"stateConfigName",parameters["stateConfigName"]);
-      break;
-    case WidgetTypeMeter:
-      c->setStringValue(path,"iconFilename",parameters["iconFilename"]);
-      c->setStringValue(path,"meterType",parameters["meterType"]);
-      c->setStringValue(path,"updateInterval",parameters["updateInterval"]);
-      c->setStringValue(path,"labelY",parameters["labelY"]);
-      c->setStringValue(path,"valueY",parameters["valueY"]);
-      c->setStringValue(path,"unitY",parameters["unitY"]);
-      break;
-    case WidgetTypeScale:
-      c->setStringValue(path,"iconFilename",parameters["iconFilename"]);
-      c->setStringValue(path,"updateInterval",parameters["updateInterval"]);
-      c->setStringValue(path,"tickLabelOffsetX",parameters["tickLabelOffsetX"]);
-      c->setStringValue(path,"mapLabelOffsetY",parameters["mapLabelOffsetY"]);
-      break;
-    case WidgetTypeStatus:
-      c->setStringValue(path,"labelWidth",parameters["labelWidth"]);
-      c->setStringValue(path,"iconFilename",parameters["iconFilename"]);
-      c->setStringValue(path,"updateInterval",parameters["updateInterval"]);
-      break;
+  ParameterMap::iterator i;
+  for (i=parameters.begin();i!=parameters.end();i++) {
+    std::string innerPath = path;
+    std::string name = i->first;
+    size_t pos;
+    while ((pos = name.find("/"))!=std::string::npos) {
+      innerPath.append("/");
+      innerPath.append(name.substr(0,pos));
+      name=name.substr(pos+1);
+    }
+    c->setStringValue(innerPath, name, i->second);
   }
 }
 
@@ -140,6 +120,7 @@ void WidgetEngine::createGraphic() {
     parameters["iconFilename"]="zoomOut";
     parameters["command"]="zoom(0.875)";
     addWidgetToPage("Default",WidgetTypeButton,"Zoom Out",              62.5, 23.0,0,93.0, 62.5,0,255,255,255,255,255,255,255,100,parameters);
+    /*
     parameters.clear();
     parameters["iconFilename"]="rotateLeft";
     parameters["command"]="rotate(+3)";
@@ -148,6 +129,7 @@ void WidgetEngine::createGraphic() {
     parameters["iconFilename"]="rotateRight";
     parameters["command"]="rotate(-3)";
     addWidgetToPage("Default",WidgetTypeButton,"Rotate Right",          12.5, 23.0,0,93.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    */
     parameters.clear();
     parameters["uncheckedIconFilename"]="trackRecordingOff";
     parameters["uncheckedCommand"]="setRecordTrack(0)";
@@ -155,11 +137,12 @@ void WidgetEngine::createGraphic() {
     parameters["checkedCommand"]="setRecordTrack(1)";
     parameters["stateConfigPath"]="Navigation";
     parameters["stateConfigName"]="recordTrack";
-    addWidgetToPage("Default",WidgetTypeCheckbox,"Track Recording",     87.5, 93.0,0,7.0, 87.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Track Recording",     37.5, 93.0,0,7.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="createNewTrack";
     parameters["command"]="createNewTrack()";
-    addWidgetToPage("Default",WidgetTypeButton,"Create New Track",      62.5, 93.0,0,7.0, 62.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Create New Track",      12.5, 93.0,0,7.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    /*
     parameters.clear();
     parameters["uncheckedIconFilename"]="wakeLockOff";
     parameters["uncheckedCommand"]="setWakeLock(0)";
@@ -168,6 +151,7 @@ void WidgetEngine::createGraphic() {
     parameters["stateConfigPath"]="General";
     parameters["stateConfigName"]="wakeLock";
     addWidgetToPage("Default",WidgetTypeCheckbox,"Wake Lock",           37.5, 93.0,0,7.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    */
     parameters.clear();
     parameters["uncheckedIconFilename"]="returnToLocationOff";
     parameters["uncheckedCommand"]="setReturnToLocation(0)";
@@ -175,7 +159,7 @@ void WidgetEngine::createGraphic() {
     parameters["checkedCommand"]="setReturnToLocation(1)";
     parameters["stateConfigPath"]="Map";
     parameters["stateConfigName"]="returnToLocation";
-    addWidgetToPage("Default",WidgetTypeCheckbox,"Return To Location",  12.5, 93.0,0,7.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Return To Location",  37.5, 23.0,0,93.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["uncheckedIconFilename"]="zoomLevelLockOff";
     parameters["uncheckedCommand"]="setZoomLevelLock(0)";
@@ -183,7 +167,7 @@ void WidgetEngine::createGraphic() {
     parameters["checkedCommand"]="setZoomLevelLock(1)";
     parameters["stateConfigPath"]="Map";
     parameters["stateConfigName"]="zoomLevelLock";
-    addWidgetToPage("Default",WidgetTypeCheckbox,"Zoom Level Lock",     87.5, 81.0,0,75.0,87.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Zoom Level Lock",     12.5, 23.0,0,93.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="meterBackground";
     parameters["meterType"]="altitude";
@@ -201,12 +185,38 @@ void WidgetEngine::createGraphic() {
     parameters["updateInterval"]="1000000";
     parameters["tickLabelOffsetX"]="-3.5";
     parameters["mapLabelOffsetY"]="9.0";
-    addWidgetToPage("Default",WidgetTypeScale,"Map scale",              35.0, 81.0,0,37.0, 88.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeScale,"Map scale",              25.5, 81.0,0,50.0, 88.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="statusBackground";
     parameters["updateInterval"]="100000";
     parameters["labelWidth"]="255";
-    addWidgetToPage("Default",WidgetTypeStatus,"Status",                35.0, 81.0,1,37.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeStatus,"Status",                30.5, 81.0,1,50.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="navigationBackground";
+    parameters["updateInterval"]="1000000";
+    parameters["durationLabelOffsetY"]="38";
+    parameters["durationValueOffsetY"]="25";
+    parameters["targetDistanceLabelOffsetY"]="68";
+    parameters["targetDistanceValueOffsetY"]="55";
+    parameters["turnDistanceValueOffsetY"]="25";
+    parameters["directionIconFilename"]="navigationDirection";
+    parameters["targetIconFilename"]="navigationTarget";
+    parameters["separatorIconFilename"]="navigationSeparator";
+    parameters["directionChangeDuration"]="500000";
+    parameters["targetRadius"]="86.0";
+    parameters["orientationLabelRadius"]="86.5";
+    parameters["turnLineWidth"] = "15.0";
+    parameters["turnLineArrowOverhang"] = "7.5";
+    parameters["turnLineArrowHeight"] = "15.0";
+    parameters["turnLineStartHeight"] = "21.0";
+    parameters["turnLineMiddleHeight"] = "8.5";
+    parameters["turnLineStartX"] = "50.0";
+    parameters["turnLineStartY"] = "37.0";
+    parameters["TurnColor/red"] = "0";
+    parameters["TurnColor/green"] = "0";
+    parameters["TurnColor/blue"] = "0";
+    parameters["TurnColor/alpha"] = "255";
+    addWidgetToPage("Default",WidgetTypeNavigation,"Navigation",        78.0, 86.0,0,14.0, 78.0,0,255,255,255,255,255,255,255,100,parameters);
     pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
   }
 
@@ -240,6 +250,7 @@ void WidgetEngine::createGraphic() {
       WidgetMeter *meter;
       WidgetScale *scale;
       WidgetStatus *status;
+      WidgetNavigation *navigation;
       if (widgetType=="button") {
         button=new WidgetButton();
         primitive=button;
@@ -260,6 +271,10 @@ void WidgetEngine::createGraphic() {
         status=new WidgetStatus();
         primitive=status;
       }
+      if (widgetType=="navigation") {
+        navigation=new WidgetNavigation();
+        primitive=navigation;
+      }
 
       // Set type-independent properties
       std::list<std::string> name;
@@ -270,7 +285,7 @@ void WidgetEngine::createGraphic() {
       primitive->setColor(primitive->getInactiveColor());
 
       // Load the image of the widget
-      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")) {
+      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")) {
         primitive->setTextureFromIcon(c->getStringValue(widgetPath,"iconFilename"));
       }
       if (widgetType=="checkbox") {
@@ -278,6 +293,17 @@ void WidgetEngine::createGraphic() {
         checkbox->setCheckedTexture(primitive->getTexture());
         primitive->setTextureFromIcon(c->getStringValue(widgetPath,"uncheckedIconFilename"));
         checkbox->setUncheckedTexture(primitive->getTexture());
+      }
+      if (widgetType=="navigation") {
+        navigation->getDirectionIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"directionIconFilename"));
+        navigation->getDirectionIcon()->setX(-navigation->getDirectionIcon()->getIconWidth()/2);
+        navigation->getDirectionIcon()->setY(-navigation->getDirectionIcon()->getIconHeight()/2);
+        navigation->getTargetIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"targetIconFilename"));
+        navigation->getTargetIcon()->setX(-navigation->getTargetIcon()->getIconWidth()/2);
+        navigation->getTargetIcon()->setY(-navigation->getTargetIcon()->getIconHeight()/2);
+        navigation->getSeparatorIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"separatorIconFilename"));
+        navigation->getSeparatorIcon()->setX(0);
+        navigation->getSeparatorIcon()->setY(0);
       }
 
       // Set type-dependent properties
@@ -319,6 +345,25 @@ void WidgetEngine::createGraphic() {
         GraphicColor c=status->getColor();
         c.setAlpha(0);
         status->setColor(c);
+      }
+      if (widgetType=="navigation") {
+        navigation->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
+        navigation->setDurationLabelOffsetY(c->getDoubleValue(widgetPath,"durationLabelOffsetY")*navigation->getIconHeight()/100.0);
+        navigation->setDurationValueOffsetY(c->getDoubleValue(widgetPath,"durationValueOffsetY")*navigation->getIconHeight()/100.0);
+        navigation->setTargetDistanceLabelOffsetY(c->getDoubleValue(widgetPath,"targetDistanceLabelOffsetY")*navigation->getIconHeight()/100.0);
+        navigation->setTargetDistanceValueOffsetY(c->getDoubleValue(widgetPath,"targetDistanceValueOffsetY")*navigation->getIconHeight()/100.0);
+        navigation->setTurnDistanceValueOffsetY(c->getDoubleValue(widgetPath,"turnDistanceValueOffsetY")*navigation->getIconHeight()/100.0);
+        navigation->setDirectionChangeDuration(c->getDoubleValue(widgetPath,"directionChangeDuration"));
+        navigation->setTargetRadius(c->getDoubleValue(widgetPath,"targetRadius")*navigation->getIconHeight()/200.0);
+        navigation->setOrientationLabelRadius(c->getDoubleValue(widgetPath,"orientationLabelRadius")*navigation->getIconHeight()/200.0);
+        navigation->setTurnLineWidth(c->getDoubleValue(widgetPath,"turnLineWidth")*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineArrowOverhang(c->getDoubleValue(widgetPath,"turnLineArrowOverhang")*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineArrowHeight(c->getDoubleValue(widgetPath,"turnLineArrowHeight")*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineStartHeight(c->getDoubleValue(widgetPath,"turnLineStartHeight")*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineMiddleHeight(c->getDoubleValue(widgetPath,"turnLineMiddleHeight")*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineStartX(c->getDoubleValue(widgetPath,"turnLineStartX")*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineStartY(c->getDoubleValue(widgetPath,"turnLineStartY")*navigation->getIconHeight()/100.0);
+        navigation->setTurnColor(c->getGraphicColorValue(widgetPath+"/TurnColor"));
       }
 
       // Add the widget to the page

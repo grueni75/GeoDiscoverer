@@ -4,7 +4,12 @@ config.xml
 Track/
 config.xsd
 Map/OpenCycleMap/*.bin
-Map/OpenCycleMap/tiles.zip
+Map/OpenCycleMap/*.zip
 Map/Default/*.bin
+Map/Default/*.zip
 Map/HikeMap/*.bin
-Map/HikeMap/tiles.zip
+Map/HikeMap/*.zip
+Map/OpenTopoHikeMap/*.bin
+Map/OpenTopoHikeMap/*.zip
+Map/DDorf/*.bin
+Icon/240dpi/*

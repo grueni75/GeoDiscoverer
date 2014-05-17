@@ -48,6 +48,12 @@ public:
   // Adds one point to the internal array
   bool addPoint(Short x, Short y);
 
+  // Adds one point to the internal array
+  bool addPoint(GraphicPoint point);
+
+  // Removes all points
+  void reset();
+
   // Uses the stored points to draw triangles
   void drawAsTriangles(Screen *screen);
 

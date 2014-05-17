@@ -94,7 +94,7 @@ void GraphicPrimitive::setFadeAnimation(TimestampInMicroseconds startTime, Graph
 }
 
 // Sets a new rotation target
-void GraphicPrimitive::setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite, TimestampInMicroseconds duration) {
+void GraphicPrimitive::setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite, TimestampInMicroseconds duration, GraphicRotateAnimationType animationType) {
   rotateDuration=duration;
   rotateStartTime=startTime;
   rotateEndTime=startTime+duration;
@@ -103,6 +103,7 @@ void GraphicPrimitive::setRotateAnimation(TimestampInMicroseconds startTime, dou
   if (duration==0)
     angle=endAngle;
   rotateInfinite=infinite;
+  rotateAnimationType=animationType;
 }
 
 // Sets a new scale target
@@ -210,7 +211,7 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
   // Infinite rotation animation required?
   if (rotateStartTime==rotateEndTime) {
     if (rotateInfinite) {
-      setRotateAnimation(currentTime,rotateStartAngle,rotateEndAngle,true,rotateDuration);
+      setRotateAnimation(currentTime,rotateStartAngle,rotateEndAngle,true,rotateDuration,rotateAnimationType);
     }  else {
 
       // Some more parameters in the list?
@@ -226,12 +227,31 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
     if (currentTime<=rotateEndTime) {
       Int elapsedTime=currentTime-rotateStartTime;
       Int duration=rotateEndTime-rotateStartTime;
-      double factor=(double)elapsedTime/(double)duration;
       double angleDiff=rotateEndAngle-rotateStartAngle;
-      angle=angleDiff*factor+rotateStartAngle;
+      double speed,accel;
+      switch(rotateAnimationType) {
+        case GraphicRotateAnimationTypeLinear:
+          speed=(double)elapsedTime/(double)duration;
+          angle=angleDiff*speed+rotateStartAngle;
+          break;
+        case GraphicRotateAnimationTypeAccelerated:
+          accel=angleDiff/(((double)duration)*((double)duration)/4.0);
+          speed=accel*((double)duration)/2;
+          if (elapsedTime<=duration/2) {
+            angle=rotateStartAngle+accel*((double)elapsedTime)*((double)elapsedTime)/2;
+          } else {
+            double t=((double)elapsedTime)-((double)duration)/2;
+            angle=rotateStartAngle+angleDiff/2+speed*t-accel*t*t/2;
+          }
+          break;
+        default:
+          FATAL("animation type is not supported",NULL);
+      }
     } else {
       angle=rotateEndAngle;
       rotateStartTime=rotateEndTime;
+      if (rotateAnimationType==GraphicRotateAnimationTypeAccelerated)
+        DEBUG("final angle=%f",angle);
     }
   }
 
@@ -341,7 +361,7 @@ void GraphicPrimitive::setNextRotateAnimationStep() {
   if (rotateAnimationSequence.size()>0) {
     GraphicRotateAnimationParameter parameter = rotateAnimationSequence.front();
     rotateAnimationSequence.pop_front();
-    setRotateAnimation(parameter.getStartTime(),parameter.getStartAngle(),parameter.getEndAngle(),parameter.getInfinite(),parameter.getDuration());
+    setRotateAnimation(parameter.getStartTime(),parameter.getStartAngle(),parameter.getEndAngle(),parameter.getInfinite(),parameter.getDuration(),parameter.getAnimationType());
   }
 }
 

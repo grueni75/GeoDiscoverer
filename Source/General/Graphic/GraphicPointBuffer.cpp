@@ -59,6 +59,11 @@ bool GraphicPointBuffer::addPoint(Short x, Short y) {
   }
 }
 
+// Adds one point to the internal array
+bool GraphicPointBuffer::addPoint(GraphicPoint point) {
+  return addPoint(point.getX(),point.getY());
+}
+
 // Uses the stored points to draw triangles
 void GraphicPointBuffer::drawAsTriangles(Screen *screen) {
   if (insertPos==0)
@@ -108,6 +113,12 @@ void GraphicPointBuffer::invalidate() {
     unusedBuffers.push_back(buffer);
     buffer=core->getScreen()->getBufferNotDefined();
   }
+}
+
+// Removes all points
+void GraphicPointBuffer::reset() {
+  insertPos=0;
+  bufferOutdated=true;
 }
 
 }

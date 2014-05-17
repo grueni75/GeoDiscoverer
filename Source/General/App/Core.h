@@ -335,6 +335,7 @@ extern Core *core;
 #include <Storage.h>
 #include <Dialog.h>
 #include <Screen.h>
+#include <NavigationInfo.h>
 #include <GraphicPosition.h>
 #include <GraphicAnimationParameter.h>
 #include <GraphicScaleAnimationParameter.h>
@@ -343,6 +344,7 @@ extern Core *core;
 #include <GraphicFadeAnimationParameter.h>
 #include <GraphicTextureAnimationParameter.h>
 #include <GraphicPrimitive.h>
+#include <GraphicPoint.h>
 #include <GraphicPointBuffer.h>
 #include <GraphicLine.h>
 #include <GraphicRectangle.h>
@@ -361,6 +363,7 @@ extern Core *core;
 #include <WidgetCheckbox.h>
 #include <WidgetMeter.h>
 #include <WidgetScale.h>
+#include <WidgetNavigation.h>
 #include <WidgetStatus.h>
 #include <WidgetPage.h>
 #include <GraphicEngine.h>

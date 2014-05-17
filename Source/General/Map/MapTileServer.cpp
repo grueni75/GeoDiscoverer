@@ -70,11 +70,9 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, UInt
   lastDownloadURL=url;
 
   // Download the file
-  mapSource->lockAccess();
   DownloadResult result = core->downloadURL(url,imagePath,!mapSource->getDownloadWarningOccured(),true);
   switch (result) {
     case DownloadResultSuccess:
-      mapSource->unlockAccess();
 
       // Check if the image can be loaded
       if ((!core->getImage()->queryPNG(imagePath,imageWidth,imageHeight))&&
@@ -87,10 +85,10 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, UInt
 
     // Some tile servers do not have tiles for every location, so ignore file not found
     case DownloadResultFileNotFound:
-      mapSource->unlockAccess();
       return DownloadResultFileNotFound;
 
     case DownloadResultOtherFail:
+      mapSource->lockAccess();
       mapSource->setDownloadWarningOccured(true);
       mapSource->unlockAccess();
       break;

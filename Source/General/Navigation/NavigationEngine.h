@@ -128,14 +128,13 @@ protected:
   // Parameters when to update the navigation information
   MapPosition lastNavigationLocationPos;
   double minDistanceToNavigationUpdate;
+  bool forceNavigationUpdate;
+
+  // Mutex for accessing the navigation infos
+  ThreadMutexInfo *navigationInfosMutex;
 
   // Navigation information
-  double navigationLocationBearing;
-  double navigationTargetBearing;
-  double navigationDistance;
-  double navigationDuration;
-  double turnDistance;
-  double turnAngle;
+  NavigationInfo navigationInfo;
 
   // Updates the navigation infos
   void updateNavigationInfos();
@@ -293,6 +292,19 @@ public:
     core->getThread()->unlockMutex(statusMutex);
   }
 
+  NavigationInfo *lockNavigationInfo()
+  {
+      core->getThread()->lockMutex(navigationInfosMutex);
+      return &navigationInfo;
+  }
+  void unlockNavigationInfo()
+  {
+      core->getThread()->unlockMutex(navigationInfosMutex);
+  }
+
+  TimestampInMicroseconds getTargetRotateDuration() const {
+    return targetRotateDuration;
+  }
 };
 
 }

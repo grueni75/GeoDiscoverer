@@ -25,6 +25,9 @@
 #include <GL/glut.h>
 #include <Core.h>
 
+// Indicates if the main thread as exited
+bool mainThreadHasExited=false;
+
 // Main thread of the application
 void *mainThread(void *args) {
 
@@ -41,14 +44,41 @@ void *mainThread(void *args) {
   GEODISCOVERER::core->getScreen()->mainLoop();
 
   // Exit the thread
+  mainThreadHasExited=true;
   GEODISCOVERER::core->getThread()->exitThread();
 }
 
 // Debugging thread
 void *debugThread(void *args) {
 
+  /* Set an example position
+  while (!mainThreadHasExited) {
+    double bearing = rand() % 359 + 0;
+    std::stringstream cmd;
+    cmd << "locationChanged(gps,";
+    cmd << GEODISCOVERER::core->getClock()->getMicrosecondsSinceStart() << ",";
+    double longitude = 6.7766815000000005 + ((double)((rand() % 500) - 250)) / 500.0;
+    double latitude = 51.23516803333333 + ((double)((rand() % 500) - 250)) / 500.0;
+    cmd << longitude << "," << latitude << ",";
+    cmd << "1,100.0,1,";
+    cmd << "1," << bearing << ",";
+    cmd << "1,4.16,";
+    cmd << "1,400.0)";
+    GEODISCOVERER::core->getCommander()->execute(cmd.str());
+    for (int i=0;i<1;i++) {
+      std::stringstream cmd;
+      cmd << "setTargetAtGeographicCoordinate(";
+      double longitude = 6.7766815000000005 + ((double)((rand() % 500) - 250)) / 500.0;
+      double latitude = 51.23516803333333 + ((double)((rand() % 500) - 250)) / 500.0;
+      cmd << longitude << "," << latitude << ")";
+      GEODISCOVERER::core->getCommander()->execute(cmd.str());
+      usleep(rand() % 10000000);
+    }
+  }*/
+
   // Set an example position
-  GEODISCOVERER::core->getCommander()->execute("locationChanged(gps,1289865600000,6.7766815000000005,51.23516803333333,1,100.0,1,1,200.0,1,4.16,1,400.0)");
+  //GEODISCOVERER::core->getCommander()->execute("locationChanged(gps,1289865600000,6.7766815000000005,51.23516803333333,1,100.0,1,1,200.0,1,4.16,1,400.0)");
+  GEODISCOVERER::core->getCommander()->execute("locationChanged(gps,1289865600000,6.7766815000000005,51.23516803333333,1,100.0,1,1,0.0,1,4.16,1,400.0)");
 
   // Set an example bearing
   GEODISCOVERER::core->getCommander()->execute("compassBearingChanged(345.3542)");

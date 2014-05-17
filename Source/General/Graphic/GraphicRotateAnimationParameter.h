@@ -27,10 +27,13 @@
 
 namespace GEODISCOVERER {
 
+typedef enum { GraphicRotateAnimationTypeLinear, GraphicRotateAnimationTypeAccelerated } GraphicRotateAnimationType;
+
 class GraphicRotateAnimationParameter: public GEODISCOVERER::GraphicAnimationParameter {
 
-  double startAngle;                       // Start factor of scale operation
-  double endAngle;                         // End factor of scale operation
+  GraphicRotateAnimationType animationType; // Type of rotation
+  double startAngle;                        // Start factor of scale operation
+  double endAngle;                          // End factor of scale operation
 
 public:
 
@@ -57,6 +60,13 @@ public:
     this->startAngle = startAngle;
   }
 
+  GraphicRotateAnimationType getAnimationType() const {
+    return animationType;
+  }
+
+  void setAnimationType(GraphicRotateAnimationType animationType) {
+    this->animationType = animationType;
+  }
 };
 
 } /* namespace GEODISCOVERER */

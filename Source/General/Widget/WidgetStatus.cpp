@@ -99,7 +99,7 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
     }
 
     // Set the next update time
-    nextUpdateTime+=updateInterval;
+    nextUpdateTime=t+updateInterval;
 
   }
 

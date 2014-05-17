@@ -67,11 +67,9 @@ NavigationEngine::NavigationEngine() {
   targetScaleMinFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor");
   targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor");
   backgroundLoaderFinished=false;
-  navigationLocationBearing=999.0;
-  navigationTargetBearing=999.0;
-  navigationDistance=-1;
-  navigationDuration=-1;
+  navigationInfosMutex=core->getThread()->createMutex();
   minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate");
+  forceNavigationUpdate=false;
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -99,6 +97,7 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(statusMutex);
   core->getThread()->destroyMutex(targetPosMutex);
   core->getThread()->destroyMutex(backgroundLoaderFinishedMutex);
+  core->getThread()->destroyMutex(navigationInfosMutex);
 }
 
 // Initializes the engine
@@ -106,7 +105,7 @@ void NavigationEngine::init() {
 
   // Set the animation of the target
   GraphicRectangle *targetIcon = core->getGraphicEngine()->lockTargetIcon();
-  targetIcon->setRotateAnimation(0,0,360,true,targetRotateDuration);
+  targetIcon->setRotateAnimation(0,0,360,true,targetRotateDuration,GraphicRotateAnimationTypeLinear);
   core->getGraphicEngine()->unlockTargetIcon();
 
   // Set the color of the recorded track
@@ -1035,6 +1034,8 @@ void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, b
   core->getConfigStore()->setDoubleValue(path,"lng",lng);
   core->getConfigStore()->setDoubleValue(path,"lat",lat);
   showTarget(repositionMap);
+  forceNavigationUpdate=true;
+  updateNavigationInfos();
 }
 
 // Updates the navigation infos
@@ -1059,12 +1060,13 @@ void NavigationEngine::updateNavigationInfos() {
   // Use the last bearing if the new location has no bearing
 
   // Check if the infos need to be updated
-  if (lastNavigationLocationPos.isValid()) {
+  if ((lastNavigationLocationPos.isValid())&&(!forceNavigationUpdate)) {
     double travelledDistance = locationPos.computeDistance(lastNavigationLocationPos);
-    if ((travelledDistance < minDistanceToNavigationUpdate))
+    if (travelledDistance < minDistanceToNavigationUpdate)
       return;
   }
   lastNavigationLocationPos=locationPos;
+  forceNavigationUpdate=false;
 
   // Copy target pos
   lockTargetPos();
@@ -1072,17 +1074,12 @@ void NavigationEngine::updateNavigationInfos() {
   unlockTargetPos();
 
   // If a route is active, compute the details for the given route
-  navigationLocationBearing=999.0;
-  navigationTargetBearing=999.0;
-  navigationDistance=-1;
-  navigationDuration=-1;
-  turnDistance=-1;
-  turnAngle=360;
+  lockNavigationInfo();
+  navigationInfo=NavigationInfo();
   double speed=0;
-  MapPosition turnPos;
   if (locationPos.isValid()) {
     if (locationPos.getHasBearing()) {
-      navigationLocationBearing=locationPos.getBearing();
+      navigationInfo.setLocationBearing(locationPos.getBearing());
     }
     if (locationPos.getHasSpeed()) {
       speed=locationPos.getSpeed();
@@ -1090,9 +1087,9 @@ void NavigationEngine::updateNavigationInfos() {
 
     // If a target is active, compute the details for the given target
     if (targetPos.isValid()) {
-      if (navigationLocationBearing!=999.0)
-        navigationTargetBearing=locationPos.computeBearing(targetPos);
-      navigationDistance = locationPos.computeDistance(targetPos);
+      if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
+        navigationInfo.setTargetBearing(locationPos.computeBearing(targetPos));
+      navigationInfo.setTargetDistance(locationPos.computeDistance(targetPos));
     } else {
 
       if (activeRoute) {
@@ -1100,19 +1097,19 @@ void NavigationEngine::updateNavigationInfos() {
         // Compute the navigation details for the given route
         //static MapPosition prevTurnPos;
         lockRoutes();
-        activeRoute->computeNavigationInfos(locationPos,targetPos,turnPos,turnAngle,turnDistance,navigationDistance);
+        activeRoute->computeNavigationInfo(locationPos,targetPos,navigationInfo);
         unlockRoutes();
         //WARNING("enable route locking",NULL);
         if (targetPos.isValid()) {
           //setTargetAtGeographicCoordinate(targetPos.getLng(),targetPos.getLat(),false);
-          if (navigationLocationBearing!=999.0)
-            navigationTargetBearing=locationPos.computeBearing(targetPos);
+          if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
+            navigationInfo.setTargetBearing(locationPos.computeBearing(targetPos));
         }
-        if (turnPos.isValid()) {
-          if (turnAngle>0) {
-            DEBUG("turn to the left by %f°in %f meters",turnAngle,turnDistance);
+        if (navigationInfo.getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
+          if (navigationInfo.getTurnAngle()>0) {
+            DEBUG("turn to the left by %f°in %f meters",navigationInfo.getTurnAngle(),navigationInfo.getTurnDistance());
           } else {
-            DEBUG("turn to the right by %f° in %f meters",turnAngle,turnDistance);
+            DEBUG("turn to the right by %f° in %f meters",navigationInfo.getTurnAngle(),navigationInfo.getTurnDistance());
           }
           /*if ((!prevTurnPos.isValid())||(prevTurnPos!=turnPos)) {
             setTargetAtGeographicCoordinate(turnPos.getLng(),turnPos.getLat(),false);
@@ -1126,40 +1123,44 @@ void NavigationEngine::updateNavigationInfos() {
     }
   }
   if (speed>0) {
-    navigationDuration = navigationDistance / speed;
+    if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance())
+      navigationInfo.setTargetDuration(navigationInfo.getTargetDistance() / speed);
   }
 
   // Update the parent app
   std::string value,unit;
-  if (navigationLocationBearing!=999.0)
-    infos << navigationLocationBearing;
+  if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
+    infos << navigationInfo.getLocationBearing();
   else
     infos << "-";
-  if (navigationTargetBearing!=999.0)
-    infos << ";" << navigationTargetBearing;
+  if (navigationInfo.getTargetBearing()!=NavigationInfo::getUnknownAngle())
+    infos << ";" << navigationInfo.getTargetBearing();
   else
     infos << ";-";
   infos << ";Distance;";
-  if (navigationDistance!=-1) {
-    core->getUnitConverter()->formatMeters(navigationDistance,value,unit);
+  if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance()) {
+    core->getUnitConverter()->formatMeters(navigationInfo.getTargetDistance(),value,unit);
     infos << value << " " << unit;
   } else {
     infos << "infinite";
   }
   infos << ";Duration;";
-  if (navigationDuration!=-1) {
-    core->getUnitConverter()->formatTime(navigationDuration,value,unit);
+  if (navigationInfo.getTargetDuration()!=NavigationInfo::getUnknownDuration()) {
+    core->getUnitConverter()->formatTime(navigationInfo.getTargetDuration(),value,unit);
     infos << value << " " << unit;
   } else {
     infos << "move!";
   }
-  if (turnPos.isValid()) {
-    infos << ";" << turnAngle;
-    core->getUnitConverter()->formatMeters(turnDistance,value,unit);
+  if (navigationInfo.getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
+    infos << ";" << navigationInfo.getTurnAngle();
+    core->getUnitConverter()->formatMeters(navigationInfo.getTurnDistance(),value,unit);
     infos << ";" << value << " " << unit;
   } else {
     infos << ";-;-";
   }
+  unlockNavigationInfo();
+
+  // Update other apps
   //DEBUG("updateNavigationInfos(%s)",infos.str().c_str());
   core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
 }

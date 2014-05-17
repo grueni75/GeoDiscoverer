@@ -54,6 +54,7 @@ protected:
   GraphicColor fadeStartColor;                          // Start color of a fade operation
   GraphicColor fadeEndColor;                            // Stop color of a fade operation
   bool fadeInfinite;                                    // Fade is repeated infinitely if set
+  GraphicRotateAnimationType rotateAnimationType;       // Type of rotate animation type
   TimestampInMicroseconds rotateDuration;               // Duration of a rotate operation
   TimestampInMicroseconds rotateStartTime;              // Start of the rotate operation
   TimestampInMicroseconds rotateEndTime;                // End of the rotate operation
@@ -131,7 +132,7 @@ public:
   virtual void setFadeAnimation(TimestampInMicroseconds startTime, GraphicColor startColor, GraphicColor endColor, bool infinite, TimestampInMicroseconds duration);
 
   // Sets a new rotation target
-  void setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite, TimestampInMicroseconds duration);
+  void setRotateAnimation(TimestampInMicroseconds startTime, double startAngle, double endAngle, bool infinite, TimestampInMicroseconds duration, GraphicRotateAnimationType animationType);
 
   // Sets a new scale target
   void setScaleAnimation(TimestampInMicroseconds startTime, double startFactor, double endFactor, bool infinite, TimestampInMicroseconds duration);
