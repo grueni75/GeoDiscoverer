@@ -216,7 +216,7 @@ void WidgetEngine::createGraphic() {
     parameters["TurnColor/green"] = "0";
     parameters["TurnColor/blue"] = "0";
     parameters["TurnColor/alpha"] = "255";
-    addWidgetToPage("Default",WidgetTypeNavigation,"Navigation",        78.0, 86.0,0,14.0, 78.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeNavigation,"Navigation",        78.0, 87.0,0,12.0, 78.0,0,255,255,255,255,255,255,255,100,parameters);
     pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
   }
 
