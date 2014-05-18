@@ -6,19 +6,26 @@
 
 ROOT = $(shell cd .. && pwd)
 LINUX = $(ROOT)/Source/Platform/Target/Linux
+ANDROID = $(ROOT)/Source/Platform/Target/Android/assets/GeoDiscoverer
 
 # General dependencies:
 
-linux: $(LINUX)/config.xsd
-.PHONY: release
-all:    linux
+all:    linux android
 .PHONY: all
+linux:	$(LINUX)/config.xsd
+.PHONY: release
+android:	$(ANDROID)/config.xsd
+.PHONY: android
 
 # Explicit rules:
 
 # Install config schema into linux target
 $(LINUX)/config.xsd: $(ROOT)/Source/config.xsd
-	@cp $< $@
+	cp $< $@
+
+# Install config schema into android target
+$(ANDROID)/config.xsd: $(ROOT)/Source/config.xsd
+	cp $< $@
 
 # Debugging the makefile
 showvars: 

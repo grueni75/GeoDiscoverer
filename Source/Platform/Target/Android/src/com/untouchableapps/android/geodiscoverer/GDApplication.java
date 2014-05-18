@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 import android.app.Application;
+import android.media.ExifInterface;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -62,6 +63,7 @@ public class GDApplication extends Application {
     String homeDirPath = GDApplication.getHomeDirPath();
     if (homeDirPath.equals("")) {
       Toast.makeText(this, String.format(String.format(getString(R.string.no_home_dir),homeDirPath)), Toast.LENGTH_LONG).show();
+      System.exit(1);
     } else {
       coreObject=new GDCore(this, homeDirPath);
     }

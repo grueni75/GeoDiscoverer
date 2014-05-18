@@ -2,3 +2,7 @@ bin/
 gen/
 libs/
 obj/
+assets/GeoDiscoverer/Icon/*
+assets/GeoDiscoverer/config.xsd
+assets/GeoDiscoverer.list
+

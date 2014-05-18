@@ -80,6 +80,15 @@ NavigationEngine::NavigationEngine() {
       return;
     }
   }
+
+  // Create the route directory if it does not exist
+  if (stat(getRoutePath().c_str(), &st) != 0)
+  {
+    if (mkdir(getRoutePath().c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
+      FATAL("can not create route directory!",NULL);
+      return;
+    }
+  }
 }
 
 // Destructor

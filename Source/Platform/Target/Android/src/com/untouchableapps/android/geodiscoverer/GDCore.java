@@ -22,7 +22,13 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
@@ -35,7 +41,11 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -51,6 +61,7 @@ import android.os.Message;
 import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.os.Process;
 
 /** Interfaces with the C++ part */
@@ -83,7 +94,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   /** Indicates if the core is initialized */
   boolean coreInitialized = false;
-    
+  
   /** Indicates that home dir is available */
   protected boolean homeDirAvailable = false;
 
@@ -238,7 +249,103 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   //
   // Support functions
   //
+  
+  /** Updates files on the sdcard with the latest ones */
+  protected boolean updateHome() {
 
+    // Check if the GeoDiscoverer assets need to be updated
+    AssetManager am = application.getAssets();
+    SharedPreferences prefs = application.getSharedPreferences("assets",Context.MODE_PRIVATE);
+    String installedMD5Sum = prefs.getString("installedMD5Sum", "unknown");
+    String packagedMD5Sum = "none";
+    InputStream is;
+    BufferedReader br;
+    InputStreamReader isr;
+    try {
+      is = am.open("GeoDiscoverer.list");
+      isr = new InputStreamReader(is);
+      br = new BufferedReader(isr);
+      packagedMD5Sum = br.readLine();
+    }
+    catch (IOException e) {
+      executeAppCommand("fatalDialog(\"Could not read asset list! APK damaged?\")");
+      return false;
+    }
+    if (installedMD5Sum.equals(packagedMD5Sum)) {
+      return true;
+    }
+    
+    // Get all files to copy
+    List<String> files = new ArrayList<String>();
+    while(true) {
+      try {
+        String file = br.readLine();
+        if (file == null)
+          break;
+        files.add(file);
+      } 
+      catch (IOException e) {
+        break;
+      }
+    }
+    try {
+      br.close();
+      isr.close();
+      is.close();
+    }
+    catch (IOException e) { } ;
+    
+    // Inform the user of the copy information
+    String title = "Updating home directory";
+    executeAppCommand("createProgressDialog(\"" + title + "\"," + files.size() + ")");
+    
+    // Copy all files
+    int i = 0;
+    for (String path : files) {
+      String externalPath = homePath + "/" + path;
+      String internalPath = "GeoDiscoverer/" + path;
+      File f = new File(externalPath);
+      try {
+        f.getParentFile().mkdirs();
+        FileOutputStream os = new FileOutputStream(f);
+        is = am.open(internalPath);
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = is.read(buf)) > 0) {
+            os.write(buf, 0, len);
+        }
+        os.close();
+        is.close();
+      } 
+      catch (IOException e) {
+        executeAppCommand("fatalDialog(\"Could not copy file to home directory: " + e.getMessage() + "!\")");
+        return false;
+      }
+      i++;
+      executeAppCommand("updateProgressDialog(\"" + title + "\"," + i + ")");
+    }
+    
+    // Create the .nomedia file
+    File f = new File(homePath + "/.nomedia");
+    try {
+      FileOutputStream os = new FileOutputStream(f);
+      os.close();
+    }
+    catch (IOException e) {
+      executeAppCommand("fatalDialog(\"Could not create .nomedia file in home directory: " + e.getMessage() + "!\")");
+      return false;
+    }
+    
+    // Update the shared prefs
+    SharedPreferences.Editor prefsEditor = prefs.edit();
+    prefsEditor.putString("installedMD5Sum", packagedMD5Sum);
+    prefsEditor.commit();
+    
+    // That's it!
+    executeAppCommand("closeProgressDialog()");
+    return true;
+  }
+  
   /** Sets the view map activity */
   public void setActivity(ViewMap activity) {
     lock.lock();
@@ -259,6 +366,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     lock.unlock();
     if (!isInitialized) {
   
+      // Copy the assets files
+      if (!updateHome())
+        return;
+      
       // Init the core
       boolean initialized=false;
       if (homeDirAvailable) {

@@ -1,0 +1,6 @@
+#!/bin/bash
+ROOT="`pwd`/../../../.."
+sh -c "cd $ROOT/Source && make android"
+sh -c "cd $ROOT/Source/Media/Icon && make android"
+find assets/GeoDiscoverer -type f -exec cat {} \; | md5sum >assets/GeoDiscoverer.list
+sh -c "cd assets/GeoDiscoverer && find -type f" | sed 's/^.\///' >>assets/GeoDiscoverer.list 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GDS version="1.0">
+  <TileServer>
+    <serverURL>http://s0.outdooractive.com/map/AlpsteinSummer/${z}/${x}/${y}.png</serverURL>
+    <overlayAlpha>1.0</overlayAlpha>
+  </TileServer>
+  <TileServer>
+    <serverURL>http://s0.outdooractive.com/map/xWandern3/${z}/${x}/${y}.png</serverURL>
+    <overlayAlpha>1.0</overlayAlpha>
+  </TileServer>
+  <TileServer>
+    <serverURL>http://s0.outdooractive.com/map/xWandernFern/${z}/${x}/${y}.png</serverURL>
+    <overlayAlpha>1.0</overlayAlpha>
+  </TileServer>
+  <minZoomLevel>0</minZoomLevel>
+  <maxZoomLevel>17</maxZoomLevel>
+</GDS>
