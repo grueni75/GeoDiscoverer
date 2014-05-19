@@ -189,7 +189,7 @@ void WidgetEngine::createGraphic() {
     parameters.clear();
     parameters["iconFilename"]="statusBackground";
     parameters["updateInterval"]="100000";
-    parameters["labelWidth"]="255";
+    parameters["labelWidth"]="95.0";
     addWidgetToPage("Default",WidgetTypeStatus,"Status",                30.5, 81.0,1,50.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="navigationBackground";
