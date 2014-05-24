@@ -1114,18 +1114,18 @@ void NavigationEngine::updateNavigationInfos() {
           if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
             navigationInfo.setTargetBearing(locationPos.computeBearing(targetPos));
         }
-        if (navigationInfo.getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
+        /*if (navigationInfo.getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
           if (navigationInfo.getTurnAngle()>0) {
             DEBUG("turn to the left by %f°in %f meters",navigationInfo.getTurnAngle(),navigationInfo.getTurnDistance());
           } else {
             DEBUG("turn to the right by %f° in %f meters",navigationInfo.getTurnAngle(),navigationInfo.getTurnDistance());
           }
-          /*if ((!prevTurnPos.isValid())||(prevTurnPos!=turnPos)) {
+          if ((!prevTurnPos.isValid())||(prevTurnPos!=turnPos)) {
             setTargetAtGeographicCoordinate(turnPos.getLng(),turnPos.getLat(),false);
             sleep(1);
             DEBUG("new target set",NULL);
-          }*/
-        }
+          }
+        }*/
         //prevTurnPos=turnPos;
 
       }
