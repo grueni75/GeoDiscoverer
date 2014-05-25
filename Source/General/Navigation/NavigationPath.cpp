@@ -607,117 +607,125 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
         }
         //core->getNavigationEngine()->setTargetAtGeographicCoordinate(pos.getLng(),pos.getLat(),false);
 
-        // Determine the way point for target computation
-        double distanceFromLocation = pos.computeDistance(locationPos);
-        if ((!wayPointSet)&&(distanceFromLocation>minDistanceToRouteWayPoint)) {
-          wayPoint=pos;
-          wayPointSet=true;
-        }
+        // Ignore points that lie behind the current bearing for way point and turn point computation
+        double bearing = locationPos.computeBearing(pos);
+        if ((fabs(bearing-locationPos.getBearing())<90.0)||(firstFrontPosFound)) {
 
-        // Update the look back and look forward points for turn detection
-        std::list<MapPosition>::iterator turnIterator=iterator;
-        MapPosition turnLookBackPos=pos;
-        MapPosition prevPos2=pos;
-        double distance=0;
-        while (true) {
-          MapPosition pos2 = *turnIterator;
-          if (pos2==NavigationPath::getPathInterruptedPos()) {
-            break;
-          } else {
-            distance+=pos2.computeDistance(prevPos2);
-            prevPos2=pos2;
-            turnLookBackPos=pos2;
-            if (distance>turnDetectionDistance) {
-              break;
-            }
-          }
-          if (reverse) {
-            turnIterator++;
-            if (turnIterator==mapPositions.end())
-              break;
-          } else {
-            if (turnIterator==mapPositions.begin())
-              break;
-            turnIterator--;
-          }
-        }
-        turnIterator=iterator;
-        MapPosition turnLookForwardPos=pos;
-        prevPos2=pos;
-        distance=0;
-        while (true) {
-          MapPosition pos2 = *turnIterator;
-          if (pos2==NavigationPath::getPathInterruptedPos()) {
-            break;
-          } else {
-            distance+=pos2.computeDistance(prevPos2);
-            prevPos2=pos2;
-            turnLookForwardPos=pos2;
-            if (distance>turnDetectionDistance) {
-              break;
-            }
-          }
-          if (reverse) {
-            if (turnIterator==mapPositions.begin())
-              break;
-            turnIterator--;
-          } else {
-            turnIterator++;
-            if (turnIterator==mapPositions.end())
-              break;
-          }
-        }
+          // Do check all positions from the first front pos onwards
+          firstFrontPosFound=true;
 
-        // Turn detection
-        double turnLookBackAngle=pos.computeBearing(turnLookBackPos);
-        double turnLookForwardAngle=pos.computeBearing(turnLookForwardPos);
-        double angle=turnLookForwardAngle-turnLookBackAngle;
-        if (angle<0)
-          angle+=360;
-        if (angle>360)
-          angle-=360;
-        angle=180-angle;
-        /*if ((!turnPointSet)||(prevPointWasTurnPoint)) {
-          DEBUG("lookBackAngle=%f loockForwardAngle=%f angle=%f",turnLookBackAngle,turnLookForwardAngle,angle);
-          core->getThread()->unlockMutex(accessMutex);
-          core->getNavigationEngine()->setTargetAtGeographicCoordinate(pos.getLng(),pos.getLat(),false);
-          sleep(1);
-          core->getThread()->lockMutex(accessMutex);
-        }*/
-        if (fabs(angle)>minTurnAngle) {
-          if (prevPointWasTurnPoint) {
-            //DEBUG("turn point candidate found: lat=%f, lng=%f, angle=%f",pos.getLat(),pos.getLng(),angle);
-            if (!turnPointSet) {
-              turnPoint=pos;
-              bestTurnLookForwardPos=turnLookForwardPos;
-              turnAngle=angle;
-              //DEBUG("candidate set",NULL);
+          // Determine the way point for target computation
+          double distanceFromLocation = pos.computeDistance(locationPos);
+          if ((!wayPointSet)&&(distanceFromLocation>minDistanceToRouteWayPoint)) {
+            wayPoint=pos;
+            wayPointSet=true;
+          }
+
+          // Update the look back and look forward points for turn detection
+          std::list<MapPosition>::iterator turnIterator=iterator;
+          MapPosition turnLookBackPos=pos;
+          MapPosition prevPos2=pos;
+          double distance=0;
+          while (true) {
+            MapPosition pos2 = *turnIterator;
+            if (pos2==NavigationPath::getPathInterruptedPos()) {
+              break;
             } else {
-              if (turnAngle<0) {
-                if ((angle<0)&&(angle<turnAngle)) {
-                  turnPoint=pos;
-                  bestTurnLookForwardPos=turnLookForwardPos;
-                  turnAngle=angle;
-                  //DEBUG("candidate set",NULL);
-                } else {
-                  prevPointWasTurnPoint=false;
-                }
-              } else {
-                if ((angle>0)&&(angle>turnAngle)) {
-                  turnPoint=pos;
-                  bestTurnLookForwardPos=turnLookForwardPos;
-                  turnAngle=angle;
-                  //DEBUG("candidate set",NULL);
-                } else {
-                  prevPointWasTurnPoint=false;
-                }
+              distance+=pos2.computeDistance(prevPos2);
+              prevPos2=pos2;
+              turnLookBackPos=pos2;
+              if (distance>turnDetectionDistance) {
+                break;
               }
             }
-            turnPointSet=true;
+            if (reverse) {
+              turnIterator++;
+              if (turnIterator==mapPositions.end())
+                break;
+            } else {
+              if (turnIterator==mapPositions.begin())
+                break;
+              turnIterator--;
+            }
           }
-        } else {
-          if (turnPointSet) {
-            prevPointWasTurnPoint=false;
+          turnIterator=iterator;
+          MapPosition turnLookForwardPos=pos;
+          prevPos2=pos;
+          distance=0;
+          while (true) {
+            MapPosition pos2 = *turnIterator;
+            if (pos2==NavigationPath::getPathInterruptedPos()) {
+              break;
+            } else {
+              distance+=pos2.computeDistance(prevPos2);
+              prevPos2=pos2;
+              turnLookForwardPos=pos2;
+              if (distance>turnDetectionDistance) {
+                break;
+              }
+            }
+            if (reverse) {
+              if (turnIterator==mapPositions.begin())
+                break;
+              turnIterator--;
+            } else {
+              turnIterator++;
+              if (turnIterator==mapPositions.end())
+                break;
+            }
+          }
+
+          // Turn detection
+          double turnLookBackAngle=pos.computeBearing(turnLookBackPos);
+          double turnLookForwardAngle=pos.computeBearing(turnLookForwardPos);
+          double angle=turnLookForwardAngle-turnLookBackAngle;
+          if (angle<0)
+            angle+=360;
+          if (angle>360)
+            angle-=360;
+          angle=180-angle;
+          /*if ((!turnPointSet)||(prevPointWasTurnPoint)) {
+            DEBUG("lookBackAngle=%f loockForwardAngle=%f angle=%f",turnLookBackAngle,turnLookForwardAngle,angle);
+            core->getThread()->unlockMutex(accessMutex);
+            core->getNavigationEngine()->setTargetAtGeographicCoordinate(pos.getLng(),pos.getLat(),false);
+            sleep(1);
+            core->getThread()->lockMutex(accessMutex);
+          }*/
+          if (fabs(angle)>minTurnAngle) {
+            if (prevPointWasTurnPoint) {
+              //DEBUG("turn point candidate found: lat=%f, lng=%f, angle=%f",pos.getLat(),pos.getLng(),angle);
+              if (!turnPointSet) {
+                turnPoint=pos;
+                bestTurnLookForwardPos=turnLookForwardPos;
+                turnAngle=angle;
+                //DEBUG("candidate set",NULL);
+              } else {
+                if (turnAngle<0) {
+                  if ((angle<0)&&(angle<turnAngle)) {
+                    turnPoint=pos;
+                    bestTurnLookForwardPos=turnLookForwardPos;
+                    turnAngle=angle;
+                    //DEBUG("candidate set",NULL);
+                  } else {
+                    prevPointWasTurnPoint=false;
+                  }
+                } else {
+                  if ((angle>0)&&(angle>turnAngle)) {
+                    turnPoint=pos;
+                    bestTurnLookForwardPos=turnLookForwardPos;
+                    turnAngle=angle;
+                    //DEBUG("candidate set",NULL);
+                  } else {
+                    prevPointWasTurnPoint=false;
+                  }
+                }
+              }
+              turnPointSet=true;
+            }
+          } else {
+            if (turnPointSet) {
+              prevPointWasTurnPoint=false;
+            }
           }
         }
       }
