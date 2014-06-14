@@ -34,7 +34,6 @@ GraphicObject::GraphicObject(bool deletePrimitivesOnDestruct) : GraphicPrimitive
   isUpdated=false;
   this->deletePrimitivesOnDestruct=deletePrimitivesOnDestruct;
   primitiveMap.clear();
-  accessMutex=core->getThread()->createMutex();
 
 }
 
@@ -104,6 +103,8 @@ void GraphicObject::deinit(bool deletePrimitives) {
 // Updates all primitives contained in the object
 bool GraphicObject::work(TimestampInMicroseconds currentTime) {
 
+  std::list<GraphicPrimitive*> toBeRemovedPrimitives;
+
   // Let this object work
   GraphicPrimitive::work(currentTime);
 
@@ -111,24 +112,42 @@ bool GraphicObject::work(TimestampInMicroseconds currentTime) {
   bool redrawScene=false;
   for(std::list<GraphicPrimitive*>::iterator i=drawList.begin();i!=drawList.end();i++) {
     GraphicPrimitive *p=*i;
-    GraphicObject *o=NULL;
-    if (p->getType()==GraphicTypeObject) {
-      o=(GraphicObject*)p;
+    if ((p->getLifeEnd()!=0)&&(currentTime>p->getLifeEnd())) {
+      toBeRemovedPrimitives.push_back(p);
+    } else {
+      GraphicObject *o=NULL;
+      if (p->getType()==GraphicTypeObject) {
+        o=(GraphicObject*)p;
+      }
+      if (o) o->lockAccess();
+      if (p->work(currentTime)) {
+        //DEBUG("requesting scene redraw due to animation",NULL);
+        redrawScene=true;
+      }
+      if (o) o->unlockAccess();
     }
-    if (o) o->lockAccess();
-    if (p->work(currentTime)) {
-      //DEBUG("requesting scene redraw due to animation",NULL);
-      redrawScene=true;
-    }
-    if (o) o->unlockAccess();
   }
+
+  // Remove any primitives whose life end has been reached
+  for(std::list<GraphicPrimitive*>::iterator i=toBeRemovedPrimitives.begin();i!=toBeRemovedPrimitives.end();i++) {
+    for(GraphicPrimitiveMap::iterator j=primitiveMap.begin(); j!=primitiveMap.end(); j++) {
+      GraphicPrimitiveKey key;
+      GraphicPrimitive *primitive;
+      key=j->first;
+      primitive=j->second;
+      if (primitive==*i) {
+        removePrimitive(key,deletePrimitivesOnDestruct);
+        break;
+      }
+    }
+  }
+
   return redrawScene;
 }
 
 // Destructor
 GraphicObject::~GraphicObject() {
   deinit(deletePrimitivesOnDestruct);
-  core->getThread()->destroyMutex(accessMutex);
 }
 
 // Returns the primitive with the given key

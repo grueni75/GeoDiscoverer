@@ -46,6 +46,10 @@ protected:
   bool contextMenuIsShown;                              // Indicates that the context menu is currently shown
   TimestampInMicroseconds contextMenuDelay;             // Time that must passed before the context menu is displayed
   Int contextMenuAllowedPixelJitter;                    // Allowed pixel jitter when checking if a context menu shall be displayed
+  GraphicObject visiblePages;                           // The currently visible pages
+  TimestampInMicroseconds changePageDuration;           // Time that the transition from the current page to the next page takes
+  Int changePageOvershoot;                              // Distance that the page change shall overshoot
+  TimestampInMicroseconds ignoreTouchesEnd;             // End time until touches shall be ignored
 
   // Adds a widget to a page
   void addWidgetToPage(
@@ -57,6 +61,9 @@ protected:
     UByte activeRed, UByte activeGreen, UByte activeBlue, UByte activeAlpha,
     UByte inactiveRed, UByte inactiveGreen, UByte inactiveBlue, UByte inactiveAlpha,
     ParameterMap parameters);
+
+  // Deselects the currently selected page
+  void deselectPage();
 
 public:
 
@@ -80,10 +87,34 @@ public:
   void updateWidgetPositions();
 
   // Called when the screen is touched
-  bool onTouchDown(TimestampInMicroseconds t, Int x, Int y);
+  bool onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff);
 
   // Called when the screen is untouched
   bool onTouchUp(TimestampInMicroseconds t, Int x, Int y);
+
+  // Called when a two fingure gesture is done on the screen
+  bool onTouchDown(TimestampInMicroseconds t, Int x, Int y);
+
+  // Informs the engine that the map has changed
+  void onMapChange(MapPosition pos);
+
+  // Informs the engine that the location has changed
+  void onLocationChange(MapPosition mapPos);
+
+  // Informs the engine that a path has changed
+  void onPathChange(NavigationPath *path);
+
+  // Shows the context menu
+  void showContextMenu();
+
+  // Sets the target at an address
+  void setTargetAtAddress();
+
+  // Sets a new page
+  void setPage(std::string name, Int direction, bool lockAccess);
+
+  // Sets the widgets of the current page active
+  void setWidgetsActive(bool widgetsActive, bool lockAccess);
 
   // Getters and setters
   GraphicColor getSelectedWidgetColor() const
@@ -105,8 +136,6 @@ public:
     return currentPage->getWidgetsActive();
   }
 
-  // Shows the context menu
-  void showContextMenu();
 };
 
 }

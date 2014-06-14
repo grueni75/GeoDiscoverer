@@ -73,6 +73,18 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
   }
 }
 
+// Called when a two finger gesture is done on the page
+bool WidgetPage::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff) {
+
+  // Two the two fingure gesture on the selected widget
+  if (selectedWidget) {
+    selectedWidget->onTwoFingerGesture(t,dX,dY,angleDiff,scaleDiff);
+    return true;
+  } else {
+    return false;
+  }
+}
+
 // Called when the page is touched
 bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
@@ -129,13 +141,52 @@ bool WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
       WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
       primitive->onTouchUp(t,x,y);
     }
+  }
+  deselectWidget(t);
+
+}
+
+// Called when the map has changed
+void WidgetPage::onMapChange(MapPosition pos) {
+
+  // Check all widgets
+  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
+  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
+    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
+    primitive->onMapChange(pos);
+  }
+}
+
+// Called when the location has changed
+void WidgetPage::onLocationChange(MapPosition pos) {
+
+  // Check all widgets
+  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
+  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
+    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
+    primitive->onLocationChange(pos);
+  }
+}
+
+// Called when a path has changed
+void WidgetPage::onPathChange(NavigationPath *path) {
+
+  // Check all widgets
+  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
+  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
+    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
+    primitive->onPathChange(path);
+  }
+}
+
+// Deselects currently selected widget
+void WidgetPage::deselectWidget(TimestampInMicroseconds t) {
+  if (!touchStartedOutside) {
     if (selectedWidget) {
       selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),selectedWidget->getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
     }
     selectedWidget=NULL;
   }
-
-  // Reset some variables
   firstTouch=true;
   touchStartedOutside=false;
 }

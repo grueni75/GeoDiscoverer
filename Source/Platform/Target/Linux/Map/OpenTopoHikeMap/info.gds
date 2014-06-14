@@ -8,6 +8,6 @@
     <serverURL>http://tile.waymarkedtrails.org/hiking/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>0.5</overlayAlpha>
   </TileServer>
-  <minZoomLevel>0</minZoomLevel>
+  <minZoomLevel>7</minZoomLevel>
   <maxZoomLevel>15</maxZoomLevel>
 </GDS>

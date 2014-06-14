@@ -28,6 +28,10 @@ void WidgetEngine::showContextMenu() {
   DEBUG("showContextMenu called",NULL);
 }
 
+void WidgetEngine::setTargetAtAddress() {
+  DEBUG("setTargetAtAddress called",NULL);
+}
+
 }
 
 

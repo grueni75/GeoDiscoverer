@@ -31,6 +31,9 @@ void WidgetEngine::showContextMenu() {
   GDApp_executeAppCommand("showContextMenu()");
 }
 
+void WidgetEngine::setTargetAtAddress() {
+  GDApp_executeAppCommand("askForAddress()");
+}
 }
 
 

@@ -50,13 +50,13 @@ protected:
   // Indicates that the object has been changed
   bool isUpdated;
 
-  // Mutex for accessing the object
-  ThreadMutexInfo *accessMutex;
-
 public:
 
   // Constructor
   GraphicObject(bool deletePrimitivesOnDestruct=false);
+
+  // Destructor
+  virtual ~GraphicObject();
 
   // Adds a primitive to the object
   GraphicPrimitiveKey addPrimitive(GraphicPrimitive *primitive);
@@ -95,17 +95,6 @@ public:
   }
 
   GraphicPrimitive *getPrimitive(GraphicPrimitiveKey key);
-
-  void lockAccess() {
-    core->getThread()->lockMutex(accessMutex);
-  }
-
-  void unlockAccess() {
-    core->getThread()->unlockMutex(accessMutex);
-  }
-
-  // Destructor
-  virtual ~GraphicObject();
 
 };
 

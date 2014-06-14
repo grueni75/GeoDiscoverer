@@ -92,18 +92,16 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
       if (i==1) {
         lockedUnit=unit;
       }
-      if (i==3) {
-        value=value+" "+unit;
-      }
       FontString *t=scaledNumberFontString[i];
       fontEngine->updateString(&t,value);
+      textX -= t->getIconWidth()/2;
       t->setX(textX);
       t->setY(textY);
       scaledNumberFontString[i]=t;
     }
 
     // Compute the map name
-    fontEngine->updateString(&mapNameFontString,mapName);
+    fontEngine->updateString(&mapNameFontString,mapName + " (" + unit + ")",getIconWidth());
     textY=y+iconHeight+mapLabelOffsetY;
     textX=x+(iconWidth-mapNameFontString->getIconWidth())/2;
     mapNameFontString->setX(textX);

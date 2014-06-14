@@ -42,21 +42,26 @@ GraphicPrimitive::GraphicPrimitive() {
   rotateStartTime=0;
   rotateEndTime=0;
   rotateInfinite=false;
+  rotateAnimationType=GraphicRotateAnimationTypeLinear;
   scaleStartTime=0;
   scaleEndTime=0;
   scaleInfinite=false;
   translateStartTime=0;
   translateEndTime=0;
   translateInfinite=false;
+  translateAnimationType=GraphicTranslateAnimationTypeLinear;
   textureStartTime=0;
   textureEndTime=0;
   textureInfinite=false;
   isUpdated=false;
+  lifeEnd=0;
+  accessMutex=core->getThread()->createMutex();
 }
 
 // Destructor
 GraphicPrimitive::~GraphicPrimitive() {
   deinit();
+  core->getThread()->destroyMutex(accessMutex);
 }
 
 // Deinits the primitive
@@ -119,7 +124,7 @@ void GraphicPrimitive::setScaleAnimation(TimestampInMicroseconds startTime, doub
 }
 
 // Sets a new translate target
-void GraphicPrimitive::setTranslateAnimation(TimestampInMicroseconds startTime, Int startX, Int startY, Int endX, Int endY, bool infinite, TimestampInMicroseconds duration) {
+void GraphicPrimitive::setTranslateAnimation(TimestampInMicroseconds startTime, Int startX, Int startY, Int endX, Int endY, bool infinite, TimestampInMicroseconds duration, GraphicTranslateAnimationType animationType) {
   translateDuration=duration;
   translateStartTime=startTime;
   translateEndTime=startTime+duration;
@@ -132,6 +137,7 @@ void GraphicPrimitive::setTranslateAnimation(TimestampInMicroseconds startTime, 
     y=endY;
   }
   translateInfinite=infinite;
+  translateAnimationType=animationType;
 }
 
 // Lets the primitive work (e.g., animation)
@@ -250,8 +256,6 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
     } else {
       angle=rotateEndAngle;
       rotateStartTime=rotateEndTime;
-      if (rotateAnimationType==GraphicRotateAnimationTypeAccelerated)
-        DEBUG("final angle=%f",angle);
     }
   }
 
@@ -289,9 +293,9 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
   if (translateStartTime==translateEndTime) {
     if (translateInfinite) {
       if ((x==translateEndX)&&(y==translateEndY))
-        setTranslateAnimation(currentTime,translateEndX,translateEndY,translateStartX,translateStartY,true,translateDuration);
+        setTranslateAnimation(currentTime,translateEndX,translateEndY,translateStartX,translateStartY,true,translateDuration,GraphicTranslateAnimationTypeLinear);
       if ((x==translateStartX)&&(y==translateStartY))
-        setTranslateAnimation(currentTime,translateStartX,translateStartY,translateEndX,translateEndY,true,translateDuration);
+        setTranslateAnimation(currentTime,translateStartX,translateStartY,translateEndX,translateEndY,true,translateDuration,GraphicTranslateAnimationTypeLinear);
     } else  {
 
       // Some more parameters in the list?
@@ -306,12 +310,34 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
     changed=true;
     if (currentTime<=translateEndTime) {
       Int elapsedTime=currentTime-translateStartTime;
-      Int translateDiff=translateEndX-translateStartX;
-      double factor=(double)elapsedTime/(double)translateDuration;
-      x=(Int)((double)translateDiff*factor)+translateStartX;
-      //DEBUG("translateDiff=%d factor=%f x=%d",translateDiff,factor,x);
-      translateDiff=translateEndY-translateStartY;
-      y=(Int)((double)translateDiff*factor)+translateStartY;
+      Int duration=translateEndTime-translateStartTime;
+      Int translateDiffX=translateEndX-translateStartX;
+      Int translateDiffY=translateEndY-translateStartY;
+      double speedX,speedY,accelX,accelY;
+      switch(translateAnimationType) {
+        case GraphicTranslateAnimationTypeLinear:
+          speedX=(double)elapsedTime/(double)duration;
+          speedY=speedX;
+          x=(Int)((double)translateDiffX*speedX)+translateStartX;
+          y=(Int)((double)translateDiffY*speedY)+translateStartY;
+          break;
+        case GraphicTranslateAnimationTypeAccelerated:
+          accelX=translateDiffX/(((double)duration)*((double)duration)/4.0);
+          accelY=translateDiffY/(((double)duration)*((double)duration)/4.0);
+          speedX=accelX*((double)duration)/2;
+          speedY=accelY*((double)duration)/2;
+          if (elapsedTime<=duration/2) {
+            x=(Int)(translateStartX+accelX*((double)elapsedTime)*((double)elapsedTime)/2);
+            y=(Int)(translateStartY+accelY*((double)elapsedTime)*((double)elapsedTime)/2);
+          } else {
+            double t=((double)elapsedTime)-((double)duration)/2;
+            x=(Int)(translateStartX+translateDiffX/2+speedX*t-accelX*t*t/2);
+            y=(Int)(translateStartY+translateDiffY/2+speedY*t-accelY*t*t/2);
+          }
+          break;
+        default:
+          FATAL("animation type is not supported",NULL);
+      }
     } else {
       x=translateEndX;
       y=translateEndY;
@@ -352,7 +378,7 @@ void GraphicPrimitive::setNextTranslateAnimationStep() {
   if (translateAnimationSequence.size()>0) {
     GraphicTranslateAnimationParameter parameter = translateAnimationSequence.front();
     translateAnimationSequence.pop_front();
-    setTranslateAnimation(parameter.getStartTime(),parameter.getStartX(),parameter.getStartY(),parameter.getEndX(),parameter.getEndY(),parameter.getInfinite(),parameter.getDuration());
+    setTranslateAnimation(parameter.getStartTime(),parameter.getStartX(),parameter.getStartY(),parameter.getEndX(),parameter.getEndY(),parameter.getInfinite(),parameter.getDuration(),parameter.getAnimationType());
   }
 }
 

@@ -36,8 +36,8 @@ protected:
   // Path animators object
   GraphicObject pathAnimators;
 
-  // Widget page object
-  WidgetPage *widgetPage;
+  // Widget graphic object
+  GraphicObject *widgetGraphicObject;
 
   // Center icon
   GraphicRectangle centerIcon;
@@ -72,9 +72,6 @@ protected:
 
   // Color of the accuracy circle around the location indicator
   GraphicColor locationAccuracyCircleColor;
-
-  // Line width of the accuracy circle around the location indicator
-  Int locationAccuracyCircleLineWidth;
 
   // Time in us to wait after a user interaction before the cursor is hidden
   TimestampInMicroseconds centerIconTimeout;
@@ -192,10 +189,11 @@ public:
       core->getThread()->unlockMutex(pathAnimatorsMutex);
   }
 
-  void setWidgetPage(WidgetPage *widgetPage)
+  void setWidgetGraphicObject(GraphicObject *widgetGraphicObject)
   {
-      this->widgetPage = widgetPage;
+      this->widgetGraphicObject = widgetGraphicObject;
   }
+
   GraphicPosition *lockPos()
   {
       core->getThread()->lockMutex(posMutex);

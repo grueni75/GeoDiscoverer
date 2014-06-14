@@ -49,6 +49,13 @@ void NavigationPath::writeGPXFile() {
     //DEBUG("path has not been stored, writing to disk",NULL);
   }
 
+  // Copy all the data needed such that we do not need to lock the path too long
+  lockAccess();
+  std::string name=this->name;
+  std::string description=this->description;
+  std::vector<MapPosition> mapPositions=this->mapPositions;
+  unlockAccess();
+
   // Backup the previous file
   if (access(filepath.c_str(),F_OK)==0) {
     std::string backupFilepath=filepath + "~";
@@ -149,7 +156,7 @@ void NavigationPath::writeGPXFile() {
   xmlAddChild(pathNode,segmentNode);
 
   // Iterate through all points
-  for (std::list<MapPosition>::iterator i=mapPositions.begin();i!=mapPositions.end();i++) {
+  for (std::vector<MapPosition>::iterator i=mapPositions.begin();i!=mapPositions.end();i++) {
     MapPosition pos=*i;
 
     // Start of a new segment?
@@ -182,7 +189,11 @@ void NavigationPath::writeGPXFile() {
 
   // Cleanup
   xmlFreeDoc(doc);
-  isStored=true;
+  lockAccess();
+  if (this->mapPositions.size()==mapPositions.size()) {
+    isStored=true;
+  }
+  unlockAccess();
 }
 
 // Finds nodes in a xml tree
@@ -340,11 +351,15 @@ bool NavigationPath::readGPXFile() {
   // Extract data from the metadata section if it exists
   if (GPX11) {
     nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:metadata/*");
+    lockAccess();
     extractInformation(nodes);
+    unlockAccess();
   }
   if (GPX10) {
     nodes=findNodes(doc,xpathCtx,"/gpx:gpx/*");
+    lockAccess();
     extractInformation(nodes);
+    unlockAccess();
   }
 
   // Load the points of the path
@@ -365,7 +380,10 @@ bool NavigationPath::readGPXFile() {
         XMLNode node=*j;
         std::string error;
         if (pos.readGPX(node,error)) {
+          lockAccess();
           addEndPosition(pos);
+          unlockAccess();
+          core->getWidgetEngine()->onPathChange(this);
         } else {
           error="file <%s> " + error;
           ERROR(error.c_str(),gpxFilename.c_str());
@@ -384,8 +402,12 @@ bool NavigationPath::readGPXFile() {
           break;
         //core->getThread()->reschedule();
       }
-      if (i!=numberOfSegments)
+      if (i!=numberOfSegments) {
+        lockAccess();
         addEndPosition(NavigationPath::getPathInterruptedPos());
+        unlockAccess();
+        core->getWidgetEngine()->onPathChange(this);
+      }
       if (core->getQuitCore())
         break;
     }
@@ -401,7 +423,10 @@ bool NavigationPath::readGPXFile() {
       XMLNode node=*j;
       std::string error;
       if (pos.readGPX(node,error)) {
+        lockAccess();
         addEndPosition(pos);
+        unlockAccess();
+        core->getWidgetEngine()->onPathChange(this);
       } else {
         error="file <%s> " + error;
         ERROR(error.c_str(),gpxFilename.c_str());
@@ -427,9 +452,11 @@ bool NavigationPath::readGPXFile() {
 cleanup:
   if (xpathCtx) xmlXPathFreeContext(xpathCtx);
   if (doc) xmlFreeDoc(doc);
+  lockAccess();
   isStored=true;
   hasChanged=true;
   hasBeenLoaded=true;
+  unlockAccess();
   status.clear();
   core->getNavigationEngine()->setStatus(status);
   return result;

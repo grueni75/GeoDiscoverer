@@ -71,6 +71,26 @@ void WidgetPrimitive::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
   isFirstTimeSelected=false;
 }
 
+// Called when the map has changed
+void WidgetPrimitive::onMapChange(MapPosition pos) {
+
+}
+
+// Called when the location has changed
+void WidgetPrimitive::onLocationChange(MapPosition pos) {
+
+}
+
+// Called when a path has changed
+void WidgetPrimitive::onPathChange(NavigationPath *path) {
+
+}
+
+// Called when a two fingure gesture is done on the widget
+void WidgetPrimitive::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff) {
+  return;
+}
+
 // Called when the widget has changed his position
 void WidgetPrimitive::updatePosition(Int x, Int y, Int z) {
   setX(x);

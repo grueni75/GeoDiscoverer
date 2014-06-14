@@ -239,10 +239,9 @@ public:
       core->getThread()->unlockMutex(targetPosMutex);
   }
 
-  std::list<NavigationPath*> *lockRoutes()
+  void lockRoutes()
   {
       core->getThread()->lockMutex(routesMutex);
-      return &routes;
   }
   void unlockRoutes()
   {

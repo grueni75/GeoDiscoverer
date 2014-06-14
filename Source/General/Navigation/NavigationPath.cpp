@@ -30,7 +30,6 @@ NavigationPath::NavigationPath() {
 
   // Init variables
   accessMutex=core->getThread()->createMutex();
-  isInitMutex=core->getThread()->createMutex();
   gpxFilefolder=core->getNavigationEngine()->getTrackPath();
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength");
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance");
@@ -66,7 +65,6 @@ NavigationPath::~NavigationPath() {
 
   // Free variables
   core->getThread()->destroyMutex(accessMutex);
-  core->getThread()->destroyMutex(isInitMutex);
 }
 
 // Updates the visualization of the tile
@@ -241,17 +239,66 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
         }
         tileVisualization->unlockAccess();
 
+        // Add the path to the tile if it is not already there
+
+
       }
     }
   }
   core->getMapSource()->unlockAccess();
 }
 
+// Updates the crossing path segments in the map tiles of the given map containers for the new point
+void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapContainers, Int pos) {
+
+  // Add this point to the path segments of all tiles it lies within
+  for(std::list<MapContainer*>::iterator i=mapContainers->begin();i!=mapContainers->end();i++) {
+    MapContainer* mapContainer=*i;
+    MapPosition t=mapPositions[pos];
+    if (mapContainer->getMapCalibrator()->setPictureCoordinates(t)) {
+      MapTile* mapTile=mapContainer->findMapTileByPictureCoordinate(t);
+      if (mapTile) {
+
+        // Check if the point continues a previous segment
+        std::list<NavigationPathSegment*>* pathSegments = mapTile->findCrossingNavigationPathSegments(this);
+        bool addNewSegment=false;
+        if (pathSegments==NULL) {
+          addNewSegment=true;
+        }  else {
+          addNewSegment=true;
+          for (std::list<NavigationPathSegment*>::iterator j=pathSegments->begin();j!=pathSegments->end();j++) {
+            if ((pos>=(*j)->getStartIndex())&&(pos<=(*j)->getEndIndex())) {
+              addNewSegment=false;
+              break; // already present
+            }
+            if ((pos==(*j)->getEndIndex()+1)) {
+              (*j)->setEndIndex(pos);
+              addNewSegment=false;
+              break; // existing segment extended
+            }
+          }
+        }
+
+        // If not, add a new segment
+        if (addNewSegment) {
+          NavigationPathSegment *pathSegment;
+          if (!(pathSegment=new NavigationPathSegment())) {
+            FATAL("can not create navigation path segment object",NULL);
+            break;
+          }
+          pathSegment->setPath(this);
+          pathSegment->setStartIndex(pos);
+          pathSegment->setEndIndex(pathSegment->getStartIndex());
+          mapTile->addCrossingNavigationPathSegment(this, pathSegment);
+        }
+
+      }
+    }
+  }
+}
+
 // Adds a point to the path
 void NavigationPath::addEndPosition(MapPosition pos) {
-
-  // Ensure that only one thread is executing this code
-  core->getThread()->lockMutex(accessMutex);
 
   // Decide whether to add a new point or use the last one
   if (!hasLastPoint) {
@@ -269,6 +316,24 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   if ((hasSecondLastPoint)&&(hasLastPoint)) {
     if ((secondLastPoint!=NavigationPath::getPathInterruptedPos())&&(lastPoint!=NavigationPath::getPathInterruptedPos())) {
       length+=secondLastPoint.computeDistance(lastPoint);
+      if ((lastPoint.getHasAltitude())&&(secondLastPoint.getHasAltitude())) {
+        double altitudeDiff = lastPoint.getAltitude() - secondLastPoint.getAltitude();
+        if (altitudeDiff>0) {
+          altitudeUp+=altitudeDiff;
+        } else {
+          altitudeDown+=-altitudeDiff;
+        }
+      }
+    }
+  }
+  if (hasLastPoint) {
+    if (lastPoint.getHasAltitude()) {
+      if (lastPoint.getAltitude()<minAltitude) {
+        minAltitude=lastPoint.getAltitude();
+      }
+      if (lastPoint.getAltitude()>maxAltitude) {
+        maxAltitude=lastPoint.getAltitude();
+      }
     }
   }
 
@@ -335,9 +400,11 @@ void NavigationPath::addEndPosition(MapPosition pos) {
 
   }
 
-  // Unlock the mutex
-  core->getThread()->unlockMutex(accessMutex);
-
+  // Add this point to the path segments of all tiles it lies within
+  core->getMapSource()->lockAccess();
+  std::list<MapContainer*> mapContainers = core->getMapSource()->findMapContainersByGeographicCoordinate(pos);
+  updateCrossingTileSegments(&mapContainers, mapPositions.size()-1);
+  core->getMapSource()->unlockAccess();
 }
 
 // Clears the graphical representation
@@ -348,6 +415,17 @@ void NavigationPath::deinit() {
     delete *i;
   }
   zoomLevelVisualizations.clear();
+
+  // Remove from all tiles the path segments
+  core->getMapSource()->lockAccess();
+  std::vector<MapContainer*> *containers=core->getMapSource()->getMapContainers();
+  for (std::vector<MapContainer*>::iterator i=containers->begin();i!=containers->end();i++) {
+    std::vector<MapTile*> *tiles=(*i)->getMapTiles();
+    for (std::vector<MapTile*>::iterator j=tiles->begin();j!=tiles->end();j++) {
+      (*j)->removeCrossingNavigationPathSegments(this);
+    }
+  }
+  core->getMapSource()->unlockAccess();
 
   // Force a redraw
   GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators();
@@ -373,6 +451,10 @@ void NavigationPath::init() {
   isNew=true;
   mapPositions.clear();
   length=0;
+  altitudeUp=0;
+  altitudeDown=0;
+  minAltitude=std::numeric_limits<double>::max();
+  maxAltitude=std::numeric_limits<double>::min();
   blinkMode=false;
 
   // Configure the animator
@@ -402,11 +484,9 @@ void NavigationPath::init() {
 void NavigationPath::destroyGraphic() {
 
   // Invalidate all zoom levels
-  core->getThread()->lockMutex(accessMutex);
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     (*i)->destroyGraphic();
   }
-  core->getThread()->unlockMutex(accessMutex);
 
 }
 
@@ -414,11 +494,9 @@ void NavigationPath::destroyGraphic() {
 void NavigationPath::createGraphic() {
 
   // Invalidate all zoom levels
-  core->getThread()->lockMutex(accessMutex);
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     (*i)->createGraphic();
   }
-  core->getThread()->unlockMutex(accessMutex);
 
 }
 
@@ -426,11 +504,9 @@ void NavigationPath::createGraphic() {
 void NavigationPath::optimizeGraphic() {
 
   // Go through all zoom levels
-  core->getThread()->lockMutex(accessMutex);
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     (*i)->optimizeGraphic();
   }
-  core->getThread()->unlockMutex(accessMutex);
 
 }
 
@@ -442,7 +518,6 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
 
   // Go through all containers
   // The mapContainers list is sorted according to the zoom level
-  core->getThread()->lockMutex(accessMutex);
   std::list<MapContainer*>::iterator j=mapContainers->begin();
   bool more_entries=true;
   while(more_entries) {
@@ -488,7 +563,11 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
       j++;
     }
   }
-  core->getThread()->unlockMutex(accessMutex);
+
+  // Update the crossing path segments for this container
+  for (Int i=0;i<mapPositions.size();i++) {
+    updateCrossingTileSegments(mapContainers, i);
+  }
 }
 
 // Removes the visualization of the given container
@@ -498,32 +577,26 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
   Int zoomLevel=-1;
 
   // Remove the tile from the visualization
-  core->getThread()->lockMutex(accessMutex);
   NavigationPathVisualization *visualization=zoomLevelVisualizations[mapContainer->getZoomLevel()-1];
   std::vector<MapTile*> *mapTiles=mapContainer->getMapTiles();
   for(std::vector<MapTile*>::iterator i=mapTiles->begin();i!=mapTiles->end();i++) {
     visualization->removeTileInfo(*i);
+    (*i)->removeCrossingNavigationPathSegments(this);
   }
-  core->getThread()->unlockMutex(accessMutex);
-
 }
 
 // Computes navigation details for the given location
 void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition &wayPoint, NavigationInfo &navigationInfo) {
 
-  // Ensure that only one thread is executing this code
-  core->getThread()->lockMutex(accessMutex);
-
   // Do not calculate if path is not initialized
   if (!isInit) {
-    core->getThread()->unlockMutex(accessMutex);
     return;
   }
 
   // Find the nearest point on the route
   double minDistance=std::numeric_limits<double>::max();
-  std::list<MapPosition>::iterator nearestIterator;
-  for (std::list<MapPosition>::iterator i=mapPositions.begin();i!=mapPositions.end();i++) {
+  std::vector<MapPosition>::iterator nearestIterator;
+  for (std::vector<MapPosition>::iterator i=mapPositions.begin();i!=mapPositions.end();i++) {
     double distance = (*i).computeDistance(locationPos);
     if (distance<minDistance)  {
       minDistance=distance;
@@ -542,7 +615,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
     bool firstPos=true;
     double routeBearing=0;
     double minBearingDiff=std::numeric_limits<double>::max();
-    std::list<MapPosition>::iterator iterator,prevIterator,newNearestIterator=nearestIterator;
+    std::vector<MapPosition>::iterator iterator,prevIterator,newNearestIterator=nearestIterator;
     if (reverse) {
       iterator=mapPositions.end();
     } else {
@@ -591,7 +664,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
   MapPosition prevPos=NavigationPath::getPathInterruptedPos();
   MapPosition bestTurnLookForwardPos;
   MapPosition turnPoint;
-  std::list<MapPosition>::iterator iterator=std::list<MapPosition>::iterator(nearestIterator);
+  std::vector<MapPosition>::iterator iterator=std::vector<MapPosition>::iterator(nearestIterator);
   bool firstFrontPosFound = false;
   bool turnPointSet = false;
   bool prevPointWasTurnPoint = true;
@@ -622,7 +695,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
           }
 
           // Update the look back and look forward points for turn detection
-          std::list<MapPosition>::iterator turnIterator=iterator;
+          std::vector<MapPosition>::iterator turnIterator=iterator;
           MapPosition turnLookBackPos=pos;
           MapPosition prevPos2=pos;
           double distance=0;
@@ -686,10 +759,8 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
           angle=180-angle;
           /*if ((!turnPointSet)||(prevPointWasTurnPoint)) {
             DEBUG("lookBackAngle=%f loockForwardAngle=%f angle=%f",turnLookBackAngle,turnLookForwardAngle,angle);
-            core->getThread()->unlockMutex(accessMutex);
             core->getNavigationEngine()->setTargetAtGeographicCoordinate(pos.getLng(),pos.getLat(),false);
             sleep(1);
-            core->getThread()->lockMutex(accessMutex);
           }*/
           if (fabs(angle)>minTurnAngle) {
             if (prevPointWasTurnPoint) {
@@ -772,9 +843,6 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
   navigationInfo.setTargetDistance(distanceToRouteEnd);
   navigationInfo.setTurnAngle(turnAngle);
   navigationInfo.setTurnDistance(turnDistance);
-
-  // That's it!
-  core->getThread()->unlockMutex(accessMutex);
 }
 
 }

@@ -24,23 +24,18 @@ package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import android.app.AlertDialog;
-import android.app.Application;
 import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
-import android.content.*;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -48,30 +43,17 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.preference.PreferenceScreen;
-
-import android.sax.TextElementListener;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.LayoutAnimationController;
-import android.view.animation.RotateAnimation;
-import android.view.animation.TranslateAnimation;
-import android.view.inputmethod.ExtractedTextRequest;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
@@ -102,9 +84,9 @@ public class ViewMap extends GDActivity {
   /** Reference to the core object */
   GDCore coreObject = null;
   
-  // Info about the last location entered
-  String lastLocationSubject;
-  String lastLocationText = "";
+  // Info about the last address entered
+  String lastAddressSubject;
+  String lastAddressText = "";
   
   // Managers
   LocationManager locationManager;
@@ -172,7 +154,7 @@ public class ViewMap extends GDActivity {
           public void onClick(DialogInterface dialog, int which) {
             switch(which) {
               case 0: coreObject.executeCoreCommand("setTargetAtMapCenter()"); break;
-              case 1: askForLocation(getString(R.string.manually_entered_location),lastLocationText); break;
+              case 1: askForAddress(getString(R.string.manually_entered_address),lastAddressText); break;
               case 2: coreObject.executeCoreCommand("showTarget()"); break;
               case 3: coreObject.executeCoreCommand("hideTarget()"); break;
             }
@@ -306,6 +288,10 @@ public class ViewMap extends GDActivity {
                 showContextMenu();
                 commandExecuted=true;
               }
+              if (commandFunction.equals("askForAddress")) {
+                askForAddress(getString(R.string.manually_entered_address),lastAddressText);
+                commandExecuted=true;
+              }
               if (commandFunction.equals("exitActivity")) {
                 exitRequested = true;
                 stopService(new Intent(ViewMap.this, GDService.class));
@@ -314,7 +300,7 @@ public class ViewMap extends GDActivity {
               } 
               
               if (!commandExecuted) {
-                GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + "received");
+                GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
               }
               break;
           }
@@ -364,17 +350,17 @@ public class ViewMap extends GDActivity {
   }
   
   /** Asks the user for confirmation of the address */
-  void askForLocation(final String subject, final String text) {
+  void askForAddress(final String subject, final String text) {
     AlertDialog.Builder builder = new AlertDialog.Builder(this);
     final EditText editText = new EditText(this);
     editText.setText(text);
-    builder.setTitle(R.string.location_dialog_title);
-    builder.setMessage(R.string.location_dialog_message);
+    builder.setTitle(R.string.address_dialog_title);
+    builder.setMessage(R.string.address_dialog_message);
     builder.setIcon(android.R.drawable.ic_menu_mapmode);
     builder.setView(editText);
     builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {  
       public void onClick(DialogInterface dialog, int whichButton) {  
-        AddressFromLocationTask task = new AddressFromLocationTask();
+        LocationFromAddressTask task = new LocationFromAddressTask();
         task.subject = subject;
         task.text = editText.getText().toString();
         task.execute();
@@ -526,7 +512,7 @@ public class ViewMap extends GDActivity {
             warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));
           }
         } else if (extras.containsKey(Intent.EXTRA_TEXT)) {
-          askForLocation(extras.getString(Intent.EXTRA_SUBJECT), extras.getString(Intent.EXTRA_TEXT));
+          askForAddress(extras.getString(Intent.EXTRA_SUBJECT), extras.getString(Intent.EXTRA_TEXT));
         } else {
           warningDialog(getString(R.string.unsupported_intent));        
         }
@@ -707,7 +693,7 @@ public class ViewMap extends GDActivity {
   }  
   
   /** Finds the geographic position for the given address */
-  private class AddressFromLocationTask extends AsyncTask<Void, Void, Void> {
+  private class LocationFromAddressTask extends AsyncTask<Void, Void, Void> {
 
     String subject;
     String text;
@@ -720,11 +706,11 @@ public class ViewMap extends GDActivity {
 
       // Go through all lines and treat each line as an address
       // If the geocoder finds the address, add it as a POI
-      String[] locationLines = text.split("\n");
+      String[] addressLines = text.split("\n");
       Geocoder geocoder = new Geocoder(ViewMap.this);
-      for (String locationLine : locationLines) { 
+      for (String addressLine : addressLines) { 
         try {
-          List<Address> addresses = geocoder.getFromLocationName(locationLine, 1);
+          List<Address> addresses = geocoder.getFromLocationName(addressLine, 1);
           if (addresses.size()>0) {
             Address address = addresses.get(0);
             locationFound=true;
@@ -742,8 +728,8 @@ public class ViewMap extends GDActivity {
       if (!locationFound) {
         warningDialog(String.format(getString(R.string.location_not_found),text));
       } 
-      lastLocationSubject=subject;
-      lastLocationText=text;
+      lastAddressSubject=subject;
+      lastAddressText=text;
     }
   }
   

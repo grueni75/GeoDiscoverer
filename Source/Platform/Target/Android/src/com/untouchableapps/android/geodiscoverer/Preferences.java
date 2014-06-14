@@ -520,6 +520,7 @@ public class Preferences extends PreferenceActivity implements
       routeNavigationCategory.setTitle("Route navigation");
       rootScreen.addPreference(routeNavigationCategory);
       addPreference(routeNavigationCategory, routeNavigationCategory, "Navigation", "activeRoute");
+      addPreference(routeNavigationCategory, routeNavigationCategory, "Navigation", "averageTravelSpeed");
     } else {
       inflatePreferences(currentPath, rootScreen);
     }

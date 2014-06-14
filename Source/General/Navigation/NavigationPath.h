@@ -39,7 +39,7 @@ protected:
   bool hasLastPoint;                              // Indicates if the path already has its last point
   MapPosition secondLastPoint;                    // The point added before the last point
   bool hasSecondLastPoint;                        // Indicates if the path already has its second last point
-  std::list<MapPosition> mapPositions;            // List of map positions the path consists of
+  std::vector<MapPosition> mapPositions;          // List of map positions the path consists of
   bool blinkMode;                                 // Indicates if the path shall blink
   GraphicColor normalColor;                       // Normal color of the path
   GraphicColor highlightColor;                    // Highlight color of the path
@@ -53,8 +53,6 @@ protected:
   Int pathMinSegmentLength;                       // Minimum segment length of tracks, routes and other paths
   Int pathMinDirectionDistance;                   // Minimum distance between two direction arrows of tracks, routes and other paths
   Int pathWidth;                                  // Width of tracks, routes and other paths
-  double length;                                  // Current length of the track in meters
-  ThreadMutexInfo *isInitMutex;                   // Mutex for accessing the isInit variable
   bool isInit;                                    // Indicates if the track is initialized
   double minDistanceToRouteWayPoint;              // Minimum distance to a point on the route to consider it as the target for navigation
   double maxDistanceToTurnWayPoint;               // Maximum distance in meters to a turn before it is indicated
@@ -62,6 +60,13 @@ protected:
   double minTurnAngle;                            // Minimum angle at which a turn in the path is detected
   double turnDetectionDistance;                   // Distance in meters to look forward and back for detecting a turn
   double minDistanceToBeOffRoute;                 // Minimum distance from nearest route point such that navigation considers location to be off route
+
+  // Information about the path
+  double length;                                  // Current length of the track in meters
+  double altitudeUp;                              // Current total altitude of the track uphill in meters
+  double altitudeDown;                            // Current total altitude of the track downhill in meters
+  double minAltitude;                             // Minimum altitude of the track
+  double maxAltitude;                             // Maximum altitude of the track
 
   // Visualization of the path for each zoom level
   std::vector<NavigationPathVisualization*> zoomLevelVisualizations;
@@ -77,6 +82,9 @@ protected:
 
   // Updates the visualization of the tile
   void updateTileVisualization(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, MapPosition prevPos, MapPosition prevArrowPos, MapPosition currentPos);
+
+  // Updates the crossing path segments in the map tiles of the given map containers for the new point
+  void updateCrossingTileSegments(std::list<MapContainer*> *mapContainers, Int pos);
 
 public:
 
@@ -259,18 +267,18 @@ public:
       core->getGraphicEngine()->unlockPathAnimators();
   }
 
-  bool getIsInit() const {
+  bool getIsInit() {
     bool isInit;
-    core->getThread()->lockMutex(isInitMutex);
+    lockAccess();
     isInit=this->isInit;
-    core->getThread()->unlockMutex(isInitMutex);
+    unlockAccess();
     return isInit;
   }
 
   void setIsInit(bool isInit) {
-    core->getThread()->lockMutex(isInitMutex);
+    lockAccess();
     this->isInit = isInit;
-    core->getThread()->unlockMutex(isInitMutex);
+    unlockAccess();
   }
 
   bool getReverse() const {
@@ -279,6 +287,42 @@ public:
 
   void setReverse(bool reverse) {
     this->reverse = reverse;
+  }
+
+  MapPosition getPoint(Int index) {
+    return mapPositions[index];
+  }
+
+  std::vector<MapPosition> getPoints() {
+    return mapPositions;
+  }
+
+  double getAltitudeDown() const {
+    return altitudeDown;
+  }
+
+  double getAltitudeUp() const {
+    return altitudeUp;
+  }
+
+  double getMaxAltitude() const {
+    return maxAltitude;
+  }
+
+  double getMinAltitude() const {
+    return minAltitude;
+  }
+
+  void lockAccess() {
+    core->getThread()->lockMutex(accessMutex);
+  }
+
+  void unlockAccess() {
+    core->getThread()->unlockMutex(accessMutex);
+  }
+
+  Int getSize() const {
+    return mapPositions.size();
   }
 };
 

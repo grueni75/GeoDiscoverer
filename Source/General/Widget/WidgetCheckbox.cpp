@@ -27,9 +27,9 @@ namespace GEODISCOVERER {
 
 WidgetCheckbox::WidgetCheckbox() : WidgetPrimitive() {
   widgetType=WidgetTypeCheckbox;
-  firstTime=true;
   checkedTexture=core->getScreen()->getTextureNotDefined();
   uncheckedTexture=core->getScreen()->getTextureNotDefined();
+  nextUpdateTime=0;
 }
 
 WidgetCheckbox::~WidgetCheckbox() {
@@ -57,10 +57,10 @@ void WidgetCheckbox::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 // Executed every time the graphic engine needs to draw
 bool WidgetCheckbox::work(TimestampInMicroseconds t) {
   bool changed=WidgetPrimitive::work(t);
-  if (firstTime) {
+  if (t>nextUpdateTime) {
     Int checked=core->getConfigStore()->getIntValue(stateConfigPath,stateConfigName);
     update(checked,false);
-    firstTime=false;
+    nextUpdateTime=t+updateInterval;
   }
   return changed;
 }

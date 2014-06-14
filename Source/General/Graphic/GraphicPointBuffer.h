@@ -51,6 +51,9 @@ public:
   // Adds one point to the internal array
   bool addPoint(GraphicPoint point);
 
+  // Adds a list of points to the internal array
+  bool addPoints(std::list<GraphicPoint> points);
+
   // Removes all points
   void reset();
 

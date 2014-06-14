@@ -959,6 +959,9 @@ void MapEngine::updateMap() {
     // Update the tile graphic
     core->getNavigationEngine()->updateMapGraphic();
 
+    // Update any widgets
+    core->getWidgetEngine()->onMapChange(mapPos);
+
     // Inform the cache
     core->getMapCache()->tileVisibilityChanged();
   }

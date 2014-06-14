@@ -26,11 +26,16 @@
 
 namespace GEODISCOVERER {
 
-typedef enum { PictureBorderTop, PictureBorderBottom, PictureBorderRight, PictureBorderLeft } PictureBorder;
-
+class NavigationPath;
+class NavigationPathSegment;
 class MapContainer;
 class MapPosition;
 class MapArea;
+
+// Types for storing the tile info
+typedef enum { PictureBorderTop, PictureBorderBottom, PictureBorderRight, PictureBorderLeft } PictureBorder;
+typedef std::map<NavigationPath*, std::list<NavigationPathSegment*>* > MapTileNavigationPathMap;
+typedef std::pair<NavigationPath*, std::list<NavigationPathSegment*>* > MapTileNavigationPathPair;
 
 class MapTile {
 
@@ -73,6 +78,9 @@ protected:
   double lngX[2];                         // x Position in world (both sides)
   double latY[2];                         // y Position in world (both sides)
   double northAngle;                      // Angle to true north in degrees
+
+  // Path segments that cross this tile
+  MapTileNavigationPathMap crossingPathSegmentsMap;
 
   // Compares the latitude and longitude positions with the one of the given tile
   bool isNeighbor(MapTile *t, Int ownEdgeX, Int ownEdgeY, Int foreignEdgeX, Int foreignEdgeY) const;
@@ -172,6 +180,18 @@ public:
 
   // Transfers the current visual position to the rectangle
   void activateVisPos();
+
+  // Returns the segments of the given path that cross this tile
+  std::list<NavigationPathSegment*> *findCrossingNavigationPathSegments(NavigationPath *path);
+
+  // Adds a new segment that crosses this map tile
+  void addCrossingNavigationPathSegment(NavigationPath *path, NavigationPathSegment *segment);
+
+  // Removes all segments that belong to the given path
+  void removeCrossingNavigationPathSegments(NavigationPath *path);
+
+  // Returns a list of path segments that cross this tile
+  std::list<NavigationPathSegment*> getCrossingNavigationPathSegments();
 
   // Getters and setters
   Int getMapBorder(PictureBorder border);

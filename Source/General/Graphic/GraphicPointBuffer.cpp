@@ -121,4 +121,13 @@ void GraphicPointBuffer::reset() {
   bufferOutdated=true;
 }
 
+// Adds a list of points to the internal array
+bool GraphicPointBuffer::addPoints(std::list<GraphicPoint> points) {
+  for(std::list<GraphicPoint>::iterator i = points.begin();i!=points.end();i++) {
+    if (!addPoint(*i))
+      return false;
+  }
+  return true;
+}
+
 }

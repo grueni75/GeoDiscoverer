@@ -299,6 +299,14 @@ bool MapSourceCalibratedPictures::init()
     core->getDialog()->closeProgress(dialog);
     createSearchDataStructures(true);
 
+    // Zoom levels with zero tiles are not supported
+    for (int z=0;z<=maxZoomLevel+1;z++) {
+      if (zoomLevelSearchTrees[z]==NULL) {
+        ERROR("map <%s> can not be used because it has zoom levels with no tiles",std::string(folder).c_str());
+        goto cleanup;
+      }
+    }
+
     // Store the map source contents for fast retrieval later
     title="Writing cache for map " + std::string(folder);
     dialog=core->getDialog()->createProgress(title,0);

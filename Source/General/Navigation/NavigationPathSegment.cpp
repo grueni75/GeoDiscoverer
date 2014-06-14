@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicTranslateAnimationParameter.cpp
+// Name        : NavigationPathSegment.cpp
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -24,14 +24,14 @@
 
 namespace GEODISCOVERER {
 
-// Constructor
-GraphicTranslateAnimationParameter::GraphicTranslateAnimationParameter() : GraphicAnimationParameter() {
-  type=GraphicAnimationParameterTypeTranslate;
-  animationType=GraphicTranslateAnimationTypeLinear;
+NavigationPathSegment::NavigationPathSegment() {
+  path=NULL;
+  startIndex=-1;
+  endIndex=-1;
 }
 
-// Destructor
-GraphicTranslateAnimationParameter::~GraphicTranslateAnimationParameter() {
+NavigationPathSegment::~NavigationPathSegment() {
+  // TODO Auto-generated destructor stub
 }
 
 } /* namespace GEODISCOVERER */

@@ -265,13 +265,13 @@ void NavigationEngine::deinit() {
   }
 
   // Save the track first
-  lockRecordedTrack();
   if (recordedTrack) {
-    recordedTrack->writeGPXFile();
+    recordedTrack->writeGPXFile(); // locking is handled within writeGPXFile()
+    lockRecordedTrack();
     delete recordedTrack;
     recordedTrack=NULL;
+    unlockRecordedTrack();
   }
-  unlockRecordedTrack();
 
   // Free all routes
   lockRoutes();
@@ -378,6 +378,9 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     updateTrack();
     //PROFILE_ADD("track update");
 
+    // Inform the widget engine
+    core->getWidgetEngine()->onLocationChange(locationPos);
+
     // Update the graphics
     updateScreenGraphic(false);
     //PROFILE_ADD("graphics update");
@@ -418,9 +421,9 @@ void NavigationEngine::updateTrack() {
 
   // Get access to the recorded track
   //DEBUG("before recorded track update",NULL);
-  lockRecordedTrack();
 
   // If the track was just loaded, we need to add this point as a stable one
+  recordedTrack->lockAccess();
   if (recordedTrack->getHasBeenLoaded()) {
     pointMeetsCriterias=true;
     recordedTrack->setHasBeenLoaded(false);
@@ -448,17 +451,18 @@ void NavigationEngine::updateTrack() {
   }
 
   // Free the recorded track
-  unlockRecordedTrack();
+  recordedTrack->unlockAccess();
   //DEBUG("after recorded track update",NULL);
+
+  // Inform the widget engine
+  core->getWidgetEngine()->onPathChange(recordedTrack);
 }
 
 // Saves the recorded track if required
 void NavigationEngine::backup() {
 
   // Store the recorded track
-  lockRecordedTrack();
-  recordedTrack->writeGPXFile();
-  unlockRecordedTrack();
+  recordedTrack->writeGPXFile(); // locking is handled within method
 
 }
 
@@ -472,14 +476,16 @@ bool NavigationEngine::setRecordTrack(bool recordTrack, bool ignoreIsInit)
   }
 
   // Interrupt the track if there is a previous point
-  lockRecordedTrack();
   if ((recordTrack)&&(!this->recordTrack)) {
+    recordedTrack->lockAccess();
     if (recordedTrack->getHasLastPoint()) {
       if (recordedTrack->getLastPoint()!=NavigationPath::getPathInterruptedPos()) {
         recordedTrack->addEndPosition(NavigationPath::getPathInterruptedPos());
       }
     }
+    recordedTrack->unlockAccess();
   }
+  lockRecordedTrack();
   this->recordTrack=recordTrack;
   core->getConfigStore()->setIntValue("Navigation","recordTrack",recordTrack);
   unlockRecordedTrack();
@@ -499,11 +505,13 @@ void NavigationEngine::createNewTrack() {
     WARNING("can not change track recording status because track is currently loading",NULL);
     return;
   }
-  lockRecordedTrack();
-  recordedTrack->writeGPXFile();
+  recordedTrack->writeGPXFile(); // locking is handled within writeGPXFile
+  recordedTrack->lockAccess();
   recordedTrack->deinit();
   recordedTrack->init();
   recordedTrack->setIsInit(true);
+  recordedTrack->unlockAccess();
+  lockRecordedTrack();
   core->getConfigStore()->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename());
   unlockRecordedTrack();
   INFO("new %s created",recordedTrack->getGpxFilename().c_str());
@@ -782,7 +790,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
         arrowIcon->setAngle(visAngle);
         arrowIcon->setIsUpdated(true);
         arrowIcon->setTranslateAnimationSequence(std::list<GraphicTranslateAnimationParameter>());
-        arrowIcon->setTranslateAnimation(core->getClock()->getMicrosecondsSinceStart(),visPosX,visPosY,translateEndX,translateEndY,true,arrowNormalTranslateDuration);
+        arrowIcon->setTranslateAnimation(core->getClock()->getMicrosecondsSinceStart(),visPosX,visPosY,translateEndX,translateEndY,true,arrowNormalTranslateDuration,GraphicTranslateAnimationTypeLinear);
       } else {
         std::list<GraphicTranslateAnimationParameter> translateAnimationSequence = arrowIcon->getTranslateAnimationSequence();
         TimestampInMicroseconds startTime = core->getClock()->getMicrosecondsSinceStart();
@@ -859,16 +867,16 @@ void NavigationEngine::updateMapGraphic() {
   core->getMapSource()->unlockAccess();
 
   // Process the unfinished tile list
-  lockRoutes();
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    (*i)->lockAccess();
     (*i)->addVisualization(&containers);
+    (*i)->unlockAccess();
   }
-  unlockRoutes();
-  lockRecordedTrack();
   if (recordedTrack) {
+    recordedTrack->lockAccess();
     recordedTrack->addVisualization(&containers);
+    recordedTrack->unlockAccess();
   }
-  unlockRecordedTrack();
 
   // Indicate that all tiles have been processed
   core->getMapSource()->lockAccess();
@@ -882,16 +890,16 @@ void NavigationEngine::updateMapGraphic() {
 void NavigationEngine::destroyGraphic() {
 
   // Clear the buffers used in the path object
-  lockRoutes();
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    (*i)->lockAccess();
     (*i)->destroyGraphic();
+    (*i)->unlockAccess();
   }
-  unlockRoutes();
-  lockRecordedTrack();
   if (recordedTrack) {
+    recordedTrack->lockAccess();
     recordedTrack->destroyGraphic();
+    recordedTrack->unlockAccess();
   }
-  unlockRecordedTrack();
 }
 
 // Creates all graphics
@@ -903,32 +911,32 @@ void NavigationEngine::createGraphic() {
   core->getGraphicEngine()->unlockArrowIcon();
 
   // Creates the buffers used in the path object
-  lockRoutes();
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    (*i)->lockAccess();
     (*i)->createGraphic();
+    (*i)->unlockAccess();
   }
-  unlockRoutes();
-  lockRecordedTrack();
   if (recordedTrack) {
+    recordedTrack->lockAccess();
     recordedTrack->createGraphic();
+    recordedTrack->unlockAccess();
   }
-  unlockRecordedTrack();
 }
 
 // Recreate the objects to reduce the number of graphic point buffers
 void NavigationEngine::optimizeGraphic() {
 
   // Optimize the buffers used in the path object
-  lockRoutes();
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    (*i)->lockAccess();
     (*i)->optimizeGraphic();
+    (*i)->unlockAccess();
   }
-  unlockRoutes();
-  lockRecordedTrack();
   if (recordedTrack) {
+    recordedTrack->lockAccess();
     recordedTrack->optimizeGraphic();
+    recordedTrack->unlockAccess();
   }
-  unlockRecordedTrack();
 }
 
 // Adds the visualization for the given tile
@@ -950,16 +958,16 @@ void NavigationEngine::addGraphics(MapContainer *container) {
 void NavigationEngine::removeGraphics(MapContainer *container) {
 
   // Process the unfinished tile list
-  lockRoutes();
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    (*i)->lockAccess();
     (*i)->removeVisualization(container);
+    (*i)->unlockAccess();
   }
-  unlockRoutes();
-  lockRecordedTrack();
   if (recordedTrack) {
+    recordedTrack->lockAccess();
     recordedTrack->removeVisualization(container);
+    recordedTrack->unlockAccess();
   }
-  unlockRecordedTrack();
 }
 
 // Loads all pathes in the background
@@ -976,7 +984,7 @@ void NavigationEngine::backgroundLoader() {
     if (core->getQuitCore()) {
       goto exitThread;
     }
-    recordedTrack->readGPXFile();
+    recordedTrack->readGPXFile(); // locking is handled within method
     recordedTrack->setIsInit(true);
   }
 
@@ -985,7 +993,7 @@ void NavigationEngine::backgroundLoader() {
     if (core->getQuitCore()) {
       goto exitThread;
     }
-    (*i)->readGPXFile();
+    (*i)->readGPXFile(); // locking is handled within method
     (*i)->setIsInit(true);
   }
 
@@ -1105,9 +1113,9 @@ void NavigationEngine::updateNavigationInfos() {
 
         // Compute the navigation details for the given route
         //static MapPosition prevTurnPos;
-        lockRoutes();
+        activeRoute->lockAccess();
         activeRoute->computeNavigationInfo(locationPos,targetPos,navigationInfo);
-        unlockRoutes();
+        activeRoute->unlockAccess();
         //WARNING("enable route locking",NULL);
         if (targetPos.isValid()) {
           //setTargetAtGeographicCoordinate(targetPos.getLng(),targetPos.getLat(),false);

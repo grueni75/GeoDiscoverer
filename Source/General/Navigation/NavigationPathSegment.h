@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicTranslateAnimationParameter.cpp
+// Name        : NavigationPathSegment.h
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -20,18 +20,52 @@
 //
 //============================================================================
 
-#include <Core.h>
+#ifndef NAVIGATIONPATHSEGMENT_H_
+#define NAVIGATIONPATHSEGMENT_H_
 
 namespace GEODISCOVERER {
 
-// Constructor
-GraphicTranslateAnimationParameter::GraphicTranslateAnimationParameter() : GraphicAnimationParameter() {
-  type=GraphicAnimationParameterTypeTranslate;
-  animationType=GraphicTranslateAnimationTypeLinear;
-}
+class NavigationPathSegment {
 
-// Destructor
-GraphicTranslateAnimationParameter::~GraphicTranslateAnimationParameter() {
-}
+protected:
+
+  NavigationPath *path;     // The path that contains this segment
+  Int startIndex;           // Start index of the segment in the path
+  Int endIndex;             // End index of the segment in the path
+
+public:
+
+  // Constructor
+  NavigationPathSegment();
+
+  // Destructor
+  virtual ~NavigationPathSegment();
+
+  // Getters and setters
+  Int getEndIndex() const {
+    return endIndex;
+  }
+
+  void setEndIndex(Int endIndex) {
+    this->endIndex = endIndex;
+  }
+
+  NavigationPath* getPath() const {
+    return path;
+  }
+
+  void setPath(NavigationPath* path) {
+    this->path = path;
+  }
+
+  Int getStartIndex() const {
+    return startIndex;
+  }
+
+  void setStartIndex(Int startIndex) {
+    this->startIndex = startIndex;
+  }
+};
 
 } /* namespace GEODISCOVERER */
+#endif /* NAVIGATIONPATHSEGMENT_H_ */

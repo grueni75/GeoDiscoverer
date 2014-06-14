@@ -67,8 +67,8 @@ WidgetNavigation::~WidgetNavigation() {
   if (durationLabelFontString) core->getFontEngine()->destroyString(durationLabelFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansSmall");
-  if (distanceLabelFontString) core->getFontEngine()->destroyString(distanceValueFontString);
-  if (durationLabelFontString) core->getFontEngine()->destroyString(durationValueFontString);
+  if (distanceValueFontString) core->getFontEngine()->destroyString(distanceValueFontString);
+  if (durationValueFontString) core->getFontEngine()->destroyString(durationValueFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny");
   for(int i=0;i<4;i++) {

@@ -36,7 +36,6 @@ GraphicEngine::GraphicEngine() {
   noChangeFrameCount=0;
   locationAccuracyBackgroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyBackgroundColor");
   locationAccuracyCircleColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyCircleColor");
-  locationAccuracyCircleLineWidth=core->getConfigStore()->getIntValue("Graphic","locationAccuracyCircleLineWidth");
   locationAccuracyRadiusX=0;
   locationAccuracyRadiusY=0;
   locationIconMutex=core->getThread()->createMutex();
@@ -65,6 +64,7 @@ GraphicEngine::GraphicEngine() {
   tileImageNotDownloadedFilename.setColor(GraphicColor(255,255,255,0));
   fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration");
   blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration");
+  widgetGraphicObject=NULL;
 
   // Init the dynamic data
   init();
@@ -173,10 +173,12 @@ void GraphicEngine::draw(bool forceRedraw) {
   unlockPathAnimators();
 
   // Let the widget primitives work
-  if ((widgetPage)&&(widgetPage->getGraphicObject()->work(currentTime))) {
+  widgetGraphicObject->lockAccess();
+  if ((widgetGraphicObject)&&(widgetGraphicObject->work(currentTime))) {
     //DEBUG("requesting scene redraw due to widget page work result",NULL);
     redrawScene=true;
   }
+  widgetGraphicObject->unlockAccess();
 
   // Handle the hiding of the center icon
   TimestampInMicroseconds fadeStartTime=pos.getLastUserModification()+centerIconTimeout;
@@ -629,18 +631,25 @@ void GraphicEngine::draw(bool forceRedraw) {
     //DEBUG("after cursor icon draw",NULL);
 
     // Draw all widgets
-    if (widgetPage) {
-      screen->startObject();
-      std::list<GraphicPrimitive*> *widgetDrawList=widgetPage->getGraphicObject()->getDrawList();
-      for(std::list<GraphicPrimitive *>::const_iterator i=widgetDrawList->begin(); i != widgetDrawList->end(); i++) {
+    if (widgetGraphicObject) {
+      widgetGraphicObject->lockAccess();
+      std::list<GraphicPrimitive*> *pageDrawList=widgetGraphicObject->getDrawList();
+      for(std::list<GraphicPrimitive *>::const_iterator i=pageDrawList->begin(); i != pageDrawList->end(); i++) {
+        GraphicObject *page = (GraphicObject*) *i;
+        std::list<GraphicPrimitive*> *widgetDrawList=page->getDrawList();
+        screen->startObject();
+        screen->translate(page->getX(),page->getY(),0);
+        for(std::list<GraphicPrimitive *>::const_iterator i=widgetDrawList->begin(); i != widgetDrawList->end(); i++) {
 
-        // Draw the widget
-        WidgetPrimitive *widget;
-        widget=(WidgetPrimitive*)*i;
-        widget->draw(screen,currentTime);
+          // Draw the widget
+          WidgetPrimitive *widget;
+          widget=(WidgetPrimitive*)*i;
+          widget->draw(screen,currentTime);
 
+        }
+        screen->endObject();
       }
-      screen->endObject();
+      widgetGraphicObject->unlockAccess();
     }
     //DEBUG("after widget draw",NULL);
 

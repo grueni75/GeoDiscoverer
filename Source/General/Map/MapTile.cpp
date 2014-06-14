@@ -86,6 +86,14 @@ MapTile::~MapTile() {
     FATAL("expected only the rectangle in the visualization object",NULL);
   }
   visualization.unlockAccess();
+  for (MapTileNavigationPathMap::iterator i=crossingPathSegmentsMap.begin();i!=crossingPathSegmentsMap.end();i++) {
+    std::list<NavigationPathSegment*> *pathSegments = i->second;
+    for (std::list<NavigationPathSegment*>::iterator j=pathSegments->begin();j!=pathSegments->end();j++) {
+      delete *j;
+    }
+    delete pathSegments;
+  }
+  crossingPathSegmentsMap.clear();
 }
 
 // Does the computationly intensive part of the initialization
@@ -437,6 +445,58 @@ void MapTile::setIsCached(bool isCached, GraphicTextureInfo texture, bool fadeOu
     endTexture=texture;
   }
   setIsHidden(isHidden, fadeOutAnimation);
+}
+
+// Adds a new segment that crosses this map tile
+void MapTile::addCrossingNavigationPathSegment(NavigationPath *path, NavigationPathSegment *segment) {
+  MapTileNavigationPathMap::iterator i;
+  i=crossingPathSegmentsMap.find(path);
+  std::list<NavigationPathSegment*> *pathSegments=NULL;
+  if (i==crossingPathSegmentsMap.end()) {
+    if (!(pathSegments=new std::list<NavigationPathSegment*>())) {
+      FATAL("can not create list object of navigation path segments",NULL);
+      return;
+    }
+    crossingPathSegmentsMap.insert(MapTileNavigationPathPair(path,pathSegments));
+  } else {
+    pathSegments=i->second;
+  }
+  pathSegments->push_back(segment);
+}
+
+// Returns the segments of the given path that cross this tile
+std::list<NavigationPathSegment*>* MapTile::findCrossingNavigationPathSegments(NavigationPath *path) {
+  MapTileNavigationPathMap::iterator i=crossingPathSegmentsMap.find(path);
+  if (i!=crossingPathSegmentsMap.end()) {
+    return i->second;
+  } else {
+    return NULL;
+  }
+}
+
+// Returns a list of path segments that cross this tile
+std::list<NavigationPathSegment*> MapTile::getCrossingNavigationPathSegments() {
+  std::list<NavigationPathSegment*> allPathSegments;
+  for (MapTileNavigationPathMap::iterator i=crossingPathSegmentsMap.begin();i!=crossingPathSegmentsMap.end();i++) {
+    std::list<NavigationPathSegment*> *pathSegments = i->second;
+    for (std::list<NavigationPathSegment*>::iterator j=pathSegments->begin();j!=pathSegments->end();j++) {
+      allPathSegments.push_back(*j);
+    }
+  }
+  return allPathSegments;
+}
+
+// Removes all segments that belong to the given path
+void MapTile::removeCrossingNavigationPathSegments(NavigationPath *path) {
+  MapTileNavigationPathMap::iterator i=crossingPathSegmentsMap.find(path);
+  if (i!=crossingPathSegmentsMap.end()) {
+    std::list<NavigationPathSegment*> *pathSegments = i->second;
+    for (std::list<NavigationPathSegment*>::iterator j=pathSegments->begin();j!=pathSegments->end();j++) {
+      delete *j;
+    }
+    delete pathSegments;
+    crossingPathSegmentsMap.erase(i);
+  }
 }
 
 }

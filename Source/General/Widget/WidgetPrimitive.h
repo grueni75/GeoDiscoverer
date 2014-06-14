@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale, WidgetTypeStatus, WidgetTypeNavigation} WidgetType;
+typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale, WidgetTypeStatus, WidgetTypeNavigation, WidgetTypePathInfo} WidgetType;
 
 class WidgetPrimitive : public GraphicRectangle {
 
@@ -49,11 +49,23 @@ public:
   WidgetPrimitive();
   virtual ~WidgetPrimitive();
 
+  // Called when a two fingure gesture is done on the widget
+  virtual void onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff);
+
   // Called when the widget is touched
   virtual void onTouchDown(TimestampInMicroseconds t, Int x, Int y);
 
   // Called when the widget is not touched anymore
   virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y);
+
+  // Called when the map has changed
+  virtual void onMapChange(MapPosition pos);
+
+  // Called when the location changes
+  virtual void onLocationChange(MapPosition pos);
+
+  // Called when a path changes
+  virtual void onPathChange(NavigationPath *path);
 
   // Called when the widget has changed his position
   virtual void updatePosition(Int x, Int y, Int z);

@@ -29,6 +29,9 @@ namespace GEODISCOVERER {
 NavigationPathVisualization::NavigationPathVisualization() {
   prevLinePoint=NavigationPath::getPathInterruptedPos();
   prevArrowPoint=NavigationPath::getPathInterruptedPos();
+  lngScale=0;
+  latScale=0;
+  zoomLevel=0;
 }
 
 // Destructor

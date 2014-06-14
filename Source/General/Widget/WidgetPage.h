@@ -37,9 +37,6 @@ protected:
   bool firstTouch;               // Indicates that no touch was done before
   WidgetPrimitive *selectedWidget; // The currently selected widget
 
-  // Sets the active state of the widgets
-  void setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive);
-
 public:
 
   // Constructors and destructor
@@ -52,11 +49,29 @@ public:
   // Removes all widgets
   void deinit(bool deleteWidgets=true);
 
+  // Called when the screen is touched
+  bool onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff);
+
   // Called when the widget is touched
   bool onTouchDown(TimestampInMicroseconds t, Int x, Int y);
 
   // Called when the widget is not touched anymore
   bool onTouchUp(TimestampInMicroseconds t, Int x, Int y);
+
+  // Called when the map has changed
+  void onMapChange(MapPosition pos);
+
+  // Called when the location has changed
+  void onLocationChange(MapPosition pos);
+
+  // Called when a path has changed
+  void onPathChange(NavigationPath *path);
+
+  // Deselects currently selected widget
+  void deselectWidget(TimestampInMicroseconds t);
+
+  // Sets the active state of the widgets
+  void setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive);
 
   // Getters and setters
   GraphicObject *getGraphicObject()

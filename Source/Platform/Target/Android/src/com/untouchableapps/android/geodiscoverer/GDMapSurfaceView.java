@@ -163,8 +163,8 @@ public class GDMapSurfaceView extends GLSurfaceView {
         double distY=secondY-firstY;
         float distance=(float)Math.sqrt(distX*distX+distY*distY);
         float angle=(float)Math.atan2(distX, distY);
-        int x = (int)Math.round(firstX+distance/2*Math.cos(angle));
-        int y = (int)Math.round(firstY+distance/2*Math.sin(angle));
+        int x = (int)Math.round(firstX+distance/2*Math.sin(angle));
+        int y = (int)Math.round(firstY+distance/2*Math.cos(angle));
         
         // Move or set action?
         if (moveAction) {

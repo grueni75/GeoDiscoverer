@@ -54,7 +54,7 @@ protected:
   GraphicColor fadeStartColor;                          // Start color of a fade operation
   GraphicColor fadeEndColor;                            // Stop color of a fade operation
   bool fadeInfinite;                                    // Fade is repeated infinitely if set
-  GraphicRotateAnimationType rotateAnimationType;       // Type of rotate animation type
+  GraphicRotateAnimationType rotateAnimationType;       // Type of rotate animation
   TimestampInMicroseconds rotateDuration;               // Duration of a rotate operation
   TimestampInMicroseconds rotateStartTime;              // Start of the rotate operation
   TimestampInMicroseconds rotateEndTime;                // End of the rotate operation
@@ -67,6 +67,7 @@ protected:
   double scaleStartFactor;                              // Start factor of scale operation
   double scaleEndFactor;                                // End factor of scale operation
   bool scaleInfinite;                                   // Rotation is repeated infinitely if set
+  GraphicTranslateAnimationType translateAnimationType; // Type of translate animation
   TimestampInMicroseconds translateDuration;            // Duration of a translate operation
   TimestampInMicroseconds translateStartTime;           // Start of the translate operation
   TimestampInMicroseconds translateEndTime;             // End of the translate operation
@@ -77,6 +78,8 @@ protected:
   bool translateInfinite;                               // Translation is repeated infinitely if set
   bool isUpdated;                                       // Indicates that the primitive has been changed
   bool destroyTexture;                                  // Indicates if the texture shall be destroyed if the object is deleted
+  TimestampInMicroseconds lifeEnd;                      // Time point at which the object can be removed from the parent container
+  ThreadMutexInfo *accessMutex;                         // Mutex for accessing the object
 
   // List of texture animations to execute on this object
   std::list<GraphicTextureAnimationParameter> textureAnimationSequence;
@@ -138,7 +141,7 @@ public:
   void setScaleAnimation(TimestampInMicroseconds startTime, double startFactor, double endFactor, bool infinite, TimestampInMicroseconds duration);
 
   // Sets a new translate target
-  void setTranslateAnimation(TimestampInMicroseconds startTime, Int startX, Int startY, Int endX, Int endY, bool infinite, TimestampInMicroseconds duration);
+  void setTranslateAnimation(TimestampInMicroseconds startTime, Int startX, Int startY, Int endX, Int endY, bool infinite, TimestampInMicroseconds duration, GraphicTranslateAnimationType animationType);
 
   // Let the primitive work
   // For example, animations are handled in this method
@@ -293,6 +296,22 @@ public:
   void setAnimator(GraphicPrimitive *animator)
   {
       this->animator = animator;
+  }
+
+  TimestampInMicroseconds getLifeEnd() const {
+    return lifeEnd;
+  }
+
+  void setLifeEnd(TimestampInMicroseconds lifeEnd) {
+    this->lifeEnd = lifeEnd;
+  }
+
+  void lockAccess() {
+    core->getThread()->lockMutex(accessMutex);
+  }
+
+  void unlockAccess() {
+    core->getThread()->unlockMutex(accessMutex);
   }
 };
 

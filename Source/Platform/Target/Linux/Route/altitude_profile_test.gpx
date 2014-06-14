@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.1" creator="Geo Discoverer" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <metadata>
+    <name>Track-20130128-075923</name>
+    <desc>Track recorded with GeoDiscoverer.</desc>
+    <time>2013-01-28T08:00:34</time>
+  </metadata>
+  <trk>
+    <name>Track-20130128-075923</name>
+    <desc>Track recorded with GeoDiscoverer.</desc>
+    <trkseg>
+      <trkpt lat="51.2377" lon="6.8167">
+        <time>2012-03-25T09:50:08</time>
+        <ele>10.0</ele>
+        <extensions>
+          <pt xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <source>gps</source>
+            <bearing>174.3</bearing>
+            <speed>5.7717</speed>
+            <accuracy>3</accuracy>
+          </pt>
+        </extensions>
+      </trkpt>
+      <trkpt lat="51.2375" lon="6.81672">
+        <time>2012-03-25T09:50:13</time>
+        <ele>500.0</ele>
+        <extensions>
+          <pt xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <source>gps</source>
+            <bearing>172.3</bearing>
+            <speed>5.75</speed>
+            <accuracy>4</accuracy>
+          </pt>
+        </extensions>
+      </trkpt>
+      <trkpt lat="51.2372" lon="6.81689">
+        <time>2012-03-25T09:50:18</time>
+        <ele>400.0</ele>
+        <extensions>
+          <pt xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <source>gps</source>
+            <bearing>144.9</bearing>
+            <speed>5.7717</speed>
+            <accuracy>3</accuracy>
+          </pt>
+        </extensions>
+      </trkpt>
+      <trkpt lat="51.237" lon="6.81711">
+        <time>2012-03-25T09:50:23</time>
+        <ele>300.0</ele>
+        <extensions>
+          <pt xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <source>gps</source>
+            <bearing>156.5</bearing>
+            <speed>6</speed>
+            <accuracy>3</accuracy>
+          </pt>
+        </extensions>
+      </trkpt>
+      <trkpt lat="51.2368" lon="6.81712">
+        <time>2012-03-25T09:50:28</time>
+        <ele>100.0</ele>
+        <extensions>
+          <pt xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <source>gps</source>
+            <bearing>204.4</bearing>
+            <speed>3.75</speed>
+            <accuracy>2</accuracy>
+          </pt>
+        </extensions>
+      </trkpt>
+      <trkpt lat="51.2366" lon="6.81674">
+        <time>2012-03-25T09:50:35</time>
+        <ele>150.0</ele>
+        <extensions>
+          <pt xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <source>gps</source>
+            <bearing>240</bearing>
+            <speed>4.75</speed>
+            <accuracy>2</accuracy>
+          </pt>
+        </extensions>
+      </trkpt>
+      <trkpt lat="51.2365" lon="6.81639">
+        <time>2012-03-25T09:50:41</time>
+        <ele>200.0</ele>
+        <extensions>
+          <pt xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <source>gps</source>
+            <bearing>244.3</bearing>
+            <speed>4.75</speed>
+            <accuracy>3</accuracy>
+          </pt>
+        </extensions>
+      </trkpt>
+      <trkpt lat="51.2364" lon="6.816">
+        <time>2012-03-25T09:50:46</time>
+        <ele>100.0</ele>
+        <extensions>
+          <pt xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <source>gps</source>
+            <bearing>251.9</bearing>
+            <speed>5.52268</speed>
+            <accuracy>3</accuracy>
+          </pt>
+        </extensions>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

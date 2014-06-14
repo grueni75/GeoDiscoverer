@@ -118,7 +118,13 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="setPage") {
+    core->getWidgetEngine()->setPage(args[0],atoi(args[1].c_str()),atoi(args[2].c_str()));
+    cmdExecuted=true;
+  }
   if (cmdName=="twoFingerGesture") {
+
+    // Convert the coordinates
     Int x,y;
     x=atoi(args[0].c_str());
     y=atoi(args[1].c_str());
@@ -126,12 +132,24 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     y=core->getScreen()->getHeight()/2-1-y;
     Int dX=lastTouchedX-x;
     Int dY=lastTouchedY-y;
-    pos=core->getGraphicEngine()->lockPos();
-    pos->rotate(atof(args[2].c_str()));
-    pos->zoom(atof(args[3].c_str()));
-    pos->pan(dX,dY);
-    pos->updateLastUserModification();
-    core->getGraphicEngine()->unlockPos();
+
+    // First check if a widget was two fingure gestured
+    bool widgetTouched=false;
+    if (core->getWidgetEngine()->onTwoFingerGesture(t,dX,dY,atof(args[2].c_str()),atof(args[3].c_str()))) {
+      widgetTouched=true;
+    }
+
+    // Then do the map scrolling
+    if (!widgetTouched) {
+      pos=core->getGraphicEngine()->lockPos();
+      pos->rotate(atof(args[2].c_str()));
+      pos->zoom(atof(args[3].c_str()));
+      pos->pan(dX,dY);
+      pos->updateLastUserModification();
+      core->getGraphicEngine()->unlockPos();
+    }
+
+    // Update some variables
     lastTouchedX=x;
     lastTouchedY=y;
     cmdExecuted=true;
@@ -302,6 +320,7 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
   if (cmdName=="hideTarget") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->hideTarget();
+      INFO("target has been hidden",NULL);
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
@@ -344,8 +363,24 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     core->getWidgetEngine()->showContextMenu();
     cmdExecuted=true;
   }
+  if (cmdName=="setTargetAtAddress") {
+    core->getWidgetEngine()->setTargetAtAddress();
+    cmdExecuted=true;
+  }
   if ((cmdName=="newNavigationInfos")||(cmdName=="initComplete")) {
     core->getWidgetEngine()->showContextMenu();
+    cmdExecuted=true;
+  }
+  if (cmdName=="setPathInfoLock") {
+    bool state;
+    if (atoi(args[0].c_str())) {
+      state=true;
+      INFO("path info widget always shows current path",NULL);
+    } else {
+      INFO("path info widget shows nearest path",NULL);
+      state=false;
+    }
+    WidgetPathInfo::setCurrentPathLocked(state);
     cmdExecuted=true;
   }
 

@@ -258,19 +258,14 @@ void Font::createStringBitmap(FontString *fontString) {
       FontCharacterPair p=FontCharacterPair(c,fontCharacter);
       characterMap.insert(p);
 
-      // Copy character infos
-      fontCharacter->setPenOffsetLeft(strokeBGlyph->left);
-      fontCharacter->setPenOffsetTop(strokeBGlyph->top);
-      fontCharacter->setPenAdvanceX(face->glyph->advance.x>>6);
-      characterBitmap=fontCharacter->getBitmap();
-
       // Merge the bitmaps
+      characterBitmap=fontCharacter->getBitmap();
       FT_BitmapGlyph normalBGlyph=(FT_BitmapGlyph)normalGlyph;
       FT_Bitmap *normalBitmap=&normalBGlyph->bitmap;
       Int normalBitmapWidth=normalBitmap->width/3;
       Int normalBitmapHeight=normalBitmap->rows;
-      Int offsetX=(strokeBitmapWidth-normalBitmapWidth)/2;
-      Int offsetY=(strokeBitmapHeight-normalBitmapHeight)/2;
+      Int offsetX=normalBGlyph->left-strokeBGlyph->left;
+      Int offsetY=strokeBGlyph->top-normalBGlyph->top;
       for (Int y=0;y<strokeBitmapHeight;y++) {
         for (Int x=0;x<strokeBitmapWidth;x++) {
           Int strokeRed=(strokeBitmap->buffer[y*strokeBitmap->pitch+3*x])>>4;
@@ -300,6 +295,11 @@ void Font::createStringBitmap(FontString *fontString) {
           characterBitmap[y*strokeBitmapWidth+x]=value;
         }
       }
+
+      // Copy character infos
+      fontCharacter->setPenOffsetLeft(normalBGlyph->left-offsetX);
+      fontCharacter->setPenOffsetTop(normalBGlyph->top+offsetY);
+      fontCharacter->setPenAdvanceX(face->glyph->advance.x>>6);
 
       // Cleanup
       FT_Done_Glyph(normalGlyph);
@@ -363,6 +363,8 @@ void Font::createStringBitmap(FontString *fontString) {
 
   }
   height=top-bottom;
+  /*if (fontString->getWidthLimit()!=-1)
+    DEBUG("width=%d widthLimit=%d",width,fontString->getWidthLimit());*/
 
   // Decide on the width and height to use in the texture
   //DEBUG("contents=%s left=%d top=%d bottom=%d width=%d height=%d",fontString->getContents().c_str(),left,top,bottom,width,height);

@@ -364,6 +364,7 @@ extern Core *core;
 #include <WidgetMeter.h>
 #include <WidgetScale.h>
 #include <WidgetNavigation.h>
+#include <WidgetPathInfo.h>
 #include <WidgetStatus.h>
 #include <WidgetPage.h>
 #include <GraphicEngine.h>
@@ -384,6 +385,7 @@ extern Core *core;
 #include <NavigationPathTileInfo.h>
 #include <NavigationPathVisualization.h>
 #include <NavigationPath.h>
+#include <NavigationPathSegment.h>
 #include <NavigationTarget.h>
 #include <NavigationEngine.h>
 #include <Commander.h>

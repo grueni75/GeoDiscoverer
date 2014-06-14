@@ -36,8 +36,9 @@ protected:
   std::string uncheckedCommand;          // Command to execute when the box becomes unticked
   std::string stateConfigPath;           // Path to the config entry that indicates the state
   std::string stateConfigName;           // Name of the config entry that indicates the state
-  bool firstTime;                        // Indicates if the work routine has already been called
   std::string configPath;                // Path to this widget in the config
+  TimestampInMicroseconds updateInterval; // Update interval of the widget
+  TimestampInMicroseconds nextUpdateTime;   // Next timestamp when to update the widget
 
   // Updates the state of the check box
   bool update(bool checked, bool executeCommand);
@@ -98,6 +99,9 @@ public:
       this->stateConfigPath = stateConfigPath;
   }
 
+  void setUpdateInterval(TimestampInMicroseconds updateInterval) {
+    this->updateInterval = updateInterval;
+  }
 };
 
 }

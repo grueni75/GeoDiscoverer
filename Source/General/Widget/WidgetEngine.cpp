@@ -37,6 +37,9 @@ WidgetEngine::WidgetEngine() {
   contextMenuAllowedPixelJitter=c->getIntValue("Graphic/Widget","contextMenuAllowedPixelJitter");
   isTouched=false;
   contextMenuIsShown=false;
+  currentPage=NULL;
+  changePageDuration=c->getIntValue("Graphic/Widget","changePageDuration");
+  ignoreTouchesEnd=0;
 
   // Init the rest
   init();
@@ -68,6 +71,7 @@ void WidgetEngine::addWidgetToPage(
     case WidgetTypeScale: widgetTypeString="scale"; break;
     case WidgetTypeStatus: widgetTypeString="status"; break;
     case WidgetTypeNavigation: widgetTypeString="navigation"; break;
+    case WidgetTypePathInfo: widgetTypeString="pathInfo"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
   c->setStringValue(path,"type",widgetTypeString);
@@ -107,28 +111,39 @@ void WidgetEngine::createGraphic() {
 
   ConfigStore *c=core->getConfigStore();
 
+  // Only one thread please
+  visiblePages.lockAccess();
+
   // Get all widget pages
   // If no exist, create the default ones
   std::list<std::string> pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
   if (pageNames.size()==0) {
     ParameterMap parameters;
     parameters.clear();
+    parameters["iconFilename"]="pageLeft";
+    parameters["command"]="setPage(Path Tools,+1,0)";
+    addWidgetToPage("Default",WidgetTypeButton,"Page Left",               3.5, 50.0,0, 3.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="pageRight";
+    parameters["command"]="setPage(Path Tools,-1,0)";
+    addWidgetToPage("Default",WidgetTypeButton,"Page Right",             96.5, 50.0,0,97.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
     parameters["iconFilename"]="zoomIn";
     parameters["command"]="zoom(1.125)";
-    addWidgetToPage("Default",WidgetTypeButton,"Zoom In",               87.5, 23.0,0,93.0, 87.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Zoom In",                87.5, 23.0,0,89.5, 87.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="zoomOut";
     parameters["command"]="zoom(0.875)";
-    addWidgetToPage("Default",WidgetTypeButton,"Zoom Out",              62.5, 23.0,0,93.0, 62.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Zoom Out",               62.5, 23.0,0,89.5, 62.5,0,255,255,255,255,255,255,255,100,parameters);
     /*
     parameters.clear();
     parameters["iconFilename"]="rotateLeft";
     parameters["command"]="rotate(+3)";
-    addWidgetToPage("Default",WidgetTypeButton,"Rotate Left",           37.5, 23.0,0,93.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Rotate Left",            37.5, 23.0,0,89.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="rotateRight";
     parameters["command"]="rotate(-3)";
-    addWidgetToPage("Default",WidgetTypeButton,"Rotate Right",          12.5, 23.0,0,93.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Rotate Right",           12.5, 23.0,0,89.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     */
     parameters.clear();
     parameters["uncheckedIconFilename"]="trackRecordingOff";
@@ -137,11 +152,12 @@ void WidgetEngine::createGraphic() {
     parameters["checkedCommand"]="setRecordTrack(1)";
     parameters["stateConfigPath"]="Navigation";
     parameters["stateConfigName"]="recordTrack";
-    addWidgetToPage("Default",WidgetTypeCheckbox,"Track Recording",     37.5, 93.0,0,7.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters["updateInterval"]="250000";
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Track Recording",      84.0, 82.0,0,10.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="createNewTrack";
     parameters["command"]="createNewTrack()";
-    addWidgetToPage("Default",WidgetTypeButton,"Create New Track",      12.5, 93.0,0,7.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Create New Track",       57.0, 82.0,0,10.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     /*
     parameters.clear();
     parameters["uncheckedIconFilename"]="wakeLockOff";
@@ -150,7 +166,7 @@ void WidgetEngine::createGraphic() {
     parameters["checkedCommand"]="setWakeLock(1)";
     parameters["stateConfigPath"]="General";
     parameters["stateConfigName"]="wakeLock";
-    addWidgetToPage("Default",WidgetTypeCheckbox,"Wake Lock",           37.5, 93.0,0,7.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Wake Lock",            37.5, 93.0,0,10.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     */
     parameters.clear();
     parameters["uncheckedIconFilename"]="returnToLocationOff";
@@ -159,7 +175,8 @@ void WidgetEngine::createGraphic() {
     parameters["checkedCommand"]="setReturnToLocation(1)";
     parameters["stateConfigPath"]="Map";
     parameters["stateConfigName"]="returnToLocation";
-    addWidgetToPage("Default",WidgetTypeCheckbox,"Return To Location",  37.5, 23.0,0,93.0, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters["updateInterval"]="250000";
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Return To Location",   37.5, 23.0,0,89.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["uncheckedIconFilename"]="zoomLevelLockOff";
     parameters["uncheckedCommand"]="setZoomLevelLock(0)";
@@ -167,7 +184,8 @@ void WidgetEngine::createGraphic() {
     parameters["checkedCommand"]="setZoomLevelLock(1)";
     parameters["stateConfigPath"]="Map";
     parameters["stateConfigName"]="zoomLevelLock";
-    addWidgetToPage("Default",WidgetTypeCheckbox,"Zoom Level Lock",     12.5, 23.0,0,93.0, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters["updateInterval"]="250000";
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Zoom Level Lock",      12.5, 23.0,0,89.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="meterBackground";
     parameters["meterType"]="altitude";
@@ -175,22 +193,22 @@ void WidgetEngine::createGraphic() {
     parameters["labelY"]="78.0";
     parameters["valueY"]="40.0";
     parameters["unitY"]="10.0";
-    addWidgetToPage("Default",WidgetTypeMeter,"Current altitude",       17.0, 9.0,0,25.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeMeter,"Current altitude",        17.0, 9.0,0,26.5, 14.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters["meterType"]="speed";
-    addWidgetToPage("Default",WidgetTypeMeter,"Current speed",          50.0, 9.0,0,50.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeMeter,"Current speed",           50.0, 9.0,0,50.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters["meterType"]="trackLength";
-    addWidgetToPage("Default",WidgetTypeMeter,"Track length",           83.0, 9.0,0,75.0, 14.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeMeter,"Track length",            83.0, 9.0,0,73.5, 14.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="scale";
     parameters["updateInterval"]="1000000";
-    parameters["tickLabelOffsetX"]="-3.5";
+    parameters["tickLabelOffsetX"]="0";
     parameters["mapLabelOffsetY"]="9.0";
-    addWidgetToPage("Default",WidgetTypeScale,"Map scale",              25.5, 81.0,0,50.0, 88.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeScale,"Map scale",               70.0, 93.0,0,50.0, 88.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="statusBackground";
     parameters["updateInterval"]="100000";
     parameters["labelWidth"]="95.0";
-    addWidgetToPage("Default",WidgetTypeStatus,"Status",                30.5, 81.0,1,50.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeStatus,"Status",                 70.0, 93.0,1,50.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="navigationBackground";
     parameters["updateInterval"]="1000000";
@@ -216,7 +234,112 @@ void WidgetEngine::createGraphic() {
     parameters["TurnColor/green"] = "0";
     parameters["TurnColor/blue"] = "0";
     parameters["TurnColor/alpha"] = "255";
-    addWidgetToPage("Default",WidgetTypeNavigation,"Navigation",        78.0, 87.0,0,12.0, 78.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeNavigation,"Navigation",         22.0, 87.0,0,14.5, 78.0,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="pageLeft";
+    parameters["command"]="setPage(Default,+1,0)";
+    addWidgetToPage("Path Tools",WidgetTypeButton,"Page Left",            3.5, 50.0,0, 3.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="pageRight";
+    parameters["command"]="setPage(Default,-1,0)";
+    addWidgetToPage("Path Tools",WidgetTypeButton,"Page Right",          96.5, 50.0,0,97.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="pathInfoBackground";
+    parameters["pathNameOffsetX"]="3.0";
+    parameters["pathNameOffsetY"]="82.0";
+    parameters["pathNameWidth"]="60.0";
+    parameters["pathValuesOffsetX"]="75.0";
+    parameters["pathValuesWidth"]="24.0";
+    parameters["pathLengthOffsetY"]="82.0";
+    parameters["pathAltitudeUpOffsetY"]="57.25";
+    parameters["pathAltitudeDownOffsetY"]="32.5";
+    parameters["pathDurationOffsetY"]="8.25";
+    parameters["altitudeProfileWidth"]="51.0";
+    parameters["altitudeProfileHeight"]="54.0";
+    parameters["altitudeProfileOffsetX"]="9.5";
+    parameters["altitudeProfileOffsetY"]="14.0";
+    parameters["altitudeProfileLineWidth"]="2.0";
+    parameters["altitudeProfileAxisLineWidth"]="2.0";
+    parameters["altitudeProfileMinAltitudeDiff"]="1.0";
+    parameters["altitudeProfileXTickCount"]="5";
+    parameters["altitudeProfileYTickCount"]="3";
+    parameters["altitudeProfileXTickLabelOffsetY"]="1.5";
+    parameters["altitudeProfileYTickLabelOffsetX"]="1.0";
+    parameters["altitudeProfileXTickLabelWidth"]="3";
+    parameters["altitudeProfileYTickLabelWidth"]="3";
+    parameters["AltitudeProfileFillColor/red"] = "255";
+    parameters["AltitudeProfileFillColor/green"] = "190";
+    parameters["AltitudeProfileFillColor/blue"] = "127";
+    parameters["AltitudeProfileFillColor/alpha"] = "255";
+    parameters["AltitudeProfileLineColor/red"] = "255";
+    parameters["AltitudeProfileLineColor/green"] = "127";
+    parameters["AltitudeProfileLineColor/blue"] = "0";
+    parameters["AltitudeProfileLineColor/alpha"] = "255";
+    parameters["AltitudeProfileAxisColor/red"] = "0";
+    parameters["AltitudeProfileAxisColor/green"] = "0";
+    parameters["AltitudeProfileAxisColor/blue"] = "0";
+    parameters["AltitudeProfileAxisColor/alpha"] = "64";
+    parameters["noAltitudeProfileOffsetX"]="32.0";
+    parameters["noAltitudeProfileOffsetY"]="42.0";
+    parameters["locationIconFilename"]="pathInfoLocation";
+    addWidgetToPage("Path Tools",WidgetTypePathInfo,"Path Info",         50.0, 12.5,1,50.0, 21.0,1,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["uncheckedIconFilename"]="targetOff";
+    parameters["uncheckedCommand"]="hideTarget()";
+    parameters["checkedIconFilename"]="targetOn";
+    parameters["checkedCommand"]="showTarget()";
+    parameters["stateConfigPath"]="Navigation/Target";
+    parameters["stateConfigName"]="visible";
+    parameters["updateInterval"]="250000";
+    addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Target Visibility", 87.5, 93.0,0,10.5, 87.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="setTargetAtAddress";
+    parameters["command"]="setTargetAtAddress()";
+    addWidgetToPage("Path Tools",WidgetTypeButton,"Target At Address",   62.5, 93.0,0,10.5, 62.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="setTargetAtMapCenter";
+    parameters["command"]="setTargetAtMapCenter()";
+    addWidgetToPage("Path Tools",WidgetTypeButton,"Target At Center",    37.5, 93.0,0,10.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["uncheckedIconFilename"]="pathInfoLockOff";
+    parameters["uncheckedCommand"]="setPathInfoLock(0)";
+    parameters["checkedIconFilename"]="pathInfoLockOn";
+    parameters["checkedCommand"]="setPathInfoLock(1)";
+    parameters["stateConfigPath"]="Navigation";
+    parameters["stateConfigName"]="pathInfoLocked";
+    parameters["updateInterval"]="250000";
+    addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Path Info Lock",    12.5, 93.0,0,10.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="statusBackground";
+    parameters["updateInterval"]="100000";
+    parameters["labelWidth"]="95.0";
+    addWidgetToPage("Path Tools",WidgetTypeStatus,"Status",              50.0, 30.0,1,50.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="zoomIn";
+    parameters["command"]="zoom(1.125)";
+    addWidgetToPage("Path Tools",WidgetTypeButton,"Zoom In",             87.5, 80.0,0,89.5, 87.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["iconFilename"]="zoomOut";
+    parameters["command"]="zoom(0.875)";
+    addWidgetToPage("Path Tools",WidgetTypeButton,"Zoom Out",            62.5, 80.0,0,89.5, 62.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["uncheckedIconFilename"]="returnToLocationOff";
+    parameters["uncheckedCommand"]="setReturnToLocation(0)";
+    parameters["checkedIconFilename"]="returnToLocationOn";
+    parameters["checkedCommand"]="setReturnToLocation(1)";
+    parameters["stateConfigPath"]="Map";
+    parameters["stateConfigName"]="returnToLocation";
+    parameters["updateInterval"]="250000";
+    addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Return To Location",37.5, 80.0,0,89.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters.clear();
+    parameters["uncheckedIconFilename"]="zoomLevelLockOff";
+    parameters["uncheckedCommand"]="setZoomLevelLock(0)";
+    parameters["checkedIconFilename"]="zoomLevelLockOn";
+    parameters["checkedCommand"]="setZoomLevelLock(1)";
+    parameters["stateConfigPath"]="Map";
+    parameters["stateConfigName"]="zoomLevelLock";
+    parameters["updateInterval"]="250000";
+    addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Zoom Level Lock",   12.5, 80.0,0,89.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
   }
 
@@ -230,6 +353,7 @@ void WidgetEngine::createGraphic() {
     WidgetPage *page=new WidgetPage(*i);
     if (!page) {
       FATAL("can not create widget page object",NULL);
+      visiblePages.unlockAccess();
       return;
     }
     WidgetPagePair pair=WidgetPagePair(*i,page);
@@ -251,6 +375,7 @@ void WidgetEngine::createGraphic() {
       WidgetScale *scale;
       WidgetStatus *status;
       WidgetNavigation *navigation;
+      WidgetPathInfo *pathInfo;
       if (widgetType=="button") {
         button=new WidgetButton();
         primitive=button;
@@ -275,6 +400,10 @@ void WidgetEngine::createGraphic() {
         navigation=new WidgetNavigation();
         primitive=navigation;
       }
+      if (widgetType=="pathInfo") {
+        pathInfo=new WidgetPathInfo();
+        primitive=pathInfo;
+      }
 
       // Set type-independent properties
       std::list<std::string> name;
@@ -285,7 +414,7 @@ void WidgetEngine::createGraphic() {
       primitive->setColor(primitive->getInactiveColor());
 
       // Load the image of the widget
-      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")) {
+      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")) {
         primitive->setTextureFromIcon(c->getStringValue(widgetPath,"iconFilename"));
       }
       if (widgetType=="checkbox") {
@@ -293,6 +422,7 @@ void WidgetEngine::createGraphic() {
         checkbox->setCheckedTexture(primitive->getTexture());
         primitive->setTextureFromIcon(c->getStringValue(widgetPath,"uncheckedIconFilename"));
         checkbox->setUncheckedTexture(primitive->getTexture());
+        checkbox->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
       }
       if (widgetType=="navigation") {
         navigation->getDirectionIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"directionIconFilename"));
@@ -327,6 +457,7 @@ void WidgetEngine::createGraphic() {
           meter->setMeterType(WidgetMeterTypeTrackLength);
         } else {
           FATAL("unknown meter type",NULL);
+          visiblePages.unlockAccess();
           return;
         }
         meter->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
@@ -365,6 +496,37 @@ void WidgetEngine::createGraphic() {
         navigation->setTurnLineStartY(c->getDoubleValue(widgetPath,"turnLineStartY")*navigation->getIconHeight()/100.0);
         navigation->setTurnColor(c->getGraphicColorValue(widgetPath+"/TurnColor"));
       }
+      if (widgetType=="pathInfo") {
+        pathInfo->setPathNameOffsetX(c->getDoubleValue(widgetPath,"pathNameOffsetX")*pathInfo->getIconWidth()/100.0);
+        pathInfo->setPathNameOffsetY(c->getDoubleValue(widgetPath,"pathNameOffsetY")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathNameWidth(c->getDoubleValue(widgetPath,"pathNameWidth")*pathInfo->getIconWidth()/100.0);
+        pathInfo->setPathValuesOffsetX(c->getDoubleValue(widgetPath,"pathValuesOffsetX")*pathInfo->getIconWidth()/100.0);
+        pathInfo->setPathValuesWidth(c->getDoubleValue(widgetPath,"pathValuesWidth")*pathInfo->getIconWidth()/100.0);
+        pathInfo->setPathNameOffsetY(c->getDoubleValue(widgetPath,"pathNameOffsetY")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathLengthOffsetY(c->getDoubleValue(widgetPath,"pathLengthOffsetY")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathAltitudeUpOffsetY(c->getDoubleValue(widgetPath,"pathAltitudeUpOffsetY")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathAltitudeDownOffsetY(c->getDoubleValue(widgetPath,"pathAltitudeDownOffsetY")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathDurationOffsetY(c->getDoubleValue(widgetPath,"pathDurationOffsetY")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileWidth(c->getDoubleValue(widgetPath,"altitudeProfileWidth")*pathInfo->getIconWidth()/100.0);
+        pathInfo->setAltitudeProfileHeight(c->getDoubleValue(widgetPath,"altitudeProfileHeight")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileOffsetX")*pathInfo->getIconWidth()/100.0);
+        pathInfo->setAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileOffsetY")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth")*((double)core->getScreen()->getDPI())/160.0);
+        pathInfo->setAltitudeProfileAxisLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileAxisLineWidth")*((double)core->getScreen()->getDPI())/160.0);
+        pathInfo->setNoAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetX")*pathInfo->getIconWidth()/100.0);
+        pathInfo->setNoAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetY")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileFillColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileFillColor"));
+        pathInfo->setAltitudeProfileLineColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileLineColor"));
+        pathInfo->setAltitudeProfileAxisColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileAxisColor"));
+        pathInfo->setAltitudeProfileMinAltitudeDiff(c->getDoubleValue(widgetPath,"altitudeProfileMinAltitudeDiff"));
+        pathInfo->setAltitudeProfileXTickCount(c->getIntValue(widgetPath,"altitudeProfileXTickCount"));
+        pathInfo->setAltitudeProfileYTickCount(c->getIntValue(widgetPath,"altitudeProfileYTickCount"));
+        pathInfo->setAltitudeProfileXTickLabelOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileXTickLabelOffsetY")*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileYTickLabelOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileYTickLabelOffsetX")*pathInfo->getIconWidth()/100.0);
+        pathInfo->setAltitudeProfileXTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileXTickLabelWidth"));
+        pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth"));
+        pathInfo->getLocationIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"locationIconFilename"));
+      }
 
       // Add the widget to the page
       page->addWidget(primitive);
@@ -375,14 +537,19 @@ void WidgetEngine::createGraphic() {
 
   // Set the default page on the graphic engine
   WidgetPageMap::iterator j;
-  j=pageMap.find("Default");
+  j=pageMap.find(c->getStringValue("Graphic/Widget","selectedPage"));
   if (j==pageMap.end()) {
     FATAL("default page does not exist",NULL);
+    visiblePages.unlockAccess();
     return;
   } else {
     currentPage=j->second;
-    core->getGraphicEngine()->setWidgetPage(currentPage);
+    visiblePages.addPrimitive(currentPage->getGraphicObject());
+    core->getGraphicEngine()->setWidgetGraphicObject(&visiblePages);
   }
+
+  // Allow access by the next thread
+  visiblePages.unlockAccess();
 
   // Set the positions of the widgets
   updateWidgetPositions();
@@ -390,6 +557,9 @@ void WidgetEngine::createGraphic() {
 
 // Updates the positions of the widgets in dependence of the current screen dimension
 void WidgetEngine::updateWidgetPositions() {
+
+  // Only one thread please
+  visiblePages.lockAccess();
 
   // Find out the orientation for which we need to update the positioning
   std::string orientation="Unknown";
@@ -400,6 +570,9 @@ void WidgetEngine::updateWidgetPositions() {
   DEBUG("orientation=%s",orientation.c_str());
   Int width=core->getScreen()->getWidth();
   Int height=core->getScreen()->getHeight();
+
+  // Set global variables that depend on the screen configuration
+  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot")*core->getScreen()->getWidth()/100.0);
 
   // Go through all pages
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
@@ -429,10 +602,22 @@ void WidgetEngine::updateWidgetPositions() {
     }
 
   }
+
+  // Allow access by the next thread
+  visiblePages.unlockAccess();
 }
 
 // Clears all widget pages
 void WidgetEngine::deinit() {
+
+  // Only one thread
+  visiblePages.lockAccess();
+
+  // No page is active
+  currentPage=NULL;
+
+  // Clear the graphic object
+  visiblePages.deinit(false);
 
   // Delete all pages
   WidgetPageMap::iterator i;
@@ -441,14 +626,26 @@ void WidgetEngine::deinit() {
   }
   pageMap.clear();
 
+  // Allow access by the next thread
+  visiblePages.unlockAccess();
 }
 
 // Called when the screen is touched
 bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
+  // Only one thread please
+  visiblePages.lockAccess();
+
+  // Shall we ignore touches?
+  if (t<=ignoreTouchesEnd) {
+    visiblePages.unlockAccess();
+    return false;
+  }
+
   // First check if a widget on the page was touched
   if (currentPage->onTouchDown(t,x,y)) {
     isTouched=false;
+    visiblePages.unlockAccess();
     return true;
   } else {
 
@@ -457,7 +654,7 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
       if ((abs(lastTouchDownX-x)<=contextMenuAllowedPixelJitter)&&(abs(lastTouchDownY-y)<=contextMenuAllowedPixelJitter)) {
         if (t-firstStableTouchDownTime >= contextMenuDelay) {
           if (!contextMenuIsShown) {
-            showContextMenu();
+            //showContextMenu();
             contextMenuIsShown=true;
           }
         }
@@ -470,16 +667,169 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     }
     lastTouchDownX=x;
     lastTouchDownY=y;
-    return false;
-
   }
+
+  // Allow access by the next thread
+  visiblePages.unlockAccess();
+
+  return false;
 }
 
 // Called when the screen is untouched
 bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
-  isTouched=false;
-  contextMenuIsShown=false;
-  return currentPage->onTouchUp(t,x,y);
+
+  visiblePages.lockAccess();
+  if (t<=ignoreTouchesEnd) {
+    visiblePages.unlockAccess();
+    return false;
+  }
+  deselectPage();
+  bool result = currentPage->onTouchUp(t,x,y);
+  visiblePages.unlockAccess();
+  return result;
 }
 
+// Called when the screen is touched
+bool WidgetEngine::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff) {
+
+  // Only one thread please
+  visiblePages.lockAccess();
+
+  // Shall we ignore touches?
+  if (t<=ignoreTouchesEnd) {
+    visiblePages.unlockAccess();
+    return false;
+  }
+
+  // First check if a widget on the page was touched
+  if (currentPage->onTwoFingerGesture(t,dX,dY,angleDiff,scaleDiff)) {
+    visiblePages.unlockAccess();
+    return true;
+  }
+
+  // Allow access by the next thread
+  visiblePages.unlockAccess();
+
+  return false;
+}
+
+// Deselects the currently selected page
+void WidgetEngine::deselectPage() {
+  isTouched=false;
+  contextMenuIsShown=false;
+}
+
+// Sets a new page
+void WidgetEngine::setPage(std::string name, Int direction, bool lockAccess) {
+
+  if (lockAccess) visiblePages.lockAccess();
+
+  TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
+  Int width = core->getScreen()->getWidth();
+
+  // Check if the requested page exists
+  if (pageMap.find(name)==pageMap.end()) {
+    WARNING("page <%s> does not exist",name.c_str());
+    if (lockAccess) visiblePages.unlockAccess();
+    return;
+  }
+  WidgetPage *nextPage = pageMap[name];
+
+  // Deselect widget in current page
+  deselectPage();
+  currentPage->deselectWidget(t);
+
+  // Compute the durations for the two animation steps
+  double changePageDurationStep1=changePageDuration/2;
+  double changePageDurationStep2=changePageDuration/2;
+
+  // Let the current page move outside the window
+  std::list<GraphicTranslateAnimationParameter> translateAnimationSequence;
+  GraphicObject *prevPageGraphicObject=currentPage->getGraphicObject();
+  GraphicTranslateAnimationParameter translateParameter;
+  translateParameter.setStartTime(t);
+  translateParameter.setStartX(0);
+  translateParameter.setStartY(0);
+  translateParameter.setEndX(direction*(width+changePageOvershoot));
+  translateParameter.setEndY(0);
+  translateParameter.setDuration(changePageDurationStep1);
+  translateParameter.setInfinite(false);
+  translateParameter.setAnimationType(GraphicTranslateAnimationTypeAccelerated);
+  translateAnimationSequence.push_back(translateParameter);
+  prevPageGraphicObject->setTranslateAnimationSequence(translateAnimationSequence);
+  prevPageGraphicObject->setLifeEnd(t+changePageDurationStep1);
+
+  // Let the new page move inside the window
+  translateAnimationSequence.clear();
+  GraphicObject *nextPageGraphicObject=nextPage->getGraphicObject();
+  translateParameter.setStartTime(t);
+  translateParameter.setStartX(-1*direction*(width));
+  translateParameter.setStartY(0);
+  translateParameter.setEndX(+1*direction*(changePageOvershoot));
+  translateParameter.setEndY(0);
+  translateParameter.setDuration(changePageDurationStep1);
+  translateParameter.setInfinite(false);
+  translateParameter.setAnimationType(GraphicTranslateAnimationTypeAccelerated);
+  translateAnimationSequence.push_back(translateParameter);
+  translateParameter.setStartTime(t+changePageDurationStep1);
+  translateParameter.setStartX(+1*direction*(changePageOvershoot));
+  translateParameter.setStartY(0);
+  translateParameter.setEndX(0);
+  translateParameter.setEndY(0);
+  translateParameter.setDuration(changePageDurationStep2);
+  translateParameter.setInfinite(false);
+  translateParameter.setAnimationType(GraphicTranslateAnimationTypeAccelerated);
+  translateAnimationSequence.push_back(translateParameter);
+  nextPageGraphicObject->setTranslateAnimationSequence(translateAnimationSequence);
+  nextPageGraphicObject->setLifeEnd(0);
+  visiblePages.addPrimitive(nextPageGraphicObject);
+
+  // Ignore any touches during transition
+  ignoreTouchesEnd=t+changePageDurationStep1+changePageDurationStep2;
+
+  // Set the new page
+  currentPage=nextPage;
+  core->getConfigStore()->setStringValue("Graphic/Widget","selectedPage",name);
+  if (lockAccess) visiblePages.unlockAccess();;
+
+}
+
+// Informs the engine that the map has changed
+void WidgetEngine::onMapChange(MapPosition mapPos) {
+  visiblePages.lockAccess();
+  WidgetPageMap::iterator i;
+  for(i = pageMap.begin(); i!=pageMap.end(); i++) {
+    i->second->onMapChange(mapPos);
+  }
+  visiblePages.unlockAccess();
+}
+
+// Informs the engine that the location has changed
+void WidgetEngine::onLocationChange(MapPosition mapPos) {
+  visiblePages.lockAccess();
+  WidgetPageMap::iterator i;
+  for(i = pageMap.begin(); i!=pageMap.end(); i++) {
+    i->second->onLocationChange(mapPos);
+  }
+  visiblePages.unlockAccess();
+}
+
+// Informs the engine that a path has changed
+void WidgetEngine::onPathChange(NavigationPath *path) {
+  visiblePages.lockAccess();
+  WidgetPageMap::iterator i;
+  for(i = pageMap.begin(); i!=pageMap.end(); i++) {
+    i->second->onPathChange(path);
+  }
+  visiblePages.unlockAccess();
+}
+
+// Sets the widgets of the current page active
+void WidgetEngine::setWidgetsActive(bool widgetsActive, bool lockAccess) {
+  if (lockAccess) visiblePages.lockAccess();
+  if (currentPage) {
+    currentPage->setWidgetsActive(core->getClock()->getMicrosecondsSinceStart(),widgetsActive);
+  }
+  if (lockAccess) visiblePages.unlockAccess();
+}
 }
