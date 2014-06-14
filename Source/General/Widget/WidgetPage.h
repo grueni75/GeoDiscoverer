@@ -59,13 +59,13 @@ public:
   bool onTouchUp(TimestampInMicroseconds t, Int x, Int y);
 
   // Called when the map has changed
-  void onMapChange(MapPosition pos);
+  void onMapChange(bool pageVisible, MapPosition pos);
 
   // Called when the location has changed
-  void onLocationChange(MapPosition pos);
+  void onLocationChange(bool pageVisible, MapPosition pos);
 
   // Called when a path has changed
-  void onPathChange(NavigationPath *path);
+  void onPathChange(bool pageVisible, NavigationPath *path);
 
   // Deselects currently selected widget
   void deselectWidget(TimestampInMicroseconds t);

@@ -799,7 +799,7 @@ void WidgetEngine::onMapChange(MapPosition mapPos) {
   visiblePages.lockAccess();
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
-    i->second->onMapChange(mapPos);
+    i->second->onMapChange(currentPage==i->second ? true : false, mapPos);
   }
   visiblePages.unlockAccess();
 }
@@ -809,7 +809,7 @@ void WidgetEngine::onLocationChange(MapPosition mapPos) {
   visiblePages.lockAccess();
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
-    i->second->onLocationChange(mapPos);
+    i->second->onLocationChange(currentPage==i->second ? true : false, mapPos);
   }
   visiblePages.unlockAccess();
 }
@@ -819,7 +819,7 @@ void WidgetEngine::onPathChange(NavigationPath *path) {
   visiblePages.lockAccess();
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
-    i->second->onPathChange(path);
+    i->second->onPathChange(currentPage==i->second ? true : false, path);
   }
   visiblePages.unlockAccess();
 }

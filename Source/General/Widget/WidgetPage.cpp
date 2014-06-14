@@ -147,35 +147,35 @@ bool WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 }
 
 // Called when the map has changed
-void WidgetPage::onMapChange(MapPosition pos) {
+void WidgetPage::onMapChange(bool pageVisible, MapPosition pos) {
 
   // Check all widgets
   std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
   for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
     WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-    primitive->onMapChange(pos);
+    primitive->onMapChange(pageVisible, pos);
   }
 }
 
 // Called when the location has changed
-void WidgetPage::onLocationChange(MapPosition pos) {
+void WidgetPage::onLocationChange(bool pageVisible, MapPosition pos) {
 
   // Check all widgets
   std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
   for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
     WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-    primitive->onLocationChange(pos);
+    primitive->onLocationChange(pageVisible, pos);
   }
 }
 
 // Called when a path has changed
-void WidgetPage::onPathChange(NavigationPath *path) {
+void WidgetPage::onPathChange(bool pageVisible, NavigationPath *path) {
 
   // Check all widgets
   std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
   for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
     WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-    primitive->onPathChange(path);
+    primitive->onPathChange(pageVisible, path);
   }
 }
 

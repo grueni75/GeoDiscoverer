@@ -104,7 +104,7 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   bool firstTouchDown;
 
   // Ensures that the complete path becomes visible
-  void resetPathVisibility();
+  void resetPathVisibility(bool widgetVisible);
 
 public:
 
@@ -119,13 +119,13 @@ public:
   virtual void draw(Screen *screen, TimestampInMicroseconds t);
 
   // Called when the map has changed
-  virtual void onMapChange(MapPosition pos);
+  virtual void onMapChange(bool widgetVisible, MapPosition pos);
 
   // Called when the location has changed
-  virtual void onLocationChange(MapPosition pos);
+  virtual void onLocationChange(bool widgetVisible, MapPosition pos);
 
   // Called when a path has changed
-  virtual void onPathChange(NavigationPath *path);
+  virtual void onPathChange(bool widgetVisible, NavigationPath *path);
 
   // Called when a two fingure gesture is done on the widget
   virtual void onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff);

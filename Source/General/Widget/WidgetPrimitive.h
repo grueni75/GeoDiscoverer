@@ -59,13 +59,13 @@ public:
   virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y);
 
   // Called when the map has changed
-  virtual void onMapChange(MapPosition pos);
+  virtual void onMapChange(bool widgetVisible, MapPosition pos);
 
   // Called when the location changes
-  virtual void onLocationChange(MapPosition pos);
+  virtual void onLocationChange(bool widgetVisible, MapPosition pos);
 
   // Called when a path changes
-  virtual void onPathChange(NavigationPath *path);
+  virtual void onPathChange(bool widgetVisible, NavigationPath *path);
 
   // Called when the widget has changed his position
   virtual void updatePosition(Int x, Int y, Int z);

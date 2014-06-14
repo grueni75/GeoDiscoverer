@@ -301,10 +301,8 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
         do {
           precision++;
           core->getUnitConverter()->formatMeters(visiblePathMaxDistance,value,unit,precision,lockedUnit);
-          DEBUG("visiblePathMaxDistance=%f value=%s",visiblePathMaxDistance,value.c_str());
         }
         while (value.size()<altitudeProfileXTickLabelWidth);
-        DEBUG("precision=%d",precision);
         core->getUnitConverter()->formatMeters(pathLength,value,lockedUnit,0);
         Int negHalveLineWidth = -altitudeProfileAxisLineWidth/2;
         Int posHalveLineWidth = altitudeProfileAxisLineWidth/2+altitudeProfileAxisLineWidth%2;
@@ -437,7 +435,7 @@ void WidgetPathInfo::draw(Screen *screen, TimestampInMicroseconds t) {
 }
 
 // Called when the map has changed
-void WidgetPathInfo::onMapChange(MapPosition pos) {
+void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
 
   // Do not change if path is locked
   if (currentPathLocked)
@@ -469,13 +467,13 @@ void WidgetPathInfo::onMapChange(MapPosition pos) {
 
     // Remember the selected path
     currentPath=nearestPath;
-    resetPathVisibility();
+    resetPathVisibility(widgetVisible);
   }
 
 }
 
 // Ensures that the complete path becomes visible
-void WidgetPathInfo::resetPathVisibility() {
+void WidgetPathInfo::resetPathVisibility(bool widgetVisible) {
   if (currentPath) {
     currentPath->lockAccess();
     if (currentPath->getReverse()) {
@@ -492,7 +490,8 @@ void WidgetPathInfo::resetPathVisibility() {
     if (endIndex<startIndex) {
       currentPath=NULL;
     } else {
-      core->getWidgetEngine()->setWidgetsActive(true,false);
+      if (widgetVisible)
+        core->getWidgetEngine()->setWidgetsActive(true,false);
     }
     core->getConfigStore()->setStringValue("Navigation","pathInfoName",currentPathName);
   }
@@ -500,14 +499,15 @@ void WidgetPathInfo::resetPathVisibility() {
 }
 
 // Called when the location has changed
-void WidgetPathInfo::onLocationChange(MapPosition pos) {
+void WidgetPathInfo::onLocationChange(bool widgetVisible, MapPosition pos) {
   locationPos=pos;
-  core->getWidgetEngine()->setWidgetsActive(true,false);
+  if ((widgetVisible)&&(currentPath))
+    core->getWidgetEngine()->setWidgetsActive(true,false);
   redrawRequired=true;
 }
 
 // Called when a path has changed
-void WidgetPathInfo::onPathChange(NavigationPath *path) {
+void WidgetPathInfo::onPathChange(bool widgetVisible, NavigationPath *path) {
 
   // If no path is selected, check if the given path was previsouly selected
   if ((currentPath==NULL)&&(path->getName()==currentPathName)) {
@@ -517,12 +517,12 @@ void WidgetPathInfo::onPathChange(NavigationPath *path) {
   // Check if the widget needs to change its shown path
   MapPosition *pos=core->getMapEngine()->lockMapPos();
   if (pos->getMapTile()!=NULL)
-    onMapChange(*pos);
+    onMapChange(widgetVisible, *pos);
   core->getMapEngine()->unlockMapPos();
 
   // Redraw is also required if this widget is showing the changed paht
   if (currentPath==path) {
-    resetPathVisibility();
+    resetPathVisibility(widgetVisible);
   }
 }
 

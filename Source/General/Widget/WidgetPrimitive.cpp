@@ -72,17 +72,17 @@ void WidgetPrimitive::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 }
 
 // Called when the map has changed
-void WidgetPrimitive::onMapChange(MapPosition pos) {
+void WidgetPrimitive::onMapChange(bool widgetVisible, MapPosition pos) {
 
 }
 
 // Called when the location has changed
-void WidgetPrimitive::onLocationChange(MapPosition pos) {
+void WidgetPrimitive::onLocationChange(bool widgetVisible, MapPosition pos) {
 
 }
 
 // Called when a path has changed
-void WidgetPrimitive::onPathChange(NavigationPath *path) {
+void WidgetPrimitive::onPathChange(bool widgetVisible, NavigationPath *path) {
 
 }
 
