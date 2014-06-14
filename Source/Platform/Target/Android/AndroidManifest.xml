@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.untouchableapps.android.geodiscoverer"
-      android:versionCode="20140614"
+      android:versionCode="2"
       android:versionName="20140614">
   	<uses-feature android:glEsVersion="0x00010001"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
