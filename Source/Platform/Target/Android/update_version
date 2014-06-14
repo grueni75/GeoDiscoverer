@@ -1,4 +1,5 @@
 #!/bin/bash
 sed 's/android:versionName=\".*\"/android:versionName="'`date +"%Y%m%d"`'"/' AndroidManifest.xml >AndroidManifest.new.xml
-mv AndroidManifest.new.xml AndroidManifest.xml
+sed 's/android:versionCode=\".*\"/android:versionCode="'`date +"%Y%m%d"`'"/' AndroidManifest.new.xml >AndroidManifest.xml
+rm AndroidManifest.new.xml
 
