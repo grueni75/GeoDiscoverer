@@ -1009,6 +1009,22 @@ void MapEngine::setMaxTiles() {
   maxTiles=maxTiles*maxTiles;
 }
 
+// Sets a new map position
+void MapEngine::setMapPos(MapPosition mapPos)
+{
+    bool updateMap = false;
+    core->getMapSource()->lockAccess();
+    MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
+    core->getMapSource()->unlockAccess();
+    if (tile) {
+      core->getThread()->lockMutex(mapPosMutex);
+      requestedMapPos = mapPos;
+      core->getThread()->unlockMutex(mapPosMutex);
+      setForceMapUpdate();
+    } else {
+      DEBUG("requested map pos has been ignored because map contains no tile",NULL);
+    }
+}
 
 
 }

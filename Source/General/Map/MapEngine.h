@@ -150,14 +150,7 @@ public:
   {
       core->getThread()->unlockMutex(mapPosMutex);
   }
-  void setMapPos(MapPosition mapPos)
-  {
-      bool updateMap = false;
-      core->getThread()->lockMutex(mapPosMutex);
-      requestedMapPos = mapPos;
-      core->getThread()->unlockMutex(mapPosMutex);
-      setForceMapUpdate();
-  }
+  void setMapPos(MapPosition mapPos);
 
   MapArea *lockDisplayArea()
   {
