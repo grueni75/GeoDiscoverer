@@ -29,7 +29,7 @@ namespace GEODISCOVERER {
 NavigationPath::NavigationPath() {
 
   // Init variables
-  accessMutex=core->getThread()->createMutex();
+  accessMutex=core->getThread()->createMutex("navigation path access mutex");
   gpxFilefolder=core->getNavigationEngine()->getTrackPath();
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength");
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance");
@@ -40,8 +40,11 @@ NavigationPath::NavigationPath() {
   maxDistanceToTurnWayPoint=core->getConfigStore()->getDoubleValue("Navigation","maxDistanceToTurnWayPoint");
   turnDetectionDistance=core->getConfigStore()->getDoubleValue("Navigation","turnDetectionDistance");
   minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute");
+  minAltitudeChange=core->getConfigStore()->getDoubleValue("Navigation","minAltitudeChange");
+  averageTravelSpeed=core->getConfigStore()->getDoubleValue("Navigation","averageTravelSpeed");
   isInit=false;
   reverse=false;
+  lastValidAltiudeMetersPoint=NavigationPath::getPathInterruptedPos();
 
   // Do the dynamic initialization
   init();
@@ -312,16 +315,26 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   // Add the new pair
   mapPositions.push_back(pos);
 
-  // Update the length
+  // Update the length and altitude meters
   if ((hasSecondLastPoint)&&(hasLastPoint)) {
     if ((secondLastPoint!=NavigationPath::getPathInterruptedPos())&&(lastPoint!=NavigationPath::getPathInterruptedPos())) {
       length+=secondLastPoint.computeDistance(lastPoint);
-      if ((lastPoint.getHasAltitude())&&(secondLastPoint.getHasAltitude())) {
-        double altitudeDiff = lastPoint.getAltitude() - secondLastPoint.getAltitude();
-        if (altitudeDiff>0) {
-          altitudeUp+=altitudeDiff;
-        } else {
-          altitudeDown+=-altitudeDiff;
+      if (lastValidAltiudeMetersPoint==NavigationPath::getPathInterruptedPos()) {
+        lastValidAltiudeMetersPoint=secondLastPoint;
+      }
+      if (lastPoint.getHasAltitude()) {
+
+        // Check if the altitude difference is sane
+        double altitudeDiff = lastPoint.getAltitude() - lastValidAltiudeMetersPoint.getAltitude();
+        if (fabs(altitudeDiff)>=minAltitudeChange) {
+
+          // Update the altitude meters
+          if (altitudeDiff>0) {
+            altitudeUp+=altitudeDiff;
+          } else {
+            altitudeDown+=-altitudeDiff;
+          }
+          lastValidAltiudeMetersPoint=lastPoint;
         }
       }
     }
@@ -629,7 +642,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
         // If the route point is around the nearest found point,
         // remember the one that is closest to the location bearing
-        if ((*iterator).computeDistance(*nearestIterator)<minDistanceToBeOffRoute) {
+        if ((locationPos.getHasBearing())&&((*iterator).computeDistance(*nearestIterator)<minDistanceToBeOffRoute)) {
           double bearingDiff=fabs(routeBearing-locationPos.getBearing());
           if (bearingDiff<minBearingDiff) {
             newNearestIterator=iterator;

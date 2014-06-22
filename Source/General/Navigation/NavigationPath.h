@@ -39,6 +39,7 @@ protected:
   bool hasLastPoint;                              // Indicates if the path already has its last point
   MapPosition secondLastPoint;                    // The point added before the last point
   bool hasSecondLastPoint;                        // Indicates if the path already has its second last point
+  MapPosition lastValidAltiudeMetersPoint;        // The last point that was used for altitude meter computation
   std::vector<MapPosition> mapPositions;          // List of map positions the path consists of
   bool blinkMode;                                 // Indicates if the path shall blink
   GraphicColor normalColor;                       // Normal color of the path
@@ -60,6 +61,8 @@ protected:
   double minTurnAngle;                            // Minimum angle at which a turn in the path is detected
   double turnDetectionDistance;                   // Distance in meters to look forward and back for detecting a turn
   double minDistanceToBeOffRoute;                 // Minimum distance from nearest route point such that navigation considers location to be off route
+  double averageTravelSpeed;                      // Speed in meters per second to use for calculating the duration of a route
+  double minAltitudeChange;                       // Minimum change of altitude required to update altitude meters
 
   // Information about the path
   double length;                                  // Current length of the track in meters
@@ -194,6 +197,11 @@ public:
       return lastPoint;
   }
 
+  double getDuration() const
+  {
+      return getLength() / averageTravelSpeed;
+  }
+
   bool getHasChanged() const
   {
       return hasChanged;
@@ -269,16 +277,12 @@ public:
 
   bool getIsInit() {
     bool isInit;
-    lockAccess();
     isInit=this->isInit;
-    unlockAccess();
     return isInit;
   }
 
   void setIsInit(bool isInit) {
-    lockAccess();
     this->isInit = isInit;
-    unlockAccess();
   }
 
   bool getReverse() const {

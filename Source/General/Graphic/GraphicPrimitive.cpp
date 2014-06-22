@@ -55,7 +55,7 @@ GraphicPrimitive::GraphicPrimitive() {
   textureInfinite=false;
   isUpdated=false;
   lifeEnd=0;
-  accessMutex=core->getThread()->createMutex();
+  accessMutex=core->getThread()->createMutex("graphic primitive access mutex");
 }
 
 // Destructor

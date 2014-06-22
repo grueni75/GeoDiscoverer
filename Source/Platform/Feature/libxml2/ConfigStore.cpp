@@ -32,6 +32,8 @@ void ConfigStore::init()
     ConfigStore::parserInitialized=true;
   }
   xmlKeepBlanksDefault(0);
+
+  // Start the write thread
 }
 
 // Deinits the data
@@ -68,13 +70,13 @@ void ConfigStore::read()
   int i, j;
 
   // Only one thread may enter read
-  core->getThread()->lockMutex(mutex);
+  core->getThread()->lockMutex(accessMutex);
 
   // Read the schema
   schema = xmlReadFile(schemaFilepath.c_str(), NULL, 0);
   if (!schema) {
     FATAL("read of schema file <%s> failed",schemaFilepath.c_str());
-    core->getThread()->unlockMutex(mutex);
+    core->getThread()->unlockMutex(accessMutex);
     return;
   }
 
@@ -85,18 +87,18 @@ void ConfigStore::read()
     doc = xmlNewDoc(BAD_CAST "1.0");
     if (!doc) {
       FATAL("can not create xml document",NULL);
-      core->getThread()->unlockMutex(mutex);
+      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     rootNode = xmlNewNode(NULL, BAD_CAST "GDC");
     if (!rootNode) {
       FATAL("can not create xml root node",NULL);
-      core->getThread()->unlockMutex(mutex);
+      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     if (!xmlNewProp(rootNode, BAD_CAST "version", BAD_CAST "1.0")) {
       FATAL("can not create xml property",NULL);
-      core->getThread()->unlockMutex(mutex);
+      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     xmlDocSetRootElement(doc, rootNode);
@@ -105,24 +107,25 @@ void ConfigStore::read()
     xmlNsPtr configNamespace=xmlNewNs(rootNode,BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/config/1/0", BAD_CAST NULL);
     if (!configNamespace) {
      FATAL("can not create config namespace",NULL);
-     core->getThread()->unlockMutex(mutex);
+     core->getThread()->unlockMutex(accessMutex);
      return;
     }
     xmlNsPtr xmlNamespace=xmlNewNs(rootNode,BAD_CAST "http://www.w3.org/2001/XMLSchema-instance", BAD_CAST "xsi");
     if (!xmlNamespace) {
      FATAL("can not create xml namespace",NULL);
-     core->getThread()->unlockMutex(mutex);
+     core->getThread()->unlockMutex(accessMutex);
      return;
     }
     if (!xmlNewNsProp(rootNode, xmlNamespace, BAD_CAST "schemaLocation", BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/config/1/0 http://www.untouchableapps.de/GeoDiscoverer/config/1/0/config.xsd")) {
       FATAL("can not create xml property",NULL);
-      core->getThread()->unlockMutex(mutex);
+      core->getThread()->unlockMutex(accessMutex);
       return;
     }
 
     // Save the XML config
     config=doc;
-    write();
+    hasChanged=true;
+    core->getThread()->issueSignal(writeConfigSignal);
 
     // Cleanup
     xmlFreeDoc(doc);
@@ -134,13 +137,13 @@ void ConfigStore::read()
   doc = xmlReadFile(configFilepath.c_str(), NULL, 0);
   if (!doc) {
     FATAL("read of config file <%s> failed",configFilepath.c_str());
-    core->getThread()->unlockMutex(mutex);
+    core->getThread()->unlockMutex(accessMutex);
     return;
   }
   rootNode = xmlDocGetRootElement(doc);
   if (!rootNode) {
     FATAL("could not extract root node",NULL);
-    core->getThread()->unlockMutex(mutex);
+    core->getThread()->unlockMutex(accessMutex);
     return;
   }
 
@@ -148,7 +151,7 @@ void ConfigStore::read()
   xmlChar *text = xmlGetProp(rootNode,BAD_CAST "version");
   if (strcmp((char*)text,"1.0")!=0) {
     FATAL("config file <%s> has unknown version",configFilepath.c_str());
-    core->getThread()->unlockMutex(mutex);
+    core->getThread()->unlockMutex(accessMutex);
     return;
   }
   xmlFree(text);
@@ -160,36 +163,39 @@ void ConfigStore::read()
   xpathConfigCtx = xmlXPathNewContext(doc);
   if (xpathConfigCtx == NULL) {
     FATAL("can not create config xpath context",NULL);
-    core->getThread()->unlockMutex(mutex);
+    core->getThread()->unlockMutex(accessMutex);
     return;
   }
   xmlXPathRegisterNs(xpathConfigCtx, BAD_CAST "gdc", BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/config/1/0");
   xpathSchemaCtx = xmlXPathNewContext(schema);
   if (xpathSchemaCtx == NULL) {
     FATAL("can not create schema xpath context",NULL);
-    core->getThread()->unlockMutex(mutex);
+    core->getThread()->unlockMutex(accessMutex);
     return;
   }
   xmlXPathRegisterNs(xpathSchemaCtx, BAD_CAST "xsd", BAD_CAST "http://www.w3.org/2001/XMLSchema");
 
   // That's it
-  core->getThread()->unlockMutex(mutex);
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Writes the config
 void ConfigStore::write()
 {
-  xmlDocPtr doc = (xmlDocPtr) config;
-  if (!doc) {
-    FATAL("config object has no xml document",NULL);
-    return;
+  if (hasChanged) {
+    xmlDocPtr doc = (xmlDocPtr) config;
+    if (!doc) {
+      FATAL("config object has no xml document",NULL);
+      return;
+    }
+    std::string tempFilepath = configFilepath + "+";
+    if (xmlSaveFormatFileEnc(tempFilepath.c_str(), doc, "UTF-8", 1)==-1) {
+      FATAL("can not write configuration file <%s>",configFilepath.c_str());
+      return;
+    }
+    rename(tempFilepath.c_str(),configFilepath.c_str());
   }
-  std::string tempFilepath = configFilepath + "+";
-  if (xmlSaveFormatFileEnc(tempFilepath.c_str(), doc, "UTF-8", 1)==-1) {
-    FATAL("can not write configuration file <%s>",configFilepath.c_str());
-    return;
-  }
-  rename(tempFilepath.c_str(),configFilepath.c_str());
+  hasChanged=false;
 }
 
 // Crates a node inclusive its path
@@ -403,7 +409,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
     xpath="/GDC/" + path + "/" + name;
 
   // Only one thread may enter getStringValue
-  core->getThread()->lockMutex(mutex);
+  core->getThread()->lockMutex(accessMutex);
 
   // Check if node exists
   std::list<XMLNode> configNodes,schemaNodes;
@@ -414,7 +420,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
     schemaNodes=findSchemaNodes(xpath);
     if (schemaNodes.size()!=1) {
       FATAL("could not find path <%s/%s> in schema",path.c_str(),name.c_str());
-      core->getThread()->unlockMutex(mutex);
+      core->getThread()->unlockMutex(accessMutex);
       return "";
     }
 
@@ -428,7 +434,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
     }
     if (defaultValue=="") {
       FATAL("can not find default value for config path <%s/%s>",path.c_str(),name.c_str());
-      core->getThread()->unlockMutex(mutex);
+      core->getThread()->unlockMutex(accessMutex);
       return "";
     }
 
@@ -439,7 +445,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
     configNodes=findConfigNodes(xpath);
     if (configNodes.size()==0) {
       FATAL("could not find new node (%s/%s)",path.c_str(),name.c_str());
-      core->getThread()->unlockMutex(mutex);
+      core->getThread()->unlockMutex(accessMutex);
       return "";
     }
 
@@ -448,7 +454,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
   // Sanity check
   if (configNodes.size()!=1) {
     FATAL("more than one node found (%s/%s)",path.c_str(),name.c_str());
-    core->getThread()->unlockMutex(mutex);
+    core->getThread()->unlockMutex(accessMutex);
     return "";
   }
   node=configNodes.front();
@@ -456,11 +462,11 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
   // Return result
   if ((!node->children)||(std::string((char*)node->children->name)!="text")) {
     FATAL("node has no text child",NULL);
-    core->getThread()->unlockMutex(mutex);
+    core->getThread()->unlockMutex(accessMutex);
     return "";
   }
   value=std::string((char*)node->children->content);
-  core->getThread()->unlockMutex(mutex);
+  core->getThread()->unlockMutex(accessMutex);
   return value;
 }
 
@@ -476,7 +482,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     xpath="/GDC/" + path + "/" + name;
 
   // Only one thread may enter setStringValue
-  if (!innerCall) core->getThread()->lockMutex(mutex);
+  if (!innerCall) core->getThread()->lockMutex(accessMutex);
 
   // Check if node exists
   std::list<XMLNode> configNodes, schemaNodes;
@@ -487,7 +493,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     schemaNodes=findSchemaNodes(xpath);
     if (schemaNodes.size()!=1) {
       FATAL("could not find path <%s> in schema",path.c_str());
-      if (!innerCall) core->getThread()->unlockMutex(mutex);
+      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
       return;
     }
 
@@ -495,7 +501,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     rootNode = xmlDocGetRootElement(doc);
     if (!rootNode) {
       FATAL("could not extract root node",NULL);
-      if (!innerCall) core->getThread()->unlockMutex(mutex);
+      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
       return;
     }
     createNodeWithPath(rootNode,path,name,value);
@@ -505,7 +511,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     // Sanity check
     if (configNodes.size()!=1) {
       FATAL("more than one node found",NULL);
-      if (!innerCall) core->getThread()->unlockMutex(mutex);
+      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
       return;
     }
     node=configNodes.front();
@@ -513,15 +519,16 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     // Update node
     if ((!node->children)||(std::string((char*)node->children->name)!="text")) {
       FATAL("node has no text child",NULL);
-      if (!innerCall) core->getThread()->unlockMutex(mutex);
+      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
       return;
     }
     xmlChar *valueEncoded = xmlEncodeSpecialChars(doc,(const xmlChar *)value.c_str());
     xmlNodeSetContent(node->children,valueEncoded);
     xmlFree(valueEncoded);
   }
-  write();
-  if (!innerCall) core->getThread()->unlockMutex(mutex);
+  hasChanged=true;
+  core->getThread()->issueSignal(writeConfigSignal);
+  if (!innerCall) core->getThread()->unlockMutex(accessMutex);
 }
 
 // Returns a list of attribute values for a given path and attribute name
@@ -531,7 +538,7 @@ std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::st
   std::list<std::string> values;
   xmlNodePtr n;
 
-  core->getThread()->lockMutex(mutex);
+  core->getThread()->lockMutex(accessMutex);
   nodes=findConfigNodes("/GDC/" + path);
   std::list<XMLNode>::iterator i;
   for(i=nodes.begin();i!=nodes.end();i++) {
@@ -543,7 +550,7 @@ std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::st
       }
     }
   }
-  core->getThread()->unlockMutex(mutex);
+  core->getThread()->unlockMutex(accessMutex);
   return values;
 }
 

@@ -57,7 +57,19 @@ protected:
   XMLXPathContext xpathSchemaCtx;
 
   // Mutex to sequentialize changes in the config
-  ThreadMutexInfo *mutex;
+  ThreadMutexInfo *accessMutex;
+
+  // Minimum distance in seconds between writes of the config store
+  Int writeConfigMinWaitTime;
+
+  // Indicates if the config has changed
+  bool hasChanged;
+
+  // Variables for the write config thread
+  ThreadSignalInfo *writeConfigSignal;
+  ThreadSignalInfo *skipWaitSignal;
+  ThreadInfo *writeConfigThreadInfo;
+  bool quitWriteConfigThread;
 
   // Inits the data
   void init();
@@ -93,6 +105,9 @@ public:
 
   // Test if a path exists
   bool pathExists(std::string path);
+
+  // Config write thread function
+  void writeConfig();
 
   // Access methods to config values
   void setStringValue(std::string path, std::string name, std::string value, bool innerCall=false);

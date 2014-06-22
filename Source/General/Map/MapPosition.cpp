@@ -48,6 +48,7 @@ MapPosition::MapPosition(bool doNotDelete) {
     hasAccuracy=false;
     isUpdated=false;
     invalidate();
+    hasTimestamp=false;
     source=(char*)unknownSource;
   }
 }
@@ -73,7 +74,8 @@ bool MapPosition::operator==(const MapPosition &rhs)
       (latScale==rhs.getLatScale())&&(lngScale==rhs.getLngScale())&&
       (hasBearing==rhs.getHasBearing())&&(bearing==rhs.getBearing())&&
       (hasSpeed==rhs.getHasSpeed())&&(speed==rhs.getSpeed())&&
-      (hasAccuracy==rhs.getHasAccuracy())&&(accuracy==rhs.getAccuracy())&&(timestamp==rhs.getTimestamp()))
+      (hasAccuracy==rhs.getHasAccuracy())&&(accuracy==rhs.getAccuracy())&&
+      (hasTimestamp==rhs.getHasTimestamp())&&(timestamp==rhs.getTimestamp()))
     return true;
   else
     return false;

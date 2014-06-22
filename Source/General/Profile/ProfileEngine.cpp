@@ -27,7 +27,7 @@ namespace GEODISCOVERER {
 
 // Constructor
 ProfileEngine::ProfileEngine() {
-  accessMutex=core->getThread()->createMutex();
+  accessMutex=core->getThread()->createMutex("profile engine access mutex");
 }
 
 // Destructor

@@ -103,21 +103,6 @@ bool MapSourceCalibratedPictures::init()
   std::string cacheFilepath=mapPath+"/cache.bin";
   ZipArchive *mapArchive;
 
-  // Open the zip archive that contains the maps
-  lockMapArchives();
-  if (!(mapArchive=new ZipArchive(mapPath,"tiles.zip"))) {
-    FATAL("can not create zip archive object",NULL);
-    result=false;
-    goto cleanup;
-  }
-  if (!mapArchive->init()) {
-    ERROR("can not open tiles.zip in map directory <%s>",folder.c_str());
-    result=false;
-    goto cleanup;
-  }
-  mapArchives.push_back(mapArchive);
-  unlockMapArchives();
-
   // Check if we can use the cache
   cacheRetrieved=false;
   if (((stat(mapPath.c_str(),&mapFolderStat))==0)&&(stat(cacheFilepath.c_str(),&mapCacheStat)==0)) {
@@ -167,6 +152,21 @@ bool MapSourceCalibratedPictures::init()
       }
     }
   }
+
+  // Open the zip archive that contains the maps
+  lockMapArchives();
+  if (!(mapArchive=new ZipArchive(mapPath,"tiles.zip"))) {
+    FATAL("can not create zip archive object",NULL);
+    result=false;
+    goto cleanup;
+  }
+  if (!mapArchive->init()) {
+    ERROR("can not open tiles.zip in map directory <%s>",folder.c_str());
+    result=false;
+    goto cleanup;
+  }
+  mapArchives.push_back(mapArchive);
+  unlockMapArchives();
 
   // Could the cache not be loaded?
   if (!cacheRetrieved) {

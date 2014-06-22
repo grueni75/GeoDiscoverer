@@ -28,6 +28,12 @@ namespace GEODISCOVERER {
 std::string WidgetPathInfo::currentPathName = "";
 bool WidgetPathInfo::currentPathLocked = false;
 
+// Path info widget thread
+void *widgetPathInfoThread(void *args) {
+  ((WidgetPathInfo*)args)->updateVisualization();
+  return NULL;
+}
+
 // Constructor
 WidgetPathInfo::WidgetPathInfo() : WidgetPrimitive(), altitudeProfileAxisPointBuffer(8*6) {
   widgetType=WidgetTypePathInfo;
@@ -40,7 +46,6 @@ WidgetPathInfo::WidgetPathInfo() : WidgetPrimitive(), altitudeProfileAxisPointBu
   altitudeProfileFillPointBuffer=NULL;
   altitudeProfileLinePointBuffer=NULL;
   noAltitudeProfileFontString=NULL;
-  averageTravelSpeed=core->getConfigStore()->getDoubleValue("Navigation","averageTravelSpeed");
   altitudeProfileXTickFontStrings=NULL;
   altitudeProfileYTickFontStrings=NULL;
   redrawRequired=false;
@@ -52,10 +57,19 @@ WidgetPathInfo::WidgetPathInfo() : WidgetPrimitive(), altitudeProfileAxisPointBu
   prevX=0;
   currentPathName=core->getConfigStore()->getStringValue("Navigation","pathInfoName");
   currentPathLocked=core->getConfigStore()->getIntValue("Navigation","pathInfoLocked");
+  updateVisualizationSignal=core->getThread()->createSignal();
+  visualizationMutex=core->getThread()->createMutex("widget path info visualization mutex");
+  widgetPathInfoThreadInfo=core->getThread()->createThread("widget path info thread",widgetPathInfoThread,this);
+  minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute");
 }
 
 // Destructor
 WidgetPathInfo::~WidgetPathInfo() {
+  core->getThread()->cancelThread(widgetPathInfoThreadInfo);
+  core->getThread()->waitForThread(widgetPathInfoThreadInfo);
+  core->getThread()->destroyThread(widgetPathInfoThreadInfo);
+  core->getThread()->destroySignal(updateVisualizationSignal);
+  core->getThread()->destroyMutex(visualizationMutex);
   core->getFontEngine()->lockFont("sansNormal");
   if (pathNameFontString) core->getFontEngine()->destroyString(pathNameFontString);
   if (pathLengthFontString) core->getFontEngine()->destroyString(pathLengthFontString);
@@ -90,37 +104,19 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
   bool changed=WidgetPrimitive::work(t);
 
   // Redraw the widget if required
-  if ((redrawRequired)&&(currentPath)) {
-
-    // Get infos from path
-    currentPath->lockAccess();
-    std::string pathName=currentPath->getName();
-    double pathLength=currentPath->getLength();
-    double pathAltitudeUp=currentPath->getAltitudeUp();
-    double pathAltitudeDown=currentPath->getAltitudeDown();
-    std::vector<MapPosition> pathPoints=currentPath->getPoints();
-    //DEBUG("pathPoints.size()=%d",pathPoints.size());
-    bool pathReversed=currentPath->getReverse();
-    double pathMinAltitude = currentPath->getMinAltitude();
-    double pathMaxAltitude = currentPath->getMaxAltitude();
-    currentPath->unlockAccess();
+  core->getThread()->lockMutex(visualizationMutex);
+  if (redrawRequired) {
 
     // Update the labels
     FontEngine *fontEngine=core->getFontEngine();
     fontEngine->lockFont("sansNormal");
-    fontEngine->updateString(&pathNameFontString,pathName,pathNameWidth);
+    fontEngine->updateString(&pathNameFontString,visualizationPathName,pathNameWidth);
     pathNameFontString->setX(x+pathNameOffsetX);
     pathNameFontString->setY(y+pathNameOffsetY);
-    std::string value="";
-    std::string unit="";
-    core->getUnitConverter()->formatMeters(pathLength,value,unit,1);
-    fontEngine->updateString(&pathLengthFontString,value + " " + unit,pathValuesWidth);
-    core->getUnitConverter()->formatMeters(pathAltitudeUp,value,unit,1);
-    fontEngine->updateString(&pathAltitudeUpFontString,value + " " + unit,pathValuesWidth);
-    core->getUnitConverter()->formatMeters(pathAltitudeDown,value,unit,1);
-    fontEngine->updateString(&pathAltitudeDownFontString,value + " " + unit,pathValuesWidth);
-    core->getUnitConverter()->formatTime(pathLength/averageTravelSpeed,value,unit,1);
-    fontEngine->updateString(&pathDurationFontString,value + " " + unit,pathValuesWidth);
+    fontEngine->updateString(&pathLengthFontString,visualizationPathLength,pathValuesWidth);
+    fontEngine->updateString(&pathAltitudeUpFontString,visualizationPathAltitudeUp,pathValuesWidth);
+    fontEngine->updateString(&pathAltitudeDownFontString,visualizationPathAltitudeDown,pathValuesWidth);
+    fontEngine->updateString(&pathDurationFontString,visualizationPathDuration,pathValuesWidth);
     core->getFontEngine()->unlockFont();
     Int maxWidth=pathLengthFontString->getIconWidth();
     if (pathAltitudeUpFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeUpFontString->getIconWidth();
@@ -136,231 +132,8 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
     pathDurationFontString->setX(x+pathValuesOffsetX+(pathValuesWidth-maxWidth)/2);
     pathDurationFontString->setY(y+pathDurationOffsetY);
 
-    // Compute the altitude profile
-    double minDistance=std::numeric_limits<double>::max();
-    bool noAltitudeProfile=true;
-    if ((pathMinAltitude<=pathMaxAltitude)&&(pathPoints.size()>=2)) {
-      std::list<GraphicPoint> altitudeProfileFillPoints;
-      std::list<GraphicPoint> altitudeProfileLinePoints;
-      MapPosition prevPos;
-      double visiblePathLength=0;
-      double visiblePathMinAltitude=std::numeric_limits<double>::max();
-      double visiblePathMaxAltitude=std::numeric_limits<double>::min();
-      double visiblePathMaxDistance=0;
-      bool firstRound=true;
-      for(Int i=pathReversed?endIndex+1:startIndex-1;pathReversed?i>=startIndex:i<=endIndex;pathReversed?i--:i++) {
-        MapPosition curPos = pathPoints[i];
-        if (!firstRound)
-          visiblePathMaxDistance += curPos.computeDistance(prevPos);
-        if (pathReversed?i<=endIndex:i>=startIndex) {
-          visiblePathLength += curPos.computeDistance(prevPos);
-        }
-        if (curPos.getHasAltitude()) {
-          if (curPos.getAltitude()<visiblePathMinAltitude)
-            visiblePathMinAltitude=curPos.getAltitude();
-          if (curPos.getAltitude()>visiblePathMaxAltitude)
-            visiblePathMaxAltitude=curPos.getAltitude();
-        }
-        prevPos = curPos;
-        firstRound = false;
-      }
-      double pixelPerLen = ((double)altitudeProfileWidth)/visiblePathLength;
-      double pixelPerHeight;
-      double altitudeDiff;
-      if ((visiblePathMaxAltitude-visiblePathMinAltitude)<altitudeProfileMinAltitudeDiff) {
-        altitudeDiff = altitudeProfileMinAltitudeDiff;
-      } else {
-        altitudeDiff = visiblePathMaxAltitude-visiblePathMinAltitude;
-      }
-      pixelPerHeight = ((double)altitudeProfileHeight)/altitudeDiff;
-      //DEBUG("pixelPerHeight=%e visiblePathMaxDistance=%f visiblePathMaxAltitude=%f visiblePathMinAltitude=%f altitudeProfileMinAltitudeDiff=%f altitudeDiff=%f",pixelPerHeight,visiblePathMaxDistance,visiblePathMaxAltitude,visiblePathMinAltitude,altitudeProfileMinAltitudeDiff,altitudeDiff);
-      if ((pixelPerLen!=std::numeric_limits<double>::infinity())&&(pixelPerHeight!=std::numeric_limits<double>::infinity())) {
-
-        // Compute the profile points from the path positions
-        Int prevX=0,curX=0;
-        Int prevY=0,curY=0;
-        Int prevXU=0, prevXU2=0, prevXD=0, prevXD2=0, curXU=0, curXD=0;
-        Int prevYU=0, prevYU2=0, prevYD=0, prevYD2=0, curYU=0, curYD=0;
-        noAltitudeProfile=false;
-        double curLen = 0, startLen = 0;
-        prevPos = pathReversed ? pathPoints[maxEndIndex] : pathPoints[0];
-        bool firstVisiblePointSeen=false;
-        for(Int i=pathReversed?maxEndIndex-1:1;pathReversed?i>=0:i<=maxEndIndex;pathReversed?i--:i++) {
-          MapPosition curPos = pathPoints[i];
-          if ((prevPos!=NavigationPath::getPathInterruptedPos())&&(curPos!=NavigationPath::getPathInterruptedPos())) {
-            if (!firstVisiblePointSeen) {
-              startLen=curLen;
-            }
-            curLen += curPos.computeDistance(prevPos);
-
-            // Only draw the requested horizontal part of the profile
-            if ((i>=startIndex)&&(i<=endIndex)) {
-              firstVisiblePointSeen=true;
-              curX=round((curLen-startLen)*pixelPerLen);
-              //DEBUG("curX=%d curLen=%f",curX,curLen);
-              if (curX>prevX) {
-
-                // Compute the current Y positions
-                if (curPos.getHasAltitude()) {
-                  curY=round(((double)curPos.getAltitude()-visiblePathMinAltitude)*pixelPerHeight);
-                }
-                if (prevPos.getHasAltitude()) {
-                  prevY=round(((double)prevPos.getAltitude()-visiblePathMinAltitude)*pixelPerHeight);
-                }
-                //DEBUG("curX=%d curY=%d curLen=%f  pixelPerLen=%f pixelPerHeight=%f",curX,curY,curLen,pixelPerLen,pixelPerHeight);
-
-                // Add the new point to the profile
-                altitudeProfileFillPoints.push_back(GraphicPoint(prevX,0));
-                altitudeProfileFillPoints.push_back(GraphicPoint(prevX,prevY));
-                altitudeProfileFillPoints.push_back(GraphicPoint(curX,0));
-                altitudeProfileFillPoints.push_back(GraphicPoint(curX,0));
-                altitudeProfileFillPoints.push_back(GraphicPoint(prevX,prevY));
-                altitudeProfileFillPoints.push_back(GraphicPoint(curX,curY));
-                double alpha=atan(((double)(curY-prevY))/((double)(curX-prevX)));
-                Int dX=round(sin(alpha)*(((double)altitudeProfileLineWidth)/2));
-                Int dY=round(cos(alpha)*(((double)altitudeProfileLineWidth)/2));
-                curXU=curX-dX;
-                curYU=curY+dY;
-                curXD=curX+dX;
-                curYD=curY-dY;
-                prevXU=prevX-dX;
-                prevYU=prevY+dY;
-                prevXD=prevX+dX;
-                prevYD=prevY-dY;
-                altitudeProfileLinePoints.push_back(GraphicPoint(prevXU,prevYU));
-                altitudeProfileLinePoints.push_back(GraphicPoint(curXU,curYU));
-                altitudeProfileLinePoints.push_back(GraphicPoint(prevXD,prevYD));
-                altitudeProfileLinePoints.push_back(GraphicPoint(prevXD,prevYD));
-                altitudeProfileLinePoints.push_back(GraphicPoint(curXD,curYD));
-                altitudeProfileLinePoints.push_back(GraphicPoint(curXU,curYU));
-                if (pathReversed?i<=endIndex-1:i>=startIndex+1) {
-                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXD2,prevYD2));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXD,prevYD));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(prevX,prevY));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXU2,prevYU2));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXU,prevYU));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(prevX,prevY));
-                }
-                prevY=curY;
-                prevX=curX;
-                prevXU2=curXU;
-                prevYU2=curYU;
-                prevXD2=curXD;
-                prevYD2=curYD;
-              }
-            }
-
-            // If this position is nearer to the current location, update the position of the location indicator
-            if (locationPos.isValid()) {
-              double d=curPos.computeDistance(locationPos);
-              if (d<minDistance) {
-                locationIcon.setX(this->x+altitudeProfileOffsetX+curX-locationIcon.getIconWidth()/2);
-                locationIcon.setY(this->y+altitudeProfileOffsetY+curY-locationIcon.getIconHeight()/2);
-                minDistance=d;
-                if ((i<startIndex)||(i>endIndex)) {
-                  hideLocationIcon=true;
-                } else {
-                  hideLocationIcon=false;
-                }
-              }
-            } else {
-              hideLocationIcon=true;
-            }
-          }
-          prevPos = curPos;
-        }
-        if (altitudeProfileFillPointBuffer) delete altitudeProfileFillPointBuffer;
-        altitudeProfileFillPointBuffer=new GraphicPointBuffer(altitudeProfileFillPoints.size());
-        if (!altitudeProfileFillPointBuffer) {
-          FATAL("can not create point buffer for altitude profile",NULL);
-          return changed;
-        }
-        altitudeProfileFillPointBuffer->addPoints(altitudeProfileFillPoints);
-        if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
-        altitudeProfileLinePointBuffer=new GraphicPointBuffer(altitudeProfileLinePoints.size());
-        if (!altitudeProfileLinePointBuffer) {
-          FATAL("can not create point buffer for altitude profile",NULL);
-          return changed;
-        }
-        altitudeProfileLinePointBuffer->addPoints(altitudeProfileLinePoints);
-
-        // Prepare the axis
-        fontEngine->lockFont("sansTiny");
-        altitudeProfileAxisPointBuffer.reset();
-        Int count=altitudeProfileXTickCount;
-        if (!altitudeProfileXTickFontStrings) {
-          if (!(altitudeProfileXTickFontStrings=(FontString**)malloc(altitudeProfileXTickCount*sizeof(FontString*)))) {
-            FATAL("can not create font string array for x tick labels of altitude profile",NULL);
-            return changed;
-          }
-          memset(altitudeProfileXTickFontStrings,0,altitudeProfileXTickCount*sizeof(FontString*));
-        }
-        std::string lockedUnit;
-        core->getUnitConverter()->formatMeters(pathLength,value,lockedUnit);
-        Int precision=-1;
-        do {
-          precision++;
-          core->getUnitConverter()->formatMeters(visiblePathMaxDistance,value,unit,precision,lockedUnit);
-        }
-        while (value.size()<altitudeProfileXTickLabelWidth);
-        core->getUnitConverter()->formatMeters(pathLength,value,lockedUnit,0);
-        Int negHalveLineWidth = -altitudeProfileAxisLineWidth/2;
-        Int posHalveLineWidth = altitudeProfileAxisLineWidth/2+altitudeProfileAxisLineWidth%2;
-        for(Int i=0;i<count;i++) {
-          Int x=i*altitudeProfileWidth/(count-1)+negHalveLineWidth;
-          altitudeProfileAxisPointBuffer.addPoint(x,negHalveLineWidth);
-          altitudeProfileAxisPointBuffer.addPoint(x,altitudeProfileHeight+posHalveLineWidth);
-          altitudeProfileAxisPointBuffer.addPoint(x+altitudeProfileAxisLineWidth,negHalveLineWidth);
-          altitudeProfileAxisPointBuffer.addPoint(x+altitudeProfileAxisLineWidth,negHalveLineWidth);
-          altitudeProfileAxisPointBuffer.addPoint(x+altitudeProfileAxisLineWidth,altitudeProfileHeight+posHalveLineWidth);
-          altitudeProfileAxisPointBuffer.addPoint(x,altitudeProfileHeight+posHalveLineWidth);
-          core->getUnitConverter()->formatMeters(startLen+((double)i)*(visiblePathLength/(double)(count-1)),value,unit,precision,lockedUnit);
-          fontEngine->updateString(&altitudeProfileXTickFontStrings[i],value);
-          double x2=this->x+altitudeProfileOffsetX+x+((double)altitudeProfileAxisLineWidth)/2;
-          if (i==0)
-            x2+=0;
-          else
-            x2-=((double)altitudeProfileXTickFontStrings[i]->getIconWidth())/2;
-          altitudeProfileXTickFontStrings[i]->setX(x2);
-          altitudeProfileXTickFontStrings[i]->setY(this->y+altitudeProfileOffsetY-altitudeProfileXTickLabelOffsetY-altitudeProfileXTickFontStrings[i]->getIconHeight());
-        }
-        count=altitudeProfileYTickCount;
-        if (!altitudeProfileYTickFontStrings) {
-          if (!(altitudeProfileYTickFontStrings=(FontString**)malloc(altitudeProfileYTickCount*sizeof(FontString*)))) {
-            FATAL("can not create font string array for y tick labels of altitude profile",NULL);
-            return changed;
-          }
-          memset(altitudeProfileYTickFontStrings,0,altitudeProfileYTickCount*sizeof(FontString*));
-        }
-        core->getUnitConverter()->formatMeters(pathMaxAltitude,value,lockedUnit);
-        precision=-1;
-        do {
-          precision++;
-          core->getUnitConverter()->formatMeters(visiblePathMaxAltitude,value,unit,precision,lockedUnit);
-        }
-        while (value.size()<altitudeProfileYTickLabelWidth);
-        for(Int i=0;i<count;i++) {
-          Int y=i*altitudeProfileHeight/(count-1)+negHalveLineWidth;
-          altitudeProfileAxisPointBuffer.addPoint(negHalveLineWidth,y);
-          altitudeProfileAxisPointBuffer.addPoint(altitudeProfileWidth+posHalveLineWidth,y);
-          altitudeProfileAxisPointBuffer.addPoint(altitudeProfileWidth+posHalveLineWidth,y+altitudeProfileAxisLineWidth);
-          altitudeProfileAxisPointBuffer.addPoint(altitudeProfileWidth+posHalveLineWidth,y+altitudeProfileAxisLineWidth);
-          altitudeProfileAxisPointBuffer.addPoint(negHalveLineWidth,y+altitudeProfileAxisLineWidth);
-          altitudeProfileAxisPointBuffer.addPoint(negHalveLineWidth,y);
-          core->getUnitConverter()->formatMeters(visiblePathMinAltitude+((double)i)*(altitudeDiff/(double)(count-1)),value,unit,precision,lockedUnit);
-          fontEngine->updateString(&altitudeProfileYTickFontStrings[i],value);
-          double y2=this->y+altitudeProfileOffsetY+y+((double)altitudeProfileAxisLineWidth)/2-altitudeProfileYTickFontStrings[i]->getBaselineOffsetY();
-          if (i==0)
-            y2+=0;
-          else
-            y2-=((double)altitudeProfileYTickFontStrings[i]->getIconHeight())/2;
-          altitudeProfileYTickFontStrings[i]->setY(y2);
-          altitudeProfileYTickFontStrings[i]->setX(this->x+altitudeProfileOffsetX-altitudeProfileYTickLabelOffsetX-altitudeProfileYTickFontStrings[i]->getIconWidth());
-        }
-        fontEngine->unlockFont();
-      }
-    }
-    if (noAltitudeProfile) {
+    // Show only text if no altitude profile is present
+    if (visualizationNoAltitudeProfile) {
       if (altitudeProfileFillPointBuffer) delete altitudeProfileFillPointBuffer;
       altitudeProfileFillPointBuffer=NULL;
       if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
@@ -370,10 +143,50 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
       fontEngine->unlockFont();
       noAltitudeProfileFontString->setX(x+noAltitudeProfileOffsetX-noAltitudeProfileFontString->getIconWidth()/2);
       noAltitudeProfileFontString->setY(y+noAltitudeProfileOffsetY-noAltitudeProfileFontString->getIconHeight()/2);
+    } else {
+
+      // Create the altitude profile
+      if (altitudeProfileFillPointBuffer) delete altitudeProfileFillPointBuffer;
+      altitudeProfileFillPointBuffer=new GraphicPointBuffer(visualizationAltitudeProfileFillPoints.size());
+      if (!altitudeProfileFillPointBuffer) {
+        FATAL("can not create point buffer for altitude profile",NULL);
+        return changed;
+      }
+      altitudeProfileFillPointBuffer->addPoints(visualizationAltitudeProfileFillPoints);
+      if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
+      altitudeProfileLinePointBuffer=new GraphicPointBuffer(visualizationAltitudeProfileLinePoints.size());
+      if (!altitudeProfileLinePointBuffer) {
+        FATAL("can not create point buffer for altitude profile",NULL);
+        return changed;
+      }
+      altitudeProfileLinePointBuffer->addPoints(visualizationAltitudeProfileLinePoints);
+      locationIcon.setX(visualizationAltitudeProfileLocationIconPoint.getX());
+      locationIcon.setY(visualizationAltitudeProfileLocationIconPoint.getY());
+      hideLocationIcon=visualizationAltitudeProfileHideLocationIcon;
+
+      // Create the axis
+      fontEngine->lockFont("sansTiny");
+      altitudeProfileAxisPointBuffer.reset();
+      altitudeProfileAxisPointBuffer.addPoints(visualizationAltitudeProfileAxisPoints);
+      for(Int i=0;i<visualizationAltitudeProfileXTickLabels.size();i++) {
+        fontEngine->updateString(&altitudeProfileXTickFontStrings[i],visualizationAltitudeProfileXTickLabels[i]);
+        altitudeProfileXTickFontStrings[i]->setX(visualizationAltitudeProfileXTickPoints[i].getX()-altitudeProfileXTickFontStrings[i]->getIconWidth()/2);
+        altitudeProfileXTickFontStrings[i]->setY(visualizationAltitudeProfileXTickPoints[i].getY()-altitudeProfileXTickFontStrings[i]->getIconHeight());
+      }
+      for(Int i=0;i<visualizationAltitudeProfileYTickLabels.size();i++) {
+        fontEngine->updateString(&altitudeProfileYTickFontStrings[i],visualizationAltitudeProfileYTickLabels[i]);
+        Int y=altitudeProfileYTickFontStrings[i]->getBaselineOffsetY();
+        if (i!=0)
+          y+=altitudeProfileYTickFontStrings[i]->getIconHeight()/2;
+        altitudeProfileYTickFontStrings[i]->setX(visualizationAltitudeProfileYTickPoints[i].getX()-altitudeProfileYTickFontStrings[i]->getIconWidth());
+        altitudeProfileYTickFontStrings[i]->setY(visualizationAltitudeProfileYTickPoints[i].getY()-y);
+      }
+      fontEngine->unlockFont();
     }
 
   }
   redrawRequired=false;
+  core->getThread()->unlockMutex(visualizationMutex);
 
   // Return result
   return changed;
@@ -434,6 +247,32 @@ void WidgetPathInfo::draw(Screen *screen, TimestampInMicroseconds t) {
   }
 }
 
+// Ensures that the complete path becomes visible
+void WidgetPathInfo::resetPathVisibility(bool widgetVisible) {
+  NavigationPath *path=currentPath;
+  if (path) {
+    path->lockAccess();
+    if (path->getReverse()) {
+      startIndex=0;
+      endIndex=path->getSize()-2;
+    } else {
+      startIndex=1;
+      endIndex=path->getSize()-1;
+    }
+    maxEndIndex=path->getSize()-1;
+    indexLen=endIndex-startIndex;
+    currentPathName=path->getName();
+    if (endIndex<startIndex) {
+      currentPath=NULL;
+      path->unlockAccess();
+    } else {
+      path->unlockAccess();
+    }
+    core->getConfigStore()->setStringValue("Navigation","pathInfoName",currentPathName);
+  }
+  core->getThread()->issueSignal(updateVisualizationSignal);
+}
+
 // Called when the map has changed
 void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
 
@@ -458,6 +297,7 @@ void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
         minDistance=d;
         nearestPath=s->getPath();
       }
+      core->interruptAllowedHere();  // onMapChange may only be called by the map update thread!
     }
     s->getPath()->unlockAccess();
   }
@@ -468,61 +308,51 @@ void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
     // Remember the selected path
     currentPath=nearestPath;
     resetPathVisibility(widgetVisible);
+    if (widgetVisible)
+      core->getWidgetEngine()->setWidgetsActive(true,false);
+
   }
 
-}
-
-// Ensures that the complete path becomes visible
-void WidgetPathInfo::resetPathVisibility(bool widgetVisible) {
-  if (currentPath) {
-    currentPath->lockAccess();
-    if (currentPath->getReverse()) {
-      startIndex=0;
-      endIndex=currentPath->getSize()-2;
-    } else {
-      startIndex=1;
-      endIndex=currentPath->getSize()-1;
-    }
-    maxEndIndex=currentPath->getSize()-1;
-    indexLen=endIndex-startIndex;
-    currentPathName=currentPath->getName();
-    currentPath->unlockAccess();
-    if (endIndex<startIndex) {
-      currentPath=NULL;
-    } else {
-      if (widgetVisible)
-        core->getWidgetEngine()->setWidgetsActive(true,false);
-    }
-    core->getConfigStore()->setStringValue("Navigation","pathInfoName",currentPathName);
-  }
-  redrawRequired=true;
 }
 
 // Called when the location has changed
 void WidgetPathInfo::onLocationChange(bool widgetVisible, MapPosition pos) {
   locationPos=pos;
-  if ((widgetVisible)&&(currentPath))
-    core->getWidgetEngine()->setWidgetsActive(true,false);
-  redrawRequired=true;
+  core->getThread()->issueSignal(updateVisualizationSignal);
 }
 
 // Called when a path has changed
 void WidgetPathInfo::onPathChange(bool widgetVisible, NavigationPath *path) {
 
-  // If no path is selected, check if the given path was previsouly selected
+  // If no path is selected, check if the given path was previously selected
   if ((currentPath==NULL)&&(path->getName()==currentPathName)) {
     currentPath=path;
+    resetPathVisibility(widgetVisible);
   }
 
-  // Check if the widget needs to change its shown path
-  MapPosition *pos=core->getMapEngine()->lockMapPos();
-  if (pos->getMapTile()!=NULL)
-    onMapChange(widgetVisible, *pos);
-  core->getMapEngine()->unlockMapPos();
-
-  // Redraw is also required if this widget is showing the changed paht
+  // Redraw is also required if this widget is showing the changed path
   if (currentPath==path) {
-    resetPathVisibility(widgetVisible);
+
+    // If the user has zoomed in, keep the zoom
+    path->lockAccess();
+    Int newEndIndex=path->getSize()-1;
+    bool reversed=path->getReverse();
+    maxEndIndex=path->getSize()-1;
+    path->unlockAccess();
+    if (newEndIndex>1) {
+      if (reversed) {
+        if ((startIndex==0)&&(endIndex==newEndIndex-2)) {
+          resetPathVisibility(widgetVisible);
+        }
+      } else {
+        if ((startIndex==1)&&(endIndex==newEndIndex-1)) {
+          resetPathVisibility(widgetVisible);
+        }
+      }
+    } else {
+      resetPathVisibility(widgetVisible);
+    }
+
   }
 }
 
@@ -563,9 +393,9 @@ void WidgetPathInfo::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int d
   }
   endIndex=newEndIndex;
   startIndex=newStartIndex;
-  //DEBUG("startIndex=%d endIndex=%d",startIndex,endIndex);
+  firstTouchDown=true;
   currentPath->unlockAccess();
-  redrawRequired=true;
+  core->getThread()->issueSignal(updateVisualizationSignal);
 }
 
 // Called when the widget is touched
@@ -589,7 +419,7 @@ void WidgetPathInfo::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
       }
     }
     currentPath->unlockAccess();
-    redrawRequired=true;
+    core->getThread()->issueSignal(updateVisualizationSignal);
   }
   prevX=x;
   firstTouchDown=false;
@@ -600,5 +430,304 @@ void WidgetPathInfo::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
   WidgetPrimitive::onTouchUp(t,x,y);
   firstTouchDown=true;
 }
+
+// Recomputes the visualization of the path info
+void WidgetPathInfo::updateVisualization() {
+
+  std::list<std::string> status;
+
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+
+  // This thread can be cancelled at any time
+  core->getThread()->setThreadCancable();
+
+  // Do an endless loop
+  while (1) {
+
+    // Wait for an update trigger
+    core->getThread()->waitForSignal(updateVisualizationSignal);
+
+    // Variables that define the visualization
+    std::string vPathName;
+    std::string vPathLength;
+    std::string vPathAltitudeUp;
+    std::string vPathAltitudeDown;
+    std::string vPathDuration;
+    std::list<GraphicPoint> altitudeProfileFillPoints;
+    std::list<GraphicPoint> altitudeProfileLinePoints;
+    GraphicPoint altitudeProfileLocationIconPoint;
+    bool altitudeProfileHideLocationIcon=true;
+    std::list<GraphicPoint> altitudeProfileAxisPoints;
+    std::vector<std::string> altitudeProfileXTickLabels;
+    std::vector<GraphicPoint> altitudeProfileXTickPoints;
+    std::vector<std::string> altitudeProfileYTickLabels;
+    std::vector<GraphicPoint> altitudeProfileYTickPoints;
+    bool noAltitudeProfile=true;
+
+    // Only update if we have a path
+    if (currentPath) {
+
+      // Get infos from path
+      currentPath->lockAccess();
+      std::string pathName=currentPath->getName();
+      double pathLength=currentPath->getLength();
+      double pathDuration=currentPath->getDuration();
+      double pathAltitudeUp=currentPath->getAltitudeUp();
+      double pathAltitudeDown=currentPath->getAltitudeDown();
+      std::vector<MapPosition> pathPoints=currentPath->getPoints();
+      //DEBUG("pathPoints.size()=%d",pathPoints.size());
+      bool pathReversed=currentPath->getReverse();
+      double pathMinAltitude = currentPath->getMinAltitude();
+      double pathMaxAltitude = currentPath->getMaxAltitude();
+      Int pathEndIndex = endIndex;
+      Int pathStartIndex = startIndex;
+      Int pathMaxEndIndex = maxEndIndex;
+      currentPath->unlockAccess();
+
+      // Update the labels
+      vPathName=pathName;
+      std::string value="";
+      std::string unit="";
+      core->getUnitConverter()->formatMeters(pathLength,value,unit,1);
+      vPathLength=value + " " + unit;
+      core->getUnitConverter()->formatMeters(pathAltitudeUp,value,unit,1);
+      vPathAltitudeUp=value + " " + unit;
+      core->getUnitConverter()->formatMeters(pathAltitudeDown,value,unit,1);
+      vPathAltitudeDown=value + " " + unit;
+      core->getUnitConverter()->formatTime(pathDuration,value,unit,1);
+      vPathDuration=value + " " + unit;
+
+      // Compute the altitude profile
+      double minDistance=std::numeric_limits<double>::max();
+      double minBearingDiff=std::numeric_limits<double>::max();
+      if ((pathMinAltitude<=pathMaxAltitude)&&(pathPoints.size()>=2)) {
+        MapPosition prevPos=NavigationPath::getPathInterruptedPos();
+        double visiblePathLength=0;
+        double visiblePathMinAltitude=std::numeric_limits<double>::max();
+        double visiblePathMaxAltitude=std::numeric_limits<double>::min();
+        for(Int i=pathReversed?pathEndIndex+1:pathStartIndex-1;pathReversed?i>=pathStartIndex:i<=pathEndIndex;pathReversed?i--:i++) {
+          MapPosition curPos = pathPoints[i];
+          if (curPos!=NavigationPath::getPathInterruptedPos()) {
+            if (curPos.getHasAltitude()) {
+              if (curPos.getAltitude()<visiblePathMinAltitude)
+                visiblePathMinAltitude=curPos.getAltitude();
+              if (curPos.getAltitude()>visiblePathMaxAltitude)
+                visiblePathMaxAltitude=curPos.getAltitude();
+            }
+            if (prevPos!=NavigationPath::getPathInterruptedPos()) {
+              if (pathReversed?i<=pathEndIndex:i>=pathStartIndex) {
+                visiblePathLength += curPos.computeDistance(prevPos);
+              }
+            }
+          }
+          prevPos = curPos;
+        }
+        double pixelPerLen = ((double)altitudeProfileWidth)/visiblePathLength;
+        double pixelPerHeight;
+        double altitudeDiff;
+        if ((visiblePathMaxAltitude-visiblePathMinAltitude)<altitudeProfileMinAltitudeDiff) {
+          altitudeDiff = altitudeProfileMinAltitudeDiff;
+        } else {
+          altitudeDiff = visiblePathMaxAltitude-visiblePathMinAltitude;
+        }
+        pixelPerHeight = ((double)altitudeProfileHeight)/altitudeDiff;
+        //DEBUG("pixelPerHeight=%e visiblePathMaxDistance=%f visiblePathMaxAltitude=%f visiblePathMinAltitude=%f altitudeProfileMinAltitudeDiff=%f altitudeDiff=%f",pixelPerHeight,visiblePathMaxDistance,visiblePathMaxAltitude,visiblePathMinAltitude,altitudeProfileMinAltitudeDiff,altitudeDiff);
+        if ((pixelPerLen!=std::numeric_limits<double>::infinity())&&(pixelPerHeight!=std::numeric_limits<double>::infinity())) {
+
+          // Compute the profile points from the path positions
+          Int prevX=0,curX=0;
+          Int prevY=0,curY=0;
+          Int prevXU=0, prevXU2=0, prevXD=0, prevXD2=0, curXU=0, curXD=0;
+          Int prevYU=0, prevYU2=0, prevYD=0, prevYD2=0, curYU=0, curYD=0;
+          noAltitudeProfile=false;
+          double curLen = 0, startLen = 0;
+          prevPos = pathReversed ? pathPoints[pathMaxEndIndex] : pathPoints[0];
+          bool firstVisiblePointSeen=false;
+          for(Int i=pathReversed?pathMaxEndIndex-1:1;pathReversed?i>=0:i<=pathMaxEndIndex;pathReversed?i--:i++) {
+            MapPosition curPos = pathPoints[i];
+            if ((prevPos!=NavigationPath::getPathInterruptedPos())&&(curPos!=NavigationPath::getPathInterruptedPos())) {
+              if (!firstVisiblePointSeen) {
+                startLen=curLen;
+              }
+              curLen += curPos.computeDistance(prevPos);
+
+              // Only draw the requested horizontal part of the profile
+              if ((i>=pathStartIndex)&&(i<=pathEndIndex)) {
+                firstVisiblePointSeen=true;
+                curX=round((curLen-startLen)*pixelPerLen);
+                //DEBUG("curX=%d curLen=%f",curX,curLen);
+                if (curX>prevX) {
+
+                  // Compute the current Y positions
+                  if (curPos.getHasAltitude()) {
+                    curY=round(((double)curPos.getAltitude()-visiblePathMinAltitude)*pixelPerHeight);
+                  }
+                  if (prevPos.getHasAltitude()) {
+                    prevY=round(((double)prevPos.getAltitude()-visiblePathMinAltitude)*pixelPerHeight);
+                  }
+                  //DEBUG("curX=%d curY=%d curLen=%f  pixelPerLen=%f pixelPerHeight=%f",curX,curY,curLen,pixelPerLen,pixelPerHeight);
+
+                  // Add the new point to the profile
+                  altitudeProfileFillPoints.push_back(GraphicPoint(prevX,0));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(prevX,prevY));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(curX,0));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(curX,0));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(prevX,prevY));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(curX,curY));
+                  double alpha=atan(((double)(curY-prevY))/((double)(curX-prevX)));
+                  Int dX=round(sin(alpha)*(((double)altitudeProfileLineWidth)/2));
+                  Int dY=round(cos(alpha)*(((double)altitudeProfileLineWidth)/2));
+                  curXU=curX-dX;
+                  curYU=curY+dY;
+                  curXD=curX+dX;
+                  curYD=curY-dY;
+                  prevXU=prevX-dX;
+                  prevYU=prevY+dY;
+                  prevXD=prevX+dX;
+                  prevYD=prevY-dY;
+                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXU,prevYU));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(curXU,curYU));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXD,prevYD));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXD,prevYD));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(curXD,curYD));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(curXU,curYU));
+                  if (pathReversed?i<=pathEndIndex-1:i>=pathStartIndex+1) {
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXD2,prevYD2));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXD,prevYD));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevX,prevY));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXU2,prevYU2));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXU,prevYU));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevX,prevY));
+                  }
+                  prevY=curY;
+                  prevX=curX;
+                  prevXU2=curXU;
+                  prevYU2=curYU;
+                  prevXD2=curXD;
+                  prevYD2=curYD;
+                }
+              }
+
+              // If this position is nearer to the current location, update the position of the location indicator
+              if (locationPos.isValid()) {
+                bool updateLocationIcon=false;
+                double d=curPos.computeDistance(locationPos);
+                if ((locationPos.getHasBearing())&&(d<minDistanceToBeOffRoute)) {
+                  double bearingDiff=fabs(prevPos.computeBearing(curPos)-locationPos.getBearing());
+                  if (bearingDiff<minBearingDiff) {
+                    minBearingDiff=bearingDiff;
+                    updateLocationIcon=true;
+                  }
+                } else {
+                  if (d<minDistance) {
+                    updateLocationIcon=true;
+                  }
+                }
+                if (updateLocationIcon) {
+                  altitudeProfileLocationIconPoint.setX(this->x+altitudeProfileOffsetX+curX-locationIcon.getIconWidth()/2);
+                  altitudeProfileLocationIconPoint.setY(this->y+altitudeProfileOffsetY+curY-locationIcon.getIconHeight()/2);
+                  minDistance=d;
+                  if ((i<pathStartIndex)||(i>pathEndIndex)) {
+                    altitudeProfileHideLocationIcon=true;
+                  } else {
+                    altitudeProfileHideLocationIcon=false;
+                  }
+                }
+              } else {
+                altitudeProfileHideLocationIcon=true;
+              }
+            }
+            prevPos = curPos;
+          }
+
+          // Prepare the axis
+          Int count=altitudeProfileXTickCount;
+          if (!altitudeProfileXTickFontStrings) {
+            if (!(altitudeProfileXTickFontStrings=(FontString**)malloc(altitudeProfileXTickCount*sizeof(FontString*)))) {
+              FATAL("can not create font string array for x tick labels of altitude profile",NULL);
+              return;
+            }
+            memset(altitudeProfileXTickFontStrings,0,altitudeProfileXTickCount*sizeof(FontString*));
+          }
+          std::string lockedUnit;
+          core->getUnitConverter()->formatMeters(pathLength,value,lockedUnit);
+          Int precision=-1;
+          do {
+            precision++;
+            core->getUnitConverter()->formatMeters(startLen+visiblePathLength,value,unit,precision+1,lockedUnit);
+          }
+          while (value.length()<=altitudeProfileXTickLabelWidth);
+          core->getUnitConverter()->formatMeters(pathLength,value,lockedUnit,0);
+          Int negHalveLineWidth = -altitudeProfileAxisLineWidth/2;
+          Int posHalveLineWidth = altitudeProfileAxisLineWidth/2+altitudeProfileAxisLineWidth%2;
+          for(Int i=0;i<count;i++) {
+            Int x=i*altitudeProfileWidth/(count-1)+negHalveLineWidth;
+            altitudeProfileAxisPoints.push_back(GraphicPoint(x,negHalveLineWidth));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(x,altitudeProfileHeight+posHalveLineWidth));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(x+altitudeProfileAxisLineWidth,negHalveLineWidth));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(x+altitudeProfileAxisLineWidth,negHalveLineWidth));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(x+altitudeProfileAxisLineWidth,altitudeProfileHeight+posHalveLineWidth));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(x,altitudeProfileHeight+posHalveLineWidth));
+            core->getUnitConverter()->formatMeters(startLen+((double)i)*(visiblePathLength/(double)(count-1)),value,unit,precision,lockedUnit);
+            altitudeProfileXTickLabels.push_back(value);
+            Int x2=this->x+altitudeProfileOffsetX+x+altitudeProfileAxisLineWidth/2;
+            altitudeProfileXTickPoints.push_back(GraphicPoint(x2,this->y+altitudeProfileOffsetY-altitudeProfileXTickLabelOffsetY));
+          }
+          count=altitudeProfileYTickCount;
+          if (!altitudeProfileYTickFontStrings) {
+            if (!(altitudeProfileYTickFontStrings=(FontString**)malloc(altitudeProfileYTickCount*sizeof(FontString*)))) {
+              FATAL("can not create font string array for y tick labels of altitude profile",NULL);
+              return;
+            }
+            memset(altitudeProfileYTickFontStrings,0,altitudeProfileYTickCount*sizeof(FontString*));
+          }
+          core->getUnitConverter()->formatMeters(pathMaxAltitude,value,lockedUnit);
+          precision=-1;
+          do {
+            precision++;
+            core->getUnitConverter()->formatMeters(visiblePathMaxAltitude,value,unit,precision+1,lockedUnit);
+          }
+          while (value.length()<=altitudeProfileYTickLabelWidth);
+          for(Int i=0;i<count;i++) {
+            Int y=i*altitudeProfileHeight/(count-1)+negHalveLineWidth;
+            altitudeProfileAxisPoints.push_back(GraphicPoint(negHalveLineWidth,y));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(altitudeProfileWidth+posHalveLineWidth,y));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(altitudeProfileWidth+posHalveLineWidth,y+altitudeProfileAxisLineWidth));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(altitudeProfileWidth+posHalveLineWidth,y+altitudeProfileAxisLineWidth));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(negHalveLineWidth,y+altitudeProfileAxisLineWidth));
+            altitudeProfileAxisPoints.push_back(GraphicPoint(negHalveLineWidth,y));
+            core->getUnitConverter()->formatMeters(visiblePathMinAltitude+((double)i)*(altitudeDiff/(double)(count-1)),value,unit,precision,lockedUnit);
+            altitudeProfileYTickLabels.push_back(value);
+            Int y2=this->y+altitudeProfileOffsetY+y+altitudeProfileAxisLineWidth/2;
+            altitudeProfileYTickPoints.push_back(GraphicPoint(this->x+altitudeProfileOffsetX-altitudeProfileYTickLabelOffsetX,y2));
+          }
+        }
+      }
+    }
+
+    // Update the variables for the next drawing round
+    core->getThread()->lockMutex(visualizationMutex);
+    this->visualizationPathName=vPathName;
+    this->visualizationPathLength=vPathLength;
+    this->visualizationPathAltitudeUp=vPathAltitudeUp;
+    this->visualizationPathAltitudeDown=vPathAltitudeDown;
+    this->visualizationPathDuration=vPathDuration;
+    this->visualizationAltitudeProfileFillPoints=altitudeProfileFillPoints;
+    this->visualizationAltitudeProfileLinePoints=altitudeProfileLinePoints;
+    this->visualizationAltitudeProfileLocationIconPoint=altitudeProfileLocationIconPoint;
+    this->visualizationAltitudeProfileHideLocationIcon=altitudeProfileHideLocationIcon;
+    this->visualizationAltitudeProfileAxisPoints=altitudeProfileAxisPoints;
+    this->visualizationAltitudeProfileXTickLabels=altitudeProfileXTickLabels;
+    this->visualizationAltitudeProfileXTickPoints=altitudeProfileXTickPoints;
+    this->visualizationAltitudeProfileYTickLabels=altitudeProfileYTickLabels;
+    this->visualizationAltitudeProfileYTickPoints=altitudeProfileYTickPoints;
+    this->visualizationNoAltitudeProfile=noAltitudeProfile;
+    redrawRequired=true;
+    core->getThread()->unlockMutex(visualizationMutex);
+
+  }
+}
+
 
 } /* namespace GEODISCOVERER */

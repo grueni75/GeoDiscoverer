@@ -110,7 +110,7 @@ int main(int argc, char **argv)
   }
 
   // Start it as a thread
-  GEODISCOVERER::ThreadInfo *main=GEODISCOVERER::core->getThread()->createThread(mainThread,NULL);
+  GEODISCOVERER::ThreadInfo *main=GEODISCOVERER::core->getThread()->createThread("main thread",mainThread,NULL);
 
   // Wait some time
   while (!GEODISCOVERER::core->getIsInitialized()) {
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
   }
 
   // Start the debugging thread
-  GEODISCOVERER::ThreadInfo *debug=GEODISCOVERER::core->getThread()->createThread(debugThread,NULL);
+  GEODISCOVERER::ThreadInfo *debug=GEODISCOVERER::core->getThread()->createThread("debug thread",debugThread,NULL);
 
   // Wait until the threads exit
   GEODISCOVERER::core->getThread()->waitForThread(debug);

@@ -153,11 +153,11 @@ void WidgetEngine::createGraphic() {
     parameters["stateConfigPath"]="Navigation";
     parameters["stateConfigName"]="recordTrack";
     parameters["updateInterval"]="250000";
-    addWidgetToPage("Default",WidgetTypeCheckbox,"Track Recording",      84.0, 82.0,0,10.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeCheckbox,"Track Recording",      84.0, 80.5,0,10.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="createNewTrack";
     parameters["command"]="createNewTrack()";
-    addWidgetToPage("Default",WidgetTypeButton,"Create New Track",       57.0, 82.0,0,10.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeButton,"Create New Track",       57.0, 80.5,0,10.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     /*
     parameters.clear();
     parameters["uncheckedIconFilename"]="wakeLockOff";
@@ -203,12 +203,12 @@ void WidgetEngine::createGraphic() {
     parameters["updateInterval"]="1000000";
     parameters["tickLabelOffsetX"]="0";
     parameters["mapLabelOffsetY"]="9.0";
-    addWidgetToPage("Default",WidgetTypeScale,"Map scale",               70.0, 93.0,0,50.0, 88.0,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeScale,"Map scale",               70.0, 92.0,0,50.0, 88.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="statusBackground";
     parameters["updateInterval"]="100000";
     parameters["labelWidth"]="95.0";
-    addWidgetToPage("Default",WidgetTypeStatus,"Status",                 70.0, 93.0,1,50.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Default",WidgetTypeStatus,"Status",                 70.0, 92.0,1,50.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="navigationBackground";
     parameters["updateInterval"]="1000000";
@@ -254,7 +254,7 @@ void WidgetEngine::createGraphic() {
     parameters["pathAltitudeUpOffsetY"]="57.25";
     parameters["pathAltitudeDownOffsetY"]="32.5";
     parameters["pathDurationOffsetY"]="8.25";
-    parameters["altitudeProfileWidth"]="51.0";
+    parameters["altitudeProfileWidth"]="50.5";
     parameters["altitudeProfileHeight"]="54.0";
     parameters["altitudeProfileOffsetX"]="9.5";
     parameters["altitudeProfileOffsetY"]="14.0";
@@ -265,8 +265,8 @@ void WidgetEngine::createGraphic() {
     parameters["altitudeProfileYTickCount"]="3";
     parameters["altitudeProfileXTickLabelOffsetY"]="1.5";
     parameters["altitudeProfileYTickLabelOffsetX"]="1.0";
-    parameters["altitudeProfileXTickLabelWidth"]="3";
-    parameters["altitudeProfileYTickLabelWidth"]="3";
+    parameters["altitudeProfileXTickLabelWidth"]="5";
+    parameters["altitudeProfileYTickLabelWidth"]="4";
     parameters["AltitudeProfileFillColor/red"] = "255";
     parameters["AltitudeProfileFillColor/green"] = "190";
     parameters["AltitudeProfileFillColor/blue"] = "127";

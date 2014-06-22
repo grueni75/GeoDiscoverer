@@ -38,13 +38,40 @@ typedef struct ThreadSignalInfo {
 } ThreadSignalInfo;
 enum ThreadPriority { threadPriorityForeground=0, threadPriorityBackgroundHigh=1, threadPriorityBackgroundLow=2 };
 
+typedef std::map<ThreadInfo, std::string*> ThreadNameMap;
+typedef std::pair<ThreadInfo, std::string*> ThreadNamePair;
+typedef std::map<ThreadMutexInfo*, std::string*> ThreadMutexNameMap;
+typedef std::pair<ThreadMutexInfo*, std::string*> ThreadMutexNamePair;
+typedef std::map<ThreadMutexInfo*, std::list<std::string*> *> ThreadMutexWaitQueueMap;
+typedef std::pair<ThreadMutexInfo*, std::list<std::string*> *> ThreadMutexWaitQueuePair;
+
 class Thread {
+
+protected:
+
+  // Maps thread ids to thread names
+  ThreadNameMap threadNameMap;
+
+  // Maps mutex pointers to mutex names
+  ThreadMutexNameMap mutexNameMap;
+
+  // Contains all threads that are currently waiting for a mutex
+  ThreadMutexWaitQueueMap mutexWaitQueueMap;
+
+  // Thread that outputs all threads waiting for a mute
+  ThreadInfo *mutexDebugThreadInfo;
+
+  // Mutex to control access to the maps
+  ThreadMutexInfo *accessMutex;
+
+  // Decides if mutex locking infos shall be logged
+  bool createMutexLog;
 
 public:
   Thread();
 
   // Creates a thread
-  ThreadInfo *createThread(ThreadFunction threadFunction, void *threadArgument);
+  ThreadInfo *createThread(std::string name, ThreadFunction threadFunction, void *threadArgument);
 
   // Sets the priority of a thread
   void setThreadPriority(ThreadPriority priority);
@@ -59,7 +86,7 @@ public:
   void waitForThread(ThreadInfo *thread);
 
   // Creates a mutex
-  ThreadMutexInfo *createMutex();
+  ThreadMutexInfo *createMutex(std::string name);
 
   // Destroys a mutex
   void destroyMutex(ThreadMutexInfo *mutex);
@@ -81,7 +108,7 @@ public:
   void issueSignal(ThreadSignalInfo *signal);
 
   // Waits for a signal
-  void waitForSignal(ThreadSignalInfo *signal);
+  bool waitForSignal(ThreadSignalInfo *signal, TimestampInMilliseconds maxWaitTime=0);
 
   // Let other thread run
   void reschedule();
@@ -93,7 +120,10 @@ public:
   void setThreadCancable();
 
   // Cancel the thread
-  void cancelThread(ThreadInfo *thread);
+  bool cancelThread(ThreadInfo *thread);
+
+  // Thread function that debugs mute locks
+  void debugMutexLocks();
 
   // Destructor
   virtual ~Thread();

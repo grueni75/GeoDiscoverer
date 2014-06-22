@@ -53,7 +53,22 @@
               </xsd:element>
               <xsd:element name="createMessageLog" type="xsd:boolean" default="0">
                 <xsd:annotation>
-                  <xsd:documentation>Writes messages into a file in the log directory if ticked.</xsd:documentation>
+                  <xsd:documentation>Writes debug messages into a file in the log directory if ticked.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="createMutexLog" type="xsd:boolean" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Writes mutex locking messages into a file in the log directory if ticked.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="mutexLogUpdateInterval" type="xsd:boolean" default="10">
+                <xsd:annotation>
+                  <xsd:documentation>Distance in seconds between updates of the mutex log.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="writeConfigMinWaitTime" type="xsd:boolean" default="1">
+                <xsd:annotation>
+                  <xsd:documentation>Minimum distance in seconds between writes of the config store.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
             </xsd:sequence>
@@ -1350,6 +1365,11 @@
               <xsd:element name="minDistanceToBeOffRoute" type="xsd:double" default="50">
                 <xsd:annotation>
                   <xsd:documentation>Minimum distance from nearest route point such that navigation considers location to be off route.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="minAltitudeChange" type="xsd:double" default="20">
+                <xsd:annotation>
+                  <xsd:documentation>Minimum change of altitude required to update altitude meters.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
             </xsd:sequence>

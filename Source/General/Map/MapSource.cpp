@@ -28,11 +28,11 @@ MapSource::MapSource() {
   folder=core->getConfigStore()->getStringValue("Map","folder");
   neighborPixelTolerance=core->getConfigStore()->getDoubleValue("Map","neighborPixelTolerance");
   mapTileLength=core->getConfigStore()->getIntValue("Map","tileLength");
-  statusMutex=core->getThread()->createMutex();
+  statusMutex=core->getThread()->createMutex("map source status mutex");
   isInitialized=false;
   contentsChanged=false;
   centerPosition=NULL;
-  mapArchivesMutex=core->getThread()->createMutex();
+  mapArchivesMutex=core->getThread()->createMutex("map archives mutex");
 }
 
 MapSource::~MapSource() {

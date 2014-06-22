@@ -31,7 +31,7 @@ MapCalibrator::MapCalibrator(bool doNotDelete) {
   if (doNotDelete) {
     new(&this->calibrationPoints) std::list<MapPosition*>();
   }
-  this->accessMutex=core->getThread()->createMutex();
+  this->accessMutex=core->getThread()->createMutex("map calibrator access mutex");
 }
 
 // Destructor

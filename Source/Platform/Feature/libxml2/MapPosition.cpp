@@ -203,6 +203,7 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
         }
         if (name == "time") {
           //DEBUG("before conversion: %s",text.c_str());
+          hasTimestamp=true;
           timestamp=core->getClock()->getXMLDate(text,false);
           timestamp*=1000;
           //DEBUG("after conversion: %s",core->getClock()->getXMLDate(timestamp/1000).c_str());

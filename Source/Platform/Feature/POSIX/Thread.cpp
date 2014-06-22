@@ -33,12 +33,30 @@ void threadExitHandler(int sig)
       pthread_exit(0);
 }
 
+// Mutex debug thread
+void *mutexDebugThread(void *args) {
+  ((Thread*)args)->debugMutexLocks();
+  return NULL;
+}
+
 // Constructor
 Thread::Thread() {
+
+  // Remember the thread that created this object
+  threadNameMap.insert(ThreadNamePair(pthread_self(),new std::string("Core")));
+
+  // Create the thread that outputs all threads waiting for a mutex
+  if (!(accessMutex=(ThreadMutexInfo *)malloc(sizeof(ThreadMutexInfo)))) {
+    FATAL("can not reserve memory for mutex structure",NULL);
+  }
+  pthread_mutex_init(accessMutex,NULL);
+  createMutexLog=false;
+  mutexDebugThreadInfo=createThread("mutex debug thread",mutexDebugThread,this);
+
 }
 
 // Creates a thread
-ThreadInfo *Thread::createThread(ThreadFunction threadFunction, void *threadArgument) {
+ThreadInfo *Thread::createThread(std::string name, ThreadFunction threadFunction, void *threadArgument) {
   ThreadInfo *thread;
   pthread_attr_t attr;
   struct sched_param param;
@@ -59,12 +77,26 @@ ThreadInfo *Thread::createThread(ThreadFunction threadFunction, void *threadArgu
   if (result!=0) {
     FATAL("can not set thread priority (error=%d)",result);
   }*/
+  pthread_mutex_lock(accessMutex);
+  std::string *t = new std::string(name);
+  if (!t) {
+    FATAL("can not create string",NULL);
+  }
+  threadNameMap.insert(ThreadNamePair(*thread,t));
+  pthread_mutex_unlock(accessMutex);
   return thread;
 }
 
 // Destroys a thread
 void Thread::destroyThread(ThreadInfo *thread) {
   //pthread_cancel(*thread);
+  pthread_mutex_lock(accessMutex);
+  ThreadNameMap::iterator i = threadNameMap.find(*thread);
+  if (i!=threadNameMap.end()) {
+    delete i->second;
+    threadNameMap.erase(i);
+  }
+  pthread_mutex_unlock(accessMutex);
   free(thread);
 }
 
@@ -81,32 +113,108 @@ void Thread::detachThread(ThreadInfo *thread) {
   pthread_detach(*thread);
 }
 
-
 // Creates a mutex
-ThreadMutexInfo *Thread::createMutex() {
+ThreadMutexInfo *Thread::createMutex(std::string name) {
   ThreadMutexInfo *m;
   if (!(m=(ThreadMutexInfo *)malloc(sizeof(ThreadMutexInfo)))) {
     FATAL("can not reserve memory for mutex structure",NULL);
     return NULL;
   }
   pthread_mutex_init(m,NULL);
+  pthread_mutex_lock(accessMutex);
+  std::stringstream s;
+  s << name << " (0x" << std::stringstream::hex << m << ")";
+  std::string *t = new std::string(s.str());
+  if (!t) {
+    FATAL("can not create string",NULL);
+  }
+  mutexNameMap.insert(ThreadMutexNamePair(m,t));
+  pthread_mutex_unlock(accessMutex);
   return m;
 }
 
 // Destroys a mutex
 void Thread::destroyMutex(ThreadMutexInfo *mutex) {
+  pthread_mutex_lock(accessMutex);
+  ThreadMutexWaitQueueMap::iterator j = mutexWaitQueueMap.find(mutex);
+  if (j!=mutexWaitQueueMap.end()) {
+    for(std::list<std::string*>::iterator k=j->second->begin();k!=j->second->end();k++) {
+      delete *k;
+    }
+    delete j->second;
+    mutexWaitQueueMap.erase(j);
+  }
+  ThreadMutexNameMap::iterator i = mutexNameMap.find(mutex);
+  if (i!=mutexNameMap.end()) {
+    delete i->second;
+    mutexNameMap.erase(i);
+  }
+  pthread_mutex_unlock(accessMutex);
   pthread_mutex_destroy(mutex);
   free(mutex);
 }
 
 // Locks a mutex
 void Thread::lockMutex(ThreadMutexInfo *mutex) {
+  pthread_t self = pthread_self();
+  std::list<std::string*> *waitQueue=NULL;
+  std::string *threadNameCopy=NULL;
+  if (createMutexLog) {
+    pthread_mutex_lock(accessMutex);
+    if (mutexWaitQueueMap.find(mutex)!=mutexWaitQueueMap.end()) {
+      waitQueue=mutexWaitQueueMap[mutex];
+    } else {
+      if (!(waitQueue=new std::list<std::string*>())) {
+        FATAL("can not create mutex wait queue",NULL);
+        return;
+      }
+      mutexWaitQueueMap.insert(ThreadMutexWaitQueuePair(mutex,waitQueue));
+    }
+    std::string *threadName = threadNameMap[self];
+    if (threadName==NULL) {
+      FATAL("thread has no name",NULL);
+    }
+    threadNameCopy = new std::string(*threadName);
+    if (!threadNameCopy)
+      FATAL("can not create thread name string",NULL);
+    waitQueue->push_back(threadNameCopy);
+    pthread_mutex_unlock(accessMutex);
+  }
   pthread_mutex_lock(mutex);
+  if (createMutexLog) {
+    pthread_mutex_lock(accessMutex);
+    waitQueue->remove(threadNameCopy);
+    std::string *threadNameLocked = new std::string(*threadNameCopy + " (locked)");
+    if (threadNameLocked==NULL) {
+      FATAL("can not create locked thread name string",NULL);
+    }
+    delete threadNameCopy;
+    waitQueue->push_back(threadNameLocked);
+    pthread_mutex_unlock(accessMutex);
+  }
 }
 
 // Unlocks a mutex
 void Thread::unlockMutex(ThreadMutexInfo *mutex) {
   pthread_mutex_unlock(mutex);
+  if (createMutexLog) {
+    pthread_mutex_lock(accessMutex);
+    std::list<std::string*> *waitQueue;
+    if (mutexWaitQueueMap.find(mutex)!=mutexWaitQueueMap.end()) {
+      pthread_t self = pthread_self();
+      waitQueue=mutexWaitQueueMap[mutex];
+      std::string *threadName = threadNameMap[self];
+      for(std::list<std::string*>::iterator i=waitQueue->begin();i!=waitQueue->end();i++) {
+        std::string *entry = *i;
+        if (*entry==(*threadName + " (locked)")) {
+          delete entry;
+          waitQueue->erase(i);
+          break;
+        }
+      }
+    }
+    pthread_mutex_unlock(accessMutex);
+  }
 }
 
 // Creates a signal
@@ -139,14 +247,29 @@ void Thread::issueSignal(ThreadSignalInfo *signal) {
 }
 
 // Waits for a signal
-void Thread::waitForSignal(ThreadSignalInfo *signal) {
+bool Thread::waitForSignal(ThreadSignalInfo *signal, TimestampInMilliseconds maxWaitTime) {
   pthread_mutex_lock(&signal->mutex);
-  while(!signal->issued) {
-    pthread_cond_wait(&signal->cv,&signal->mutex);
+  if (maxWaitTime>0) {
+    if(!signal->issued) {
+      struct timeval tv;
+      struct timespec ts;
+      gettimeofday(&tv, NULL);
+      ts.tv_sec = time(NULL) + maxWaitTime / 1000;
+      ts.tv_nsec = tv.tv_usec * 1000 + 1000 * 1000 * (maxWaitTime % 1000);
+      ts.tv_sec += ts.tv_nsec / (1000 * 1000 * 1000);
+      ts.tv_nsec %= (1000 * 1000 * 1000);
+      pthread_cond_timedwait(&signal->cv, &signal->mutex, &ts);
+    }
+  } else {
+    while(!signal->issued) {
+      pthread_cond_wait(&signal->cv,&signal->mutex);
+    }
   }
+  bool result=signal->issued;
   if (!signal->oneTimeOnly)
     signal->issued=false;
   pthread_mutex_unlock(&signal->mutex);
+  return result;
 }
 
 // Exits a thead (has to be called by thread itself)
@@ -174,16 +297,104 @@ void Thread::setThreadCancable() {
 }
 
 // Cancel the thread
-void Thread::cancelThread(ThreadInfo *thread) {
+bool Thread::cancelThread(ThreadInfo *thread) {
   //pthread_cancel(*thread);
   //DEBUG("signaling thread %d",*thread);
-  if (pthread_kill(*thread, SIGABRT) != 0) {
+  Int rc = pthread_kill(*thread, SIGABRT);
+  if ((rc != 0)&&(rc != 3)) {
     FATAL("can not kill thread",NULL);
   }
+  if (rc == 3)
+    return false;
+  else
+    return true;
 }
 
 // Destructor
 Thread::~Thread() {
+  pthread_mutex_lock(accessMutex);
+  if (cancelThread(mutexDebugThreadInfo)) {
+    waitForThread(mutexDebugThreadInfo);
+  }
+  free(mutexDebugThreadInfo);
+  pthread_mutex_unlock(accessMutex);
+  pthread_mutex_destroy(accessMutex);
+  free(accessMutex);
+  for(ThreadMutexWaitQueueMap::iterator i=mutexWaitQueueMap.begin();i!=mutexWaitQueueMap.end();i++) {
+    for(std::list<std::string*>::iterator j=i->second->begin();j!=i->second->end();j++) {
+      delete *j;
+    }
+    delete i->second;
+  }
+  mutexWaitQueueMap.clear();
+  for(ThreadMutexNameMap::iterator i=mutexNameMap.begin();i!=mutexNameMap.end();i++) {
+    delete i->second;
+  }
+  mutexNameMap.clear();
+  for(ThreadNameMap::iterator i=threadNameMap.begin();i!=threadNameMap.end();i++) {
+    delete i->second;
+  }
+  threadNameMap.clear();
+}
+
+// Thread function that debugs mute locks
+void Thread::debugMutexLocks() {
+
+  // Wait until the core object is available
+  while (core==NULL) {
+    sleep(1);
+  }
+  while (core->getConfigStore()==NULL) {
+    sleep(1);
+  }
+
+  // Check if we shall create a mutex debug log
+  createMutexLog = core->getConfigStore()->getIntValue("General","createMutexLog");
+  if (!createMutexLog)
+    return;
+
+  // Prepare variables
+  Int waitTime = core->getConfigStore()->getIntValue("General","mutexLogUpdateInterval");
+  FILE *mutexDebugLog;
+  std::string logPath=core->getHomePath() + "/Log/mutex-" + core->getClock()->getFormattedDate() + ".log";
+
+  // Set the priority
+  setThreadPriority(threadPriorityBackgroundLow);
+
+  // This thread can be cancelled at any time
+  setThreadCancable();
+
+  // Do an endless loop
+  while (1) {
+
+    // Wait a little bit
+    sleep(waitTime);
+
+    // Open the mutex debug log
+    pthread_mutex_lock(accessMutex);
+    if (!(mutexDebugLog=fopen(logPath.c_str(),"w"))) {
+      FATAL("can not open mutex log for writing!", NULL);
+    } else {
+      for(ThreadMutexWaitQueueMap::iterator i=mutexWaitQueueMap.begin();i!=mutexWaitQueueMap.end();i++) {
+        std::list<std::string*> *waitQueue = i->second;
+        if (!waitQueue->empty()) {
+          std::string *mutexName = mutexNameMap[i->first];
+          std::stringstream buffer;
+          buffer << "-----------------------------------------------------------------------------" << "\n";
+          buffer << *mutexName << "\n";
+          buffer << "-----------------------------------------------------------------------------" << "\n";
+          for(std::list<std::string*>::iterator i=waitQueue->begin();i!=waitQueue->end();i++) {
+            buffer << *(*i) << "\n";
+          }
+          buffer << "\n";
+          fwrite(buffer.str().c_str(),buffer.str().length(),1,mutexDebugLog);
+        }
+      }
+      fclose(mutexDebugLog);
+    }
+    pthread_mutex_unlock(accessMutex);
+
+  }
 }
 
 }

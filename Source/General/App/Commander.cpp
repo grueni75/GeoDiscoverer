@@ -28,7 +28,7 @@ namespace GEODISCOVERER {
 // Constructor
 Commander::Commander() {
   pos=NULL;
-  accessMutex=core->getThread()->createMutex();
+  accessMutex=core->getThread()->createMutex("commander access mutex");
   lastTouchedX=0;
   lastTouchedY=0;
 }

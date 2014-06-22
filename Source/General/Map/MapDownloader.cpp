@@ -34,11 +34,11 @@ MapDownloader::MapDownloader(MapSourceMercatorTiles *mapSource) {
   downloadErrorWaitTime=core->getConfigStore()->getIntValue("Map","downloadErrorWaitTime");
   maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries");
   maxMapArchiveSize=core->getConfigStore()->getIntValue("Map","maxMapArchiveSize");
-  downloadQueueMutex=core->getThread()->createMutex();
+  downloadQueueMutex=core->getThread()->createMutex("map downloader download queue mutex");
   downloadStartSignal=core->getThread()->createSignal();
   quitMapImageDownloadThread=false;
   this->mapSource=mapSource;
-  mapImageDownloadThreadInfo=core->getThread()->createThread(mapDownloaderThread,this);
+  mapImageDownloadThreadInfo=core->getThread()->createThread("map downloader thread",mapDownloaderThread,this);
 }
 
 MapDownloader::~MapDownloader() {

@@ -92,7 +92,7 @@ Core::Core(std::string homePath, Int screenDPI) {
     exit(1);
     return;
   }
-  isInitializedMutex=thread->createMutex();
+  isInitializedMutex=thread->createMutex("core is initialized mutex");
   isInitializedSignal=thread->createSignal(true);
   thread->lockMutex(isInitializedMutex);
 }
@@ -189,8 +189,6 @@ Core::~Core() {
   if (image) delete image;
   DEBUG("deleting dialog",NULL);
   if (dialog) delete dialog;
-  DEBUG("deleting thread",NULL);
-  if (thread) delete thread;
   DEBUG("deleting clock",NULL);
   if (clock) delete clock;
   DEBUG("deleting config",NULL);
@@ -198,7 +196,9 @@ Core::~Core() {
   DEBUG("deleting profile engine",NULL);
   if (profileEngine) delete profileEngine;
   DEBUG("deleting debug",NULL);
-  if (debug) delete debug;
+  if (debug) delete debug; debug=NULL;
+  DEBUG("deleting thread",NULL);
+  if (thread) delete thread;
 }
 
 // Starts the application
@@ -226,7 +226,7 @@ bool Core::init() {
   */
 
   // Ensure that the core is not deinitialized before its initialized
-  mapUpdateInterruptMutex=thread->createMutex();
+  mapUpdateInterruptMutex=thread->createMutex("core map update interrupt mutex");
   interruptMapUpdate();
 
   // Continue creating components
@@ -308,16 +308,16 @@ bool Core::init() {
   // Create mutexes and signals for thread communication
   mapUpdateStartSignal=thread->createSignal();
   mapUpdateTileTextureProcessedSignal=thread->createSignal();
-  maintenanceMutex=thread->createMutex();
+  maintenanceMutex=thread->createMutex("core maintenance mutex");
 
   // Create the map update thread
-  mapUpdateThreadInfo=thread->createThread(mapUpdateThread,NULL);
+  mapUpdateThreadInfo=thread->createThread("map update thread",mapUpdateThread,NULL);
 
   // Create the maintenance thread
-  maintenanceThreadInfo=thread->createThread(maintenanceThread,NULL);
+  maintenanceThreadInfo=thread->createThread("maintenance thread",maintenanceThread,NULL);
 
   // Create the late init thread
-  lateInitThreadInfo=thread->createThread(lateInitThread,NULL);
+  lateInitThreadInfo=thread->createThread("late init thread",lateInitThread,NULL);
 
   // We are initialized
   continueMapUpdate();

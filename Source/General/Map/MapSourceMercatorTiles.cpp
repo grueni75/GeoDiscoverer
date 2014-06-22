@@ -33,7 +33,7 @@ MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   type=MapSourceTypeMercatorTiles;
   mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize");
   mapTileLength=256;
-  accessMutex=core->getThread()->createMutex();
+  accessMutex=core->getThread()->createMutex("map source mercator tiles access mutex");
   errorOccured=false;
   downloadWarningOccured=false;
   mapDownloader=new MapDownloader(this);

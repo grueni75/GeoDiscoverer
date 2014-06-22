@@ -53,6 +53,7 @@ protected:
   bool hasAccuracy;                                 // Indicates that an accuracy value is included
   double accuracy;                                  // Accuracy in meters (radius of a circle around lng and lat)
   double distance;                                  // Distance to a reference point
+  bool hasTimestamp;                                // Indicates that an timestamp value is included
   TimestampInMilliseconds timestamp;                // Time in UTC notation when this position was generated
   double latScale;                                  // Scale factor for latitude
   double lngScale;                                  // Scale factor for longitude
@@ -304,6 +305,11 @@ public:
   bool getHasBearing() const
   {
       return hasBearing;
+  }
+
+  bool getHasTimestamp() const
+  {
+      return hasTimestamp;
   }
 
   bool getHasSpeed() const

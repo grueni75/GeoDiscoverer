@@ -30,7 +30,7 @@ MapCache::MapCache() {
   // Get some configuration
   size=0;
   abortUpdate=false;
-  accessMutex=core->getThread()->createMutex();
+  accessMutex=core->getThread()->createMutex("map cache access mutex");
 
   // Reserve the memory for preparing a tile image
   //DEBUG("sizeof(*tileImageScratch)=%d",sizeof(*tileImageScratch));

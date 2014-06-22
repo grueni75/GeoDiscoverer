@@ -38,20 +38,20 @@ NavigationEngine::NavigationEngine() {
   locationOutdatedThreshold=core->getConfigStore()->getIntValue("Navigation","locationOutdatedThreshold");
   locationSignificantlyInaccurateThreshold=core->getConfigStore()->getIntValue("Navigation","locationSignificantlyInaccurateThreshold");
   trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance");
-  backgroundLoaderFinishedMutex=core->getThread()->createMutex();
-  recordedTrackMutex=core->getThread()->createMutex();
-  routesMutex=core->getThread()->createMutex();
-  locationPosMutex=core->getThread()->createMutex();
-  compassBearingMutex=core->getThread()->createMutex();
-  updateGraphicsMutex=core->getThread()->createMutex();
+  backgroundLoaderFinishedMutex=core->getThread()->createMutex("navigation engine background loader finished mutex");
+  recordedTrackMutex=core->getThread()->createMutex("navigation engine recorded track mutex");
+  routesMutex=core->getThread()->createMutex("navigation engine routes mutex");
+  locationPosMutex=core->getThread()->createMutex("navigation engine location pos mutex");
+  compassBearingMutex=core->getThread()->createMutex("navigation engine compass bearing mutex");
+  updateGraphicsMutex=core->getThread()->createMutex("navigation engine update graphics mutex");
   recordTrack=core->getConfigStore()->getIntValue("Navigation","recordTrack");
   compassBearing=0;
   isInitialized=false;
   recordedTrack=NULL;
   activeRoute=NULL;
   backgroundLoaderThreadInfo=NULL;
-  statusMutex=core->getThread()->createMutex();
-  targetPosMutex=core->getThread()->createMutex();
+  statusMutex=core->getThread()->createMutex("navigation engine status mutex");
+  targetPosMutex=core->getThread()->createMutex("navigation engine target pos mutex");
   targetVisible=false;
   arrowVisible=false;
   arrowX=std::numeric_limits<Int>::min();
@@ -67,7 +67,7 @@ NavigationEngine::NavigationEngine() {
   targetScaleMinFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor");
   targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor");
   backgroundLoaderFinished=false;
-  navigationInfosMutex=core->getThread()->createMutex();
+  navigationInfosMutex=core->getThread()->createMutex("navigation engine navigation infos mutex");
   minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate");
   forceNavigationUpdate=false;
 
@@ -188,7 +188,7 @@ void NavigationEngine::init() {
   }
 
   // Start the background loader
-  if (!(backgroundLoaderThreadInfo=core->getThread()->createThread(navigationEngineBackgroundLoaderThread,this)))
+  if (!(backgroundLoaderThreadInfo=core->getThread()->createThread("navigation engine background loader thread",navigationEngineBackgroundLoaderThread,this)))
     FATAL("can not start background loader thread",NULL);
 
   // Object is initialized

@@ -40,7 +40,7 @@ FontEngine::FontEngine() {
   fadeOutOffset=core->getConfigStore()->getIntValue("Graphic/Font","fadeOutOffset");
 
   // Init the mutex
-  accessMutex=core->getThread()->createMutex();
+  accessMutex=core->getThread()->createMutex("font engine access mutex");
 
   // Load the supported fonts
   std::string fontBaseDir = core->getHomePath() + "/Font/";

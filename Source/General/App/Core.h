@@ -53,6 +53,7 @@
 
 // Mandatory application includes for the core class
 #include <Types.h>
+#include <Clock.h>
 #include <Thread.h>
 #include <GraphicColor.h>
 
@@ -324,7 +325,6 @@ extern Core *core;
 #include <FloatingPoint.h>
 #include <Integer.h>
 #include <Debug.h>
-#include <Clock.h>
 #include <ProfileBlockResult.h>
 #include <ProfileMethodResult.h>
 #include <ProfileEngine.h>

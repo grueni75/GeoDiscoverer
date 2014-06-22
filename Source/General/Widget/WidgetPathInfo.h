@@ -51,6 +51,9 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   GraphicColor altitudeProfileLineColor;
   GraphicColor altitudeProfileAxisColor;
 
+  // Minimum distance from nearest path point such that location is off path
+  double minDistanceToBeOffRoute;
+
   // Position information
   Int pathNameWidth;
   Int pathNameOffsetX;
@@ -89,9 +92,6 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   // Last known location
   MapPosition locationPos;
 
-  // Speed in meters per second to use for calculating the duration of a route
-  double averageTravelSpeed;
-
   // Indicates that a redraw of the widget is required
   bool redrawRequired;
 
@@ -105,6 +105,26 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
 
   // Ensures that the complete path becomes visible
   void resetPathVisibility(bool widgetVisible);
+
+  // Variables for the visualization thread
+  ThreadSignalInfo *updateVisualizationSignal;
+  ThreadInfo *widgetPathInfoThreadInfo;
+  ThreadMutexInfo *visualizationMutex;
+  std::string visualizationPathName;
+  std::string visualizationPathLength;
+  std::string visualizationPathAltitudeUp;
+  std::string visualizationPathAltitudeDown;
+  std::string visualizationPathDuration;
+  std::list<GraphicPoint> visualizationAltitudeProfileFillPoints;
+  std::list<GraphicPoint> visualizationAltitudeProfileLinePoints;
+  GraphicPoint visualizationAltitudeProfileLocationIconPoint;
+  bool visualizationAltitudeProfileHideLocationIcon;
+  std::list<GraphicPoint> visualizationAltitudeProfileAxisPoints;
+  std::vector<std::string> visualizationAltitudeProfileXTickLabels;
+  std::vector<GraphicPoint> visualizationAltitudeProfileXTickPoints;
+  std::vector<std::string> visualizationAltitudeProfileYTickLabels;
+  std::vector<GraphicPoint> visualizationAltitudeProfileYTickPoints;
+  bool visualizationNoAltitudeProfile;
 
 public:
 
@@ -135,6 +155,9 @@ public:
 
   // Called when the widget is not touched anymore
   virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y);
+
+  // Recomputes the visualization of the path info
+  void updateVisualization();
 
   // Getters and setters
   void setPathNameOffsetX(Int pathNameOffsetX) {
@@ -218,7 +241,6 @@ public:
 
   void setAltitudeProfileMinAltitudeDiff(double altitudeProfileMinAltitudeDiff) {
     this->altitudeProfileMinAltitudeDiff = altitudeProfileMinAltitudeDiff;
-    DEBUG("altiudeProfileMinAltiudeDiff=%f", this->altitudeProfileMinAltitudeDiff);
   }
 
   void setAltitudeProfileXTickCount(Int altitudeProfileXTickCount) {

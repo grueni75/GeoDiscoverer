@@ -25,6 +25,12 @@
 
 namespace GEODISCOVERER {
 
+// Config write thread
+void *configStoreWriteThread(void *args) {
+  ((ConfigStore*)args)->writeConfig();
+  return NULL;
+}
+
 // Indicates that the xml parser is initialized
 bool ConfigStore::parserInitialized = false;
 
@@ -37,15 +43,31 @@ ConfigStore::ConfigStore() {
   schema=NULL;
   xpathConfigCtx=NULL;
   xpathSchemaCtx=NULL;
-  mutex=core->getThread()->createMutex();
+  accessMutex=core->getThread()->createMutex("config store access mutex");
+  quitWriteConfigThread=false;
+  writeConfigSignal=core->getThread()->createSignal();
+  skipWaitSignal=core->getThread()->createSignal();
+  writeConfigThreadInfo=core->getThread()->createThread("config store write config thread",configStoreWriteThread,this);
+
   init();
   read();
+
+  writeConfigMinWaitTime=getIntValue("General","writeConfigMinWaitTime");
 }
 
 // Destructor
 ConfigStore::~ConfigStore() {
+
+  // Quit the write config thread
+  quitWriteConfigThread=true;
+  core->getThread()->issueSignal(writeConfigSignal);
+  core->getThread()->issueSignal(skipWaitSignal);
+  core->getThread()->waitForThread(writeConfigThreadInfo);
+  core->getThread()->destroyThread(writeConfigThreadInfo);
+  core->getThread()->destroySignal(writeConfigSignal);
+  core->getThread()->destroySignal(skipWaitSignal);
   deinit();
-  core->getThread()->destroyMutex(mutex);
+  core->getThread()->destroyMutex(accessMutex);
 }
 
 // Sets an integer value in the config
@@ -109,7 +131,7 @@ GraphicColor ConfigStore::getGraphicColorValue(std::string path) {
 
 // Test if a path exists
 bool ConfigStore::pathExists(std::string path) {
-  core->getThread()->lockMutex(mutex);
+  core->getThread()->lockMutex(accessMutex);
   std::list<XMLNode> nodes=findConfigNodes("/GDC/" + path);
   bool result;
   if (nodes.size()>0) {
@@ -117,8 +139,35 @@ bool ConfigStore::pathExists(std::string path) {
   } else {
     result=false;
   }
-  core->getThread()->unlockMutex(mutex);
+  core->getThread()->unlockMutex(accessMutex);
   return result;
+}
+
+// Writes the config if triggered
+void ConfigStore::writeConfig() {
+
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+
+  // Do an endless loop
+  while (1) {
+
+    // Wait for an update trigger
+    core->getThread()->waitForSignal(writeConfigSignal);
+
+    // Write the configuration
+    core->getThread()->lockMutex(accessMutex);
+    write();
+    core->getThread()->unlockMutex(accessMutex);
+
+    // Shall we quit?
+    if (quitWriteConfigThread)
+      return;
+
+    // Wait a minimum time before writing next
+    core->getThread()->waitForSignal(skipWaitSignal,writeConfigMinWaitTime*1000);
+
+  }
 }
 
 }
