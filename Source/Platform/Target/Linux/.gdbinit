@@ -1,0 +1,2 @@
+handle SIGABRT nostop
+
