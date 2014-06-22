@@ -125,12 +125,11 @@ void ConfigStore::read()
     // Save the XML config
     config=doc;
     hasChanged=true;
-    core->getThread()->issueSignal(writeConfigSignal);
+    write();
 
     // Cleanup
     xmlFreeDoc(doc);
     config=NULL;
-
   }
 
   // Read the config
