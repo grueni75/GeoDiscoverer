@@ -40,8 +40,11 @@ protected:
   // Name of the config file
   std::string configFilepath;
 
-  // Name of the schema file
-  std::string schemaFilepath;
+  // Name of the shipped schema file
+  std::string schemaShippedFilepath;
+
+  // Name of the current schema file
+  std::string schemaCurrentFilepath;
 
   // Width of the value field in config file
   Int configValueWidth;
@@ -71,6 +74,9 @@ protected:
   ThreadInfo *writeConfigThreadInfo;
   bool quitWriteConfigThread;
 
+  // List of user data extracted from old config
+  std::list<std::vector<std::string> > migratedUserConfig;
+
   // Inits the data
   void init();
 
@@ -91,6 +97,12 @@ protected:
 
   // Finds a set of schema nodes at the given path
   std::list<XMLNode> findSchemaNodes(std::string path, std::string extension="");
+
+  // Reads the config with a given schema
+  void read(std::string schemaFilepath, bool recreateConfig);
+
+  // Extracts all schema nodes that hold user-definable values
+  void rememberUserConfig(std::string path, XMLNode nodes);
 
 public:
 
@@ -114,13 +126,13 @@ public:
   void setIntValue(std::string path, std::string name, Int value);
   void setDoubleValue(std::string path, std::string name, double value);
   void setGraphicColorValue(std::string path, GraphicColor value);
-  std::string getStringValue(std::string path, std::string name);
+  std::string getStringValue(std::string path, std::string name, bool innerCall=false);
   Int getIntValue(std::string path, std::string name);
   double getDoubleValue(std::string path, std::string name);
   GraphicColor getGraphicColorValue(std::string path);
 
   // Returns a list of attribute values for a given path and attribute name
-  std::list<std::string> getAttributeValues(std::string path, std::string attributeName);
+  std::list<std::string> getAttributeValues(std::string path, std::string attributeName, bool innerCall=false);
 
   // Lists all elements for the given path
   std::list<std::string> getNodeNames(std::string path);

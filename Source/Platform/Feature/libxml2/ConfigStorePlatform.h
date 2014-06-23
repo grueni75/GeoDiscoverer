@@ -33,6 +33,7 @@ namespace GEODISCOVERER {
 
 typedef xmlDocPtr XMLDocument;
 typedef xmlNodePtr XMLNode;
+typedef xmlAttrPtr XMLAttribute;
 typedef xmlNsPtr XMLNamespace;
 typedef xmlXPathContextPtr XMLXPathContext;
 

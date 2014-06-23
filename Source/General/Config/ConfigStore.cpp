@@ -37,7 +37,8 @@ bool ConfigStore::parserInitialized = false;
 // Constructor
 ConfigStore::ConfigStore() {
   configFilepath=core->getHomePath() + "/config.xml";
-  schemaFilepath=core->getHomePath() + "/config.xsd";
+  schemaShippedFilepath=core->getHomePath() + "/config.shipped.xsd";
+  schemaCurrentFilepath=core->getHomePath() + "/config.current.xsd";
   configValueWidth=40;
   config=NULL;
   schema=NULL;
