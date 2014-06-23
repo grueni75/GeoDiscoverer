@@ -14,7 +14,7 @@
    height="64px"
    id="svg2869"
    version="1.1"
-   inkscape:version="0.47 r22583"
+   inkscape:version="0.48.3.1 r9886"
    sodipodi:docname="createNewTrack.svg"
    inkscape:export-filename="/home/grueni/apps/GeoDiscoverer/Source/Media/createNewTrack.png"
    inkscape:export-xdpi="90"
@@ -617,8 +617,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="10.966867"
-     inkscape:cx="0.57248041"
-     inkscape:cy="37.864867"
+     inkscape:cx="4.7726032"
+     inkscape:cy="30.570167"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:document-units="px"
@@ -627,8 +627,8 @@
      inkscape:guide-bbox="true"
      inkscape:snap-global="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1168"
-     inkscape:window-x="1436"
+     inkscape:window-height="1048"
+     inkscape:window-x="-8"
      inkscape:window-y="-3"
      inkscape:window-maximized="1"
      inkscape:snap-grids="true"
@@ -691,23 +691,11 @@
        sodipodi:nodetypes="cc"
        id="path3320-8"
        d="m 10,32 44,0"
-       style="fill:none;stroke:#ffffff;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+       style="fill:none;stroke:#f88109;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:#f88109;fill-opacity:1;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        d="m 51.01637,32.500001 -33.804112,-10.384236 0,20.76847 33.804112,-10.384234 z"
        id="path2935" />
-    <path
-       sodipodi:type="arc"
-       style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
-       id="path3719"
-       sodipodi:cx="32.5"
-       sodipodi:cy="31.5"
-       sodipodi:rx="2.5"
-       sodipodi:ry="2.5"
-       d="m 35,31.5 a 2.5,2.5 0 1 1 -5,0 2.5,2.5 0 1 1 5,0 z"
-       transform="matrix(1.9553463,0,0,1.9553463,-36.766991,-29.093409)"
-       inkscape:export-xdpi="45"
-       inkscape:export-ydpi="45" />
     <path
        style="fill:none;stroke:#ff001f;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:0.78431374;stroke-dasharray:none"
        d="M 10,10 54,54"
