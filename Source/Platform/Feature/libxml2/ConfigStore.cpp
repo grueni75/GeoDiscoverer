@@ -289,8 +289,45 @@ void ConfigStore::read()
   } else {
 
     // Check if the schemas have changed
-    if ((schemaShippedStat.st_size!=schemaCurrentStat.st_size)||
-        (schemaShippedStat.st_mtim.tv_sec!=schemaCurrentStat.st_mtim.tv_sec)) {
+    bool schemaHasChanged=false;
+    if (schemaShippedStat.st_size!=schemaCurrentStat.st_size) {
+      schemaHasChanged=true;
+    } else {
+      FILE *in1=fopen(schemaShippedFilepath.c_str(),"r");
+      FILE *in2=fopen(schemaCurrentFilepath.c_str(),"r");
+      if ((in1==NULL)||(in2==NULL)) {
+        FATAL("can not read shipped or current schema",NULL);
+        core->getThread()->unlockMutex(accessMutex);
+        return;
+      }
+      UByte *buf1, *buf2;
+      const Int bufSize=16384;
+      buf1=(UByte*)malloc(bufSize);
+      buf2=(UByte*)malloc(bufSize);
+      if ((buf1==NULL)||(buf2==NULL)) {
+        FATAL("can not create buffers",NULL);
+        core->getThread()->unlockMutex(accessMutex);
+        return;
+      }
+      while (!feof(in1)) {
+        Int readBytes1 = fread(buf1,1,bufSize,in1);
+        Int readBytes2 = fread(buf2,1,bufSize,in2);
+        if (readBytes1!=readBytes2) {
+          schemaHasChanged=true;
+          break;
+        }
+        if (memcmp(buf1,buf2,readBytes1)!=0) {
+          schemaHasChanged=true;
+          break;
+        }
+      }
+      if (!feof(in2)) {
+        schemaHasChanged=true;
+      }
+      free(buf1);
+      free(buf2);
+    }
+    if (schemaHasChanged) {
 
       // Copy all user config values from the old config
       INFO("upgrading schema while keeping all user configuration",NULL);
@@ -312,9 +349,6 @@ void ConfigStore::read()
     std::ifstream src(schemaShippedFilepath.c_str(), std::ios::binary);
     std::ofstream dst(schemaCurrentFilepath.c_str(), std::ios::binary);
     dst << src.rdbuf();
-    struct utimbuf times;
-    times.modtime=schemaShippedStat.st_mtim.tv_sec;
-    utime(schemaCurrentFilepath.c_str(), &times);
   }
 
   // Read the config
