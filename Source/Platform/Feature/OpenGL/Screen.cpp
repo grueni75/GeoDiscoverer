@@ -452,8 +452,10 @@ void Screen::destroyBufferInfo(GraphicBufferInfo buffer) {
 }
 
 // If set to one, the screen is not turned off
-void Screen::setWakeLock(bool state) {
-  core->getConfigStore()->setIntValue("General","wakeLock",state);
+void Screen::setWakeLock(bool state, bool persistent) {
+  if (persistent)
+    core->getConfigStore()->setIntValue("General","wakeLock",state);
+  wakeLock=state;
 }
 
 // Frees any internal textures or buffers

@@ -171,6 +171,9 @@ bool MapSourceCalibratedPictures::init()
   // Could the cache not be loaded?
   if (!cacheRetrieved) {
 
+    // Prevent that phone switches off
+    core->getScreen()->setWakeLock(true,false);
+
     // Create a new progress dialog if required
     std::string title="Collecting files of map " + std::string(folder);
     DialogKey dialog=core->getDialog()->createProgress(title,0);
@@ -325,6 +328,9 @@ bool MapSourceCalibratedPictures::init()
 
     // Close progress
     core->getDialog()->closeProgress(dialog);
+
+    // Reset wakelock
+    core->getScreen()->setWakeLock(core->getConfigStore()->getIntValue("General","wakeLock"),false);
   }
 
   //DEBUG("centerPosition.lng=%e centerPosition.lat=%e",centerPosition->getLng(),centerPosition->getLat());

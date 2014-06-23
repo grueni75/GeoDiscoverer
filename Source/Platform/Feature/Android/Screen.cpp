@@ -25,10 +25,11 @@
 namespace GEODISCOVERER {
 
 // If set to one, the screen is not turned off
-void Screen::setWakeLock(int state) {
+void Screen::setWakeLock(bool state, bool persistent) {
   std::stringstream out;
   wakeLock=state;
-  core->getConfigStore()->setIntValue("General","wakeLock",state);
+  if (persistent)
+    core->getConfigStore()->setIntValue("General","wakeLock",state);
   out << "updateWakeLock()";
   GDApp_executeAppCommand(out.str().c_str());
   if (state) {
