@@ -113,7 +113,7 @@ public class ViewMap extends GDActivity {
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
       progressDialog.setMessage(progressMessage);    
       progressDialog.setMax(progressMax);
-      progressDialog.setCancelable(true);
+      progressDialog.setCancelable(false);
       progressDialog.show();
     }
     progressDialog.setMessage(progressMessage);    
