@@ -24,6 +24,9 @@
 
 namespace GEODISCOVERER {
 
+// Holds all attributes extracted from the gds file
+std::list<std::vector<std::string> > MapSource::gdsElements;
+
 MapSource::MapSource() {
   folder=core->getConfigStore()->getStringValue("Map","folder");
   neighborPixelTolerance=core->getConfigStore()->getDoubleValue("Map","neighborPixelTolerance");
@@ -290,13 +293,65 @@ void MapSource::closeProgress() {
 // Creates a new map source object of the correct type
 MapSource *MapSource::newMapSource() {
 
-  std::string infoPath = core->getHomePath() + "/Map/" + core->getConfigStore()->getStringValue("Map","folder") + "/info.gds";
+  std::string folderPath = core->getHomePath() + "/Map/" + core->getConfigStore()->getStringValue("Map","folder");
+  std::string infoPath = folderPath + "/info.gds";
+
+  // Check if the folder exists
+  struct stat s;
+  int err = stat(folderPath.c_str(), &s);
+  if ((err!=0)||(!S_ISDIR(s.st_mode))) {
+    ERROR("map folder <%s> does not exist",NULL);
+    return NULL;
+  }
 
   // If the info.gds file does not exist, it is an offline source
   if (access(infoPath.c_str(),F_OK)) {
-    return new MapSourceCalibratedPictures();
+
+    // Check if tiles archive exists
+    std::string mapArchivePath = folderPath + "/tiles.gda";
+    if (access(mapArchivePath.c_str(),F_OK)) {
+      ERROR("map folder <%s> does not contain a tiles.gda file",NULL);
+      return NULL;
+    } else {
+      return new MapSourceCalibratedPictures(mapArchivePath);
+    }
+
   } else {
-    return new MapSourceMercatorTiles();
+
+    // Read in info.gds to find out type of source
+    readGDSInfo(infoPath);
+
+    // Find out the kind of source
+    std::string type = "tileServer";
+    std::string mapArchivePath;
+    bool mapArchivePathFound = false;
+    for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
+      std::vector<std::string> element = *i;
+      if (element[0]=="type") {
+        type = element[1];
+      }
+      if (element[0]=="mapArchivePath") {
+        mapArchivePath = element[1];
+        mapArchivePathFound = true;
+      }
+    }
+
+    // Create the correct source
+    if (type=="tileServer") {
+      return new MapSourceMercatorTiles();
+    }
+    if (type=="externalMapArchive") {
+      if (!mapArchivePathFound) {
+        ERROR("map source file <%s> does not contain a mapArchivePath element",infoPath.c_str());
+        return NULL;
+      }
+      if (access(mapArchivePath.c_str(),F_OK)) {
+        ERROR("external map archive <%s> referenced in <%s> does not exist",mapArchivePath.c_str(),infoPath.c_str());
+        return NULL;
+      } else {
+        return new MapSourceCalibratedPictures(mapArchivePath);
+      }
+    }
   }
 }
 

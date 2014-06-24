@@ -30,6 +30,9 @@ class MapSourceCalibratedPictures  : public MapSource {
 
 protected:
 
+  // Path to the map archive
+  std::string mapArchivePath;
+
   // Memory that holds all the sub objects if retrieve was used
   char *cacheData;
 
@@ -45,7 +48,7 @@ protected:
 public:
 
   // Constructurs and destructor
-  MapSourceCalibratedPictures();
+  MapSourceCalibratedPictures(std::string mapArchivePath);
   virtual ~MapSourceCalibratedPictures();
 
   // Operators

@@ -54,4 +54,7 @@
 <string name="address_dialog_message">Please note: The address must be entered in a single line.</string>
 <string name="device_admin_description">Allows Geo Discoverer to turn off the screen by locking it.</string>
 <string name="device_admin_not_enabled">Screen can not be locked: Please allow GeoDiscoverer to act as a device admin in the system settings.</string>
+<string name="replace_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;? There exists already a map folder that will be replaced.</string>
+<string name="create_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;?</string>
+<string name="cannot_create_map_folder">Map folder &lt;%1$s&gt; could not be created!</string>
 </resources>

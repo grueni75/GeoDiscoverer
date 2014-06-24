@@ -69,6 +69,7 @@ bool MapDownloader::init() {
   ZipArchive *mapArchive;
 
   // Merge all tiles from the previous session
+  core->getScreen()->setWakeLock(true,false);
   std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives();
   mapArchive=mapArchives->front();
   std::string title="Merging tiles from last session with map " + mapSource->getFolder();
@@ -85,7 +86,7 @@ bool MapDownloader::init() {
     Int nr;
 
     // Copy files if this is a valid archive
-    if (sscanf(dp->d_name,"tiles%d.zip",&nr)==1) {
+    if (sscanf(dp->d_name,"tiles%d.gda",&nr)==1) {
       ZipArchive *archive = new ZipArchive(mapPath,dp->d_name);
       if ((archive)&&(archive->init())) {
         for (Int index=0;index<=archive->getEntryCount();index++) {
@@ -113,6 +114,7 @@ bool MapDownloader::init() {
   closedir(dfd);
   core->getDialog()->closeProgress(dialog);
   mapSource->unlockMapArchives();
+  core->getScreen()->setWakeLock(core->getConfigStore()->getIntValue("General","wakeLock"),false);
 
   return true;
 }
@@ -274,12 +276,12 @@ void MapDownloader::downloadMapImages() {
                 ZipArchive *mapArchive=mapArchives->back();
                 if (mapArchive->getUnchangedSize()>maxMapArchiveSize) {
                   std::stringstream newFilename;
-                  if (mapArchive->getArchiveName()=="tiles.zip")
-                    newFilename << "tiles2.zip";
+                  if (mapArchive->getArchiveName()=="tiles.gda")
+                    newFilename << "tiles2.gda";
                   else {
                     Int nr;
-                    sscanf(mapArchive->getArchiveName().c_str(),"tiles%d.zip",&nr);
-                    newFilename << "tiles" << nr+1 << ".zip";
+                    sscanf(mapArchive->getArchiveName().c_str(),"tiles%d.gda",&nr);
+                    newFilename << "tiles" << nr+1 << ".gda";
                   }
                   mapArchive=new ZipArchive(mapArchive->getArchiveFolder(),newFilename.str());
                   if ((mapArchive==NULL)||(!mapArchive->init()))

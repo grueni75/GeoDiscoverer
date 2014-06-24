@@ -26,10 +26,10 @@
 namespace GEODISCOVERER {
 
 // Returns the text contained in a xml node
-std::string MapSourceMercatorTiles::getNodeText(XMLNode node)
+std::string MapSource::getNodeText(XMLNode node)
 {
   xmlNodePtr n;
-  for (n = node->children; n; n = n->next) {
+  for (n = node; n; n = n->next) {
     std::string name=std::string((char*)n->name);
     if (name=="text") {
       return std::string((char*)n->content);
@@ -38,8 +38,39 @@ std::string MapSourceMercatorTiles::getNodeText(XMLNode node)
   return "";
 }
 
+// Reads elements from the GDS XML structure
+bool MapSource::readGDSInfo(XMLNode startNode, std::vector<std::string> path) {
+  bool result=false;
+  for (XMLNode n = startNode; n; n = n->next) {
+    if (n->type == XML_ELEMENT_NODE) {
+      std::string name=std::string((char*)n->name);
+      if (n->children) {
+        std::vector<std::string> newPath = path;
+        newPath.push_back(name);
+        if (readGDSInfo(n->children,newPath)) {
+          result=true;
+          if (gdsElements.back().size()!=newPath.size()+1) {
+            newPath[newPath.size()-1]="/"+name;
+            gdsElements.push_back(newPath);
+          }
+        }
+      }
+    }
+    if (n->type == XML_TEXT_NODE) {
+      std::vector<std::string> element;
+      for (Int i=0;i<path.size();i++)
+        element.push_back(path[i]);
+      std::string value = getNodeText(n);
+      element.push_back(value);
+      gdsElements.push_back(element);
+      result=true;
+    }
+  }
+  return result;
+}
+
 // Reads information about the map
-bool MapSourceMercatorTiles::readGDSInfo()
+bool MapSource::readGDSInfo(std::string infoFilePath)
 {
   xmlDocPtr doc = NULL;
   xmlNodePtr rootNode,gdsNode,n;
@@ -47,10 +78,10 @@ bool MapSourceMercatorTiles::readGDSInfo()
   std::string version;
   bool tileServerFound=false;
   std::string name;
-  std::string infoFilePath=getFolderPath() + "/info.gds";
   bool minZoomLevelFound,maxZoomLevelFound;
   std::stringstream in;
   xmlChar *text;
+  std::vector<std::string> emptyPath;
 
   // Read the XML file
   doc = xmlReadFile(infoFilePath.c_str(), NULL, 0);
@@ -89,75 +120,13 @@ bool MapSourceMercatorTiles::readGDSInfo()
   }
 
   // Loop over the root node to extract the information
-  tileServerFound=false;
-  minZoomLevelFound=false;
-  maxZoomLevelFound=false;
-  for (n = gdsNode; n; n = n->next) {
-    if (n->type == XML_ELEMENT_NODE) {
-      name=std::string((char*)n->name);
-      in.str(getNodeText(n));
-      in.clear();
-      if (name=="TileServer") {
-        std::string serverURL;
-        bool serverURLFound=false;
-        double overlayAlpha;
-        bool overlayAlphaFound=false;
-        for (xmlNodePtr m = n->children; m; m = m->next) {
-          if (m->type == XML_ELEMENT_NODE) {
-            std::string name=std::string((char*)m->name);
-            in.str(getNodeText(m));
-            in.clear();
-            if (name=="serverURL") {
-              serverURL=getNodeText(m);
-              serverURLFound=true;
-            }
-            if (name=="overlayAlpha") {
-              in >> overlayAlpha;
-              overlayAlphaFound=true;
-            }
-          }
-        }
-        if (!serverURLFound) {
-          ERROR("one TileServer element has no serverURL element in <%s>",infoFilePath.c_str());
-          goto cleanup;
-        }
-        if (!overlayAlphaFound) {
-          ERROR("one TileServer element has no overlayAlpha element in <%s>",infoFilePath.c_str());
-          goto cleanup;
-        }
-        mapDownloader->addTileServer(serverURL,overlayAlpha);
-        tileServerFound=true;
-      }
-      if (name=="minZoomLevel") {
-        minZoomLevelFound=true;
-        in >> minZoomLevel;
-      }
-      if (name=="maxZoomLevel") {
-        maxZoomLevelFound=true;
-        in >> maxZoomLevel;
-      }
-    }
-  }
-  if (!tileServerFound) {
-    ERROR("no tileServer element found in <%s>",infoFilePath.c_str());
-    goto cleanup;
-  }
-  if (!minZoomLevelFound) {
-    ERROR("minZoomLevel not found in <%s>",infoFilePath.c_str());
-    goto cleanup;
-  }
-  if (!maxZoomLevelFound) {
-    ERROR("maxZoomLevel not found in <%s>",infoFilePath.c_str());
-    goto cleanup;
-  }
+  readGDSInfo(gdsNode,emptyPath);
   result=true;
 
-cleanup:
-
   // Clean up
+cleanup:
   if (doc)
     xmlFreeDoc(doc);
-  //xmlCleanupParser(); // will be done by config store
 
   return result;
 }

@@ -24,6 +24,7 @@ package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
@@ -535,37 +536,99 @@ public class ViewMap extends GDActivity {
       final File srcFile = new File(srcFilename);
       if (srcFile.exists()) {
 
-        // Ask the user if the file should be copied
-        String dstFilename = app.getHomeDirPath() + "/Route/" + srcFile.getName();
-        final File dstFile = new File(dstFilename);
-        if (!srcFile.equals(dstFile)) {
+        // Route?
+        if (srcFilename.endsWith(".gpx")) {
+        
+          // Ask the user if the file should be copied
+          String dstFilename = app.getHomeDirPath() + "/Route/" + srcFile.getName();
+          final File dstFile = new File(dstFilename);
+          if (!srcFile.equals(dstFile)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getTitle());
+            String message; 
+            if (dstFile.exists())
+              message=getString(R.string.overwrite_route_question);              
+            else
+              message=getString(R.string.copy_route_question);
+            message = String.format(message, srcFile.getName());
+            builder.setMessage(message);              
+            builder.setCancelable(true);
+            builder.setPositiveButton(R.string.yes,
+              new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                  
+                  // Copy file
+                  ProgressDialog progressDialog = new ProgressDialog(ViewMap.this);
+                  progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                  String message = getString(R.string.copying_file);
+                  message = String.format(message, srcFile.getName());
+                  progressDialog.setMessage(message);
+                  progressDialog.setCancelable(false);
+                  progressDialog.show();
+                  try {
+                    GDApplication.copyFile(srcFile.getPath(), dstFile.getPath());
+                  }
+                  catch (IOException e) {
+                    errorDialog(String.format(getString(R.string.cannot_copy_file), srcFile.getPath(), dstFile.getPath()));
+                  }
+                  progressDialog.dismiss();
+                  
+                  // Restart the core
+                  busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
+                  Message m=Message.obtain(coreObject.messageHandler);
+                  m.what = GDCore.RESTART_CORE;
+                  Bundle b = new Bundle();
+                  b.putBoolean("resetConfig", false);
+                  m.setData(b);    
+                  coreObject.messageHandler.sendMessage(m);
+                }
+              });
+            builder.setNegativeButton(R.string.no, null);
+            builder.setIcon(android.R.drawable.ic_dialog_info);
+            AlertDialog alert = builder.create();
+            alert.show();
+          }
+        }
+        
+        // Map archive?
+        if (srcFilename.endsWith(".gda")) {
+        
+          // Ask the user if a new map shall be created based on the archive
+          String mapFolderFilename = app.getHomeDirPath() + "/Map/" + srcFile.getName();
+          mapFolderFilename = mapFolderFilename.substring(0, mapFolderFilename.lastIndexOf('.'));
+          final String mapInfoFilename = mapFolderFilename + "/info.gds";
+          final File mapFolder = new File(mapFolderFilename);
           AlertDialog.Builder builder = new AlertDialog.Builder(this);
           builder.setTitle(getTitle());
           String message; 
-          if (dstFile.exists())
-            message=getString(R.string.overwrite_route_question);              
+          if (mapFolder.exists())
+            message=getString(R.string.replace_map_folder_question,mapFolder.getName(),srcFile);              
           else
-            message=getString(R.string.copy_route_question);
-          message = String.format(message, srcFile.getName());
+            message=getString(R.string.create_map_folder_question,mapFolder.getName(),srcFile);
           builder.setMessage(message);              
           builder.setCancelable(true);
           builder.setPositiveButton(R.string.yes,
             new DialogInterface.OnClickListener() {
               public void onClick(DialogInterface dialog, int which) {
-                ProgressDialog progressDialog = new ProgressDialog(ViewMap.this);
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                String message = getString(R.string.copying_file);
-                message = String.format(message, srcFile.getName());
-                progressDialog.setMessage(message);
-                progressDialog.setCancelable(false);
-                progressDialog.show();
+                
+                // Create the map folder
                 try {
-                  GDApplication.copyFile(srcFile.getPath(), dstFile.getPath());
+                  mapFolder.mkdir();
+                  File cache = new File(mapFolder.getPath() + "/cache.bin");
+                  cache.delete();
+                  PrintWriter writer = new PrintWriter(mapInfoFilename,"UTF-8");
+                  writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                  writer.println("<GDS version=\"1.0\">");
+                  writer.println("  <type>externalMapArchive</type>");
+                  writer.println(String.format("  <mapArchivePath>%s</mapArchivePath>",srcFile.getAbsolutePath()));
+                  writer.println("</GDS>");
+                  writer.close();
                 }
-                catch (IOException e) {
-                  errorDialog(String.format(getString(R.string.cannot_copy_file), srcFile.getPath(), dstFile.getPath()));
+                catch(IOException e) {
+                  errorDialog(String.format(getString(R.string.cannot_create_map_folder), mapFolder.getName()));
                 }
-                progressDialog.dismiss();
+                
+                // Restart the core
                 busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
                 Message m=Message.obtain(coreObject.messageHandler);
                 m.what = GDCore.RESTART_CORE;
@@ -580,6 +643,7 @@ public class ViewMap extends GDActivity {
           AlertDialog alert = builder.create();
           alert.show();
         }
+
       } else {
         errorDialog(getString(R.string.file_does_not_exist));
       }

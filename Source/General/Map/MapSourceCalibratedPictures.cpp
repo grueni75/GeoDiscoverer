@@ -24,9 +24,10 @@
 
 namespace GEODISCOVERER {
 
-MapSourceCalibratedPictures::MapSourceCalibratedPictures()  : MapSource() {
+MapSourceCalibratedPictures::MapSourceCalibratedPictures(std::string mapArchivePath)  : MapSource() {
   type=MapSourceTypeCalibratedPictures;
   cacheData=NULL;
+  this->mapArchivePath=mapArchivePath;
 }
 
 MapSourceCalibratedPictures::~MapSourceCalibratedPictures() {
@@ -102,6 +103,9 @@ bool MapSourceCalibratedPictures::init()
   std::string mapPath=getFolderPath();
   std::string cacheFilepath=mapPath+"/cache.bin";
   ZipArchive *mapArchive;
+  std::string mapArchiveDir;
+  std::string mapArchiveFile;
+  char *mapArchivePathCStr = NULL;
 
   // Check if we can use the cache
   cacheRetrieved=false;
@@ -155,13 +159,18 @@ bool MapSourceCalibratedPictures::init()
 
   // Open the zip archive that contains the maps
   lockMapArchives();
-  if (!(mapArchive=new ZipArchive(mapPath,"tiles.zip"))) {
+  mapArchivePathCStr=strdup(mapArchivePath.c_str());
+  mapArchiveDir=std::string(dirname(mapArchivePathCStr));
+  strcpy(mapArchivePathCStr,mapArchivePath.c_str());
+  mapArchiveFile=std::string(basename(mapArchivePathCStr));
+  free(mapArchivePathCStr);
+  if (!(mapArchive=new ZipArchive(mapArchiveDir,mapArchiveFile))) {
     FATAL("can not create zip archive object",NULL);
     result=false;
     goto cleanup;
   }
   if (!mapArchive->init()) {
-    ERROR("can not open tiles.zip in map directory <%s>",folder.c_str());
+    ERROR("can not open tiles.gda in map directory <%s>",folder.c_str());
     result=false;
     goto cleanup;
   }
@@ -455,7 +464,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Check if the class has changed
   Int size=sizeof(MapSourceCalibratedPictures);
 #ifdef TARGET_LINUX
-  if (size!=280) {
+  if (size!=288) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return false;
   }

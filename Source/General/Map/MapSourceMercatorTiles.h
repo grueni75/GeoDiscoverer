@@ -42,14 +42,14 @@ protected:
   // Fetches the map tile in which the given position lies from disk or server
   MapTile *fetchMapTile(MapPosition pos, Int zoomLevel);
 
-  // Returns the text contained in a xml node
-  std::string getNodeText(XMLNode node);
-
   // Finds the best matching zoom level
   Int findBestMatchingZoomLevel(MapPosition pos);
 
   // Creates the calibrator for the given bounds
   MapCalibrator *createMapCalibrator(double latNorth, double latSouth, double lngWest, double lngEast);
+
+  // Reads information about the map
+  bool parseGDSInfo();
 
 public:
 
@@ -68,9 +68,6 @@ public:
 
   // Returns the map tile that lies in a given area
   virtual MapTile *findMapTileByGeographicArea(MapArea area, MapTile *preferredNeigbor, MapContainer* &usedMapContainer);
-
-  // Reads information about the map
-  bool readGDSInfo();
 
   // Performs maintenance (e.g., recreate degraded search tree)
   virtual void maintenance();
