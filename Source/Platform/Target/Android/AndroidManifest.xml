@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.untouchableapps.android.geodiscoverer"
       android:versionCode="5"
-      android:versionName="20140623">
+      android:versionName="20140624">
   	<uses-feature android:glEsVersion="0x00010001"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
@@ -18,17 +18,29 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>  
+            <!--  GPX files -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/html"/>
-                <data android:mimeType="application/xml"/>
-                <data android:mimeType="application/x-gpx"/>
-                <data android:mimeType="application/x-gpx+xml"/>
-                <data android:mimeType="x-cache/x-gpx"/>
-                <data android:mimeType="x-cache/x-gpx+xml"/>
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:mimeType="*/*" /> 
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.gpx" />
           	</intent-filter>
+            <!--  Map archive files -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:mimeType="*/*" /> 
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.gda" />
+            </intent-filter>
+            <!-- Text sent by other apps (e.g., addresses) -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
