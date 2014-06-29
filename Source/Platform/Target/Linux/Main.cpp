@@ -78,7 +78,7 @@ void *debugThread(void *args) {
 
   // Set an example position
   //GEODISCOVERER::core->getCommander()->execute("locationChanged(gps,1289865600000,6.7766815000000005,51.23516803333333,1,100.0,1,1,200.0,1,4.16,1,400.0)");
-  GEODISCOVERER::core->getCommander()->execute("locationChanged(gps,1289865600000,6.676667000,51.26940000,1,100.0,1,1,0.0,1,4.16,1,400.0)");
+  GEODISCOVERER::core->getCommander()->execute("locationChanged(gps,1289865600000,6.81552,51.238585,1,100.0,1,1,0.0,1,4.16,1,400.0)");
 
   // Set an example bearing
   GEODISCOVERER::core->getCommander()->execute("compassBearingChanged(345.3542)");
