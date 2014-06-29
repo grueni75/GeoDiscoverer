@@ -26,7 +26,19 @@ namespace GEODISCOVERER {
 
 // Sets the priority of a thread
 void Thread::setThreadPriority(ThreadPriority priority) {
-
+  switch(priority) {
+    case threadPriorityForeground:
+      nice(0);
+      break;
+    case threadPriorityBackgroundHigh:
+      nice(1);
+      break;
+    case threadPriorityBackgroundLow:
+      nice(2);
+      break;
+    default:
+      FATAL("unsupported thread priority",NULL);
+  }
 }
 
 }

@@ -297,7 +297,6 @@ void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
         minDistance=d;
         nearestPath=s->getPath();
       }
-      core->interruptAllowedHere();  // onMapChange may only be called by the map update thread!
     }
     s->getPath()->unlockAccess();
   }

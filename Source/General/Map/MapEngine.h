@@ -99,6 +99,7 @@ public:
   {
       return updateInProgress;
   }
+
   void setAbortUpdate()
   {
       if (updateInProgress) {

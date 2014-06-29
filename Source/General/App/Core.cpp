@@ -58,7 +58,6 @@ Core::Core(std::string homePath, Int screenDPI) {
   this->lateInitThreadInfo=NULL;
   this->mapUpdateThreadInfo=NULL;
   this->mapUpdateInterruptMutex=NULL;
-  this->screenUpdateInterruptMutex=NULL;
   this->mapUpdateStartSignal=NULL;
   this->mapUpdateTileTextureProcessedSignal=NULL;
   this->isInitializedMutex=NULL;
@@ -143,9 +142,6 @@ Core::~Core() {
   // Free mutexes and signals
   if (maintenanceMutex) {
     thread->destroyMutex(maintenanceMutex);
-  }
-  if (screenUpdateInterruptMutex) {
-    thread->destroyMutex(screenUpdateInterruptMutex);
   }
   if (mapUpdateInterruptMutex) {
     thread->destroyMutex(mapUpdateInterruptMutex);
@@ -331,9 +327,6 @@ bool Core::init() {
 void Core::updateScreen(bool forceRedraw) {
 
   bool wakeupMapUpdateThread=false;
-
-  // Interrupt the map update thread
-  //interruptMapUpdate();
 
   // Allow texture allocation
   screen->setAllowAllocation(true);

@@ -108,9 +108,6 @@ protected:
   // Used to interrupt the map update thread
   ThreadMutexInfo *mapUpdateInterruptMutex;
 
-  // Used to interrupt the screen update thread
-  ThreadMutexInfo *screenUpdateInterruptMutex;
-
   // Used to trigger the map update thread
   ThreadSignalInfo *mapUpdateStartSignal;
   ThreadSignalInfo *mapUpdateTileTextureProcessedSignal;
