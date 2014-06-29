@@ -53,8 +53,29 @@ void Storage::storeInt(std::ofstream *ofs, Int value) {
 }
 
 // Writes a piece of memory into file
-void Storage::storeMem(std::ofstream *ofs, char *mem, Int size) {
+void Storage::storeMem(std::ofstream *ofs, char *mem, Int size, bool wordAligned) {
+  if (wordAligned) {
+    uintptr_t zeros = 0;
+    uintptr_t pos = ofs->tellp();
+    if (pos==-1) {
+      FATAL("can not determine position in output stream",NULL);
+    }
+    UInt padding = sizeof(mem)-pos%sizeof(mem);
+    if (padding<sizeof(mem)) {
+      ofs->write((char*)&zeros,padding);
+    }
+  }
   ofs->write(mem,size);
+}
+
+// Skips any padding added by storeMem in the given pointer
+void Storage::skipPadding(char *& mem, Int & memSize) {
+
+  uintptr_t padding = sizeof(mem)-(((uintptr_t)mem)%sizeof(mem));
+  if (padding<sizeof(mem)) {
+    mem+=padding;
+    memSize-=padding;
+  }
 }
 
 // Read integer from file

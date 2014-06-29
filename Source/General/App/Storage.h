@@ -68,7 +68,10 @@ public:
   static void retrieveTimestampInMilliseconds(char *&cacheData, Int &cacheSize, TimestampInMilliseconds &value);
 
   // Writes a piece of memory into file
-  static void storeMem(std::ofstream *ofs, char *mem, Int size);
+  static void storeMem(std::ofstream *ofs, char *mem, Int size, bool wordAligned);
+
+  // Skips any padding added by storeMem in the given pointer
+  static void skipPadding(char *& mem, Int & memSize);
 
 };
 

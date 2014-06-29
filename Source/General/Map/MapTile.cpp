@@ -214,7 +214,7 @@ void MapTile::store(std::ofstream *ofs) {
   MapTile *rightChild=this->rightChild;
   this->leftChild=NULL;
   this->rightChild=NULL;
-  Storage::storeMem(ofs,(char*)this,sizeof(MapTile));
+  Storage::storeMem(ofs,(char*)this,sizeof(MapTile),true);
   this->leftChild=leftChild;
   this->rightChild=rightChild;
 }
@@ -243,6 +243,7 @@ MapTile *MapTile::retrieve(char *&cacheData, Int &cacheSize, MapContainer *paren
   //PROFILE_ADD("sanity check");
 
   // Create a new object
+  Storage::skipPadding(cacheData,cacheSize);
   cacheSize-=sizeof(MapTile);
   if (cacheSize<0) {
     DEBUG("can not create map tile object",NULL);

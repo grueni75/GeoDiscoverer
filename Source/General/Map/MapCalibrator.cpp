@@ -115,7 +115,7 @@ void MapCalibrator::store(std::ofstream *ofs) {
   Storage::storeInt(ofs,size);
 
   // Store all relevant fields
-  Storage::storeMem(ofs,(char*)this,size);
+  Storage::storeMem(ofs,(char*)this,size,true);
   if (args==NULL)
     Storage::storeString(ofs,"");
   else
@@ -183,6 +183,7 @@ MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize) {
   //PROFILE_ADD("sanity check");
 
   // Create a new map container object
+  Storage::skipPadding(cacheData,cacheSize);
   MapCalibrator *mapCalibrator=MapCalibrator::newMapCalibrator(type,cacheData,cacheSize);
   //PROFILE_ADD("object creation");
 

@@ -157,7 +157,7 @@ void MapPosition::store(std::ofstream *ofs)
   // Store all relevant fields
   MapTile *mapTile=this->mapTile;
   this->mapTile=NULL;
-  Storage::storeMem(ofs,(char*)this,sizeof(MapPosition));
+  Storage::storeMem(ofs,(char*)this,sizeof(MapPosition),true);
   this->mapTile=mapTile;
   Storage::storeString(ofs, source);
 }
@@ -185,6 +185,7 @@ MapPosition *MapPosition::retrieve(char *& cacheData, Int & cacheSize)
   //PROFILE_ADD("sanity check");
 
   // Create a new map position object
+  Storage::skipPadding(cacheData,cacheSize);
   cacheSize-=sizeof(MapPosition);
   if (cacheSize<0) {
     DEBUG("can not create map position object",NULL);

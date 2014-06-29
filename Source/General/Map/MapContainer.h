@@ -101,7 +101,7 @@ protected:
   void storeSearchTree(std::ofstream *ofs, MapTile *node);
 
   // Reads the contents of the search tree from a binary file
-  static MapTile *retrieveSearchTree(MapContainer *mapContainer, Int &nodeNumber, char *&cacheData, Int &cacheSize);
+  static MapTile *retrieveSearchTree(MapContainer *mapContainer, Int &nodeNumber, char *&cacheData, Int &cacheSize, bool &abortRetrieve);
 
 public:
 

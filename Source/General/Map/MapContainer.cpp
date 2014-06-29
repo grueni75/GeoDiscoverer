@@ -712,7 +712,7 @@ void MapContainer::store(std::ofstream *ofs) {
   this->leftChild=NULL;
   this->rightChild=NULL;
   this->searchTree=NULL;
-  Storage::storeMem(ofs,(char*)this,sizeof(MapContainer));
+  Storage::storeMem(ofs,(char*)this,sizeof(MapContainer),true);
   this->leftChild=leftChild;
   this->rightChild=rightChild;
   this->searchTree=searchTree;
@@ -735,12 +735,14 @@ void MapContainer::store(std::ofstream *ofs) {
 }
 
 // Reads the contents of the search tree from a binary file
-MapTile *MapContainer::retrieveSearchTree(MapContainer *mapContainer, Int &nodeNumber, char *&cacheData, Int &cacheSize) {
+MapTile *MapContainer::retrieveSearchTree(MapContainer *mapContainer, Int &nodeNumber, char *&cacheData, Int &cacheSize, bool &abortRetrieve) {
 
   // Read the current node
   MapTile *node=MapTile::retrieve(cacheData,cacheSize,mapContainer);
-  if (node==NULL)
+  if (node==NULL) {
+    abortRetrieve=true;
     return NULL;
+  }
   mapContainer->mapTiles[nodeNumber]=node;
   nodeNumber++;
 
@@ -754,14 +756,18 @@ MapTile *MapContainer::retrieveSearchTree(MapContainer *mapContainer, Int &nodeN
   bool hasLeftNode;
   Storage::retrieveBool(cacheData,cacheSize,hasLeftNode);
   if (hasLeftNode) {
-    node->setLeftChild(retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize));
+    node->setLeftChild(retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize,abortRetrieve));
+    if (abortRetrieve)
+      return NULL;
   }
 
   // Read the right node
   bool hasRightNode;
   Storage::retrieveBool(cacheData,cacheSize,hasRightNode);
   if (hasRightNode) {
-    node->setRightChild(retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize));
+    node->setRightChild(retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize,abortRetrieve));
+    if (abortRetrieve)
+      return NULL;
   }
 
   // Return the node
@@ -793,6 +799,7 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize) {
 
   // Create a new map container object
   //PROFILE_ADD("map container init");
+  Storage::skipPadding(cacheData,cacheSize);
   cacheSize-=sizeof(MapContainer);
   if (cacheSize<0) {
     DEBUG("can not create map container object",NULL);
@@ -824,8 +831,9 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize) {
   Storage::retrieveBool(cacheData,cacheSize,hasSearchTree);
   if (hasSearchTree) {
     Int nodeNumber=0;
-    mapContainer->searchTree=retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize);
-    if ((mapContainer->searchTree==NULL)||(core->getQuitCore())) {
+    bool abortRetrieve=false;
+    mapContainer->searchTree=retrieveSearchTree(mapContainer,nodeNumber,cacheData,cacheSize,abortRetrieve);
+    if ((mapContainer->searchTree==NULL)||(abortRetrieve)||(core->getQuitCore())) {
       mapContainer->mapTiles.resize(nodeNumber);
       MapContainer::destruct(mapContainer);
       return NULL;
