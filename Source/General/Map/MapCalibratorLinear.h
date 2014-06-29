@@ -26,17 +26,20 @@
 namespace GEODISCOVERER {
 
 class MapCalibratorLinear : public MapCalibrator {
+
+protected:
+
+  // Convert the geographic longitude / latitude coordinates to cartesian X / Y coordinates
+  void convertGeographicToCartesian(MapPosition &pos);
+
+  // Convert the cartesian X / Y coordinates to geographic longitude / latitude coordinates
+  void convertCartesianToGeographic(MapPosition &pos);
+
 public:
 
   // Constructors and destructor
   MapCalibratorLinear(bool doNotDelete=false);
   virtual ~MapCalibratorLinear();
-
-  // Updates the geographic coordinates (longitude and latitude) from the given picture coordinates
-  virtual void setGeographicCoordinates(MapPosition &pos);
-
-  // Updates the picture coordinates from the given geographic coordinates
-  virtual bool setPictureCoordinates(MapPosition &pos);
 
 };
 

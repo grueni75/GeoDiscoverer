@@ -138,11 +138,12 @@ Int MapSourceMercatorTiles::findBestMatchingZoomLevel(MapPosition pos) {
 
 // Creates the calibrator for the given bounds
 MapCalibrator *MapSourceMercatorTiles::createMapCalibrator(double latNorth, double latSouth, double lngWest, double lngEast) {
-  MapCalibrator *mapCalibrator=MapCalibrator::newMapCalibrator(MapCalibratorTypeMercator);
+  MapCalibrator *mapCalibrator=MapCalibrator::newMapCalibrator(MapCalibratorTypeSphericalNormalMercator);
   if (!mapCalibrator) {
     FATAL("can not create map calibrator",NULL);
     return NULL;
   }
+  mapCalibrator->init();
   MapPosition t;
   t.setX(0);
   t.setY(0);

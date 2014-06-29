@@ -1,5 +1,162 @@
 LOCAL_PATH := $(call my-dir)
 
+# Build the libproj4 library
+include $(CLEAR_VARS)
+LOCAL_MODULE := gdproj4
+MY_LIBPROJ4_PATH := proj-4.8.0
+LOCAL_CFLAGS := -DHAVE_CONFIG_H -I$(MY_LIBPROJ4_PATH)/src -DMUTEX_pthread -g -O2
+LOCAL_LDLIBS := 
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_aeqd.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_gnom.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_laea.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_mod_ster.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_nsper.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_nzmg.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_ortho.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_stere.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_sterea.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_aea.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_bipc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_bonne.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_eqdc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_isea.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_imw_p.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_krovak.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_lcc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_poly.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_rpoly.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_sconics.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/proj_rouss.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_cass.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_cc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_cea.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_eqc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_gall.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_labrd.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_lsat.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_merc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_mill.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_ocea.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_omerc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_somerc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_tcc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_tcea.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_tmerc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_airy.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_aitoff.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_august.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_bacon.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_chamb.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_hammer.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_lagrng.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_larr.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_lask.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_nocol.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_ob_tran.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_oea.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_tpeqd.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_vandg.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_vandg2.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_vandg4.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_wag7.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_lcca.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_geos.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/proj_etmerc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_boggs.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_collg.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_crast.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_denoy.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_eck1.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_eck2.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_eck3.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_eck4.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_eck5.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_fahey.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_fouc_s.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_gins8.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_gstmerc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_gn_sinu.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_goode.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_igh.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_hatano.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_loxim.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_mbt_fps.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_mbtfpp.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_mbtfpq.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_moll.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_nell.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_nell_h.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_putp2.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_putp3.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_putp4p.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_putp5.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_putp6.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_robin.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_sts.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_urm5.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_urmfps.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_wag2.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_wag3.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_wink1.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_wink2.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_latlong.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_geocent.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/aasincos.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/adjlon.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/bch2bps.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/bchgen.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/biveval.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/dmstor.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/mk_cheby.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_auth.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_deriv.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_ell_set.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_ellps.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_errno.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_factors.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_fwd.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_init.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_inv.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_list.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_malloc.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_mlfn.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_msfn.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/proj_mdist.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_open_lib.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_param.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_phi2.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_pr_list.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_qsfn.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_strerrno.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_tsfn.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_units.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_ctx.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_log.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_zpoly1.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/rtodms.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/vector1.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_release.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_gauss.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_healpix.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_natearth.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/nad_cvt.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/nad_init.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/nad_intr.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/emess.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_apply_gridshift.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_datums.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_datum_set.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_transform.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/geocent.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_utils.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_gridinfo.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_gridlist.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/jniproj.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_mutex.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_initcache.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/pj_apply_vgridshift.c)
+include $(BUILD_SHARED_LIBRARY)
+
 # Build the libcurl library
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdcurl
@@ -106,7 +263,7 @@ LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/curl_ntlm.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/curl_ntlm_wb.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/curl_ntlm_core.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/curl_ntlm_msgs.c)
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 # Build the libxml2 library
 include $(CLEAR_VARS)
@@ -157,7 +314,7 @@ LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,pattern.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xmlsave.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xmlmodule.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,schematron.c)
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 # Build the jpeg library
 include $(CLEAR_VARS)
@@ -211,7 +368,7 @@ LOCAL_SRC_FILES += $(addprefix $(MY_JPEG_PATH)/,jquant2.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_JPEG_PATH)/,jutils.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_JPEG_PATH)/,jmemmgr.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_JPEG_PATH)/,jmemnobs.c)
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 # Build the freetype library
 include $(CLEAR_VARS)
@@ -231,14 +388,14 @@ LOCAL_SRC_FILES += $(addprefix $(MY_FREETYPE_PATH)/,src/autofit/autofit.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_FREETYPE_PATH)/,src/smooth/smooth.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_FREETYPE_PATH)/,src/sfnt/sfnt.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_FREETYPE_PATH)/,src/psnames/psmodule.c)
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 # Build the png library
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdpng
 MY_PNG_PATH := libpng-1.4.4
 LOCAL_CFLAGS :=  -DHAVE_CONFIG_H -I$(MY_PNG_PATH) -DPNG_CONFIGURE_LIBPNG 
-LOCAL_LDLIBS := 
+LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,png.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngset.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngget.c)
@@ -254,14 +411,14 @@ LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngwtran.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngmem.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngerror.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngpread.c)
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 # Build the zip library
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdzip
 MY_ZIP_PATH := libzip-0.10.1/lib
 LOCAL_CFLAGS := -I$(MY_ZIP_PATH) -I$(MY_ZIP_PATH)/.. -DHAVE_CONFIG_H
-LOCAL_LDLIBS := 
+LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_add.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_add_dir.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_close.c)
@@ -334,7 +491,7 @@ LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange_all.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange_archive.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange_data.c)
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 # Build the application core
 include $(CLEAR_VARS)
@@ -349,6 +506,7 @@ MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libfre
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libpng -name '*.cpp')
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libcurl -name '*.cpp')
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libzip -name '*.cpp')
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libproj4 -name '*.cpp')
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/Android -name '*.cpp')
 MY_GD_GENERAL_SRCS += $(shell find $(MY_GD_ROOT)/Source/General -name '*.cpp')
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/POSIX
@@ -359,6 +517,7 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libfreetype2
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libpng
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libcurl
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libzip
+MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libproj4
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/Android
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/App
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Map
@@ -369,9 +528,9 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Widget
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Math
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Config
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Profile
-LOCAL_CFLAGS += $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ilibxml2-2.7.7/include -Ifreetype-2.4.2/include -Ijpeg-8b -Ilibpng-1.4.4 -Icurl-7.24.0/include -Ilibzip-0.10.1/lib -DSRC_ROOT='"$(MY_GD_ABS_ROOT)/Source"' 
-LOCAL_LDLIBS += -lz -dl -llog -lGLESv1_CM
+LOCAL_CFLAGS += $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ilibxml2-2.7.7/include -Ifreetype-2.4.2/include -Ijpeg-8b -Ilibpng-1.4.4 -Icurl-7.24.0/include -Ilibzip-0.10.1/lib -Iproj-4.8.0/src -DSRC_ROOT='"$(MY_GD_ABS_ROOT)/Source"' 
+LOCAL_LDLIBS += -lz -dl -llog -lGLESv1_CM 
 LOCAL_SRC_FILES := GDCore.cpp $(MY_GD_PLATFORM_SRCS) $(MY_GD_GENERAL_SRCS)
-LOCAL_STATIC_LIBRARIES := gdjpeg gdxml gdfreetype gdpng gdcurl gdzip
-LOCAL_SHARED_LIBRARIES := 
+LOCAL_STATIC_LIBRARIES := 
+LOCAL_SHARED_LIBRARIES := gdjpeg gdxml gdfreetype gdpng gdcurl gdzip gdproj4
 include $(BUILD_SHARED_LIBRARY)

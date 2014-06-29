@@ -373,7 +373,8 @@ extern Core *core;
 #include <MapArea.h>
 #include <MapCalibrator.h>
 #include <MapCalibratorLinear.h>
-#include <MapCalibratorMercator.h>
+#include <MapCalibratorSphericalNormalMercator.h>
+#include <MapCalibratorProj4.h>
 #include <MapContainer.h>
 #include <MapContainerTreeNode.h>
 #include <MapCache.h>

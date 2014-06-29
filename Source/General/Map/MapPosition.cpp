@@ -31,6 +31,8 @@ MapPosition::MapPosition(bool doNotDelete) {
   this->doNotDelete=doNotDelete;
   if (!doNotDelete) {
     x=-1; y=-1;
+    cartesianX=-std::numeric_limits<double>::max();
+    cartesianY=std::numeric_limits<double>::max();
     mapTile=NULL;
     lng=0;
     lat=0;
@@ -68,7 +70,9 @@ MapPosition::~MapPosition() {
 // Operators
 bool MapPosition::operator==(const MapPosition &rhs)
 {
-  if ((lng==rhs.getLng())&&(lat==rhs.getLat())&&(x==rhs.getX())&&(y==rhs.getY())&&
+  if ((lng==rhs.getLng())&&(lat==rhs.getLat())&&
+      (x==rhs.getX())&&(y==rhs.getY())&&
+      (cartesianX==rhs.getCartesianX())&&(cartesianY==rhs.getCartesianY())&&
       (mapTile==rhs.getMapTile())&&
       (hasAltitude==rhs.getHasAltitude())&&(altitude==rhs.getAltitude())&&(distance==rhs.getDistance())&&
       (latScale==rhs.getLatScale())&&(lngScale==rhs.getLngScale())&&
@@ -164,6 +168,13 @@ MapPosition *MapPosition::retrieve(char *& cacheData, Int & cacheSize)
   //PROFILE_START;
   // Check if the class has changed
   Int size = sizeof (MapPosition);
+#ifdef TARGET_LINUX
+  if (size!=184) {
+    FATAL("unknown size of object (%d), please adapt class storage",size);
+    return NULL;
+  }
+#endif
+
   // Read the size of the object and check with current size
   size=0;
   Storage::retrieveInt(cacheData,cacheSize,size);

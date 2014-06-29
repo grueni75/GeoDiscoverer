@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : MapCalibratorMercator.h
+// Name        : MapCalibratorSphericalNormalMercator.cpp
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -20,32 +20,28 @@
 //
 //============================================================================
 
-#ifndef MAPCALIBRATORMERCATOR_H_
-#define MAPCALIBRATORMERCATOR_H_
+#include <Core.h>
 
 namespace GEODISCOVERER {
 
-class MapCalibratorMercator : public MapCalibrator {
+MapCalibratorSphericalNormalMercator::MapCalibratorSphericalNormalMercator(bool doNotDelete) : MapCalibrator(doNotDelete) {
+  type=MapCalibratorTypeSphericalNormalMercator;
+}
 
-  // Computes the mercator projection for the given latitude
-  double computeMercatorProjection(double value);
+MapCalibratorSphericalNormalMercator::~MapCalibratorSphericalNormalMercator() {
+}
 
-  // Computes the inverse mercator projection for the given value
-  double computeInverseMercatorProjection(double value);
+// Convert the geographic longitude / latitude coordinates to cartesian X / Y coordinates
+void MapCalibratorSphericalNormalMercator::convertGeographicToCartesian(MapPosition &pos) {
+  pos.setCartesianX(pos.getLng());
+  pos.setCartesianY(log((sin(pos.getLatRad())+1)/cos(pos.getLatRad())));
+}
 
-public:
-
-  // Constructors and destructor
-  MapCalibratorMercator(bool doNotDelete=false);
-  virtual ~MapCalibratorMercator();
-
-  // Updates the geographic coordinates (longitude and latitude) from the given picture coordinates
-  virtual void setGeographicCoordinates(MapPosition &pos);
-
-  // Updates the picture coordinates from the given geographic coordinates
-  virtual bool setPictureCoordinates(MapPosition &pos);
-
-};
+// Convert the cartesian X / Y coordinates to geographic longitude / latitude coordinates
+void MapCalibratorSphericalNormalMercator::convertCartesianToGeographic(MapPosition &pos) {
+  pos.setLng(pos.getCartesianX());
+  double t=pow(M_E,pos.getCartesianY());
+  pos.setLat(FloatingPoint::rad2degree(2.0*atan((t-1)/(t+1))));
+}
 
 } /* namespace GEODISCOVERER */
-#endif /* MAPCALIBRATORMERCATOR_H_ */

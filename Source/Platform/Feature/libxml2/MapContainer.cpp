@@ -61,8 +61,11 @@ void MapContainer::writeCalibrationFile()
     case MapCalibratorTypeLinear:
       mapProjection="linear";
       break;
-    case MapCalibratorTypeMercator:
-      mapProjection="mercator";
+    case MapCalibratorTypeSphericalNormalMercator:
+      mapProjection="sphericalNormalMercator";
+      break;
+    case MapCalibratorTypeProj4:
+      mapProjection="proj4";
       break;
     default:
       FATAL("unsupported map calibrator type",NULL);
@@ -164,10 +167,12 @@ bool MapContainer::readGDMCalibrationFile()
   bool longitudeFound=false;
   bool latitudeFound=false;
   bool mapProjectionFound=false;
+  bool mapProjectionArgsFound=false;
   std::string name,name2;
   std::stringstream in;
   MapPosition pos;
   MapCalibratorType calibratorType=MapCalibratorTypeLinear;
+  std::string mapProjectionArgs;
   std::list<MapPosition> calibrationPoints;
   xmlChar *text;
   void *buffer;
@@ -248,12 +253,18 @@ bool MapContainer::readGDMCalibrationFile()
         std::string mapProjection=getNodeText(n);
         if (mapProjection=="linear") {
           calibratorType=MapCalibratorTypeLinear;
-        } else if (mapProjection=="mercator") {
-          calibratorType=MapCalibratorTypeMercator;
+        } else if ((mapProjection=="mercator")||(mapProjection=="sphericalNormalMercator")) {
+          calibratorType=MapCalibratorTypeSphericalNormalMercator;
+        } else if (mapProjection=="proj4") {
+          calibratorType=MapCalibratorTypeProj4;
         } else {
           ERROR("map projection <%s> defined in <%s> not supported",mapProjection.c_str(),calibrationFilePath);
           goto cleanup;
         }
+      }
+      if (name=="mapProjectionArgs") {
+        mapProjectionArgs=getNodeText(n);
+        mapProjectionArgsFound=true;
       }
       if (name=="zoomLevel") {
         zoomLevelFound=true;
@@ -310,11 +321,20 @@ bool MapContainer::readGDMCalibrationFile()
   result=true;
 
   // Create the calibrator
+  if (calibratorType==MapCalibratorTypeProj4) {
+    if (!mapProjectionArgsFound) {
+      ERROR("map projection arguments not found for map projection type \"proj4\" in <$s>",calibrationFilePath);
+      goto cleanup;
+    }
+  }
   mapCalibrator=MapCalibrator::newMapCalibrator(calibratorType);
   if (!mapCalibrator) {
     FATAL("can not create map calibrator",NULL);
     return false;
   }
+  if (mapProjectionArgsFound)
+    mapCalibrator->setArgs(mapProjectionArgs);
+  mapCalibrator->init();
   for(std::list<MapPosition>::iterator i=calibrationPoints.begin();i!=calibrationPoints.end();i++) {
     mapCalibrator->addCalibrationPoint(*i);
   }

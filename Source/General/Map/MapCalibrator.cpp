@@ -28,6 +28,7 @@ namespace GEODISCOVERER {
 // Constructor
 MapCalibrator::MapCalibrator(bool doNotDelete) {
   this->doNotDelete=doNotDelete;
+  args=NULL;
   if (doNotDelete) {
     new(&this->calibrationPoints) std::list<MapPosition*>();
   }
@@ -36,10 +37,17 @@ MapCalibrator::MapCalibrator(bool doNotDelete) {
 
 // Destructor
 MapCalibrator::~MapCalibrator() {
+
+  // Close all referenced libraries
+  deinit();
+
   // Delete all calibration points
   for (std::list<MapPosition *>::const_iterator i=calibrationPoints.begin();i!=calibrationPoints.end();i++) {
     MapPosition *t=*i;
     MapPosition::destruct(t);
+  }
+  if (!doNotDelete) {
+    if (args) free(args);
   }
   core->getThread()->destroyMutex(this->accessMutex);
 }
@@ -47,12 +55,19 @@ MapCalibrator::~MapCalibrator() {
 // Adds a calibration point
 void MapCalibrator::addCalibrationPoint(MapPosition pos) {
   //DEBUG("Adding calibration point (%d %d %.2f %.2f)",pos.getX(),pos.getY(),pos.getLng().toDouble(),pos.getLat().toDouble());
+
+  // Convert theg geographic longitude / latitude to cartesian X / Y coordinates
+  convertGeographicToCartesian(pos);
+
+  // Make a copy of the calibration point
   MapPosition *t=new MapPosition();
   if (!t) {
     FATAL("can not create map position",NULL);
     return;
   }
   *t=pos;
+
+  // Put it into the list
   calibrationPoints.push_back(t);
 }
 
@@ -82,22 +97,29 @@ void MapCalibrator::store(std::ofstream *ofs) {
 
   // Write the size of the object for detecting changes later
   Storage::storeInt(ofs,type);
-  Int size=sizeof(*this);
-  Storage::storeInt(ofs,size);
-
-  // Store all relevant fields
+  Int size;
   switch(type) {
     case MapCalibratorTypeLinear:
       size=sizeof(MapCalibratorLinear);
       break;
-    case MapCalibratorTypeMercator:
-      size=sizeof(MapCalibratorMercator);
+    case MapCalibratorTypeSphericalNormalMercator:
+      size=sizeof(MapCalibratorSphericalNormalMercator);
+      break;
+    case MapCalibratorTypeProj4:
+      size=sizeof(MapCalibratorProj4);
       break;
     default:
       FATAL("map calibrator type not supported",NULL);
       break;
   }
+  Storage::storeInt(ofs,size);
+
+  // Store all relevant fields
   Storage::storeMem(ofs,(char*)this,size);
+  if (args==NULL)
+    Storage::storeString(ofs,"");
+  else
+    Storage::storeString(ofs,args);
   Storage::storeInt(ofs,calibrationPoints.size());
   for(std::list<MapPosition*>::iterator i=calibrationPoints.begin();i!=calibrationPoints.end();i++) {
     (*i)->store(ofs);
@@ -121,16 +143,25 @@ MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize) {
     case MapCalibratorTypeLinear:
       expectedSize=sizeof(MapCalibratorLinear);
 #ifdef TARGET_LINUX
-      if (expectedSize!=40) {
+      if (expectedSize!=56) {
         FATAL("unknown size of object (%d), please adapt class storage",expectedSize);
         return NULL;
       }
 #endif
       break;
-    case MapCalibratorTypeMercator:
-      expectedSize=sizeof(MapCalibratorMercator);
+    case MapCalibratorTypeSphericalNormalMercator:
+      expectedSize=sizeof(MapCalibratorSphericalNormalMercator);
 #ifdef TARGET_LINUX
-      if (expectedSize!=40) {
+      if (expectedSize!=56) {
+        FATAL("unknown size of object (%d), please adapt class storage",expectedSize);
+        return NULL;
+      }
+#endif
+      break;
+    case MapCalibratorTypeProj4:
+      expectedSize=sizeof(MapCalibratorProj4);
+#ifdef TARGET_LINUX
+      if (expectedSize!=64) {
         FATAL("unknown size of object (%d), please adapt class storage",expectedSize);
         return NULL;
       }
@@ -156,6 +187,12 @@ MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize) {
   //PROFILE_ADD("object creation");
 
   // Read the fields
+  Storage::retrieveString(cacheData,cacheSize,&mapCalibrator->args);
+
+  // Init the calibrator
+  mapCalibrator->init();
+
+  // Read the calibration points
   Storage::retrieveInt(cacheData,cacheSize,size);
   for (Int i=0;i<size;i++) {
     MapPosition *p=MapPosition::retrieve(cacheData,cacheSize);
@@ -166,6 +203,7 @@ MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize) {
     mapCalibrator->calibrationPoints.push_back(p);
   }
   //PROFILE_ADD("map position retrieve");
+
 
   // Return result
   return mapCalibrator;
@@ -188,8 +226,11 @@ MapCalibrator *MapCalibrator::newMapCalibrator(MapCalibratorType type) {
     case MapCalibratorTypeLinear:
       return new MapCalibratorLinear();
       break;
-    case MapCalibratorTypeMercator:
-      return new MapCalibratorMercator();
+    case MapCalibratorTypeSphericalNormalMercator:
+      return new MapCalibratorSphericalNormalMercator();
+      break;
+    case MapCalibratorTypeProj4:
+      return new MapCalibratorProj4();
       break;
     default:
       FATAL("unsupported map calibration type",NULL);
@@ -202,16 +243,20 @@ MapCalibrator *MapCalibrator::newMapCalibrator(MapCalibratorType type) {
 MapCalibrator *MapCalibrator::newMapCalibrator(MapCalibratorType type, char *&cacheData, Int &cacheSize) {
   MapCalibrator *mapCalibrator=NULL;
   MapCalibratorLinear *linear;
-  MapCalibratorMercator *mercator;
+  MapCalibratorSphericalNormalMercator *mercator;
   Int size;
   switch(type) {
     case MapCalibratorTypeLinear:
       size=sizeof(MapCalibratorLinear);
       mapCalibrator=new(cacheData) MapCalibratorLinear(true);
       break;
-    case MapCalibratorTypeMercator:
-      size=sizeof(MapCalibratorMercator);
-      mapCalibrator=new(cacheData) MapCalibratorMercator(true);
+    case MapCalibratorTypeSphericalNormalMercator:
+      size=sizeof(MapCalibratorSphericalNormalMercator);
+      mapCalibrator=new(cacheData) MapCalibratorSphericalNormalMercator(true);
+      break;
+    case MapCalibratorTypeProj4:
+      size=sizeof(MapCalibratorProj4);
+      mapCalibrator=new(cacheData) MapCalibratorProj4(true);
       break;
     default:
       FATAL("unsupported map calibration type",NULL);
@@ -235,6 +280,153 @@ double MapCalibrator::computePixelDistance(MapPosition a, MapPosition b) {
   double distX = a.getX()-b.getX();
   double distY = a.getY()-b.getY();
   return sqrt(distX*distX+distY*distY);
+}
+
+// Inits the calibrator
+void MapCalibrator::init() {
+
+}
+
+// Frees the calibrator
+void MapCalibrator::deinit() {
+
+}
+
+// Returns the three nearest calibration points
+bool MapCalibrator::findThreeNearestCalibrationPoints(bool usePictureCoordinates, MapPosition pos, std::vector<double> &pictureX, std::vector<double> &pictureY, std::vector<double> &cartesianX, std::vector<double> &cartesianY) {
+
+  // Check that we have enough calibration points
+  if (calibrationPoints.size()<3) {
+    FATAL("at least 3 calibration points are required",NULL);
+    return false;
+  }
+
+  // Prepare variables
+  pictureX.resize(3);
+  pictureY.resize(3);
+  cartesianX.resize(3);
+  cartesianY.resize(3);
+
+  // Find the nearest calibration points
+  sortCalibrationPoints(pos,usePictureCoordinates);
+
+  // Solve the equation
+  Int j=0;
+  for (std::list<MapPosition*>::const_iterator i=calibrationPoints.begin();i!=calibrationPoints.end();i++) {
+    MapPosition *t=*i;
+    pictureX[j]=t->getX();
+    pictureY[j]=t->getY();
+    cartesianX[j]=t->getCartesianX();
+    cartesianY[j]=t->getCartesianY();
+    if (j==2)
+      break;
+    j++;
+  }
+  return true;
+}
+
+// Updates the geographic coordinates (longitude and latitude) from the given picture coordinates
+bool MapCalibrator::setGeographicCoordinates(MapPosition &pos) {
+
+  // Ensure that only one thread is executing this function at a time
+  core->getThread()->lockMutex(accessMutex);
+
+  // Find the nearest calibration points
+  std::vector<double> picX;
+  std::vector<double> picY;
+  std::vector<double> cartX;
+  std::vector<double> cartY;
+  if (!findThreeNearestCalibrationPoints(true,pos,picX,picY,cartX,cartY)) {
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+
+  // Solve the equation to compute cartesian coordinates from picture coordinates
+  std::vector<double> cHoriz,cVert;
+  cHoriz=FloatingPoint::solveZEqualsC0XPlusC1YPlusC2(picX,picY,cartX);
+  cVert=FloatingPoint::solveZEqualsC0XPlusC1YPlusC2(picX,picY,cartY);
+  if ((cHoriz.size()==0)) {
+    FATAL("can not solve equation cartX=cHoriz[0]*picX+cHoriz[1]*picY+cHoriz[2]",NULL);
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+  if ((cVert.size()==0)) {
+    FATAL("can not solve equation cartY=cVert[0]*picX+cVert[1]*picY+cVert[2]",NULL);
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+
+  // Compute the position
+  pos.setCartesianX(cHoriz[0]*pos.getX()+cHoriz[1]*pos.getY()+cHoriz[2]);
+  pos.setCartesianY(cVert[0]*pos.getX()+cVert[1]*pos.getY()+cVert[2]);
+  convertCartesianToGeographic(pos);
+
+  // Check ranges
+  if ((pos.getLng()>180.0)||(pos.getLng()<-180.0)) {
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+  if ((pos.getLat()>90.0)||(pos.getLat()<-90.0)) {
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+
+  // That's it
+  core->getThread()->unlockMutex(accessMutex);
+  return true;
+}
+
+// Updates the picture coordinates from the given geographic coordinates
+bool MapCalibrator::setPictureCoordinates(MapPosition &pos) {
+
+  // Ensure that only one thread is executing this function at a time
+  core->getThread()->lockMutex(accessMutex);
+
+  // Find the nearest calibration points
+  std::vector<double> picX;
+  std::vector<double> picY;
+  std::vector<double> cartX;
+  std::vector<double> cartY;
+  if (!findThreeNearestCalibrationPoints(false,pos,picX,picY,cartX,cartY)) {
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+
+  // Solve the equation to compute picture coordinates from cartesian coordinates
+  std::vector<double> cHoriz,cVert;
+  cHoriz=FloatingPoint::solveZEqualsC0XPlusC1YPlusC2(cartX,cartY,picX);
+  cVert=FloatingPoint::solveZEqualsC0XPlusC1YPlusC2(cartX,cartY,picY);
+  if ((cHoriz.size()==0)) {
+    FATAL("can not solve equation picX=cHoriz[0]*cartX+cHoriz[1]*cartY+cHoriz[2]",NULL);
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+  if ((cVert.size()==0)) {
+    FATAL("can not solve equation picY=cVert[0]*cartX+cVert[1]*cartY+cVert[2]",NULL);
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+
+  // Compute the position
+  convertGeographicToCartesian(pos);
+  double x=round(cHoriz[0]*pos.getCartesianX()+cHoriz[1]*pos.getCartesianY()+cHoriz[2]);
+  double y=round(cVert[0]*pos.getCartesianX()+cVert[1]*pos.getCartesianY()+cVert[2]);
+
+  // Check ranges
+  if ((x>std::numeric_limits<Int>::max())||(x<std::numeric_limits<Int>::min())) {
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+  if ((y>std::numeric_limits<Int>::max())||(y<std::numeric_limits<Int>::min())) {
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+  pos.setX(x);
+  pos.setY(y);
+
+  // That's it
+  core->getThread()->unlockMutex(accessMutex);
+  return true;
 }
 
 }

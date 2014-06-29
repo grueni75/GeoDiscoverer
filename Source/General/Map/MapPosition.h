@@ -39,8 +39,10 @@ protected:
   static const char *unknownSource;                 // String indicating that the source is unknown
   static const double earthRadius = 6.371 * 1e6;    // Radius of earh in meter
   MapTile *mapTile;                                 // Tile this position belongs to
-  Int x;                                            // X position
-  Int y;                                            // Y position
+  Int x;                                            // X position in picture coordinate system
+  Int y;                                            // Y position in picture coordinate system
+  double cartesianX;                                // X position in cartesian coordinate system of selected map projection
+  double cartesianY;                                // Y position in cartesian coordinate system of selected map projection
   double lng;                                       // WGS84 Longitude in degrees
   double lat;                                       // WGS84 Latitude in degrees
   bool hasAltitude;                                 // Indicates that a height value is included
@@ -347,6 +349,21 @@ public:
       this->isWGS84Altitude = isWGS84Altitude;
   }
 
+  double getCartesianX() const {
+    return cartesianX;
+  }
+
+  void setCartesianX(double cartesianX) {
+    this->cartesianX = cartesianX;
+  }
+
+  double getCartesianY() const {
+    return cartesianY;
+  }
+
+  void setCartesianY(double cartesianY) {
+    this->cartesianY = cartesianY;
+  }
 };
 
 }

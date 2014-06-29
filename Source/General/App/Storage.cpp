@@ -40,6 +40,8 @@ void Storage::storeString(std::ofstream *ofs, std::string string) {
 void Storage::retrieveString(char *&cacheData, Int &cacheSize, char **string) {
   *string=cacheData;
   Int len=strlen(*string);
+  if (strlen(*string)==0)
+    *string=NULL;
   cacheSize-=len+1;
   cacheData+=len+1;
 }
