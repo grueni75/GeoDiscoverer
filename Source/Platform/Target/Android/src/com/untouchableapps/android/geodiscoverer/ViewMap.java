@@ -25,6 +25,9 @@ package com.untouchableapps.android.geodiscoverer;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -349,6 +352,18 @@ public class ViewMap extends GDActivity {
       messageLayout.setOrientation(LinearLayout.VERTICAL);  
     rootFrameLayout.requestLayout();
   }
+
+  /** Restarts the core */
+  void restartCore(boolean resetConfig) {
+    busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
+    Message m=Message.obtain(coreObject.messageHandler);
+    m.what = GDCore.RESTART_CORE;
+    Bundle b = new Bundle();
+    b.putBoolean("resetConfig", resetConfig);
+    m.setData(b);    
+    coreObject.messageHandler.sendMessage(m);
+  }
+
   
   /** Asks the user for confirmation of the address */
   void askForAddress(final String subject, final String text) {
@@ -371,6 +386,209 @@ public class ViewMap extends GDActivity {
     builder.setCancelable(true);
     AlertDialog alert = builder.create();
     alert.show();                
+  }
+  
+  /** Copies tracks from the Track into the Route directory */
+  private class CopyTracksTask extends AsyncTask<Void, Integer, Void> {
+
+    ProgressDialog progressDialog;
+    public String[] trackNames;
+
+    protected void onPreExecute() {
+
+      // Prepare the progress dialog
+      progressDialog = new ProgressDialog(ViewMap.this);
+      progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+      progressDialog.setMessage(getString(R.string.copying_tracks));
+      progressDialog.setMax(trackNames.length);
+      progressDialog.setCancelable(false);
+      progressDialog.show();
+    }
+
+    protected Void doInBackground(Void... params) {
+
+      // Copy all selected tracks to the route directory
+      Integer progress = 0;
+      for (String trackName : trackNames) {
+        String srcFilename = coreObject.homePath + "/Track/" + trackName;
+        String dstFilename = coreObject.homePath + "/Route/" + trackName;
+        try {
+          GDApplication.copyFile(srcFilename, dstFilename);
+        } catch (IOException exception) {
+          Toast.makeText(ViewMap.this,String.format(getString(R.string.cannot_copy_file), srcFilename, dstFilename), Toast.LENGTH_LONG).show();
+        }
+        progress++;
+        publishProgress(progress);
+      }
+
+      return null;
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+      progressDialog.setProgress(progress[0]);
+    }
+
+    protected void onPostExecute(Void result) {
+
+      // Close the progress dialog
+      progressDialog.dismiss();
+
+      // Restart the core to load the new routes
+      restartCore(false);
+    }
+  }
+
+  /** Copies tracks to the route directory */
+  void addTracksAsRoutes() {
+
+    // Obtain the list of file in the folder
+    File folderFile = new File(coreObject.homePath + "/Track");
+    LinkedList<String> routes = new LinkedList<String>();
+    for (File file : folderFile.listFiles()) {
+      if ((!file.isDirectory())
+          && (!file.getName().substring(file.getName().length() - 1)
+              .equals("~"))) {
+        routes.add(file.getName());
+      }
+    }
+    final String[] items = new String[routes.size()];
+    routes.toArray(items);
+    Arrays.sort(items, Collections.reverseOrder());
+
+    // Create the state array
+    final boolean[] checkedItems = new boolean[routes.size()];
+
+    // Create the dialog
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setTitle(R.string.track_as_route_selection_question);
+    builder.setMultiChoiceItems(items, checkedItems,
+        new DialogInterface.OnMultiChoiceClickListener() {
+          public void onClick(DialogInterface dialog, int which,
+              boolean isChecked) {
+          }
+        });
+    builder.setCancelable(true);
+    builder.setPositiveButton(R.string.finished,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            CopyTracksTask copyTracksTask = new CopyTracksTask();
+            LinkedList<String> trackNames = new LinkedList<String>();
+            for (int i = 0; i < items.length; i++) {
+              if (checkedItems[i]) {
+                trackNames.add(items[i]);
+              }
+            }
+            if (trackNames.size() == 0)
+              return;
+            copyTracksTask.trackNames = new String[trackNames.size()];
+            trackNames.toArray(copyTracksTask.trackNames);
+            copyTracksTask.execute();
+          }
+        });
+    builder.setNegativeButton(R.string.cancel, null);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
+    AlertDialog alert = builder.create();
+    alert.show();
+  }
+
+  /** Removes routes from the Route directory */
+  private class RemoveRoutesTask extends AsyncTask<Void, Integer, Void> {
+
+    ProgressDialog progressDialog;
+    public String[] routeNames;
+
+    protected void onPreExecute() {
+
+      // Prepare the progress dialog
+      progressDialog = new ProgressDialog(ViewMap.this);
+      progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+      progressDialog.setMessage(getString(R.string.removing_routes));
+      progressDialog.setMax(routeNames.length);
+      progressDialog.setCancelable(false);
+      progressDialog.show();
+    }
+
+    protected Void doInBackground(Void... params) {
+
+      // Copy all selected tracks to the route directory
+      Integer progress = 0;
+      for (String routeName : routeNames) {
+        File route = new File(coreObject.homePath + "/Route/" + routeName);
+        if (!route.delete()) {
+          Toast.makeText(ViewMap.this,String.format(getString(R.string.cannot_remove_file), route.getPath()), Toast.LENGTH_LONG).show();
+        }
+        progress++;
+        publishProgress(progress);
+      }
+
+      return null;
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+      progressDialog.setProgress(progress[0]);
+    }
+
+    protected void onPostExecute(Void result) {
+
+      // Close the progress dialog
+      progressDialog.dismiss();
+
+      // Restart the core to load the new routes
+      restartCore(false);
+    }
+  }
+  
+  /** Removes routes from the route directory */
+  void removeRoutes() {
+
+    // Obtain the list of file in the folder
+    File folderFile = new File(coreObject.homePath + "/Route");
+    LinkedList<String> routes = new LinkedList<String>();
+    for (File file : folderFile.listFiles()) {
+      if ((!file.isDirectory())
+          && (!file.getName().substring(file.getName().length() - 1)
+              .equals("~"))) {
+        routes.add(file.getName());
+      }
+    }
+    final String[] items = new String[routes.size()];
+    routes.toArray(items);
+    Arrays.sort(items);
+
+    // Create the state array
+    final boolean[] checkedItems = new boolean[routes.size()];
+
+    // Create the dialog
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setTitle(R.string.route_remove_selection_question);
+    builder.setMultiChoiceItems(items, checkedItems,
+        new DialogInterface.OnMultiChoiceClickListener() {
+          public void onClick(DialogInterface dialog, int which,
+              boolean isChecked) {
+          }
+        });
+    builder.setCancelable(true);
+    builder.setPositiveButton(R.string.finished,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            RemoveRoutesTask removeRoutesTask = new RemoveRoutesTask();
+            LinkedList<String> routeNames = new LinkedList<String>();
+            for (int i = 0; i < items.length; i++) {
+              if (checkedItems[i]) {
+                routeNames.add(items[i]);
+              }
+            }
+            if (routeNames.size() == 0)
+              return;
+            removeRoutesTask.routeNames = new String[routeNames.size()];
+            routeNames.toArray(removeRoutesTask.routeNames);
+            removeRoutesTask.execute();
+          }
+        });
+    builder.setNegativeButton(R.string.cancel, null);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
+    AlertDialog alert = builder.create();
+    alert.show();
   }
   
   /** Called when the activity is first created. */
@@ -574,13 +792,7 @@ public class ViewMap extends GDActivity {
                   progressDialog.dismiss();
                   
                   // Restart the core
-                  busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
-                  Message m=Message.obtain(coreObject.messageHandler);
-                  m.what = GDCore.RESTART_CORE;
-                  Bundle b = new Bundle();
-                  b.putBoolean("resetConfig", false);
-                  m.setData(b);    
-                  coreObject.messageHandler.sendMessage(m);
+                  restartCore(false);
                 }
               });
             builder.setNegativeButton(R.string.no, null);
@@ -629,13 +841,7 @@ public class ViewMap extends GDActivity {
                 }
                 
                 // Restart the core
-                busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
-                Message m=Message.obtain(coreObject.messageHandler);
-                m.what = GDCore.RESTART_CORE;
-                Bundle b = new Bundle();
-                b.putBoolean("resetConfig", false);
-                m.setData(b);    
-                coreObject.messageHandler.sendMessage(m);
+                restartCore(false);
               }
             });
           builder.setNegativeButton(R.string.no, null);
@@ -719,13 +925,7 @@ public class ViewMap extends GDActivity {
               builder.setPositiveButton(R.string.yes,
                   new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                      busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
-                      Message m=Message.obtain(coreObject.messageHandler);
-                      m.what = GDCore.RESTART_CORE;
-                      Bundle b = new Bundle();
-                      b.putBoolean("resetConfig", true);
-                      m.setData(b);    
-                      coreObject.messageHandler.sendMessage(m);
+                      restartCore(true);
                     }
                   });
               builder.setNegativeButton(R.string.no, null);
@@ -750,6 +950,12 @@ public class ViewMap extends GDActivity {
               item.setTitle(R.string.hide_messages);
             }
             rootFrameLayout.requestLayout();
+            return true;
+          case R.id.add_tracks_as_routes:
+            addTracksAsRoutes();
+            return true;
+          case R.id.remove_routes:
+            removeRoutes();
             return true;
           default:
               return super.onOptionsItemSelected(item);
@@ -805,13 +1011,7 @@ public class ViewMap extends GDActivity {
       if (resultCode==1) {
         
         // Restart the core object
-        busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");        
-        Message m=Message.obtain(coreObject.messageHandler);
-        m.what = GDCore.RESTART_CORE;
-        Bundle b = new Bundle();
-        b.putBoolean("resetConfig", false);
-        m.setData(b);    
-        coreObject.messageHandler.sendMessage(m);
+        restartCore(true);
         
       }
     }
