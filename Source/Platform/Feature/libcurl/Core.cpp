@@ -77,7 +77,7 @@ DownloadResult Core::downloadURL(std::string url, std::string filePath, bool gen
           result=DownloadResultOtherFail;
           break;
       }
-      snprintf(curlErrorBuffer,CURL_ERROR_SIZE,"response code = %d",curlResponseCode);
+      snprintf(curlErrorBuffer,CURL_ERROR_SIZE,"response code = %ld",curlResponseCode);
       break;
     default:
       result=DownloadResultOtherFail;
