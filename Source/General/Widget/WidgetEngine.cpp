@@ -248,8 +248,8 @@ void WidgetEngine::createGraphic() {
     parameters["pathNameOffsetX"]="3.0";
     parameters["pathNameOffsetY"]="82.0";
     parameters["pathNameWidth"]="60.0";
-    parameters["pathValuesOffsetX"]="75.0";
-    parameters["pathValuesWidth"]="24.0";
+    parameters["pathValuesOffsetX"]="74.5";
+    parameters["pathValuesWidth"]="22.5";
     parameters["pathLengthOffsetY"]="82.0";
     parameters["pathAltitudeUpOffsetY"]="57.25";
     parameters["pathAltitudeDownOffsetY"]="32.5";

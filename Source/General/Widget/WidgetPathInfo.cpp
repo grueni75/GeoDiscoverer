@@ -490,6 +490,7 @@ void WidgetPathInfo::updateVisualization() {
       std::string unit="";
       core->getUnitConverter()->formatMeters(pathLength,value,unit,1);
       vPathLength=value + " " + unit;
+      //vPathLength="XXXXXXXXXXXXXXX";
       core->getUnitConverter()->formatMeters(pathAltitudeUp,value,unit,1);
       vPathAltitudeUp=value + " " + unit;
       core->getUnitConverter()->formatMeters(pathAltitudeDown,value,unit,1);
