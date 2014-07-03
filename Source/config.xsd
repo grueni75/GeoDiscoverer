@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:gpx="http://www.topografix.com/GPX/1/1" xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" targetNamespace="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" elementFormDefault="qualified">
   <xsd:annotation>
-    <xsd:documentation>GeoDiscoverer config schema version 1.0</xsd:documentation>
+    <xsd:documentation>GeoDiscoverer config schema</xsd:documentation>
   </xsd:annotation>
   <xsd:element name="GDC">
     <xsd:annotation>
@@ -228,7 +228,7 @@
                         <xsd:documentation>Distance in percent of the screen width that the page change shall overshoot.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="selectedPage" type="xsd:string" default="Default">
+                    <xsd:element name="selectedPage" type="xsd:string" default="Default" use="required">
                       <xsd:annotation>
                         <xsd:documentation>Name of the currently selected widget page.</xsd:documentation>
                       </xsd:annotation>
