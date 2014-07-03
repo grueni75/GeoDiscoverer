@@ -1011,7 +1011,7 @@ public class ViewMap extends GDActivity {
       if (resultCode==1) {
         
         // Restart the core object
-        restartCore(true);
+        restartCore(false);
         
       }
     }
