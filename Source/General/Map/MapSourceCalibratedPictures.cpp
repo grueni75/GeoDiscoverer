@@ -435,6 +435,10 @@ MapContainerTreeNode *MapSourceCalibratedPictures::retrieveSearchTree(MapSourceC
   // Read the current node index and update the contents of the tree node
   Int index;
   Storage::retrieveInt(cacheData,cacheSize,index);
+  if (index>=mapSource->mapContainers.size()) {
+    DEBUG("node index is out of range, aborting retrieve",NULL);
+    return NULL;
+  }
   mapContainerTreeNode->setContents(mapSource->mapContainers[index]);
 
   // Read the left node

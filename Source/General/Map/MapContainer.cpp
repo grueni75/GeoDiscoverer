@@ -483,6 +483,14 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
   Int tileCountY=imageHeight/tileHeight;
   if (imageHeight%tileHeight!=0)
     WARNING("some part of the bottom border of image <%s> is not used because image height is not a multiple of <%d>",imageFileName,tileHeight);
+  if (tileCountX==0) {
+    ERROR("width of image <%s> is too small (must be at least %d but is %d)",imageFileName,tileWidth,imageWidth);
+    return false;
+  }
+  if (tileCountY==0) {
+    ERROR("height of image <%s> is too small (must be at least %d but is %d)",imageFileName,tileHeight,imageHeight);
+    return false;
+  }
 
   // Update some variables
   width=tileCountX*tileWidth;
