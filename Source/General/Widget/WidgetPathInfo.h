@@ -107,6 +107,7 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   void resetPathVisibility(bool widgetVisible);
 
   // Variables for the visualization thread
+  bool quitWidgetPathInfoThread;
   ThreadSignalInfo *updateVisualizationSignal;
   ThreadInfo *widgetPathInfoThreadInfo;
   ThreadMutexInfo *visualizationMutex;

@@ -32,6 +32,8 @@ WidgetPage::WidgetPage(std::string name) {
   touchStartedOutside=false;
   firstTouch=true;
   selectedWidget=NULL;
+  touchEndTime=0;
+  lastTouchStartedOutside=true;
 }
 
 // Destructor
@@ -70,6 +72,9 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
       }
     }
     this->widgetsActive=widgetsActive;
+  }
+  if (widgetsActive) {
+    touchEndTime=t;
   }
 }
 
@@ -115,9 +120,12 @@ bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
   // If this is the first touch and no widget was hit, do not activate any widgets later
   // This allows smooth scrolling of the map
   if ((firstTouch)&&(!selectedWidget)) {
-    setWidgetsActive(t,false);
+    //setWidgetsActive(t,false);
     touchStartedOutside=true;
+    lastTouchStartedOutside=true;
     return false;
+  } else {
+    lastTouchStartedOutside=false;
   }
 
   // Do the fade in animation
@@ -143,6 +151,7 @@ bool WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
     }
   }
   deselectWidget(t);
+  touchEndTime=t;
 
 }
 
@@ -191,6 +200,13 @@ void WidgetPage::deselectWidget(TimestampInMicroseconds t) {
   touchStartedOutside=false;
 }
 
-
+// Let the page work
+bool WidgetPage::work(TimestampInMicroseconds t) {
+  if ((widgetsActive)&&(firstTouch)&&(t>touchEndTime+core->getWidgetEngine()->getWidgetsActiveTimeout())) {
+    setWidgetsActive(t,false);
+    return true;
+  }
+  return false;
+}
 
 }

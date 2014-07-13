@@ -28,6 +28,7 @@ namespace GEODISCOVERER {
 // Constructor
 WidgetButton::WidgetButton() : WidgetPrimitive() {
   widgetType=WidgetTypeButton;
+  repeat=true;
 }
 
 // Destructor
@@ -57,7 +58,7 @@ bool WidgetButton::work(TimestampInMicroseconds t) {
   if (getIsSelected()) {
 
     // Repeat the command if the initial delay is over
-    if (t>=nextDispatchTime) {
+    if ((repeat)&&(t>=nextDispatchTime)) {
       core->getCommander()->execute(command);
       nextDispatchTime=t+core->getWidgetEngine()->getButtonRepeatPeriod();
     }
@@ -72,7 +73,7 @@ void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
   if (getIsHit()) {
 
     // Execute the command only if the repeating dispatching has not yet started
-    if (t<nextDispatchTime) {
+    if ((!repeat)||(t<nextDispatchTime)) {
       core->getCommander()->execute(command, true);
     }
   }

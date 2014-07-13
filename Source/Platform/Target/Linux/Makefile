@@ -88,6 +88,7 @@ $(PRGNAME): $(OBJS)
 # XML schema for configuration
 xsd:
 	cd $(ROOT)/Source && make linux
+	sed -i 's/<xsd:documentation>GeoDiscoverer config schema.*<\/xsd:documentation>/<xsd:documentation>GeoDiscoverer config schema '`date +"%Y%m%d-%H%M%S"`'<\/xsd:documentation>/' config.shipped.xsd 
 
 # Iconss
 icons:

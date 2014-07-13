@@ -25,12 +25,14 @@
 namespace GEODISCOVERER {
 
 NavigationInfo::NavigationInfo() {
+  type=NavigationInfoTypeUnknown;
   locationBearing=unknownAngle;
   targetBearing=unknownAngle;
   targetDistance=unknownDistance;
   targetDuration=unknownDuration;
   turnDistance=unknownDistance;
   turnAngle=unknownAngle;
+  offRoute=false;
 }
 
 NavigationInfo::~NavigationInfo() {

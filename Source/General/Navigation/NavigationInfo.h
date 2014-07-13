@@ -25,9 +25,14 @@
 
 namespace GEODISCOVERER {
 
+typedef enum {NavigationInfoTypeUnknown, NavigationInfoTypeRoute, NavigationInfoTypeTarget} NavigationInfoType;
+
 class NavigationInfo {
 
 protected:
+
+  // Indicates if navigating along a route or to a target
+  NavigationInfoType type;
 
   // Undefined distance
   const static double unknownDistance = -1;
@@ -55,6 +60,9 @@ protected:
 
   // Angle by which the turn will change the direction
   double turnAngle;
+
+  // Indicates if location is off route
+  bool offRoute;
 
 public:
 
@@ -123,6 +131,22 @@ public:
 
   static const double getUnknownDuration() {
     return unknownDuration;
+  }
+
+  bool getOffRoute() const {
+    return offRoute;
+  }
+
+  void setOffRoute(bool offRoute) {
+    this->offRoute = offRoute;
+  }
+
+  NavigationInfoType getType() const {
+    return type;
+  }
+
+  void setType(NavigationInfoType type) {
+    this->type = type;
   }
 };
 

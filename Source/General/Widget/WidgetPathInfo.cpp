@@ -61,11 +61,13 @@ WidgetPathInfo::WidgetPathInfo() : WidgetPrimitive(), altitudeProfileAxisPointBu
   visualizationMutex=core->getThread()->createMutex("widget path info visualization mutex");
   widgetPathInfoThreadInfo=core->getThread()->createThread("widget path info thread",widgetPathInfoThread,this);
   minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute");
+  quitWidgetPathInfoThread=false;
 }
 
 // Destructor
 WidgetPathInfo::~WidgetPathInfo() {
-  core->getThread()->cancelThread(widgetPathInfoThreadInfo);
+  quitWidgetPathInfoThread=true;
+  core->getThread()->issueSignal(updateVisualizationSignal);
   core->getThread()->waitForThread(widgetPathInfoThreadInfo);
   core->getThread()->destroyThread(widgetPathInfoThreadInfo);
   core->getThread()->destroySignal(updateVisualizationSignal);
@@ -307,8 +309,10 @@ void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
     // Remember the selected path
     currentPath=nearestPath;
     resetPathVisibility(widgetVisible);
-    if (widgetVisible)
+    if (widgetVisible) {
+      DEBUG("activating widgets",NULL);
       core->getWidgetEngine()->setWidgetsActive(true,false);
+    }
 
   }
 
@@ -442,10 +446,12 @@ void WidgetPathInfo::updateVisualization() {
   core->getThread()->setThreadCancable();
 
   // Do an endless loop
-  while (1) {
+  while (true) {
 
     // Wait for an update trigger
     core->getThread()->waitForSignal(updateVisualizationSignal);
+    if (quitWidgetPathInfoThread)
+      return;
 
     // Variables that define the visualization
     std::string vPathName;

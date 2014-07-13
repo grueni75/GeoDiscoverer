@@ -30,12 +30,14 @@ class WidgetPage {
 
 protected:
 
-  std::string name;              // Name of the page
-  GraphicObject graphicObject;   // Contains the widgets of this page
-  bool widgetsActive;            // Indicates if the widgets are active
-  bool touchStartedOutside;      // Indicates that the widgets were not touched directly at the beginning
-  bool firstTouch;               // Indicates that no touch was done before
-  WidgetPrimitive *selectedWidget; // The currently selected widget
+  std::string name;                                     // Name of the page
+  GraphicObject graphicObject;                          // Contains the widgets of this page
+  bool widgetsActive;                                   // Indicates if the widgets are active
+  bool touchStartedOutside;                             // Indicates that the widgets were not touched directly at the beginning
+  bool firstTouch;                                      // Indicates that no touch was done before
+  WidgetPrimitive *selectedWidget;                      // The currently selected widget
+  TimestampInMicroseconds touchEndTime;                 // Last time no widget was touched
+  bool lastTouchStartedOutside;                         // Indicates if the last touch was not hitting any widgets
 
 public:
 
@@ -66,6 +68,9 @@ public:
 
   // Called when a path has changed
   void onPathChange(bool pageVisible, NavigationPath *path);
+
+  // Let the page work
+  bool work(TimestampInMicroseconds t);
 
   // Deselects currently selected widget
   void deselectWidget(TimestampInMicroseconds t);

@@ -1027,6 +1027,8 @@ void NavigationEngine::hideTarget() {
   targetPos.invalidate();
   unlockTargetPos();
   core->getMapEngine()->setForceMapUpdate();
+  forceNavigationUpdate=true;
+  updateNavigationInfos();
 }
 
 // Shows the current target
@@ -1043,6 +1045,8 @@ void NavigationEngine::showTarget(bool repositionMap) {
   if (repositionMap)
     core->getMapEngine()->setMapPos(targetPos);
   core->getMapEngine()->setForceMapUpdate();
+  forceNavigationUpdate=true;
+  updateNavigationInfos();
 }
 
 // Shows the current target at the given position
@@ -1051,8 +1055,6 @@ void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, b
   core->getConfigStore()->setDoubleValue(path,"lng",lng);
   core->getConfigStore()->setDoubleValue(path,"lat",lat);
   showTarget(repositionMap);
-  forceNavigationUpdate=true;
-  updateNavigationInfos();
 }
 
 // Updates the navigation infos
@@ -1104,6 +1106,7 @@ void NavigationEngine::updateNavigationInfos() {
 
     // If a target is active, compute the details for the given target
     if (targetPos.isValid()) {
+      navigationInfo.setType(NavigationInfoTypeTarget);
       if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
         navigationInfo.setTargetBearing(locationPos.computeBearing(targetPos));
       navigationInfo.setTargetDistance(locationPos.computeDistance(targetPos));
@@ -1113,6 +1116,7 @@ void NavigationEngine::updateNavigationInfos() {
 
         // Compute the navigation details for the given route
         //static MapPosition prevTurnPos;
+        navigationInfo.setType(NavigationInfoTypeRoute);
         activeRoute->lockAccess();
         activeRoute->computeNavigationInfo(locationPos,targetPos,navigationInfo);
         activeRoute->unlockAccess();

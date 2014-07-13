@@ -381,6 +381,11 @@
                                     <xsd:documentation>Command to execute if widget is clicked.</xsd:documentation>
                                   </xsd:annotation>
                                 </xsd:element>
+                                <xsd:element name="repeat" type="xsd:integer" default="0" minOccurs="0">
+                                  <xsd:annotation>
+                                    <xsd:documentation>Executes command repeatedly if set.</xsd:documentation>
+                                  </xsd:annotation>
+                                </xsd:element>
                                 <xsd:element name="checkedIconFilename" type="xsd:string" default="unknown" minOccurs="0">
                                   <xsd:annotation>
                                     <xsd:documentation>Filename of the background image showing the checked state.</xsd:documentation>

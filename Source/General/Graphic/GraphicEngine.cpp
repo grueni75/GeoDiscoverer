@@ -178,6 +178,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     //DEBUG("requesting scene redraw due to widget page work result",NULL);
     redrawScene=true;
   }
+  core->getWidgetEngine()->work(currentTime);
   widgetGraphicObject->unlockAccess();
 
   // Handle the hiding of the center icon

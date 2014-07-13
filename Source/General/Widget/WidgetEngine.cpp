@@ -40,6 +40,7 @@ WidgetEngine::WidgetEngine() {
   currentPage=NULL;
   changePageDuration=c->getIntValue("Graphic/Widget","changePageDuration");
   ignoreTouchesEnd=0;
+  widgetsActiveTimeout=c->getIntValue("Graphic/Widget","widgetsActiveTimeout");
 
   // Init the rest
   init();
@@ -122,27 +123,33 @@ void WidgetEngine::createGraphic() {
     parameters.clear();
     parameters["iconFilename"]="pageLeft";
     parameters["command"]="setPage(Path Tools,+1,0)";
+    parameters["repeat"]="0";
     addWidgetToPage("Default",WidgetTypeButton,"Page Left",               3.5, 50.0,0, 3.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="pageRight";
     parameters["command"]="setPage(Path Tools,-1,0)";
+    parameters["repeat"]="0";
     addWidgetToPage("Default",WidgetTypeButton,"Page Right",             96.5, 50.0,0,97.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="zoomIn";
     parameters["command"]="zoom(1.125)";
+    parameters["repeat"]="1";
     addWidgetToPage("Default",WidgetTypeButton,"Zoom In",                87.5, 23.0,0,89.5, 87.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="zoomOut";
     parameters["command"]="zoom(0.875)";
+    parameters["repeat"]="1";
     addWidgetToPage("Default",WidgetTypeButton,"Zoom Out",               62.5, 23.0,0,89.5, 62.5,0,255,255,255,255,255,255,255,100,parameters);
     /*
     parameters.clear();
     parameters["iconFilename"]="rotateLeft";
     parameters["command"]="rotate(+3)";
+    parameters["repeat"]="1";
     addWidgetToPage("Default",WidgetTypeButton,"Rotate Left",            37.5, 23.0,0,89.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="rotateRight";
     parameters["command"]="rotate(-3)";
+    parameters["repeat"]="1";
     addWidgetToPage("Default",WidgetTypeButton,"Rotate Right",           12.5, 23.0,0,89.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     */
     parameters.clear();
@@ -157,6 +164,7 @@ void WidgetEngine::createGraphic() {
     parameters.clear();
     parameters["iconFilename"]="createNewTrack";
     parameters["command"]="createNewTrack()";
+    parameters["repeat"]="0";
     addWidgetToPage("Default",WidgetTypeButton,"Create New Track",       57.0, 80.5,0,10.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     /*
     parameters.clear();
@@ -225,8 +233,8 @@ void WidgetEngine::createGraphic() {
     parameters["orientationLabelRadius"]="86.5";
     parameters["turnLineWidth"] = "15.0";
     parameters["turnLineArrowOverhang"] = "7.5";
-    parameters["turnLineArrowHeight"] = "15.0";
-    parameters["turnLineStartHeight"] = "21.0";
+    parameters["turnLineArrowHeight"] = "13.0";
+    parameters["turnLineStartHeight"] = "20.0";
     parameters["turnLineMiddleHeight"] = "8.5";
     parameters["turnLineStartX"] = "50.0";
     parameters["turnLineStartY"] = "37.0";
@@ -238,10 +246,12 @@ void WidgetEngine::createGraphic() {
     parameters.clear();
     parameters["iconFilename"]="pageLeft";
     parameters["command"]="setPage(Default,+1,0)";
+    parameters["repeat"]="0";
     addWidgetToPage("Path Tools",WidgetTypeButton,"Page Left",            3.5, 50.0,0, 3.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="pageRight";
     parameters["command"]="setPage(Default,-1,0)";
+    parameters["repeat"]="0";
     addWidgetToPage("Path Tools",WidgetTypeButton,"Page Right",          96.5, 50.0,0,97.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="pathInfoBackground";
@@ -299,6 +309,7 @@ void WidgetEngine::createGraphic() {
     parameters.clear();
     parameters["iconFilename"]="setTargetAtMapCenter";
     parameters["command"]="setTargetAtMapCenter()";
+    parameters["repeat"]="0";
     addWidgetToPage("Path Tools",WidgetTypeButton,"Target At Center",    37.5, 93.0,0,10.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["uncheckedIconFilename"]="pathInfoLockOff";
@@ -317,10 +328,12 @@ void WidgetEngine::createGraphic() {
     parameters.clear();
     parameters["iconFilename"]="zoomIn";
     parameters["command"]="zoom(1.125)";
+    parameters["repeat"]="1";
     addWidgetToPage("Path Tools",WidgetTypeButton,"Zoom In",             87.5, 80.0,0,89.5, 87.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="zoomOut";
     parameters["command"]="zoom(0.875)";
+    parameters["repeat"]="1";
     addWidgetToPage("Path Tools",WidgetTypeButton,"Zoom Out",            62.5, 80.0,0,89.5, 62.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["uncheckedIconFilename"]="returnToLocationOff";
@@ -439,6 +452,7 @@ void WidgetEngine::createGraphic() {
       // Set type-dependent properties
       if (widgetType=="button") {
         button->setCommand(c->getStringValue(widgetPath,"command"));
+        button->setRepeat(c->getIntValue(widgetPath,"repeat"));
       }
       if (widgetType=="checkbox") {
         checkbox->setConfigPath(widgetPath);
@@ -789,6 +803,7 @@ void WidgetEngine::setPage(std::string name, Int direction, bool lockAccess) {
 
   // Set the new page
   currentPage=nextPage;
+  nextPage->setWidgetsActive(t,true);
   core->getConfigStore()->setStringValue("Graphic/Widget","selectedPage",name);
   if (lockAccess) visiblePages.unlockAccess();;
 
@@ -832,4 +847,14 @@ void WidgetEngine::setWidgetsActive(bool widgetsActive, bool lockAccess) {
   }
   if (lockAccess) visiblePages.unlockAccess();
 }
+
+// Let the engine work
+bool WidgetEngine::work(TimestampInMicroseconds t) {
+  if (currentPage) {
+    return currentPage->work(t);
+  } else {
+    return false;
+  }
+}
+
 }

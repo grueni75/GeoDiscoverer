@@ -50,6 +50,7 @@ protected:
   TimestampInMicroseconds changePageDuration;           // Time that the transition from the current page to the next page takes
   Int changePageOvershoot;                              // Distance that the page change shall overshoot
   TimestampInMicroseconds ignoreTouchesEnd;             // End time until touches shall be ignored
+  TimestampInMicroseconds widgetsActiveTimeout;         // Time to show the widgets after last interaction
 
   // Adds a widget to a page
   void addWidgetToPage(
@@ -104,6 +105,9 @@ public:
   // Informs the engine that a path has changed
   void onPathChange(NavigationPath *path);
 
+  // Let the engine work
+  bool work(TimestampInMicroseconds t);
+
   // Shows the context menu
   void showContextMenu();
 
@@ -136,6 +140,9 @@ public:
     return currentPage->getWidgetsActive();
   }
 
+  TimestampInMicroseconds getWidgetsActiveTimeout() const {
+    return widgetsActiveTimeout;
+  }
 };
 
 }

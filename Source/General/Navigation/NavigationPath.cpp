@@ -853,6 +853,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
   }
 
   // Set the navigation infos
+  navigationInfo.setOffRoute(offRoute);
   navigationInfo.setTargetDistance(distanceToRouteEnd);
   navigationInfo.setTurnAngle(turnAngle);
   navigationInfo.setTurnDistance(turnDistance);

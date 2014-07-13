@@ -57,6 +57,7 @@ WidgetNavigation::WidgetNavigation() : WidgetPrimitive(), turnArrowPointBuffer(2
   hideCompass=true;
   hideTarget=true;
   showTurn=false;
+  active=false;
 }
 
 // Destructor
@@ -94,12 +95,14 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   if (t>=nextUpdateTime) {
 
     // Is a turn coming?
+    bool activateWidget = false;
     NavigationInfo *navigationInfo=navigationEngine->lockNavigationInfo();
     fontEngine->lockFont("sansSmall");
     if (navigationInfo->getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
 
       // Get distance to turn
       showTurn=true;
+      activateWidget=true;
       unitConverter->formatMeters(navigationInfo->getTurnDistance(),value,unit);
       infos.str("");
       infos << value << " " << unit;
@@ -172,6 +175,8 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
     } else {
 
+      // Only activate widget if target is shown or if off route
+
       // Get the current duration and distance to the target
       showTurn=false;
       if (navigationInfo->getTargetDistance()!=NavigationInfo::getUnknownDistance()) {
@@ -179,6 +184,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&distanceValueFontString,infos.str());
+        activateWidget=true;
       } else {
         fontEngine->updateString(&distanceValueFontString,"infinite");
       }
@@ -187,6 +193,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&durationValueFontString,infos.str());
+        activateWidget=true;
       } else {
         fontEngine->updateString(&durationValueFontString,"move!");
       }
@@ -223,6 +230,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         rotateAnimationSequence.push_back(rotateParameter);
         compassObject.setRotateAnimationSequence(rotateAnimationSequence);
         //directionIcon.setAngle(navigationInfos->locationBearing);
+        activateWidget=true;
         hideCompass=false;
       }
     }
@@ -242,10 +250,42 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         targetObject.setRotateAnimationSequence(rotateAnimationSequence);
         //directionIcon.setAngle(navigationInfos->locationBearing);
         hideTarget=false;
+        activateWidget=true;
       }
     }
     prevNavigationInfo=*navigationInfo;
     navigationEngine->unlockNavigationInfo();
+
+    // Depending on the navigation type, widget may or may not be activated
+    switch(navigationInfo->getType()) {
+      case NavigationInfoTypeTarget:
+        // Always show widget
+        break;
+      case NavigationInfoTypeRoute:
+        // Only show widget if off route or turn is shown
+        if ((!navigationInfo->getOffRoute()&&(!showTurn)))
+          activateWidget=false;
+        break;
+      case NavigationInfoTypeUnknown:
+        activateWidget=false;
+        break;
+      default:
+        FATAL("unsupported navigation info type",NULL);
+    }
+
+    // Activate widget if not already
+    if (!core->getWidgetEngine()->getWidgetsActive()) {
+      if (activateWidget!=active) {
+        if (activateWidget) {
+          setFadeAnimation(t,getColor(),getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
+        } else {
+          setFadeAnimation(t,getColor(),getInactiveColor(),false,core->getGraphicEngine()->getFadeDuration());
+        }
+        active=activateWidget;
+      }
+    } else {
+      active=false;
+    }
 
     // Set the next update time
     nextUpdateTime=t+updateInterval;

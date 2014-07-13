@@ -32,6 +32,7 @@ protected:
 
   std::string command;                        // Command to execute when clicked
   TimestampInMicroseconds nextDispatchTime;   // Time when to execute the next command
+  bool repeat;                                // Decides if commands are repeatedly executed
 
 public:
 
@@ -54,6 +55,9 @@ public:
       this->command = command;
   }
 
+  void setRepeat(bool repeat) {
+    this->repeat = repeat;
+  }
 };
 
 }

@@ -60,6 +60,9 @@ protected:
   // Show the turn
   bool showTurn;
 
+  // Indicates if widget is active
+  bool active;
+
   // Current navigation metrics
   double locationBearingNominal,locationBearingActual;
 
