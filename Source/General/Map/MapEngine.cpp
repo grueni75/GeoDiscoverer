@@ -31,8 +31,8 @@ MapEngine::MapEngine() {
   returnToLocationTimeout=core->getConfigStore()->getIntValue("Map","returnToLocationTimeout");
   returnToLocationOneTime=false;
   returnToLocation=false;
-  setReturnToLocation(core->getConfigStore()->getIntValue("Map","returnToLocation"));
-  setZoomLevelLock(core->getConfigStore()->getIntValue("Map","zoomLevelLock"));
+  setReturnToLocation(core->getConfigStore()->getIntValue("Map","returnToLocation"),false);
+  setZoomLevelLock(core->getConfigStore()->getIntValue("Map","zoomLevelLock"),false);
   map=NULL;
   updateInProgress=false;
   abortUpdate=false;
@@ -588,29 +588,33 @@ bool MapEngine::mapUpdateIsRequired(GraphicPosition &visPos, Int *diffVisX, Int 
 }
 
 // Sets the return to location flag
-void MapEngine::setReturnToLocation(bool returnToLocation)
+void MapEngine::setReturnToLocation(bool returnToLocation, bool showInfo)
 {
   if ((!this->returnToLocation)&&(returnToLocation)) {
     returnToLocationOneTime=true;
   }
   this->returnToLocation=returnToLocation;
   core->getConfigStore()->setIntValue("Map","returnToLocation",returnToLocation);
-  if (returnToLocation) {
-    INFO("return to location is enabled",NULL);
-  } else {
-    INFO("return to location is disabled",NULL);
+  if (showInfo) {
+    if (returnToLocation) {
+      INFO("return to location is enabled",NULL);
+    } else {
+      INFO("return to location is disabled",NULL);
+    }
   }
 }
 
 // Sets the zoom level lock flag
-void MapEngine::setZoomLevelLock(bool zoomLevelLock)
+void MapEngine::setZoomLevelLock(bool zoomLevelLock, bool showInfo)
 {
   this->zoomLevelLock=zoomLevelLock;
   core->getConfigStore()->setIntValue("Map","zoomLevelLock",zoomLevelLock);
-  if (zoomLevelLock) {
-    INFO("zoom level lock is enabled",NULL);
-  } else {
-    INFO("zoom level lock is disabled",NULL);
+  if (showInfo) {
+    if (zoomLevelLock) {
+      INFO("zoom level lock is enabled",NULL);
+    } else {
+      INFO("zoom level lock is disabled",NULL);
+    }
   }
 }
 

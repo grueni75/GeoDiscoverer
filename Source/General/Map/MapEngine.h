@@ -180,9 +180,9 @@ public:
 
   void setMaxTiles();
 
-  void setReturnToLocation(bool returnToLocation);
+  void setReturnToLocation(bool returnToLocation, bool showInfo=true);
 
-  void setZoomLevelLock(bool zoomLevelLock);
+  void setZoomLevelLock(bool zoomLevelLock, bool showInfo=true);
 
 };
 

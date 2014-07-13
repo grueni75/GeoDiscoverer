@@ -140,7 +140,7 @@ void NavigationEngine::init() {
   unlockRecordedTrack();
 
   // Set the track recording
-  setRecordTrack(recordTrack, true);
+  setRecordTrack(recordTrack, true, false);
 
   // Update the route lists
   updateRoutes();
@@ -467,7 +467,7 @@ void NavigationEngine::backup() {
 }
 
 // Switches the track recording
-bool NavigationEngine::setRecordTrack(bool recordTrack, bool ignoreIsInit)
+bool NavigationEngine::setRecordTrack(bool recordTrack, bool ignoreIsInit, bool showInfo)
 {
   // Ignore command if track is not initialized
   if ((!recordedTrack->getIsInit())&&(!ignoreIsInit)) {
@@ -489,10 +489,12 @@ bool NavigationEngine::setRecordTrack(bool recordTrack, bool ignoreIsInit)
   this->recordTrack=recordTrack;
   core->getConfigStore()->setIntValue("Navigation","recordTrack",recordTrack);
   unlockRecordedTrack();
-  if (recordTrack) {
-    INFO("track recording is enabled",NULL);
-  } else {
-    INFO("track recording is disabled",NULL);
+  if (showInfo) {
+    if (recordTrack) {
+      INFO("track recording is enabled",NULL);
+    } else {
+      INFO("track recording is disabled",NULL);
+    }
   }
   updateScreenGraphic(false);
   return true;
