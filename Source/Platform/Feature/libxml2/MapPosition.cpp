@@ -126,7 +126,13 @@ void MapPosition::writeGPX(XMLNode parentNode) {
 
 // Returns the text contents of a element node
 bool MapPosition::getText(XMLNode node, std::string &contents) {
-  if ((!node->children)||(std::string((char*)node->children->name)!="text"))
+  if (!node->children)
+    return false;
+  if (!node->children->name)
+    return false;
+  if ((std::string((char*)node->children->name)!="text"))
+    return false;
+  if (!node->children->content)
     return false;
   contents=std::string((char*)node->children->content);
   if (contents=="")
