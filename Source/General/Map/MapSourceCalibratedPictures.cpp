@@ -338,6 +338,14 @@ bool MapSourceCalibratedPictures::init()
     // Close progress
     core->getDialog()->closeProgress(dialog);
 
+    // Extract legend if any
+    if (mapArchive->getEntrySize("legend.png")!=0) {
+      title="Extracting legend of map " + std::string(folder);
+      dialog=core->getDialog()->createProgress(title,0);
+      mapArchive->exportEntry("legend.png",getLegendPath());
+      core->getDialog()->closeProgress(dialog);
+    }
+
     // Reset wakelock
     core->getScreen()->setWakeLock(core->getConfigStore()->getIntValue("General","wakeLock"),false);
   }

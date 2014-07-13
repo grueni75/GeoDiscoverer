@@ -23,22 +23,12 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
-import java.io.IOException;
-import java.security.PublicKey;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
-
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
-
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
+import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -49,14 +39,8 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceGroup;
-import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.text.method.DigitsKeyListener;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.widget.ListAdapter;
-import android.widget.Toast;
 
 public class Preferences extends PreferenceActivity implements
     OnPreferenceClickListener,OnPreferenceChangeListener {
@@ -141,6 +125,7 @@ public class Preferences extends PreferenceActivity implements
   }
   
   /** Creates the preferences entries for the given path */
+  @SuppressLint("DefaultLocale")
   boolean addPreference(PreferenceGroup attributeParent, PreferenceGroup containerParent, String path, String name) {
 
     boolean attributesFound=false;
@@ -241,10 +226,7 @@ public class Preferences extends PreferenceActivity implements
         String[] values = coreObject.configStoreGetAttributeValues(key,
             info.getString("isUnbounded"));
         PreferenceCategory category = new PreferenceCategory(this);
-        if (key.equals("Navigation/Route")) 
-          category.setTitle(prettyName + " list (use menu to modify)");
-        else
-          category.setTitle(prettyName + " list");
+        category.setTitle(prettyName + " list");
         category.setPersistent(false);
         category.setSummary(info.getString("documentation"));
         containerParent.addPreference(category);

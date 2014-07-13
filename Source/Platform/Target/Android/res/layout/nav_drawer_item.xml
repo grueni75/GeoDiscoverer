@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp">
+    
+    <ImageView
+        android:id="@+id/nav_drawer_item_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:contentDescription="@string/navigation_drawer_menu_entry_icon_description"
+        />
+
+    <TextView
+         android:id="@+id/nav_drawer_item_title"
+         android:layout_width="wrap_content"
+         android:layout_height="match_parent"
+         android:layout_toRightOf="@+id/nav_drawer_item_icon"
+         android:gravity="center"
+         android:textSize="16sp" />
+
+</RelativeLayout>

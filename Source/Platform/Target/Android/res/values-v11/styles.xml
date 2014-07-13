@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="GDStyle" parent="android:Theme.Holo">
+  </style> 
+  <style name="GDStyle.NoTitleBar" parent="android:Theme.Holo.NoActionBar">
+  </style> 
+</resources>

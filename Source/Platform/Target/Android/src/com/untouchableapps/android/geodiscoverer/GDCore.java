@@ -28,11 +28,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -42,9 +41,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
@@ -58,11 +55,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.DisplayMetrics;
-import android.widget.FrameLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 import android.os.Process;
+import android.util.DisplayMetrics;
 
 /** Interfaces with the C++ part */
 public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorEventListener, Runnable {
@@ -195,8 +189,49 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   // Thread that handles the starting and stoppingg of the core
   //
   
+  // Message handler
+  static protected class AppMessageHandler extends Handler {
+    
+    protected final WeakReference<GDCore> weakCoreObject; 
+    
+    AppMessageHandler(GDCore coreObject) {
+      this.weakCoreObject = new WeakReference<GDCore>(coreObject);
+    }
+    
+    /** Called when the core has a message */
+    @Override
+    public void handleMessage(Message msg) {  
+      GDCore coreObject = weakCoreObject.get();
+      if (coreObject==null)
+        return;
+      Bundle b=msg.getData();
+      switch(msg.what) {
+        case START_CORE:
+          coreObject.start();
+          break;
+        case RESTART_CORE:
+          coreObject.restart(b.getBoolean("resetConfig"));
+          break;
+        case STOP_CORE:
+          coreObject.stop();
+          coreObject.executeAppCommand("exitActivity()");
+          break;
+        case HOME_DIR_AVAILABLE:
+          coreObject.homeDirAvailable=true;
+          coreObject.start();
+          break;
+        case HOME_DIR_NOT_AVAILABLE:
+          coreObject.homeDirAvailable=false;
+          coreObject.stop();
+          break;
+        default:
+          GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown message received");
+      }
+    }
+  }
+
   protected Thread thread = null;
-  public Handler messageHandler = null;
+  public AppMessageHandler messageHandler = null;
 
   // Types of messages
   public static final int START_CORE = 0;  
@@ -207,7 +242,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   // Variables for handling the metwatch app
   boolean metawWatchAppActive = false;
-
+  
   // Handler thread
   public void run() {
     
@@ -218,36 +253,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         
     // Process messages
     Looper.prepare();
-    messageHandler = new Handler() {
-
-      /** Called when there is a message for the core */
-      @Override
-      public void handleMessage(Message msg) {  
-        Bundle b=msg.getData();
-        switch(msg.what) {
-          case START_CORE:
-            start();
-            break;
-          case RESTART_CORE:
-            restart(b.getBoolean("resetConfig"));
-            break;
-          case STOP_CORE:
-            stop();
-            executeAppCommand("exitActivity()");
-            break;
-          case HOME_DIR_AVAILABLE:
-            homeDirAvailable=true;
-            start();
-            break;
-          case HOME_DIR_NOT_AVAILABLE:
-            homeDirAvailable=false;
-            stop();
-            break;
-          default:
-            GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown message received");
-        }
-      }      
-    };
+    messageHandler = new AppMessageHandler(this);    
     threadInitialized.signal();
     lock.unlock();
     Looper.loop();

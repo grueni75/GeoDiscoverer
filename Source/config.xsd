@@ -223,6 +223,11 @@
                         <xsd:documentation>Time in microseconds that the transition from the current page to the next page takes.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
+                    <xsd:element name="widgetsActiveTimeout" type="xsd:integer" default="5000000">
+                      <xsd:annotation>
+                        <xsd:documentation>Time in microseconds to show the widgets after last interaction.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
                     <xsd:element name="changePageOvershoot" type="xsd:double" default="10.0">
                       <xsd:annotation>
                         <xsd:documentation>Distance in percent of the screen width that the page change shall overshoot.</xsd:documentation>

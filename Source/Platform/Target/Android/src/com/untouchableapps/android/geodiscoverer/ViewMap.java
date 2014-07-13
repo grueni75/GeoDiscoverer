@@ -23,45 +23,58 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.graphics.Typeface;
+import android.database.Cursor;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.util.DisplayMetrics;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.Window;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,11 +92,9 @@ public class ViewMap extends GDActivity {
   GDMapSurfaceView mapSurfaceView = null;
   TextView messageView = null;
   TextView busyTextView = null;
-  ImageView splashView = null;
-  ImageView busyCircleView = null;
-  FrameLayout rootFrameLayout = null;
+  FrameLayout viewMapRootLayout = null;
   LinearLayout messageLayout = null;
-  LinearLayout splashLinearLayout = null;
+  LinearLayout splashLayout = null;
   
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -92,11 +103,15 @@ public class ViewMap extends GDActivity {
   String lastAddressSubject;
   String lastAddressText = "";
   
+  // Info about the current gpx file
+  String gpxName = "";
+  
   // Managers
   LocationManager locationManager;
   SensorManager sensorManager;
   PowerManager powerManager;
   DevicePolicyManager devicePolicyManager;
+  DownloadManager downloadManager;
   
   // Wake lock
   WakeLock wakeLock = null;
@@ -104,6 +119,33 @@ public class ViewMap extends GDActivity {
   // Flags
   boolean compassWatchStarted = false;
   boolean exitRequested = false;
+  
+  // Handles finished queued downloads
+  LinkedList<Bundle> downloads = new LinkedList<Bundle>();
+  BroadcastReceiver downloadCompleteReceiver = new BroadcastReceiver() {
+    
+    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      
+      // If one of the requested download finished, restart the core
+      for (Bundle download : downloads) {
+        DownloadManager.Query query = new DownloadManager.Query();
+        query.setFilterById(download.getLong("ID"));
+        Cursor cur = downloadManager.query(query);
+        int col = cur.getColumnIndex(DownloadManager.COLUMN_STATUS);
+        if (cur.moveToFirst()) {
+          if (cur.getInt(col)==DownloadManager.STATUS_SUCCESSFUL) {
+            restartCore(false);
+          } else {
+            errorDialog(getString(R.string.download_failed,download.getLong("Name")));
+          }
+        }
+        downloads.remove(download);
+        break;
+      }
+    }
+  };
   
   /** Updates the progress dialog */
   protected void updateProgressDialog(String message, int progress) {
@@ -127,17 +169,17 @@ public class ViewMap extends GDActivity {
   // Shows the splash screen
   void setSplashVisibility(boolean isVisible) {
     if (isVisible) {
-      splashLinearLayout.setVisibility(LinearLayout.VISIBLE);
-      messageView.setVisibility(TextView.VISIBLE);
+      splashLayout.setVisibility(LinearLayout.VISIBLE);
+      messageLayout.setVisibility(LinearLayout.VISIBLE);
       coreObject.setSplashIsVisible(true);
       /*RotateAnimation animation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
       animation.setRepeatCount(Animation.INFINITE);
       animation.setDuration(3000);
       busyCircleView.setAnimation(animation);*/
     } else {
-      splashLinearLayout.setVisibility(LinearLayout.GONE);
+      splashLayout.setVisibility(LinearLayout.GONE);
       //busyCircleView.setAnimation(null);                    
-      messageView.setVisibility(TextView.INVISIBLE);
+      messageLayout.setVisibility(LinearLayout.INVISIBLE);
       busyTextView.setText(" " + getString(R.string.starting_core_object) + " ");
     }
   }
@@ -146,7 +188,7 @@ public class ViewMap extends GDActivity {
   void showContextMenu() {
     AlertDialog.Builder builder = new AlertDialog.Builder(this);
     builder.setTitle(R.string.context_menu_title);
-    builder.setIcon(android.R.drawable.ic_menu_mapmode);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
     String[] items = { 
       getString(R.string.set_target_at_map_center), 
       getString(R.string.set_target_at_location), 
@@ -172,146 +214,160 @@ public class ViewMap extends GDActivity {
   
   // Communication with the native core
   public static final int EXECUTE_COMMAND = 0;
-  
-  public Handler coreMessageHandler = new Handler() {
-
-      /** Called when the core has a message */
-      @Override
-      public void handleMessage(Message msg) {  
-          Bundle b=msg.getData();
-          switch(msg.what) {
-            case EXECUTE_COMMAND:
-              
-              // Extract the command
-              String command=b.getString("command");
-              int args_start=command.indexOf("(");
-              int args_end=command.lastIndexOf(")");
-              String commandFunction=command.substring(0, args_start);
-              String t=command.substring(args_start+1,args_end);
-              Vector<String> commandArgs = new Vector<String>();
-              boolean stringStarted=false;
-              int startPos=0;
-              for(int i=0;i<t.length();i++) {
-                if (t.substring(i,i+1).equals("\"")) {
-                  if (stringStarted)
-                    stringStarted=false;
-                  else
-                    stringStarted=true;                    
+  static protected class CoreMessageHandler extends Handler {
+    
+    protected final WeakReference<ViewMap> weakViewMap; 
+    
+    CoreMessageHandler(ViewMap viewMap) {
+      this.weakViewMap = new WeakReference<ViewMap>(viewMap);
+    }
+    
+    /** Called when the core has a message */
+    @Override
+    public void handleMessage(Message msg) {  
+      
+      // Abort if the object is not available anymore
+      ViewMap viewMap = weakViewMap.get();
+      if (viewMap==null)
+        return;
+    
+      // Handle the message
+      Bundle b=msg.getData();
+      switch(msg.what) {
+        case EXECUTE_COMMAND:
+          
+          // Extract the command
+          String command=b.getString("command");
+          int args_start=command.indexOf("(");
+          int args_end=command.lastIndexOf(")");
+          String commandFunction=command.substring(0, args_start);
+          String t=command.substring(args_start+1,args_end);
+          Vector<String> commandArgs = new Vector<String>();
+          boolean stringStarted=false;
+          int startPos=0;
+          for(int i=0;i<t.length();i++) {
+            if (t.substring(i,i+1).equals("\"")) {
+              if (stringStarted)
+                stringStarted=false;
+              else
+                stringStarted=true;                    
+            }
+            if (!stringStarted) {
+              if ((t.substring(i,i+1).equals(","))||(i==t.length()-1)) {
+                String arg;
+                if (i==t.length()-1) 
+                  arg=t.substring(startPos,i+1);
+                else
+                  arg=t.substring(startPos,i);
+                if (arg.startsWith("\"")) {
+                  arg=arg.substring(1);
                 }
-                if (!stringStarted) {
-                  if ((t.substring(i,i+1).equals(","))||(i==t.length()-1)) {
-                    String arg;
-                    if (i==t.length()-1) 
-                      arg=t.substring(startPos,i+1);
-                    else
-                      arg=t.substring(startPos,i);
-                    if (arg.startsWith("\"")) {
-                      arg=arg.substring(1);
-                    }
-                    if (arg.endsWith("\"")) {
-                      arg=arg.substring(0,arg.length()-1);
-                    }
-                    commandArgs.add(arg);
-                    startPos=i+1;
-                  }
+                if (arg.endsWith("\"")) {
+                  arg=arg.substring(0,arg.length()-1);
                 }
+                commandArgs.add(arg);
+                startPos=i+1;
               }
-              
-              // Execute command
-              boolean commandExecuted=false;
-              if (commandFunction.equals("fatalDialog")) {
-                fatalDialog(commandArgs.get(0));
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("errorDialog")) {
-                errorDialog(commandArgs.get(0));
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("warningDialog")) {
-                warningDialog(commandArgs.get(0));
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("infoDialog")) {
-                infoDialog(commandArgs.get(0));
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("createProgressDialog")) {
-                progressMax=Integer.parseInt(commandArgs.get(1));
-                updateProgressDialog(commandArgs.get(0),0);
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("updateProgressDialog")) {
-                updateProgressDialog(commandArgs.get(0),Integer.parseInt(commandArgs.get(1)));
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("closeProgressDialog")) {
-                if (progressDialog!=null) {
-                  progressDialog.dismiss();
-                  progressDialog=null;
-                }
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("getLastKnownLocation")) {
-                if (coreObject!=null) {
-                  coreObject.onLocationChanged(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-                  coreObject.onLocationChanged(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
-                }
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("coreInitialized")) {
-                Intent intent = new Intent(ViewMap.this, GDService.class);
-                intent.setAction("coreInitialized");
-                startService(intent);             
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("updateWakeLock")) {
-                updateWakeLock();
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("updateMessages")) {
-                if (messageView!=null) {
-                  if (messageView.getVisibility()==TextView.VISIBLE) {
-                    messageView.setText(GDApplication.messages);
-                    messageView.invalidate();
-                  }
-                }
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("setSplashVisibility")) {
-                if (messageView!=null) {
-                  if (commandArgs.get(0).equals("1")) {
-                    setSplashVisibility(true);
-                  } else {
-                    setSplashVisibility(false);
-                  }
-                  rootFrameLayout.requestLayout();
-                }
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("showContextMenu")) {
-                showContextMenu();
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("askForAddress")) {
-                askForAddress(getString(R.string.manually_entered_address),lastAddressText);
-                commandExecuted=true;
-              }
-              if (commandFunction.equals("exitActivity")) {
-                exitRequested = true;
-                stopService(new Intent(ViewMap.this, GDService.class));
-                finish();
-                commandExecuted=true;
-              } 
-              
-              if (!commandExecuted) {
-                GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
-              }
-              break;
+            }
           }
+          
+          // Execute command
+          boolean commandExecuted=false;
+          if (commandFunction.equals("fatalDialog")) {
+            viewMap.fatalDialog(commandArgs.get(0));
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("errorDialog")) {
+            viewMap.errorDialog(commandArgs.get(0));
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("warningDialog")) {
+            viewMap.warningDialog(commandArgs.get(0));
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("infoDialog")) {
+            viewMap.infoDialog(commandArgs.get(0));
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("createProgressDialog")) {
+            viewMap.progressMax=Integer.parseInt(commandArgs.get(1));
+            viewMap.updateProgressDialog(commandArgs.get(0),0);
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("updateProgressDialog")) {
+            viewMap.updateProgressDialog(commandArgs.get(0),Integer.parseInt(commandArgs.get(1)));
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("closeProgressDialog")) {
+            if (viewMap.progressDialog!=null) {
+              viewMap.progressDialog.dismiss();
+              viewMap.progressDialog=null;
+            }
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("getLastKnownLocation")) {
+            if (viewMap.coreObject!=null) {
+              viewMap.coreObject.onLocationChanged(viewMap.locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+              viewMap.coreObject.onLocationChanged(viewMap.locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+            }
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("coreInitialized")) {
+            Intent intent = new Intent(viewMap, GDService.class);
+            intent.setAction("coreInitialized");
+            viewMap.startService(intent);             
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("updateWakeLock")) {
+            viewMap.updateWakeLock();
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("updateMessages")) {
+            if (viewMap.messageLayout!=null) {
+              if (viewMap.messageLayout.getVisibility()==LinearLayout.VISIBLE) {
+                viewMap.messageView.setText(GDApplication.messages);
+                viewMap.messageView.invalidate();
+              }
+            }
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("setSplashVisibility")) {
+            if (viewMap.messageLayout!=null) {
+              if (commandArgs.get(0).equals("1")) {
+                viewMap.setSplashVisibility(true);
+              } else {
+                viewMap.setSplashVisibility(false);
+              }
+              viewMap.viewMapRootLayout.requestLayout();
+            }
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("showContextMenu")) {
+            viewMap.showContextMenu();
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("askForAddress")) {
+            viewMap.askForAddress(viewMap.getString(R.string.manually_entered_address),viewMap.lastAddressText);
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("exitActivity")) {
+            viewMap.exitRequested = true;
+            viewMap.stopService(new Intent(viewMap, GDService.class));
+            viewMap.finish();
+            commandExecuted=true;
+          } 
+          
+          if (!commandExecuted) {
+            GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
+          }
+          break;
       }
-  };  
+    }
+  }
+  CoreMessageHandler coreMessageHandler = new CoreMessageHandler(this);
 
   /** Sets the screen time out */
+  @SuppressLint("Wakelock")
   void updateWakeLock() {
     if (mapSurfaceView!=null) {
       String state=coreObject.executeCoreCommand("getWakeLock()");
@@ -350,7 +406,7 @@ public class ViewMap extends GDActivity {
       messageLayout.setOrientation(LinearLayout.HORIZONTAL);
     else 
       messageLayout.setOrientation(LinearLayout.VERTICAL);  
-    rootFrameLayout.requestLayout();
+    viewMapRootLayout.requestLayout();
   }
 
   /** Restarts the core */
@@ -372,7 +428,7 @@ public class ViewMap extends GDActivity {
     editText.setText(text);
     builder.setTitle(R.string.address_dialog_title);
     builder.setMessage(R.string.address_dialog_message);
-    builder.setIcon(android.R.drawable.ic_menu_mapmode);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
     builder.setView(editText);
     builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {  
       public void onClick(DialogInterface dialog, int whichButton) {  
@@ -387,7 +443,57 @@ public class ViewMap extends GDActivity {
     AlertDialog alert = builder.create();
     alert.show();                
   }
-  
+
+  /** Asks the user for confirmation of the route name */
+  void askForRouteName(Uri srcURI, final String routeName) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    final ImportRouteTask task = new ImportRouteTask();
+    task.srcURI = srcURI;
+    final FrameLayout dialogRootLayout = new FrameLayout(this);
+    builder.setTitle(R.string.route_name_dialog_title);
+    builder.setMessage(R.string.route_name_dialog_message);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
+    builder.setView(dialogRootLayout);
+    builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {  
+      public void onClick(DialogInterface dialog, int whichButton) {  
+        task.execute();
+      }  
+    });
+    builder.setNegativeButton(R.string.cancel, null);
+    builder.setCancelable(true);
+    AlertDialog alert = builder.create();
+    LayoutInflater inflater = alert.getLayoutInflater();
+    final View contentView = inflater.inflate(R.layout.route_name, dialogRootLayout);
+    final EditText editText = (EditText) contentView.findViewById(R.id.route_name_edit_text);
+    editText.setText(gpxName);
+    final TextView routeExistsTextView = (TextView) contentView.findViewById(R.id.route_name_route_exists_warning);
+    TextWatcher textWatcher = new TextWatcher() {
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        
+        // Check if route exists
+        String dstFilename = GDApplication.getHomeDirPath() + "/Route/" + s;
+        final File dstFile = new File(dstFilename);
+        if ((s=="")||(!dstFile.exists())) 
+          routeExistsTextView.setVisibility(View.GONE);          
+        else
+          routeExistsTextView.setVisibility(View.VISIBLE);
+        contentView.requestLayout();
+
+        // Remember the select name
+        task.name=s.toString();
+        task.dstFilename=dstFilename;
+        
+      }
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+      }
+      public void afterTextChanged(Editable s) {
+      }
+    };
+    textWatcher.onTextChanged(editText.getText(),0,0,0);
+    editText.addTextChangedListener(textWatcher);
+    alert.show();                
+  }
+
   /** Copies tracks from the Track into the Route directory */
   private class CopyTracksTask extends AsyncTask<Void, Integer, Void> {
 
@@ -438,6 +544,63 @@ public class ViewMap extends GDActivity {
     }
   }
 
+  /** Copies tracks from the Track into the Route directory */
+  private class ImportRouteTask extends AsyncTask<Void, Integer, Void> {
+
+    ProgressDialog progressDialog;
+    public String name;
+    public Uri srcURI;
+    public String dstFilename;
+
+    protected void onPreExecute() {
+
+      // Prepare the progress dialog
+      progressDialog = new ProgressDialog(ViewMap.this);
+      progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+      progressDialog.setMessage(getString(R.string.importing_route,name));
+      progressDialog.setCancelable(false);
+      progressDialog.show();
+    }
+
+    protected Void doInBackground(Void... params) {
+
+      // Open the content of the route file
+      InputStream gpxContents = null;
+      try {
+        gpxContents = getContentResolver().openInputStream(srcURI);
+      }
+      catch (FileNotFoundException e) {
+        errorDialog(getString(R.string.cannot_read_uri,srcURI.toString()));
+      }
+      if (gpxContents!=null) {
+        
+        // Create the destination file
+        try {
+          GDApplication.copyFile(gpxContents, dstFilename);
+          gpxContents.close();
+        } 
+        catch (IOException e) {
+          Toast.makeText(ViewMap.this,String.format(getString(R.string.cannot_import_route), name), Toast.LENGTH_LONG).show();          
+        }
+        
+      }
+
+      return null;
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+    }
+
+    protected void onPostExecute(Void result) {
+
+      // Close the progress dialog
+      progressDialog.dismiss();
+
+      // Restart the core to load the new routes
+      restartCore(false);
+    }
+  }
+  
   /** Copies tracks to the route directory */
   void addTracksAsRoutes() {
 
@@ -591,6 +754,105 @@ public class ViewMap extends GDActivity {
     alert.show();
   }
   
+  /** Defines all entries in the navigation drawer */
+  ArrayList<GDNavDrawerItem> createNavDrawerEntries() {
+    ArrayList<GDNavDrawerItem> entries = new ArrayList<GDNavDrawerItem>();
+    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_info_details,getString(R.string.show_messages)));
+    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_preferences,getString(R.string.preferences)));
+    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_add,getString(R.string.add_tracks_as_routes)));
+    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_delete,getString(R.string.remove_routes)));
+    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_revert,getString(R.string.reset)));
+    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_close_clear_cancel,getString(R.string.exit)));
+    return entries;
+  }
+  
+  /** Prepares activity for functions only available on gingerbread */
+  @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+  void onCreateGingerbread() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+      downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+      IntentFilter filter = new IntentFilter();
+      filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+      registerReceiver(downloadCompleteReceiver, filter);
+    }
+  }
+  
+  /** Downloads files extracted from intents */
+  @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+  void downloadRoute(final Uri srcURI) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+
+      // Create some variables
+      final String name = srcURI.getLastPathSegment();
+      final String dstFilename = GDApplication.getHomeDirPath() + "/Route/" + name;
+
+      // Check if download is already ongoing
+      DownloadManager.Query query = new DownloadManager.Query();
+      query.setFilterByStatus(DownloadManager.STATUS_PAUSED|DownloadManager.STATUS_PENDING|DownloadManager.STATUS_RUNNING);
+      Cursor cur = downloadManager.query(query);
+      int col = cur.getColumnIndex(DownloadManager.COLUMN_ID);
+      boolean downloadOngoing = false;
+      for (Bundle download : downloads) {
+        for (cur.moveToFirst(); !cur.isAfterLast(); cur.moveToNext()) {
+          if (cur.getLong(col)==download.getLong("ID")) {
+            downloadOngoing = true;
+            break;
+          }
+        }
+      }
+      if (downloadOngoing) {
+        infoDialog(getString(R.string.skipping_download));
+      } else {
+
+        // Ask the user if GPX file shall be downloaded and overwritten if file exists
+        final File dstFile = new File(dstFilename);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getTitle());
+        String message; 
+        if (dstFile.exists())
+          message=getString(R.string.overwrite_route_question);              
+        else
+          message=getString(R.string.copy_route_question);
+        message = String.format(message, name);
+        builder.setMessage(message);              
+        builder.setCancelable(true);
+        builder.setPositiveButton(R.string.yes,
+          new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+              
+              // Delete file if it exists
+              if (dstFile.exists()) 
+                dstFile.delete();
+              
+              // Request download of file
+              DownloadManager.Request request = new DownloadManager.Request(srcURI);
+              request.setDescription(getString(R.string.downloading_gpx_to_route_directory));
+              request.setTitle(name);
+              request.setDestinationUri(Uri.fromFile(dstFile));
+              //request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+              long id = downloadManager.enqueue(request);
+              Bundle download = new Bundle();
+              download.putLong("ID", id);
+              download.putString("Name",name);
+              downloads.add(download);
+              
+            }
+          });
+        builder.setNegativeButton(R.string.no, null);
+        builder.setIcon(android.R.drawable.ic_dialog_info);
+        AlertDialog alert = builder.create();
+        alert.show();
+      }
+
+    } else {
+      errorDialog(getString(R.string.download_manager_not_available));
+    }
+    
+    
+    
+    
+  }
+  
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -606,64 +868,28 @@ public class ViewMap extends GDActivity {
     sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
     powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
     devicePolicyManager = (DevicePolicyManager)this.getSystemService(Context.DEVICE_POLICY_SERVICE);
-
-    // Setup the GUI
-    requestWindowFeature(Window.FEATURE_NO_TITLE);    
-
+    
     // Prepare the window contents
-    DisplayMetrics metrics = new DisplayMetrics();
-    getWindowManager().getDefaultDisplay().getMetrics(metrics);
-    rootFrameLayout = new FrameLayout(this);    
-    mapSurfaceView = new GDMapSurfaceView(this);
-    mapSurfaceView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
-    messageLayout = new LinearLayout(this);
-    messageLayout.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
-    messageView = new TextView(this);
-    messageView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT,LayoutParams.FILL_PARENT));
-    messageView.setTextColor(0xFFFFFFFF);
-    messageView.setTypeface(Typeface.MONOSPACE);
-    messageView.setTextSize(10);
-    messageView.setBackgroundColor(0xA0000000);
-    messageView.setVisibility(TextView.INVISIBLE);
-    messageView.setGravity(Gravity.BOTTOM);
-    splashLinearLayout = new LinearLayout(this);
-    LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-    linearLayoutParams.gravity = Gravity.CENTER;
-    splashLinearLayout.setLayoutParams(linearLayoutParams);
-    splashLinearLayout.setOrientation(LinearLayout.VERTICAL);
-    splashView = new ImageView(this);
-    splashView.setImageResource(R.drawable.splash);
-    linearLayoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-    linearLayoutParams.gravity = Gravity.CENTER;
-    splashView.setLayoutParams(linearLayoutParams);
-    busyTextView = new TextView(this);
-    linearLayoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-    linearLayoutParams.gravity = Gravity.CENTER;
-    linearLayoutParams.leftMargin = (int)(5*metrics.density);
-    linearLayoutParams.rightMargin = linearLayoutParams.leftMargin;
-    linearLayoutParams.bottomMargin = (int)(10*metrics.density);
-    busyTextView.setLayoutParams(linearLayoutParams);
-    busyTextView.setTextSize(18.0f);
-    busyTextView.setTextColor(0xFFFFFFFF);
-    busyTextView.setBackgroundColor(0xA0000000);
-    busyTextView.setGravity(Gravity.CENTER);
-    splashLinearLayout.addView(splashView,0);
-    splashLinearLayout.addView(busyTextView,1);
-    messageLayout.addView(splashLinearLayout, 0);
-    messageLayout.addView(messageView, 1);    
-    rootFrameLayout.addView(mapSurfaceView,0);
-    rootFrameLayout.addView(messageLayout,1);
-    splashLinearLayout.setVisibility(LinearLayout.GONE);
-    updateViewConfiguration(getResources().getConfiguration());
+    setContentView(R.layout.view_map);
+    mapSurfaceView = (GDMapSurfaceView) findViewById(R.id.view_map_map_surface_view);
+    mapSurfaceView.setCoreObject(coreObject);
+    messageView = (TextView) findViewById(R.id.view_map_message_text_view);
+    busyTextView = (TextView) findViewById(R.id.view_map_busy_text_view);
+    viewMapRootLayout = (FrameLayout) findViewById(R.id.view_map_root_layout);
+    messageLayout = (LinearLayout) findViewById(R.id.view_map_message_layout);
+    splashLayout = (LinearLayout) findViewById(R.id.view_map_splash_layout);
     setSplashVisibility(true); // to get the correct busy text
     setSplashVisibility(false);
-    setContentView(rootFrameLayout);   
+    updateViewConfiguration(getResources().getConfiguration());
 
     // Get a wake lock
     wakeLock=powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
     if (wakeLock==null) {
       fatalDialog("Can not obtain wake lock!");
     }
+    
+    // Prepare activity for gingerbread
+    onCreateGingerbread();
     
     /* Start test thread
     new Thread(new Runnable() {
@@ -720,15 +946,17 @@ public class ViewMap extends GDActivity {
     // Extract the file path from the intent
     intent = getIntent();
     String srcFilename = "";
+    Uri webURI = null;
+    Uri fileURI = null;
     if (intent!=null) {
       if (Intent.ACTION_SEND.equals(intent.getAction())) {
         Bundle extras = intent.getExtras();
         if (extras.containsKey(Intent.EXTRA_STREAM)) {
           Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
-          if (uri.getScheme().equals("file")) {
-            srcFilename = uri.getPath();
+          if (uri.getScheme().equals("http") || uri.getScheme().equals("https")) {
+            webURI=uri;
           } else {
-            warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));
+            fileURI=uri;
           }
         } else if (extras.containsKey(Intent.EXTRA_TEXT)) {
           askForAddress(extras.getString(Intent.EXTRA_SUBJECT), extras.getString(Intent.EXTRA_TEXT));
@@ -738,80 +966,33 @@ public class ViewMap extends GDActivity {
       }
       if (Intent.ACTION_VIEW.equals(intent.getAction())) {
         Uri uri = intent.getData();
-        if (uri.getScheme().equals("file")) {
+        if (uri.getScheme().equals("file")&&(uri.getLastPathSegment().endsWith(".gda"))) {
           srcFilename = uri.getPath();
+        } else if (uri.getScheme().equals("http") || uri.getScheme().equals("https")) {
+          webURI=uri;
         } else {
-          warningDialog(String.format(getString(R.string.unsupported_scheme),uri.getScheme()));        
+          fileURI=uri;
         }
       }
     }
     
     // Handle the intent
-    GDApplication app=(GDApplication)getApplication();
     if (!srcFilename.equals("")) {
             
       // Ask the user if the file should be copied to the route directory
       final File srcFile = new File(srcFilename);
       if (srcFile.exists()) {
 
-        // Route?
-        if (srcFilename.endsWith(".gpx")) {
-        
-          // Ask the user if the file should be copied
-          String dstFilename = app.getHomeDirPath() + "/Route/" + srcFile.getName();
-          final File dstFile = new File(dstFilename);
-          if (!srcFile.equals(dstFile)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(getTitle());
-            String message; 
-            if (dstFile.exists())
-              message=getString(R.string.overwrite_route_question);              
-            else
-              message=getString(R.string.copy_route_question);
-            message = String.format(message, srcFile.getName());
-            builder.setMessage(message);              
-            builder.setCancelable(true);
-            builder.setPositiveButton(R.string.yes,
-              new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                  
-                  // Copy file
-                  ProgressDialog progressDialog = new ProgressDialog(ViewMap.this);
-                  progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                  String message = getString(R.string.copying_file);
-                  message = String.format(message, srcFile.getName());
-                  progressDialog.setMessage(message);
-                  progressDialog.setCancelable(false);
-                  progressDialog.show();
-                  try {
-                    GDApplication.copyFile(srcFile.getPath(), dstFile.getPath());
-                  }
-                  catch (IOException e) {
-                    errorDialog(String.format(getString(R.string.cannot_copy_file), srcFile.getPath(), dstFile.getPath()));
-                  }
-                  progressDialog.dismiss();
-                  
-                  // Restart the core
-                  restartCore(false);
-                }
-              });
-            builder.setNegativeButton(R.string.no, null);
-            builder.setIcon(android.R.drawable.ic_dialog_info);
-            AlertDialog alert = builder.create();
-            alert.show();
-          }
-        }
-        
         // Map archive?
         if (srcFilename.endsWith(".gda")) {
         
           // Ask the user if a new map shall be created based on the archive
-          String mapFolderFilename = app.getHomeDirPath() + "/Map/" + srcFile.getName();
+          String mapFolderFilename = GDApplication.getHomeDirPath() + "/Map/" + srcFile.getName();
           mapFolderFilename = mapFolderFilename.substring(0, mapFolderFilename.lastIndexOf('.'));
           final String mapInfoFilename = mapFolderFilename + "/info.gds";
           final File mapFolder = new File(mapFolderFilename);
           AlertDialog.Builder builder = new AlertDialog.Builder(this);
-          builder.setTitle(getTitle());
+          builder.setTitle(R.string.import_map);
           String message; 
           if (mapFolder.exists())
             message=getString(R.string.replace_map_folder_question,mapFolder.getName(),srcFile);              
@@ -854,6 +1035,18 @@ public class ViewMap extends GDActivity {
         errorDialog(getString(R.string.file_does_not_exist));
       }
     }
+    if (webURI!=null) {
+      downloadRoute(webURI);
+    }
+    if (fileURI!=null) {
+
+      // Get the name of the GPX file
+      gpxName = fileURI.getLastPathSegment();
+      if (!gpxName.endsWith(".gpx")) {
+        gpxName = gpxName + ".gpx";
+      }
+      askForRouteName(fileURI,gpxName);
+    }
     
     // Reset intent
     setIntent(null);
@@ -867,6 +1060,7 @@ public class ViewMap extends GDActivity {
   }
 
   /** Called when the activity is destroyed */
+  @SuppressLint("Wakelock")
   @Override
   public void onDestroy() {    
     super.onDestroy();
@@ -898,7 +1092,7 @@ public class ViewMap extends GDActivity {
   @Override
   public boolean onPrepareOptionsMenu(Menu menu) {
     super.onPrepareOptionsMenu(menu);
-    if (messageView.getVisibility()==TextView.VISIBLE) {
+    if (messageLayout.getVisibility()==LinearLayout.VISIBLE) {
       menu.findItem(R.id.toggle_messages).setTitle(R.string.hide_messages);
     } else {
       menu.findItem(R.id.toggle_messages).setTitle(R.string.show_messages);
@@ -941,21 +1135,33 @@ public class ViewMap extends GDActivity {
             coreObject.messageHandler.sendMessage(m);
             return true;
           case R.id.toggle_messages:
-            if (messageView.getVisibility()==TextView.VISIBLE) {
-              messageView.setVisibility(TextView.INVISIBLE);
+            if (messageLayout.getVisibility()==LinearLayout.VISIBLE) {
+              messageLayout.setVisibility(LinearLayout.INVISIBLE);
               item.setTitle(R.string.show_messages);
             } else {
               messageView.setText(GDApplication.messages);
-              messageView.setVisibility(TextView.VISIBLE);
+              messageLayout.setVisibility(LinearLayout.VISIBLE);
               item.setTitle(R.string.hide_messages);
             }
-            rootFrameLayout.requestLayout();
+            viewMapRootLayout.requestLayout();
             return true;
           case R.id.add_tracks_as_routes:
             addTracksAsRoutes();
             return true;
           case R.id.remove_routes:
             removeRoutes();
+            return true;
+          case R.id.show_legend:
+            String legendPath = coreObject.executeCoreCommand("getMapLegendPath()");
+            File legendPathFile = new File(legendPath);
+            if (!legendPathFile.exists()) {
+              errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder()"),legendPath));
+            } else {
+              Intent intent = new Intent();
+              intent.setAction(Intent.ACTION_VIEW);
+              intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
+              startActivity(intent);
+            }
             return true;
           default:
               return super.onOptionsItemSelected(item);

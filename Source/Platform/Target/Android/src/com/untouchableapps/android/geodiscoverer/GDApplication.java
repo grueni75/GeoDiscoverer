@@ -26,12 +26,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.FileChannel;
 
 import android.app.Application;
-import android.media.ExifInterface;
 import android.os.Environment;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -93,6 +92,25 @@ public class GDApplication extends Application {
     }
   }  
   
+  /** Copies a source file to a destination file */
+  public static void copyFile(InputStream srcInputStream, String dstFilename) throws IOException {
+    File dstFile = new File(dstFilename);    
+    if(!dstFile.exists()) {
+      dstFile.createNewFile();
+    }
+    FileChannel source = ((FileInputStream)srcInputStream).getChannel();
+    FileChannel destination = null;
+    try {
+      destination = new FileOutputStream(dstFile).getChannel();
+      destination.transferFrom(source, 0, source.size());
+    }
+    finally {
+      if(destination != null) {
+        destination.close();
+      }
+    }
+  }  
+
   /** Returns the path of the home dir */
   public static String getHomeDirPath() {
 

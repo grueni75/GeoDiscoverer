@@ -60,11 +60,11 @@ public class GDActivity extends FragmentActivity {
         }
         warningToast.cancel();
       }
-      warningToast=Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG);
+      warningToast=Toast.makeText(this, message, Toast.LENGTH_LONG);
       warningToast.show();
       lastToastTimestamp=SystemClock.uptimeMillis();
     } else if (kind==INFO_DIALOG) {      
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     } else {
       if (alertDialog == null) {
         alertDialog = new AlertDialog.Builder(this).create();
@@ -74,14 +74,14 @@ public class GDActivity extends FragmentActivity {
         alertDialog.setCancelable(false);
         if (kind == FATAL_DIALOG) {
           alertDialog.setButton(getString(R.string.button_label_exit), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(final DialogInterface dialog, int which) {
               alertDialog=null;
               finish();
             } 
           }); 
         } else {
           alertDialog.setButton(getString(R.string.button_label_ok), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(final DialogInterface dialog, int which) {
               alertDialog=null;
             }
           }); 

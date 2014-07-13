@@ -179,6 +179,10 @@ public:
     return core->getHomePath() + "/Map/" + folder;
   }
 
+  std::string getLegendPath() const {
+    return core->getHomePath() + "/Map/" + folder + "/legend.png";
+  }
+
   virtual void lockAccess() {
   }
 

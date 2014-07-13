@@ -122,6 +122,18 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_dei
     env->DeleteGlobalRef(coreClass);
   }
   coreClass=NULL;
+  if (appClass) {
+    env->DeleteGlobalRef(appClass);
+  }
+  appClass=NULL;
+  if (bundleClass) {
+    env->DeleteGlobalRef(bundleClass);
+  }
+  bundleClass=NULL;
+  if (listClass) {
+    env->DeleteGlobalRef(listClass);
+  }
+  listClass=NULL;
 }
 
 // Inits the jni
@@ -143,19 +155,19 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_ini
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitJNI(env,thiz);
     exit(1);
   }
-  bundleClass = env->FindClass("android/os/Bundle");
+  bundleClass = (jclass)env->NewGlobalRef(env->FindClass("android/os/Bundle"));
   if (!bundleClass) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find Bundle class!");
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitJNI(env,thiz);
     exit(1);
   }
-  listClass = env->FindClass("java/util/List");
+  listClass = (jclass)env->NewGlobalRef(env->FindClass("java/util/List"));
   if (!bundleClass) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find List class!");
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitJNI(env,thiz);
     exit(1);
   }
-  appClass = env->FindClass("com/untouchableapps/android/geodiscoverer/GDApplication");
+  appClass = (jclass)env->NewGlobalRef(env->FindClass("com/untouchableapps/android/geodiscoverer/GDApplication"));
   if (!appClass) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find GDApplication class!");
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitJNI(env,thiz);

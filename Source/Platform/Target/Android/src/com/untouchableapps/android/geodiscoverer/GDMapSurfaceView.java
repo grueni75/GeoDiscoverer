@@ -22,12 +22,14 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
-import android.view.KeyEvent;
+import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 /** Does the rendering with the OpenGL API */
@@ -48,82 +50,22 @@ public class GDMapSurfaceView extends GLSurfaceView {
   /** Previous distance between first and second pointer */
   float prevDistance=0;
 
-  // Variables for handling multi touch
-  boolean multitouchAvailable = true;
-  int ACTION_POINTER_UP;
-  int ACTION_POINTER_DOWN;
-  int ACTION_POINTER_INDEX_MASK;
-  int ACTION_POINTER_INDEX_SHIFT;
-  int ACTION_MASK;
-  int ACTION_DOWN;
-  int ACTION_MOVE;
-  int ACTION_UP;
-  int ACTION_CANCEL;
-  Method findPointerIndex;
-  Method getPointerId;
-  Method getPointerCount;
-  Method getX;
-  Method getY;
-  Method getAction;
-
   /** Constructor */
-  public GDMapSurfaceView(ViewMap parent) {
-    super(parent);
+  public GDMapSurfaceView(Context context, AttributeSet attrs) {
+    super(context, attrs);
     
     // Set the framebuffer
     setEGLConfigChooser(5,6,5,0,0,0);
-    
-    // Get the core object
-    GDApplication app=(GDApplication)parent.getApplication();
-    coreObject=app.coreObject;
-    
-    // Set the renderer
+  }
+
+  /** Sets the core object */
+  public void setCoreObject(GDCore coreObject) {
+    this.coreObject=coreObject;
     setRenderer(coreObject);
     //setRenderMode(RENDERMODE_WHEN_DIRTY);
     //requestRender();
-
-    // Check if we are on a multitouch device
-    ACTION_POINTER_UP=-1;
-    ACTION_POINTER_DOWN=-1;    
-    try {
-      Class motionEventClass = Class.forName("android.view.MotionEvent");
-      Field f;
-      f = motionEventClass.getDeclaredField("ACTION_POINTER_UP");
-      ACTION_POINTER_UP=f.getInt(null);
-      f = motionEventClass.getDeclaredField("ACTION_POINTER_DOWN");
-      ACTION_POINTER_DOWN=f.getInt(null);
-      f = motionEventClass.getDeclaredField("ACTION_POINTER_INDEX_MASK");
-      ACTION_POINTER_INDEX_MASK=f.getInt(null);
-      f = motionEventClass.getDeclaredField("ACTION_POINTER_INDEX_SHIFT");
-      ACTION_POINTER_INDEX_SHIFT=f.getInt(null);
-      f = motionEventClass.getDeclaredField("ACTION_MASK");
-      ACTION_MASK=f.getInt(null);
-      f = motionEventClass.getDeclaredField("ACTION_DOWN");
-      ACTION_DOWN=f.getInt(null);
-      f = motionEventClass.getDeclaredField("ACTION_UP");
-      ACTION_UP=f.getInt(null);
-      f = motionEventClass.getDeclaredField("ACTION_MOVE");
-      ACTION_MOVE=f.getInt(null);
-      f = motionEventClass.getDeclaredField("ACTION_CANCEL");
-      ACTION_CANCEL=f.getInt(null);
-      findPointerIndex=motionEventClass.getMethod("findPointerIndex", int.class);
-      getPointerId=motionEventClass.getMethod("getPointerId", int.class);
-      getPointerCount=motionEventClass.getMethod("getPointerCount");
-      getX=motionEventClass.getMethod("getX", int.class);
-      getY=motionEventClass.getMethod("getY", int.class);
-      getAction=motionEventClass.getMethod("getAction");
-    }
-    catch (Throwable e) {
-      multitouchAvailable=false;
-    }
-    
-    if (multitouchAvailable) {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "multitouch is available");
-    } else {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "multitouch is not available");
-    }
   }
-
+  
   /** Calculates the chage in angle and zoom if the pinch-to-zoom gesture is used */
   protected void updateTwoFingerGesture(MotionEvent event, boolean moveAction) {
     if (firstPointerID==-1)
@@ -132,12 +74,12 @@ public class GDMapSurfaceView extends GLSurfaceView {
       if (secondPointerID==-1) {
   
         // Update the core object
-        int pointerIndex=(Integer)findPointerIndex.invoke(event,firstPointerID);
+        int pointerIndex=event.findPointerIndex(firstPointerID);
         if (pointerIndex==-1) {
           return;
         }
-        int x = Math.round((Float)getX.invoke(event,pointerIndex));
-        int y = Math.round((Float)getY.invoke(event,pointerIndex));
+        int x = Math.round(event.getX(pointerIndex));
+        int y = Math.round(event.getY(pointerIndex));
         if (moveAction) {
           coreObject.executeCoreCommand("touchMove(" + x + "," + y + ")");        
         } else {
@@ -147,18 +89,18 @@ public class GDMapSurfaceView extends GLSurfaceView {
       } else {
         
         // Compute new angle, distance and position
-        int firstPointerIndex=(Integer)findPointerIndex.invoke(event, firstPointerID);
+        int firstPointerIndex=event.findPointerIndex(firstPointerID);
         if (firstPointerIndex==-1) {
           return;
         }
-        float firstX = (Float)getX.invoke(event,firstPointerIndex);
-        float firstY = (Float)getY.invoke(event,firstPointerIndex);
-        int secondPointerIndex=(Integer)findPointerIndex.invoke(event, secondPointerID);
+        float firstX = Math.round(event.getX(firstPointerIndex));
+        float firstY = Math.round(event.getY(firstPointerIndex));
+        int secondPointerIndex=event.findPointerIndex(secondPointerID);
         if (secondPointerIndex==-1) {
           return;
         }
-        float secondX = (Float)getX.invoke(event,secondPointerIndex);
-        float secondY = (Float)getY.invoke(event,secondPointerIndex);
+        float secondX = Math.round(event.getX(secondPointerIndex));
+        float secondY = Math.round(event.getY(secondPointerIndex));
         double distX=secondX-firstX;
         double distY=secondY-firstY;
         float distance=(float)Math.sqrt(distX*distX+distY*distY);
@@ -215,10 +157,12 @@ public class GDMapSurfaceView extends GLSurfaceView {
   }
   
   /** Called if the surface is touched */
+  @SuppressLint("ClickableViewAccessibility")
+  @TargetApi(Build.VERSION_CODES.ECLAIR)
   public boolean onTouchEvent(final MotionEvent event) {
                         
     // What happened?
-    if (!multitouchAvailable) {
+    if (VERSION.SDK_INT < VERSION_CODES.ECLAIR) {
 
       // Extract infos
       int action = event.getAction();
@@ -241,80 +185,74 @@ public class GDMapSurfaceView extends GLSurfaceView {
         }
       
     } else {
-    
-      try {
-        
-        // Find out what happened
-        int actionValue=(Integer)getAction.invoke(event);
-        int action=actionValue & ACTION_MASK;
-        int pointerIndex;
-        int x,y;
+            
+      // Find out what happened
+      int actionValue=event.getAction();
+      int action=actionValue & MotionEvent.ACTION_MASK;
+      int pointerIndex;
+      int x,y;
 
-        // First pointer touched screen?
-        if (action==ACTION_DOWN) {
-          firstPointerID=(Integer)getPointerId.invoke(event, 0);
-          pointerIndex=(Integer)findPointerIndex.invoke(event,firstPointerID);
-          x = Math.round((Float)getX.invoke(event,pointerIndex));
-          y = Math.round((Float)getY.invoke(event,pointerIndex));
-          coreObject.executeCoreCommand("touchDown(" + x + "," + y + ")");
-        }
+      // First pointer touched screen?
+      if (action==MotionEvent.ACTION_DOWN) {
+        firstPointerID=event.getPointerId(0);
+        pointerIndex=event.findPointerIndex(firstPointerID);
+        x = Math.round(event.getX(pointerIndex));
+        y = Math.round(event.getY(pointerIndex));
+        coreObject.executeCoreCommand("touchDown(" + x + "," + y + ")");
+      }
 
-        // One or more pointers have moved?
-        if (action==ACTION_MOVE) {
-          updateTwoFingerGesture(event, true);
-        }
-        
-        // All pointers have left?
-        if ((action==ACTION_UP)||(action==ACTION_CANCEL)) {
-          pointerIndex=(Integer)findPointerIndex.invoke(event,firstPointerID);
-          x = Math.round((Float)getX.invoke(event,pointerIndex));
-          y = Math.round((Float)getY.invoke(event,pointerIndex));          
-          coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");
-          firstPointerID=-1;
-          secondPointerID=-1;
-        }
-  
-        // New pointer touched screen? 
-        if (action==ACTION_POINTER_DOWN) {
-         
-          // Choose a second pointer if we don't have one yet
-          if (secondPointerID==-1) {
-            int newPointerIndex = (actionValue & ACTION_POINTER_INDEX_MASK) >> ACTION_POINTER_INDEX_SHIFT;
-            secondPointerID=(Integer)getPointerId.invoke(event,newPointerIndex);
-            updateTwoFingerGesture(event, false);            
-          }
+      // One or more pointers have moved?
+      if (action==MotionEvent.ACTION_MOVE) {
+        updateTwoFingerGesture(event, true);
+      }
+      
+      // All pointers have left?
+      if ((action==MotionEvent.ACTION_UP)||(action==MotionEvent.ACTION_CANCEL)) {
+        pointerIndex=event.findPointerIndex(firstPointerID);
+        x = Math.round(event.getX(pointerIndex));
+        y = Math.round(event.getY(pointerIndex));
+        coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");
+        firstPointerID=-1;
+        secondPointerID=-1;
+      }
 
-        }
-        
-        // Existing pointer left screen?
-        if (action==ACTION_POINTER_UP) {
-
-          // Choose a new first and second pointer
-          int leavingPointerIndex = (actionValue & ACTION_POINTER_INDEX_MASK) >> ACTION_POINTER_INDEX_SHIFT;
-          int numberOfPointers=(Integer)getPointerCount.invoke(event);
-          int firstPointerIndex=-1;
-          for (int i=0;i<numberOfPointers;i++) {
-            if (leavingPointerIndex!=i) {
-             firstPointerIndex=i;
-            }
-          }        
-          firstPointerID=(Integer)getPointerId.invoke(event, firstPointerIndex);
-          int secondPointerIndex=-1;            
-          for (int i=0;i<numberOfPointers;i++) {
-            if ((leavingPointerIndex!=i)&&(firstPointerIndex!=i)) {
-              secondPointerIndex=i;
-            }
-          }
-          if (secondPointerIndex!=-1) {
-            secondPointerID=(Integer)getPointerId.invoke(event, secondPointerIndex);
-          } else {
-            secondPointerID=-1;
-          }
+      // New pointer touched screen? 
+      if (action==MotionEvent.ACTION_POINTER_DOWN) {
+       
+        // Choose a second pointer if we don't have one yet
+        if (secondPointerID==-1) {
+          int newPointerIndex = (actionValue & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+          secondPointerID=event.getPointerId(newPointerIndex);
           updateTwoFingerGesture(event, false);            
         }
+
       }
-      catch (Throwable e) {
-        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "can not call multitouch related methods");
+      
+      // Existing pointer left screen?
+      if (action==MotionEvent.ACTION_POINTER_UP) {
+
+        // Choose a new first and second pointer
+        int leavingPointerIndex = (actionValue & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+        int numberOfPointers=event.getPointerCount();
+        int firstPointerIndex=-1;
+        for (int i=0;i<numberOfPointers;i++) {
+          if (leavingPointerIndex!=i) {
+           firstPointerIndex=i;
+          }
+        }        
+        firstPointerID=event.getPointerId(firstPointerIndex);
+        int secondPointerIndex=-1;            
+        for (int i=0;i<numberOfPointers;i++) {
+          if ((leavingPointerIndex!=i)&&(firstPointerIndex!=i)) {
+            secondPointerIndex=i;
+          }
+        }
+        if (secondPointerIndex!=-1) {
+          secondPointerID=event.getPointerId(secondPointerIndex);
+        } else {
+          secondPointerID=-1;
+        }
+        updateTwoFingerGesture(event, false);            
       }
     }
      

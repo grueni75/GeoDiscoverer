@@ -295,6 +295,14 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="getMapLegendPath") {
+    result=core->getMapSource()->getLegendPath();
+    cmdExecuted=true;
+  }
+  if (cmdName=="getMapFolder") {
+    result=core->getMapSource()->getFolder();
+    cmdExecuted=true;
+  }
   if (cmdName=="setReturnToLocation") {
     core->getMapEngine()->setReturnToLocation(atoi(args[0].c_str()));
     cmdExecuted=true;

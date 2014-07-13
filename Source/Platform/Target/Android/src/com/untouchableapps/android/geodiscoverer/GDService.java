@@ -22,43 +22,21 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Vector;
-
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
-import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class GDService extends Service {
-
-  // For backward compatibility
-  private static final Class[] mStartForegroundSignature = new Class[] {
-    int.class, Notification.class};
-  private static final Class[] mStopForegroundSignature = new Class[] {
-      boolean.class};
-  private NotificationManager mNM;
-  private Method mStartForeground;
-  private Method mStopForeground;
-  private Object[] mStartForegroundArgs = new Object[2];
-  private Object[] mStopForegroundArgs = new Object[1];
   
   // Managers
   LocationManager locationManager;
@@ -125,18 +103,6 @@ public class GDService extends Service {
    
     super.onCreate();
     
-    // Find out on which platform the service is running
-    mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-    try {
-      mStartForeground = getClass().getMethod("startForeground",
-              mStartForegroundSignature);
-      mStopForeground = getClass().getMethod("stopForeground",
-              mStopForegroundSignature);
-    } catch (NoSuchMethodException e) {
-      // Running on an older platform.
-      mStartForeground = mStopForeground = null;
-    }  
-
     // Get the core object
     coreObject=GDApplication.coreObject;
     
@@ -185,58 +151,6 @@ public class GDService extends Service {
     registerReceiver(metaWatchAppReceiver, filter);
   }
   
-  /**
-   * This is a wrapper around the new startForeground method, using the older
-   * APIs if it is not available.
-   */
-  void startForegroundCompat(int id, Notification notification) {
-    // If we have the new startForeground API, then use it.
-    if (mStartForeground != null) {
-      mStartForegroundArgs[0] = Integer.valueOf(id);
-      mStartForegroundArgs[1] = notification;
-      try {
-        mStartForeground.invoke(this, mStartForegroundArgs);
-      } catch (InvocationTargetException e) {
-        // Should not happen.
-        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unable to invoke startForeground");
-      } catch (IllegalAccessException e) {
-        // Should not happen.
-        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unable to invoke startForeground");
-      }
-      return;
-    }
-    
-    // Fall back on the old API.
-    setForeground(true);
-    mNM.notify(id, notification);
-  }
-  
-  /**
-   * This is a wrapper around the new stopForeground method, using the older
-   * APIs if it is not available.
-   */
-  void stopForegroundCompat(int id) {
-    // If we have the new stopForeground API, then use it.
-    if (mStopForeground != null) {
-      mStopForegroundArgs[0] = Boolean.TRUE;
-      try {
-        mStopForeground.invoke(this, mStopForegroundArgs);
-      } catch (InvocationTargetException e) {
-        // Should not happen.
-        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unable to invoke stopForeground");
-      } catch (IllegalAccessException e) {
-        // Should not happen.
-        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unable to invoke stopForeground");
-      }
-      return;
-    }
-      
-    // Fall back on the old API.  Note to cancel BEFORE changing the
-    // foreground state, since we could be killed at that point.
-    mNM.cancel(id);
-    setForeground(false);
-  }  
-
   /** No binding supported */
   @Override
   public IBinder onBind(Intent intent) {
@@ -271,12 +185,12 @@ public class GDService extends Service {
             
       // Inform the user
       if (notification!=null) {
-        stopForegroundCompat(R.string.notification_title);
+        stopForeground(true);
         //notificationManager.cancel(R.string.notification_title);
       }
       notification = new Notification(R.drawable.status, getText(R.string.notification_activity_active_message), System.currentTimeMillis());
       notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_activity_active_message), pendingIntent);
-      startForegroundCompat(R.string.notification_title, notification);
+      startForeground(R.string.notification_title, notification);
     }
     if (intent.getAction().equals("coreInitialized")) {
       metaWatchAppActive = coreObject.configStoreGetStringValue("MetaWatch", "activateMetaWatchApp").equals("1");
@@ -293,7 +207,7 @@ public class GDService extends Service {
         locationWatchStarted = false;
         stopSelf();
       } else {
-        stopForegroundCompat(R.string.notification_title);
+        stopForeground(true);
         //notificationManager.cancel(R.string.notification_title);
         CharSequence message;
         if ((metaWatchAppActive)&&(recordingPosition))
@@ -304,7 +218,7 @@ public class GDService extends Service {
           message = getText(R.string.notification_activity_inactive_recording_message);
         notification = new Notification(R.drawable.status, message, System.currentTimeMillis());
         notification.setLatestEventInfo(this, getText(R.string.notification_title), message, pendingIntent);
-        startForegroundCompat(R.string.notification_title, notification);
+        startForeground(R.string.notification_title, notification);
       }
 
     }
@@ -316,7 +230,7 @@ public class GDService extends Service {
   public void onDestroy() {
     
     // Hide the notification
-    stopForegroundCompat(R.string.notification_title);
+    stopForeground(true);
     //notificationManager.cancel(R.string.notification_title);
 
     // Stop watching for external storage
