@@ -54,6 +54,12 @@ protected:
   // Path direction icon
   GraphicRectangle pathDirectionIcon;
 
+  // Path start flag
+  GraphicRectangle pathStartFlagIcon;
+
+  // Path end flag
+  GraphicRectangle pathEndFlagIcon;
+
   // Compass cone icon
   GraphicRectangle compassConeIcon;
 
@@ -288,6 +294,13 @@ public:
       return &tileImageNotDownloadedFilename;
   }
 
+  GraphicRectangle *getPathEndFlagIcon() {
+    return &pathEndFlagIcon;
+  }
+
+  GraphicRectangle *getPathStartFlagIcon() {
+    return &pathStartFlagIcon;
+  }
 };
 
 }

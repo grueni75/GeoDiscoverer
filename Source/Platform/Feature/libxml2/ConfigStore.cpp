@@ -199,7 +199,7 @@ void ConfigStore::rememberUserConfig(std::string path, XMLNode nodes) {
             std::vector<std::string> t(3);
             t[0]=path;
             t[1]=name;
-            t[2]=getStringValue(path,name,true);
+            t[2]=getStringValue(path,name);
             migratedUserConfig.push_back(t);
             //DEBUG("required node found: path=%s name=%s value=%s",t[0].c_str(),t[1].c_str(),t[2].c_str());
           }
@@ -213,7 +213,7 @@ void ConfigStore::rememberUserConfig(std::string path, XMLNode nodes) {
                 FATAL("only one attribute per element is supported",NULL);
               } else {
                 attributeName=std::string((const char *)j->children->content);
-                attributeValues=getAttributeValues(path,attributeName,true);
+                attributeValues=getAttributeValues(path,attributeName);
                 oneAttributeFound=true;
               }
             }
@@ -357,7 +357,7 @@ void ConfigStore::read()
   // Add any migrated user config (if any)
   for (std::list<std::vector<std::string> >::iterator i=migratedUserConfig.begin();i!=migratedUserConfig.end();i++) {
     std::vector<std::string> entry = *i;
-    setStringValue(entry[0],entry[1],entry[2],true);
+    setStringValue(entry[0],entry[1],entry[2]);
   }
 
   // That's it
@@ -582,7 +582,7 @@ std::list<XMLNode> ConfigStore::findSchemaNodes(std::string path, std::string ex
 }
 
 // Gets a string value from the config
-std::string ConfigStore::getStringValue(std::string path, std::string name, bool innerCall)
+std::string ConfigStore::getStringValue(std::string path, std::string name)
 {
   xmlDocPtr doc = config;
   std::string value;
@@ -594,7 +594,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, bool
     xpath="/GDC/" + path + "/" + name;
 
   // Only one thread may enter getStringValue
-  if (!innerCall) core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex);
 
   // Check if node exists
   std::list<XMLNode> configNodes,schemaNodes;
@@ -605,7 +605,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, bool
     schemaNodes=findSchemaNodes(xpath);
     if (schemaNodes.size()!=1) {
       FATAL("could not find path <%s/%s> in schema",path.c_str(),name.c_str());
-      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+      core->getThread()->unlockMutex(accessMutex);
       return "";
     }
 
@@ -619,18 +619,18 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, bool
     }
     if (defaultValue=="") {
       FATAL("can not find default value for config path <%s/%s>",path.c_str(),name.c_str());
-      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+      core->getThread()->unlockMutex(accessMutex);
       return "";
     }
 
     // Create node
-    setStringValue(path,name,defaultValue,true);
+    setStringValue(path,name,defaultValue);
 
     // Find it again
     configNodes=findConfigNodes(xpath);
     if (configNodes.size()==0) {
       FATAL("could not find new node (%s/%s)",path.c_str(),name.c_str());
-      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+      core->getThread()->unlockMutex(accessMutex);
       return "";
     }
 
@@ -639,7 +639,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, bool
   // Sanity check
   if (configNodes.size()!=1) {
     FATAL("more than one node found (%s/%s)",path.c_str(),name.c_str());
-    if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+    core->getThread()->unlockMutex(accessMutex);
     return "";
   }
   node=configNodes.front();
@@ -647,16 +647,16 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, bool
   // Return result
   if ((!node->children)||(std::string((char*)node->children->name)!="text")) {
     FATAL("node has no text child",NULL);
-    if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+    core->getThread()->unlockMutex(accessMutex);
     return "";
   }
   value=std::string((char*)node->children->content);
-  if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+  core->getThread()->unlockMutex(accessMutex);
   return value;
 }
 
 // Sets a string value in the config
-void ConfigStore::setStringValue(std::string path, std::string name, std::string value, bool innerCall)
+void ConfigStore::setStringValue(std::string path, std::string name, std::string value)
 {
   xmlDocPtr doc = config;
   xmlNodePtr node,rootNode;
@@ -667,7 +667,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     xpath="/GDC/" + path + "/" + name;
 
   // Only one thread may enter setStringValue
-  if (!innerCall) core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex);
 
   // Check if node exists
   std::list<XMLNode> configNodes, schemaNodes;
@@ -678,7 +678,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     schemaNodes=findSchemaNodes(xpath);
     if (schemaNodes.size()!=1) {
       FATAL("could not find path <%s> in schema",path.c_str());
-      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+      core->getThread()->unlockMutex(accessMutex);
       return;
     }
 
@@ -686,7 +686,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     rootNode = xmlDocGetRootElement(doc);
     if (!rootNode) {
       FATAL("could not extract root node",NULL);
-      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     createNodeWithPath(rootNode,path,name,value);
@@ -696,7 +696,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     // Sanity check
     if (configNodes.size()!=1) {
       FATAL("more than one node found",NULL);
-      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     node=configNodes.front();
@@ -704,7 +704,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     // Update node
     if ((!node->children)||(std::string((char*)node->children->name)!="text")) {
       FATAL("node has no text child",NULL);
-      if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     xmlChar *valueEncoded = xmlEncodeSpecialChars(doc,(const xmlChar *)value.c_str());
@@ -713,17 +713,17 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
   }
   hasChanged=true;
   core->getThread()->issueSignal(writeConfigSignal);
-  if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Returns a list of attribute values for a given path and attribute name
-std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::string attributeName, bool innerCall) {
+std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::string attributeName) {
 
   std::list<XMLNode> nodes;
   std::list<std::string> values;
   xmlNodePtr n;
 
-  if (!innerCall) core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex);
   nodes=findConfigNodes("/GDC/" + path);
   std::list<XMLNode>::iterator i;
   for(i=nodes.begin();i!=nodes.end();i++) {
@@ -735,7 +735,7 @@ std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::st
       }
     }
   }
-  if (!innerCall) core->getThread()->unlockMutex(accessMutex);
+  core->getThread()->unlockMutex(accessMutex);
   return values;
 }
 

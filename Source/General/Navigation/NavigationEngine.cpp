@@ -31,6 +31,12 @@ void *navigationEngineBackgroundLoaderThread(void *args) {
   return NULL;
 }
 
+// Compute navigation info thread
+void *navigationEngineComputeNavigationInfoThread(void *args) {
+  ((NavigationEngine*)args)->computeNavigationInfo();
+  return NULL;
+}
+
 // Constructor
 NavigationEngine::NavigationEngine() {
 
@@ -39,6 +45,7 @@ NavigationEngine::NavigationEngine() {
   locationSignificantlyInaccurateThreshold=core->getConfigStore()->getIntValue("Navigation","locationSignificantlyInaccurateThreshold");
   trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance");
   backgroundLoaderFinishedMutex=core->getThread()->createMutex("navigation engine background loader finished mutex");
+  activeRouteMutex=core->getThread()->createMutex("navigation engine active route mutex");
   recordedTrackMutex=core->getThread()->createMutex("navigation engine recorded track mutex");
   routesMutex=core->getThread()->createMutex("navigation engine routes mutex");
   locationPosMutex=core->getThread()->createMutex("navigation engine location pos mutex");
@@ -70,6 +77,8 @@ NavigationEngine::NavigationEngine() {
   navigationInfosMutex=core->getThread()->createMutex("navigation engine navigation infos mutex");
   minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate");
   forceNavigationUpdate=false;
+  computeNavigationInfoThreadInfo=NULL;
+  computeNavigationInfoSignal=core->getThread()->createSignal();
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -107,6 +116,7 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(targetPosMutex);
   core->getThread()->destroyMutex(backgroundLoaderFinishedMutex);
   core->getThread()->destroyMutex(navigationInfosMutex);
+  core->getThread()->destroyMutex(activeRouteMutex);
 }
 
 // Initializes the engine
@@ -173,9 +183,8 @@ void NavigationEngine::init() {
       routes.push_back(route);
 
       // Check if it is selected for navigation
-      if (activeRouteName==route->getName()) {
-        activeRoute=route;
-        activeRoute->setBlinkMode(true);
+      if (activeRouteName==route->getGpxFilename()) {
+        setActiveRoute(route);
       }
 
     }
@@ -190,6 +199,10 @@ void NavigationEngine::init() {
   // Start the background loader
   if (!(backgroundLoaderThreadInfo=core->getThread()->createThread("navigation engine background loader thread",navigationEngineBackgroundLoaderThread,this)))
     FATAL("can not start background loader thread",NULL);
+
+  // Start the navigation info calculator
+  if (!(computeNavigationInfoThreadInfo=core->getThread()->createThread("navigation engine compute navigation info thread",navigationEngineComputeNavigationInfoThread,this)))
+    FATAL("can not start compute navigation info thread",NULL);
 
   // Object is initialized
   isInitialized=true;
@@ -252,6 +265,16 @@ void NavigationEngine::updateRoutes() {
 
 // Deinitializes the engine
 void NavigationEngine::deinit() {
+
+  // Finish the navigation info calculator thread
+  if (computeNavigationInfoThreadInfo) {
+    core->getThread()->lockMutex(activeRouteMutex);
+    core->getThread()->cancelThread(computeNavigationInfoThreadInfo);
+    core->getThread()->waitForThread(computeNavigationInfoThreadInfo);
+    core->getThread()->destroyThread(computeNavigationInfoThreadInfo);
+    core->getThread()->destroySignal(computeNavigationInfoSignal);
+    core->getThread()->unlockMutex(activeRouteMutex);
+  }
 
   // Finish the background thread
   if (backgroundLoaderThreadInfo) {
@@ -372,7 +395,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     //PROFILE_ADD("position update init");
 
     // Update the navigation infos
-    updateNavigationInfos();
+    core->getThread()->issueSignal(computeNavigationInfoSignal);
 
     // Update the current track
     updateTrack();
@@ -443,19 +466,13 @@ void NavigationEngine::updateTrack() {
       pointMeetsCriterias=true;
     }
   }
+  recordedTrack->unlockAccess();
 
   // Add the new point if it meets the criterias
   if (pointMeetsCriterias) {
     //DEBUG("adding new point (%f,%f): navigationDistance=%.2f pointMeetsCriterias=%d",locationPos.getLat(),locationPos.getLng(),navigationDistance,pointMeetsCriterias);
     recordedTrack->addEndPosition(locationPos);
   }
-
-  // Free the recorded track
-  recordedTrack->unlockAccess();
-  //DEBUG("after recorded track update",NULL);
-
-  // Inform the widget engine
-  core->getWidgetEngine()->onPathChange(recordedTrack);
 }
 
 // Saves the recorded track if required
@@ -478,12 +495,15 @@ bool NavigationEngine::setRecordTrack(bool recordTrack, bool ignoreIsInit, bool 
   // Interrupt the track if there is a previous point
   if ((recordTrack)&&(!this->recordTrack)) {
     recordedTrack->lockAccess();
+    bool addPathInterruptedPos=false;
     if (recordedTrack->getHasLastPoint()) {
       if (recordedTrack->getLastPoint()!=NavigationPath::getPathInterruptedPos()) {
-        recordedTrack->addEndPosition(NavigationPath::getPathInterruptedPos());
+        addPathInterruptedPos=true;
       }
     }
     recordedTrack->unlockAccess();
+    if (addPathInterruptedPos)
+      recordedTrack->addEndPosition(NavigationPath::getPathInterruptedPos());
   }
   lockRecordedTrack();
   this->recordTrack=recordTrack;
@@ -997,6 +1017,28 @@ void NavigationEngine::backgroundLoader() {
     }
     (*i)->readGPXFile(); // locking is handled within method
     (*i)->setIsInit(true);
+    std::string routePath="Navigation/Route[@name='" + (*i)->getGpxFilename() + "']";
+    Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex");
+    if (startIndex==-1) startIndex=0;
+    Int endIndex=core->getConfigStore()->getIntValue(routePath,"endFlagIndex");
+    if (endIndex==-1) endIndex=(*i)->getSelectedSize()-1;
+    if ((*i)->getReverse()) {
+      if (startIndex>endIndex) {
+        (*i)->setStartFlag(startIndex);
+        (*i)->setEndFlag(endIndex);
+      } else {
+        (*i)->setStartFlag(endIndex);
+        (*i)->setEndFlag(startIndex);
+      }
+    } else {
+      if (startIndex<endIndex) {
+        (*i)->setStartFlag(startIndex);
+        (*i)->setEndFlag(endIndex);
+      } else {
+        (*i)->setStartFlag(endIndex);
+        (*i)->setEndFlag(startIndex);
+      }
+    }
   }
 
   // Set the active route
@@ -1029,8 +1071,7 @@ void NavigationEngine::hideTarget() {
   targetPos.invalidate();
   unlockTargetPos();
   core->getMapEngine()->setForceMapUpdate();
-  forceNavigationUpdate=true;
-  updateNavigationInfos();
+  forceNavigationInfoUpdate();
 }
 
 // Shows the current target
@@ -1047,8 +1088,7 @@ void NavigationEngine::showTarget(bool repositionMap) {
   if (repositionMap)
     core->getMapEngine()->setMapPos(targetPos);
   core->getMapEngine()->setForceMapUpdate();
-  forceNavigationUpdate=true;
-  updateNavigationInfos();
+  forceNavigationInfoUpdate();
 }
 
 // Shows the current target at the given position
@@ -1059,134 +1099,194 @@ void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, b
   showTarget(repositionMap);
 }
 
-// Updates the navigation infos
-void NavigationEngine::updateNavigationInfos() {
+// Sets the start flag on the nearest route
+void NavigationEngine::setStartFlag(NavigationPath *path, Int index) {
+  if (path==recordedTrack) {
+    WARNING("flags can not be set on tracks",NULL);
+  } else {
+    path->setStartFlag(index);
+  }
+  forceNavigationInfoUpdate();
+}
+
+// Sets the end flag on the nearest route
+void NavigationEngine::setEndFlag(NavigationPath *path, Int index) {
+  if (path==recordedTrack) {
+    WARNING("flags can not be set on tracks",NULL);
+  } else {
+    path->setEndFlag(index);
+  }
+  forceNavigationInfoUpdate();
+}
+
+
+// Sets the active route
+void NavigationEngine::setActiveRoute(NavigationPath *route) {
+
+  if (route==recordedTrack) {
+    WARNING("the currently recorded track can not be set as the active route",NULL);
+    return;
+  }
+  if (activeRoute!=NULL) {
+    activeRoute->lockAccess();
+    activeRoute->setBlinkMode(false);
+    activeRoute->unlockAccess();
+  }
+  core->getThread()->lockMutex(activeRouteMutex);
+  activeRoute=route;
+  core->getThread()->unlockMutex(activeRouteMutex);
+  activeRoute->lockAccess();
+  activeRoute->setBlinkMode(true);
+  activeRoute->unlockAccess();
+  core->getConfigStore()->setStringValue("Navigation","activeRoute",activeRoute->getGpxFilename());
+  forceNavigationInfoUpdate();
+}
+
+// Calculates navigation infos such as bearing, distance, ...
+void NavigationEngine::computeNavigationInfo() {
+
   std::stringstream infos;
 
-  // Copy location pos
-  lockLocationPos();
-  /*if (!this->locationPos.getHasBearing()) {
-    this->locationPos.setHasBearing(true);
-    this->locationPos.setBearing(0);
-  }
-  if (!this->locationPos.getHasSpeed()) {
-    this->locationPos.setHasSpeed(true);
-    this->locationPos.setSpeed(0);
-  }
-  this->locationPos.setBearing(this->locationPos.getBearing()+4);
-  this->locationPos.setSpeed(this->locationPos.getSpeed()+1);*/
-  MapPosition locationPos=this->locationPos;
-  unlockLocationPos();
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
 
-  // Use the last bearing if the new location has no bearing
+  // This thread can be cancelled
+  core->getThread()->setThreadCancable();
 
-  // Check if the infos need to be updated
-  if ((lastNavigationLocationPos.isValid())&&(!forceNavigationUpdate)) {
-    double travelledDistance = locationPos.computeDistance(lastNavigationLocationPos);
-    if (travelledDistance < minDistanceToNavigationUpdate)
-      return;
-  }
-  lastNavigationLocationPos=locationPos;
-  forceNavigationUpdate=false;
+  // Do an endless loop
+  while(true) {
 
-  // Copy target pos
-  lockTargetPos();
-  MapPosition targetPos=this->targetPos;
-  unlockTargetPos();
+    // Wait for an compute trigger
+    core->getThread()->waitForSignal(computeNavigationInfoSignal);
 
-  // If a route is active, compute the details for the given route
-  lockNavigationInfo();
-  navigationInfo=NavigationInfo();
-  double speed=0;
-  if (locationPos.isValid()) {
-    if (locationPos.getHasBearing()) {
-      navigationInfo.setLocationBearing(locationPos.getBearing());
+    // Copy location pos
+    lockLocationPos();
+    /*if (!this->locationPos.getHasBearing()) {
+      this->locationPos.setHasBearing(true);
+      this->locationPos.setBearing(0);
     }
-    if (locationPos.getHasSpeed()) {
-      speed=locationPos.getSpeed();
+    if (!this->locationPos.getHasSpeed()) {
+      this->locationPos.setHasSpeed(true);
+      this->locationPos.setSpeed(0);
     }
+    this->locationPos.setBearing(this->locationPos.getBearing()+4);
+    this->locationPos.setSpeed(this->locationPos.getSpeed()+1);*/
+    MapPosition locationPos=this->locationPos;
+    unlockLocationPos();
 
-    // If a target is active, compute the details for the given target
-    if (targetPos.isValid()) {
-      navigationInfo.setType(NavigationInfoTypeTarget);
-      if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
-        navigationInfo.setTargetBearing(locationPos.computeBearing(targetPos));
-      navigationInfo.setTargetDistance(locationPos.computeDistance(targetPos));
-    } else {
+    // Use the last bearing if the new location has no bearing
 
-      if (activeRoute) {
+    // Check if the infos need to be updated
+    if ((lastNavigationLocationPos.isValid())&&(!forceNavigationUpdate)) {
+      double travelledDistance = locationPos.computeDistance(lastNavigationLocationPos);
+      if (travelledDistance < minDistanceToNavigationUpdate)
+        continue;
+    }
+    lastNavigationLocationPos=locationPos;
+    forceNavigationUpdate=false;
 
-        // Compute the navigation details for the given route
-        //static MapPosition prevTurnPos;
-        navigationInfo.setType(NavigationInfoTypeRoute);
-        activeRoute->lockAccess();
-        activeRoute->computeNavigationInfo(locationPos,targetPos,navigationInfo);
-        activeRoute->unlockAccess();
-        //WARNING("enable route locking",NULL);
-        if (targetPos.isValid()) {
-          //setTargetAtGeographicCoordinate(targetPos.getLng(),targetPos.getLat(),false);
-          if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
-            navigationInfo.setTargetBearing(locationPos.computeBearing(targetPos));
+    // Copy target pos
+    lockTargetPos();
+    MapPosition targetPos=this->targetPos;
+    unlockTargetPos();
+
+    // If a route is active, compute the details for the given route
+    NavigationInfo navigationInfo=NavigationInfo();
+    double speed=0;
+    if (locationPos.isValid()) {
+      if (locationPos.getHasBearing()) {
+        navigationInfo.setLocationBearing(locationPos.getBearing());
+      }
+      if (locationPos.getHasSpeed()) {
+        speed=locationPos.getSpeed();
+      }
+
+      // If a target is active, compute the details for the given target
+      if (targetPos.isValid()) {
+        navigationInfo.setType(NavigationInfoTypeTarget);
+        if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
+          navigationInfo.setTargetBearing(locationPos.computeBearing(targetPos));
+        navigationInfo.setTargetDistance(locationPos.computeDistance(targetPos));
+      } else {
+
+        core->getThread()->lockMutex(activeRouteMutex);
+        NavigationPath *activeRoute=this->activeRoute;
+        core->getThread()->unlockMutex(activeRouteMutex);
+        if (activeRoute) {
+
+          // Compute the navigation details for the given route
+          //static MapPosition prevTurnPos;
+          navigationInfo.setType(NavigationInfoTypeRoute);
+          activeRoute->computeNavigationInfo(locationPos,targetPos,navigationInfo);
+          //WARNING("enable route locking",NULL);
+          if (targetPos.isValid()) {
+            //setTargetAtGeographicCoordinate(targetPos.getLng(),targetPos.getLat(),false);
+            if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
+              navigationInfo.setTargetBearing(locationPos.computeBearing(targetPos));
+          }
+          /*if (navigationInfo.getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
+            if (navigationInfo.getTurnAngle()>0) {
+              DEBUG("turn to the left by %f°in %f meters",navigationInfo.getTurnAngle(),navigationInfo.getTurnDistance());
+            } else {
+              DEBUG("turn to the right by %f° in %f meters",navigationInfo.getTurnAngle(),navigationInfo.getTurnDistance());
+            }
+            if ((!prevTurnPos.isValid())||(prevTurnPos!=turnPos)) {
+              setTargetAtGeographicCoordinate(turnPos.getLng(),turnPos.getLat(),false);
+              sleep(1);
+              DEBUG("new target set",NULL);
+            }
+          }*/
+          //prevTurnPos=turnPos;
+
         }
-        /*if (navigationInfo.getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
-          if (navigationInfo.getTurnAngle()>0) {
-            DEBUG("turn to the left by %f°in %f meters",navigationInfo.getTurnAngle(),navigationInfo.getTurnDistance());
-          } else {
-            DEBUG("turn to the right by %f° in %f meters",navigationInfo.getTurnAngle(),navigationInfo.getTurnDistance());
-          }
-          if ((!prevTurnPos.isValid())||(prevTurnPos!=turnPos)) {
-            setTargetAtGeographicCoordinate(turnPos.getLng(),turnPos.getLat(),false);
-            sleep(1);
-            DEBUG("new target set",NULL);
-          }
-        }*/
-        //prevTurnPos=turnPos;
-
       }
     }
-  }
-  if (speed>0) {
-    if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance())
-      navigationInfo.setTargetDuration(navigationInfo.getTargetDistance() / speed);
-  }
+    if (speed>0) {
+      if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance())
+        navigationInfo.setTargetDuration(navigationInfo.getTargetDistance() / speed);
+    }
 
-  // Update the parent app
-  std::string value,unit;
-  if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
-    infos << navigationInfo.getLocationBearing();
-  else
-    infos << "-";
-  if (navigationInfo.getTargetBearing()!=NavigationInfo::getUnknownAngle())
-    infos << ";" << navigationInfo.getTargetBearing();
-  else
-    infos << ";-";
-  infos << ";Distance;";
-  if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance()) {
-    core->getUnitConverter()->formatMeters(navigationInfo.getTargetDistance(),value,unit);
-    infos << value << " " << unit;
-  } else {
-    infos << "infinite";
-  }
-  infos << ";Duration;";
-  if (navigationInfo.getTargetDuration()!=NavigationInfo::getUnknownDuration()) {
-    core->getUnitConverter()->formatTime(navigationInfo.getTargetDuration(),value,unit);
-    infos << value << " " << unit;
-  } else {
-    infos << "move!";
-  }
-  if (navigationInfo.getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
-    infos << ";" << navigationInfo.getTurnAngle();
-    core->getUnitConverter()->formatMeters(navigationInfo.getTurnDistance(),value,unit);
-    infos << ";" << value << " " << unit;
-  } else {
-    infos << ";-;-";
-  }
-  unlockNavigationInfo();
+    // Set the new navigation info
+    lockNavigationInfo();
+    this->navigationInfo=navigationInfo;
+    unlockNavigationInfo();
 
-  // Update other apps
-  //DEBUG("updateNavigationInfos(%s)",infos.str().c_str());
-  core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
+    // Update the parent app
+    std::string value,unit;
+    if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
+      infos << navigationInfo.getLocationBearing();
+    else
+      infos << "-";
+    if (navigationInfo.getTargetBearing()!=NavigationInfo::getUnknownAngle())
+      infos << ";" << navigationInfo.getTargetBearing();
+    else
+      infos << ";-";
+    infos << ";Distance;";
+    if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance()) {
+      core->getUnitConverter()->formatMeters(navigationInfo.getTargetDistance(),value,unit);
+      infos << value << " " << unit;
+    } else {
+      infos << "infinite";
+    }
+    infos << ";Duration;";
+    if (navigationInfo.getTargetDuration()!=NavigationInfo::getUnknownDuration()) {
+      core->getUnitConverter()->formatTime(navigationInfo.getTargetDuration(),value,unit);
+      infos << value << " " << unit;
+    } else {
+      infos << "move!";
+    }
+    if (navigationInfo.getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
+      infos << ";" << navigationInfo.getTurnAngle();
+      core->getUnitConverter()->formatMeters(navigationInfo.getTurnDistance(),value,unit);
+      infos << ";" << value << " " << unit;
+    } else {
+      infos << ";-;-";
+    }
+    core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
+
+  }
 }
+
 
 }
 

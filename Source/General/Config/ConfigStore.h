@@ -122,17 +122,17 @@ public:
   void writeConfig();
 
   // Access methods to config values
-  void setStringValue(std::string path, std::string name, std::string value, bool innerCall=false);
+  void setStringValue(std::string path, std::string name, std::string value);
   void setIntValue(std::string path, std::string name, Int value);
   void setDoubleValue(std::string path, std::string name, double value);
   void setGraphicColorValue(std::string path, GraphicColor value);
-  std::string getStringValue(std::string path, std::string name, bool innerCall=false);
+  std::string getStringValue(std::string path, std::string name);
   Int getIntValue(std::string path, std::string name);
   double getDoubleValue(std::string path, std::string name);
   GraphicColor getGraphicColorValue(std::string path);
 
   // Returns a list of attribute values for a given path and attribute name
-  std::list<std::string> getAttributeValues(std::string path, std::string attributeName, bool innerCall=false);
+  std::list<std::string> getAttributeValues(std::string path, std::string attributeName);
 
   // Lists all elements for the given path
   std::list<std::string> getNodeNames(std::string path);

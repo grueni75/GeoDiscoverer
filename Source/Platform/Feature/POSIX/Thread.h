@@ -29,7 +29,11 @@ namespace GEODISCOVERER {
 
 typedef void *(*ThreadFunction)(void *);
 typedef pthread_t ThreadInfo;
-typedef pthread_mutex_t ThreadMutexInfo;
+typedef struct ThreadMutexInfo {
+  pthread_mutex_t pthreadMutex;
+  ThreadInfo lockedThread;
+  Int lockedCount;
+} ThreadMutexInfo;
 typedef struct ThreadSignalInfo {
   pthread_mutex_t mutex;
   pthread_cond_t cv;
@@ -62,7 +66,7 @@ protected:
   ThreadInfo *mutexDebugThreadInfo;
 
   // Mutex to control access to the maps
-  ThreadMutexInfo *accessMutex;
+  pthread_mutex_t accessMutex;
 
   // Decides if mutex locking infos shall be logged
   bool createMutexLog;

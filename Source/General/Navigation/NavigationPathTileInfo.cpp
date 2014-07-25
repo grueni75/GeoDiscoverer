@@ -27,10 +27,14 @@ namespace GEODISCOVERER {
 
 // Constructor
 NavigationPathTileInfo::NavigationPathTileInfo() {
-  graphicLineKey=0;
-  graphicLine=NULL;
-  graphicRectangleListKey=0;
-  graphicRectangleList=NULL;
+  pathLineKey=0;
+  pathLine=NULL;
+  pathArrowListKey=0;
+  pathArrowList=NULL;
+  pathStartFlag=NULL;
+  pathStartFlagKey=0;
+  pathEndFlag=NULL;
+  pathEndFlagKey=0;
 }
 
 // Destructor

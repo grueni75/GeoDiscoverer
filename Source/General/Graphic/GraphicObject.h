@@ -30,6 +30,8 @@ namespace GEODISCOVERER {
 typedef UInt GraphicPrimitiveKey;
 typedef std::map<GraphicPrimitiveKey, GraphicPrimitive*> GraphicPrimitiveMap;
 typedef std::pair<GraphicPrimitiveKey, GraphicPrimitive*> GraphicPrimitivePair;
+typedef std::map<Int, std::list<GraphicPrimitive*>::iterator> GraphicZMap;
+typedef std::pair<Int, std::list<GraphicPrimitive*>::iterator> GraphicZPair;
 
 class GraphicObject : public GraphicPrimitive {
 
@@ -40,6 +42,9 @@ protected:
 
   // A list of all primitives sorted according to their z value
   std::list<GraphicPrimitive*> drawList;
+
+  // A map of iterators for the z value
+  GraphicZMap zStartIteratorMap;
 
   // Next key to use for a rectangle
   GraphicPrimitiveKey nextPrimitiveKey;
@@ -73,6 +78,9 @@ public:
   // Recreates any textures or buffers
   virtual void recreateGraphic();
 
+  // Returns a drawing list with no graphic objects inside
+  std::list<GraphicPrimitive*> getFlattenDrawList();
+
   // Getters and setters
   GraphicPrimitiveMap *getPrimitiveMap()
   {
@@ -94,8 +102,16 @@ public:
       return &drawList;
   }
 
-  GraphicPrimitive *getPrimitive(GraphicPrimitiveKey key);
+  std::list<GraphicPrimitive*>::iterator getFirstElementInDrawList(Int z)
+  {
+      GraphicZMap::iterator i=zStartIteratorMap.find(z);
+      if (i!=zStartIteratorMap.end())
+        return i->second;
+      else
+        return drawList.end();
+  }
 
+  GraphicPrimitive *getPrimitive(GraphicPrimitiveKey key);
 };
 
 }

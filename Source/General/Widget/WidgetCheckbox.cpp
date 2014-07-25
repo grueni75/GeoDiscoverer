@@ -69,7 +69,7 @@ bool WidgetCheckbox::work(TimestampInMicroseconds t) {
 bool WidgetCheckbox::update(bool checked, bool executeCommand) {
   if (!checked) {
     if (executeCommand) {
-      std::string result=core->getCommander()->execute(uncheckedCommand,true);
+      std::string result=core->getCommander()->execute(uncheckedCommand);
       if (result=="false")
         return false;
     }
@@ -78,7 +78,7 @@ bool WidgetCheckbox::update(bool checked, bool executeCommand) {
   } else {
     //DEBUG("executing checked command",NULL);
     if (executeCommand) {
-      std::string result=core->getCommander()->execute(checkedCommand,true);
+      std::string result=core->getCommander()->execute(checkedCommand);
       if (result=="false")
         return false;
     }

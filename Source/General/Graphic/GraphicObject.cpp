@@ -51,12 +51,16 @@ GraphicPrimitiveKey GraphicObject::addPrimitive(GraphicPrimitive *primitive)
     GraphicPrimitive *p=*i;
     if (!GraphicPrimitive::zSortPredicate(primitive,p)) {
       inserted=true;
-      drawList.insert(i,primitive);
+      zStartIteratorMap[primitive->getZ()]=drawList.insert(i,primitive);
       break;
     }
   }
-  if (!inserted)
+  if (!inserted) {
     drawList.push_back(primitive);
+    std::list<GraphicPrimitive*>::iterator i=drawList.end();
+    --i;
+    zStartIteratorMap[primitive->getZ()]=i;
+  }
   /*DEBUG("sorted list",NULL);
   for(std::list<GraphicPrimitive*>::iterator i=drawList.begin();i!=drawList.end();i++) {
     GraphicPrimitive *p=*i;
@@ -73,6 +77,17 @@ void GraphicObject::removePrimitive(GraphicPrimitiveKey key, bool deletePrimitiv
   i=primitiveMap.find(key);
   if (i!=primitiveMap.end()) {
     GraphicPrimitive *primitive = i->second;
+    GraphicZMap::iterator j=zStartIteratorMap.find(primitive->getZ());
+    if (j!=zStartIteratorMap.end()) {
+      std::list<GraphicPrimitive*>::iterator k=j->second;
+      if (*k==primitive) {
+        k++;
+        if ((k==drawList.end())||((*k)->getZ()!=primitive->getZ()))
+          zStartIteratorMap.erase(j);
+        else
+          zStartIteratorMap[(*k)->getZ()]=k;
+      }
+    }
     drawList.remove(i->second);
     primitiveMap.erase(key);
     isUpdated=true;

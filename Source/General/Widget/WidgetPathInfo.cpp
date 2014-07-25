@@ -256,20 +256,15 @@ void WidgetPathInfo::resetPathVisibility(bool widgetVisible) {
     path->lockAccess();
     if (path->getReverse()) {
       startIndex=0;
-      endIndex=path->getSize()-2;
+      endIndex=path->getSelectedSize()-2;
     } else {
       startIndex=1;
-      endIndex=path->getSize()-1;
+      endIndex=path->getSelectedSize()-1;
     }
-    maxEndIndex=path->getSize()-1;
+    maxEndIndex=path->getSelectedSize()-1;
     indexLen=endIndex-startIndex;
-    currentPathName=path->getName();
-    if (endIndex<startIndex) {
-      currentPath=NULL;
-      path->unlockAccess();
-    } else {
-      path->unlockAccess();
-    }
+    currentPathName=path->getGpxFilename();
+    path->unlockAccess();
     core->getConfigStore()->setStringValue("Navigation","pathInfoName",currentPathName);
   }
   core->getThread()->issueSignal(updateVisualizationSignal);
@@ -282,36 +277,15 @@ void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
   if (currentPathLocked)
     return;
 
-  // Find the nearest path in the currently visible map tile
-  std::list<NavigationPathSegment*> nearbyPathSegments;
-  if (pos.getMapTile()) {
-    nearbyPathSegments=pos.getMapTile()->getCrossingNavigationPathSegments();
-  }
-  NavigationPath *nearestPath=NULL;
-  double minDistance=std::numeric_limits<double>::max();
-  for(std::list<NavigationPathSegment*>::iterator i=nearbyPathSegments.begin();i!=nearbyPathSegments.end();i++) {
-    NavigationPathSegment *s=*i;
-    s->getPath()->lockAccess();
-    for(Int j=s->getStartIndex();j<=s->getEndIndex();j++) {
-      MapPosition pathPos=s->getPath()->getPoint(j);
-      double d=pos.computeDistance(pathPos);
-      if (d<minDistance) {
-        minDistance=d;
-        nearestPath=s->getPath();
-      }
-    }
-    s->getPath()->unlockAccess();
-  }
-
-  // Visualize the path
+  // Visualize the nearest path if it has changed
+  NavigationPath* nearestPath = core->getWidgetEngine()->getNearestPath();
   if ((nearestPath)&&(nearestPath!=currentPath)) {
 
     // Remember the selected path
     currentPath=nearestPath;
     resetPathVisibility(widgetVisible);
     if (widgetVisible) {
-      DEBUG("activating widgets",NULL);
-      core->getWidgetEngine()->setWidgetsActive(true,false);
+      core->getWidgetEngine()->setWidgetsActive(true);
     }
 
   }
@@ -325,10 +299,10 @@ void WidgetPathInfo::onLocationChange(bool widgetVisible, MapPosition pos) {
 }
 
 // Called when a path has changed
-void WidgetPathInfo::onPathChange(bool widgetVisible, NavigationPath *path) {
+void WidgetPathInfo::onPathChange(bool widgetVisible, NavigationPath *path, NavigationPathChangeType changeType) {
 
   // If no path is selected, check if the given path was previously selected
-  if ((currentPath==NULL)&&(path->getName()==currentPathName)) {
+  if ((currentPath==NULL)&&(path->getGpxFilename()==currentPathName)) {
     currentPath=path;
     resetPathVisibility(widgetVisible);
   }
@@ -336,26 +310,39 @@ void WidgetPathInfo::onPathChange(bool widgetVisible, NavigationPath *path) {
   // Redraw is also required if this widget is showing the changed path
   if (currentPath==path) {
 
-    // If the user has zoomed in, keep the zoom
-    path->lockAccess();
-    Int newEndIndex=path->getSize()-1;
-    bool reversed=path->getReverse();
-    maxEndIndex=path->getSize()-1;
-    path->unlockAccess();
-    if (newEndIndex>1) {
-      if (reversed) {
-        if ((startIndex==0)&&(endIndex==newEndIndex-2)) {
-          resetPathVisibility(widgetVisible);
-        }
-      } else {
-        if ((startIndex==1)&&(endIndex==newEndIndex-1)) {
-          resetPathVisibility(widgetVisible);
-        }
-      }
-    } else {
-      resetPathVisibility(widgetVisible);
-    }
+    // Was only a new point added?
+    Int newEndIndex;
+    bool reversed;
+    switch(changeType) {
+      case NavigationPathChangeTypeEndPositionAdded:
 
+        // If the user has zoomed in, keep the zoom
+        path->lockAccess();
+        newEndIndex=path->getSelectedSize()-1;
+        reversed=path->getReverse();
+        maxEndIndex=path->getSelectedSize()-1;
+        path->unlockAccess();
+        if (newEndIndex>1) {
+          if (reversed) {
+            if ((startIndex==0)&&(endIndex==newEndIndex-2)) {
+              resetPathVisibility(widgetVisible);
+            }
+          } else {
+            if ((startIndex==1)&&(endIndex==newEndIndex-1)) {
+              resetPathVisibility(widgetVisible);
+            }
+          }
+        } else {
+          resetPathVisibility(widgetVisible);
+        }
+        break;
+      case NavigationPathChangeTypeFlagSet:
+        resetPathVisibility(widgetVisible);
+        break;
+      default:
+        FATAL("navigation path change type not supported",NULL);
+        break;
+    }
   }
 }
 
@@ -475,12 +462,12 @@ void WidgetPathInfo::updateVisualization() {
 
       // Get infos from path
       currentPath->lockAccess();
-      std::string pathName=currentPath->getName();
+      std::string pathName=currentPath->getGpxFilename();
       double pathLength=currentPath->getLength();
       double pathDuration=currentPath->getDuration();
       double pathAltitudeUp=currentPath->getAltitudeUp();
       double pathAltitudeDown=currentPath->getAltitudeDown();
-      std::vector<MapPosition> pathPoints=currentPath->getPoints();
+      std::vector<MapPosition> pathPoints=currentPath->getSelectedPoints();
       //DEBUG("pathPoints.size()=%d",pathPoints.size());
       bool pathReversed=currentPath->getReverse();
       double pathMinAltitude = currentPath->getMinAltitude();
@@ -488,6 +475,18 @@ void WidgetPathInfo::updateVisualization() {
       Int pathEndIndex = endIndex;
       Int pathStartIndex = startIndex;
       Int pathMaxEndIndex = maxEndIndex;
+      if (pathMaxEndIndex>=pathPoints.size()) {
+        pathMaxEndIndex=pathPoints.size()-1;
+      }
+      if (pathEndIndex>pathMaxEndIndex) {
+        pathEndIndex=pathMaxEndIndex;
+      }
+      if (pathStartIndex>=pathEndIndex) {
+        pathEndIndex=pathEndIndex-1;
+      }
+      if (pathStartIndex<0) {
+        pathStartIndex=0;
+      }
       currentPath->unlockAccess();
 
       // Update the labels

@@ -29,12 +29,20 @@ namespace GEODISCOVERER {
 class NavigationPathTileInfo {
 
   // Info about the graphic line object
-  GraphicPrimitiveKey graphicLineKey;
-  GraphicLine *graphicLine;
+  GraphicPrimitiveKey pathLineKey;
+  GraphicLine *pathLine;
 
   // Info about the graphic rectangle list object
-  GraphicPrimitiveKey graphicRectangleListKey;
-  GraphicRectangleList *graphicRectangleList;
+  GraphicPrimitiveKey pathArrowListKey;
+  GraphicRectangleList *pathArrowList;
+
+  // Info about the start flag
+  GraphicPrimitiveKey pathStartFlagKey;
+  GraphicRectangle *pathStartFlag;
+
+  // Info about the end flag
+  GraphicPrimitiveKey pathEndFlagKey;
+  GraphicRectangle *pathEndFlag;
 
 public:
 
@@ -45,46 +53,77 @@ public:
   virtual ~NavigationPathTileInfo();
 
   // Getters and setters
-  GraphicLine *getGraphicLine() const
+  GraphicLine *getPathLine() const
   {
-      return graphicLine;
+      return pathLine;
   }
 
-  GraphicPrimitiveKey getGraphicLineKey() const
+  GraphicPrimitiveKey getPathLineKey() const
   {
-      return graphicLineKey;
+      return pathLineKey;
   }
 
-  void setGraphicLine(GraphicLine *graphicLine)
+  void setPathLine(GraphicLine *pathLine)
   {
-      this->graphicLine = graphicLine;
+      this->pathLine = pathLine;
   }
 
-  void setGraphicLineKey(GraphicPrimitiveKey graphicLineKey)
+  void setPathLineKey(GraphicPrimitiveKey pathLineKey)
   {
-      this->graphicLineKey = graphicLineKey;
+      this->pathLineKey = pathLineKey;
   }
 
-  GraphicRectangleList *getGraphicRectangeList() const
+  GraphicRectangleList *getPathArrowList() const
   {
-      return graphicRectangleList;
+      return pathArrowList;
   }
 
-  GraphicPrimitiveKey getGraphicRectangleListKey() const
+  GraphicPrimitiveKey getPathArrowListKey() const
   {
-      return graphicRectangleListKey;
+      return pathArrowListKey;
   }
 
-  void setGraphicRectangleList(GraphicRectangleList *graphicRectangleList)
+  void setPathArrowList(GraphicRectangleList *pathArrowList)
   {
-      this->graphicRectangleList = graphicRectangleList;
+      this->pathArrowList = pathArrowList;
   }
 
-  void setGraphicRectangleListKey(GraphicPrimitiveKey graphicRectangleListKey)
+  void setPathArrowListKey(GraphicPrimitiveKey pathArrowListKey)
   {
-      this->graphicRectangleListKey = graphicRectangleListKey;
+      this->pathArrowListKey = pathArrowListKey;
   }
 
+  GraphicRectangle* getPathEndFlag() const {
+    return pathEndFlag;
+  }
+
+  void setPathEndFlag(GraphicRectangle* pathEndFlag) {
+    this->pathEndFlag = pathEndFlag;
+  }
+
+  GraphicPrimitiveKey getPathEndFlagKey() const {
+    return pathEndFlagKey;
+  }
+
+  void setPathEndFlagKey(GraphicPrimitiveKey pathEndFlagKey) {
+    this->pathEndFlagKey = pathEndFlagKey;
+  }
+
+  GraphicRectangle* getPathStartFlag() const {
+    return pathStartFlag;
+  }
+
+  void setPathStartFlag(GraphicRectangle* pathStartFlag) {
+    this->pathStartFlag = pathStartFlag;
+  }
+
+  GraphicPrimitiveKey getPathStartFlagKey() const {
+    return pathStartFlagKey;
+  }
+
+  void setPathStartFlagKey(GraphicPrimitiveKey pathStartFlagKey) {
+    this->pathStartFlagKey = pathStartFlagKey;
+  }
 };
 
 }

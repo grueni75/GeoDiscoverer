@@ -66,9 +66,9 @@ debug: CXXFLAGS += -g -O0 -rdynamic
 
 # General dependencies:
 
-release: $(PRGNAME) xsd icons
+release: $(PRGNAME) config.shipped.xsd icons
 .PHONY: release
-debug:   $(PRGNAME) xsd icons
+debug:   $(PRGNAME) config.shipped.xsd icons
 .PHONY: debug
 all:    release
 .PHONY: all
@@ -86,11 +86,12 @@ $(PRGNAME): $(OBJS)
 	$(LINK_PREFIX) $(CXX) $(CXXFLAGS) $(OBJS) $(STATIC_OBJS) $(LIBS) $(LIBDIRS) -o $(PRGNAME)
 
 # XML schema for configuration
-xsd:
+# Update if source XSD has changed or widget engine
+config.shipped.xsd: $(ROOT)/Source/config.xsd $(ROOT)/Source/General/Widget/WidgetEngine.cpp 
 	cd $(ROOT)/Source && make linux
 	sed -i 's/<xsd:documentation>GeoDiscoverer config schema.*<\/xsd:documentation>/<xsd:documentation>GeoDiscoverer config schema '`date +"%Y%m%d-%H%M%S"`'<\/xsd:documentation>/' config.shipped.xsd 
 
-# Iconss
+# Icons
 icons:
 	cd $(ROOT)/Source/Media/Icon && make linux
 

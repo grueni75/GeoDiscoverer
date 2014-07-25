@@ -26,10 +26,16 @@
 
 namespace GEODISCOVERER {
 
+typedef enum {NavigationPathVisualizationTypeStartFlag, NavigationPathVisualizationTypeEndFlag } NavigationPathVisualizationType;
+
 class NavigationPath {
 
 protected:
 
+
+  std::vector<MapPosition> mapPositions;          // List of map positions the path consists of
+  Int startIndex;                                 // Current start in mapPosition list
+  Int endIndex;                                   // Current end in mapPosition list
   ThreadMutexInfo *accessMutex;                   // Mutex for accessing the path
   std::string name;                               // The name of the path
   std::string description;                        // The description of this path
@@ -40,7 +46,6 @@ protected:
   MapPosition secondLastPoint;                    // The point added before the last point
   bool hasSecondLastPoint;                        // Indicates if the path already has its second last point
   MapPosition lastValidAltiudeMetersPoint;        // The last point that was used for altitude meter computation
-  std::vector<MapPosition> mapPositions;          // List of map positions the path consists of
   bool blinkMode;                                 // Indicates if the path shall blink
   GraphicColor normalColor;                       // Normal color of the path
   GraphicColor highlightColor;                    // Highlight color of the path
@@ -63,6 +68,7 @@ protected:
   double minDistanceToBeOffRoute;                 // Minimum distance from nearest route point such that navigation considers location to be off route
   double averageTravelSpeed;                      // Speed in meters per second to use for calculating the duration of a route
   double minAltitudeChange;                       // Minimum change of altitude required to update altitude meters
+  TimestampInMicroseconds flagAnimationDuration;  // Duration in microseconds that the flag animation shall last
 
   // Information about the path
   double length;                                  // Current length of the track in meters
@@ -83,11 +89,23 @@ protected:
   // Extracts information about the path from the given node set
   void extractInformation(std::list<XMLNode> nodes);
 
-  // Updates the visualization of the tile
+  // Updates the visualization of the tile (path line and arrows)
   void updateTileVisualization(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, MapPosition prevPos, MapPosition prevArrowPos, MapPosition currentPos);
+
+  // Updates the visualization of the tile (start and end flag)
+  void updateTileVisualization(NavigationPathVisualizationType type, std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, bool remove, bool animate);
 
   // Updates the crossing path segments in the map tiles of the given map containers for the new point
   void updateCrossingTileSegments(std::list<MapContainer*> *mapContainers, Int pos);
+
+  // Updates the metrics (altitude, length, duration, ...) of the path
+  void updateMetrics();
+
+  // Computes the metrics for the given map positions
+  void updateMetrics(MapPosition prevPoint, MapPosition curPoint);
+
+  // Updates the flag visualization for all zoom levels
+  void updateFlagVisualization(NavigationPathVisualizationType type, bool remove, bool animate);
 
 public:
 
@@ -136,6 +154,12 @@ public:
   // Computes navigation details for the given location
   void computeNavigationInfo(MapPosition locationPos, MapPosition &wayPoint, NavigationInfo &navigationInfo);
 
+  // Sets the start flag at the given index
+  void setStartFlag(Int index);
+
+  // Sets the end flag at the given index
+  void setEndFlag(Int index);
+
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)
   {
@@ -155,16 +179,6 @@ public:
   void setGpxFilename(std::string gpxFilename)
   {
       this->gpxFilename = gpxFilename;
-  }
-
-  bool getHasSecondLastPoint() const
-  {
-      return hasSecondLastPoint;
-  }
-
-  MapPosition getSecondLastPoint() const
-  {
-      return secondLastPoint;
   }
 
   std::string getDescription() const
@@ -283,6 +297,10 @@ public:
 
   void setIsInit(bool isInit) {
     this->isInit = isInit;
+    if (isInit) {
+      if (reverse)
+        updateMetrics();
+    }
   }
 
   bool getReverse() const {
@@ -297,9 +315,7 @@ public:
     return mapPositions[index];
   }
 
-  std::vector<MapPosition> getPoints() {
-    return mapPositions;
-  }
+  std::vector<MapPosition> getSelectedPoints();
 
   double getAltitudeDown() const {
     return altitudeDown;
@@ -325,8 +341,17 @@ public:
     core->getThread()->unlockMutex(accessMutex);
   }
 
-  Int getSize() const {
-    return mapPositions.size();
+  Int getSelectedSize() const {
+    Int startIndex=0;
+    Int endIndex=mapPositions.size()-1;
+    if (this->startIndex!=-1)
+      startIndex=this->startIndex;
+    if (this->endIndex!=-1)
+      endIndex=this->endIndex;
+    if (this->reverse)
+      return startIndex-endIndex+1;
+    else
+      return endIndex-startIndex+1;
   }
 };
 

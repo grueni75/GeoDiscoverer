@@ -117,7 +117,7 @@ public:
   std::list<MapContainer*> findMapContainersByGeographicArea(MapArea area);
 
   // Returns a list of map containers in which the given position lies
-  std::list<MapContainer*> findMapContainersByGeographicCoordinate(MapPosition pos);
+  std::list<MapContainer*> findMapContainersByGeographicCoordinate(MapPosition pos, Int zoomLevel=0);
 
   // Initializes the progress bar
   void openProgress(std::string title, Int valueMax);

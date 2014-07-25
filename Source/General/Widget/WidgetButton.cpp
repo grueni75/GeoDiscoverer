@@ -74,7 +74,7 @@ void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 
     // Execute the command only if the repeating dispatching has not yet started
     if ((!repeat)||(t<nextDispatchTime)) {
-      core->getCommander()->execute(command, true);
+      core->getCommander()->execute(command);
     }
   }
 }

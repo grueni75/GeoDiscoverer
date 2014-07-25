@@ -55,10 +55,14 @@ void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
     NavigationPathTileInfo *tileInfo=i->second;
     GraphicObject *tileVisualization=tile->getVisualization();
     tileVisualization->lockAccess();
-    if (tileInfo->getGraphicLine())
-      tileVisualization->removePrimitive(tileInfo->getGraphicLineKey(),true);
-    if (tileInfo->getGraphicRectangeList())
-      tileVisualization->removePrimitive(tileInfo->getGraphicRectangleListKey(),true);
+    if (tileInfo->getPathLine())
+      tileVisualization->removePrimitive(tileInfo->getPathLineKey(),true);
+    if (tileInfo->getPathArrowList())
+      tileVisualization->removePrimitive(tileInfo->getPathArrowListKey(),true);
+    if (tileInfo->getPathStartFlag())
+      tileVisualization->removePrimitive(tileInfo->getPathStartFlagKey(),true);
+    if (tileInfo->getPathEndFlag())
+      tileVisualization->removePrimitive(tileInfo->getPathEndFlagKey(),true);
     tileVisualization->unlockAccess();
     tileInfoMap.erase(i);
   }
@@ -91,11 +95,19 @@ NavigationPathTileInfo *NavigationPathVisualization::findTileInfo(MapTile *tile)
 void NavigationPathVisualization::destroyGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
     NavigationPathTileInfo *tileInfo=i->second;
-    GraphicLine *line=tileInfo->getGraphicLine();
+    GraphicLine *line=tileInfo->getPathLine();
     if (line) line->invalidate();
-    GraphicRectangleList *rectangleList=tileInfo->getGraphicRectangeList();
+    GraphicRectangleList *rectangleList=tileInfo->getPathArrowList();
     if (rectangleList) {
       rectangleList->invalidate();
+    }
+    GraphicRectangle *rectangle=tileInfo->getPathStartFlag();
+    if (rectangle) {
+      rectangle->invalidate();
+    }
+    rectangle=tileInfo->getPathEndFlag();
+    if (rectangle) {
+      rectangle->invalidate();
     }
   }
 }
@@ -104,9 +116,17 @@ void NavigationPathVisualization::destroyGraphic() {
 void NavigationPathVisualization::createGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
     NavigationPathTileInfo *tileInfo=i->second;
-    GraphicRectangleList *rectangleList=tileInfo->getGraphicRectangeList();
+    GraphicRectangleList *rectangleList=tileInfo->getPathArrowList();
     if (rectangleList) {
       rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
+    }
+    GraphicRectangle *rectangle=tileInfo->getPathStartFlag();
+    if (rectangle) {
+      rectangle->setTexture(core->getGraphicEngine()->getPathStartFlagIcon()->getTexture());
+    }
+    rectangle=tileInfo->getPathEndFlag();
+    if (rectangle) {
+      rectangle->setTexture(core->getGraphicEngine()->getPathEndFlagIcon()->getTexture());
     }
   }
 }
@@ -115,10 +135,14 @@ void NavigationPathVisualization::createGraphic() {
 void NavigationPathVisualization::optimizeGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
     i->first->getVisualization()->lockAccess();
-    GraphicLine *line=i->second->getGraphicLine();
+    GraphicLine *line=i->second->getPathLine();
     if (line) line->optimize();
-    GraphicRectangleList *rectangleList=i->second->getGraphicRectangeList();
+    GraphicRectangleList *rectangleList=i->second->getPathArrowList();
     if (rectangleList) rectangleList->optimize();
+    GraphicRectangle *rectangle=i->second->getPathStartFlag();
+    if (rectangle) rectangle->optimize();
+    rectangle=i->second->getPathEndFlag();
+    if (rectangle) rectangle->optimize();
     i->first->getVisualization()->unlockAccess();
   }
 }

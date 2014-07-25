@@ -94,6 +94,7 @@ bool WidgetPage::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, d
 bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
   // Skip the check if it started outside
+  touchEndTime=t;
   if (touchStartedOutside)
     return false;
 
@@ -178,13 +179,13 @@ void WidgetPage::onLocationChange(bool pageVisible, MapPosition pos) {
 }
 
 // Called when a path has changed
-void WidgetPage::onPathChange(bool pageVisible, NavigationPath *path) {
+void WidgetPage::onPathChange(bool pageVisible, NavigationPath *path, NavigationPathChangeType changeType) {
 
   // Check all widgets
   std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
   for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
     WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-    primitive->onPathChange(pageVisible, path);
+    primitive->onPathChange(pageVisible, path, changeType);
   }
 }
 

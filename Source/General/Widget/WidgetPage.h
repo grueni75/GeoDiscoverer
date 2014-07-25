@@ -67,7 +67,7 @@ public:
   void onLocationChange(bool pageVisible, MapPosition pos);
 
   // Called when a path has changed
-  void onPathChange(bool pageVisible, NavigationPath *path);
+  void onPathChange(bool pageVisible, NavigationPath *path, NavigationPathChangeType changeType);
 
   // Let the page work
   bool work(TimestampInMicroseconds t);

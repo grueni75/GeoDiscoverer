@@ -30,9 +30,6 @@ class Commander {
 
 protected:
 
-  // The current position of the graphic engine
-  GraphicPosition *pos;
-
   // Mutex to ensure that only one thread is executing a command at a time
   ThreadMutexInfo *accessMutex;
 
@@ -57,7 +54,7 @@ public:
   }
 
   // Execute a command
-  std::string execute(std::string cmd, bool innerCall=false);
+  std::string execute(std::string cmd);
 
   // Dispatch a command to the parent app
   void dispatch(std::string cmd);

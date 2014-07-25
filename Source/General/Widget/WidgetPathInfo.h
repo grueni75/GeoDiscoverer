@@ -146,7 +146,7 @@ public:
   virtual void onLocationChange(bool widgetVisible, MapPosition pos);
 
   // Called when a path has changed
-  virtual void onPathChange(bool widgetVisible, NavigationPath *path);
+  virtual void onPathChange(bool widgetVisible, NavigationPath *path, NavigationPathChangeType changeType);
 
   // Called when a two fingure gesture is done on the widget
   virtual void onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff);

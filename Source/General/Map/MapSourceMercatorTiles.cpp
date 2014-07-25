@@ -46,6 +46,7 @@ MapSourceMercatorTiles::~MapSourceMercatorTiles() {
 
   // Stop the map downloader object
   delete mapDownloader;
+  mapDownloader=NULL;
 
   // Free everything else
   deinit();
@@ -55,7 +56,7 @@ MapSourceMercatorTiles::~MapSourceMercatorTiles() {
 // Deinitializes the map source
 void MapSourceMercatorTiles::deinit() {
   MapSource::deinit();
-  mapDownloader->deinit();
+  if (mapDownloader) mapDownloader->deinit();
 }
 
 // Initializes the map source

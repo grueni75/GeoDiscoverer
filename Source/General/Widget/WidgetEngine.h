@@ -51,6 +51,8 @@ protected:
   Int changePageOvershoot;                              // Distance that the page change shall overshoot
   TimestampInMicroseconds ignoreTouchesEnd;             // End time until touches shall be ignored
   TimestampInMicroseconds widgetsActiveTimeout;         // Time to show the widgets after last interaction
+  NavigationPath *nearestPath;                          // Path that is currently the nearest to the map center
+  Int nearestPathIndex;                                 // Index of the nearest point on the nearest path
 
   // Adds a widget to a page
   void addWidgetToPage(
@@ -97,13 +99,13 @@ public:
   bool onTouchDown(TimestampInMicroseconds t, Int x, Int y);
 
   // Informs the engine that the map has changed
-  void onMapChange(MapPosition pos);
+  void onMapChange(MapPosition pos, std::list<MapTile*> *centerMapTiles);
 
   // Informs the engine that the location has changed
   void onLocationChange(MapPosition mapPos);
 
   // Informs the engine that a path has changed
-  void onPathChange(NavigationPath *path);
+  void onPathChange(NavigationPath *path, NavigationPathChangeType changeType);
 
   // Let the engine work
   bool work(TimestampInMicroseconds t);
@@ -115,10 +117,10 @@ public:
   void setTargetAtAddress();
 
   // Sets a new page
-  void setPage(std::string name, Int direction, bool lockAccess);
+  void setPage(std::string name, Int direction);
 
   // Sets the widgets of the current page active
-  void setWidgetsActive(bool widgetsActive, bool lockAccess);
+  void setWidgetsActive(bool widgetsActive);
 
   // Getters and setters
   GraphicColor getSelectedWidgetColor() const
@@ -142,6 +144,14 @@ public:
 
   TimestampInMicroseconds getWidgetsActiveTimeout() const {
     return widgetsActiveTimeout;
+  }
+
+  NavigationPath* getNearestPath() const {
+    return nearestPath;
+  }
+
+  Int getNearestPathIndex() const {
+    return nearestPathIndex;
   }
 };
 

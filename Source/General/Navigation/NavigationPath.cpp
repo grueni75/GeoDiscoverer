@@ -34,6 +34,7 @@ NavigationPath::NavigationPath() {
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength");
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance");
   pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth");
+  flagAnimationDuration=core->getConfigStore()->getIntValue("Graphic","flagAnimationDuration");
   minDistanceToRouteWayPoint=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToRouteWayPoint");
   minTurnAngle=core->getConfigStore()->getDoubleValue("Navigation","minTurnAngle");
   minDistanceToTurnWayPoint=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToTurnWayPoint");
@@ -70,7 +71,7 @@ NavigationPath::~NavigationPath() {
   core->getThread()->destroyMutex(accessMutex);
 }
 
-// Updates the visualization of the tile
+// Updates the visualization of the tile (path line and arrows)
 void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, MapPosition prevPos, MapPosition prevArrowPos, MapPosition currentPos) {
 
   // Compute the search boundary
@@ -157,7 +158,7 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
 
         // Check if the map tile has already graphic objects for this path
         NavigationPathTileInfo *info=visualization->findTileInfo(*k);
-        GraphicLine *line=info->getGraphicLine();
+        GraphicLine *line=info->getPathLine();
         GraphicObject *tileVisualization=(*k)->getVisualization();
         tileVisualization->lockAccess();
         if (!line) {
@@ -173,8 +174,8 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           line->setCutEnabled(true);
           line->setCutWidth((*k)->getWidth());
           line->setCutHeight((*k)->getHeight());
-          info->setGraphicLine(line);
-          info->setGraphicLineKey(tileVisualization->addPrimitive(line));
+          info->setPathLine(line);
+          info->setPathLineKey(tileVisualization->addPrimitive(line));
 
         }
 
@@ -189,7 +190,7 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
         if (currentPos.getHasBearing()) {
 
           // Get the existing rectangle list or create a new one
-          GraphicRectangleList *rectangleList=info->getGraphicRectangeList();
+          GraphicRectangleList *rectangleList=info->getPathArrowList();
           if (!rectangleList) {
 
             // Create a new rectangle list and add it to the tile
@@ -199,7 +200,7 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
               return;
             }
             rectangleList->setAnimator(&animator);
-            rectangleList->setZ(2); // ensure that rectangle is drawn after line texture
+            rectangleList->setZ(2); // ensure that arrow is drawn after line texture
             rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
             rectangleList->setDestroyTexture(false);
             rectangleList->setCutEnabled(true);
@@ -218,8 +219,8 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
               angleToCenter=atan((double)arrowYToCenter/(double)arrowXToCenter);
             }
             rectangleList->setParameter(totalRadius,distanceToCenter,angleToCenter);
-            info->setGraphicRectangleList(rectangleList);
-            info->setGraphicRectangleListKey(tileVisualization->addPrimitive(rectangleList));
+            info->setPathArrowList(rectangleList);
+            info->setPathArrowListKey(tileVisualization->addPrimitive(rectangleList));
           }
 
           // Add the arrow
@@ -242,10 +243,146 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
         }
         tileVisualization->unlockAccess();
 
-        // Add the path to the tile if it is not already there
-
-
       }
+    }
+  }
+  core->getMapSource()->unlockAccess();
+}
+
+// Updates the visualization of the tile (start and end flag)
+void NavigationPath::updateTileVisualization(NavigationPathVisualizationType type, std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, bool remove, bool animate) {
+
+  // Get the position to search
+  MapPosition pos;
+  switch(type) {
+    case NavigationPathVisualizationTypeStartFlag:
+      if (startIndex!=-1)
+        pos = mapPositions[startIndex];
+      else
+        return;
+      break;
+    case NavigationPathVisualizationTypeEndFlag:
+      if (endIndex!=-1)
+        pos = mapPositions[endIndex];
+      else
+        return;
+      break;
+    default:
+      FATAL("unsupported visualization type",NULL);
+      return;
+  }
+
+  // Find all map tiles that overlap the given
+  std::list<MapContainer*> foundContainers;
+  MapArea area;
+  area.setZoomLevel(visualization->getZoomLevel());
+  core->getMapSource()->lockAccess();
+  if (!mapContainers) {
+    foundContainers=core->getMapSource()->findMapContainersByGeographicCoordinate(pos,visualization->getZoomLevel());
+  } else {
+    for (std::list<MapContainer*>::iterator i=mapContainers->begin();i!=mapContainers->end();i++) {
+      if ((pos.getLng()>=(*i)->getLngWest())&&(pos.getLng()<=(*i)->getLngEast())&&
+          (pos.getLat()>=(*i)->getLatSouth())&&(pos.getLat()<=(*i)->getLatNorth())) {
+        foundContainers.push_back(*i);
+      }
+    }
+  }
+
+  // Go through all of them
+  TimestampInMicroseconds t = core->getClock()->getMicrosecondsSinceStart();
+  for(std::list<MapContainer*>::iterator j=foundContainers.begin();j!=foundContainers.end();j++) {
+
+    // Compute the coordinates of the segment within the container
+    MapContainer *mapContainer=*j;
+    bool overflowOccured=false;
+    if (!mapContainer->getMapCalibrator()->setPictureCoordinates(pos)) {
+      overflowOccured=true;
+    }
+    if (!overflowOccured) {
+
+      // Find map tile that contains the position
+      MapTile *k=mapContainer->findMapTileByPictureCoordinate(pos);
+
+      // Check if the map tile has already graphic objects for this path
+      NavigationPathTileInfo *info=visualization->findTileInfo(k);
+      GraphicRectangle *flag=NULL;
+      switch(type) {
+        case NavigationPathVisualizationTypeStartFlag:
+          flag=info->getPathStartFlag();
+          break;
+        case NavigationPathVisualizationTypeEndFlag:
+          flag=info->getPathEndFlag();
+          break;
+      }
+      GraphicObject *tileVisualization=k->getVisualization();
+      tileVisualization->lockAccess();
+      if (!remove) {
+        if (!flag) {
+
+          // Create a new flag and add it to the tile
+          flag=new GraphicRectangle();
+          if (!flag) {
+            FATAL("can not create graphic rectangle object",NULL);
+            return;
+          }
+          flag->setAnimator(&animator);
+          GraphicRectangle *ref = NULL;
+          switch(type) {
+            case NavigationPathVisualizationTypeStartFlag:
+              ref = core->getGraphicEngine()->getPathStartFlagIcon();
+              info->setPathStartFlag(flag);
+              flag->setZ(3); // ensure that start flag is drawn after tile and direction texture
+              info->setPathStartFlagKey(tileVisualization->addPrimitive(flag));
+              break;
+            case NavigationPathVisualizationTypeEndFlag:
+              ref = core->getGraphicEngine()->getPathEndFlagIcon();
+              info->setPathEndFlag(flag);
+              flag->setZ(4); // ensure that end flag is drawn after start flag, tile and direction texture
+              info->setPathEndFlagKey(tileVisualization->addPrimitive(flag));
+              break;
+          }
+          flag->setColor(GraphicColor(255,255,255,255));
+          flag->setTexture(ref->getTexture());
+          flag->setIconWidth(ref->getIconWidth());
+          flag->setIconHeight(ref->getIconHeight());
+          flag->setWidth(ref->getWidth());
+          flag->setHeight(ref->getHeight());
+          Int endX=pos.getX()-k->getMapX(0)-flag->getIconWidth()/2;
+          Int endY=k->getHeight()-(pos.getY()-k->getMapY(0))-flag->getIconHeight()/2;
+          Int startX=endX;
+          Int startY=endY+core->getScreen()->getHeight();
+          if (animate) {
+            flag->setX(startX);
+            flag->setY(startY);
+            flag->setTranslateAnimation(t,startX,startY,endX,endY,false,flagAnimationDuration,GraphicTranslateAnimationTypeAccelerated);
+          } else {
+            flag->setX(endX);
+            flag->setY(endY);
+          }
+        }
+      } else {
+        if (flag) {
+          GraphicPrimitiveKey key;
+          GraphicRectangle *flag;
+          switch(type) {
+            case NavigationPathVisualizationTypeStartFlag:
+              key=info->getPathStartFlagKey();
+              flag=info->getPathStartFlag();
+              info->setPathStartFlag(NULL);
+              info->setPathStartFlagKey(0);
+              break;
+            case NavigationPathVisualizationTypeEndFlag:
+              key=info->getPathEndFlagKey();
+              flag=info->getPathEndFlag();
+              info->setPathEndFlag(NULL);
+              info->setPathEndFlagKey(0);
+              break;
+          }
+          flag->setTexture(core->getScreen()->getTextureNotDefined());
+          tileVisualization->removePrimitive(key,true);
+        }
+      }
+      tileVisualization->unlockAccess();
     }
   }
   core->getMapSource()->unlockAccess();
@@ -303,6 +440,8 @@ void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapCon
 // Adds a point to the path
 void NavigationPath::addEndPosition(MapPosition pos) {
 
+  lockAccess();
+
   // Decide whether to add a new point or use the last one
   if (!hasLastPoint) {
     hasLastPoint=true;
@@ -316,38 +455,8 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   mapPositions.push_back(pos);
 
   // Update the length and altitude meters
-  if ((hasSecondLastPoint)&&(hasLastPoint)) {
-    if ((secondLastPoint!=NavigationPath::getPathInterruptedPos())&&(lastPoint!=NavigationPath::getPathInterruptedPos())) {
-      length+=secondLastPoint.computeDistance(lastPoint);
-      if (lastValidAltiudeMetersPoint==NavigationPath::getPathInterruptedPos()) {
-        lastValidAltiudeMetersPoint=secondLastPoint;
-      }
-      if (lastPoint.getHasAltitude()) {
-
-        // Check if the altitude difference is sane
-        double altitudeDiff = lastPoint.getAltitude() - lastValidAltiudeMetersPoint.getAltitude();
-        if (fabs(altitudeDiff)>=minAltitudeChange) {
-
-          // Update the altitude meters
-          if (altitudeDiff>0) {
-            altitudeUp+=altitudeDiff;
-          } else {
-            altitudeDown+=-altitudeDiff;
-          }
-          lastValidAltiudeMetersPoint=lastPoint;
-        }
-      }
-    }
-  }
-  if (hasLastPoint) {
-    if (lastPoint.getHasAltitude()) {
-      if (lastPoint.getAltitude()<minAltitude) {
-        minAltitude=lastPoint.getAltitude();
-      }
-      if (lastPoint.getAltitude()>maxAltitude) {
-        maxAltitude=lastPoint.getAltitude();
-      }
-    }
+  if (endIndex==-1) {
+    updateMetrics(secondLastPoint,lastPoint);
   }
 
   // Path was modified
@@ -398,6 +507,10 @@ void NavigationPath::addEndPosition(MapPosition pos) {
           // Add a line stroke to all matching tiles
           updateTileVisualization(NULL,visualization,visualization->getPrevLinePoint(),visualization->getPrevArrowPoint(),pos);
 
+          // Add the visualization of the flags
+          updateTileVisualization(NavigationPathVisualizationTypeStartFlag,NULL,visualization,false,false);
+          updateTileVisualization(NavigationPathVisualizationTypeEndFlag,NULL,visualization,false,false);
+
           // Update the previous point
           visualization->addPoint(pos);
 
@@ -418,6 +531,10 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   std::list<MapContainer*> mapContainers = core->getMapSource()->findMapContainersByGeographicCoordinate(pos);
   updateCrossingTileSegments(&mapContainers, mapPositions.size()-1);
   core->getMapSource()->unlockAccess();
+  unlockAccess();
+
+  // Inform the widgets
+  core->getWidgetEngine()->onPathChange(this,NavigationPathChangeTypeEndPositionAdded);
 }
 
 // Clears the graphical representation
@@ -455,6 +572,8 @@ void NavigationPath::init() {
   // Reset variables
   hasLastPoint=false;
   hasSecondLastPoint=false;
+  lastPoint=NavigationPath::getPathInterruptedPos();
+  secondLastPoint=NavigationPath::getPathInterruptedPos();
   gpxFilename="track-" + core->getClock()->getFormattedDate() + ".gpx";
   setName("Track-" + core->getClock()->getFormattedDate());
   setDescription("Track recorded with GeoDiscoverer.");
@@ -463,12 +582,10 @@ void NavigationPath::init() {
   hasBeenLoaded=false;
   isNew=true;
   mapPositions.clear();
-  length=0;
-  altitudeUp=0;
-  altitudeDown=0;
-  minAltitude=std::numeric_limits<double>::max();
-  maxAltitude=std::numeric_limits<double>::min();
   blinkMode=false;
+  startIndex=-1;
+  endIndex=-1;
+  updateMetrics();
 
   // Configure the animator
   core->getGraphicEngine()->lockPathAnimators();
@@ -561,6 +678,10 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
               prevArrowPoint=*i;
           }
         }
+
+        // Add the visualization of the flags
+        updateTileVisualization(NavigationPathVisualizationTypeStartFlag,&mapContainersOfSameZoomLevel,visualization,false,false);
+        updateTileVisualization(NavigationPathVisualizationTypeEndFlag,&mapContainersOfSameZoomLevel,visualization,false,false);
       }
 
       // Create a new empty list
@@ -601,19 +722,33 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
 // Computes navigation details for the given location
 void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition &wayPoint, NavigationInfo &navigationInfo) {
 
+  // Lock the path until we have enough information
+  lockAccess();
+
   // Do not calculate if path is not initialized
   if (!isInit) {
+    unlockAccess();
     return;
   }
 
-  // Find the nearest point on the route
+  // Init variables
+  std::vector<MapPosition> mapPositions=getSelectedPoints();
   double minDistance=std::numeric_limits<double>::max();
   std::vector<MapPosition>::iterator nearestIterator;
-  for (std::vector<MapPosition>::iterator i=mapPositions.begin();i!=mapPositions.end();i++) {
-    double distance = (*i).computeDistance(locationPos);
+  Int startIndex, endIndex;
+  startIndex=reverse ? mapPositions.size()-1 : 0;
+  endIndex=reverse ? 0 : mapPositions.size()-1;
+
+  // All code after this point is using local variables or read-only class members
+  // We can safely unlock the general access to the path object
+  unlockAccess();
+
+  // Find the nearest point on the route
+  for (Int i=startIndex; reverse?i>=endIndex:i<=endIndex;reverse?i--:i++) {
+    double distance = mapPositions[i].computeDistance(locationPos);
     if (distance<minDistance)  {
       minDistance=distance;
-      nearestIterator=i;
+      nearestIterator=mapPositions.begin()+i;
     }
   }
 
@@ -629,11 +764,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
     double routeBearing=0;
     double minBearingDiff=std::numeric_limits<double>::max();
     std::vector<MapPosition>::iterator iterator,prevIterator,newNearestIterator=nearestIterator;
-    if (reverse) {
-      iterator=mapPositions.end();
-    } else {
-      iterator=mapPositions.begin();
-    }
+    iterator=mapPositions.begin()+startIndex;
     while (true) {
 
       // Compute the current bearing of the route
@@ -655,14 +786,12 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
       // Select the next route point
       prevIterator=iterator;
+      if (iterator==mapPositions.begin()+endIndex)
+        break;
       if (reverse) {
-        if (iterator==mapPositions.begin())
-          break;
         iterator--;
       } else {
         iterator++;
-        if (iterator==mapPositions.end())
-          break;
       }
     }
     nearestIterator=newNearestIterator;
@@ -724,13 +853,11 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
                 break;
               }
             }
+            if (turnIterator==mapPositions.begin()+startIndex)
+              break;
             if (reverse) {
               turnIterator++;
-              if (turnIterator==mapPositions.end())
-                break;
             } else {
-              if (turnIterator==mapPositions.begin())
-                break;
               turnIterator--;
             }
           }
@@ -750,14 +877,12 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
                 break;
               }
             }
+            if (turnIterator==mapPositions.begin()+endIndex)
+              break;
             if (reverse) {
-              if (turnIterator==mapPositions.begin())
-                break;
               turnIterator--;
             } else {
               turnIterator++;
-              if (turnIterator==mapPositions.end())
-                break;
             }
           }
 
@@ -814,14 +939,12 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
         }
       }
       prevPos=pos;
+      if (iterator==mapPositions.begin()+endIndex)
+        break;
       if (reverse) {
-        if (iterator==mapPositions.begin())
-          break;
         iterator--;
       } else {
         iterator++;
-        if (iterator==mapPositions.end())
-          break;
       }
     }
   }
@@ -857,6 +980,217 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
   navigationInfo.setTargetDistance(distanceToRouteEnd);
   navigationInfo.setTurnAngle(turnAngle);
   navigationInfo.setTurnDistance(turnDistance);
+}
+
+// Computes the metrics for the given map positions
+void NavigationPath::updateMetrics(MapPosition prevPoint, MapPosition curPoint) {
+  if ((prevPoint!=NavigationPath::getPathInterruptedPos())&&(curPoint!=NavigationPath::getPathInterruptedPos())) {
+    length+=prevPoint.computeDistance(curPoint);
+    if (lastValidAltiudeMetersPoint==NavigationPath::getPathInterruptedPos()) {
+      lastValidAltiudeMetersPoint=prevPoint;
+    }
+    if (curPoint.getHasAltitude()) {
+
+      // Check if the altitude difference is sane
+      double altitudeDiff = curPoint.getAltitude() - lastValidAltiudeMetersPoint.getAltitude();
+      if (fabs(altitudeDiff)>=minAltitudeChange) {
+
+        // Update the altitude meters
+        if (altitudeDiff>0) {
+          altitudeUp+=altitudeDiff;
+        } else {
+          altitudeDown+=-altitudeDiff;
+        }
+        lastValidAltiudeMetersPoint=curPoint;
+      }
+    }
+  }
+  if (curPoint.getHasAltitude()) {
+    if (curPoint.getAltitude()<minAltitude) {
+      minAltitude=curPoint.getAltitude();
+    }
+    if (prevPoint.getAltitude()>maxAltitude) {
+      maxAltitude=curPoint.getAltitude();
+    }
+  }
+}
+
+// Updates the metrics (altitude, length, duration, ...) of the path
+void NavigationPath::updateMetrics() {
+  Int startIndex, endIndex;
+  MapPosition prevPos = NavigationPath::getPathInterruptedPos();
+  startIndex=reverse ? mapPositions.size()-1 : 0;
+  if (this->startIndex!=-1)
+    startIndex=this->startIndex;
+  endIndex=reverse ? 0 : mapPositions.size()-1;
+  if (this->endIndex!=-1)
+    endIndex=this->endIndex;
+  if (reverse) {
+    if (endIndex<mapPositions.size()-1)
+      prevPos=mapPositions[endIndex+1];
+  } else {
+    if (startIndex>0)
+      prevPos=mapPositions[startIndex-1];
+  }
+  length=0;
+  altitudeUp=0;
+  altitudeDown=0;
+  minAltitude=std::numeric_limits<double>::max();
+  maxAltitude=std::numeric_limits<double>::min();
+  for(Int i=startIndex;reverse?i>endIndex:i<endIndex;reverse?i--:i++) {
+    updateMetrics(prevPos,mapPositions[i]);
+    prevPos=mapPositions[i];
+  }
+}
+
+// Updates the flag visualization for all zoom levels
+void NavigationPath::updateFlagVisualization(NavigationPathVisualizationType type, bool remove, bool animate) {
+  for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
+    NavigationPathVisualization *visualization=*i;
+    updateTileVisualization(type,NULL,visualization,remove,animate);
+  }
+}
+
+// Sets the start flag at the given index
+void NavigationPath::setStartFlag(Int index) {
+
+  // Path may only be changed by one thread
+  lockAccess();
+
+  // Remove the current visualization of start and end flag
+  if (startIndex!=-1)
+    updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,true,true);
+
+  // Shall the start flag be hidden?
+  if (index==-1) {
+    startIndex=-1;
+  } else {
+
+    // First check if start flag is within range of path
+    if (index<0)
+      index=0;
+    if (index>mapPositions.size()-1)
+      index=mapPositions.size()-1;
+
+    // If the new start flag is behind the end flag, set the end flag to the start flag
+    bool updateEndFlag=false;
+    Int newEndIndex=-1;
+    startIndex=index;
+    if (reverse) {
+      if ((endIndex!=-1)&&(index<endIndex)) {
+        updateEndFlag=true;
+        newEndIndex=index;
+      }
+    } else {
+      if ((endIndex!=-1)&&(index>endIndex)) {
+        updateEndFlag=true;
+        newEndIndex=index;
+      }
+    }
+
+    // Update the visualization
+    updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,false,true);
+    std::string routePath="Navigation/Route[@name='" + getGpxFilename() + "']";
+    core->getConfigStore()->setIntValue(routePath,"startFlagIndex",startIndex);
+    if (updateEndFlag) {
+      updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,true,true);
+      endIndex=newEndIndex;
+      updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,false,true);
+      core->getConfigStore()->setIntValue(routePath,"endFlagIndex",endIndex);
+    }
+  }
+
+  // Update the metrics of the path
+  updateMetrics();
+
+  // Path can be used again
+  unlockAccess();
+
+  // Inform the widget engine
+  core->getWidgetEngine()->onPathChange(this, NavigationPathChangeTypeFlagSet);
+}
+
+// Sets the end flag at the given index
+void NavigationPath::setEndFlag(Int index) {
+
+  // Path may only be changed by one thread
+  lockAccess();
+
+  // Remove the current visualization of start and end flag
+  if (endIndex!=-1)
+    updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,true,true);
+
+  // Shall the end flag be hidden?
+  if (index==-1) {
+    endIndex=-1;
+  } else {
+
+    // First check if end flag is within range of path
+    if (index<0)
+      index=0;
+    if (index>mapPositions.size()-1)
+      index=mapPositions.size()-1;
+
+    // If the new end flag is behind the start flag, set the start flag to the end flag
+    bool updateStartFlag=false;
+    Int newStartIndex=-1;
+    endIndex=index;
+    if (reverse) {
+      if ((startIndex!=-1)&&(index>startIndex)) {
+        updateStartFlag=true;
+        newStartIndex=index;
+      }
+    } else {
+      if ((endIndex!=-1)&&(index<startIndex)) {
+        updateStartFlag=true;
+        newStartIndex=index;
+      }
+    }
+
+    // Update the visualization
+    updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,false,true);
+    std::string routePath="Navigation/Route[@name='" + getGpxFilename() + "']";
+    core->getConfigStore()->setIntValue(routePath,"endFlagIndex",endIndex);
+    if (updateStartFlag) {
+      updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,true,true);
+      startIndex=newStartIndex;
+      updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,false,true);
+      core->getConfigStore()->setIntValue(routePath,"startFlagIndex",startIndex);
+    }
+  }
+
+  // Update the metrics of the path
+  updateMetrics();
+
+  // Path can be used again
+  unlockAccess();
+
+  // Inform the widget engine
+  core->getWidgetEngine()->onPathChange(this, NavigationPathChangeTypeFlagSet);
+}
+
+// Returns the points selected by the flags
+std::vector<MapPosition> NavigationPath::getSelectedPoints() {
+  if ((startIndex==-1)&&(endIndex==-1))
+    return mapPositions;
+  else {
+    Int startIndex=0;
+    Int endIndex=mapPositions.size()-1;
+    if (this->startIndex!=-1)
+      startIndex=this->startIndex;
+    if (this->endIndex!=-1)
+      endIndex=this->endIndex;
+    std::vector<MapPosition>::iterator startIterator;
+    std::vector<MapPosition>::iterator endIterator;
+    if (reverse) {
+      startIterator = mapPositions.begin()+endIndex;
+      endIterator = mapPositions.begin()+startIndex+1;
+    } else {
+      startIterator = mapPositions.begin()+startIndex;
+      endIterator = mapPositions.begin()+endIndex+1;
+    }
+    return std::vector<MapPosition>(startIterator,endIterator);
+  }
 }
 
 }

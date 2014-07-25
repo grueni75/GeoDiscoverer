@@ -351,10 +351,20 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
         //DEBUG("using calibrator to compute position",NULL);
         MapPosition pos=area.getRefPos();
         tile->getParentMapContainer()->getMapCalibrator()->setPictureCoordinates(pos);
-        Int diffVisX=tile->getMapX()-pos.getX();
-        Int diffVisY=tile->getMapY()-pos.getY();
         tile->setVisX(visXByCalibrator);
         tile->setVisY(visYByCalibrator);
+      }
+
+      // Remember this tile if it is in the direct neighborhood of the center position
+      if ((
+           (tile->getVisX(0)<area.getRefPos().getX()+core->getMapSource()->getMapTileWidth())&&
+           (tile->getVisX(1)>area.getRefPos().getX()-core->getMapSource()->getMapTileWidth())
+          )&&(
+           (tile->getVisY(0)<area.getRefPos().getY()+core->getMapSource()->getMapTileHeight())&&
+           (tile->getVisY(1)>area.getRefPos().getY()-core->getMapSource()->getMapTileHeight())
+         ))
+      {
+        centerMapTiles.push_back(tile);
       }
 
       // Tile not in draw list?
@@ -902,6 +912,7 @@ void MapEngine::updateMap() {
         // Fill the complete area
         //DEBUG("starting area fill",NULL);
         MapArea searchArea=newDisplayArea;
+        centerMapTiles.clear();
         fillGeographicAreaWithTiles(searchArea,NULL,(tiles.size()==0) ? true : false);
         //PROFILE_ADD("tile fill");
 
@@ -964,7 +975,7 @@ void MapEngine::updateMap() {
     core->getNavigationEngine()->updateMapGraphic();
 
     // Update any widgets
-    core->getWidgetEngine()->onMapChange(mapPos);
+    core->getWidgetEngine()->onMapChange(mapPos,&centerMapTiles);
 
     // Inform the cache
     core->getMapCache()->tileVisibilityChanged();

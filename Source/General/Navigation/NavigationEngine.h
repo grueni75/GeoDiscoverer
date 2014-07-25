@@ -130,14 +130,26 @@ protected:
   double minDistanceToNavigationUpdate;
   bool forceNavigationUpdate;
 
+  // Mutex for accessing the active route
+  ThreadMutexInfo *activeRouteMutex;
+
   // Mutex for accessing the navigation infos
   ThreadMutexInfo *navigationInfosMutex;
 
   // Navigation information
   NavigationInfo navigationInfo;
 
-  // Updates the navigation infos
-  void updateNavigationInfos();
+  // Information about the navigation compute thread
+  ThreadInfo *computeNavigationInfoThreadInfo;
+
+  // Signal to wakeup the navigation compute thread
+  ThreadSignalInfo *computeNavigationInfoSignal;
+
+  // Forces an update of the navigation infos
+  void forceNavigationInfoUpdate() {
+    forceNavigationUpdate=true;
+    core->getThread()->issueSignal(computeNavigationInfoSignal);
+  }
 
 public:
 
@@ -146,6 +158,9 @@ public:
 
   // Destructor
   virtual ~NavigationEngine();
+
+  // Calculates navigation infos such as bearing, distance, ...
+  void computeNavigationInfo();
 
   // Initializes the engine
   void init();
@@ -173,6 +188,9 @@ public:
 
   // Shows the current target at the given position
   void setTargetAtGeographicCoordinate(double lng, double lat, bool repositionMap);
+
+  // Sets the active route
+  void setActiveRoute(NavigationPath *route);
 
   // Makes the target invisible
   void hideTarget();
@@ -212,6 +230,12 @@ public:
 
   // Updates the route list (remove stale ones, add new ones)
   void updateRoutes();
+
+  // Sets the start flag
+  void setStartFlag(NavigationPath *path, Int index);
+
+  // Sets the end flag
+  void setEndFlag(NavigationPath *path, Int index);
 
   // Getters and setters
   NavigationPath *lockRecordedTrack()

@@ -41,6 +41,8 @@ WidgetEngine::WidgetEngine() {
   changePageDuration=c->getIntValue("Graphic/Widget","changePageDuration");
   ignoreTouchesEnd=0;
   widgetsActiveTimeout=c->getIntValue("Graphic/Widget","widgetsActiveTimeout");
+  nearestPath=NULL;
+  nearestPathIndex=-1;
 
   // Init the rest
   init();
@@ -122,12 +124,12 @@ void WidgetEngine::createGraphic() {
     ParameterMap parameters;
     parameters.clear();
     parameters["iconFilename"]="pageLeft";
-    parameters["command"]="setPage(Path Tools,+1,0)";
+    parameters["command"]="setPage(Path Tools,+1)";
     parameters["repeat"]="0";
     addWidgetToPage("Default",WidgetTypeButton,"Page Left",               3.5, 50.0,0, 3.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="pageRight";
-    parameters["command"]="setPage(Path Tools,-1,0)";
+    parameters["command"]="setPage(Path Tools,-1)";
     parameters["repeat"]="0";
     addWidgetToPage("Default",WidgetTypeButton,"Page Right",             96.5, 50.0,0,97.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
@@ -245,12 +247,12 @@ void WidgetEngine::createGraphic() {
     addWidgetToPage("Default",WidgetTypeNavigation,"Navigation",         22.0, 87.0,0,14.5, 78.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="pageLeft";
-    parameters["command"]="setPage(Default,+1,0)";
+    parameters["command"]="setPage(Default,+1)";
     parameters["repeat"]="0";
     addWidgetToPage("Path Tools",WidgetTypeButton,"Page Left",            3.5, 50.0,0, 3.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="pageRight";
-    parameters["command"]="setPage(Default,-1,0)";
+    parameters["command"]="setPage(Default,-1)";
     parameters["repeat"]="0";
     addWidgetToPage("Path Tools",WidgetTypeButton,"Page Right",          96.5, 50.0,0,97.0, 50.0,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
@@ -326,24 +328,20 @@ void WidgetEngine::createGraphic() {
     parameters["labelWidth"]="95.0";
     addWidgetToPage("Path Tools",WidgetTypeStatus,"Status",              50.0, 30.0,1,50.0, 88.0,1,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
-    parameters["iconFilename"]="zoomIn";
-    parameters["command"]="zoom(1.125)";
-    parameters["repeat"]="1";
-    addWidgetToPage("Path Tools",WidgetTypeButton,"Zoom In",             87.5, 80.0,0,89.5, 87.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters["iconFilename"]="setPathEndFlag";
+    parameters["command"]="setPathEndFlag()";
+    parameters["repeat"]="0";
+    addWidgetToPage("Path Tools",WidgetTypeButton,"Set Path End Flag",  87.5, 80.0,0,89.5, 87.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
-    parameters["iconFilename"]="zoomOut";
-    parameters["command"]="zoom(0.875)";
-    parameters["repeat"]="1";
-    addWidgetToPage("Path Tools",WidgetTypeButton,"Zoom Out",            62.5, 80.0,0,89.5, 62.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters["iconFilename"]="setPathStartFlag";
+    parameters["command"]="setPathStartFlag()";
+    parameters["repeat"]="0";
+    addWidgetToPage("Path Tools",WidgetTypeButton,"Set Path Start Flag",62.5, 80.0,0,89.5, 62.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
-    parameters["uncheckedIconFilename"]="returnToLocationOff";
-    parameters["uncheckedCommand"]="setReturnToLocation(0)";
-    parameters["checkedIconFilename"]="returnToLocationOn";
-    parameters["checkedCommand"]="setReturnToLocation(1)";
-    parameters["stateConfigPath"]="Map";
-    parameters["stateConfigName"]="returnToLocation";
-    parameters["updateInterval"]="250000";
-    addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Return To Location",37.5, 80.0,0,89.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
+    parameters["iconFilename"]="setActiveRoute";
+    parameters["command"]="setActiveRoute()";
+    parameters["repeat"]="0";
+    addWidgetToPage("Path Tools",WidgetTypeButton,"Set Active Route",   37.5, 80.0,0,89.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["uncheckedIconFilename"]="zoomLevelLockOff";
     parameters["uncheckedCommand"]="setZoomLevelLock(0)";
@@ -734,9 +732,9 @@ void WidgetEngine::deselectPage() {
 }
 
 // Sets a new page
-void WidgetEngine::setPage(std::string name, Int direction, bool lockAccess) {
+void WidgetEngine::setPage(std::string name, Int direction) {
 
-  if (lockAccess) visiblePages.lockAccess();
+  visiblePages.lockAccess();
 
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   Int width = core->getScreen()->getWidth();
@@ -744,7 +742,7 @@ void WidgetEngine::setPage(std::string name, Int direction, bool lockAccess) {
   // Check if the requested page exists
   if (pageMap.find(name)==pageMap.end()) {
     WARNING("page <%s> does not exist",name.c_str());
-    if (lockAccess) visiblePages.unlockAccess();
+    visiblePages.unlockAccess();
     return;
   }
   WidgetPage *nextPage = pageMap[name];
@@ -805,12 +803,36 @@ void WidgetEngine::setPage(std::string name, Int direction, bool lockAccess) {
   currentPage=nextPage;
   nextPage->setWidgetsActive(t,true);
   core->getConfigStore()->setStringValue("Graphic/Widget","selectedPage",name);
-  if (lockAccess) visiblePages.unlockAccess();;
+  visiblePages.unlockAccess();;
 
 }
 
 // Informs the engine that the map has changed
-void WidgetEngine::onMapChange(MapPosition mapPos) {
+void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMapTiles) {
+
+  // Find the nearest path in the currently visible map tile
+  nearestPath=NULL;
+  double minDistance=std::numeric_limits<double>::max();
+  for(std::list<MapTile*>::iterator j=centerMapTiles->begin();j!=centerMapTiles->end();j++) {
+    std::list<NavigationPathSegment*> nearbyPathSegments;
+    nearbyPathSegments=(*j)->getCrossingNavigationPathSegments();
+    for(std::list<NavigationPathSegment*>::iterator i=nearbyPathSegments.begin();i!=nearbyPathSegments.end();i++) {
+      NavigationPathSegment *s=*i;
+      s->getPath()->lockAccess();
+      for(Int j=s->getStartIndex();j<=s->getEndIndex();j++) {
+        MapPosition pathPos=s->getPath()->getPoint(j);
+        double d=mapPos.computeDistance(pathPos);
+        if (d<minDistance) {
+          minDistance=d;
+          nearestPath=s->getPath();
+          nearestPathIndex=j;
+        }
+      }
+      s->getPath()->unlockAccess();
+    }
+  }
+
+  // Inform the widget
   visiblePages.lockAccess();
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
@@ -830,22 +852,22 @@ void WidgetEngine::onLocationChange(MapPosition mapPos) {
 }
 
 // Informs the engine that a path has changed
-void WidgetEngine::onPathChange(NavigationPath *path) {
+void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType changeType) {
   visiblePages.lockAccess();
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
-    i->second->onPathChange(currentPage==i->second ? true : false, path);
+    i->second->onPathChange(currentPage==i->second ? true : false, path, changeType);
   }
   visiblePages.unlockAccess();
 }
 
 // Sets the widgets of the current page active
-void WidgetEngine::setWidgetsActive(bool widgetsActive, bool lockAccess) {
-  if (lockAccess) visiblePages.lockAccess();
+void WidgetEngine::setWidgetsActive(bool widgetsActive) {
+  visiblePages.lockAccess();
   if (currentPage) {
     currentPage->setWidgetsActive(core->getClock()->getMicrosecondsSinceStart(),widgetsActive);
   }
-  if (lockAccess) visiblePages.unlockAccess();
+  visiblePages.unlockAccess();
 }
 
 // Let the engine work

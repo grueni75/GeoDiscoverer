@@ -27,7 +27,6 @@ namespace GEODISCOVERER {
 
 // Constructor
 Commander::Commander() {
-  pos=NULL;
   accessMutex=core->getThread()->createMutex("commander access mutex");
   lastTouchedX=0;
   lastTouchedY=0;
@@ -39,13 +38,12 @@ Commander::~Commander() {
 }
 
 // Execute a command
-std::string Commander::execute(std::string cmd, bool innerCall) {
-
-  // Only one at a time
-  if (!innerCall) core->getThread()->lockMutex(accessMutex);
+std::string Commander::execute(std::string cmd) {
 
   //DEBUG("executing command <%s>",cmd.c_str());
+  core->getThread()->lockMutex(accessMutex);
   TRACE(cmd.c_str(),NULL);
+  core->getThread()->unlockMutex(accessMutex);
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
 
   // Set the default result
@@ -55,13 +53,11 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
   Int argStart=cmd.find('(');
   if (argStart==std::string::npos) {
     ERROR("can not extract start of arguments from command <%s>",cmd.c_str());
-    if (!innerCall) core->getThread()->unlockMutex(accessMutex);
     return "";
   }
   Int argEnd=cmd.find(')');
   if (argEnd==std::string::npos) {
     ERROR("can not extract end of arguments from command <%s>",cmd.c_str());
-    if (!innerCall) core->getThread()->unlockMutex(accessMutex);
     return "";
   }
   std::string cmdName=cmd.substr(0,argStart);
@@ -94,21 +90,21 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
   bool cmdExecuted=false;
   //DEBUG("before: x=%d y=%d",pos->getX(),pos->getY());
   if (cmdName=="zoom") {
-    pos=core->getGraphicEngine()->lockPos();
+    GraphicPosition *pos=core->getGraphicEngine()->lockPos();
     pos->zoom(atof(args[0].c_str()));
     pos->updateLastUserModification();
     core->getGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
   if (cmdName=="pan") {
-    pos=core->getGraphicEngine()->lockPos();
+    GraphicPosition *pos=core->getGraphicEngine()->lockPos();
     pos->pan(atoi(args[0].c_str()),atoi(args[1].c_str()));
     pos->updateLastUserModification();
     core->getGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
   if (cmdName=="rotate") {
-    pos=core->getGraphicEngine()->lockPos();
+    GraphicPosition *pos=core->getGraphicEngine()->lockPos();
     pos->rotate(atof(args[0].c_str()));
     pos->updateLastUserModification();
     core->getGraphicEngine()->unlockPos();
@@ -119,7 +115,7 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     cmdExecuted=true;
   }
   if (cmdName=="setPage") {
-    core->getWidgetEngine()->setPage(args[0],atoi(args[1].c_str()),atoi(args[2].c_str()));
+    core->getWidgetEngine()->setPage(args[0],atoi(args[1].c_str()));
     cmdExecuted=true;
   }
   if (cmdName=="twoFingerGesture") {
@@ -130,8 +126,10 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     y=atoi(args[1].c_str());
     x=x-core->getScreen()->getWidth()/2;
     y=core->getScreen()->getHeight()/2-1-y;
+    core->getThread()->lockMutex(accessMutex);
     Int dX=lastTouchedX-x;
     Int dY=lastTouchedY-y;
+    core->getThread()->unlockMutex(accessMutex);
 
     // First check if a widget was two fingure gestured
     bool widgetTouched=false;
@@ -141,7 +139,7 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
 
     // Then do the map scrolling
     if (!widgetTouched) {
-      pos=core->getGraphicEngine()->lockPos();
+      GraphicPosition *pos=core->getGraphicEngine()->lockPos();
       pos->rotate(atof(args[2].c_str()));
       pos->zoom(atof(args[3].c_str()));
       pos->pan(dX,dY);
@@ -150,8 +148,10 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     }
 
     // Update some variables
+    core->getThread()->lockMutex(accessMutex);
     lastTouchedX=x;
     lastTouchedY=y;
+    core->getThread()->unlockMutex(accessMutex);
     cmdExecuted=true;
   }
   if (cmdName.substr(0,5)=="touch") {
@@ -179,10 +179,12 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     // Then do the map scrolling
     if (!widgetTouched) {
       if ((cmdName=="touchMove")||(cmdName=="touchUp")) {
+        core->getThread()->lockMutex(accessMutex);
         Int dX=lastTouchedX-x;
         Int dY=lastTouchedY-y;
+        core->getThread()->unlockMutex(accessMutex);
         //DEBUG("pan(%d,%d)",dX,dY);
-        pos=core->getGraphicEngine()->lockPos();
+        GraphicPosition *pos=core->getGraphicEngine()->lockPos();
         pos->pan(dX,dY);
         pos->updateLastUserModification();
         core->getGraphicEngine()->unlockPos();
@@ -190,8 +192,10 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     }
 
     // Update some variables
+    core->getThread()->lockMutex(accessMutex);
     lastTouchedX=x;
     lastTouchedY=y;
+    core->getThread()->unlockMutex(accessMutex);
     cmdExecuted=true;
   }
   //DEBUG("after: x=%d y=%d",pos->getX(),pos->getY());
@@ -391,12 +395,40 @@ std::string Commander::execute(std::string cmd, bool innerCall) {
     WidgetPathInfo::setCurrentPathLocked(state);
     cmdExecuted=true;
   }
+  if (cmdName=="setPathStartFlag") {
+    NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
+    Int nearestPathIndex = core->getWidgetEngine()->getNearestPathIndex();
+    if (nearestPath==NULL) {
+      WARNING("cannot set start flag: no path near to the current map center found",NULL);
+    } else {
+      core->getNavigationEngine()->setStartFlag(nearestPath,nearestPathIndex);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="setPathEndFlag") {
+    NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
+    Int nearestPathIndex = core->getWidgetEngine()->getNearestPathIndex();
+    if (nearestPath==NULL) {
+      WARNING("cannot set end flag: no path near to the current map center found",NULL);
+    } else {
+      core->getNavigationEngine()->setEndFlag(nearestPath,nearestPathIndex);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="setActiveRoute") {
+    NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
+    if (nearestPath==NULL) {
+      WARNING("cannot set active route: no path near to the current map center found",NULL);
+    } else {
+      core->getNavigationEngine()->setActiveRoute(nearestPath);
+    }
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {
     ERROR("unknown command <%s>",cmd.c_str());
   }
-  if (!innerCall) core->getThread()->unlockMutex(accessMutex);
   return result;
 }
 

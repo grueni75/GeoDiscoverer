@@ -24,6 +24,9 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+// Enable profiling
+//#define PROFILING_ENABLED
+
 // System
 #include <stddef.h>
 #include <stdio.h>
@@ -82,6 +85,9 @@ class Commander;
 
 // Error types for downloads
 typedef enum { DownloadResultSuccess, DownloadResultFileNotFound, DownloadResultOtherFail } DownloadResult;
+
+// Types of changes to a navigation path object
+typedef enum {NavigationPathChangeTypeEndPositionAdded, NavigationPathChangeTypeFlagSet } NavigationPathChangeType;
 
 class Core {
 

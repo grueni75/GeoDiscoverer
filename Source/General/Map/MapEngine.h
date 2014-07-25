@@ -61,6 +61,7 @@ protected:
   bool zoomLevelLock;                             // Indicates if the zoom level of the map shall not be changed when zooming
   bool returnToLocationOneTime;                   // Return immediately to the current location the next time
   bool isInitialized;                             // Indicates if the map source is initialized
+  std::list<MapTile*> centerMapTiles;             // All tiles around the neighborhood of the map center
 
   // Does all action to remove a tile from the map
   void deinitTile(MapTile *t);

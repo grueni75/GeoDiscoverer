@@ -65,7 +65,7 @@ public:
   virtual void onLocationChange(bool widgetVisible, MapPosition pos);
 
   // Called when a path changes
-  virtual void onPathChange(bool widgetVisible, NavigationPath *path);
+  virtual void onPathChange(bool widgetVisible, NavigationPath *path, NavigationPathChangeType changeType);
 
   // Called when the widget has changed his position
   virtual void updatePosition(Int x, Int y, Int z);

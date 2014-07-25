@@ -740,7 +740,7 @@ std::list<MapContainer*> MapSource::findMapContainersByGeographicArea(MapArea ar
 }
 
 // Returns a list of map containers in which the given position lies
-std::list<MapContainer*> MapSource::findMapContainersByGeographicCoordinate(MapPosition pos) {
+std::list<MapContainer*> MapSource::findMapContainersByGeographicCoordinate(MapPosition pos, Int zoomLevel) {
 
   bool betterMapContainerFound=false;
   MapPosition bestPos;
@@ -752,7 +752,7 @@ std::list<MapContainer*> MapSource::findMapContainersByGeographicCoordinate(MapP
     return result;
 
   // Get the search tree to use
-  MapContainerTreeNode *startNode=zoomLevelSearchTrees[0];
+  MapContainerTreeNode *startNode=zoomLevelSearchTrees[zoomLevel];
 
   // Find all map containers matching the given area
   findMapContainerByGeographicCoordinate(pos,NULL,startNode,GeographicBorderLatNorth,bestPos,distToNearestLngScale,distToNearestLatScale,betterMapContainerFound,&result);

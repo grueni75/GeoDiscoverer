@@ -82,7 +82,7 @@ void WidgetPrimitive::onLocationChange(bool widgetVisible, MapPosition pos) {
 }
 
 // Called when a path has changed
-void WidgetPrimitive::onPathChange(bool widgetVisible, NavigationPath *path) {
+void WidgetPrimitive::onPathChange(bool widgetVisible, NavigationPath *path, NavigationPathChangeType changeType) {
 
 }
 

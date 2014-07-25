@@ -386,10 +386,7 @@ bool NavigationPath::readGPXFile() {
         XMLNode node=*j;
         std::string error;
         if (pos.readGPX(node,error)) {
-          lockAccess();
           addEndPosition(pos);
-          unlockAccess();
-          core->getWidgetEngine()->onPathChange(this);
         } else {
           error="file <%s> " + error;
           ERROR(error.c_str(),gpxFilename.c_str());
@@ -409,10 +406,7 @@ bool NavigationPath::readGPXFile() {
         //core->getThread()->reschedule();
       }
       if (i!=numberOfSegments) {
-        lockAccess();
         addEndPosition(NavigationPath::getPathInterruptedPos());
-        unlockAccess();
-        core->getWidgetEngine()->onPathChange(this);
       }
       if (core->getQuitCore())
         break;
@@ -429,10 +423,7 @@ bool NavigationPath::readGPXFile() {
       XMLNode node=*j;
       std::string error;
       if (pos.readGPX(node,error)) {
-        lockAccess();
         addEndPosition(pos);
-        unlockAccess();
-        core->getWidgetEngine()->onPathChange(this);
       } else {
         error="file <%s> " + error;
         ERROR(error.c_str(),gpxFilename.c_str());

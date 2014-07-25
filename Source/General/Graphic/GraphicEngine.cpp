@@ -86,6 +86,8 @@ void GraphicEngine::createGraphic() {
   locationIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","locationIconFilename"));
   unlockLocationIcon();
   pathDirectionIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathDirectionIconFilename"));
+  pathStartFlagIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathStartFlagIconFilename"));
+  pathEndFlagIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathEndFlagIconFilename"));
   lockCompassConeIcon();
   compassConeIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","compassConeFilename"));
   unlockCompassConeIcon();
@@ -106,6 +108,8 @@ void GraphicEngine::deinit() {
   locationIcon.deinit();
   unlockLocationIcon();
   pathDirectionIcon.deinit();
+  pathStartFlagIcon.deinit();
+  pathEndFlagIcon.deinit();
   lockTargetIcon();
   targetIcon.deinit();
   unlockTargetIcon();
@@ -130,7 +134,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   Screen *screen = core->getScreen();
   double scale,backScale;
 
-  //PROFILE_START;
+  PROFILE_START;
 
   // Start measuring of drawing time and utilization
   currentTime=core->getClock()->getMicrosecondsSinceStart();
@@ -287,7 +291,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     noChangeFrameCount=0;
   }
 
-  //PROFILE_ADD("drawing check");
+  PROFILE_ADD("drawing check");
 
   // Redraw required?
   if (redrawScene) {
@@ -315,7 +319,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     // Set translation factors
     screen->translate(-pos.getX(),-pos.getY(),0);
 
-    //PROFILE_ADD("drawing init");
+    PROFILE_ADD("drawing init");
 
     // Draw all primitives of the map object
     if (map) {
@@ -323,182 +327,176 @@ void GraphicEngine::draw(bool forceRedraw) {
       //PROFILE_START;
 
       map->lockAccess();
-      std::list<GraphicPrimitive*> *mapDrawList=map->getDrawList();
-      //DEBUG("tile count = %d",mapDrawList->size());
-      for(std::list<GraphicPrimitive *>::const_iterator i=mapDrawList->begin(); i != mapDrawList->end(); i++) {
+      for(Int z=0;z<=4;z++) {
+        std::list<GraphicPrimitive*> *mapDrawList=map->getDrawList();
+        //DEBUG("tile count = %d",mapDrawList->size());
+        for(std::list<GraphicPrimitive *>::iterator i=mapDrawList->begin(); i != mapDrawList->end(); i++) {
 
-        //DEBUG("inside primitive draw",NULL);
-        switch((*i)->getType()) {
+          //DEBUG("inside primitive draw",NULL);
+          switch((*i)->getType()) {
 
-          case GraphicTypeObject:
-          {
-            // Get graphic object
-            GraphicObject *tileVisualization;
-            tileVisualization=(GraphicObject*)*i;
-            tileVisualization->lockAccess();
+            case GraphicTypeObject:
+            {
+              // Get graphic object
+              GraphicObject *tileVisualization;
+              tileVisualization=(GraphicObject*)*i;
+              tileVisualization->lockAccess();
 
-            // Skip drawing if primitive is invisible
-            UByte alpha=tileVisualization->getColor().getAlpha();
-            if (alpha!=0) {
+              // Skip drawing if primitive is invisible
+              UByte alpha=tileVisualization->getColor().getAlpha();
+              if (alpha!=0) {
 
-              // Position the object
-              screen->startObject();
-              screen->translate(tileVisualization->getX(),tileVisualization->getY(),tileVisualization->getZ());
+                // Position the object
+                screen->startObject();
+                screen->translate(tileVisualization->getX(),tileVisualization->getY(),tileVisualization->getZ());
 
-              // Go through all objects of the tile visualization
-              std::list<GraphicPrimitive*> *tileDrawList=tileVisualization->getDrawList();
-              for(std::list<GraphicPrimitive *>::const_iterator j=tileDrawList->begin(); j != tileDrawList->end(); j++) {
+                // Go through all objects of the tile visualization for the requested z
+                std::list<GraphicPrimitive*>::iterator j=tileVisualization->getFirstElementInDrawList(z);
+                //DEBUG("tile count = %d",mapDrawList->size());
+                while(j!=tileVisualization->getDrawList()->end()&&((*j)->getZ()==z)) {
 
-                // Which type of primitive?
-                GraphicPrimitive *primitive=*j;
-                switch(primitive->getType()) {
+                  // Which type of primitive?
+                  GraphicPrimitive *primitive=*j;
+                  switch(primitive->getType()) {
 
-                  // Rectangle primitive?
-                  case GraphicTypeRectangle:
-                  {
-                    GraphicRectangle *rectangle=(GraphicRectangle*)primitive;
+                    // Rectangle primitive?
+                    case GraphicTypeRectangle:
+                    {
+                      GraphicRectangle *rectangle=(GraphicRectangle*)primitive;
 
-                    // Set color
-                    screen->setColor(rectangle->getColor().getRed(),rectangle->getColor().getGreen(),rectangle->getColor().getBlue(),rectangle->getColor().getAlpha());
-                    /*if (rectangle->getColor().getRed()==0) {
-                      DEBUG("red component is 0",NULL);
-                    }
-                    if (rectangle->getColor().getGreen()==0) {
-                      DEBUG("green component is 0",NULL);
-                    }
-                    if (rectangle->getColor().getBlue()==0) {
-                      DEBUG("blue component is 0",NULL);
-                    }
-                    if (rectangle->getColor().getAlpha()==0) {
-                      DEBUG("alpha component is 0",NULL);
-                    }*/
+                      // Set color
+                      screen->setColor(rectangle->getColor().getRed(),rectangle->getColor().getGreen(),rectangle->getColor().getBlue(),rectangle->getColor().getAlpha());
 
-                    // Dimm the color in debug mode
-                    // This allows to differntiate the tiles
-                    GraphicColor originalColor;
-                    if ((debugMode)&&(primitive->getName().size()!=0)) {
-                      originalColor=rectangle->getColor();
-                      GraphicColor modifiedColor=originalColor;
-                      modifiedColor.setRed(originalColor.getRed()/2);
-                      modifiedColor.setGreen(originalColor.getGreen()/2);
-                      modifiedColor.setBlue(originalColor.getBlue()/2);
-                      rectangle->setColor(modifiedColor);
-                    }
+                      // Dimm the color in debug mode
+                      // This allows to differntiate the tiles
+                      GraphicColor originalColor;
+                      if ((debugMode)&&(primitive->getName().size()!=0)) {
+                        originalColor=rectangle->getColor();
+                        GraphicColor modifiedColor=originalColor;
+                        modifiedColor.setRed(originalColor.getRed()/2);
+                        modifiedColor.setGreen(originalColor.getGreen()/2);
+                        modifiedColor.setBlue(originalColor.getBlue()/2);
+                        rectangle->setColor(modifiedColor);
+                      }
 
-                    // Draw the rectangle
-                    rectangle->draw(screen,currentTime);
+                      // Draw the rectangle
+                      rectangle->draw(screen,currentTime);
 
-                    // Restore the color
-                    if ((debugMode)&&(primitive->getName().size()!=0)) {
-                      rectangle->setColor(originalColor);
-                    }
+                      // Restore the color
+                      if ((debugMode)&&(primitive->getName().size()!=0)) {
+                        rectangle->setColor(originalColor);
+                      }
 
-                    //DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
+                      //DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
 
-                    // If the texture is not defined, draw a box around it and it's name inside the box
-                    //PROFILE_START;
-                    if ((primitive->getName().size()!=0)&&(rectangle->getTexture()==screen->getTextureNotDefined())||(debugMode)) {
+                      // If the texture is not defined, draw a box around it and it's name inside the box
+                      //PROFILE_START;
+                      if ((primitive->getName().size()!=0)&&(debugMode)) {
 
-                      // Draw the name of the tile
-                      //std::string name=".";
-                      if (debugMode) {
-                        std::list<std::string> name=rectangle->getName();
-                        FontEngine *fontEngine=core->getFontEngine();
-                        fontEngine->lockFont("sansSmall");
-                        Int nameHeight=name.size()*fontEngine->getLineHeight();
-                        Int lineNr=name.size()-1;
-                        x1=rectangle->getX();
-                        y1=rectangle->getY();
-                        x2=x1+rectangle->getWidth();
-                        y2=y1+rectangle->getHeight();
-                        //PROFILE_START;
-                        for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
-                          //DEBUG("text=%s",(*i).c_str());
-                          FontString *fontString=fontEngine->createString(*i);
-                          //PROFILE_ADD("create string");
-                          fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
-                          fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
-                          //PROFILE_ADD("set string coordinate");
-                          fontString->draw(screen,currentTime);
-                          //PROFILE_ADD("draw string");
-                          fontEngine->destroyString(fontString);
-                          //PROFILE_ADD("destroy string");
-                          lineNr--;
+                        // Draw the name of the tile
+                        //std::string name=".";
+                        if (debugMode) {
+                          std::list<std::string> name=rectangle->getName();
+                          FontEngine *fontEngine=core->getFontEngine();
+                          fontEngine->lockFont("sansSmall");
+                          Int nameHeight=name.size()*fontEngine->getLineHeight();
+                          Int lineNr=name.size()-1;
+                          x1=rectangle->getX();
+                          y1=rectangle->getY();
+                          x2=x1+rectangle->getWidth();
+                          y2=y1+rectangle->getHeight();
+                          //PROFILE_START;
+                          for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
+                            //DEBUG("text=%s",(*i).c_str());
+                            FontString *fontString=fontEngine->createString(*i);
+                            //PROFILE_ADD("create string");
+                            fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
+                            fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
+                            //PROFILE_ADD("set string coordinate");
+                            fontString->draw(screen,currentTime);
+                            //PROFILE_ADD("draw string");
+                            fontEngine->destroyString(fontString);
+                            //PROFILE_ADD("destroy string");
+                            lineNr--;
+                          }
+                          fontEngine->unlockFont();
+                          //PROFILE_END;
                         }
-                        fontEngine->unlockFont();
-                        //PROFILE_END;
+                        //PROFILE_ADD("map tile name drawing");
+
+                        // Draw the borders of the tile
+                        screen->setColor(255,255,255,255);
+                        screen->setLineWidth(1);
+                        screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
+                        //PROFILE_ADD("map tile border drawing");
                       }
                       //PROFILE_ADD("map tile name drawing");
-
-                      // Draw the borders of the tile
-                      screen->setColor(255,255,255,255);
-                      screen->setLineWidth(1);
-                      screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
-                      //PROFILE_ADD("map tile border drawing");
+                      //PROFILE_END;
+                      break;
                     }
-                    //PROFILE_ADD("map tile name drawing");
-                    //PROFILE_END;
-                    break;
-                  }
 
-                  // Line primitive?
-                  case GraphicTypeLine:
-                  {
-                    GraphicLine *line=(GraphicLine*)primitive;
-                    screen->setColorModeMultiply();
-                    GraphicColor color=line->getAnimator()->getColor();
-                    screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
-                    line->draw(screen);
-                    screen->setColorModeAlpha();
-                    //PROFILE_ADD("map overlay line drawing");
-                    break;
-                  }
+                    // Line primitive?
+                    case GraphicTypeLine:
+                    {
+                      GraphicLine *line=(GraphicLine*)primitive;
+                      screen->setColorModeMultiply();
+                      GraphicColor color=line->getAnimator()->getColor();
+                      screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
+                      line->draw(screen);
+                      screen->setColorModeAlpha();
+                      //PROFILE_ADD("map overlay line drawing");
+                      break;
+                    }
 
-                  // Rectangle list primitive?
-                  case GraphicTypeRectangleList:
-                  {
-                    GraphicRectangleList *rectangleList=(GraphicRectangleList*)primitive;
-                    GraphicColor color=rectangleList->getAnimator()->getColor();
-                    screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
-                    rectangleList->draw(screen);
-                    //PROFILE_ADD("map overlay icon drawing");
-                    break;
-                  }
+                    // Rectangle list primitive?
+                    case GraphicTypeRectangleList:
+                    {
+                      GraphicRectangleList *rectangleList=(GraphicRectangleList*)primitive;
+                      GraphicColor color=rectangleList->getAnimator()->getColor();
+                      screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
+                      rectangleList->draw(screen);
+                      //PROFILE_ADD("map overlay icon drawing");
+                      break;
+                    }
 
-                  default:
-                    FATAL("unknown primitive type",NULL);
-                    break;
+                    default:
+                      FATAL("unknown primitive type",NULL);
+                      break;
+                  }
+                  j++;
                 }
+
+                // That's it
+                screen->endObject();
               }
 
-              // That's it
-              screen->endObject();
+              // Unlock the visualization
+              tileVisualization->unlockAccess();
+              break;
             }
 
-            // Unlock the visualization
-            tileVisualization->unlockAccess();
-            break;
-          }
+            case GraphicTypeRectangle:
+            {
+              GraphicRectangle *r=(GraphicRectangle*)*i;
+              if (r->getZ()==z) {
+                x1=r->getX();
+                y1=r->getY();
+                x2=(GLfloat)(r->getWidth()+x1);
+                y2=(GLfloat)(r->getHeight()+y1);
+                screen->startObject();
+                screen->setColor(r->getColor().getRed(),r->getColor().getGreen(),r->getColor().getBlue(),r->getColor().getAlpha());
+                screen->setLineWidth(1);
+                screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
+                screen->endObject();
+                //PROFILE_ADD("map rectangle drawing");
+              }
+              break;
+            }
 
-          case GraphicTypeRectangle:
-          {
-            GraphicRectangle *r=(GraphicRectangle*)*i;
-            x1=r->getX();
-            y1=r->getY();
-            x2=(GLfloat)(r->getWidth()+x1);
-            y2=(GLfloat)(r->getHeight()+y1);
-            screen->startObject();
-            screen->setColor(r->getColor().getRed(),r->getColor().getGreen(),r->getColor().getBlue(),r->getColor().getAlpha());
-            screen->setLineWidth(1);
-            screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
-            screen->endObject();
-            //PROFILE_ADD("map rectangle drawing");
-            break;
+            default:
+              FATAL("unknown primitive type",NULL);
+              break;
           }
-
-          default:
-            FATAL("unknown primitive type",NULL);
-            break;
         }
       }
       map->unlockAccess();
@@ -506,7 +504,7 @@ void GraphicEngine::draw(bool forceRedraw) {
 
     //PROFILE_END;
 
-    //PROFILE_ADD("map drawing");
+    PROFILE_ADD("map drawing");
 
     //DEBUG("after path draw",NULL);
 
@@ -560,7 +558,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     //WARNING("enable location icon",NULL);
     //DEBUG("locationAccuradyRadiusX=%d locationAccuracyRadiusY=%d",locationAccuracyRadiusX,locationAccuracyRadiusY);
 
-    //PROFILE_ADD("location drawing");
+    PROFILE_ADD("location drawing");
 
     // Draw the target icon
     lockTargetIcon();
@@ -610,7 +608,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     }
     unlockArrowIcon();
 
-    //PROFILE_ADD("arrow drawing");
+    PROFILE_ADD("arrow drawing");
 
     // End the map object
     screen->endObject();
@@ -627,7 +625,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     screen->drawRectangle(x1,y1,x2,y2,centerIcon.getTexture(),true);
     screen->endObject();
 
-    //PROFILE_ADD("cursor drawing");
+    PROFILE_ADD("cursor drawing");
 
     //DEBUG("after cursor icon draw",NULL);
 
@@ -654,7 +652,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     }
     //DEBUG("after widget draw",NULL);
 
-    //PROFILE_ADD("widget drawing");
+    PROFILE_ADD("widget drawing");
 
     // Finish the drawing
     screen->endScene();
@@ -691,7 +689,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   // Everything done
   isDrawing=false;
 
-  //PROFILE_END;
+  PROFILE_END;
 }
 
 // Destructor

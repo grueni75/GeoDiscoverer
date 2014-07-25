@@ -223,7 +223,7 @@
                         <xsd:documentation>Time in microseconds that the transition from the current page to the next page takes.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="widgetsActiveTimeout" type="xsd:integer" default="5000000">
+                    <xsd:element name="widgetsActiveTimeout" type="xsd:integer" default="10000000">
                       <xsd:annotation>
                         <xsd:documentation>Time in microseconds to show the widgets after last interaction.</xsd:documentation>
                       </xsd:annotation>
@@ -315,7 +315,7 @@
                                 </xsd:element>
                                 <xsd:element name="ActiveColor">
                                   <xsd:annotation>
-                                    <xsd:documentation>Color of the widdget if it is activated.</xsd:documentation>
+                                    <xsd:documentation>Color of the widget if it is activated.</xsd:documentation>
                                   </xsd:annotation>
                                   <xsd:complexType>
                                     <xsd:sequence>
@@ -970,6 +970,16 @@
                   <xsd:documentation>Image of the center cursor.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="pathStartFlagIconFilename" type="xsd:string" default="pathStartFlag">
+                <xsd:annotation>
+                  <xsd:documentation>Image of the path start flag.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="pathEndFlagIconFilename" type="xsd:string" default="pathEndFlag">
+                <xsd:annotation>
+                  <xsd:documentation>Image of the path end flag.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="locationIconFilename" type="xsd:string" default="location">
                 <xsd:annotation>
                   <xsd:documentation>Image of the location cursor.</xsd:documentation>
@@ -1018,6 +1028,11 @@
               <xsd:element name="pathWidth" type="xsd:integer" default="8">
                 <xsd:annotation>
                   <xsd:documentation>Width of tracks, routes and other paths.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="flagAnimationDuration" type="xsd:integer" default="500000">
+                <xsd:annotation>
+                  <xsd:documentation>Duration in microseconds of .</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="lineNumberOfStrokesOtherSegemnts" type="xsd:integer" default="32">
@@ -1277,7 +1292,7 @@
                               <xsd:documentation>Green component [0-255]</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="blue" type="xsd:integer" default="0">
+                          <xsd:element name="blue" type="xsd:integer" default="255">
                             <xsd:annotation>
                               <xsd:documentation>Blue component [0-255]</xsd:documentation>
                             </xsd:annotation>
@@ -1296,7 +1311,7 @@
                       </xsd:annotation>
                       <xsd:complexType>
                         <xsd:sequence>
-                          <xsd:element name="red" type="xsd:integer" default="255">
+                          <xsd:element name="red" type="xsd:integer" default="0">
                             <xsd:annotation>
                               <xsd:documentation>Red component [0-255]</xsd:documentation>
                             </xsd:annotation>
@@ -1306,7 +1321,7 @@
                               <xsd:documentation>Green component [0-255]</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="blue" type="xsd:integer" default="0">
+                          <xsd:element name="blue" type="xsd:integer" default="255">
                             <xsd:annotation>
                               <xsd:documentation>Blue component [0-255]</xsd:documentation>
                             </xsd:annotation>
@@ -1327,6 +1342,16 @@
                     <xsd:element name="visible" type="xsd:boolean" default="1" use="required">
                       <xsd:annotation>
                         <xsd:documentation>Route is drawn on map if ticked.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="startFlagIndex" type="xsd:integer" default="-1" use="required">
+                      <xsd:annotation>
+                        <xsd:documentation>Position of the start flag.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="endFlagIndex" type="xsd:integer" default="-1" use="required">
+                      <xsd:annotation>
+                        <xsd:documentation>Position of the end flag.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
                   </xsd:sequence>
