@@ -128,7 +128,7 @@ protected:
   // Parameters when to update the navigation information
   MapPosition lastNavigationLocationPos;
   double minDistanceToNavigationUpdate;
-  bool forceNavigationUpdate;
+  bool forceNavigationInfoUpdate;
 
   // Mutex for accessing the active route
   ThreadMutexInfo *activeRouteMutex;
@@ -146,8 +146,8 @@ protected:
   ThreadSignalInfo *computeNavigationInfoSignal;
 
   // Forces an update of the navigation infos
-  void forceNavigationInfoUpdate() {
-    forceNavigationUpdate=true;
+  void triggerNavigationInfoUpdate() {
+    forceNavigationInfoUpdate=true;
     core->getThread()->issueSignal(computeNavigationInfoSignal);
   }
 

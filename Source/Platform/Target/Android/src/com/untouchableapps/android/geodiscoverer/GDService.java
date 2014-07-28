@@ -136,11 +136,11 @@ public class GDService extends Service {
       public void onReceive(Context context, Intent intent) {
         if (metaWatchAppActive) {
           if (intent.getAction()=="org.metawatch.manager.BUTTON_PRESS") {
-            MetaWatchApp.update(coreObject.application, null, true);
+            MetaWatchApp.update(null, true);
           }
           if (intent.getAction()=="org.metawatch.manager.APPLICATION_DISCOVERY") {
             MetaWatchApp.announce(coreObject.application);
-            MetaWatchApp.start(coreObject.application);
+            MetaWatchApp.start();
           }
         }
       }

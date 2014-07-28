@@ -25,7 +25,11 @@ package com.untouchableapps.android.geodiscoverer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -48,6 +52,9 @@ public class MetaWatchApp {
   // Minimum time that must pass between updates
   static int minUpdatePeriodNormal;
   static int minUpdatePeriodTurn;
+  static int offRouteVibrateFastPeriod;
+  static int offRouteVibrateFastCount;
+  static int offRouteVibrateSlowPeriod;
   
   // Time in milliseconds to sleep before vibrating
   static int waitTimeBeforeVibrate;
@@ -61,6 +68,10 @@ public class MetaWatchApp {
   // Distance to turn
   static String currentTurnDistance="-";
   static String lastTurnDistance="-";
+  
+  // Off route indication
+  static boolean currentOffRoute=false;
+  static boolean lastOffRoute=false;  
   
   // Holds the current bitmap
   static Bitmap bitmap = null;
@@ -86,6 +97,16 @@ public class MetaWatchApp {
   static Paint compassPaint = null;
   static Paint filledPaint = null;
   
+  // Context
+  static Context context;
+  
+  // Thread that manages vibrations
+  static final Lock lock = new ReentrantLock();
+  static final Condition triggerVibrate = lock.newCondition();
+  static int expectedVibrateCount = 0;
+  static boolean quitVibrateThread = false;
+  static Thread vibrateThread = null;
+  
   static Bitmap loadBitmapFromAssets(Context context, String path) {
     try {
       InputStream inputStream = context.getAssets().open(path);
@@ -109,6 +130,9 @@ public class MetaWatchApp {
     minUpdatePeriodNormal = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "minUpdatePeriodNormal"));
     minUpdatePeriodTurn = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "minUpdatePeriodTurn"));
     waitTimeBeforeVibrate = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "waitTimeBeforeVibrate"));
+    offRouteVibrateFastPeriod = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "offRouteVibrateFastPeriod"));
+    offRouteVibrateFastCount = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "offRouteVibrateFastCount"));
+    offRouteVibrateSlowPeriod = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "offRouteVibrateSlowPeriod"));
     
     // Load bitmaps
     target = loadBitmapFromAssets(context, "MetaWatchApp/target.png");
@@ -141,6 +165,92 @@ public class MetaWatchApp {
     filledPaint = new Paint();
     filledPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
+    // Start the vibrate thread
+    if ((vibrateThread!=null)&&(vibrateThread.isAlive())) {
+      boolean repeat=true;
+      while(repeat) {
+        repeat=false;
+        try {
+          lock.lock();
+          quitVibrateThread=true;
+          triggerVibrate.signal();
+          lock.unlock();
+          vibrateThread.join();
+        }
+        catch(InterruptedException e) {
+          repeat=true;
+        }
+      }
+    }
+    MetaWatchApp.context=context;
+    quitVibrateThread=false;
+    vibrateThread = new Thread(new Runnable() {
+      public void run() {
+        int currentVibrateCount = 0;
+        while (!quitVibrateThread) {
+          try {
+            lock.lock();
+            if (currentVibrateCount==expectedVibrateCount)
+              triggerVibrate.await();
+            lock.unlock();
+            if (quitVibrateThread)
+              return;
+            int fastVibrateCount=1;
+            do {
+              
+              // Ensure that the app is shown
+              Intent intent = new Intent("org.metawatch.manager.APPLICATION_START");
+              Bundle b = new Bundle();
+              b.putString("id", id);
+              b.putString("name", name);
+              intent.putExtras(b);
+              MetaWatchApp.context.sendBroadcast(intent);
+              if (MetaWatchApp.bitmap!=null) {
+                intent = new Intent("org.metawatch.manager.APPLICATION_UPDATE");
+                b = new Bundle();
+                b.putString("id", id);
+                b.putIntArray("array", makeSendableArray(MetaWatchApp.bitmap));
+                intent.putExtras(b);
+                MetaWatchApp.context.sendBroadcast(intent);
+              }
+              
+              // Wait a little bit before vibrating
+              Thread.sleep(waitTimeBeforeVibrate);
+              if (quitVibrateThread)
+                return;
+
+              // Vibrate
+              intent = new Intent("org.metawatch.manager.VIBRATE");
+              b = new Bundle();
+              b.putInt("vibrate_on", 500);
+              b.putInt("vibrate_off", 500);
+              b.putInt("vibrate_cycles", 2);
+              intent.putExtras(b);
+              MetaWatchApp.context.sendBroadcast(intent);
+              if (currentOffRoute) {
+                int offRouteVibratePeriod;
+                if (fastVibrateCount>offRouteVibrateFastCount) {
+                  offRouteVibratePeriod=offRouteVibrateSlowPeriod;
+                } else {
+                  offRouteVibratePeriod=offRouteVibrateFastPeriod;
+                  fastVibrateCount++;
+                }
+                Thread.sleep(offRouteVibratePeriod);
+              }
+              if (quitVibrateThread)
+                return;
+            }
+            while (currentOffRoute);
+            currentVibrateCount++;
+          }
+          catch(InterruptedException e) {
+            ; // repeat
+          }
+        }
+      }
+    });   
+    vibrateThread.start();
+    
     // Inform metawatch about this app
     Intent intent = new Intent("org.metawatch.manager.APPLICATION_ANNOUNCE");
     Bundle b = new Bundle();
@@ -151,7 +261,8 @@ public class MetaWatchApp {
     
   }
   
-  public static void start(Context context) {
+  public static void start() {
+    if (context==null) return;
     Intent intent = new Intent("org.metawatch.manager.APPLICATION_START");
     Bundle b = new Bundle();
     b.putString("id", id);
@@ -159,7 +270,7 @@ public class MetaWatchApp {
     intent.putExtras(b);
     context.sendBroadcast(intent);
     lastUpdate = 0;
-    update(context,null,true);
+    update(null,true);
     lastUpdate = 0;
   }
   
@@ -173,7 +284,7 @@ public class MetaWatchApp {
     c.drawPath(path, filledPaint);
   }
   
-  private static void refreshApp(Context context, String[] infos) {
+  private static void refreshApp(String[] infos) {
     
     float radius,x,y,x2,y2;
         
@@ -319,7 +430,9 @@ public class MetaWatchApp {
     }
   }
   
-  public static void update(final Context context, String infosAsSSV, boolean forceUpdate) {
+  public static void update(String infosAsSSV, boolean forceUpdate) {
+    
+    if (context==null) return;
     
     // Use the last infos if no infos given
     if (infosAsSSV == null) {
@@ -332,11 +445,18 @@ public class MetaWatchApp {
       return;
     String[] infos = infosAsSSV.split(";");
     currentTurnDistance=infos[7];
+    currentOffRoute=false;
+    if (infos[5].equals("off route!")) {
+      infos[5]="off rte!";
+      currentOffRoute=true;
+    }
     
     // If the turn has appeared or disapperas, force an update
     if ((currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals("-")))
       forceUpdate=true;
     if ((!currentTurnDistance.equals("-"))&&(lastTurnDistance.equals("-")))
+      forceUpdate=true;
+    if (lastOffRoute!=currentOffRoute) 
       forceUpdate=true;
     
     // Check if the info is updated too fast
@@ -345,59 +465,52 @@ public class MetaWatchApp {
       minUpdatePeriod = minUpdatePeriodNormal;
     else
       minUpdatePeriod = minUpdatePeriodTurn;
-    long diffToLastUpdate = Calendar.getInstance().getTimeInMillis() - lastUpdate;
+    long t = Calendar.getInstance().getTimeInMillis();
+    long diffToLastUpdate = t - lastUpdate;
     if ((!forceUpdate)&&(diffToLastUpdate < minUpdatePeriod)) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Skipped update because last update was too recent");
       return;
     }
         
     // Draw the bitmap
-    refreshApp(context,infos);
+    refreshApp(infos);
     
-    // Inform metawatch app
-    Intent intent = new Intent("org.metawatch.manager.APPLICATION_UPDATE");
-    Bundle b = new Bundle();
-    b.putString("id", id);
-    b.putIntArray("array", makeSendableArray(bitmap));
-    intent.putExtras(b);
-    context.sendBroadcast(intent);
-
-    // Vibrate if the turn appears the first time
+    // Vibrate if the turn appears the first time or if off route
+    boolean vibrate=false;
+    if (((!lastOffRoute)&&currentOffRoute)) {
+      vibrate=true;
+    }
     if ((!currentTurnDistance.equals("-"))&&(lastTurnDistance.equals("-"))) {
+      vibrate=true;
+    }
+    if (vibrate) {
+            
+      // Inform the vibrate thread to do the work
+      lock.lock();
+      expectedVibrateCount++;
+      triggerVibrate.signal();
+      lock.unlock();
       
-      // Ensure that the app is shown
-      intent = new Intent("org.metawatch.manager.APPLICATION_START");
-      b = new Bundle();
+    } else {
+
+      // Send the bitmap directly
+      Intent intent = new Intent("org.metawatch.manager.APPLICATION_UPDATE");
+      Bundle b = new Bundle();
       b.putString("id", id);
-      b.putString("name", name);
+      b.putIntArray("array", makeSendableArray(bitmap));
       intent.putExtras(b);
       context.sendBroadcast(intent);
       
-      // Delay the vibrate to ensure that watch shows the turn
-      new Thread(new Runnable() {
-        public void run() {
-          try {
-            Thread.sleep(waitTimeBeforeVibrate);
-          } 
-          catch (Exception e) {
-          }
-          Intent intent = new Intent("org.metawatch.manager.VIBRATE");
-          Bundle b = new Bundle();
-          b.putInt("vibrate_on", 500);
-          b.putInt("vibrate_off", 500);
-          b.putInt("vibrate_cycles", 2);
-          intent.putExtras(b);
-          context.sendBroadcast(intent);
-        }
-      }).start();      
     }
 
     // Remember when was updated
     lastUpdate = Calendar.getInstance().getTimeInMillis();
     lastTurnDistance=currentTurnDistance;
+    lastOffRoute=currentOffRoute;
   }
   
-  public static void stop(Context context) {
+  public static void stop() {
+    if (context==null) return;
     Intent intent = new Intent("org.metawatch.manager.APPLICATION_STOP");
     Bundle b = new Bundle();
     b.putString("id", id);
@@ -406,7 +519,8 @@ public class MetaWatchApp {
     bitmap = null;
   }
   
-  public static void button(Context context, int button, int type) {
+  public static void button(int button, int type) {
+    if (context==null) return;
     //update(context,"");
   }
 

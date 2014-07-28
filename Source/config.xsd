@@ -90,6 +90,21 @@
                   <xsd:documentation>Minimum time in milliseconds between meta watch app updates if no turn is shown.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="offRouteVibrateFastPeriod" type="xsd:integer" default="10000">
+                <xsd:annotation>
+                  <xsd:documentation>Time in milliseconds between vibrate notification if route has been just left.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="offRouteVibrateFastCount" type="xsd:integer" default="6">
+                <xsd:annotation>
+                  <xsd:documentation>Number of vibrates to perform with fast period before switching to slow period.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="offRouteVibrateSlowPeriod" type="xsd:integer" default="60000">
+                <xsd:annotation>
+                  <xsd:documentation>Time in milliseconds between vibrate notification if route has already been left for some time.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="minUpdatePeriodTurn" type="xsd:integer" default="1000">
                 <xsd:annotation>
                   <xsd:documentation>Minimum time in milliseconds between meta watch app updates if a turn is shown.</xsd:documentation>

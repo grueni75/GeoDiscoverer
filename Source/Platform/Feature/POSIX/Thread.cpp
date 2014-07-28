@@ -175,7 +175,13 @@ void Thread::lockMutex(ThreadMutexInfo *mutex) {
     }
     std::string *threadName = threadNameMap[self];
     if (threadName==NULL) {
-      FATAL("thread has no name",NULL);
+      std::stringstream s;
+      s << "unnamed thread 0x" << std::hex << std::setw(8) << self;
+      threadName = new std::string(s.str());
+      if (!threadName) {
+        FATAL("can not create string",NULL);
+      }
+      threadNameMap[self]=threadName;
     }
     threadNameCopy = new std::string(*threadName);
     if (!threadNameCopy)
@@ -213,12 +219,14 @@ void Thread::unlockMutex(ThreadMutexInfo *mutex) {
       pthread_t self = pthread_self();
       waitQueue=mutexWaitQueueMap[mutex];
       std::string *threadName = threadNameMap[self];
-      for(std::list<std::string*>::iterator i=waitQueue->begin();i!=waitQueue->end();i++) {
-        std::string *entry = *i;
-        if (*entry==(*threadName + " (locked)")) {
-          delete entry;
-          waitQueue->erase(i);
-          break;
+      if (threadName) {
+        for(std::list<std::string*>::iterator i=waitQueue->begin();i!=waitQueue->end();i++) {
+          std::string *entry = *i;
+          if (*entry==(*threadName + " (locked)")) {
+            delete entry;
+            waitQueue->erase(i);
+            break;
+          }
         }
       }
     }

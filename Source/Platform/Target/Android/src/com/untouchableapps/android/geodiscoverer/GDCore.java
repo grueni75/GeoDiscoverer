@@ -426,7 +426,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       // Stop the metawatch app
       if (metawWatchAppActive) {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Stopping meta watch app");
-        MetaWatchApp.stop(application);
+        MetaWatchApp.stop();
         metawWatchAppActive = false;
       }
           
@@ -539,7 +539,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Starting meta watch app");
           metawWatchAppActive = true;
           MetaWatchApp.announce(application);      
-          MetaWatchApp.start(application);
+          MetaWatchApp.start();
         }
       }
       cmdExecuted=true;
@@ -548,7 +548,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       if (metawWatchAppActive) {
         String infos = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", infos);
-        MetaWatchApp.update(application,infos,false);
+        MetaWatchApp.update(infos,false);
       }
       cmdExecuted=true;
     }

@@ -176,7 +176,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     } else {
 
       // Only activate widget if target is shown or if off route
-
       // Get the current duration and distance to the target
       showTurn=false;
       if (navigationInfo->getTargetDistance()!=NavigationInfo::getUnknownDistance()) {
@@ -188,7 +187,9 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       } else {
         fontEngine->updateString(&distanceValueFontString,"infinite");
       }
-      if (navigationInfo->getTargetDuration()!=NavigationInfo::getUnknownDuration()) {
+      if (navigationInfo->getOffRoute()) {
+        fontEngine->updateString(&durationValueFontString,"off route!");
+      } else if (navigationInfo->getTargetDuration()!=NavigationInfo::getUnknownDuration()) {
         unitConverter->formatTime(navigationInfo->getTargetDuration(),value,unit);
         infos.str("");
         infos << value << " " << unit;

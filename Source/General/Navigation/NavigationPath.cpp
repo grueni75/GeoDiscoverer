@@ -343,6 +343,7 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
           }
           flag->setColor(GraphicColor(255,255,255,255));
           flag->setTexture(ref->getTexture());
+          flag->setDestroyTexture(false);
           flag->setIconWidth(ref->getIconWidth());
           flag->setIconHeight(ref->getIconHeight());
           flag->setWidth(ref->getWidth());
@@ -378,7 +379,6 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
               info->setPathEndFlagKey(0);
               break;
           }
-          flag->setTexture(core->getScreen()->getTextureNotDefined());
           tileVisualization->removePrimitive(key,true);
         }
       }

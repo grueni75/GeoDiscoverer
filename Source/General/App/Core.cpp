@@ -527,9 +527,15 @@ void Core::maintenance(bool endlessLoop) {
     thread->unlockMutex(maintenanceMutex);
 
     // Wait for the next maintenance slot
-    if (endlessLoop)
-      sleep(maintenancePeriod);
-    else
+    if (endlessLoop) {
+      TimestampInSeconds sleepEndTime=core->getClock()->getSecondsSinceEpoch()+maintenancePeriod;
+      TimestampInSeconds duration=1;
+      while(duration>0) {
+        duration=sleepEndTime-core->getClock()->getSecondsSinceEpoch();
+        if (duration>0)
+          sleep(duration);
+      }
+    } else
       return;
 
   }

@@ -418,10 +418,9 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setActiveRoute") {
     NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
     if (nearestPath==NULL) {
-      WARNING("cannot set active route: no path near to the current map center found",NULL);
-    } else {
-      core->getNavigationEngine()->setActiveRoute(nearestPath);
+      WARNING("no path near to the current map center found: disabling route",NULL);
     }
+    core->getNavigationEngine()->setActiveRoute(nearestPath);
     cmdExecuted=true;
   }
 

@@ -458,6 +458,7 @@ void WidgetPathInfo::updateVisualization() {
     bool noAltitudeProfile=true;
 
     // Only update if we have a path
+    NavigationPath *currentPath=this->currentPath;
     if (currentPath) {
 
       // Get infos from path
