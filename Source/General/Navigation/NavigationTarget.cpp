@@ -53,7 +53,6 @@ NavigationTarget::~NavigationTarget() {
 void NavigationTarget::updateTileVisualization(std::list<MapContainer*> *mapContainers) {
 
   // Find all map tiles that overlap with this segment
-  DEBUG("before",NULL);
   core->getMapSource()->lockAccess();
   std::list<MapContainer*> foundContainers;
   if (!mapContainers) {
@@ -98,7 +97,6 @@ void NavigationTarget::updateTileVisualization(std::list<MapContainer*> *mapCont
     }
   }
   core->getMapSource()->unlockAccess();
-  DEBUG("after",NULL);
 }
 
 
