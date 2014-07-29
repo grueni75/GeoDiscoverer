@@ -64,22 +64,20 @@ void MapDownloader::deinit() {
 
 // Initializes the map downloader
 bool MapDownloader::init() {
+  return true;
+}
 
+// Merges all so far downloaded zip archives into the first one
+void MapDownloader::maintenance() {
   std::string mapPath=mapSource->getFolderPath();
-  ZipArchive *mapArchive;
 
-  // Merge all tiles from the previous session
-  core->getScreen()->setWakeLock(true,false);
-  std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives();
-  mapArchive=mapArchives->front();
-  std::string title="Merging tiles from last session with map " + mapSource->getFolder();
-  DialogKey dialog=core->getDialog()->createProgress(title,0);
+  /* Merge all tiles into a single archive
   struct dirent *dp;
   DIR *dfd;
   dfd=opendir(mapPath.c_str());
   if (dfd==NULL) {
     FATAL("can not read directory <%s>",mapPath.c_str());
-    return false;
+    return;
   }
   while ((dp = readdir(dfd)) != NULL)
   {
@@ -96,8 +94,11 @@ bool MapDownloader::init() {
           void *buffer = malloc(bufferSize);
           if ((entry)&&(buffer)) {
             archive->readEntry(entry,buffer,bufferSize);
-            mapArchive->addEntry(entryName,buffer,bufferSize);
+            std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives();
+            mapArchives->front()->addEntry(entryName,buffer,bufferSize);
+            mapSource->unlockMapArchives();
             archive->closeEntry(entry);
+
           }
         }
         mapArchive->writeChanges();
@@ -111,12 +112,7 @@ bool MapDownloader::init() {
       remove((mapPath + "/" + filename).c_str());
     }
   }
-  closedir(dfd);
-  core->getDialog()->closeProgress(dialog);
-  mapSource->unlockMapArchives();
-  core->getScreen()->setWakeLock(core->getConfigStore()->getIntValue("General","wakeLock"),false);
-
-  return true;
+  closedir(dfd);*/
 }
 
 // Adds a map container to the download queue

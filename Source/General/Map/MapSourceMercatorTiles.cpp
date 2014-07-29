@@ -69,7 +69,7 @@ bool MapSourceMercatorTiles::init() {
   if (!parseGDSInfo())
     return false;
 
-  // Open the zip archive that contains the maps
+  // We always need the default tiles.gda file
   lockMapArchives();
   if (!(mapArchive=new ZipArchive(mapPath,"tiles.gda"))) {
     FATAL("can not create zip archive object",NULL);
@@ -80,6 +80,37 @@ bool MapSourceMercatorTiles::init() {
     return false;
   }
   mapArchives.push_back(mapArchive);
+
+  // Read all the additional tilesX.gda files
+  std::string title="Reading tiles of map " + getFolder();
+  DialogKey dialog=core->getDialog()->createProgress(title,0);
+  struct dirent *dp;
+  DIR *dfd;
+  dfd=opendir(mapPath.c_str());
+  if (dfd==NULL) {
+    FATAL("can not read directory <%s>",mapPath.c_str());
+    return false;
+  }
+  while ((dp = readdir(dfd)) != NULL)
+  {
+    Int nr;
+
+    // Add this archive if it is valid
+    if (sscanf(dp->d_name,"tiles%d.gda",&nr)==1) {
+      ZipArchive *archive = new ZipArchive(mapPath,dp->d_name);
+      if ((archive)&&(archive->init())) {
+        mapArchives.push_back(archive);
+      }
+    }
+
+    // Remove any left over write tries
+    std::string filename(dp->d_name);
+    if ((filename.find(".zip.")!=std::string::npos)&&(filename.find("tiles")!=std::string::npos)) {
+      remove((mapPath + "/" + filename).c_str());
+    }
+  }
+  closedir(dfd);
+  core->getDialog()->closeProgress(dialog);
   unlockMapArchives();
 
   // Init the map downloader
@@ -362,7 +393,7 @@ void MapSourceMercatorTiles::maintenance() {
   if (contentsChanged) {
 
     // Remove map containers from list until cache size is reached again
-    for(std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
+    for(std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();) {
       if (mapContainers.size()>mapContainerCacheSize) {
 
         // Remove container if it is not currently downloaded and if it is not visible
@@ -370,8 +401,11 @@ void MapSourceMercatorTiles::maintenance() {
         if ((!c->isDrawn())&&(c->getDownloadComplete()&&(!c->getOverlayGraphicInvalid()))) {
           core->getMapCache()->removeTile(c->getMapTiles()->front());
           core->getNavigationEngine()->removeGraphics(c);
-          mapContainers.erase(i);
+          i=mapContainers.erase(i);
+          //DEBUG("removing map container 0x%08x",c);
           delete c;
+        } else {
+          i++;
         }
 
       } else {

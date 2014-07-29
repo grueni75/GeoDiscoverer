@@ -63,6 +63,8 @@ public:
   // Downloads map tiles from the tile server
   void downloadMapImages();
 
+  // Merges all so far downloaded zip archives into the first one
+  void maintenance();
 };
 
 } /* namespace GEODISCOVERER */
