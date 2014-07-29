@@ -373,10 +373,11 @@ void Core::updateScreen(bool forceRedraw) {
 
       // Abort the update if the pos has changed
       GraphicPosition visPos=*(graphicEngine->lockPos());
+      graphicEngine->unlockPos();
       if (mapEngine->mapUpdateIsRequired(visPos,NULL,NULL,NULL,false)) {
         mapEngine->setAbortUpdate();
       }
-      graphicEngine->unlockPos();
+
 
     }
   }
@@ -392,9 +393,9 @@ void Core::updateScreen(bool forceRedraw) {
     // Check if an update of the map is required
     bool updateRequired=false;
     GraphicPosition visPos=*(graphicEngine->lockPos());
+    graphicEngine->unlockPos();
     if (mapEngine->mapUpdateIsRequired(visPos))
       updateRequired=true;
-    graphicEngine->unlockPos();
 
     // Request an update of the map
     //DEBUG("waking up map update thread",NULL);

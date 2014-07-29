@@ -546,7 +546,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 }
 
 // Checks if a map update is required
-bool MapEngine::mapUpdateIsRequired(GraphicPosition &visPos, Int *diffVisX, Int *diffVisY, double *diffZoom, bool checkLocationPos) {
+bool MapEngine::mapUpdateIsRequired(GraphicPosition visPos, Int *diffVisX, Int *diffVisY, double *diffZoom, bool checkLocationPos) {
 
   // Check if it is time to reset the visual position to the gps position
   if ((checkLocationPos)&&(returnToLocation)) {

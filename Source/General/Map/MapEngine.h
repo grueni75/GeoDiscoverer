@@ -90,7 +90,7 @@ public:
   virtual ~MapEngine();
 
   // Checks if a map update is required
-  bool mapUpdateIsRequired(GraphicPosition &visPos, Int *diffVisX=NULL, Int *diffVisY=NULL, double *diffZoom=NULL, bool checkLocationPos=true);
+  bool mapUpdateIsRequired(GraphicPosition visPos, Int *diffVisX=NULL, Int *diffVisY=NULL, double *diffZoom=NULL, bool checkLocationPos=true);
 
   // Saves the current position
   void backup();
