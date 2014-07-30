@@ -41,9 +41,9 @@ void *navigationEngineComputeNavigationInfoThread(void *args) {
 NavigationEngine::NavigationEngine() {
 
   // Init variables
-  locationOutdatedThreshold=core->getConfigStore()->getIntValue("Navigation","locationOutdatedThreshold");
-  locationSignificantlyInaccurateThreshold=core->getConfigStore()->getIntValue("Navigation","locationSignificantlyInaccurateThreshold");
-  trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance");
+  locationOutdatedThreshold=core->getConfigStore()->getIntValue("Navigation","locationOutdatedThreshold", __FILE__, __LINE__);
+  locationSignificantlyInaccurateThreshold=core->getConfigStore()->getIntValue("Navigation","locationSignificantlyInaccurateThreshold", __FILE__, __LINE__);
+  trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance", __FILE__, __LINE__);
   backgroundLoaderFinishedMutex=core->getThread()->createMutex("navigation engine background loader finished mutex");
   activeRouteMutex=core->getThread()->createMutex("navigation engine active route mutex");
   recordedTrackMutex=core->getThread()->createMutex("navigation engine recorded track mutex");
@@ -51,7 +51,7 @@ NavigationEngine::NavigationEngine() {
   locationPosMutex=core->getThread()->createMutex("navigation engine location pos mutex");
   compassBearingMutex=core->getThread()->createMutex("navigation engine compass bearing mutex");
   updateGraphicsMutex=core->getThread()->createMutex("navigation engine update graphics mutex");
-  recordTrack=core->getConfigStore()->getIntValue("Navigation","recordTrack");
+  recordTrack=core->getConfigStore()->getIntValue("Navigation","recordTrack", __FILE__, __LINE__);
   compassBearing=0;
   isInitialized=false;
   recordedTrack=NULL;
@@ -65,17 +65,17 @@ NavigationEngine::NavigationEngine() {
   arrowY=std::numeric_limits<Int>::min();
   arrowAngle=-1;
   arrowDiameter=0;
-  arrowInitialTranslateDuration=core->getConfigStore()->getIntValue("Graphic","arrowInitialTranslateDuration");
-  arrowNormalTranslateDuration=core->getConfigStore()->getIntValue("Graphic","arrowNormalTranslateDuration");
-  targetInitialScaleDuration=core->getConfigStore()->getIntValue("Graphic","targetInitialScaleDuration");
-  targetNormalScaleDuration=core->getConfigStore()->getIntValue("Graphic","targetNormalScaleDuration");
-  targetRotateDuration=core->getConfigStore()->getIntValue("Graphic","targetRotateDuration");
-  targetScaleMaxFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMaxFactor");
-  targetScaleMinFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor");
-  targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor");
+  arrowInitialTranslateDuration=core->getConfigStore()->getIntValue("Graphic","arrowInitialTranslateDuration", __FILE__, __LINE__);
+  arrowNormalTranslateDuration=core->getConfigStore()->getIntValue("Graphic","arrowNormalTranslateDuration", __FILE__, __LINE__);
+  targetInitialScaleDuration=core->getConfigStore()->getIntValue("Graphic","targetInitialScaleDuration", __FILE__, __LINE__);
+  targetNormalScaleDuration=core->getConfigStore()->getIntValue("Graphic","targetNormalScaleDuration", __FILE__, __LINE__);
+  targetRotateDuration=core->getConfigStore()->getIntValue("Graphic","targetRotateDuration", __FILE__, __LINE__);
+  targetScaleMaxFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMaxFactor", __FILE__, __LINE__);
+  targetScaleMinFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleMinFactor", __FILE__, __LINE__);
+  targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor", __FILE__, __LINE__);
   backgroundLoaderFinished=false;
   navigationInfosMutex=core->getThread()->createMutex("navigation engine navigation infos mutex");
-  minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate");
+  minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate", __FILE__, __LINE__);
   forceNavigationInfoUpdate=false;
   computeNavigationInfoThreadInfo=NULL;
   computeNavigationInfoSignal=core->getThread()->createSignal();
@@ -123,28 +123,28 @@ NavigationEngine::~NavigationEngine() {
 void NavigationEngine::init() {
 
   // Set the animation of the target
-  GraphicRectangle *targetIcon = core->getGraphicEngine()->lockTargetIcon();
+  GraphicRectangle *targetIcon = core->getGraphicEngine()->lockTargetIcon(__FILE__, __LINE__);
   targetIcon->setRotateAnimation(0,0,360,true,targetRotateDuration,GraphicRotateAnimationTypeLinear);
   core->getGraphicEngine()->unlockTargetIcon();
 
   // Set the color of the recorded track
   ConfigStore *c=core->getConfigStore();
-  lockRecordedTrack();
+  lockRecordedTrack(__FILE__, __LINE__);
   if (!(recordedTrack=new NavigationPath)) {
     FATAL("can not create track",NULL);
     return;
   }
-  recordedTrack->setNormalColor(c->getGraphicColorValue("Navigation/TrackColor"));
+  recordedTrack->setNormalColor(c->getGraphicColorValue("Navigation/TrackColor", __FILE__, __LINE__), __FILE__, __LINE__);
 
   // Prepare the last recorded track if it does exist
-  std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename");
+  std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename", __FILE__, __LINE__);
   std::string filepath=recordedTrack->getGpxFilefolder()+"/"+lastRecordedTrackFilename;
   if ((lastRecordedTrackFilename!="")&&(access(filepath.c_str(),F_OK)==0)) {
     //DEBUG("track gpx file exists, using it",NULL);
     recordedTrack->setGpxFilename(lastRecordedTrackFilename);
   } else {
     //DEBUG("track gpx file does not exist, starting new track",NULL);
-    c->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename());
+    c->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename(), __FILE__, __LINE__);
     recordedTrack->setIsInit(true);
   }
   unlockRecordedTrack();
@@ -156,14 +156,14 @@ void NavigationEngine::init() {
   updateRoutes();
 
   // Prepare any routes
-  lockRoutes();
+  lockRoutes(__FILE__, __LINE__);
   std::string path="Navigation/Route";
-  std::list<std::string> routeNames=c->getAttributeValues(path,"name");
+  std::list<std::string> routeNames=c->getAttributeValues(path,"name",__FILE__,__LINE__);
   std::list<std::string>::iterator j;
-  std::string activeRouteName = c->getStringValue("Navigation","activeRoute");
+  std::string activeRouteName = c->getStringValue("Navigation","activeRoute",__FILE__,__LINE__);
   for(std::list<std::string>::iterator i=routeNames.begin();i!=routeNames.end();i++) {
     std::string routePath=path + "[@name='" + *i + "']";
-    if (c->getIntValue(routePath,"visible")) {
+    if (c->getIntValue(routePath,"visible",__FILE__,__LINE__)) {
 
       // Create the route
       NavigationPath *route=new NavigationPath();
@@ -171,11 +171,11 @@ void NavigationEngine::init() {
         FATAL("can not create route",NULL);
         return;
       }
-      GraphicColor highlightColor = c->getGraphicColorValue(routePath + "/HighlightColor");
-      route->setHighlightColor(highlightColor);
-      route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor"));
-      route->setBlinkMode(false);
-      route->setReverse(c->getIntValue(routePath,"reverse"));
+      GraphicColor highlightColor = c->getGraphicColorValue(routePath + "/HighlightColor",__FILE__,__LINE__);
+      route->setHighlightColor(highlightColor,__FILE__,__LINE__);
+      route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor",__FILE__,__LINE__), __FILE__, __LINE__);
+      route->setBlinkMode(false, __FILE__, __LINE__);
+      route->setReverse(c->getIntValue(routePath,"reverse",__FILE__, __LINE__));
       route->setName(*i);
       route->setDescription("route number " + *i);
       route->setGpxFilefolder(getRoutePath());
@@ -192,7 +192,7 @@ void NavigationEngine::init() {
   unlockRoutes();
 
   // Prepare the target
-  if (c->getIntValue("Navigation/Target","visible")) {
+  if (c->getIntValue("Navigation/Target","visible", __FILE__, __LINE__)) {
     showTarget(false);
   }
 
@@ -214,7 +214,7 @@ void NavigationEngine::init() {
  */
 void NavigationEngine::updateRoutes() {
 
-  lockRoutes();
+  lockRoutes(__FILE__, __LINE__);
 
   // First get a list of all available route filenames
   DIR *dp = opendir( getRoutePath().c_str() );
@@ -243,7 +243,7 @@ void NavigationEngine::updateRoutes() {
   closedir(dp);
 
   // Go through all routes in the config and remove the ones that do not exist anymore
-  std::list<std::string> routeNames = core->getConfigStore()->getAttributeValues("Navigation/Route", "name");
+  std::list<std::string> routeNames = core->getConfigStore()->getAttributeValues("Navigation/Route", "name", __FILE__, __LINE__);
   for(std::list<std::string>::iterator i=routeNames.begin(); i!=routeNames.end(); i++) {
     std::string path = "Navigation/Route[@name='" + *i + "']";
     std::string filepath = getRoutePath() + "/" + *i;
@@ -257,7 +257,7 @@ void NavigationEngine::updateRoutes() {
   // Add new ones
   for(std::list<std::string>::iterator i=routes.begin(); i!=routes.end(); i++) {
     std::string path = "Navigation/Route[@name='" + *i + "']";
-    core->getConfigStore()->setIntValue(path,"visible", 1);
+    core->getConfigStore()->setIntValue(path,"visible", 1, __FILE__, __LINE__);
   }
 
   unlockRoutes();
@@ -268,7 +268,7 @@ void NavigationEngine::deinit() {
 
   // Finish the navigation info calculator thread
   if (computeNavigationInfoThreadInfo) {
-    core->getThread()->lockMutex(activeRouteMutex);
+    core->getThread()->lockMutex(activeRouteMutex, __FILE__, __LINE__);
     core->getThread()->cancelThread(computeNavigationInfoThreadInfo);
     core->getThread()->waitForThread(computeNavigationInfoThreadInfo);
     core->getThread()->destroyThread(computeNavigationInfoThreadInfo);
@@ -278,7 +278,7 @@ void NavigationEngine::deinit() {
 
   // Finish the background thread
   if (backgroundLoaderThreadInfo) {
-    core->getThread()->lockMutex(backgroundLoaderFinishedMutex);
+    core->getThread()->lockMutex(backgroundLoaderFinishedMutex, __FILE__, __LINE__);
     if (!backgroundLoaderFinished) {
       core->getThread()->cancelThread(backgroundLoaderThreadInfo);
       core->getThread()->waitForThread(backgroundLoaderThreadInfo);
@@ -290,14 +290,14 @@ void NavigationEngine::deinit() {
   // Save the track first
   if (recordedTrack) {
     recordedTrack->writeGPXFile(); // locking is handled within writeGPXFile()
-    lockRecordedTrack();
+    lockRecordedTrack(__FILE__, __LINE__);
     delete recordedTrack;
     recordedTrack=NULL;
     unlockRecordedTrack();
   }
 
   // Free all routes
-  lockRoutes();
+  lockRoutes(__FILE__, __LINE__);
   for (std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
     delete *i;
   }
@@ -385,10 +385,10 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     }
 
     // Store the new fix
-    lockLocationPos();
+    lockLocationPos(__FILE__, __LINE__);
     locationPos=newLocationPos;
     unlockLocationPos();
-    MapPosition *pos=core->getMapEngine()->lockLocationPos();
+    MapPosition *pos=core->getMapEngine()->lockLocationPos(__FILE__, __LINE__);
     *pos=locationPos;
     core->getMapEngine()->unlockLocationPos();
 
@@ -416,7 +416,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
 
 // Updates the compass
 void NavigationEngine::newCompassBearing(double bearing) {
-  lockCompassBearing();
+  lockCompassBearing(__FILE__, __LINE__);
   compassBearing=bearing;
   unlockCompassBearing();
   updateScreenGraphic(false);
@@ -446,7 +446,7 @@ void NavigationEngine::updateTrack() {
   //DEBUG("before recorded track update",NULL);
 
   // If the track was just loaded, we need to add this point as a stable one
-  recordedTrack->lockAccess();
+  recordedTrack->lockAccess(__FILE__, __LINE__);
   if (recordedTrack->getHasBeenLoaded()) {
     pointMeetsCriterias=true;
     recordedTrack->setHasBeenLoaded(false);
@@ -494,7 +494,7 @@ bool NavigationEngine::setRecordTrack(bool recordTrack, bool ignoreIsInit, bool 
 
   // Interrupt the track if there is a previous point
   if ((recordTrack)&&(!this->recordTrack)) {
-    recordedTrack->lockAccess();
+    recordedTrack->lockAccess(__FILE__, __LINE__);
     bool addPathInterruptedPos=false;
     if (recordedTrack->getHasLastPoint()) {
       if (recordedTrack->getLastPoint()!=NavigationPath::getPathInterruptedPos()) {
@@ -505,9 +505,9 @@ bool NavigationEngine::setRecordTrack(bool recordTrack, bool ignoreIsInit, bool 
     if (addPathInterruptedPos)
       recordedTrack->addEndPosition(NavigationPath::getPathInterruptedPos());
   }
-  lockRecordedTrack();
+  lockRecordedTrack(__FILE__, __LINE__);
   this->recordTrack=recordTrack;
-  core->getConfigStore()->setIntValue("Navigation","recordTrack",recordTrack);
+  core->getConfigStore()->setIntValue("Navigation","recordTrack",recordTrack,__FILE__,__LINE__);
   unlockRecordedTrack();
   if (showInfo) {
     if (recordTrack) {
@@ -528,13 +528,13 @@ void NavigationEngine::createNewTrack() {
     return;
   }
   recordedTrack->writeGPXFile(); // locking is handled within writeGPXFile
-  recordedTrack->lockAccess();
+  recordedTrack->lockAccess(__FILE__, __LINE__);
   recordedTrack->deinit();
   recordedTrack->init();
   recordedTrack->setIsInit(true);
   recordedTrack->unlockAccess();
-  lockRecordedTrack();
-  core->getConfigStore()->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename());
+  lockRecordedTrack(__FILE__, __LINE__);
+  core->getConfigStore()->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename(), __FILE__, __LINE__);
   unlockRecordedTrack();
   INFO("new %s created",recordedTrack->getGpxFilename().c_str());
   updateScreenGraphic(false);
@@ -552,11 +552,11 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
 
   // Ensure that only one thread is executing this function at most
   //DEBUG("before graphics update",NULL);
-  core->getThread()->lockMutex(updateGraphicsMutex);
+  core->getThread()->lockMutex(updateGraphicsMutex, __FILE__, __LINE__);
 
   // We need a map tile to compute the coordinates
   //DEBUG("before map pos lock",NULL);
-  mapPos=*(mapEngine->lockMapPos());
+  mapPos=*(mapEngine->lockMapPos(__FILE__, __LINE__));
   mapEngine->unlockMapPos();
   //DEBUG("after map pos lock",NULL);
   if (!mapPos.getMapTile()) {
@@ -567,17 +567,17 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
 
   // Copy the current display area
   //DEBUG("before display area lock",NULL);
-  MapArea displayArea=*(mapEngine->lockDisplayArea());
+  MapArea displayArea=*(mapEngine->lockDisplayArea(__FILE__, __LINE__));
   mapEngine->unlockDisplayArea();
   //DEBUG("after display area lock",NULL);
 
   // Copy the current visual position
-  GraphicPosition visPos=*(core->getGraphicEngine()->lockPos());
+  GraphicPosition visPos=*(core->getGraphicEngine()->lockPos(__FILE__, __LINE__));
   core->getGraphicEngine()->unlockPos();
 
   // Update the location icon
   //DEBUG("before location pos lock",NULL);
-  lockLocationPos();
+  lockLocationPos(__FILE__, __LINE__);
   showCursor=false;
   updatePosition=false;
   if ((locationPos.isValid())&&(mapPos.getMapTile())) {
@@ -623,7 +623,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   unlockLocationPos();
   //DEBUG("after location pos to vis pos lock",NULL);
   //DEBUG("before location icon lock",NULL);
-  GraphicRectangle *locationIcon=core->getGraphicEngine()->lockLocationIcon();
+  GraphicRectangle *locationIcon=core->getGraphicEngine()->lockLocationIcon(__FILE__, __LINE__);
   if (showCursor) {
     if (updatePosition) {
       if ((locationIcon->getX()!=visPosX)||(locationIcon->getY()!=visPosY)||
@@ -655,12 +655,12 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
 
   // Update the compass bearing
   //DEBUG("before compass bearing lock",NULL);
-  lockCompassBearing();
+  lockCompassBearing(__FILE__, __LINE__);
   double compassBearing=this->compassBearing;
   unlockCompassBearing();
   //DEBUG("after compass bearing lock",NULL);
   //DEBUG("before compass cone icon lock",NULL);
-  GraphicRectangle *compassConeIcon=core->getGraphicEngine()->lockCompassConeIcon();
+  GraphicRectangle *compassConeIcon=core->getGraphicEngine()->lockCompassConeIcon(__FILE__, __LINE__);
   compassConeIcon->setAngle(-compassBearing-mapPos.getMapTile()->getNorthAngle());
   compassConeIcon->setIsUpdated(true);
   core->getGraphicEngine()->unlockCompassConeIcon();
@@ -668,7 +668,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
 
   // Update the target icon
   //DEBUG("before location pos lock",NULL);
-  lockTargetPos();
+  lockTargetPos(__FILE__, __LINE__);
   showCursor=false;
   double targetIconPosValid=false;
   updatePosition=false;
@@ -713,7 +713,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     }
   }
   unlockTargetPos();
-  GraphicRectangle *targetIcon=core->getGraphicEngine()->lockTargetIcon();
+  GraphicRectangle *targetIcon=core->getGraphicEngine()->lockTargetIcon(__FILE__, __LINE__);
   if (updateAnimation) {
     std::list<GraphicScaleAnimationParameter> scaleAnimationSequence;
     TimestampInMicroseconds startTime = core->getClock()->getMicrosecondsSinceStart();
@@ -761,7 +761,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
 
   // Update the arrow icon
   //DEBUG("before location pos lock",NULL);
-  lockTargetPos();
+  lockTargetPos(__FILE__, __LINE__);
   updateAnimation=false;
   showCursor=false;
   Int translateEndX, translateEndY;
@@ -800,7 +800,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     showCursor=false;
   }
   unlockTargetPos();
-  GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon();
+  GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon(__FILE__, __LINE__);
   if (showCursor) {
     if ((arrowX!=visPosX)||((arrowY!=visPosY))||(arrowAngle!=visAngle)) {
       arrowX=visPosX;
@@ -890,12 +890,12 @@ void NavigationEngine::updateMapGraphic() {
 
   // Process the unfinished tile list
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->lockAccess();
+    (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->addVisualization(&containers);
     (*i)->unlockAccess();
   }
   if (recordedTrack) {
-    recordedTrack->lockAccess();
+    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->addVisualization(&containers);
     recordedTrack->unlockAccess();
   }
@@ -913,12 +913,12 @@ void NavigationEngine::destroyGraphic() {
 
   // Clear the buffers used in the path object
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->lockAccess();
+    (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->destroyGraphic();
     (*i)->unlockAccess();
   }
   if (recordedTrack) {
-    recordedTrack->lockAccess();
+    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->destroyGraphic();
     recordedTrack->unlockAccess();
   }
@@ -928,18 +928,18 @@ void NavigationEngine::destroyGraphic() {
 void NavigationEngine::createGraphic() {
 
   // Get the radius of the arrow icon
-  GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon();
+  GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon(__FILE__, __LINE__);
   arrowDiameter=sqrt((double)(arrowIcon->getIconWidth()*arrowIcon->getIconWidth()+arrowIcon->getIconHeight()*arrowIcon->getIconHeight()));
   core->getGraphicEngine()->unlockArrowIcon();
 
   // Creates the buffers used in the path object
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->lockAccess();
+    (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->createGraphic();
     (*i)->unlockAccess();
   }
   if (recordedTrack) {
-    recordedTrack->lockAccess();
+    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->createGraphic();
     recordedTrack->unlockAccess();
   }
@@ -950,12 +950,12 @@ void NavigationEngine::optimizeGraphic() {
 
   // Optimize the buffers used in the path object
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->lockAccess();
+    (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->optimizeGraphic();
     (*i)->unlockAccess();
   }
   if (recordedTrack) {
-    recordedTrack->lockAccess();
+    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->optimizeGraphic();
     recordedTrack->unlockAccess();
   }
@@ -981,12 +981,12 @@ void NavigationEngine::removeGraphics(MapContainer *container) {
 
   // Process the unfinished tile list
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->lockAccess();
+    (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->removeVisualization(container);
     (*i)->unlockAccess();
   }
   if (recordedTrack) {
-    recordedTrack->lockAccess();
+    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->removeVisualization(container);
     recordedTrack->unlockAccess();
   }
@@ -1018,25 +1018,25 @@ void NavigationEngine::backgroundLoader() {
     (*i)->readGPXFile(); // locking is handled within method
     (*i)->setIsInit(true);
     std::string routePath="Navigation/Route[@name='" + (*i)->getGpxFilename() + "']";
-    Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex");
+    Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex", __FILE__, __LINE__);
     if (startIndex==-1) startIndex=0;
-    Int endIndex=core->getConfigStore()->getIntValue(routePath,"endFlagIndex");
+    Int endIndex=core->getConfigStore()->getIntValue(routePath,"endFlagIndex", __FILE__, __LINE__);
     if (endIndex==-1) endIndex=(*i)->getSelectedSize()-1;
     if ((*i)->getReverse()) {
       if (startIndex>endIndex) {
-        (*i)->setStartFlag(startIndex);
-        (*i)->setEndFlag(endIndex);
+        (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
+        (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
       } else {
-        (*i)->setStartFlag(endIndex);
-        (*i)->setEndFlag(startIndex);
+        (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
+        (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
       }
     } else {
       if (startIndex<endIndex) {
-        (*i)->setStartFlag(startIndex);
-        (*i)->setEndFlag(endIndex);
+        (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
+        (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
       } else {
-        (*i)->setStartFlag(endIndex);
-        (*i)->setEndFlag(startIndex);
+        (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
+        (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
       }
     }
     if (*i==activeRoute)
@@ -1047,7 +1047,7 @@ void NavigationEngine::backgroundLoader() {
 
   // Thread is finished
 exitThread:
-  core->getThread()->lockMutex(backgroundLoaderFinishedMutex);
+  core->getThread()->lockMutex(backgroundLoaderFinishedMutex, __FILE__, __LINE__);
   backgroundLoaderFinished=true;
   core->getThread()->unlockMutex(backgroundLoaderFinishedMutex);
 }
@@ -1060,7 +1060,7 @@ void NavigationEngine::newPointOfInterest(std::string name, std::string descript
 
 // Sets the target to the center of the map
 void NavigationEngine::setTargetAtMapCenter() {
-  MapPosition *pos = core->getMapEngine()->lockMapPos();
+  MapPosition *pos = core->getMapEngine()->lockMapPos(__FILE__, __LINE__);
   setTargetAtGeographicCoordinate(pos->getLng(),pos->getLat(),false);
   core->getMapEngine()->unlockMapPos();
 }
@@ -1068,55 +1068,55 @@ void NavigationEngine::setTargetAtMapCenter() {
 // Makes the target invisible
 void NavigationEngine::hideTarget() {
   std::string path="Navigation/Target";
-  core->getConfigStore()->setIntValue(path,"visible",0);
-  lockTargetPos();
+  core->getConfigStore()->setIntValue(path,"visible",0,__FILE__,__LINE__);
+  lockTargetPos(__FILE__, __LINE__);
   targetPos.invalidate();
   unlockTargetPos();
-  core->getMapEngine()->setForceMapUpdate();
+  core->getMapEngine()->setForceMapUpdate(__FILE__, __LINE__);
   triggerNavigationInfoUpdate();
 }
 
 // Shows the current target
 void NavigationEngine::showTarget(bool repositionMap) {
   std::string path="Navigation/Target";
-  core->getConfigStore()->setIntValue(path,"visible",1);
-  double lng = core->getConfigStore()->getDoubleValue(path,"lng");
-  double lat = core->getConfigStore()->getDoubleValue(path,"lat");
-  lockTargetPos();
+  core->getConfigStore()->setIntValue(path,"visible",1, __FILE__,__LINE__);
+  double lng = core->getConfigStore()->getDoubleValue(path,"lng", __FILE__, __LINE__);
+  double lat = core->getConfigStore()->getDoubleValue(path,"lat", __FILE__, __LINE__);
+  lockTargetPos(__FILE__, __LINE__);
   targetPos.setLng(lng);
   targetPos.setLat(lat);
   targetPos.setIsUpdated(true);
   unlockTargetPos();
   if (repositionMap)
     core->getMapEngine()->setMapPos(targetPos);
-  core->getMapEngine()->setForceMapUpdate();
+  core->getMapEngine()->setForceMapUpdate(__FILE__, __LINE__);
   triggerNavigationInfoUpdate();
 }
 
 // Shows the current target at the given position
 void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, bool repositionMap) {
   std::string path="Navigation/Target";
-  core->getConfigStore()->setDoubleValue(path,"lng",lng);
-  core->getConfigStore()->setDoubleValue(path,"lat",lat);
+  core->getConfigStore()->setDoubleValue(path,"lng",lng,__FILE__,__LINE__);
+  core->getConfigStore()->setDoubleValue(path,"lat",lat,__FILE__,__LINE__);
   showTarget(repositionMap);
 }
 
 // Sets the start flag on the nearest route
-void NavigationEngine::setStartFlag(NavigationPath *path, Int index) {
+void NavigationEngine::setStartFlag(NavigationPath *path, Int index, const char *file, int line) {
   if (path==recordedTrack) {
     WARNING("flags can not be set on tracks",NULL);
   } else {
-    path->setStartFlag(index);
+    path->setStartFlag(index, file, line);
   }
   triggerNavigationInfoUpdate();
 }
 
 // Sets the end flag on the nearest route
-void NavigationEngine::setEndFlag(NavigationPath *path, Int index) {
+void NavigationEngine::setEndFlag(NavigationPath *path, Int index, const char *file, int line) {
   if (path==recordedTrack) {
     WARNING("flags can not be set on tracks",NULL);
   } else {
-    path->setEndFlag(index);
+    path->setEndFlag(index, file, line);
   }
   triggerNavigationInfoUpdate();
 }
@@ -1129,20 +1129,20 @@ void NavigationEngine::setActiveRoute(NavigationPath *route) {
     return;
   }
   if (activeRoute!=NULL) {
-    activeRoute->lockAccess();
-    activeRoute->setBlinkMode(false);
+    activeRoute->lockAccess(__FILE__, __LINE__);
+    activeRoute->setBlinkMode(false, __FILE__, __LINE__);
     activeRoute->unlockAccess();
   }
-  core->getThread()->lockMutex(activeRouteMutex);
+  core->getThread()->lockMutex(activeRouteMutex, __FILE__, __LINE__);
   activeRoute=route;
   core->getThread()->unlockMutex(activeRouteMutex);
   if (activeRoute) {
-    activeRoute->lockAccess();
-    activeRoute->setBlinkMode(true);
+    activeRoute->lockAccess(__FILE__, __LINE__);
+    activeRoute->setBlinkMode(true, __FILE__, __LINE__);
     activeRoute->unlockAccess();
-    core->getConfigStore()->setStringValue("Navigation","activeRoute",activeRoute->getGpxFilename());
+    core->getConfigStore()->setStringValue("Navigation","activeRoute",activeRoute->getGpxFilename(),__FILE__, __LINE__);
   } else {
-    core->getConfigStore()->setStringValue("Navigation","activeRoute","none");
+    core->getConfigStore()->setStringValue("Navigation","activeRoute","none",__FILE__, __LINE__);
   }
   triggerNavigationInfoUpdate();
 }
@@ -1165,7 +1165,7 @@ void NavigationEngine::computeNavigationInfo() {
     core->getThread()->waitForSignal(computeNavigationInfoSignal);
 
     // Copy location pos
-    lockLocationPos();
+    lockLocationPos(__FILE__, __LINE__);
     /*if (!this->locationPos.getHasBearing()) {
       this->locationPos.setHasBearing(true);
       this->locationPos.setBearing(0);
@@ -1191,7 +1191,7 @@ void NavigationEngine::computeNavigationInfo() {
     forceNavigationInfoUpdate=false;
 
     // Copy target pos
-    lockTargetPos();
+    lockTargetPos(__FILE__, __LINE__);
     MapPosition targetPos=this->targetPos;
     unlockTargetPos();
 
@@ -1214,7 +1214,7 @@ void NavigationEngine::computeNavigationInfo() {
         navigationInfo.setTargetDistance(locationPos.computeDistance(targetPos));
       } else {
 
-        core->getThread()->lockMutex(activeRouteMutex);
+        core->getThread()->lockMutex(activeRouteMutex, __FILE__, __LINE__);
         NavigationPath *activeRoute=this->activeRoute;
         core->getThread()->unlockMutex(activeRouteMutex);
         if (activeRoute) {
@@ -1252,7 +1252,7 @@ void NavigationEngine::computeNavigationInfo() {
     }
 
     // Set the new navigation info
-    lockNavigationInfo();
+    lockNavigationInfo(__FILE__, __LINE__);
     this->navigationInfo=navigationInfo;
     unlockNavigationInfo();
 

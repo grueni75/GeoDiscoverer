@@ -26,13 +26,13 @@ namespace GEODISCOVERER {
 
 // Constructor
 MapEngine::MapEngine() {
-  initDistance=core->getConfigStore()->getIntValue("Map","initDistance");
+  initDistance=core->getConfigStore()->getIntValue("Map","initDistance", __FILE__, __LINE__);
   maxTiles=0;
-  returnToLocationTimeout=core->getConfigStore()->getIntValue("Map","returnToLocationTimeout");
+  returnToLocationTimeout=core->getConfigStore()->getIntValue("Map","returnToLocationTimeout", __FILE__, __LINE__);
   returnToLocationOneTime=false;
   returnToLocation=false;
-  setReturnToLocation(core->getConfigStore()->getIntValue("Map","returnToLocation"),false);
-  setZoomLevelLock(core->getConfigStore()->getIntValue("Map","zoomLevelLock"),false);
+  setReturnToLocation(core->getConfigStore()->getIntValue("Map","returnToLocation", __FILE__, __LINE__),false);
+  setZoomLevelLock(core->getConfigStore()->getIntValue("Map","zoomLevelLock", __FILE__, __LINE__),false);
   map=NULL;
   updateInProgress=false;
   abortUpdate=false;
@@ -62,9 +62,9 @@ MapEngine::~MapEngine() {
 }
 
 // Does all action to remove a tile from the map
-void MapEngine::deinitTile(MapTile *t)
+void MapEngine::deinitTile(MapTile *t, const char *file, int line)
 {
-  map->lockAccess();
+  map->lockAccess(file,line);
   map->removePrimitive(t->getVisualizationKey()); // Remove it from the graphic
   t->removeGraphic();
   if (t->getIsDummy())   // Delete dummy tiles
@@ -80,14 +80,14 @@ void MapEngine::deinitMap()
   for (std::list<MapTile*>::const_iterator i=tiles.begin();i!=tiles.end();i++) {
     MapTile *t=*i;
     t->setIsProcessed(false);
-    deinitTile(t);
+    deinitTile(t, __FILE__, __LINE__);
   }
   tiles.clear();
 
   // Delete all left-over primitives that were used for debugging
   //DEBUG("deleting debug primitives",NULL);
   if (map) {
-    map->lockAccess();
+    map->lockAccess(__FILE__, __LINE__);
     GraphicPrimitiveMap::iterator i;
     GraphicPrimitiveMap *primitiveMap = map->getPrimitiveMap();
     std::list<GraphicPrimitive*> primitives;
@@ -113,7 +113,7 @@ void MapEngine::deinitMap()
   // Free graphic objects
   //DEBUG("deleting map",NULL);
   if (map) {
-    map->lockAccess();
+    map->lockAccess(__FILE__, __LINE__);
     core->getGraphicEngine()->setMap(NULL);
     map->unlockAccess();
     delete map;
@@ -131,19 +131,19 @@ void MapEngine::initMap()
   deinitMap();
 
   // Get the current position from the graphic engine
-  GraphicPosition *graphicEngineVisPos=core->getGraphicEngine()->lockPos();
+  GraphicPosition *graphicEngineVisPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
   visPos=*graphicEngineVisPos;
   core->getGraphicEngine()->unlockPos();
 
   // Set the current position
-  std::string lastMapFolder=core->getConfigStore()->getStringValue("Map/LastPosition","folder");
+  std::string lastMapFolder=core->getConfigStore()->getStringValue("Map/LastPosition","folder", __FILE__, __LINE__);
   //DEBUG("lastMapFolder=%s",lastMapFolder.c_str());
   if (lastMapFolder!="*unknown*") {
-    lockMapPos();
-    mapPos.setLng(core->getConfigStore()->getDoubleValue("Map/LastPosition","lng"));
-    mapPos.setLat(core->getConfigStore()->getDoubleValue("Map/LastPosition","lat"));
-    mapPos.setLatScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","latScale"));
-    mapPos.setLngScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","lngScale"));
+    lockMapPos(__FILE__, __LINE__);
+    mapPos.setLng(core->getConfigStore()->getDoubleValue("Map/LastPosition","lng", __FILE__, __LINE__));
+    mapPos.setLat(core->getConfigStore()->getDoubleValue("Map/LastPosition","lat", __FILE__, __LINE__));
+    mapPos.setLatScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","latScale", __FILE__, __LINE__));
+    mapPos.setLngScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","lngScale", __FILE__, __LINE__));
     unlockMapPos();
     core->getMapSource()->lockAccess();
     MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
@@ -151,25 +151,25 @@ void MapEngine::initMap()
     //DEBUG("tile=%08x",tile);
     if (tile==NULL) {
       DEBUG("could not find tile, using center position of map",NULL);
-      lockMapPos();
+      lockMapPos(__FILE__, __LINE__);
       mapPos=*(core->getMapSource()->getCenterPosition());
       unlockMapPos();
       lastMapFolder="*unknown*";
-      core->getConfigStore()->setStringValue("Map/LastPosition","folder",lastMapFolder);
+      core->getConfigStore()->setStringValue("Map/LastPosition","folder",lastMapFolder, __FILE__, __LINE__);
     }
   } else {
-    lockMapPos();
+    lockMapPos(__FILE__, __LINE__);
     mapPos=*(core->getMapSource()->getCenterPosition());
     unlockMapPos();
   }
-  lockDisplayArea();
+  lockDisplayArea(__FILE__, __LINE__);
   displayArea.setZoomLevel(0);
   unlockDisplayArea();
   if (lastMapFolder==core->getMapSource()->getFolder()) {
-    visPos.setZoom(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoom"));
-    visPos.setAngle(core->getConfigStore()->getDoubleValue("Map/LastPosition","angle"));
-    lockDisplayArea();
-    displayArea.setZoomLevel(core->getConfigStore()->getIntValue("Map/LastPosition","zoomLevel"));
+    visPos.setZoom(core->getConfigStore()->getDoubleValue("Map/LastPosition","zoom", __FILE__, __LINE__));
+    visPos.setAngle(core->getConfigStore()->getDoubleValue("Map/LastPosition","angle", __FILE__, __LINE__));
+    lockDisplayArea(__FILE__, __LINE__);
+    displayArea.setZoomLevel(core->getConfigStore()->getIntValue("Map/LastPosition","zoomLevel", __FILE__, __LINE__));
     unlockDisplayArea();
   }
 
@@ -177,7 +177,7 @@ void MapEngine::initMap()
   backup();
 
   // Update the visual position in the graphic engine
-  graphicEngineVisPos=core->getGraphicEngine()->lockPos();
+  graphicEngineVisPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
   *graphicEngineVisPos=visPos;
   core->getGraphicEngine()->unlockPos();
 
@@ -189,7 +189,7 @@ void MapEngine::initMap()
   }
 
   // Inform the graphic engine about the new objects
-  map->lockAccess();
+  map->lockAccess(__FILE__, __LINE__);
   core->getGraphicEngine()->setMap(map);
   map->unlockAccess();
 
@@ -202,7 +202,7 @@ void MapEngine::initMap()
 
 // Remove all debugging primitives
 void MapEngine::removeDebugPrimitives() {
-  map->lockAccess();
+  map->lockAccess(__FILE__, __LINE__);
   GraphicPrimitiveMap::iterator i;
   GraphicPrimitiveMap *primitiveMap = map->getPrimitiveMap();
   std::list<GraphicPrimitive*> primitives;
@@ -230,7 +230,7 @@ void MapEngine::removeDebugPrimitives() {
 void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, bool activateVisPos) {
 
   // Allow interrupt here
-  core->interruptAllowedHere();
+  core->interruptAllowedHere(__FILE__, __LINE__);
 
   // If an abort has been requested, stop here
   if (abortUpdate)
@@ -375,7 +375,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
         // Add the tile to the map
         tiles.push_back(tile);
         GraphicObject *v=tile->getVisualization();
-        map->lockAccess();
+        map->lockAccess(__FILE__, __LINE__);
         tile->setVisualizationKey(map->addPrimitive(v));
         map->unlockAccess();
 
@@ -383,12 +383,12 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
         if (activateVisPos) {
 
           // Tell the tile that it's visibility has changed
-          tile->setIsHidden(false);
+          tile->setIsHidden(false,__FILE__, __LINE__);
 
         } else {
 
           // Hide the tile until the search is over
-          tile->setIsHidden(true);
+          tile->setIsHidden(true,__FILE__, __LINE__);
 
         }
 
@@ -402,7 +402,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
       // Activate the new visual position?
       if (activateVisPos) {
-        tile->getVisualization()->lockAccess();
+        tile->getVisualization()->lockAccess(__FILE__, __LINE__);
         tile->activateVisPos();
         tile->getVisualization()->unlockAccess();
       }
@@ -554,10 +554,10 @@ bool MapEngine::mapUpdateIsRequired(GraphicPosition visPos, Int *diffVisX, Int *
     //DEBUG("locationPos2visPosOffsetValid=%d diff=%d returnToLocationTimeout=%d locationPos2visPosOffsetX=%d locationPos2visPosOffsetY=%d",locationPos2visPosOffsetValid,diff,returnToLocationTimeout,locationPos2visPosOffsetX,locationPos2visPosOffsetY);
     if ((diff>returnToLocationTimeout)||(returnToLocationOneTime)) {
       MapPosition newPos,oldPos;
-      lockLocationPos();
+      lockLocationPos(__FILE__, __LINE__);
       newPos=locationPos;
       unlockLocationPos();
-      lockMapPos();
+      lockMapPos(__FILE__, __LINE__);
       oldPos=mapPos;
       unlockMapPos();
       if ((newPos.isValid())&&(mapPos.isValid())) {
@@ -604,7 +604,7 @@ void MapEngine::setReturnToLocation(bool returnToLocation, bool showInfo)
     returnToLocationOneTime=true;
   }
   this->returnToLocation=returnToLocation;
-  core->getConfigStore()->setIntValue("Map","returnToLocation",returnToLocation);
+  core->getConfigStore()->setIntValue("Map","returnToLocation",returnToLocation, __FILE__, __LINE__);
   if (showInfo) {
     if (returnToLocation) {
       INFO("return to location is enabled",NULL);
@@ -618,7 +618,7 @@ void MapEngine::setReturnToLocation(bool returnToLocation, bool showInfo)
 void MapEngine::setZoomLevelLock(bool zoomLevelLock, bool showInfo)
 {
   this->zoomLevelLock=zoomLevelLock;
-  core->getConfigStore()->setIntValue("Map","zoomLevelLock",zoomLevelLock);
+  core->getConfigStore()->setIntValue("Map","zoomLevelLock",zoomLevelLock,__FILE__, __LINE__);
   if (showInfo) {
     if (zoomLevelLock) {
       INFO("zoom level lock is enabled",NULL);
@@ -649,13 +649,13 @@ void MapEngine::updateMap() {
   // Check if a cache update is required
   if (forceCacheUpdate) {
     mapChanged=true;
-    core->getThread()->lockMutex(forceCacheUpdateMutex);
+    core->getThread()->lockMutex(forceCacheUpdateMutex,__FILE__, __LINE__);
     forceCacheUpdate=false;
     core->getThread()->unlockMutex(forceCacheUpdateMutex);
   }
 
   // Get the current position from the graphic engine
-  GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
+  GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
 
   // Do not update map graphic if not required
   //DEBUG("diffVisX=%d diffVisY=%d diffZoom=%f",diffVisX,diffVisY,diffZoom);
@@ -671,12 +671,12 @@ void MapEngine::updateMap() {
     returnToLocationOneTime=false;
 
     // Get the display area
-    lockDisplayArea();
+    lockDisplayArea(__FILE__, __LINE__);
     MapArea displayArea=this->displayArea;
     unlockDisplayArea();
 
     // Use the offset to compute the new position in the map
-    lockMapPos();
+    lockMapPos(__FILE__, __LINE__);
     MapPosition newMapPos;
     if (requestedMapPos.isValid()) {
 
@@ -746,7 +746,7 @@ void MapEngine::updateMap() {
       visPos->set(0,0,visPos->getZoom(),visPos->getAngle());
       visPosResetted=true;
     }
-    core->getThread()->lockMutex(forceMapUpdateMutex);
+    core->getThread()->lockMutex(forceMapUpdateMutex, __FILE__, __LINE__);
     forceMapUpdate=false;
     core->getThread()->unlockMutex(forceMapUpdateMutex);
     forceMapRecreation=false;
@@ -781,7 +781,7 @@ void MapEngine::updateMap() {
 
         // Reset the visual position to the previous one
         //DEBUG("resetting visPos",NULL);
-        lockMapPos();
+        lockMapPos(__FILE__, __LINE__);
         mapPos.setMapTile(NULL);
         unlockMapPos();
         *visPos=this->visPos;
@@ -878,13 +878,13 @@ void MapEngine::updateMap() {
         // Remember the current visual position
         this->visPos=*visPos;
         core->getGraphicEngine()->unlockPos();
-        lockMapPos();
+        lockMapPos(__FILE__, __LINE__);
         mapPos=newMapPos;
         unlockMapPos();
 
         // Set the new display area
         MapArea oldDisplayArea=displayArea;
-        lockDisplayArea();
+        lockDisplayArea(__FILE__, __LINE__);
         this->displayArea=newDisplayArea;
         unlockDisplayArea();
 
@@ -904,7 +904,7 @@ void MapEngine::updateMap() {
           (t->getVisY(1)<newDisplayArea.getYSouth())||(t->getVisY(0)>newDisplayArea.getYNorth())) {
             //DEBUG("removing tile <%s> because it is out side the new display area",t->getVisName().c_str());
             tiles.remove(t);
-            deinitTile(t);
+            deinitTile(t, __FILE__, __LINE__);
           }
         }
         //PROFILE_ADD("invisible tile remove");
@@ -928,13 +928,13 @@ void MapEngine::updateMap() {
           if (!abortUpdate) {
 
             // Activate the new position
-            t->getVisualization()->lockAccess();
+            t->getVisualization()->lockAccess(__FILE__, __LINE__);
             t->activateVisPos();
             t->getVisualization()->unlockAccess();
 
             // If the tile is hidden: make it visible
             if (t->getIsHidden()) {
-              t->setIsHidden(false);
+              t->setIsHidden(false,__FILE__, __LINE__);
             }
           }
         }
@@ -944,7 +944,7 @@ void MapEngine::updateMap() {
         //DEBUG("tiles.size()=%d",tiles.size());
         if ((tiles.size()==0)||(zoomedScreenWidth<=1)) {
         	DEBUG("resetting map",NULL);
-          core->getConfigStore()->setStringValue("Map/LastPosition","folder","*unknown*");
+          core->getConfigStore()->setStringValue("Map/LastPosition","folder","*unknown*",__FILE__, __LINE__);
           initMap();
         }
 
@@ -956,7 +956,7 @@ void MapEngine::updateMap() {
 
       // Reset the visual position to the previous one
       DEBUG("no map tile found",NULL);
-      lockMapPos();
+      lockMapPos(__FILE__, __LINE__);
       mapPos.setMapTile(NULL);
       unlockMapPos();
       *visPos=this->visPos;
@@ -995,24 +995,24 @@ void MapEngine::backup() {
   }
 
   // Create a copy of the position information
-  lockMapPos();
+  lockMapPos(__FILE__, __LINE__);
   MapPosition mapPos=this->mapPos;
   unlockMapPos();
-  lockDisplayArea();
+  lockDisplayArea(__FILE__, __LINE__);
   MapArea displayArea=this->displayArea;
   unlockDisplayArea();
-  GraphicPosition visPos=*(core->getGraphicEngine()->lockPos());
+  GraphicPosition visPos=*(core->getGraphicEngine()->lockPos(__FILE__, __LINE__));
   core->getGraphicEngine()->unlockPos();
 
   // Store the position
-  core->getConfigStore()->setStringValue("Map/LastPosition","folder",core->getMapSource()->getFolder());
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","lng",mapPos.getLng());
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","lat",mapPos.getLat());
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","latScale",mapPos.getLatScale());
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","lngScale",mapPos.getLngScale());
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","zoom",visPos.getZoom());
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","angle",visPos.getAngle());
-  core->getConfigStore()->setDoubleValue("Map/LastPosition","zoomLevel",displayArea.getZoomLevel());
+  core->getConfigStore()->setStringValue("Map/LastPosition","folder",core->getMapSource()->getFolder(), __FILE__, __LINE__);
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","lng",mapPos.getLng(), __FILE__, __LINE__);
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","lat",mapPos.getLat(), __FILE__, __LINE__);
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","latScale",mapPos.getLatScale(), __FILE__, __LINE__);
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","lngScale",mapPos.getLngScale(), __FILE__, __LINE__);
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","zoom",visPos.getZoom(), __FILE__, __LINE__);
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","angle",visPos.getAngle(), __FILE__, __LINE__);
+  core->getConfigStore()->setDoubleValue("Map/LastPosition","zoomLevel",displayArea.getZoomLevel(), __FILE__, __LINE__);
 }
 
 // Sets the maximum number of tiles to show
@@ -1020,7 +1020,7 @@ void MapEngine::setMaxTiles() {
   int len=core->getScreen()->getHeight();
   if (core->getScreen()->getWidth()>len)
     len=core->getScreen()->getWidth();
-  maxTiles=ceil(((double)len)/((double)core->getMapSource()->getMapTileLength())*((double)core->getConfigStore()->getIntValue("Map","visibleTileLimit")));
+  maxTiles=ceil(((double)len)/((double)core->getMapSource()->getMapTileLength())*((double)core->getConfigStore()->getIntValue("Map","visibleTileLimit", __FILE__, __LINE__)));
   maxTiles=maxTiles*maxTiles;
 }
 
@@ -1032,10 +1032,10 @@ void MapEngine::setMapPos(MapPosition mapPos)
     MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
     core->getMapSource()->unlockAccess();
     if (tile) {
-      core->getThread()->lockMutex(mapPosMutex);
+      core->getThread()->lockMutex(mapPosMutex, __FILE__, __LINE__);
       requestedMapPos = mapPos;
       core->getThread()->unlockMutex(mapPosMutex);
-      setForceMapUpdate();
+      setForceMapUpdate(__FILE__, __LINE__);
     } else {
       DEBUG("requested map pos has been ignored because map contains no tile",NULL);
     }

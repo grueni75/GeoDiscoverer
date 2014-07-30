@@ -124,8 +124,8 @@ Screen::Screen(Int DPI) {
   this->allowDestroying=false;
   this->allowAllocation=false;
   this->DPI=DPI;
-  this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock");
-  setWakeLock(wakeLock);
+  this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock", __FILE__, __LINE__);
+  setWakeLock(wakeLock, __FILE__, __LINE__);
 
   // Open window
   glutInit(&argc, argv);
@@ -452,9 +452,9 @@ void Screen::destroyBufferInfo(GraphicBufferInfo buffer) {
 }
 
 // If set to one, the screen is not turned off
-void Screen::setWakeLock(bool state, bool persistent) {
+void Screen::setWakeLock(bool state, const char *file, int line, bool persistent) {
   if (persistent)
-    core->getConfigStore()->setIntValue("General","wakeLock",state);
+    core->getConfigStore()->setIntValue("General","wakeLock",state,file,line);
   wakeLock=state;
 }
 

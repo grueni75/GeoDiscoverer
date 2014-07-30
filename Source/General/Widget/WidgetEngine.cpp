@@ -30,17 +30,17 @@ WidgetEngine::WidgetEngine() {
 
   // Get global config
   ConfigStore *c=core->getConfigStore();
-  selectedWidgetColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/SelectedColor");
-  buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay");
-  buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod");
-  contextMenuDelay=c->getIntValue("Graphic/Widget","contextMenuDelay");
-  contextMenuAllowedPixelJitter=c->getIntValue("Graphic/Widget","contextMenuAllowedPixelJitter");
+  selectedWidgetColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/SelectedColor",__FILE__, __LINE__);
+  buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay",__FILE__, __LINE__);
+  buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod",__FILE__, __LINE__);
+  contextMenuDelay=c->getIntValue("Graphic/Widget","contextMenuDelay",__FILE__, __LINE__);
+  contextMenuAllowedPixelJitter=c->getIntValue("Graphic/Widget","contextMenuAllowedPixelJitter",__FILE__, __LINE__);
   isTouched=false;
   contextMenuIsShown=false;
   currentPage=NULL;
-  changePageDuration=c->getIntValue("Graphic/Widget","changePageDuration");
+  changePageDuration=c->getIntValue("Graphic/Widget","changePageDuration",__FILE__, __LINE__);
   ignoreTouchesEnd=0;
-  widgetsActiveTimeout=c->getIntValue("Graphic/Widget","widgetsActiveTimeout");
+  widgetsActiveTimeout=c->getIntValue("Graphic/Widget","widgetsActiveTimeout",__FILE__, __LINE__);
   nearestPath=NULL;
   nearestPathIndex=-1;
 
@@ -77,15 +77,15 @@ void WidgetEngine::addWidgetToPage(
     case WidgetTypePathInfo: widgetTypeString="pathInfo"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
-  c->setStringValue(path,"type",widgetTypeString);
-  c->setDoubleValue(path + "/Portrait","x",portraitX);
-  c->setDoubleValue(path + "/Portrait","y",portraitY);
-  c->setIntValue(path + "/Portrait","z",portraitZ);
-  c->setDoubleValue(path + "/Landscape","x",landscapeX);
-  c->setDoubleValue(path + "/Landscape","y",landscapeY);
-  c->setIntValue(path + "/Landscape","z",landscapeZ);
-  c->setGraphicColorValue(path + "/ActiveColor",GraphicColor(activeRed,activeGreen,activeBlue,activeAlpha));
-  c->setGraphicColorValue(path + "/InactiveColor",GraphicColor(inactiveRed,inactiveGreen,inactiveBlue,inactiveAlpha));
+  c->setStringValue(path,"type",widgetTypeString,__FILE__, __LINE__);
+  c->setDoubleValue(path + "/Portrait","x",portraitX,__FILE__, __LINE__);
+  c->setDoubleValue(path + "/Portrait","y",portraitY,__FILE__, __LINE__);
+  c->setIntValue(path + "/Portrait","z",portraitZ,__FILE__, __LINE__);
+  c->setDoubleValue(path + "/Landscape","x",landscapeX,__FILE__, __LINE__);
+  c->setDoubleValue(path + "/Landscape","y",landscapeY,__FILE__, __LINE__);
+  c->setIntValue(path + "/Landscape","z",landscapeZ,__FILE__, __LINE__);
+  c->setGraphicColorValue(path + "/ActiveColor",GraphicColor(activeRed,activeGreen,activeBlue,activeAlpha),__FILE__, __LINE__);
+  c->setGraphicColorValue(path + "/InactiveColor",GraphicColor(inactiveRed,inactiveGreen,inactiveBlue,inactiveAlpha),__FILE__, __LINE__);
   ParameterMap::iterator i;
   for (i=parameters.begin();i!=parameters.end();i++) {
     std::string innerPath = path;
@@ -96,7 +96,7 @@ void WidgetEngine::addWidgetToPage(
       innerPath.append(name.substr(0,pos));
       name=name.substr(pos+1);
     }
-    c->setStringValue(innerPath, name, i->second);
+    c->setStringValue(innerPath, name, i->second, __FILE__, __LINE__);
   }
 }
 
@@ -115,11 +115,11 @@ void WidgetEngine::createGraphic() {
   ConfigStore *c=core->getConfigStore();
 
   // Only one thread please
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
 
   // Get all widget pages
   // If no exist, create the default ones
-  std::list<std::string> pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
+  std::list<std::string> pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
   if (pageNames.size()==0) {
     ParameterMap parameters;
     parameters.clear();
@@ -351,11 +351,11 @@ void WidgetEngine::createGraphic() {
     parameters["stateConfigName"]="zoomLevelLock";
     parameters["updateInterval"]="250000";
     addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Zoom Level Lock",   12.5, 80.0,0,89.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
-    pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
+    pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
   }
 
   // Create the widgets from the config
-  pageNames=c->getAttributeValues("Graphic/Widget/Page","name");
+  pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
   std::list<std::string>::iterator i;
   for(i=pageNames.begin();i!=pageNames.end();i++) {
     //DEBUG("found a widget page with name %s",(*i).c_str());
@@ -372,13 +372,13 @@ void WidgetEngine::createGraphic() {
 
     // Go through all widgets of this page
     std::string path="Graphic/Widget/Page[@name='" + *i + "']/Primitive";
-    std::list<std::string> widgetNames=c->getAttributeValues(path,"name");
+    std::list<std::string> widgetNames=c->getAttributeValues(path,"name",__FILE__, __LINE__);
     std::list<std::string>::iterator j;
     for(j=widgetNames.begin();j!=widgetNames.end();j++) {
 
       // Create the type-specific widget
       std::string widgetPath=path + "[@name='" + *j + "']";
-      std::string widgetType=c->getStringValue(widgetPath,"type");
+      std::string widgetType=c->getStringValue(widgetPath,"type",__FILE__, __LINE__);
       WidgetPrimitive *primitive;
       WidgetButton *button;
       WidgetCheckbox *checkbox;
@@ -420,47 +420,47 @@ void WidgetEngine::createGraphic() {
       std::list<std::string> name;
       name.push_back(*j);
       primitive->setName(name);
-      primitive->setActiveColor(c->getGraphicColorValue(widgetPath + "/ActiveColor"));
-      primitive->setInactiveColor(c->getGraphicColorValue(widgetPath + "/InactiveColor"));
+      primitive->setActiveColor(c->getGraphicColorValue(widgetPath + "/ActiveColor",__FILE__, __LINE__));
+      primitive->setInactiveColor(c->getGraphicColorValue(widgetPath + "/InactiveColor",__FILE__, __LINE__));
       primitive->setColor(primitive->getInactiveColor());
 
       // Load the image of the widget
       if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")) {
-        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"iconFilename"));
+        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {
-        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"checkedIconFilename"));
+        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"checkedIconFilename",__FILE__, __LINE__));
         checkbox->setCheckedTexture(primitive->getTexture());
-        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"uncheckedIconFilename"));
+        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"uncheckedIconFilename",__FILE__, __LINE__));
         checkbox->setUncheckedTexture(primitive->getTexture());
-        checkbox->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
+        checkbox->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
       }
       if (widgetType=="navigation") {
-        navigation->getDirectionIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"directionIconFilename"));
+        navigation->getDirectionIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"directionIconFilename",__FILE__, __LINE__));
         navigation->getDirectionIcon()->setX(-navigation->getDirectionIcon()->getIconWidth()/2);
         navigation->getDirectionIcon()->setY(-navigation->getDirectionIcon()->getIconHeight()/2);
-        navigation->getTargetIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"targetIconFilename"));
+        navigation->getTargetIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"targetIconFilename",__FILE__, __LINE__));
         navigation->getTargetIcon()->setX(-navigation->getTargetIcon()->getIconWidth()/2);
         navigation->getTargetIcon()->setY(-navigation->getTargetIcon()->getIconHeight()/2);
-        navigation->getSeparatorIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"separatorIconFilename"));
+        navigation->getSeparatorIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
         navigation->getSeparatorIcon()->setX(0);
         navigation->getSeparatorIcon()->setY(0);
       }
 
       // Set type-dependent properties
       if (widgetType=="button") {
-        button->setCommand(c->getStringValue(widgetPath,"command"));
-        button->setRepeat(c->getIntValue(widgetPath,"repeat"));
+        button->setCommand(c->getStringValue(widgetPath,"command",__FILE__, __LINE__));
+        button->setRepeat(c->getIntValue(widgetPath,"repeat",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {
         checkbox->setConfigPath(widgetPath);
-        checkbox->setUncheckedCommand(c->getStringValue(widgetPath,"uncheckedCommand"));
-        checkbox->setCheckedCommand(c->getStringValue(widgetPath,"checkedCommand"));
-        checkbox->setStateConfigPath(c->getStringValue(widgetPath,"stateConfigPath"));
-        checkbox->setStateConfigName(c->getStringValue(widgetPath,"stateConfigName"));
+        checkbox->setUncheckedCommand(c->getStringValue(widgetPath,"uncheckedCommand",__FILE__, __LINE__));
+        checkbox->setCheckedCommand(c->getStringValue(widgetPath,"checkedCommand",__FILE__, __LINE__));
+        checkbox->setStateConfigPath(c->getStringValue(widgetPath,"stateConfigPath",__FILE__, __LINE__));
+        checkbox->setStateConfigName(c->getStringValue(widgetPath,"stateConfigName",__FILE__, __LINE__));
       }
       if (widgetType=="meter") {
-        std::string meterType=c->getStringValue(widgetPath,"meterType");
+        std::string meterType=c->getStringValue(widgetPath,"meterType",__FILE__, __LINE__);
         if (meterType=="altitude") {
           meter->setMeterType(WidgetMeterTypeAltitude);
         } else if (meterType=="speed") {
@@ -472,72 +472,72 @@ void WidgetEngine::createGraphic() {
           visiblePages.unlockAccess();
           return;
         }
-        meter->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
-        meter->setLabelY(c->getDoubleValue(widgetPath,"labelY")*meter->getIconHeight()/100.0);
-        meter->setValueY(c->getDoubleValue(widgetPath,"valueY")*meter->getIconHeight()/100.0);
-        meter->setUnitY(c->getDoubleValue(widgetPath,"unitY")*meter->getIconHeight()/100.0);
+        meter->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
+        meter->setLabelY(c->getDoubleValue(widgetPath,"labelY",__FILE__, __LINE__)*meter->getIconHeight()/100.0);
+        meter->setValueY(c->getDoubleValue(widgetPath,"valueY",__FILE__, __LINE__)*meter->getIconHeight()/100.0);
+        meter->setUnitY(c->getDoubleValue(widgetPath,"unitY",__FILE__, __LINE__)*meter->getIconHeight()/100.0);
       }
       if (widgetType=="scale") {
-        scale->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
-        scale->setTickLabelOffsetX(c->getDoubleValue(widgetPath,"tickLabelOffsetX")*meter->getIconWidth()/100.0);
-        scale->setMapLabelOffsetY(c->getDoubleValue(widgetPath,"mapLabelOffsetY")*meter->getIconHeight()/100.0);
+        scale->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
+        scale->setTickLabelOffsetX(c->getDoubleValue(widgetPath,"tickLabelOffsetX",__FILE__, __LINE__)*meter->getIconWidth()/100.0);
+        scale->setMapLabelOffsetY(c->getDoubleValue(widgetPath,"mapLabelOffsetY",__FILE__, __LINE__)*meter->getIconHeight()/100.0);
       }
       if (widgetType=="status") {
-        status->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
-        status->setLabelWidth(c->getDoubleValue(widgetPath,"labelWidth")*status->getIconWidth()/100.0);
+        status->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
+        status->setLabelWidth(c->getDoubleValue(widgetPath,"labelWidth",__FILE__, __LINE__)*status->getIconWidth()/100.0);
         GraphicColor c=status->getColor();
         c.setAlpha(0);
         status->setColor(c);
       }
       if (widgetType=="navigation") {
-        navigation->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval"));
-        navigation->setDurationLabelOffsetY(c->getDoubleValue(widgetPath,"durationLabelOffsetY")*navigation->getIconHeight()/100.0);
-        navigation->setDurationValueOffsetY(c->getDoubleValue(widgetPath,"durationValueOffsetY")*navigation->getIconHeight()/100.0);
-        navigation->setTargetDistanceLabelOffsetY(c->getDoubleValue(widgetPath,"targetDistanceLabelOffsetY")*navigation->getIconHeight()/100.0);
-        navigation->setTargetDistanceValueOffsetY(c->getDoubleValue(widgetPath,"targetDistanceValueOffsetY")*navigation->getIconHeight()/100.0);
-        navigation->setTurnDistanceValueOffsetY(c->getDoubleValue(widgetPath,"turnDistanceValueOffsetY")*navigation->getIconHeight()/100.0);
-        navigation->setDirectionChangeDuration(c->getDoubleValue(widgetPath,"directionChangeDuration"));
-        navigation->setTargetRadius(c->getDoubleValue(widgetPath,"targetRadius")*navigation->getIconHeight()/200.0);
-        navigation->setOrientationLabelRadius(c->getDoubleValue(widgetPath,"orientationLabelRadius")*navigation->getIconHeight()/200.0);
-        navigation->setTurnLineWidth(c->getDoubleValue(widgetPath,"turnLineWidth")*navigation->getIconHeight()/100.0);
-        navigation->setTurnLineArrowOverhang(c->getDoubleValue(widgetPath,"turnLineArrowOverhang")*navigation->getIconHeight()/100.0);
-        navigation->setTurnLineArrowHeight(c->getDoubleValue(widgetPath,"turnLineArrowHeight")*navigation->getIconHeight()/100.0);
-        navigation->setTurnLineStartHeight(c->getDoubleValue(widgetPath,"turnLineStartHeight")*navigation->getIconHeight()/100.0);
-        navigation->setTurnLineMiddleHeight(c->getDoubleValue(widgetPath,"turnLineMiddleHeight")*navigation->getIconHeight()/100.0);
-        navigation->setTurnLineStartX(c->getDoubleValue(widgetPath,"turnLineStartX")*navigation->getIconHeight()/100.0);
-        navigation->setTurnLineStartY(c->getDoubleValue(widgetPath,"turnLineStartY")*navigation->getIconHeight()/100.0);
-        navigation->setTurnColor(c->getGraphicColorValue(widgetPath+"/TurnColor"));
+        navigation->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
+        navigation->setDurationLabelOffsetY(c->getDoubleValue(widgetPath,"durationLabelOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setDurationValueOffsetY(c->getDoubleValue(widgetPath,"durationValueOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTargetDistanceLabelOffsetY(c->getDoubleValue(widgetPath,"targetDistanceLabelOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTargetDistanceValueOffsetY(c->getDoubleValue(widgetPath,"targetDistanceValueOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTurnDistanceValueOffsetY(c->getDoubleValue(widgetPath,"turnDistanceValueOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setDirectionChangeDuration(c->getDoubleValue(widgetPath,"directionChangeDuration",__FILE__, __LINE__));
+        navigation->setTargetRadius(c->getDoubleValue(widgetPath,"targetRadius",__FILE__, __LINE__)*navigation->getIconHeight()/200.0);
+        navigation->setOrientationLabelRadius(c->getDoubleValue(widgetPath,"orientationLabelRadius",__FILE__, __LINE__)*navigation->getIconHeight()/200.0);
+        navigation->setTurnLineWidth(c->getDoubleValue(widgetPath,"turnLineWidth",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineArrowOverhang(c->getDoubleValue(widgetPath,"turnLineArrowOverhang",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineArrowHeight(c->getDoubleValue(widgetPath,"turnLineArrowHeight",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineStartHeight(c->getDoubleValue(widgetPath,"turnLineStartHeight",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineMiddleHeight(c->getDoubleValue(widgetPath,"turnLineMiddleHeight",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineStartX(c->getDoubleValue(widgetPath,"turnLineStartX",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTurnLineStartY(c->getDoubleValue(widgetPath,"turnLineStartY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setTurnColor(c->getGraphicColorValue(widgetPath+"/TurnColor",__FILE__, __LINE__));
       }
       if (widgetType=="pathInfo") {
-        pathInfo->setPathNameOffsetX(c->getDoubleValue(widgetPath,"pathNameOffsetX")*pathInfo->getIconWidth()/100.0);
-        pathInfo->setPathNameOffsetY(c->getDoubleValue(widgetPath,"pathNameOffsetY")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setPathNameWidth(c->getDoubleValue(widgetPath,"pathNameWidth")*pathInfo->getIconWidth()/100.0);
-        pathInfo->setPathValuesOffsetX(c->getDoubleValue(widgetPath,"pathValuesOffsetX")*pathInfo->getIconWidth()/100.0);
-        pathInfo->setPathValuesWidth(c->getDoubleValue(widgetPath,"pathValuesWidth")*pathInfo->getIconWidth()/100.0);
-        pathInfo->setPathNameOffsetY(c->getDoubleValue(widgetPath,"pathNameOffsetY")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setPathLengthOffsetY(c->getDoubleValue(widgetPath,"pathLengthOffsetY")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setPathAltitudeUpOffsetY(c->getDoubleValue(widgetPath,"pathAltitudeUpOffsetY")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setPathAltitudeDownOffsetY(c->getDoubleValue(widgetPath,"pathAltitudeDownOffsetY")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setPathDurationOffsetY(c->getDoubleValue(widgetPath,"pathDurationOffsetY")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setAltitudeProfileWidth(c->getDoubleValue(widgetPath,"altitudeProfileWidth")*pathInfo->getIconWidth()/100.0);
-        pathInfo->setAltitudeProfileHeight(c->getDoubleValue(widgetPath,"altitudeProfileHeight")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileOffsetX")*pathInfo->getIconWidth()/100.0);
-        pathInfo->setAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileOffsetY")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth")*((double)core->getScreen()->getDPI())/160.0);
-        pathInfo->setAltitudeProfileAxisLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileAxisLineWidth")*((double)core->getScreen()->getDPI())/160.0);
-        pathInfo->setNoAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetX")*pathInfo->getIconWidth()/100.0);
-        pathInfo->setNoAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetY")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setAltitudeProfileFillColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileFillColor"));
-        pathInfo->setAltitudeProfileLineColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileLineColor"));
-        pathInfo->setAltitudeProfileAxisColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileAxisColor"));
-        pathInfo->setAltitudeProfileMinAltitudeDiff(c->getDoubleValue(widgetPath,"altitudeProfileMinAltitudeDiff"));
-        pathInfo->setAltitudeProfileXTickCount(c->getIntValue(widgetPath,"altitudeProfileXTickCount"));
-        pathInfo->setAltitudeProfileYTickCount(c->getIntValue(widgetPath,"altitudeProfileYTickCount"));
-        pathInfo->setAltitudeProfileXTickLabelOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileXTickLabelOffsetY")*pathInfo->getIconHeight()/100.0);
-        pathInfo->setAltitudeProfileYTickLabelOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileYTickLabelOffsetX")*pathInfo->getIconWidth()/100.0);
-        pathInfo->setAltitudeProfileXTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileXTickLabelWidth"));
-        pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth"));
-        pathInfo->getLocationIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"locationIconFilename"));
+        pathInfo->setPathNameOffsetX(c->getDoubleValue(widgetPath,"pathNameOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
+        pathInfo->setPathNameOffsetY(c->getDoubleValue(widgetPath,"pathNameOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathNameWidth(c->getDoubleValue(widgetPath,"pathNameWidth",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
+        pathInfo->setPathValuesOffsetX(c->getDoubleValue(widgetPath,"pathValuesOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
+        pathInfo->setPathValuesWidth(c->getDoubleValue(widgetPath,"pathValuesWidth",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
+        pathInfo->setPathNameOffsetY(c->getDoubleValue(widgetPath,"pathNameOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathLengthOffsetY(c->getDoubleValue(widgetPath,"pathLengthOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathAltitudeUpOffsetY(c->getDoubleValue(widgetPath,"pathAltitudeUpOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathAltitudeDownOffsetY(c->getDoubleValue(widgetPath,"pathAltitudeDownOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathDurationOffsetY(c->getDoubleValue(widgetPath,"pathDurationOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileWidth(c->getDoubleValue(widgetPath,"altitudeProfileWidth",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
+        pathInfo->setAltitudeProfileHeight(c->getDoubleValue(widgetPath,"altitudeProfileHeight",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
+        pathInfo->setAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth",__FILE__, __LINE__)*((double)core->getScreen()->getDPI())/160.0);
+        pathInfo->setAltitudeProfileAxisLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileAxisLineWidth",__FILE__, __LINE__)*((double)core->getScreen()->getDPI())/160.0);
+        pathInfo->setNoAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
+        pathInfo->setNoAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileFillColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileFillColor",__FILE__, __LINE__));
+        pathInfo->setAltitudeProfileLineColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileLineColor",__FILE__, __LINE__));
+        pathInfo->setAltitudeProfileAxisColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileAxisColor",__FILE__, __LINE__));
+        pathInfo->setAltitudeProfileMinAltitudeDiff(c->getDoubleValue(widgetPath,"altitudeProfileMinAltitudeDiff",__FILE__, __LINE__));
+        pathInfo->setAltitudeProfileXTickCount(c->getIntValue(widgetPath,"altitudeProfileXTickCount",__FILE__, __LINE__));
+        pathInfo->setAltitudeProfileYTickCount(c->getIntValue(widgetPath,"altitudeProfileYTickCount",__FILE__, __LINE__));
+        pathInfo->setAltitudeProfileXTickLabelOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileXTickLabelOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileYTickLabelOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileYTickLabelOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
+        pathInfo->setAltitudeProfileXTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileXTickLabelWidth",__FILE__, __LINE__));
+        pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth",__FILE__, __LINE__));
+        pathInfo->getLocationIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
       }
 
       // Add the widget to the page
@@ -549,7 +549,7 @@ void WidgetEngine::createGraphic() {
 
   // Set the default page on the graphic engine
   WidgetPageMap::iterator j;
-  j=pageMap.find(c->getStringValue("Graphic/Widget","selectedPage"));
+  j=pageMap.find(c->getStringValue("Graphic/Widget","selectedPage",__FILE__, __LINE__));
   if (j==pageMap.end()) {
     FATAL("default page does not exist",NULL);
     visiblePages.unlockAccess();
@@ -571,7 +571,7 @@ void WidgetEngine::createGraphic() {
 void WidgetEngine::updateWidgetPositions() {
 
   // Only one thread please
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
 
   // Find out the orientation for which we need to update the positioning
   std::string orientation="Unknown";
@@ -584,7 +584,7 @@ void WidgetEngine::updateWidgetPositions() {
   Int height=core->getScreen()->getHeight();
 
   // Set global variables that depend on the screen configuration
-  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot")*core->getScreen()->getWidth()/100.0);
+  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*core->getScreen()->getWidth()/100.0);
 
   // Go through all pages
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
@@ -602,7 +602,7 @@ void WidgetEngine::updateWidgetPositions() {
 
       // Update the position
       std::string path="Graphic/Widget/Page[@name='" + page->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/" + orientation;
-      primitive->updatePosition(width*c->getDoubleValue(path,"x")/100.0-width/2-primitive->getIconWidth()/2,height*c->getDoubleValue(path,"y")/100.0-height/2-primitive->getIconHeight()/2,c->getIntValue(path,"z"));
+      primitive->updatePosition(width*c->getDoubleValue(path,"x",__FILE__, __LINE__)/100.0-width/2-primitive->getIconWidth()/2,height*c->getDoubleValue(path,"y",__FILE__, __LINE__)/100.0-height/2-primitive->getIconHeight()/2,c->getIntValue(path,"z",__FILE__, __LINE__));
       primitives.push_back(primitive);
 
     }
@@ -623,7 +623,7 @@ void WidgetEngine::updateWidgetPositions() {
 void WidgetEngine::deinit() {
 
   // Only one thread
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
 
   // No page is active
   currentPage=NULL;
@@ -646,7 +646,7 @@ void WidgetEngine::deinit() {
 bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
   // Only one thread please
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
 
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
@@ -690,7 +690,7 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 // Called when the screen is untouched
 bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
   if (t<=ignoreTouchesEnd) {
     visiblePages.unlockAccess();
     return false;
@@ -705,7 +705,7 @@ bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 bool WidgetEngine::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff) {
 
   // Only one thread please
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
 
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
@@ -734,7 +734,7 @@ void WidgetEngine::deselectPage() {
 // Sets a new page
 void WidgetEngine::setPage(std::string name, Int direction) {
 
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
 
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   Int width = core->getScreen()->getWidth();
@@ -802,7 +802,7 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   // Set the new page
   currentPage=nextPage;
   nextPage->setWidgetsActive(t,true);
-  core->getConfigStore()->setStringValue("Graphic/Widget","selectedPage",name);
+  core->getConfigStore()->setStringValue("Graphic/Widget","selectedPage",name,__FILE__, __LINE__);
   visiblePages.unlockAccess();;
 
 }
@@ -818,7 +818,7 @@ void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMa
     nearbyPathSegments=(*j)->getCrossingNavigationPathSegments();
     for(std::list<NavigationPathSegment*>::iterator i=nearbyPathSegments.begin();i!=nearbyPathSegments.end();i++) {
       NavigationPathSegment *s=*i;
-      s->getPath()->lockAccess();
+      s->getPath()->lockAccess(__FILE__, __LINE__);
       for(Int j=s->getStartIndex();j<=s->getEndIndex();j++) {
         MapPosition pathPos=s->getPath()->getPoint(j);
         double d=mapPos.computeDistance(pathPos);
@@ -833,7 +833,7 @@ void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMa
   }
 
   // Inform the widget
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onMapChange(currentPage==i->second ? true : false, mapPos);
@@ -843,7 +843,7 @@ void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMa
 
 // Informs the engine that the location has changed
 void WidgetEngine::onLocationChange(MapPosition mapPos) {
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onLocationChange(currentPage==i->second ? true : false, mapPos);
@@ -853,7 +853,7 @@ void WidgetEngine::onLocationChange(MapPosition mapPos) {
 
 // Informs the engine that a path has changed
 void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType changeType) {
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onPathChange(currentPage==i->second ? true : false, path, changeType);
@@ -863,7 +863,7 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
 
 // Sets the widgets of the current page active
 void WidgetEngine::setWidgetsActive(bool widgetsActive) {
-  visiblePages.lockAccess();
+  visiblePages.lockAccess(__FILE__, __LINE__);
   if (currentPage) {
     currentPage->setWidgetsActive(core->getClock()->getMicrosecondsSinceStart(),widgetsActive);
   }

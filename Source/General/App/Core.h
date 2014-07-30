@@ -175,7 +175,7 @@ public:
   void updateScreen(bool forceRedraw);
 
   // Allows an external interrupt
-  void interruptAllowedHere();
+  void interruptAllowedHere(const char *file, int line);
 
   // Updates the map
   void updateMap();
@@ -184,7 +184,7 @@ public:
   void maintenance(bool endlessLoop=true);
 
   // Indicates the map cache has prepared a new texture
-  void tileTextureAvailable();
+  void tileTextureAvailable(const char *file, int line);
 
   // Called if the textures or buffers have been lost or must be recreated
   void updateGraphic(bool graphicInvalidated);
@@ -195,7 +195,7 @@ public:
   // Called
 
   // Stops the map update thread
-  void interruptMapUpdate();
+  void interruptMapUpdate(const char *file, int line);
 
   // Continue the map update thread
   void continueMapUpdate();

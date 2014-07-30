@@ -28,9 +28,9 @@ namespace GEODISCOVERER {
 std::list<std::vector<std::string> > MapSource::gdsElements;
 
 MapSource::MapSource() {
-  folder=core->getConfigStore()->getStringValue("Map","folder");
-  neighborPixelTolerance=core->getConfigStore()->getDoubleValue("Map","neighborPixelTolerance");
-  mapTileLength=core->getConfigStore()->getIntValue("Map","tileLength");
+  folder=core->getConfigStore()->getStringValue("Map","folder", __FILE__, __LINE__);
+  neighborPixelTolerance=core->getConfigStore()->getDoubleValue("Map","neighborPixelTolerance", __FILE__, __LINE__);
+  mapTileLength=core->getConfigStore()->getIntValue("Map","tileLength", __FILE__, __LINE__);
   statusMutex=core->getThread()->createMutex("map source status mutex");
   isInitialized=false;
   contentsChanged=false;
@@ -293,7 +293,7 @@ void MapSource::closeProgress() {
 // Creates a new map source object of the correct type
 MapSource *MapSource::newMapSource() {
 
-  std::string folderPath = core->getHomePath() + "/Map/" + core->getConfigStore()->getStringValue("Map","folder");
+  std::string folderPath = core->getHomePath() + "/Map/" + core->getConfigStore()->getStringValue("Map","folder", __FILE__, __LINE__);
   std::string infoPath = folderPath + "/info.gds";
 
   // Check if the folder exists

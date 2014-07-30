@@ -35,33 +35,33 @@ FontEngine::FontEngine() {
   }
 
   // Get config parameters
-  backgroundStrokeWidth=core->getConfigStore()->getIntValue("Graphic/Font","backgroundStrokeWidth");
-  stringCacheSize=core->getConfigStore()->getIntValue("Graphic/Font","stringCacheSize");
-  fadeOutOffset=core->getConfigStore()->getIntValue("Graphic/Font","fadeOutOffset");
+  backgroundStrokeWidth=core->getConfigStore()->getIntValue("Graphic/Font","backgroundStrokeWidth", __FILE__, __LINE__);
+  stringCacheSize=core->getConfigStore()->getIntValue("Graphic/Font","stringCacheSize", __FILE__, __LINE__);
+  fadeOutOffset=core->getConfigStore()->getIntValue("Graphic/Font","fadeOutOffset", __FILE__, __LINE__);
 
   // Init the mutex
   accessMutex=core->getThread()->createMutex("font engine access mutex");
 
   // Load the supported fonts
   std::string fontBaseDir = core->getHomePath() + "/Font/";
-  std::string sansFontFilename = fontBaseDir + core->getConfigStore()->getStringValue("Graphic/Font","sansFilename");
-  std::string sansBoldFontFilename = fontBaseDir + core->getConfigStore()->getStringValue("Graphic/Font","sansBoldFilename");
-  Int sansLargeSize = core->getConfigStore()->getIntValue("Graphic/Font","sansLargeSize");
+  std::string sansFontFilename = fontBaseDir + core->getConfigStore()->getStringValue("Graphic/Font","sansFilename", __FILE__, __LINE__);
+  std::string sansBoldFontFilename = fontBaseDir + core->getConfigStore()->getStringValue("Graphic/Font","sansBoldFilename", __FILE__, __LINE__);
+  Int sansLargeSize = core->getConfigStore()->getIntValue("Graphic/Font","sansLargeSize", __FILE__, __LINE__);
   if (!loadFont("sansLarge",sansFontFilename,sansLargeSize))
     return;
   if (!loadFont("sansBoldLarge",sansBoldFontFilename,sansLargeSize))
     return;
-  Int sansNormalSize = core->getConfigStore()->getIntValue("Graphic/Font","sansNormalSize");
+  Int sansNormalSize = core->getConfigStore()->getIntValue("Graphic/Font","sansNormalSize", __FILE__, __LINE__);
   if (!loadFont("sansNormal",sansFontFilename,sansNormalSize))
     return;
   if (!loadFont("sansBoldNormal",sansBoldFontFilename,sansNormalSize))
     return;
-  Int sansSmallSize = core->getConfigStore()->getIntValue("Graphic/Font","sansSmallSize");
+  Int sansSmallSize = core->getConfigStore()->getIntValue("Graphic/Font","sansSmallSize", __FILE__, __LINE__);
   if (!loadFont("sansSmall",sansFontFilename,sansSmallSize))
     return;
   if (!loadFont("sansBoldSmall",sansBoldFontFilename,sansSmallSize))
     return;
-  Int sansTinySize = core->getConfigStore()->getIntValue("Graphic/Font","sansTinySize");
+  Int sansTinySize = core->getConfigStore()->getIntValue("Graphic/Font","sansTinySize", __FILE__, __LINE__);
   if (!loadFont("sansTiny",sansFontFilename,sansTinySize))
     return;
   if (!loadFont("sansBoldTiny",sansBoldFontFilename,sansTinySize))
@@ -147,10 +147,10 @@ void FontEngine::destroyString(FontString *fontString) {
 }
 
 // Sets the current font to use
-void FontEngine::lockFont(std::string type) {
+void FontEngine::lockFont(std::string type, const char *file, int line) {
 
   // Lock access
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex, file, line);
 
   // Lookup the font
   if (!(currentFont=findFont(type)))

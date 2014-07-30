@@ -72,7 +72,7 @@ public:
   void deinit();
 
   // Sets the current font to use
-  void lockFont(std::string type);
+  void lockFont(std::string type, const char *file, int line);
 
   // Unlocks the current font
   void unlockFont() const {

@@ -81,7 +81,7 @@ MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool 
 }
 
 MapTile::~MapTile() {
-  visualization.lockAccess();
+  visualization.lockAccess(__FILE__, __LINE__);
   if (visualization.getPrimitiveMap()->size()!=1) {
     FATAL("expected only the rectangle in the visualization object",NULL);
   }
@@ -295,7 +295,7 @@ void MapTile::removeGraphic() {
   setVisualizationKey(0);
 
   // Invalidate all graphic
-  visualization.lockAccess();
+  visualization.lockAccess(__FILE__, __LINE__);
   visualization.recreateGraphic();
   visualization.unlockAccess();
 
@@ -382,9 +382,9 @@ bool MapTile::getNeighborPos(MapArea area, MapPosition &neighborPos) {
 }
 
 // Decides if the tile is drawn on screen
-void MapTile::setIsHidden(bool isHidden, bool fadeOutAnimation) {
+void MapTile::setIsHidden(bool isHidden, const char *file, int line, bool fadeOutAnimation) {
   this->isHidden=isHidden;
-  visualization.lockAccess();
+  visualization.lockAccess(file,line);
   GraphicColor startColor=visualization.getColor();
   startColor.setAlpha(0);
   GraphicColor endColor=startColor;
@@ -445,7 +445,7 @@ void MapTile::setIsCached(bool isCached, GraphicTextureInfo texture, bool fadeOu
   } else {
     endTexture=texture;
   }
-  setIsHidden(isHidden, fadeOutAnimation);
+  setIsHidden(isHidden, __FILE__, __LINE__, fadeOutAnimation);
 }
 
 // Adds a new segment that crosses this map tile

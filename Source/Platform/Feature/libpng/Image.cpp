@@ -169,7 +169,7 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
     for (Int y=0;(y<height)&&((!calledByMapUpdateThread)||(!abortLoad));y++) {
       png_read_row(png_ptr, &image[pixelSize*width*y], NULL);
       if (calledByMapUpdateThread)
-        core->interruptAllowedHere();
+        core->interruptAllowedHere(__FILE__, __LINE__);
     }
   }
   if (((!calledByMapUpdateThread)||(!abortLoad)))

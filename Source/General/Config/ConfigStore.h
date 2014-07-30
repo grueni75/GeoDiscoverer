@@ -116,23 +116,23 @@ public:
   virtual ~ConfigStore();
 
   // Test if a path exists
-  bool pathExists(std::string path);
+  bool pathExists(std::string path, const char *file, int line);
 
   // Config write thread function
   void writeConfig();
 
   // Access methods to config values
-  void setStringValue(std::string path, std::string name, std::string value);
-  void setIntValue(std::string path, std::string name, Int value);
-  void setDoubleValue(std::string path, std::string name, double value);
-  void setGraphicColorValue(std::string path, GraphicColor value);
-  std::string getStringValue(std::string path, std::string name);
-  Int getIntValue(std::string path, std::string name);
-  double getDoubleValue(std::string path, std::string name);
-  GraphicColor getGraphicColorValue(std::string path);
+  void setStringValue(std::string path, std::string name, std::string value, const char *file, int line);
+  void setIntValue(std::string path, std::string name, Int value, const char *file, int line);
+  void setDoubleValue(std::string path, std::string name, double value, const char *file, int line);
+  void setGraphicColorValue(std::string path, GraphicColor value, const char *file, int line);
+  std::string getStringValue(std::string path, std::string name, const char *file, int line);
+  Int getIntValue(std::string path, std::string name, const char *file, int line);
+  double getDoubleValue(std::string path, std::string name, const char *file, int line);
+  GraphicColor getGraphicColorValue(std::string path, const char *file, int line);
 
   // Returns a list of attribute values for a given path and attribute name
-  std::list<std::string> getAttributeValues(std::string path, std::string attributeName);
+  std::list<std::string> getAttributeValues(std::string path, std::string attributeName, const char *file, int line);
 
   // Lists all elements for the given path
   std::list<std::string> getNodeNames(std::string path);

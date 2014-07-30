@@ -38,11 +38,11 @@ WidgetNavigation::WidgetNavigation() : WidgetPrimitive(), turnArrowPointBuffer(2
   locationBearingActual=0;
   directionChangeDuration=0;
   FontEngine *fontEngine=core->getFontEngine();
-  fontEngine->lockFont("sansBoldTiny");
+  fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   fontEngine->updateString(&distanceLabelFontString,"Distance");
   fontEngine->updateString(&durationLabelFontString,"Duration");
   fontEngine->unlockFont();
-  fontEngine->lockFont("sansTiny");
+  fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++)
     orientationLabelFontStrings[i]=NULL;
   fontEngine->updateString(&orientationLabelFontStrings[0],"N");
@@ -63,15 +63,15 @@ WidgetNavigation::WidgetNavigation() : WidgetPrimitive(), turnArrowPointBuffer(2
 // Destructor
 WidgetNavigation::~WidgetNavigation() {
   FontEngine *fontEngine=core->getFontEngine();
-  fontEngine->lockFont("sansBoldTiny");
+  fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   if (distanceLabelFontString) core->getFontEngine()->destroyString(distanceLabelFontString);
   if (durationLabelFontString) core->getFontEngine()->destroyString(durationLabelFontString);
   fontEngine->unlockFont();
-  fontEngine->lockFont("sansSmall");
+  fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
   if (distanceValueFontString) core->getFontEngine()->destroyString(distanceValueFontString);
   if (durationValueFontString) core->getFontEngine()->destroyString(durationValueFontString);
   fontEngine->unlockFont();
-  fontEngine->lockFont("sansTiny");
+  fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++) {
     if (orientationLabelFontStrings[i]) core->getFontEngine()->destroyString(orientationLabelFontStrings[i]);
   }
@@ -96,8 +96,8 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
     // Is a turn coming?
     bool activateWidget = false;
-    NavigationInfo *navigationInfo=navigationEngine->lockNavigationInfo();
-    fontEngine->lockFont("sansSmall");
+    NavigationInfo *navigationInfo=navigationEngine->lockNavigationInfo(__FILE__, __LINE__);
+    fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
     if (navigationInfo->getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
 
       // Get distance to turn

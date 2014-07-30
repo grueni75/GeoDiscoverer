@@ -148,7 +148,7 @@ ImagePixel *Image::loadJPEG(std::string filepath, Int &width, Int &height, UInt 
     memcpy(&image[y*scanlineSize], scanline, scanlineSize);
     y++;
     if (calledByMapUpdateThread)
-      core->interruptAllowedHere();
+      core->interruptAllowedHere(__FILE__, __LINE__);
   }
 
 cleanup:

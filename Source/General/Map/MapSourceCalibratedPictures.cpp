@@ -55,7 +55,7 @@ bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::li
   std::string filename;
 
   // Go through all archives
-  core->getMapSource()->lockMapArchives();
+  core->getMapSource()->lockMapArchives(__FILE__, __LINE__);
   for (std::list<ZipArchive*>::iterator i=mapArchives.begin();i!=mapArchives.end();i++) {
 
     // Go through all entries in the archive
@@ -158,7 +158,7 @@ bool MapSourceCalibratedPictures::init()
   }
 
   // Open the zip archive that contains the maps
-  lockMapArchives();
+  lockMapArchives(__FILE__, __LINE__);
   mapArchivePathCStr=strdup(mapArchivePath.c_str());
   mapArchiveDir=std::string(dirname(mapArchivePathCStr));
   strcpy(mapArchivePathCStr,mapArchivePath.c_str());
@@ -181,7 +181,7 @@ bool MapSourceCalibratedPictures::init()
   if (!cacheRetrieved) {
 
     // Prevent that phone switches off
-    core->getScreen()->setWakeLock(true,false);
+    core->getScreen()->setWakeLock(true, __FILE__, __LINE__, false);
 
     // Create a new progress dialog if required
     std::string title="Collecting files of map " + std::string(folder);
@@ -347,7 +347,7 @@ bool MapSourceCalibratedPictures::init()
     }
 
     // Reset wakelock
-    core->getScreen()->setWakeLock(core->getConfigStore()->getIntValue("General","wakeLock"),false);
+    core->getScreen()->setWakeLock(core->getConfigStore()->getIntValue("General","wakeLock",__FILE__, __LINE__),__FILE__, __LINE__,false);
   }
 
   //DEBUG("centerPosition.lng=%e centerPosition.lat=%e",centerPosition->getLng(),centerPosition->getLat());

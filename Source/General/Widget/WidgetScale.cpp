@@ -41,7 +41,7 @@ WidgetScale::WidgetScale() : WidgetPrimitive() {
 
 // Destructor
 WidgetScale::~WidgetScale() {
-  core->getFontEngine()->lockFont("sansNormal");
+  core->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
   if (mapNameFontString) core->getFontEngine()->destroyString(mapNameFontString);
   for(Int i=0;i<4;i++) {
     if (scaledNumberFontString[i]) core->getFontEngine()->destroyString(scaledNumberFontString[i]);
@@ -68,7 +68,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     mapName=core->getMapSource()->getFolder();
 
     // Compute the scale in meters
-    MapPosition *pos=core->getMapEngine()->lockMapPos();
+    MapPosition *pos=core->getMapEngine()->lockMapPos(__FILE__, __LINE__);
     if ((pos->getLngScale()>0)&&(pos->getMapTile())) {
       MapPosition pos2=*pos;
       pos2.setLng(pos->getLng()+(iconWidth/3)/pos->getLngScale());
@@ -80,7 +80,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     changed=true;
 
     // Lock the used font
-    fontEngine->lockFont("sansNormal");
+    fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
 
     // Compute the scale numbers
     textY=y-fontEngine->getFontHeight();

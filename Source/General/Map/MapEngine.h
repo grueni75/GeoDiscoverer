@@ -64,7 +64,7 @@ protected:
   std::list<MapTile*> centerMapTiles;             // All tiles around the neighborhood of the map center
 
   // Does all action to remove a tile from the map
-  void deinitTile(MapTile *t);
+  void deinitTile(MapTile *t, const char *file, int line);
 
   // Fills the given area with tiles
   void fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, bool activateVisPos);
@@ -108,18 +108,18 @@ public:
         core->getMapCache()->setAbortUpdate();
       }
   }
-  MapPosition *lockLocationPos()
+  MapPosition *lockLocationPos(const char *file, int line)
   {
-      core->getThread()->lockMutex(locationPosMutex);
+      core->getThread()->lockMutex(locationPosMutex, file, line);
       return &locationPos;
   }
   void unlockLocationPos()
   {
       core->getThread()->unlockMutex(locationPosMutex);
   }
-  double *lockCompassBearing()
+  double *lockCompassBearing(const char *file, int line)
   {
-      core->getThread()->lockMutex(compassBearingMutex);
+      core->getThread()->lockMutex(compassBearingMutex, file, line);
       return &compassBearing;
   }
   void unlockCompassBearing()
@@ -130,22 +130,22 @@ public:
   {
     forceMapRecreation=true;
   }
-  void setForceMapUpdate()
+  void setForceMapUpdate(const char *file, int line)
   {
-    core->getThread()->lockMutex(forceMapUpdateMutex);
+    core->getThread()->lockMutex(forceMapUpdateMutex, file, line);
     forceMapUpdate=true;
     core->getThread()->unlockMutex(forceMapUpdateMutex);
   }
-  void setForceCacheUpdate()
+  void setForceCacheUpdate(const char *file, int line)
   {
-    core->getThread()->lockMutex(forceCacheUpdateMutex);
+    core->getThread()->lockMutex(forceCacheUpdateMutex, file, line);
     forceCacheUpdate=true;
     core->getThread()->unlockMutex(forceCacheUpdateMutex);
   }
 
-  MapPosition *lockMapPos()
+  MapPosition *lockMapPos(const char *file, int line)
   {
-      core->getThread()->lockMutex(mapPosMutex);
+      core->getThread()->lockMutex(mapPosMutex, file, line);
       return &mapPos;
   }
   void unlockMapPos()
@@ -154,9 +154,9 @@ public:
   }
   void setMapPos(MapPosition mapPos);
 
-  MapArea *lockDisplayArea()
+  MapArea *lockDisplayArea(const char *file, int line)
   {
-      core->getThread()->lockMutex(displayAreaMutex);
+      core->getThread()->lockMutex(displayAreaMutex, file, line);
       return &displayArea;
   }
   void unlockDisplayArea()

@@ -31,18 +31,18 @@ NavigationPath::NavigationPath() {
   // Init variables
   accessMutex=core->getThread()->createMutex("navigation path access mutex");
   gpxFilefolder=core->getNavigationEngine()->getTrackPath();
-  pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength");
-  pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance");
-  pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth");
-  flagAnimationDuration=core->getConfigStore()->getIntValue("Graphic","flagAnimationDuration");
-  minDistanceToRouteWayPoint=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToRouteWayPoint");
-  minTurnAngle=core->getConfigStore()->getDoubleValue("Navigation","minTurnAngle");
-  minDistanceToTurnWayPoint=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToTurnWayPoint");
-  maxDistanceToTurnWayPoint=core->getConfigStore()->getDoubleValue("Navigation","maxDistanceToTurnWayPoint");
-  turnDetectionDistance=core->getConfigStore()->getDoubleValue("Navigation","turnDetectionDistance");
-  minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute");
-  minAltitudeChange=core->getConfigStore()->getDoubleValue("Navigation","minAltitudeChange");
-  averageTravelSpeed=core->getConfigStore()->getDoubleValue("Navigation","averageTravelSpeed");
+  pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength", __FILE__, __LINE__);
+  pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance", __FILE__, __LINE__);
+  pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth", __FILE__, __LINE__);
+  flagAnimationDuration=core->getConfigStore()->getIntValue("Graphic","flagAnimationDuration", __FILE__, __LINE__);
+  minDistanceToRouteWayPoint=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToRouteWayPoint", __FILE__, __LINE__);
+  minTurnAngle=core->getConfigStore()->getDoubleValue("Navigation","minTurnAngle", __FILE__, __LINE__);
+  minDistanceToTurnWayPoint=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToTurnWayPoint", __FILE__, __LINE__);
+  maxDistanceToTurnWayPoint=core->getConfigStore()->getDoubleValue("Navigation","maxDistanceToTurnWayPoint", __FILE__, __LINE__);
+  turnDetectionDistance=core->getConfigStore()->getDoubleValue("Navigation","turnDetectionDistance", __FILE__, __LINE__);
+  minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute", __FILE__, __LINE__);
+  minAltitudeChange=core->getConfigStore()->getDoubleValue("Navigation","minAltitudeChange", __FILE__, __LINE__);
+  averageTravelSpeed=core->getConfigStore()->getDoubleValue("Navigation","averageTravelSpeed", __FILE__, __LINE__);
   isInit=false;
   reverse=false;
   lastValidAltiudeMetersPoint=NavigationPath::getPathInterruptedPos();
@@ -51,7 +51,7 @@ NavigationPath::NavigationPath() {
   init();
 
   // Add the animator to the graphic engine
-  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators();
+  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   animatorKey=pathAnimators->addPrimitive(&animator);
   core->getGraphicEngine()->unlockPathAnimators();
 }
@@ -63,7 +63,7 @@ NavigationPath::~NavigationPath() {
   deinit();
 
   // Remove the animator
-  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators();
+  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   pathAnimators->removePrimitive(animatorKey,false);
   core->getGraphicEngine()->unlockPathAnimators();
 
@@ -160,7 +160,7 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
         NavigationPathTileInfo *info=visualization->findTileInfo(*k);
         GraphicLine *line=info->getPathLine();
         GraphicObject *tileVisualization=(*k)->getVisualization();
-        tileVisualization->lockAccess();
+        tileVisualization->lockAccess(__FILE__, __LINE__);
         if (!line) {
 
           // Create a new line and add it to the tile
@@ -315,7 +315,7 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
           break;
       }
       GraphicObject *tileVisualization=k->getVisualization();
-      tileVisualization->lockAccess();
+      tileVisualization->lockAccess(__FILE__, __LINE__);
       if (!remove) {
         if (!flag) {
 
@@ -440,7 +440,7 @@ void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapCon
 // Adds a point to the path
 void NavigationPath::addEndPosition(MapPosition pos) {
 
-  lockAccess();
+  lockAccess(__FILE__, __LINE__);
 
   // Decide whether to add a new point or use the last one
   if (!hasLastPoint) {
@@ -558,7 +558,7 @@ void NavigationPath::deinit() {
   core->getMapSource()->unlockAccess();
 
   // Force a redraw
-  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators();
+  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   pathAnimators->setIsUpdated(true);
   core->getGraphicEngine()->unlockPathAnimators();
 
@@ -588,7 +588,7 @@ void NavigationPath::init() {
   updateMetrics();
 
   // Configure the animator
-  core->getGraphicEngine()->lockPathAnimators();
+  core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
   core->getGraphicEngine()->unlockPathAnimators();
 
@@ -723,7 +723,7 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
 void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition &wayPoint, NavigationInfo &navigationInfo) {
 
   // Lock the path until we have enough information
-  lockAccess();
+  lockAccess(__FILE__, __LINE__);
 
   // Do not calculate if path is not initialized
   if (!isInit) {
@@ -1052,10 +1052,10 @@ void NavigationPath::updateFlagVisualization(NavigationPathVisualizationType typ
 }
 
 // Sets the start flag at the given index
-void NavigationPath::setStartFlag(Int index) {
+void NavigationPath::setStartFlag(Int index, const char *file, int line) {
 
   // Path may only be changed by one thread
-  lockAccess();
+  lockAccess(file,line);
 
   // Remove the current visualization of start and end flag
   if (startIndex!=-1)
@@ -1091,12 +1091,12 @@ void NavigationPath::setStartFlag(Int index) {
     // Update the visualization
     updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,false,true);
     std::string routePath="Navigation/Route[@name='" + getGpxFilename() + "']";
-    core->getConfigStore()->setIntValue(routePath,"startFlagIndex",startIndex);
+    core->getConfigStore()->setIntValue(routePath,"startFlagIndex",startIndex, __FILE__, __LINE__);
     if (updateEndFlag) {
       updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,true,true);
       endIndex=newEndIndex;
       updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,false,true);
-      core->getConfigStore()->setIntValue(routePath,"endFlagIndex",endIndex);
+      core->getConfigStore()->setIntValue(routePath,"endFlagIndex",endIndex, __FILE__, __LINE__);
     }
   }
 
@@ -1111,10 +1111,10 @@ void NavigationPath::setStartFlag(Int index) {
 }
 
 // Sets the end flag at the given index
-void NavigationPath::setEndFlag(Int index) {
+void NavigationPath::setEndFlag(Int index, const char *file, int line) {
 
   // Path may only be changed by one thread
-  lockAccess();
+  lockAccess(file, line);
 
   // Remove the current visualization of start and end flag
   if (endIndex!=-1)
@@ -1150,12 +1150,12 @@ void NavigationPath::setEndFlag(Int index) {
     // Update the visualization
     updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,false,true);
     std::string routePath="Navigation/Route[@name='" + getGpxFilename() + "']";
-    core->getConfigStore()->setIntValue(routePath,"endFlagIndex",endIndex);
+    core->getConfigStore()->setIntValue(routePath,"endFlagIndex",endIndex, __FILE__, __LINE__);
     if (updateStartFlag) {
       updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,true,true);
       startIndex=newStartIndex;
       updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,false,true);
-      core->getConfigStore()->setIntValue(routePath,"startFlagIndex",startIndex);
+      core->getConfigStore()->setIntValue(routePath,"startFlagIndex",startIndex, __FILE__, __LINE__);
     }
   }
 

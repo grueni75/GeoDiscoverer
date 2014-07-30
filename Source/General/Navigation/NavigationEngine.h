@@ -232,15 +232,15 @@ public:
   void updateRoutes();
 
   // Sets the start flag
-  void setStartFlag(NavigationPath *path, Int index);
+  void setStartFlag(NavigationPath *path, Int index, const char *file, int line);
 
   // Sets the end flag
-  void setEndFlag(NavigationPath *path, Int index);
+  void setEndFlag(NavigationPath *path, Int index, const char *file, int line);
 
   // Getters and setters
-  NavigationPath *lockRecordedTrack()
+  NavigationPath *lockRecordedTrack(const char *file, int line)
   {
-      core->getThread()->lockMutex(recordedTrackMutex);
+      core->getThread()->lockMutex(recordedTrackMutex, file, line);
       return recordedTrack;
   }
   void unlockRecordedTrack()
@@ -253,9 +253,9 @@ public:
   std::string getRoutePath() const {
     return core->getHomePath() + "/Route";
   }
-  MapPosition *lockTargetPos()
+  MapPosition *lockTargetPos(const char *file, int line)
   {
-      core->getThread()->lockMutex(targetPosMutex);
+      core->getThread()->lockMutex(targetPosMutex, file, line);
       return &targetPos;
   }
   void unlockTargetPos()
@@ -263,18 +263,18 @@ public:
       core->getThread()->unlockMutex(targetPosMutex);
   }
 
-  void lockRoutes()
+  void lockRoutes(const char *file, int line)
   {
-      core->getThread()->lockMutex(routesMutex);
+      core->getThread()->lockMutex(routesMutex, file, line);
   }
   void unlockRoutes()
   {
       core->getThread()->unlockMutex(routesMutex);
   }
 
-  MapPosition *lockLocationPos()
+  MapPosition *lockLocationPos(const char *file, int line)
   {
-      core->getThread()->lockMutex(locationPosMutex);
+      core->getThread()->lockMutex(locationPosMutex, file, line);
       return &locationPos;
   }
   void unlockLocationPos()
@@ -282,9 +282,9 @@ public:
       core->getThread()->unlockMutex(locationPosMutex);
   }
 
-  double *lockCompassBearing()
+  double *lockCompassBearing(const char *file, int line)
   {
-      core->getThread()->lockMutex(compassBearingMutex);
+      core->getThread()->lockMutex(compassBearingMutex, file, line);
       return &compassBearing;
   }
   void unlockCompassBearing()
@@ -302,22 +302,22 @@ public:
       this->isInitialized = isInitialized;
   }
 
-  std::list<std::string> getStatus() const {
-    core->getThread()->lockMutex(statusMutex);
+  std::list<std::string> getStatus(const char *file, int line) const {
+    core->getThread()->lockMutex(statusMutex, file, line);
     std::list<std::string> status=this->status;
     core->getThread()->unlockMutex(statusMutex);
     return status;
   }
 
-  void setStatus(std::list<std::string> status) {
-    core->getThread()->lockMutex(statusMutex);
+  void setStatus(std::list<std::string> status, const char *file, int line) {
+    core->getThread()->lockMutex(statusMutex, file, line);
     this->status = status;
     core->getThread()->unlockMutex(statusMutex);
   }
 
-  NavigationInfo *lockNavigationInfo()
+  NavigationInfo *lockNavigationInfo(const char *file, int line)
   {
-      core->getThread()->lockMutex(navigationInfosMutex);
+      core->getThread()->lockMutex(navigationInfosMutex, file, line);
       return &navigationInfo;
   }
   void unlockNavigationInfo()

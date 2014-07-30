@@ -306,8 +306,8 @@ public:
     this->lifeEnd = lifeEnd;
   }
 
-  void lockAccess() {
-    core->getThread()->lockMutex(accessMutex);
+  void lockAccess(const char *file, int line) {
+    core->getThread()->lockMutex(accessMutex, file, line);
   }
 
   void unlockAccess() {

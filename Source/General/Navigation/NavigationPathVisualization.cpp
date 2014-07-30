@@ -54,7 +54,7 @@ void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
   if (i!=tileInfoMap.end()) {
     NavigationPathTileInfo *tileInfo=i->second;
     GraphicObject *tileVisualization=tile->getVisualization();
-    tileVisualization->lockAccess();
+    tileVisualization->lockAccess(__FILE__, __LINE__);
     if (tileInfo->getPathLine())
       tileVisualization->removePrimitive(tileInfo->getPathLineKey(),true);
     if (tileInfo->getPathArrowList())
@@ -134,7 +134,7 @@ void NavigationPathVisualization::createGraphic() {
 // Recreate the graphic objects to reduce the number of graphic point buffers
 void NavigationPathVisualization::optimizeGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
-    i->first->getVisualization()->lockAccess();
+    i->first->getVisualization()->lockAccess(__FILE__, __LINE__);
     GraphicLine *line=i->second->getPathLine();
     if (line) line->optimize();
     GraphicRectangleList *rectangleList=i->second->getPathArrowList();

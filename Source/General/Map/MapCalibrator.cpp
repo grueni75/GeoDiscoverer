@@ -330,7 +330,7 @@ bool MapCalibrator::findThreeNearestCalibrationPoints(bool usePictureCoordinates
 bool MapCalibrator::setGeographicCoordinates(MapPosition &pos) {
 
   // Ensure that only one thread is executing this function at a time
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
 
   // Find the nearest calibration points
   std::vector<double> picX;
@@ -381,7 +381,7 @@ bool MapCalibrator::setGeographicCoordinates(MapPosition &pos) {
 bool MapCalibrator::setPictureCoordinates(MapPosition &pos) {
 
   // Ensure that only one thread is executing this function at a time
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
 
   // Find the nearest calibration points
   std::vector<double> picX;

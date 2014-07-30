@@ -198,21 +198,21 @@ public:
       return zoomLevelSearchTrees.size();
   }
 
-  std::list<std::string> getStatus() const {
-    core->getThread()->lockMutex(statusMutex);
+  std::list<std::string> getStatus(const char *file, int line) const {
+    core->getThread()->lockMutex(statusMutex, file, line);
     std::list<std::string> status=this->status;
     core->getThread()->unlockMutex(statusMutex);
     return status;
   }
 
-  void setStatus(std::list<std::string> status) {
-    core->getThread()->lockMutex(statusMutex);
+  void setStatus(std::list<std::string> status, const char *file, int line) {
+    core->getThread()->lockMutex(statusMutex, file, line);
     this->status = status;
     core->getThread()->unlockMutex(statusMutex);
   }
 
-  std::list<ZipArchive*> *lockMapArchives() {
-    core->getThread()->lockMutex(mapArchivesMutex);
+  std::list<ZipArchive*> *lockMapArchives(const char *file, int line) {
+    core->getThread()->lockMutex(mapArchivesMutex, file, line);
     return &mapArchives;
   }
 

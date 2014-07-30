@@ -29,7 +29,7 @@ namespace GEODISCOVERER {
 UnitConverter::UnitConverter() {
 
   // Get selected unit system
-  std::string unitSystemString=core->getConfigStore()->getStringValue("General","unitSystem");
+  std::string unitSystemString=core->getConfigStore()->getStringValue("General","unitSystem",__FILE__, __LINE__);
   if (unitSystemString=="metric") {
     unitSystem=MetricSystem;
   } else if (unitSystemString=="imperial") {

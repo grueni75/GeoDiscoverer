@@ -31,7 +31,7 @@ const double MapSourceMercatorTiles::lngBound = 180.0;
 // Constructor
 MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   type=MapSourceTypeMercatorTiles;
-  mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize");
+  mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize",__FILE__, __LINE__);
   mapTileLength=256;
   accessMutex=core->getThread()->createMutex("map source mercator tiles access mutex");
   errorOccured=false;
@@ -70,7 +70,7 @@ bool MapSourceMercatorTiles::init() {
     return false;
 
   // We always need the default tiles.gda file
-  lockMapArchives();
+  lockMapArchives(__FILE__, __LINE__);
   if (!(mapArchive=new ZipArchive(mapPath,"tiles.gda"))) {
     FATAL("can not create zip archive object",NULL);
     return false;
@@ -300,7 +300,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   mapContainer->createSearchTree();
 
   // Check if the tile has already been saved to disk
-  lockMapArchives();
+  lockMapArchives(__FILE__, __LINE__);
   bool found=false;
   for(std::list<ZipArchive*>::iterator i=mapArchives.begin();i!=mapArchives.end();i++) {
     ZipArchive *mapArchive = *i;
@@ -387,7 +387,7 @@ MapTile *MapSourceMercatorTiles::findMapTileByGeographicArea(MapArea area, MapTi
 // Performs maintenance (e.g., recreate degraded search tree)
 void MapSourceMercatorTiles::maintenance() {
 
-  lockAccess();
+  lockAccess(__FILE__, __LINE__);
 
   // Was the source modified?
   if (contentsChanged) {

@@ -53,7 +53,7 @@ ConfigStore::ConfigStore() {
   init();
   read();
 
-  writeConfigMinWaitTime=getIntValue("General","writeConfigMinWaitTime");
+  writeConfigMinWaitTime=getIntValue("General","writeConfigMinWaitTime", __FILE__, __LINE__);
 }
 
 // Destructor
@@ -72,37 +72,37 @@ ConfigStore::~ConfigStore() {
 }
 
 // Sets an integer value in the config
-void ConfigStore::setIntValue(std::string path, std::string name, Int value)
+void ConfigStore::setIntValue(std::string path, std::string name, Int value, const char *file, int line)
 {
   std::stringstream out;
   out << value;
   std::string valueString = out.str();
-  setStringValue(path,name,valueString);
+  setStringValue(path,name,valueString,file,line);
 }
 
 // Sets an integer value in the config
-void ConfigStore::setDoubleValue(std::string path, std::string name, double value)
+void ConfigStore::setDoubleValue(std::string path, std::string name, double value, const char *file, int line)
 {
   std::stringstream out;
   out << value;
   std::string valueString = out.str();
-  setStringValue(path,name,valueString);
+  setStringValue(path,name,valueString,file,line);
 }
 
 // Sets a color value in the config
-void ConfigStore::setGraphicColorValue(std::string path, GraphicColor value) {
-  setIntValue(path,"red",value.getRed());
-  setIntValue(path,"green",value.getGreen());
-  setIntValue(path,"blue",value.getBlue());
-  setIntValue(path,"alpha",value.getAlpha());
+void ConfigStore::setGraphicColorValue(std::string path, GraphicColor value, const char *file, int line) {
+  setIntValue(path,"red",value.getRed(),file,line);
+  setIntValue(path,"green",value.getGreen(),file,line);
+  setIntValue(path,"blue",value.getBlue(),file,line);
+  setIntValue(path,"alpha",value.getAlpha(),file,line);
 }
 
 // Gets a integer value from the config
-Int ConfigStore::getIntValue(std::string path, std::string name)
+Int ConfigStore::getIntValue(std::string path, std::string name, const char *file, int line)
 {
   std::string value;
   Int valueInt;
-  value=getStringValue(path,name);
+  value=getStringValue(path,name,file,line);
   std::istringstream in(value);
   in >> valueInt;
   return valueInt;
@@ -110,11 +110,11 @@ Int ConfigStore::getIntValue(std::string path, std::string name)
 }
 
 // Gets a double value from the config
-double ConfigStore::getDoubleValue(std::string path, std::string name)
+double ConfigStore::getDoubleValue(std::string path, std::string name, const char *file, int line)
 {
   std::string value;
   double valueDouble;
-  value=getStringValue(path,name);
+  value=getStringValue(path,name,file,line);
   std::istringstream in(value);
   in >> valueDouble;
   return valueDouble;
@@ -122,17 +122,17 @@ double ConfigStore::getDoubleValue(std::string path, std::string name)
 }
 
 // Gets a color value from the config
-GraphicColor ConfigStore::getGraphicColorValue(std::string path) {
-  UByte red=getIntValue(path,"red");
-  UByte green=getIntValue(path,"green");
-  UByte blue=getIntValue(path,"blue");
-  UByte alpha=getIntValue(path,"alpha");
+GraphicColor ConfigStore::getGraphicColorValue(std::string path, const char *file, int line) {
+  UByte red=getIntValue(path,"red",file,line);
+  UByte green=getIntValue(path,"green",file,line);
+  UByte blue=getIntValue(path,"blue",file,line);
+  UByte alpha=getIntValue(path,"alpha",file,line);
   return GraphicColor(red,green,blue,alpha);
 }
 
 // Test if a path exists
-bool ConfigStore::pathExists(std::string path) {
-  core->getThread()->lockMutex(accessMutex);
+bool ConfigStore::pathExists(std::string path, const char *file, int line) {
+  core->getThread()->lockMutex(accessMutex,file,line);
   std::list<XMLNode> nodes=findConfigNodes("/GDC/" + path);
   bool result;
   if (nodes.size()>0) {
@@ -157,7 +157,7 @@ void ConfigStore::writeConfig() {
     core->getThread()->waitForSignal(writeConfigSignal);
 
     // Write the configuration
-    core->getThread()->lockMutex(accessMutex);
+    core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
     write();
     core->getThread()->unlockMutex(accessMutex);
 

@@ -278,9 +278,9 @@ public:
     this->altitudeProfileYTickLabelWidth = altitudeProfileYTickLabelWidth;
   }
 
-  static void setCurrentPathLocked(bool currentPathLocked) {
+  static void setCurrentPathLocked(bool currentPathLocked, const char *file, int line) {
     WidgetPathInfo::currentPathLocked = currentPathLocked;
-    core->getConfigStore()->setIntValue("Navigation","pathInfoLocked",currentPathLocked);
+    core->getConfigStore()->setIntValue("Navigation","pathInfoLocked",currentPathLocked,file,line);
   }
 };
 

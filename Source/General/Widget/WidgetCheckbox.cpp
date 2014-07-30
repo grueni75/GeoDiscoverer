@@ -58,7 +58,7 @@ void WidgetCheckbox::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 bool WidgetCheckbox::work(TimestampInMicroseconds t) {
   bool changed=WidgetPrimitive::work(t);
   if (t>nextUpdateTime) {
-    Int checked=core->getConfigStore()->getIntValue(stateConfigPath,stateConfigName);
+    Int checked=core->getConfigStore()->getIntValue(stateConfigPath,stateConfigName,__FILE__, __LINE__);
     update(checked,false);
     nextUpdateTime=t+updateInterval;
   }
@@ -92,7 +92,7 @@ bool WidgetCheckbox::update(bool checked, bool executeCommand) {
 void WidgetCheckbox::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
   WidgetPrimitive::onTouchUp(t,x,y);
   if (getIsHit()) {
-    Int checked=core->getConfigStore()->getIntValue(stateConfigPath,stateConfigName);
+    Int checked=core->getConfigStore()->getIntValue(stateConfigPath,stateConfigName,__FILE__, __LINE__);
     if (update(1-checked,true))
       checked=1-checked;
   }

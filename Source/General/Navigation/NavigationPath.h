@@ -155,10 +155,10 @@ public:
   void computeNavigationInfo(MapPosition locationPos, MapPosition &wayPoint, NavigationInfo &navigationInfo);
 
   // Sets the start flag at the given index
-  void setStartFlag(Int index);
+  void setStartFlag(Int index, const char *file, int line);
 
   // Sets the end flag at the given index
-  void setEndFlag(Int index);
+  void setEndFlag(Int index, const char *file, int line);
 
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)
@@ -256,10 +256,10 @@ public:
       this->isNew = isNew;
   }
 
-  void setHighlightColor(GraphicColor highlightColor)
+  void setHighlightColor(GraphicColor highlightColor, const char *file, int line)
   {
       this->highlightColor = highlightColor;
-      core->getGraphicEngine()->lockPathAnimators();
+      core->getGraphicEngine()->lockPathAnimators(file, line);
       if (blinkMode)
         animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getGraphicEngine()->getBlinkDuration());
       else
@@ -267,10 +267,10 @@ public:
       core->getGraphicEngine()->unlockPathAnimators();
   }
 
-  void setNormalColor(GraphicColor normalColor)
+  void setNormalColor(GraphicColor normalColor, const char *file, int line)
   {
       this->normalColor = normalColor;
-      core->getGraphicEngine()->lockPathAnimators();
+      core->getGraphicEngine()->lockPathAnimators(file, line);
       if (blinkMode)
         animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getGraphicEngine()->getBlinkDuration());
       else
@@ -278,10 +278,10 @@ public:
       core->getGraphicEngine()->unlockPathAnimators();
   }
 
-  void setBlinkMode(bool blinkMode)
+  void setBlinkMode(bool blinkMode, const char *file, int line)
   {
       this->blinkMode = blinkMode;
-      core->getGraphicEngine()->lockPathAnimators();
+      core->getGraphicEngine()->lockPathAnimators(file, line);
       if (blinkMode)
         animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getGraphicEngine()->getBlinkDuration());
       else
@@ -333,8 +333,8 @@ public:
     return minAltitude;
   }
 
-  void lockAccess() {
-    core->getThread()->lockMutex(accessMutex);
+  void lockAccess(const char *file, int line) {
+    core->getThread()->lockMutex(accessMutex, file, line);
   }
 
   void unlockAccess() {

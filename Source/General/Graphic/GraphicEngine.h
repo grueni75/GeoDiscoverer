@@ -185,9 +185,9 @@ public:
       this->map = map;
   }
 
-  GraphicObject *lockPathAnimators()
+  GraphicObject *lockPathAnimators(const char *file, int line)
   {
-      core->getThread()->lockMutex(pathAnimatorsMutex);
+      core->getThread()->lockMutex(pathAnimatorsMutex, file, line);
       return &pathAnimators;
   }
   void unlockPathAnimators()
@@ -200,9 +200,9 @@ public:
       this->widgetGraphicObject = widgetGraphicObject;
   }
 
-  GraphicPosition *lockPos()
+  GraphicPosition *lockPos(const char *file, int line)
   {
-      core->getThread()->lockMutex(posMutex);
+      core->getThread()->lockMutex(posMutex, file, line);
       return &pos;
   }
   void unlockPos()
@@ -210,9 +210,9 @@ public:
       core->getThread()->unlockMutex(posMutex);
   }
 
-  GraphicRectangle *lockLocationIcon()
+  GraphicRectangle *lockLocationIcon(const char *file, int line)
   {
-    core->getThread()->lockMutex(locationIconMutex);
+    core->getThread()->lockMutex(locationIconMutex, file, line);
     return &locationIcon;
   }
 
@@ -221,9 +221,9 @@ public:
     core->getThread()->unlockMutex(locationIconMutex);
   }
 
-  GraphicRectangle *lockTargetIcon()
+  GraphicRectangle *lockTargetIcon(const char *file, int line)
   {
-    core->getThread()->lockMutex(targetIconMutex);
+    core->getThread()->lockMutex(targetIconMutex, file, line);
     return &targetIcon;
   }
 
@@ -232,9 +232,9 @@ public:
     core->getThread()->unlockMutex(targetIconMutex);
   }
 
-  GraphicRectangle *lockArrowIcon()
+  GraphicRectangle *lockArrowIcon(const char *file, int line)
   {
-    core->getThread()->lockMutex(arrowIconMutex);
+    core->getThread()->lockMutex(arrowIconMutex, file, line);
     return &arrowIcon;
   }
 
@@ -243,9 +243,9 @@ public:
     core->getThread()->unlockMutex(arrowIconMutex);
   }
 
-  GraphicRectangle *lockCompassConeIcon()
+  GraphicRectangle *lockCompassConeIcon(const char *file, int line)
   {
-    core->getThread()->lockMutex(compassConeIconMutex);
+    core->getThread()->lockMutex(compassConeIconMutex, file, line);
     return &compassConeIcon;
   }
 

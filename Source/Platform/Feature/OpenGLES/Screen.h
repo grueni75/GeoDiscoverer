@@ -158,7 +158,7 @@ public:
   void destroyBufferInfo(GraphicBufferInfo buffer);
 
   // If set to one, the screen is not turned off
-  void setWakeLock(bool state, bool persistent=true);
+  void setWakeLock(bool state, const char *file, int line, bool persistent=true);
 
   // Frees any internal textures or buffers
   void graphicInvalidated();

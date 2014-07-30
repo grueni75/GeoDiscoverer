@@ -301,7 +301,7 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_con
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitCore(env,thiz);
     exit(1);
   }
-  GEODISCOVERER::core->getConfigStore()->setStringValue(pathCStr,nameCStr,valueCStr);
+  GEODISCOVERER::core->getConfigStore()->setStringValue(pathCStr,nameCStr,valueCStr,__FILE__, __LINE__);
   env->ReleaseStringUTFChars(path,pathCStr);
   env->ReleaseStringUTFChars(name,nameCStr);
   env->ReleaseStringUTFChars(value,valueCStr);
@@ -318,7 +318,7 @@ JNIEXPORT jstring JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitCore(env,thiz);
     exit(1);
   }
-  std::string value=GEODISCOVERER::core->getConfigStore()->getStringValue(pathCStr,nameCStr);
+  std::string value=GEODISCOVERER::core->getConfigStore()->getStringValue(pathCStr,nameCStr,__FILE__, __LINE__);
   env->ReleaseStringUTFChars(path,pathCStr);
   env->ReleaseStringUTFChars(name,nameCStr);
   return env->NewStringUTF(value.c_str());
@@ -418,7 +418,7 @@ JNIEXPORT jobject JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitCore(env,thiz);
     exit(1);
   }
-  std::list<std::string> names=GEODISCOVERER::core->getConfigStore()->getAttributeValues(pathCStr,attributeNameCStr);
+  std::list<std::string> names=GEODISCOVERER::core->getConfigStore()->getAttributeValues(pathCStr,attributeNameCStr,__FILE__, __LINE__);
   env->ReleaseStringUTFChars(path,pathCStr);
   env->ReleaseStringUTFChars(path,attributeNameCStr);
 
@@ -459,7 +459,7 @@ JNIEXPORT jboolean JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitCore(env,thiz);
     exit(1);
   }
-  bool result=GEODISCOVERER::core->getConfigStore()->pathExists(pathCStr);
+  bool result=GEODISCOVERER::core->getConfigStore()->pathExists(pathCStr,__FILE__, __LINE__);
   env->ReleaseStringUTFChars(path,pathCStr);
   return result;
 }

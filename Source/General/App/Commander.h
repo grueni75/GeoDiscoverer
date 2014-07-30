@@ -44,8 +44,8 @@ public:
   virtual ~Commander();
 
   // Interrupts the commander
-  void interruptOperation() const {
-    core->getThread()->lockMutex(accessMutex);
+  void interruptOperation(const char *file, int line) const {
+    core->getThread()->lockMutex(accessMutex, file, line);
   }
 
   // Continues the commander

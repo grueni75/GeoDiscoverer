@@ -50,7 +50,7 @@ void NavigationPath::writeGPXFile() {
   }
 
   // Copy all the data needed such that we do not need to lock the path too long
-  lockAccess();
+  lockAccess(__FILE__, __LINE__);
   std::string name=this->name;
   std::string description=this->description;
   std::vector<MapPosition> mapPositions=this->mapPositions;
@@ -189,7 +189,7 @@ void NavigationPath::writeGPXFile() {
 
   // Cleanup
   xmlFreeDoc(doc);
-  lockAccess();
+  lockAccess(__FILE__, __LINE__);
   if (this->mapPositions.size()==mapPositions.size()) {
     isStored=true;
   }
@@ -280,7 +280,7 @@ bool NavigationPath::readGPXFile() {
   // Read the document
   status.push_back("Loading path (Init):");
   status.push_back(getGpxFilename());
-  core->getNavigationEngine()->setStatus(status);
+  core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
   doc = xmlReadFile(filepath.c_str(), NULL, 0);
   if (!doc) {
     ERROR("can not read file <%s>",gpxFilename.c_str());
@@ -357,13 +357,13 @@ bool NavigationPath::readGPXFile() {
   // Extract data from the metadata section if it exists
   if (GPX11) {
     nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:metadata/*");
-    lockAccess();
+    lockAccess(__FILE__, __LINE__);
     extractInformation(nodes);
     unlockAccess();
   }
   if (GPX10) {
     nodes=findNodes(doc,xpathCtx,"/gpx:gpx/*");
-    lockAccess();
+    lockAccess(__FILE__, __LINE__);
     extractInformation(nodes);
     unlockAccess();
   }
@@ -398,7 +398,7 @@ bool NavigationPath::readGPXFile() {
           progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
           status.pop_front();
           status.push_front(progress.str());
-          core->getNavigationEngine()->setStatus(status);
+          core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
         }
         prevProcessedPercentage=processedPercentage;
         if (core->getQuitCore())
@@ -435,7 +435,7 @@ bool NavigationPath::readGPXFile() {
         progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
         status.pop_front();
         status.push_front(progress.str());
-        core->getNavigationEngine()->setStatus(status);
+        core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
       }
       prevProcessedPercentage=processedPercentage;
       if (core->getQuitCore())
@@ -449,13 +449,13 @@ bool NavigationPath::readGPXFile() {
 cleanup:
   if (xpathCtx) xmlXPathFreeContext(xpathCtx);
   if (doc) xmlFreeDoc(doc);
-  lockAccess();
+  lockAccess(__FILE__, __LINE__);
   isStored=true;
   hasChanged=true;
   hasBeenLoaded=true;
   unlockAccess();
   status.clear();
-  core->getNavigationEngine()->setStatus(status);
+  core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
   return result;
 }
 

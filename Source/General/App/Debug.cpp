@@ -86,7 +86,7 @@ void Debug::init() {
   }
 
   // Open the trace log
-  if (core->getConfigStore()->getIntValue("General","createTraceLog")) {
+  if (core->getConfigStore()->getIntValue("General","createTraceLog", __FILE__, __LINE__)) {
     std::string tracelog_filename = logPath + "/trace-" + timestamp  + ".log";
     //std::string tracelog_filename = logPath + "/trace-" + "" + ".log";
     if (!(tracelog=fopen(tracelog_filename.c_str(),"w"))) {
@@ -96,7 +96,7 @@ void Debug::init() {
   }
 
   // Open the message log
-  if (core->getConfigStore()->getIntValue("General","createMessageLog")) {
+  if (core->getConfigStore()->getIntValue("General","createMessageLog", __FILE__, __LINE__)) {
     std::string messagelog_filename = logPath + "/message-" + timestamp + ".log";
     //std::string tracelog_filename = logPath + "/trace-" + "" + ".log";
     if (!(messagelog=fopen(messagelog_filename.c_str(),"w"))) {

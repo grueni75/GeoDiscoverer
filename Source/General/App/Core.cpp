@@ -93,7 +93,7 @@ Core::Core(std::string homePath, Int screenDPI) {
   }
   isInitializedMutex=thread->createMutex("core is initialized mutex");
   isInitializedSignal=thread->createSignal(true);
-  thread->lockMutex(isInitializedMutex);
+  thread->lockMutex(isInitializedMutex, __FILE__, __LINE__);
 }
 
 // Destructor of the main application
@@ -103,7 +103,7 @@ Core::~Core() {
 
   // Wait until the core is initialized
   quitCore=true;
-  thread->lockMutex(isInitializedMutex);
+  thread->lockMutex(isInitializedMutex, __FILE__, __LINE__);
   isInitialized=false;
   thread->unlockMutex(isInitializedMutex);
 
@@ -115,7 +115,7 @@ Core::~Core() {
 
   // Wait until the maintenance thread has finished
   maintenance(false);
-  thread->lockMutex(maintenanceMutex);
+  thread->lockMutex(maintenanceMutex, __FILE__, __LINE__);
   if (maintenanceThreadInfo) {
     core->getThread()->cancelThread(maintenanceThreadInfo);
     core->getThread()->waitForThread(maintenanceThreadInfo);
@@ -123,7 +123,7 @@ Core::~Core() {
   }
 
   // Wait until the map update thread has finished
-  interruptMapUpdate();
+  interruptMapUpdate(__FILE__, __LINE__);
   quitMapUpdateThread=true;
   continueMapUpdate();
   if (mapUpdateThreadInfo) {
@@ -223,7 +223,7 @@ bool Core::init() {
 
   // Ensure that the core is not deinitialized before its initialized
   mapUpdateInterruptMutex=thread->createMutex("core map update interrupt mutex");
-  interruptMapUpdate();
+  interruptMapUpdate(__FILE__, __LINE__);
 
   // Continue creating components
   DEBUG("initializing profileEngine",NULL);
@@ -299,7 +299,7 @@ bool Core::init() {
   }
 
   // Get config
-  maintenancePeriod=configStore->getIntValue("General","maintenancePeriod");
+  maintenancePeriod=configStore->getIntValue("General","maintenancePeriod", __FILE__, __LINE__);
 
   // Create mutexes and signals for thread communication
   mapUpdateStartSignal=thread->createSignal();
@@ -345,7 +345,7 @@ void Core::updateScreen(bool forceRedraw) {
     if (!mapEngine->getIsInitialized()) {
       mapCache->createGraphic();
       mapEngine->initMap();
-      thread->lockMutex(isInitializedMutex);
+      thread->lockMutex(isInitializedMutex, __FILE__, __LINE__);
       isInitialized=true;
       thread->unlockMutex(isInitializedMutex);
       core->getThread()->issueSignal(isInitializedSignal);
@@ -372,7 +372,7 @@ void Core::updateScreen(bool forceRedraw) {
     } else {
 
       // Abort the update if the pos has changed
-      GraphicPosition visPos=*(graphicEngine->lockPos());
+      GraphicPosition visPos=*(graphicEngine->lockPos(__FILE__, __LINE__));
       graphicEngine->unlockPos();
       if (mapEngine->mapUpdateIsRequired(visPos,NULL,NULL,NULL,false)) {
         mapEngine->setAbortUpdate();
@@ -392,7 +392,7 @@ void Core::updateScreen(bool forceRedraw) {
 
     // Check if an update of the map is required
     bool updateRequired=false;
-    GraphicPosition visPos=*(graphicEngine->lockPos());
+    GraphicPosition visPos=*(graphicEngine->lockPos(__FILE__, __LINE__));
     graphicEngine->unlockPos();
     if (mapEngine->mapUpdateIsRequired(visPos))
       updateRequired=true;
@@ -428,7 +428,7 @@ void Core::updateMap() {
     }
 
     // Do the map update
-    thread->lockMutex(mapUpdateInterruptMutex);
+    thread->lockMutex(mapUpdateInterruptMutex, __FILE__, __LINE__);
     mapEngine->updateMap();
     thread->unlockMutex(mapUpdateInterruptMutex);
 
@@ -445,7 +445,7 @@ void Core::lateInit() {
   // Take care that the map update and screen update thread detects that objects are not initialized
   bool wait=true;
   while (wait) {
-    interruptMapUpdate();
+    interruptMapUpdate(__FILE__, __LINE__);
     if ((!mapEngine->getUpdateInProgress())&&(mapUpdateStopped)) {
       wait=false;
     }
@@ -454,7 +454,7 @@ void Core::lateInit() {
   while (wait);
 
   // Take care that the maintenance thread detects that objects are not initialized
-  thread->lockMutex(maintenanceMutex);
+  thread->lockMutex(maintenanceMutex, __FILE__, __LINE__);
   thread->unlockMutex(maintenanceMutex);
 
   // Initialize map source if required
@@ -497,7 +497,7 @@ void Core::maintenance(bool endlessLoop) {
   while (1) {
 
     // Ensure that only one thread is executing this at most
-    thread->lockMutex(maintenanceMutex);
+    thread->lockMutex(maintenanceMutex, __FILE__, __LINE__);
 
     DEBUG("performing maintenance",NULL);
 
@@ -544,34 +544,34 @@ void Core::maintenance(bool endlessLoop) {
 }
 
 // Allows an external interrupt
-void Core::interruptAllowedHere() {
+void Core::interruptAllowedHere(const char *file, int line) {
   if (noInterruptAllowed==false) {
     thread->unlockMutex(mapUpdateInterruptMutex);
     //sleep(1); // enable to get debug rectangles in the map
-    thread->lockMutex(mapUpdateInterruptMutex);
+    thread->lockMutex(mapUpdateInterruptMutex, file, line);
   }
 }
 
 // Indicates the graphics engine that a new texture is ready
-void Core::tileTextureAvailable() {
+void Core::tileTextureAvailable(const char *file, int line) {
   thread->unlockMutex(mapUpdateInterruptMutex);
   if (!quitMapUpdateThread)
     thread->waitForSignal(mapUpdateTileTextureProcessedSignal);
-  thread->lockMutex(mapUpdateInterruptMutex);
+  thread->lockMutex(mapUpdateInterruptMutex, file, line);
 }
 
 // Called if the textures or buffers have been lost or must be recreated
 void Core::updateGraphic(bool graphicInvalidated) {
 
   // Ensure that the core is not currently being initialized
-  thread->lockMutex(isInitializedMutex);
+  thread->lockMutex(isInitializedMutex, __FILE__, __LINE__);
 
   // Wait until the map update thread is in a clean state
   bool mapUpdateThreadFinished=false;
   do {
 
     // Interrupt the map update thread
-    interruptMapUpdate();
+    interruptMapUpdate(__FILE__, __LINE__);
 
     // Check if a new texture is ready
     if (mapCache->getTileTextureAvailable()) {
@@ -633,8 +633,8 @@ void Core::updateGraphic(bool graphicInvalidated) {
 }
 
 // Stops the map update thread
-void Core::interruptMapUpdate() {
-  thread->lockMutex(mapUpdateInterruptMutex);
+void Core::interruptMapUpdate(const char *file, int line) {
+  thread->lockMutex(mapUpdateInterruptMutex, file, line);
   noInterruptAllowed=true;
 }
 

@@ -458,7 +458,7 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
 
   // Extract the image
   std::string tempImageFilePath = core->getMapSource()->getFolderPath() + "/tile.bin";
-  std::list<ZipArchive*> *mapArchives = core->getMapSource()->lockMapArchives();
+  std::list<ZipArchive*> *mapArchives = core->getMapSource()->lockMapArchives(__FILE__, __LINE__);
   for (std::list<ZipArchive*>::iterator i=mapArchives->begin();i!=mapArchives->end();i++) {
     if ((*i)->getEntrySize(imageFilePath)>0) {
       (*i)->exportEntry(imageFilePath,tempImageFilePath);

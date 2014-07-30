@@ -154,7 +154,7 @@ void Thread::destroyMutex(ThreadMutexInfo *mutex) {
 }
 
 // Locks a mutex
-void Thread::lockMutex(ThreadMutexInfo *mutex) {
+void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line) {
   pthread_t self = pthread_self();
   std::list<std::string*> *waitQueue=NULL;
   std::string *threadNameCopy=NULL;
@@ -183,7 +183,14 @@ void Thread::lockMutex(ThreadMutexInfo *mutex) {
       }
       threadNameMap[self]=threadName;
     }
-    threadNameCopy = new std::string(*threadName);
+    const char *relativeFile=strstr(file,SRC_ROOT);
+    if (!relativeFile)
+      relativeFile=file;
+    else
+      relativeFile=file+strlen(SRC_ROOT)+1;
+    std::stringstream s;
+    s << *threadName << " [" << relativeFile << ":" << line << "]";
+    threadNameCopy = new std::string(s.str());
     if (!threadNameCopy)
       FATAL("can not create thread name string",NULL);
     waitQueue->push_back(threadNameCopy);
@@ -220,9 +227,10 @@ void Thread::unlockMutex(ThreadMutexInfo *mutex) {
       waitQueue=mutexWaitQueueMap[mutex];
       std::string *threadName = threadNameMap[self];
       if (threadName) {
+        std::string prefix = *threadName + " [";
         for(std::list<std::string*>::iterator i=waitQueue->begin();i!=waitQueue->end();i++) {
           std::string *entry = *i;
-          if (*entry==(*threadName + " (locked)")) {
+          if (entry->substr(0, prefix.size())==prefix) {
             delete entry;
             waitQueue->erase(i);
             break;
@@ -366,14 +374,14 @@ void Thread::debugMutexLocks() {
 
   // Check if we shall create a mutex debug log
   pthread_mutex_lock(&accessMutex);
-  createMutexLog = core->getConfigStore()->getIntValue("General","createMutexLog");
+  createMutexLog = core->getConfigStore()->getIntValue("General","createMutexLog", __FILE__, __LINE__);
   pthread_mutex_unlock(&accessMutex);
   if (!createMutexLog) {
     return;
   }
 
   // Prepare variables
-  Int waitTime = core->getConfigStore()->getIntValue("General","mutexLogUpdateInterval");
+  Int waitTime = core->getConfigStore()->getIntValue("General","mutexLogUpdateInterval", __FILE__, __LINE__);
   FILE *mutexDebugLog;
   std::string logPath=core->getHomePath() + "/Log/mutex-" + core->getClock()->getFormattedDate() + ".log";
 

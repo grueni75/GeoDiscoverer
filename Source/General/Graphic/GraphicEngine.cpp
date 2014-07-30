@@ -30,20 +30,20 @@ GraphicEngine::GraphicEngine() {
   // Init variables
   map=NULL;
   pos=GraphicPosition();
-  debugMode=core->getConfigStore()->getIntValue("Graphic","debugMode");
+  debugMode=core->getConfigStore()->getIntValue("Graphic","debugMode",__FILE__, __LINE__);
   posMutex=core->getThread()->createMutex("graphic engine pos mutex");
   pathAnimatorsMutex=core->getThread()->createMutex("graphic engine path animators mutex");
   noChangeFrameCount=0;
-  locationAccuracyBackgroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyBackgroundColor");
-  locationAccuracyCircleColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyCircleColor");
+  locationAccuracyBackgroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyBackgroundColor",__FILE__, __LINE__);
+  locationAccuracyCircleColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyCircleColor",__FILE__, __LINE__);
   locationAccuracyRadiusX=0;
   locationAccuracyRadiusY=0;
   locationIconMutex=core->getThread()->createMutex("graphic engine location icon mutex");
   targetIconMutex=core->getThread()->createMutex("graphic engine target icon mutex");
-  centerIconTimeout=core->getConfigStore()->getIntValue("Graphic","centerIconTimeout");
+  centerIconTimeout=core->getConfigStore()->getIntValue("Graphic","centerIconTimeout",__FILE__, __LINE__);
   centerIcon.setColor(GraphicColor(255,255,255,0));
   locationIcon.setColor(GraphicColor(255,255,255,0));
-  compassConeIcon.setColor(core->getConfigStore()->getGraphicColorValue("Graphic/CompassConeColor"));
+  compassConeIcon.setColor(core->getConfigStore()->getGraphicColorValue("Graphic/CompassConeColor",__FILE__, __LINE__));
   compassConeIcon.setAngle(std::numeric_limits<double>::max());
   compassConeIconMutex=core->getThread()->createMutex("graphic engine compass cone icon mutex");
   targetIcon.setColor(GraphicColor(255,255,255,0));
@@ -62,8 +62,8 @@ GraphicEngine::GraphicEngine() {
   frameCount=0;
   tileImageNotCachedImage.setColor(GraphicColor(255,255,255,0));
   tileImageNotDownloadedFilename.setColor(GraphicColor(255,255,255,0));
-  fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration");
-  blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration");
+  fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration",__FILE__, __LINE__);
+  blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration",__FILE__, __LINE__);
   widgetGraphicObject=NULL;
 
   // Init the dynamic data
@@ -81,42 +81,42 @@ void GraphicEngine::destroyGraphic() {
 
 // Creates all graphic
 void GraphicEngine::createGraphic() {
-  centerIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","centerIconFilename"));
-  lockLocationIcon();
-  locationIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","locationIconFilename"));
+  centerIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","centerIconFilename",__FILE__, __LINE__));
+  lockLocationIcon(__FILE__, __LINE__);
+  locationIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","locationIconFilename",__FILE__, __LINE__));
   unlockLocationIcon();
-  pathDirectionIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathDirectionIconFilename"));
-  pathStartFlagIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathStartFlagIconFilename"));
-  pathEndFlagIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathEndFlagIconFilename"));
-  lockCompassConeIcon();
-  compassConeIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","compassConeFilename"));
+  pathDirectionIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathDirectionIconFilename",__FILE__, __LINE__));
+  pathStartFlagIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathStartFlagIconFilename",__FILE__, __LINE__));
+  pathEndFlagIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathEndFlagIconFilename",__FILE__, __LINE__));
+  lockCompassConeIcon(__FILE__, __LINE__);
+  compassConeIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","compassConeFilename",__FILE__, __LINE__));
   unlockCompassConeIcon();
-  lockTargetIcon();
-  targetIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","targetIconFilename"));
+  lockTargetIcon(__FILE__, __LINE__);
+  targetIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","targetIconFilename",__FILE__, __LINE__));
   unlockTargetIcon();
-  lockArrowIcon();
-  arrowIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","arrowIconFilename"));
+  lockArrowIcon(__FILE__, __LINE__);
+  arrowIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","arrowIconFilename",__FILE__, __LINE__));
   unlockArrowIcon();
-  tileImageNotCachedImage.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","tileImageNotCachedFilename"));
-  tileImageNotDownloadedFilename.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","tileImageNotDownloadedFilename"));
+  tileImageNotCachedImage.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","tileImageNotCachedFilename",__FILE__, __LINE__));
+  tileImageNotDownloadedFilename.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","tileImageNotDownloadedFilename",__FILE__, __LINE__));
 }
 
 // Deinits dynamic data
 void GraphicEngine::deinit() {
   centerIcon.deinit();
-  lockLocationIcon();
+  lockLocationIcon(__FILE__, __LINE__);
   locationIcon.deinit();
   unlockLocationIcon();
   pathDirectionIcon.deinit();
   pathStartFlagIcon.deinit();
   pathEndFlagIcon.deinit();
-  lockTargetIcon();
+  lockTargetIcon(__FILE__, __LINE__);
   targetIcon.deinit();
   unlockTargetIcon();
-  lockArrowIcon();
+  lockArrowIcon(__FILE__, __LINE__);
   arrowIcon.deinit();
   unlockArrowIcon();
-  lockCompassConeIcon();
+  lockCompassConeIcon(__FILE__, __LINE__);
   compassConeIcon.deinit();
   unlockCompassConeIcon();
   tileImageNotCachedImage.deinit();
@@ -149,7 +149,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   // Copy the current position
   //lockPos()->setAngle(this->pos.getAngle()+0.1);
   //unlockPos();
-  pos=*(lockPos());
+  pos=*(lockPos(__FILE__, __LINE__));
   unlockPos();
 
   // Force redraw if requested externally
@@ -160,7 +160,7 @@ void GraphicEngine::draw(bool forceRedraw) {
 
   // Let the map primitives work
   if (map) {
-    map->lockAccess();
+    map->lockAccess(__FILE__, __LINE__);
     if (map->work(currentTime)) {
       //DEBUG("requesting scene redraw due to map work result",NULL);
       redrawScene=true;
@@ -169,7 +169,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   }
 
   // Let the path animators primitives work
-  lockPathAnimators();
+  lockPathAnimators(__FILE__, __LINE__);
   if (pathAnimators.work(currentTime)) {
     //DEBUG("requesting scene redraw due to paths work result",NULL);
     redrawScene=true;
@@ -177,7 +177,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   unlockPathAnimators();
 
   // Let the widget primitives work
-  widgetGraphicObject->lockAccess();
+  widgetGraphicObject->lockAccess(__FILE__, __LINE__);
   if ((widgetGraphicObject)&&(widgetGraphicObject->work(currentTime))) {
     //DEBUG("requesting scene redraw due to widget page work result",NULL);
     redrawScene=true;
@@ -200,7 +200,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   }
 
   // Let the target primitive work
-  lockTargetIcon();
+  lockTargetIcon(__FILE__, __LINE__);
   if (targetIcon.work(currentTime)) {
     //DEBUG("requesting scene redraw due to target icon work result",NULL);
     redrawScene=true;
@@ -208,7 +208,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   unlockTargetIcon();
 
   // Let the arrow primitive work
-  lockArrowIcon();
+  lockArrowIcon(__FILE__, __LINE__);
   if (arrowIcon.work(currentTime)) {
     //DEBUG("requesting scene redraw due to arrow icon work result",NULL);
     redrawScene=true;
@@ -225,7 +225,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   }
 
   // Did the location icon change?
-  lockLocationIcon();
+  lockLocationIcon(__FILE__, __LINE__);
   if (locationIcon.getIsUpdated()) {
     //DEBUG("requesting scene redraw due to changed location icon",NULL);
     redrawScene=true;
@@ -234,7 +234,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   unlockLocationIcon();
 
   // Did the target icon change?
-  lockTargetIcon();
+  lockTargetIcon(__FILE__, __LINE__);
   if (targetIcon.getIsUpdated()) {
     //DEBUG("requesting scene redraw due to changed location icon",NULL);
     redrawScene=true;
@@ -243,7 +243,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   unlockTargetIcon();
 
   // Did the arrow icon change?
-  lockArrowIcon();
+  lockArrowIcon(__FILE__, __LINE__);
   if (arrowIcon.getIsUpdated()) {
     //DEBUG("requesting scene redraw due to changed location icon",NULL);
     redrawScene=true;
@@ -252,7 +252,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   unlockArrowIcon();
 
   // Did the compass cone icon change?
-  lockCompassConeIcon();
+  lockCompassConeIcon(__FILE__, __LINE__);
   if (compassConeIcon.getIsUpdated()) {
     //DEBUG("requesting scene redraw due to changed compass cone icon",NULL);
     redrawScene=true;
@@ -262,7 +262,7 @@ void GraphicEngine::draw(bool forceRedraw) {
 
   // Check if the map object has changed
   if (map)  {
-    map->lockAccess();
+    map->lockAccess(__FILE__, __LINE__);
     if (map->getIsUpdated()) {
       //DEBUG("requesting scene redraw due to changed map object",NULL);
       redrawScene=true;
@@ -272,7 +272,7 @@ void GraphicEngine::draw(bool forceRedraw) {
   }
 
   // Check if the paths object has changed
-  lockPathAnimators();
+  lockPathAnimators(__FILE__, __LINE__);
   if (pathAnimators.getIsUpdated()) {
     //DEBUG("requesting scene redraw due to changed paths object",NULL);
     redrawScene=true;
@@ -326,7 +326,7 @@ void GraphicEngine::draw(bool forceRedraw) {
 
       //PROFILE_START;
 
-      map->lockAccess();
+      map->lockAccess(__FILE__, __LINE__);
       for(Int z=0;z<=4;z++) {
         std::list<GraphicPrimitive*> *mapDrawList=map->getDrawList();
         //DEBUG("tile count = %d",mapDrawList->size());
@@ -340,7 +340,7 @@ void GraphicEngine::draw(bool forceRedraw) {
               // Get graphic object
               GraphicObject *tileVisualization;
               tileVisualization=(GraphicObject*)*i;
-              tileVisualization->lockAccess();
+              tileVisualization->lockAccess(__FILE__, __LINE__);
 
               // Skip drawing if primitive is invisible
               UByte alpha=tileVisualization->getColor().getAlpha();
@@ -398,7 +398,7 @@ void GraphicEngine::draw(bool forceRedraw) {
                         if (debugMode) {
                           std::list<std::string> name=rectangle->getName();
                           FontEngine *fontEngine=core->getFontEngine();
-                          fontEngine->lockFont("sansSmall");
+                          fontEngine->lockFont("sansSmall", __FILE__, __LINE__);
                           Int nameHeight=name.size()*fontEngine->getLineHeight();
                           Int lineNr=name.size()-1;
                           x1=rectangle->getX();
@@ -510,7 +510,7 @@ void GraphicEngine::draw(bool forceRedraw) {
 
     // Draw the location icon and the compass cone
     //DEBUG("locationIcon.getColor().getAlpha()=%d locationIcon.getX()=%d locationIcon.getY()=%d",locationIcon.getColor().getAlpha(),locationIcon.getX(),locationIcon.getY());
-    lockLocationIcon();
+    lockLocationIcon(__FILE__, __LINE__);
     if (locationIcon.getColor().getAlpha()>0) {
 
       // Translate to the current location
@@ -538,7 +538,7 @@ void GraphicEngine::draw(bool forceRedraw) {
       unlockLocationIcon();
 
       // Draw the compass cone
-      lockCompassConeIcon();
+      lockCompassConeIcon(__FILE__, __LINE__);
       if (compassConeIcon.getAngle()!=std::numeric_limits<double>::max()) {
         screen->startObject();
         screen->setColor(compassConeIcon.getColor().getRed(),compassConeIcon.getColor().getGreen(),compassConeIcon.getColor().getBlue(),compassConeIcon.getColor().getAlpha());
@@ -561,7 +561,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     PROFILE_ADD("location drawing");
 
     // Draw the target icon
-    lockTargetIcon();
+    lockTargetIcon(__FILE__, __LINE__);
     if (targetIcon.getColor().getAlpha()>0) {
 
       // Translate to the target location
@@ -585,7 +585,7 @@ void GraphicEngine::draw(bool forceRedraw) {
     unlockTargetIcon();
 
     // Draw the arrow icon
-    lockArrowIcon();
+    lockArrowIcon(__FILE__, __LINE__);
     if (arrowIcon.getColor().getAlpha()>0) {
 
       // Translate to the target location
@@ -631,7 +631,7 @@ void GraphicEngine::draw(bool forceRedraw) {
 
     // Draw all widgets
     if (widgetGraphicObject) {
-      widgetGraphicObject->lockAccess();
+      widgetGraphicObject->lockAccess(__FILE__, __LINE__);
       std::list<GraphicPrimitive*> *pageDrawList=widgetGraphicObject->getDrawList();
       for(std::list<GraphicPrimitive *>::const_iterator i=pageDrawList->begin(); i != pageDrawList->end(); i++) {
         GraphicObject *page = (GraphicObject*) *i;
@@ -705,7 +705,7 @@ GraphicEngine::~GraphicEngine() {
 
 // Outputs statistical infos
 void GraphicEngine::outputStats() {
-  core->getThread()->lockMutex(statsMutex);
+  core->getThread()->lockMutex(statsMutex,__FILE__, __LINE__);
   double avgIdleTime=(double)totalIdleTime/(double)frameCount;
   double avgDrawingTime=(double)totalDrawingTime/(double)frameCount;
   DEBUG("printing drawing statistics",NULL);

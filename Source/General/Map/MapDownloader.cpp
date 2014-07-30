@@ -31,9 +31,9 @@ void *mapDownloaderThread(void *args) {
 }
 
 MapDownloader::MapDownloader(MapSourceMercatorTiles *mapSource) {
-  downloadErrorWaitTime=core->getConfigStore()->getIntValue("Map","downloadErrorWaitTime");
-  maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries");
-  maxMapArchiveSize=core->getConfigStore()->getIntValue("Map","maxMapArchiveSize");
+  downloadErrorWaitTime=core->getConfigStore()->getIntValue("Map","downloadErrorWaitTime",__FILE__, __LINE__);
+  maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries",__FILE__, __LINE__);
+  maxMapArchiveSize=core->getConfigStore()->getIntValue("Map","maxMapArchiveSize",__FILE__, __LINE__);
   downloadQueueMutex=core->getThread()->createMutex("map downloader download queue mutex");
   downloadStartSignal=core->getThread()->createSignal();
   quitMapImageDownloadThread=false;
@@ -122,7 +122,7 @@ void MapDownloader::queueMapContainerDownload(MapContainer *mapContainer)
   mapContainer->setDownloadComplete(false);
 
   // Request the download thread to fetch this image
-  core->getThread()->lockMutex(downloadQueueMutex);
+  core->getThread()->lockMutex(downloadQueueMutex,__FILE__, __LINE__);
   downloadQueue.push_back(mapContainer);
   core->getThread()->unlockMutex(downloadQueueMutex);
   core->getThread()->issueSignal(downloadStartSignal);
@@ -186,7 +186,7 @@ void MapDownloader::downloadMapImages() {
       // Get the next container from the queue
       MapContainer *mapContainer=NULL;
       Int totalLeft;
-      core->getThread()->lockMutex(downloadQueueMutex);
+      core->getThread()->lockMutex(downloadQueueMutex,__FILE__, __LINE__);
       if (!downloadQueue.empty()) {
 
         // Prefer visible map containers
@@ -217,7 +217,7 @@ void MapDownloader::downloadMapImages() {
         s << " tiles:";
       status.push_back(s.str());
       status.push_back(mapContainer->getImageFileName());
-      mapSource->setStatus(status);
+      mapSource->setStatus(status,__FILE__, __LINE__);
 
       // Download all images
       bool downloadSuccess=true;
@@ -268,7 +268,7 @@ void MapDownloader::downloadMapImages() {
               if ((in=fopen(tempFilePath.c_str(),"r"))) {
                 fread(file_buffer,stat_buffer.st_size,1,in);
                 fclose(in);
-                std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives();
+                std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives(__FILE__, __LINE__);
                 ZipArchive *mapArchive=mapArchives->back();
                 if (mapArchive->getUnchangedSize()>maxMapArchiveSize) {
                   std::stringstream newFilename;
@@ -294,7 +294,7 @@ void MapDownloader::downloadMapImages() {
           // Write the gdm file
           if (tileAddedToArchive) {
             mapContainer->writeCalibrationFile();
-            std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives();
+            std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives(__FILE__, __LINE__);
             mapArchives->back()->writeChanges();
             mapSource->unlockMapArchives();
           } else {
@@ -306,15 +306,15 @@ void MapDownloader::downloadMapImages() {
         }
 
         // Update the map cache
-        mapSource->lockAccess();
+        mapSource->lockAccess(__FILE__, __LINE__);
         mapContainer->setDownloadComplete(true);
         mapSource->unlockAccess();
-        core->getMapEngine()->setForceCacheUpdate();
+        core->getMapEngine()->setForceCacheUpdate(__FILE__, __LINE__);
 
       } else {
 
         // Put the container back in the queue if the retry count is not reached
-        core->getThread()->lockMutex(downloadQueueMutex);
+        core->getThread()->lockMutex(downloadQueueMutex,__FILE__, __LINE__);
         downloadQueue.push_back(mapContainer);
         core->getThread()->unlockMutex(downloadQueueMutex);
         mapContainer->setDownloadRetries(mapContainer->getDownloadRetries()+1);
@@ -326,7 +326,7 @@ void MapDownloader::downloadMapImages() {
 
       // Change the status
       status.clear();
-      mapSource->setStatus(status);
+      mapSource->setStatus(status,__FILE__, __LINE__);
 
       // Shall we quit?
       if (quitMapImageDownloadThread) {

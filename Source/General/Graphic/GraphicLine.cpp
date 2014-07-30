@@ -29,7 +29,7 @@ namespace GEODISCOVERER {
 GraphicLine::GraphicLine(Int numberOfStrokes, Short width) : GraphicPrimitive() {
   type=GraphicTypeLine;
   this->valuesPerTriangle=3;
-  this->numberOfTrianglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","lineNumberOfStrokesOtherSegemnts");
+  this->numberOfTrianglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","lineNumberOfStrokesOtherSegemnts",__FILE__, __LINE__);
   this->width=width;
   this->cutEnabled=false;
   if (numberOfStrokes==0) {

@@ -134,7 +134,7 @@ bool GraphicObject::work(TimestampInMicroseconds currentTime) {
       if (p->getType()==GraphicTypeObject) {
         o=(GraphicObject*)p;
       }
-      if (o) o->lockAccess();
+      if (o) o->lockAccess(__FILE__, __LINE__);
       if (p->work(currentTime)) {
         //DEBUG("requesting scene redraw due to animation",NULL);
         redrawScene=true;

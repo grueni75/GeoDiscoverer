@@ -42,7 +42,7 @@ ProfileEngine::~ProfileEngine() {
 void ProfileEngine::startMeasure(std::string method) {
 
   // Ensure that only one instance is executing this code
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
 
   // Get the data entry from the map
   ProfileMethodResult *result;
@@ -70,7 +70,7 @@ void ProfileEngine::startMeasure(std::string method) {
 void ProfileEngine::addElapsedTime(std::string method, std::string name) {
 
   // Ensure that only one instance is executing this code
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
 
   // Get the elapsed time
   TimestampInMicroseconds currentTimestamp=core->getClock()->getMicrosecondsSinceStart();
@@ -110,7 +110,7 @@ void ProfileEngine::addElapsedTime(std::string method, std::string name) {
 void ProfileEngine::outputResult(std::string method, bool clear) {
 
   // Ensure that only one instance is executing this code
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
 
   // Sort according to method name
   std::list<ProfileMethodResult*> sortedList;

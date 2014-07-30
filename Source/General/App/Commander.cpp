@@ -41,7 +41,7 @@ Commander::~Commander() {
 std::string Commander::execute(std::string cmd) {
 
   //DEBUG("executing command <%s>",cmd.c_str());
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
   TRACE(cmd.c_str(),NULL);
   core->getThread()->unlockMutex(accessMutex);
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
@@ -90,21 +90,21 @@ std::string Commander::execute(std::string cmd) {
   bool cmdExecuted=false;
   //DEBUG("before: x=%d y=%d",pos->getX(),pos->getY());
   if (cmdName=="zoom") {
-    GraphicPosition *pos=core->getGraphicEngine()->lockPos();
+    GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
     pos->zoom(atof(args[0].c_str()));
     pos->updateLastUserModification();
     core->getGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
   if (cmdName=="pan") {
-    GraphicPosition *pos=core->getGraphicEngine()->lockPos();
+    GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
     pos->pan(atoi(args[0].c_str()),atoi(args[1].c_str()));
     pos->updateLastUserModification();
     core->getGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
   if (cmdName=="rotate") {
-    GraphicPosition *pos=core->getGraphicEngine()->lockPos();
+    GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
     pos->rotate(atof(args[0].c_str()));
     pos->updateLastUserModification();
     core->getGraphicEngine()->unlockPos();
@@ -126,7 +126,7 @@ std::string Commander::execute(std::string cmd) {
     y=atoi(args[1].c_str());
     x=x-core->getScreen()->getWidth()/2;
     y=core->getScreen()->getHeight()/2-1-y;
-    core->getThread()->lockMutex(accessMutex);
+    core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
     Int dX=lastTouchedX-x;
     Int dY=lastTouchedY-y;
     core->getThread()->unlockMutex(accessMutex);
@@ -139,7 +139,7 @@ std::string Commander::execute(std::string cmd) {
 
     // Then do the map scrolling
     if (!widgetTouched) {
-      GraphicPosition *pos=core->getGraphicEngine()->lockPos();
+      GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
       pos->rotate(atof(args[2].c_str()));
       pos->zoom(atof(args[3].c_str()));
       pos->pan(dX,dY);
@@ -148,7 +148,7 @@ std::string Commander::execute(std::string cmd) {
     }
 
     // Update some variables
-    core->getThread()->lockMutex(accessMutex);
+    core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
     lastTouchedX=x;
     lastTouchedY=y;
     core->getThread()->unlockMutex(accessMutex);
@@ -179,12 +179,12 @@ std::string Commander::execute(std::string cmd) {
     // Then do the map scrolling
     if (!widgetTouched) {
       if ((cmdName=="touchMove")||(cmdName=="touchUp")) {
-        core->getThread()->lockMutex(accessMutex);
+        core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
         Int dX=lastTouchedX-x;
         Int dY=lastTouchedY-y;
         core->getThread()->unlockMutex(accessMutex);
         //DEBUG("pan(%d,%d)",dX,dY);
-        GraphicPosition *pos=core->getGraphicEngine()->lockPos();
+        GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
         pos->pan(dX,dY);
         pos->updateLastUserModification();
         core->getGraphicEngine()->unlockPos();
@@ -192,7 +192,7 @@ std::string Commander::execute(std::string cmd) {
     }
 
     // Update some variables
-    core->getThread()->lockMutex(accessMutex);
+    core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
     lastTouchedX=x;
     lastTouchedY=y;
     core->getThread()->unlockMutex(accessMutex);
@@ -259,7 +259,7 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="getRecordTrack") {
     if (core->getIsInitialized()) {
-      if (core->getConfigStore()->getIntValue("Navigation","recordTrack")) {
+      if (core->getConfigStore()->getIntValue("Navigation","recordTrack", __FILE__, __LINE__)) {
         result="true";
       } else {
         result="false";
@@ -288,7 +288,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setWakeLock") {
-    core->getScreen()->setWakeLock(atoi(args[0].c_str()));
+    core->getScreen()->setWakeLock(atoi(args[0].c_str()), __FILE__, __LINE__);
     cmdExecuted=true;
   }
   if (cmdName=="getWakeLock") {
@@ -341,7 +341,7 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="showTarget") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->showTarget(true);
-      GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
+      GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
       visPos->updateLastUserModification();
       core->getGraphicEngine()->unlockPos();
     } else {
@@ -352,7 +352,7 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setTargetAtMapCenter") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->setTargetAtMapCenter();
-      GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
+      GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
       visPos->updateLastUserModification();
       core->getGraphicEngine()->unlockPos();
     } else {
@@ -363,7 +363,7 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setTargetAtGeographicCoordinate") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->setTargetAtGeographicCoordinate(atof(args[0].c_str()),atof(args[1].c_str()),true);
-      GraphicPosition *visPos=core->getGraphicEngine()->lockPos();
+      GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
       visPos->updateLastUserModification();
       core->getGraphicEngine()->unlockPos();
     } else {
@@ -392,7 +392,7 @@ std::string Commander::execute(std::string cmd) {
       INFO("path info widget shows nearest path",NULL);
       state=false;
     }
-    WidgetPathInfo::setCurrentPathLocked(state);
+    WidgetPathInfo::setCurrentPathLocked(state, __FILE__, __LINE__);
     cmdExecuted=true;
   }
   if (cmdName=="setPathStartFlag") {
@@ -401,7 +401,7 @@ std::string Commander::execute(std::string cmd) {
     if (nearestPath==NULL) {
       WARNING("cannot set start flag: no path near to the current map center found",NULL);
     } else {
-      core->getNavigationEngine()->setStartFlag(nearestPath,nearestPathIndex);
+      core->getNavigationEngine()->setStartFlag(nearestPath,nearestPathIndex,__FILE__, __LINE__);
     }
     cmdExecuted=true;
   }
@@ -411,7 +411,7 @@ std::string Commander::execute(std::string cmd) {
     if (nearestPath==NULL) {
       WARNING("cannot set end flag: no path near to the current map center found",NULL);
     } else {
-      core->getNavigationEngine()->setEndFlag(nearestPath,nearestPathIndex);
+      core->getNavigationEngine()->setEndFlag(nearestPath,nearestPathIndex,__FILE__, __LINE__);
     }
     cmdExecuted=true;
   }

@@ -39,13 +39,13 @@ WidgetMeter::WidgetMeter() : WidgetPrimitive() {
 
 // Destructor
 WidgetMeter::~WidgetMeter() {
-  core->getFontEngine()->lockFont("sansNormal");
+  core->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
   if (unitFontString) core->getFontEngine()->destroyString(unitFontString);
   core->getFontEngine()->unlockFont();
-  core->getFontEngine()->lockFont("sansBoldNormal");
+  core->getFontEngine()->lockFont("sansBoldNormal",__FILE__, __LINE__);
   if (labelFontString) core->getFontEngine()->destroyString(labelFontString);
   core->getFontEngine()->unlockFont();
-  core->getFontEngine()->lockFont("sansLarge");
+  core->getFontEngine()->lockFont("sansLarge",__FILE__, __LINE__);
   if (valueFontString) core->getFontEngine()->destroyString(valueFontString);
   core->getFontEngine()->unlockFont();
 }
@@ -76,7 +76,7 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
     NavigationPath *trackPath;
     switch(meterType) {
       case WidgetMeterTypeAltitude:
-        locationPos=core->getNavigationEngine()->lockLocationPos();
+        locationPos=core->getNavigationEngine()->lockLocationPos(__FILE__, __LINE__);
         if (locationPos->getHasAltitude()) {
           core->getUnitConverter()->formatMeters(locationPos->getAltitude(),value,unit);
         } else {
@@ -86,7 +86,7 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
         core->getNavigationEngine()->unlockLocationPos();
         break;
       case WidgetMeterTypeSpeed:
-        locationPos=core->getNavigationEngine()->lockLocationPos();
+        locationPos=core->getNavigationEngine()->lockLocationPos(__FILE__, __LINE__);
         if (locationPos->getHasSpeed()) {
           core->getUnitConverter()->formatMetersPerSecond(locationPos->getSpeed(),value,unit);
         } else {
@@ -96,7 +96,7 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
         core->getNavigationEngine()->unlockLocationPos();
         break;
       case WidgetMeterTypeTrackLength:
-        trackPath=core->getNavigationEngine()->lockRecordedTrack();
+        trackPath=core->getNavigationEngine()->lockRecordedTrack(__FILE__, __LINE__);
         if (trackPath)
           core->getUnitConverter()->formatMeters(trackPath->getLength(),value,unit);
         else {
@@ -112,12 +112,12 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
     changed=true;
 
     // Update the font string objects
-    fontEngine->lockFont("sansNormal");
+    fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
     fontEngine->updateString(&unitFontString,unit);
     fontEngine->unlockFont();
     unitFontString->setX(x+(iconWidth-unitFontString->getIconWidth())/2);
     unitFontString->setY(y+unitY);
-    fontEngine->lockFont("sansLarge");
+    fontEngine->lockFont("sansLarge",__FILE__, __LINE__);
     fontEngine->updateString(&valueFontString,value);
     fontEngine->unlockFont();
     valueFontString->setX(x+(iconWidth-valueFontString->getIconWidth())/2);
@@ -158,7 +158,7 @@ void WidgetMeter::setMeterType(WidgetMeterType meterType)
   this->meterType=meterType;
 
   // Set the label
-  fontEngine->lockFont("sansBoldNormal");
+  fontEngine->lockFont("sansBoldNormal",__FILE__, __LINE__);
   if (labelFontString) {
     fontEngine->destroyString(labelFontString);
     labelFontString=NULL;

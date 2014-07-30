@@ -28,7 +28,7 @@ namespace GEODISCOVERER {
 // Constructor
 GraphicRectangleList::GraphicRectangleList(Int numberOfRectangles) : GraphicPrimitive() {
   type=GraphicTypeRectangleList;
-  this->numberOfRectanglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","rectangleListNumberOfRectanglesOtherSegemnts");
+  this->numberOfRectanglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","rectangleListNumberOfRectanglesOtherSegemnts",__FILE__, __LINE__);
   if (numberOfRectangles==0) {
     numberOfRectangles=numberOfRectanglesOtherSegments;
   }

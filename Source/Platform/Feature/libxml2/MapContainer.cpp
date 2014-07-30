@@ -126,7 +126,7 @@ void MapContainer::writeCalibrationFile()
 
   // Write the file
   xmlDocDumpFormatMemoryEnc(doc, &buffer, &size, "UTF-8", 1);
-  std::list<ZipArchive*> *mapArchives=core->getMapSource()->lockMapArchives();
+  std::list<ZipArchive*> *mapArchives=core->getMapSource()->lockMapArchives(__FILE__, __LINE__);
   if (!mapArchives->back()->addEntry(calibrationFilePath,(void *)buffer,size)) {
     ERROR("can not add calibration file <%s> to map archive",calibrationFilePath);
   }
@@ -183,7 +183,7 @@ bool MapContainer::readGDMCalibrationFile()
   //xmlInitParser(); // already done by config store
 
   // Get the contents of the XML file
-  mapArchives = core->getMapSource()->lockMapArchives();
+  mapArchives = core->getMapSource()->lockMapArchives(__FILE__, __LINE__);
   for (std::list<ZipArchive*>::iterator i=mapArchives->begin();i!=mapArchives->end();i++) {
     size = (*i)->getEntrySize(calibrationFilePath);
     if (size>0) {

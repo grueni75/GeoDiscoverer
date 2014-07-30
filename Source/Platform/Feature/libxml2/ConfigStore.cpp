@@ -199,7 +199,7 @@ void ConfigStore::rememberUserConfig(std::string path, XMLNode nodes) {
             std::vector<std::string> t(3);
             t[0]=path;
             t[1]=name;
-            t[2]=getStringValue(path,name);
+            t[2]=getStringValue(path,name, __FILE__, __LINE__);
             migratedUserConfig.push_back(t);
             //DEBUG("required node found: path=%s name=%s value=%s",t[0].c_str(),t[1].c_str(),t[2].c_str());
           }
@@ -213,7 +213,7 @@ void ConfigStore::rememberUserConfig(std::string path, XMLNode nodes) {
                 FATAL("only one attribute per element is supported",NULL);
               } else {
                 attributeName=std::string((const char *)j->children->content);
-                attributeValues=getAttributeValues(path,attributeName);
+                attributeValues=getAttributeValues(path,attributeName, __FILE__, __LINE__);
                 oneAttributeFound=true;
               }
             }
@@ -272,7 +272,7 @@ void ConfigStore::read()
   bool copySchema=false;
 
   // Only one thread may enter read
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
 
   // Compare the shipped and the current schema
   if (stat(schemaShippedFilepath.c_str(),&schemaShippedStat)!=0) {
@@ -357,7 +357,7 @@ void ConfigStore::read()
   // Add any migrated user config (if any)
   for (std::list<std::vector<std::string> >::iterator i=migratedUserConfig.begin();i!=migratedUserConfig.end();i++) {
     std::vector<std::string> entry = *i;
-    setStringValue(entry[0],entry[1],entry[2]);
+    setStringValue(entry[0],entry[1],entry[2], __FILE__, __LINE__);
   }
 
   // That's it
@@ -582,7 +582,7 @@ std::list<XMLNode> ConfigStore::findSchemaNodes(std::string path, std::string ex
 }
 
 // Gets a string value from the config
-std::string ConfigStore::getStringValue(std::string path, std::string name)
+std::string ConfigStore::getStringValue(std::string path, std::string name, const char *file, int line)
 {
   xmlDocPtr doc = config;
   std::string value;
@@ -594,7 +594,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
     xpath="/GDC/" + path + "/" + name;
 
   // Only one thread may enter getStringValue
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex, file, line);
 
   // Check if node exists
   std::list<XMLNode> configNodes,schemaNodes;
@@ -624,7 +624,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
     }
 
     // Create node
-    setStringValue(path,name,defaultValue);
+    setStringValue(path,name,defaultValue,file,line);
 
     // Find it again
     configNodes=findConfigNodes(xpath);
@@ -656,7 +656,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name)
 }
 
 // Sets a string value in the config
-void ConfigStore::setStringValue(std::string path, std::string name, std::string value)
+void ConfigStore::setStringValue(std::string path, std::string name, std::string value, const char *file, int line)
 {
   xmlDocPtr doc = config;
   xmlNodePtr node,rootNode;
@@ -667,7 +667,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     xpath="/GDC/" + path + "/" + name;
 
   // Only one thread may enter setStringValue
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex, file, line);
 
   // Check if node exists
   std::list<XMLNode> configNodes, schemaNodes;
@@ -717,13 +717,13 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
 }
 
 // Returns a list of attribute values for a given path and attribute name
-std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::string attributeName) {
+std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::string attributeName, const char *file, int line) {
 
   std::list<XMLNode> nodes;
   std::list<std::string> values;
   xmlNodePtr n;
 
-  core->getThread()->lockMutex(accessMutex);
+  core->getThread()->lockMutex(accessMutex, file, line);
   nodes=findConfigNodes("/GDC/" + path);
   std::list<XMLNode>::iterator i;
   for(i=nodes.begin();i!=nodes.end();i++) {

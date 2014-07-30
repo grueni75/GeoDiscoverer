@@ -37,7 +37,7 @@ WidgetStatus::WidgetStatus() : WidgetPrimitive() {
 
 // Destructor
 WidgetStatus::~WidgetStatus() {
-  core->getFontEngine()->lockFont("sansSmall");
+  core->getFontEngine()->lockFont("sansSmall",__FILE__, __LINE__);
   if (firstStatusFontString) core->getFontEngine()->destroyString(firstStatusFontString);
   if (secondStatusFontString) core->getFontEngine()->destroyString(secondStatusFontString);
   core->getFontEngine()->unlockFont();
@@ -57,17 +57,17 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
   if (t>=nextUpdateTime) {
 
     // First check if the navigation engine is doing something
-    status=core->getNavigationEngine()->getStatus();
+    status=core->getNavigationEngine()->getStatus(__FILE__, __LINE__);
 
     // Then check if the map source is doing something
     if (status.size()==0)
-      status=core->getMapSource()->getStatus();
+      status=core->getMapSource()->getStatus(__FILE__, __LINE__);
 
     // Only display if a status is given
     if (status.size()!=0) {
 
       // Compute the graphical representation of the status
-      fontEngine->lockFont("sansSmall");
+      fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
       fontEngine->updateString(&firstStatusFontString,status.front(),labelWidth);
       textY=y+(iconHeight/2)+fontEngine->getLineHeight()/2-fontEngine->getFontHeight()/3;
       textX=x+(iconWidth/2)-(firstStatusFontString->getIconWidth())/2;

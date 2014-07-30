@@ -55,12 +55,12 @@ WidgetPathInfo::WidgetPathInfo() : WidgetPrimitive(), altitudeProfileAxisPointBu
   hideLocationIcon=true;
   firstTouchDown=true;
   prevX=0;
-  currentPathName=core->getConfigStore()->getStringValue("Navigation","pathInfoName");
-  currentPathLocked=core->getConfigStore()->getIntValue("Navigation","pathInfoLocked");
+  currentPathName=core->getConfigStore()->getStringValue("Navigation","pathInfoName",__FILE__, __LINE__);
+  currentPathLocked=core->getConfigStore()->getIntValue("Navigation","pathInfoLocked",__FILE__, __LINE__);
   updateVisualizationSignal=core->getThread()->createSignal();
   visualizationMutex=core->getThread()->createMutex("widget path info visualization mutex");
   widgetPathInfoThreadInfo=core->getThread()->createThread("widget path info thread",widgetPathInfoThread,this);
-  minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute");
+  minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute",__FILE__, __LINE__);
   quitWidgetPathInfoThread=false;
 }
 
@@ -72,7 +72,7 @@ WidgetPathInfo::~WidgetPathInfo() {
   core->getThread()->destroyThread(widgetPathInfoThreadInfo);
   core->getThread()->destroySignal(updateVisualizationSignal);
   core->getThread()->destroyMutex(visualizationMutex);
-  core->getFontEngine()->lockFont("sansNormal");
+  core->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
   if (pathNameFontString) core->getFontEngine()->destroyString(pathNameFontString);
   if (pathLengthFontString) core->getFontEngine()->destroyString(pathLengthFontString);
   if (pathAltitudeUpFontString) core->getFontEngine()->destroyString(pathAltitudeUpFontString);
@@ -81,7 +81,7 @@ WidgetPathInfo::~WidgetPathInfo() {
   core->getFontEngine()->unlockFont();
   if (altitudeProfileFillPointBuffer) delete altitudeProfileFillPointBuffer;
   if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
-  core->getFontEngine()->lockFont("sansTiny");
+  core->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
   if (altitudeProfileXTickFontStrings) {
     for (Int i=0;i<altitudeProfileXTickCount;i++)
       if (altitudeProfileXTickFontStrings[i]) core->getFontEngine()->destroyString(altitudeProfileXTickFontStrings[i]);
@@ -106,12 +106,12 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
   bool changed=WidgetPrimitive::work(t);
 
   // Redraw the widget if required
-  core->getThread()->lockMutex(visualizationMutex);
+  core->getThread()->lockMutex(visualizationMutex,__FILE__, __LINE__);
   if (redrawRequired) {
 
     // Update the labels
     FontEngine *fontEngine=core->getFontEngine();
-    fontEngine->lockFont("sansNormal");
+    fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
     fontEngine->updateString(&pathNameFontString,visualizationPathName,pathNameWidth);
     pathNameFontString->setX(x+pathNameOffsetX);
     pathNameFontString->setY(y+pathNameOffsetY);
@@ -140,7 +140,7 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
       altitudeProfileFillPointBuffer=NULL;
       if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
       altitudeProfileLinePointBuffer=NULL;
-      fontEngine->lockFont("sansNormal");
+      fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
       fontEngine->updateString(&noAltitudeProfileFontString,"No altitude profile");
       fontEngine->unlockFont();
       noAltitudeProfileFontString->setX(x+noAltitudeProfileOffsetX-noAltitudeProfileFontString->getIconWidth()/2);
@@ -167,7 +167,7 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
       hideLocationIcon=visualizationAltitudeProfileHideLocationIcon;
 
       // Create the axis
-      fontEngine->lockFont("sansTiny");
+      fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
       altitudeProfileAxisPointBuffer.reset();
       altitudeProfileAxisPointBuffer.addPoints(visualizationAltitudeProfileAxisPoints);
       for(Int i=0;i<visualizationAltitudeProfileXTickLabels.size();i++) {
@@ -253,7 +253,7 @@ void WidgetPathInfo::draw(Screen *screen, TimestampInMicroseconds t) {
 void WidgetPathInfo::resetPathVisibility(bool widgetVisible) {
   NavigationPath *path=currentPath;
   if (path) {
-    path->lockAccess();
+    path->lockAccess(__FILE__, __LINE__);
     if (path->getReverse()) {
       startIndex=0;
       endIndex=path->getSelectedSize()-2;
@@ -265,7 +265,7 @@ void WidgetPathInfo::resetPathVisibility(bool widgetVisible) {
     indexLen=endIndex-startIndex;
     currentPathName=path->getGpxFilename();
     path->unlockAccess();
-    core->getConfigStore()->setStringValue("Navigation","pathInfoName",currentPathName);
+    core->getConfigStore()->setStringValue("Navigation","pathInfoName",currentPathName,__FILE__, __LINE__);
   }
   core->getThread()->issueSignal(updateVisualizationSignal);
 }
@@ -317,7 +317,7 @@ void WidgetPathInfo::onPathChange(bool widgetVisible, NavigationPath *path, Navi
       case NavigationPathChangeTypeEndPositionAdded:
 
         // If the user has zoomed in, keep the zoom
-        path->lockAccess();
+        path->lockAccess(__FILE__, __LINE__);
         newEndIndex=path->getSelectedSize()-1;
         reversed=path->getReverse();
         maxEndIndex=path->getSelectedSize()-1;
@@ -357,7 +357,7 @@ void WidgetPathInfo::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int d
     indexLen=maxEndIndex+1;
   Int indexLenDiff = indexLen - (endIndex-startIndex+1);
   //DEBUG("scaleDiff=%f indexLenDiff=%d",scaleDiff,indexLenDiff);
-  currentPath->lockAccess();
+  currentPath->lockAccess(__FILE__, __LINE__);
   if (currentPath->getReverse()) {
     newEndIndex=endIndex+indexLenDiff/2;
     if (newEndIndex>maxEndIndex-1)
@@ -395,7 +395,7 @@ void WidgetPathInfo::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     if (!currentPath)
       return;
     Int dX=x-prevX;
-    currentPath->lockAccess();
+    currentPath->lockAccess(__FILE__, __LINE__);
     if (currentPath->getReverse()) {
       dX=-dX;
       if ((startIndex-dX>=0)&&(endIndex-dX<=maxEndIndex-1)) {
@@ -462,7 +462,7 @@ void WidgetPathInfo::updateVisualization() {
     if (currentPath) {
 
       // Get infos from path
-      currentPath->lockAccess();
+      currentPath->lockAccess(__FILE__, __LINE__);
       std::string pathName=currentPath->getGpxFilename();
       double pathLength=currentPath->getLength();
       double pathDuration=currentPath->getDuration();
@@ -713,7 +713,7 @@ void WidgetPathInfo::updateVisualization() {
     }
 
     // Update the variables for the next drawing round
-    core->getThread()->lockMutex(visualizationMutex);
+    core->getThread()->lockMutex(visualizationMutex,__FILE__, __LINE__);
     this->visualizationPathName=vPathName;
     this->visualizationPathLength=vPathLength;
     this->visualizationPathAltitudeUp=vPathAltitudeUp;

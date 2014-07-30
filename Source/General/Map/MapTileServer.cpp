@@ -88,7 +88,7 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, UInt
       return DownloadResultFileNotFound;
 
     case DownloadResultOtherFail:
-      mapSource->lockAccess();
+      mapSource->lockAccess(__FILE__, __LINE__);
       mapSource->setDownloadWarningOccured(true);
       mapSource->unlockAccess();
       break;

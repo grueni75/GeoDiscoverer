@@ -82,8 +82,8 @@ public:
   void getScales(Int zoomLevel, MapPosition pos, double &latScale, double &lngScale);
 
   // Getters and setters
-  virtual void lockAccess() {
-    core->getThread()->lockMutex(accessMutex);
+  virtual void lockAccess(const char *file, int line) {
+    core->getThread()->lockMutex(accessMutex, file, line);
   }
 
   virtual void unlockAccess() {

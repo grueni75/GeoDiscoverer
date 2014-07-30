@@ -36,7 +36,7 @@ Screen::Screen(Int DPI) {
   this->allowAllocation=false;
   this->DPI=DPI;
   this->orientation=graphicScreenOrientationProtrait;
-  this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock");
+  this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock",__FILE__, __LINE__);
   this->ellipseCoordinatesBuffer=bufferNotDefined;
 }
 

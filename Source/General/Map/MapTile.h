@@ -406,7 +406,7 @@ public:
     return lngWestMin+(lngEastMax-lngWestMin)/2;
   }
 
-  void setIsHidden(bool isHidden, bool fadeOutAnimation=true);
+  void setIsHidden(bool isHidden, const char *file, int line, bool fadeOutAnimation=true);
 
   GraphicTextureInfo getEndTexture() const {
     return endTexture;
