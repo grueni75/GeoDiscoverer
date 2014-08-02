@@ -314,14 +314,14 @@ void WidgetEngine::createGraphic() {
     parameters["repeat"]="0";
     addWidgetToPage("Path Tools",WidgetTypeButton,"Target At Center",    37.5, 93.0,0,10.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
-    parameters["uncheckedIconFilename"]="pathInfoLockOff";
-    parameters["uncheckedCommand"]="setPathInfoLock(0)";
-    parameters["checkedIconFilename"]="pathInfoLockOn";
-    parameters["checkedCommand"]="setPathInfoLock(1)";
-    parameters["stateConfigPath"]="Navigation";
-    parameters["stateConfigName"]="pathInfoLocked";
+    parameters["uncheckedIconFilename"]="zoomLevelLockOff";
+    parameters["uncheckedCommand"]="setZoomLevelLock(0)";
+    parameters["checkedIconFilename"]="zoomLevelLockOn";
+    parameters["checkedCommand"]="setZoomLevelLock(1)";
+    parameters["stateConfigPath"]="Map";
+    parameters["stateConfigName"]="zoomLevelLock";
     parameters["updateInterval"]="250000";
-    addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Path Info Lock",    12.5, 93.0,0,10.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Zoom Level Lock",    12.5, 93.0,0,10.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
     parameters["iconFilename"]="statusBackground";
     parameters["updateInterval"]="100000";
@@ -343,14 +343,14 @@ void WidgetEngine::createGraphic() {
     parameters["repeat"]="0";
     addWidgetToPage("Path Tools",WidgetTypeButton,"Set Active Route",   37.5, 80.0,0,89.5, 37.5,0,255,255,255,255,255,255,255,100,parameters);
     parameters.clear();
-    parameters["uncheckedIconFilename"]="zoomLevelLockOff";
-    parameters["uncheckedCommand"]="setZoomLevelLock(0)";
-    parameters["checkedIconFilename"]="zoomLevelLockOn";
-    parameters["checkedCommand"]="setZoomLevelLock(1)";
-    parameters["stateConfigPath"]="Map";
-    parameters["stateConfigName"]="zoomLevelLock";
+    parameters["uncheckedIconFilename"]="pathInfoLockOff";
+    parameters["uncheckedCommand"]="setPathInfoLock(0)";
+    parameters["checkedIconFilename"]="pathInfoLockOn";
+    parameters["checkedCommand"]="setPathInfoLock(1)";
+    parameters["stateConfigPath"]="Navigation";
+    parameters["stateConfigName"]="pathInfoLocked";
     parameters["updateInterval"]="250000";
-    addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Zoom Level Lock",   12.5, 80.0,0,89.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
+    addWidgetToPage("Path Tools",WidgetTypeCheckbox,"Path Info Lock",   12.5, 80.0,0,89.5, 12.5,0,255,255,255,255,255,255,255,100,parameters);
     pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
   }
 
