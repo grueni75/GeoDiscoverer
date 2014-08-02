@@ -53,7 +53,7 @@ NavigationTarget::~NavigationTarget() {
 void NavigationTarget::updateTileVisualization(std::list<MapContainer*> *mapContainers) {
 
   // Find all map tiles that overlap with this segment
-  core->getMapSource()->lockAccess();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   std::list<MapContainer*> foundContainers;
   if (!mapContainers) {
     foundContainers=core->getMapSource()->findMapContainersByGeographicCoordinate(pos);

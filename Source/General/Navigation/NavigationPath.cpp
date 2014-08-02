@@ -102,7 +102,7 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
   area.setLatSouth(latSouth-latExtend);
   area.setLngWest(lngWest-lngExtend);
   area.setLngEast(lngEast+lngExtend);
-  core->getMapSource()->lockAccess();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   if (!mapContainers) {
     foundContainers=core->getMapSource()->findMapContainersByGeographicArea(area);
   } else {
@@ -276,7 +276,7 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
   std::list<MapContainer*> foundContainers;
   MapArea area;
   area.setZoomLevel(visualization->getZoomLevel());
-  core->getMapSource()->lockAccess();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   if (!mapContainers) {
     foundContainers=core->getMapSource()->findMapContainersByGeographicCoordinate(pos,visualization->getZoomLevel());
   } else {
@@ -468,7 +468,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
     NavigationPathVisualization *visualization=*i;
 
     // Get the calibrator for this point
-    core->getMapSource()->lockAccess();
+    core->getMapSource()->lockAccess(__FILE__,__LINE__);
     bool deleteCalibrator=false;
     MapCalibrator *calibrator=NULL;
     if (pos!=NavigationPath::getPathInterruptedPos())
@@ -527,7 +527,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   }
 
   // Add this point to the path segments of all tiles it lies within
-  core->getMapSource()->lockAccess();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   std::list<MapContainer*> mapContainers = core->getMapSource()->findMapContainersByGeographicCoordinate(pos);
   updateCrossingTileSegments(&mapContainers, mapPositions.size()-1);
   core->getMapSource()->unlockAccess();
@@ -547,7 +547,7 @@ void NavigationPath::deinit() {
   zoomLevelVisualizations.clear();
 
   // Remove from all tiles the path segments
-  core->getMapSource()->lockAccess();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   std::vector<MapContainer*> *containers=core->getMapSource()->getMapContainers();
   for (std::vector<MapContainer*>::iterator i=containers->begin();i!=containers->end();i++) {
     std::vector<MapTile*> *tiles=(*i)->getMapTiles();
@@ -593,7 +593,7 @@ void NavigationPath::init() {
   core->getGraphicEngine()->unlockPathAnimators();
 
   // Create a visualization object for each zoom level
-  core->getMapSource()->lockAccess();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   for(Int zoomLevel=1;zoomLevel<core->getMapSource()->getZoomLevelCount();zoomLevel++) {
     NavigationPathVisualization *visualization=new NavigationPathVisualization();
     if (!visualization) {

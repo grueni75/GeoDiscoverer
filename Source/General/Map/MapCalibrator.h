@@ -86,7 +86,10 @@ public:
   // Returns the number of calibration points
   Int numberOfCalibrationPoints() const
   {
-    return calibrationPoints.size();
+    core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+    Int size=calibrationPoints.size();
+    core->getThread()->unlockMutex(accessMutex);
+    return size;
   }
 
   // Store the contents of the object in a binary file
@@ -96,9 +99,15 @@ public:
   static MapCalibrator *retrieve(char *&cacheData, Int &cacheSize);
 
   // Getters and setters
-  std::list<MapPosition*> *getCalibrationPoints()
+  std::list<MapPosition*> *lockCalibrationPoints()
   {
-      return &calibrationPoints;
+    core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+    return &calibrationPoints;
+  }
+
+  void unlockCalibrationPoints()
+  {
+    core->getThread()->unlockMutex(accessMutex);
   }
 
   MapCalibratorType getType() const {

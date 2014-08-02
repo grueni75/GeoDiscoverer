@@ -56,6 +56,9 @@ MapCalibrator::~MapCalibrator() {
 void MapCalibrator::addCalibrationPoint(MapPosition pos) {
   //DEBUG("Adding calibration point (%d %d %.2f %.2f)",pos.getX(),pos.getY(),pos.getLng().toDouble(),pos.getLat().toDouble());
 
+  // Ensure that only one thread is executing this function at a time
+  core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+
   // Convert theg geographic longitude / latitude to cartesian X / Y coordinates
   convertGeographicToCartesian(pos);
 
@@ -63,12 +66,13 @@ void MapCalibrator::addCalibrationPoint(MapPosition pos) {
   MapPosition *t=new MapPosition();
   if (!t) {
     FATAL("can not create map position",NULL);
-    return;
   }
   *t=pos;
 
   // Put it into the list
   calibrationPoints.push_back(t);
+
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Finds the nearest n calibration points

@@ -183,7 +183,7 @@ public:
     return core->getHomePath() + "/Map/" + folder + "/legend.png";
   }
 
-  virtual void lockAccess() {
+  virtual void lockAccess(const char *file, int line) {
   }
 
   virtual void unlockAccess() {

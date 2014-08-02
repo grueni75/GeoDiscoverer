@@ -387,23 +387,20 @@ MapTile *MapSourceMercatorTiles::findMapTileByGeographicArea(MapArea area, MapTi
 // Performs maintenance (e.g., recreate degraded search tree)
 void MapSourceMercatorTiles::maintenance() {
 
-  lockAccess(__FILE__, __LINE__);
-
   // Was the source modified?
   if (contentsChanged) {
 
     // Remove map containers from list until cache size is reached again
+    std::list<MapContainer*> obsoleteMapContainers;
+    lockAccess(__FILE__, __LINE__);
     for(std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();) {
       if (mapContainers.size()>mapContainerCacheSize) {
 
         // Remove container if it is not currently downloaded and if it is not visible
         MapContainer *c=*i;
         if ((!c->isDrawn())&&(c->getDownloadComplete()&&(!c->getOverlayGraphicInvalid()))) {
-          core->getMapCache()->removeTile(c->getMapTiles()->front());
-          core->getNavigationEngine()->removeGraphics(c);
+          obsoleteMapContainers.push_back(c);
           i=mapContainers.erase(i);
-          //DEBUG("removing map container 0x%08x",c);
-          delete c;
         } else {
           i++;
         }
@@ -412,19 +409,25 @@ void MapSourceMercatorTiles::maintenance() {
         break;
       }
     }
-    if (mapContainers.size()>mapContainerCacheSize) {
-      WARNING("map container list could not be reduced below %d entries",mapContainerCacheSize);
-    }
 
     // Recreate the search tree
     createSearchDataStructures();
+    unlockAccess();
+
+    // Delete the map containers
+    for(std::list<MapContainer*>::iterator i=obsoleteMapContainers.begin();i!=obsoleteMapContainers.end();i++) {
+      MapContainer *c=*i;
+      //DEBUG("deleting map container 0x%08x",c);
+      core->getMapCache()->removeTile(c->getMapTiles()->front());
+      core->getNavigationEngine()->removeGraphics(c);
+      delete c;
+    }
 
   }
 
   // Reset the download warning message
   downloadWarningOccured=false;
 
-  unlockAccess();
 }
 
 // Finds the calibrator for the given position

@@ -90,7 +90,7 @@ void MapContainer::writeCalibrationFile()
   }
 
   // Add the calibration points
-  std::list<MapPosition*> *calibrationPoints=mapCalibrator->getCalibrationPoints();
+  std::list<MapPosition*> *calibrationPoints=mapCalibrator->lockCalibrationPoints();
   for (std::list<MapPosition*>::const_iterator i=calibrationPoints->begin();i!=calibrationPoints->end();i++) {
     MapPosition *p=*i;
     node=xmlNewChild(rootNode,NULL,BAD_CAST "calibrationPoint", NULL);
@@ -123,6 +123,7 @@ void MapContainer::writeCalibrationFile()
       break;
     }
   }
+  mapCalibrator->unlockCalibrationPoints();
 
   // Write the file
   xmlDocDumpFormatMemoryEnc(doc, &buffer, &size, "UTF-8", 1);

@@ -180,6 +180,7 @@ void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line) {
       threadName = new std::string(s.str());
       if (!threadName) {
         FATAL("can not create string",NULL);
+        return;
       }
       threadNameMap[self]=threadName;
     }
@@ -191,8 +192,10 @@ void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line) {
     std::stringstream s;
     s << *threadName << " [" << relativeFile << ":" << line << "]";
     threadNameCopy = new std::string(s.str());
-    if (!threadNameCopy)
+    if (!threadNameCopy) {
       FATAL("can not create thread name string",NULL);
+      return;
+    }
     waitQueue->push_back(threadNameCopy);
     pthread_mutex_unlock(&accessMutex);
   }
@@ -200,13 +203,22 @@ void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line) {
   mutex->lockedThread=self;
   mutex->lockedCount=1;
   if ((createMutexLog)&&(threadNameCopy)) {
+    //DEBUG("mutex %s locked by %s",mutexNameMap[mutex]->c_str(),threadNameCopy->c_str());
     pthread_mutex_lock(&accessMutex);
     waitQueue->remove(threadNameCopy);
     std::string *threadNameLocked = new std::string(*threadNameCopy + " (locked)");
     if (threadNameLocked==NULL) {
       FATAL("can not create locked thread name string",NULL);
+      return;
     }
     delete threadNameCopy;
+    for(std::list<std::string*>::iterator i=waitQueue->begin();i!=waitQueue->end();i++) {
+      std::string *entry = *i;
+      if (entry->find("locked")!=std::string::npos) {
+        FATAL("mutex locked twice!",NULL);
+        return;
+      }
+    }
     waitQueue->push_back(threadNameLocked);
     pthread_mutex_unlock(&accessMutex);
   }
@@ -218,7 +230,6 @@ void Thread::unlockMutex(ThreadMutexInfo *mutex) {
   if (mutex->lockedCount!=0)
     return;
   mutex->lockedThread=0;
-  pthread_mutex_unlock(&mutex->pthreadMutex);
   if (createMutexLog) {
     pthread_mutex_lock(&accessMutex);
     std::list<std::string*> *waitQueue;
@@ -236,10 +247,12 @@ void Thread::unlockMutex(ThreadMutexInfo *mutex) {
             break;
           }
         }
+        //DEBUG("mutex %s unlocked by %s",mutexNameMap[mutex]->c_str(),threadName->c_str());
       }
     }
     pthread_mutex_unlock(&accessMutex);
   }
+  pthread_mutex_unlock(&mutex->pthreadMutex);
 }
 
 // Creates a signal

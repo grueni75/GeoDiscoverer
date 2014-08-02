@@ -84,7 +84,7 @@ void MapCache::createGraphic() {
   }
 
   // Put all tiles from the map source in the uncached list
-  core->getMapSource()->lockAccess();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   std::vector<MapContainer *> *maps=core->getMapSource()->getMapContainers();
   for (std::vector<MapContainer*>::const_iterator i=maps->begin();i!=maps->end();i++) {
     MapContainer *c=*i;

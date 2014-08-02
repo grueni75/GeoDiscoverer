@@ -149,7 +149,10 @@ void NavigationPathVisualization::optimizeGraphic() {
 
 // Compute the distance in pixels between two points
 MapCalibrator *NavigationPathVisualization::findCalibrator(MapPosition pos, bool &deleteCalibrator) {
-  return core->getMapSource()->findMapCalibrator(zoomLevel,pos,deleteCalibrator);
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
+  MapCalibrator *c=core->getMapSource()->findMapCalibrator(zoomLevel,pos,deleteCalibrator);
+  core->getMapSource()->unlockAccess();
+  return c;
 }
 
 // Adds a new point to the visualization

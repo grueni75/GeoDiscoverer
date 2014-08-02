@@ -883,7 +883,7 @@ void NavigationEngine::updateMapGraphic() {
   std::list<MapContainer*> containers;
 
   // Get the current unfinished list
-  core->getMapSource()->lockAccess();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   containers = unvisualizedMapContainers;
   unvisualizedMapContainers.clear();
   core->getMapSource()->unlockAccess();
@@ -901,7 +901,7 @@ void NavigationEngine::updateMapGraphic() {
   }
 
   // Indicate that all tiles have been processed
-  core->getMapSource()->lockAccess();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   for (std::list<MapContainer*>::iterator i=containers.begin();i!=containers.end();i++) {
     (*i)->setOverlayGraphicInvalid(false);
   }

@@ -293,6 +293,7 @@ void MapDownloader::downloadMapImages() {
 
           // Write the gdm file
           if (tileAddedToArchive) {
+            //DEBUG("writing calibration file of map container 0x%08x",mapContainer);
             mapContainer->writeCalibrationFile();
             std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives(__FILE__, __LINE__);
             mapArchives->back()->writeChanges();

@@ -145,7 +145,7 @@ void MapEngine::initMap()
     mapPos.setLatScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","latScale", __FILE__, __LINE__));
     mapPos.setLngScale(core->getConfigStore()->getDoubleValue("Map/LastPosition","lngScale", __FILE__, __LINE__));
     unlockMapPos();
-    core->getMapSource()->lockAccess();
+    core->getMapSource()->lockAccess(__FILE__,__LINE__);
     MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
     core->getMapSource()->unlockAccess();
     //DEBUG("tile=%08x",tile);
@@ -756,7 +756,7 @@ void MapEngine::updateMap() {
     // Find the map tile that closest matches the position
     // Lock the zoom level if the zoom did not change
     // Search all maps if no tile can be found for given zoom level
-    core->getMapSource()->lockAccess();
+    core->getMapSource()->lockAccess(__FILE__,__LINE__);
     //DEBUG("lng=%f lat=%f",newMapPos.getLng(),newMapPos.getLat());
     MapTile *bestMapTile=core->getMapSource()->findMapTileByGeographicCoordinate(newMapPos,zoomLevel,zoomLevelLock);
     //PROFILE_ADD("best map tile search");
@@ -1027,18 +1027,18 @@ void MapEngine::setMaxTiles() {
 // Sets a new map position
 void MapEngine::setMapPos(MapPosition mapPos)
 {
-    bool updateMap = false;
-    core->getMapSource()->lockAccess();
-    MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
-    core->getMapSource()->unlockAccess();
-    if (tile) {
-      core->getThread()->lockMutex(mapPosMutex, __FILE__, __LINE__);
-      requestedMapPos = mapPos;
-      core->getThread()->unlockMutex(mapPosMutex);
-      setForceMapUpdate(__FILE__, __LINE__);
-    } else {
-      DEBUG("requested map pos has been ignored because map contains no tile",NULL);
-    }
+  bool updateMap = false;
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
+  MapTile *tile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,0,false,NULL);
+  core->getMapSource()->unlockAccess();
+  if (tile) {
+    core->getThread()->lockMutex(mapPosMutex, __FILE__, __LINE__);
+    requestedMapPos = mapPos;
+    core->getThread()->unlockMutex(mapPosMutex);
+    setForceMapUpdate(__FILE__, __LINE__);
+  } else {
+    DEBUG("requested map pos has been ignored because map contains no tile",NULL);
+  }
 }
 
 
