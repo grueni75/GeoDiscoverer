@@ -43,6 +43,7 @@ NavigationPath::NavigationPath() {
   minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute", __FILE__, __LINE__);
   minAltitudeChange=core->getConfigStore()->getDoubleValue("Navigation","minAltitudeChange", __FILE__, __LINE__);
   averageTravelSpeed=core->getConfigStore()->getDoubleValue("Navigation","averageTravelSpeed", __FILE__, __LINE__);
+  xmlSaveRetries=core->getConfigStore()->getIntValue("General","xmlSaveRetries", __FILE__, __LINE__);
   isInit=false;
   reverse=false;
   lastValidAltiudeMetersPoint=NavigationPath::getPathInterruptedPos();

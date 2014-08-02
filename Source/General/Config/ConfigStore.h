@@ -37,6 +37,9 @@ protected:
   // Indicates that the xml parser is initialized
   static bool parserInitialized;
 
+  // Number of times to retry a XML save operation before aborting
+  Int xmlSaveRetries;
+
   // Name of the config file
   std::string configFilepath;
 

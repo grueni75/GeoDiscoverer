@@ -31,6 +31,11 @@
                   </xsd:restriction>
                 </xsd:simpleType>
               </xsd:element>
+              <xsd:element name="xmlSaveRetries" type="xsd:integer" default="3">
+                <xsd:annotation>
+                  <xsd:documentation>Number of times to retry a XML save operation before aborting.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="maintenancePeriod" type="xsd:integer" default="60">
                 <xsd:annotation>
                   <xsd:documentation>Time in seconds between maintenance operations (storing unsaved data, optimizing data structures, ...).</xsd:documentation>
@@ -61,12 +66,12 @@
                   <xsd:documentation>Writes mutex locking messages into a file in the log directory if ticked.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="mutexLogUpdateInterval" type="xsd:boolean" default="10">
+              <xsd:element name="mutexLogUpdateInterval" type="xsd:integer" default="10">
                 <xsd:annotation>
                   <xsd:documentation>Distance in seconds between updates of the mutex log.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="writeConfigMinWaitTime" type="xsd:boolean" default="1" >
+              <xsd:element name="writeConfigMinWaitTime" type="xsd:integer" default="1" >
                 <xsd:annotation>
                   <xsd:documentation>Minimum distance in seconds between writes of the config store.</xsd:documentation>
                 </xsd:annotation>

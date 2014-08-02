@@ -180,10 +180,17 @@ void NavigationPath::writeGPXFile() {
 
   // Write the file
   std::string tempFilepath = filepath + "+";
-  if (xmlSaveFormatFileEnc(tempFilepath.c_str(), doc, "UTF-8", 1)==-1) {
-    ERROR("can not write gpx file <%s>",tempFilepath.c_str());
+  Int tries;
+  for(tries=0;tries<xmlSaveRetries;tries++) {
+    if (xmlSaveFormatFileEnc(tempFilepath.c_str(), doc, "UTF-8", 1)!=-1) {
+      break;
+    }
+  }
+  if (tries>=xmlSaveRetries) {
+    FATAL("can not write gpx file <%s>",tempFilepath.c_str());
     return;
   }
+
   rename(tempFilepath.c_str(),filepath.c_str());
   //DEBUG("path storing is complete",NULL);
 

@@ -32,7 +32,7 @@ class NavigationPath {
 
 protected:
 
-
+  Int xmlSaveRetries;                             // Number of times to retry a XML save operation before aborting
   std::vector<MapPosition> mapPositions;          // List of map positions the path consists of
   Int startIndex;                                 // Current start in mapPosition list
   Int endIndex;                                   // Current end in mapPosition list

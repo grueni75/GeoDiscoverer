@@ -374,7 +374,13 @@ void ConfigStore::write()
       return;
     }
     std::string tempFilepath = configFilepath + "+";
-    if (xmlSaveFormatFileEnc(tempFilepath.c_str(), doc, "UTF-8", 1)==-1) {
+    Int tries;
+    for(tries=0;tries<xmlSaveRetries;tries++) {
+      if (xmlSaveFormatFileEnc(tempFilepath.c_str(), doc, "UTF-8", 1)!=-1) {
+        break;
+      }
+    }
+    if (tries>=xmlSaveRetries) {
       FATAL("can not write configuration file <%s>",configFilepath.c_str());
       return;
     }
