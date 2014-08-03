@@ -49,6 +49,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Path.FillType;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Address;
@@ -63,6 +64,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.support.v4.widget.DrawerLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -72,10 +74,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -92,9 +98,10 @@ public class ViewMap extends GDActivity {
   GDMapSurfaceView mapSurfaceView = null;
   TextView messageView = null;
   TextView busyTextView = null;
-  FrameLayout viewMapRootLayout = null;
+  DrawerLayout viewMapRootLayout = null;
   LinearLayout messageLayout = null;
   LinearLayout splashLayout = null;
+  ListView navDrawerList = null;
   
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -757,12 +764,14 @@ public class ViewMap extends GDActivity {
   /** Defines all entries in the navigation drawer */
   ArrayList<GDNavDrawerItem> createNavDrawerEntries() {
     ArrayList<GDNavDrawerItem> entries = new ArrayList<GDNavDrawerItem>();
-    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_info_details,getString(R.string.show_messages)));
-    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_preferences,getString(R.string.preferences)));
-    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_add,getString(R.string.add_tracks_as_routes)));
-    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_delete,getString(R.string.remove_routes)));
-    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_revert,getString(R.string.reset)));
-    entries.add(new GDNavDrawerItem(android.R.drawable.ic_menu_close_clear_cancel,getString(R.string.exit)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_APP_INFO,R.drawable.icon,null)); // special entry for app info
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_LEGEND,android.R.drawable.ic_menu_view,getString(R.string.show_legend)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_ADD_TRACKS_AS_ROUTES,android.R.drawable.ic_menu_add,getString(R.string.add_tracks_as_routes)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_REMOVE_ROUTES,android.R.drawable.ic_menu_delete,getString(R.string.remove_routes)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_TOGGLE_MESSAGES,android.R.drawable.ic_menu_info_details,getString(R.string.toggle_messages)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_PREFERENCES,android.R.drawable.ic_menu_preferences,getString(R.string.preferences)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_RESET,android.R.drawable.ic_menu_revert,getString(R.string.reset)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_EXIT,android.R.drawable.ic_menu_close_clear_cancel,getString(R.string.exit)));
     return entries;
   }
   
@@ -875,9 +884,79 @@ public class ViewMap extends GDActivity {
     mapSurfaceView.setCoreObject(coreObject);
     messageView = (TextView) findViewById(R.id.view_map_message_text_view);
     busyTextView = (TextView) findViewById(R.id.view_map_busy_text_view);
-    viewMapRootLayout = (FrameLayout) findViewById(R.id.view_map_root_layout);
+    viewMapRootLayout = (DrawerLayout) findViewById(R.id.view_map_root_layout);
     messageLayout = (LinearLayout) findViewById(R.id.view_map_message_layout);
     splashLayout = (LinearLayout) findViewById(R.id.view_map_splash_layout);
+    navDrawerList = (ListView) findViewById(R.id.view_map_nav_drawer);
+    navDrawerList.setAdapter(new GDNavDrawerAdapter((GDActivity)this,createNavDrawerEntries()));
+    navDrawerList.setOnItemClickListener(new OnItemClickListener() {
+
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        GDNavDrawerAdapter adapter = (GDNavDrawerAdapter)parent.getAdapter();
+        GDNavDrawerItem item = adapter.entries.get(position);
+        switch (item.id) {
+          case GDNavDrawerItem.ID_PREFERENCES:
+            if (mapSurfaceView!=null) {
+              Intent myIntent = new Intent(getApplicationContext(), Preferences.class);
+              startActivityForResult(myIntent, SHOW_PREFERENCE_REQUEST);
+            }
+            break;
+          case GDNavDrawerItem.ID_RESET:
+            if (mapSurfaceView!=null) {
+              AlertDialog.Builder builder = new AlertDialog.Builder(ViewMap.this);
+              builder.setTitle(getTitle());
+              builder.setMessage(R.string.reset_question);
+              builder.setCancelable(true);
+              builder.setPositiveButton(R.string.yes,
+                  new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                      restartCore(true);
+                    }
+                  });
+              builder.setNegativeButton(R.string.no, null);
+              builder.setIcon(android.R.drawable.ic_dialog_alert);
+              AlertDialog alert = builder.create();
+              alert.show();
+            }
+            break;
+          case GDNavDrawerItem.ID_EXIT:
+            busyTextView.setText(" " + getString(R.string.stopping_core_object) + " ");
+            Message m=Message.obtain(coreObject.messageHandler);
+            m.what = GDCore.STOP_CORE;
+            coreObject.messageHandler.sendMessage(m);
+            break;
+          case GDNavDrawerItem.ID_TOGGLE_MESSAGES:
+            if (messageLayout.getVisibility()==LinearLayout.VISIBLE) {
+              messageLayout.setVisibility(LinearLayout.INVISIBLE);
+            } else {
+              messageView.setText(GDApplication.messages);
+              messageLayout.setVisibility(LinearLayout.VISIBLE);
+            }
+            viewMapRootLayout.requestLayout();
+            break;
+          case GDNavDrawerItem.ID_ADD_TRACKS_AS_ROUTES:
+            addTracksAsRoutes();
+            break;
+          case GDNavDrawerItem.ID_REMOVE_ROUTES:
+            removeRoutes();
+            break;
+          case GDNavDrawerItem.ID_SHOW_LEGEND:
+            String legendPath = coreObject.executeCoreCommand("getMapLegendPath()");
+            File legendPathFile = new File(legendPath);
+            if (!legendPathFile.exists()) {
+              errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder()"),legendPath));
+            } else {
+              Intent intent = new Intent();
+              intent.setAction(Intent.ACTION_VIEW);
+              intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
+              startActivity(intent);
+            }
+            break;
+        }
+        navDrawerList.setItemChecked(position, false);
+        viewMapRootLayout.closeDrawer(navDrawerList);
+      }
+    });
     setSplashVisibility(true); // to get the correct busy text
     setSplashVisibility(false);
     updateViewConfiguration(getResources().getConfiguration());
@@ -891,6 +970,9 @@ public class ViewMap extends GDActivity {
     // Prepare activity for gingerbread
     onCreateGingerbread();
     
+    // Inform the user about the app drawer
+    Toast.makeText(ViewMap.this,getString(R.string.nav_drawer_hint), Toast.LENGTH_LONG).show();
+
     /* Start test thread
     new Thread(new Runnable() {
       public void run() {
@@ -1079,95 +1161,7 @@ public class ViewMap extends GDActivity {
     updateViewConfiguration(newConfig);
           
   }
-  
-  /** Called when a option menu shall be created */  
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.view_map, menu);
-    return true;
-  }
-
-  /** Called when a option menu shall be displayed */  
-  @Override
-  public boolean onPrepareOptionsMenu(Menu menu) {
-    super.onPrepareOptionsMenu(menu);
-    if (messageLayout.getVisibility()==LinearLayout.VISIBLE) {
-      menu.findItem(R.id.toggle_messages).setTitle(R.string.hide_messages);
-    } else {
-      menu.findItem(R.id.toggle_messages).setTitle(R.string.show_messages);
-    }
-    return true;
-  }
-
-  /** Called when an option menu item has been selected */
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-      switch (item.getItemId()) {
-          case R.id.preferences:
-              if (mapSurfaceView!=null) {
-                Intent myIntent = new Intent(getApplicationContext(), Preferences.class);
-                startActivityForResult(myIntent, SHOW_PREFERENCE_REQUEST);
-              }
-              return true;
-          case R.id.reset:
-            if (mapSurfaceView!=null) {
-              AlertDialog.Builder builder = new AlertDialog.Builder(this);
-              builder.setTitle(getTitle());
-              builder.setMessage(R.string.reset_question);
-              builder.setCancelable(true);
-              builder.setPositiveButton(R.string.yes,
-                  new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                      restartCore(true);
-                    }
-                  });
-              builder.setNegativeButton(R.string.no, null);
-              builder.setIcon(android.R.drawable.ic_dialog_alert);
-              AlertDialog alert = builder.create();
-              alert.show();
-            }
-            return true;
-          case R.id.exit:
-            busyTextView.setText(" " + getString(R.string.stopping_core_object) + " ");
-            Message m=Message.obtain(coreObject.messageHandler);
-            m.what = GDCore.STOP_CORE;
-            coreObject.messageHandler.sendMessage(m);
-            return true;
-          case R.id.toggle_messages:
-            if (messageLayout.getVisibility()==LinearLayout.VISIBLE) {
-              messageLayout.setVisibility(LinearLayout.INVISIBLE);
-              item.setTitle(R.string.show_messages);
-            } else {
-              messageView.setText(GDApplication.messages);
-              messageLayout.setVisibility(LinearLayout.VISIBLE);
-              item.setTitle(R.string.hide_messages);
-            }
-            viewMapRootLayout.requestLayout();
-            return true;
-          case R.id.add_tracks_as_routes:
-            addTracksAsRoutes();
-            return true;
-          case R.id.remove_routes:
-            removeRoutes();
-            return true;
-          case R.id.show_legend:
-            String legendPath = coreObject.executeCoreCommand("getMapLegendPath()");
-            File legendPathFile = new File(legendPath);
-            if (!legendPathFile.exists()) {
-              errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder()"),legendPath));
-            } else {
-              Intent intent = new Intent();
-              intent.setAction(Intent.ACTION_VIEW);
-              intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
-              startActivity(intent);
-            }
-            return true;
-          default:
-              return super.onOptionsItemSelected(item);
-      }
-  }  
-  
+    
   /** Finds the geographic position for the given address */
   private class LocationFromAddressTask extends AsyncTask<Void, Void, Void> {
 
@@ -1238,6 +1232,12 @@ public class ViewMap extends GDActivity {
           return true;
         }
       }
+    }
+    if (keyCode == KeyEvent.KEYCODE_MENU) {
+      if (!viewMapRootLayout.isDrawerOpen(navDrawerList)) {
+        viewMapRootLayout.openDrawer(navDrawerList);
+      }
+      return true;
     }
     return super.onKeyDown(keyCode,event);
   }

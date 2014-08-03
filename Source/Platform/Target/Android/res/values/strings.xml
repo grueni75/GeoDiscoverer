@@ -11,10 +11,10 @@
 	<string name="log_directory">GeoDiscoverer/log</string>
 	<string name="button_label_ok">OK</string>
 	<string name="preferences">Preferences</string>
-	<string name="remove_routes">Remove Routes</string><string name="add_tracks_as_routes">Add Tracks as Routes</string><string name="track_as_route_selection_question">Select the tracks to copy to the route directory:</string><string name="route_remove_selection_question">Select the routes to delete from the route directory:</string>
+	<string name="remove_routes">Remove routes</string><string name="add_tracks_as_routes">Add tracks as routes</string><string name="track_as_route_selection_question">Select the tracks to copy to the route directory:</string><string name="route_remove_selection_question">Select the routes to delete from the route directory:</string>
 	<string name="finished">Finished</string>
 	<string name="cancel">Cancel</string>
-	<string name="copying_tracks">Copying tracks from Track to Route directory</string><string name="removing_routes">Removing routes from Route directory</string>
+	<string name="copying_tracks">Copying tracks from track to route directory</string><string name="removing_routes">Removing routes from route directory</string>
 	<string name="starting_core_object">Starting core&#8230;</string>
 	<string name="restarting_core_object">Restarting core&#8230;</string>
 	<string name="stopping_core_object">Stopping core&#8230;</string>
@@ -44,6 +44,7 @@
 	<string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
 	<string name="show_messages">Show messages</string>
 	<string name="hide_messages">Hide messages</string>
+  <string name="toggle_messages">Toggle messages</string>
 	<string name="set_target_at_map_center">Set target at map center</string>
 	<string name="set_target_at_location">Set target at location</string>
 	<string name="hide_target">Hide target</string>
@@ -58,13 +59,12 @@
 	<string name="create_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;?</string>
 	<string name="cannot_create_map_folder">Map folder &lt;%1$s&gt; could not be created!</string>
 	<string name="navigation_drawer_menu_entry_icon_description">Icon of the menu entry</string>
-  <string name="navigation_drawer_legend_entry_image_description">Image showing the legend of the map</string>
-  <string name="navigation_drawer_legend_entry_title">Legend:</string>
+  <string name="navigation_drawer_app_info_icon_description">Image showing the icon of the app</string>
   <string name="view_map_splash_image_description">Image showing the icon of the app</string>
   <string name="show_legend">Show legend</string>
   <string name="map_has_no_legend">Map &lt;%1$s&gt; has no legend! You can add one by creating the picture &lt;%2$s&gt;.</string>
   <string name="download_manager_not_available">Your Android version does not support the download manager. Please download the file manually.</string>
-  <string name="downloading_gpx_to_route_directory">Downloading GPX to Route directory of GeoDiscoverer.</string>
+  <string name="downloading_gpx_to_route_directory">Downloading GPX to route directory of GeoDiscoverer.</string>
   <string name="skipping_download">Skipping download because there is already one ongoing.</string>
   <string name="download_failed">Downloading of file &lt;%1$s&gt; failed!</string>
   <string name="cannot_read_uri">Could not read contents of URI &lt;%1$s&gt;!</string>
@@ -74,4 +74,5 @@
   <string name="importing_route">Importing route &lt;%1$s&gt;</string>
   <string name="cannot_import_route">Could not import route &lt;%1$s&gt; (I/O error)!</string>
   <string name="import_map">Import map</string>
+  <string name="nav_drawer_hint">Swipe from the left edge to the right to open menu.</string>
 </resources>

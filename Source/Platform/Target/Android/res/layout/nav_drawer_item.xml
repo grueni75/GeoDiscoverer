@@ -6,11 +6,11 @@
     <ImageView
         android:id="@+id/nav_drawer_item_icon"
         android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
         android:contentDescription="@string/navigation_drawer_menu_entry_icon_description"
         />
 

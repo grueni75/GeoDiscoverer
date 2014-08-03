@@ -23,27 +23,37 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 /** Holds the data of an item in the navigation drawer */
 public class GDNavDrawerItem {
 
+  // Choices for IDs
+  public static final int ID_PREFERENCES = 0;
+  public static final int ID_RESET = 1;
+  public static final int ID_EXIT = 2;
+  public static final int ID_TOGGLE_MESSAGES = 3;
+  public static final int ID_ADD_TRACKS_AS_ROUTES = 4;
+  public static final int ID_REMOVE_ROUTES = 5;
+  public static final int ID_SHOW_LEGEND = 6;
+  public static final int ID_APP_INFO = 7;
+  
+  // Fields
+  int id;
   int icon;
   String title;
-  Bitmap legendBitmap;
   
-  public GDNavDrawerItem(int icon, String title) {
+  // Views
+  ImageView iconView=null;
+  TextView titleView=null;
+  TextView appVersionView=null;
+  
+  // Constructor
+  public GDNavDrawerItem(int id, int icon, String title) {
     super();
+    this.id=id;
     this.icon=icon;
     this.title=title;
-    this.legendBitmap=null;
-  }
-  
-  public GDNavDrawerItem(String legendImageFilename) {
-    super();
-    this.icon=0;
-    this.title=null;
-    this.legendBitmap=BitmapFactory.decodeFile(legendImageFilename);
   }
 }
