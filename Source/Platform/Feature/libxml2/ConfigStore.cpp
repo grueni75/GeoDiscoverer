@@ -24,11 +24,33 @@
 
 namespace GEODISCOVERER {
 
+// Error handlers for libxml2
+void xmlGenericErrorHandler(void *ctx, const char *msg, ...) {
+  const Int bufferSize=256;
+  char string[bufferSize];
+  char *message=strdup(msg);
+  message[strlen(message)-1]=0; // skip new line
+  va_list arg_ptr;
+  va_start(arg_ptr, msg);
+  vsnprintf(string, bufferSize, message, arg_ptr);
+  va_end(arg_ptr);
+  DEBUG("libxml2 generic error = %s",string);
+  free(message);
+}
+void xmlStructuredErrorHandler(void *ctx, xmlErrorPtr p) {
+  char *message=strdup(p->message);
+  message[strlen(message)-1]=0; // skip new line
+  DEBUG("libxml2 structured error = %s",message);
+  free(message);
+}
+
 // Inits the data
 void ConfigStore::init()
 {
   if (!ConfigStore::parserInitialized) {
     xmlInitParser();
+    xmlSetStructuredErrorFunc(NULL, &xmlStructuredErrorHandler);
+    xmlSetGenericErrorFunc(NULL, &xmlGenericErrorHandler);
     ConfigStore::parserInitialized=true;
   }
   xmlKeepBlanksDefault(0);
