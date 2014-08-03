@@ -84,6 +84,8 @@ Core::Core(std::string homePath, Int screenDPI) {
   commander = NULL;
   fontEngine = NULL;
   navigationEngine = NULL;
+  fileOpenForWritingRetries = 10;
+  fileOpenForWritingWaitTime = 100;
 
   // Create core objects that are required early
   if (!(thread=new Thread())) {
@@ -300,6 +302,8 @@ bool Core::init() {
 
   // Get config
   maintenancePeriod=configStore->getIntValue("General","maintenancePeriod", __FILE__, __LINE__);
+  fileOpenForWritingRetries=configStore->getIntValue("General","fileOpenForWritingRetries", __FILE__, __LINE__);
+  fileOpenForWritingWaitTime=configStore->getIntValue("General","fileOpenForWritingWaitTime", __FILE__, __LINE__);
 
   // Create mutexes and signals for thread communication
   mapUpdateStartSignal=thread->createSignal();

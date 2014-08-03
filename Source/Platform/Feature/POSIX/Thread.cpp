@@ -412,8 +412,17 @@ void Thread::debugMutexLocks() {
 
     // Open the mutex debug log
     pthread_mutex_lock(&accessMutex);
-    if (!(mutexDebugLog=fopen(logPath.c_str(),"w"))) {
-      FATAL("can not open mutex log for writing!", NULL);
+    Int tries;
+    for(tries=0;tries<core->getFileOpenForWritingRetries();tries++) {
+      DEBUG("tries=%d",tries);
+      if ((mutexDebugLog=fopen(logPath.c_str(),"w"))) {
+        break;
+      }
+      usleep(core->getFileOpenForWritingWaitTime());
+    }
+    if (tries>=core->getFileOpenForWritingRetries()) {
+      FATAL("can not open mutex log for writing!",NULL);
+      return;
     } else {
       for(ThreadMutexWaitQueueMap::iterator i=mutexWaitQueueMap.begin();i!=mutexWaitQueueMap.end();i++) {
         std::list<std::string*> *waitQueue = i->second;

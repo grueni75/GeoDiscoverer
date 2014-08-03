@@ -35,10 +35,7 @@
 	<string name="location_not_found">Can not find location &lt;%s&gt;</string>
 	<string name="cannot_copy_file">Can not copy file &lt;%1$s&gt; to &lt;%2$s&gt;!</string>
 	<string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
-	<string name="notification_activity_active_message">Taking care of your position.</string>
-	<string name="notification_activity_inactive_recording_message">Recording your position.</string>
-	<string name="notification_activity_inactive_metawatch_message">Sending your position to Metawatch.</string>
-	<string name="notification_activity_inactive_recording_and_metawatch_message">Recording your position and sending it to Metawatch.</string>
+	<string name="notification_service_in_foreground_message">Taking care of your position.</string>
 	<string name="notification_title">Geo Discoverer</string>
 	<string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
 	<string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>

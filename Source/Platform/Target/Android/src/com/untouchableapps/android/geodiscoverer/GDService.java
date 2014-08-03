@@ -44,6 +44,7 @@ public class GDService extends Service {
   
   // Flags
   boolean locationWatchStarted = false;
+  boolean serviceInForeground = false;
 
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -183,14 +184,13 @@ public class GDService extends Service {
         locationWatchStarted = true;
       }
             
-      // Inform the user
-      if (notification!=null) {
-        stopForeground(true);
-        //notificationManager.cancel(R.string.notification_title);
+      // Set the service to foreground
+      if (!serviceInForeground) {
+        notification = new Notification(R.drawable.status, getText(R.string.notification_service_in_foreground_message), System.currentTimeMillis());
+        notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_service_in_foreground_message), pendingIntent);
+        startForeground(R.string.notification_title, notification);
+        serviceInForeground=true;
       }
-      notification = new Notification(R.drawable.status, getText(R.string.notification_activity_active_message), System.currentTimeMillis());
-      notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_activity_active_message), pendingIntent);
-      startForeground(R.string.notification_title, notification);
     }
     if (intent.getAction().equals("coreInitialized")) {
       metaWatchAppActive = coreObject.configStoreGetStringValue("MetaWatch", "activateMetaWatchApp").equals("1");
@@ -205,20 +205,11 @@ public class GDService extends Service {
       if ((!metaWatchAppActive)&&(!recordingPosition)) {
         locationManager.removeUpdates(coreObject);
         locationWatchStarted = false;
+        if (serviceInForeground) {
+          stopForeground(true);
+          serviceInForeground=false;
+        }
         stopSelf();
-      } else {
-        stopForeground(true);
-        //notificationManager.cancel(R.string.notification_title);
-        CharSequence message;
-        if ((metaWatchAppActive)&&(recordingPosition))
-          message = getText(R.string.notification_activity_inactive_recording_and_metawatch_message);
-        else if (metaWatchAppActive)
-          message = getText(R.string.notification_activity_inactive_metawatch_message);
-        else
-          message = getText(R.string.notification_activity_inactive_recording_message);
-        notification = new Notification(R.drawable.status, message, System.currentTimeMillis());
-        notification.setLatestEventInfo(this, getText(R.string.notification_title), message, pendingIntent);
-        startForeground(R.string.notification_title, notification);
       }
 
     }

@@ -53,7 +53,6 @@ ConfigStore::ConfigStore() {
   init();
   read();
 
-  xmlSaveRetries=getIntValue("General","xmlSaveRetries", __FILE__, __LINE__);
   writeConfigMinWaitTime=getIntValue("General","writeConfigMinWaitTime", __FILE__, __LINE__);
 }
 

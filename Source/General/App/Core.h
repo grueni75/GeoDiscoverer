@@ -140,6 +140,10 @@ protected:
   // Time in seconds between storing of unsaved data
   Int maintenancePeriod;
 
+  // Handling of retries when opening a file for writing
+  Int fileOpenForWritingRetries;
+  TimestampInMicroseconds fileOpenForWritingWaitTime;
+
   // Components
   Debug *debug;
   ProfileEngine *profileEngine;
@@ -318,6 +322,13 @@ public:
     return isInitialized;
   }
 
+  Int getFileOpenForWritingRetries() const {
+    return fileOpenForWritingRetries;
+  }
+
+  TimestampInMicroseconds getFileOpenForWritingWaitTime() const {
+    return fileOpenForWritingWaitTime;
+  }
 };
 
 // Pointer to the core

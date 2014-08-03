@@ -31,9 +31,14 @@
                   </xsd:restriction>
                 </xsd:simpleType>
               </xsd:element>
-              <xsd:element name="xmlSaveRetries" type="xsd:integer" default="3">
+              <xsd:element name="fileOpenForWritingRetries" type="xsd:integer" default="10">
                 <xsd:annotation>
-                  <xsd:documentation>Number of times to retry a XML save operation before aborting.</xsd:documentation>
+                  <xsd:documentation>Number of times to retry a file open for writing operation before aborting.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="fileOpenForWritingWaitTime" type="xsd:integer" default="100">
+                <xsd:annotation>
+                  <xsd:documentation>Wait time in microseconds after a file open for writing operation has failed before retrying.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="maintenancePeriod" type="xsd:integer" default="60">
