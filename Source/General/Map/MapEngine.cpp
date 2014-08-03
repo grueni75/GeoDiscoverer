@@ -233,18 +233,26 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   core->interruptAllowedHere(__FILE__, __LINE__);
 
   // If an abort has been requested, stop here
-  if (abortUpdate)
+  if (abortUpdate) {
+    //DEBUG("update aborted",NULL);
     return;
+  }
 
   // Check if the area is plausible
-  if (area.getYNorth()<area.getYSouth())
+  if (area.getYNorth()<area.getYSouth()) {
+    //DEBUG("north smaller than south",NULL);
     return;
-  if (area.getXEast()<area.getXWest())
+  }
+  if (area.getXEast()<area.getXWest()) {
+    //DEBUG("east smaller than west",NULL);
     return;
+  }
 
   // Check if the maximum number of tiles to display are reached
-  if (tiles.size()>=maxTiles)
+  if (tiles.size()>=maxTiles) {
+    //DEBUG("too many tiles",NULL);
     return;
+  }
 
   /* Visualize the search area
   if (core->getGraphicEngine()->getDebugMode()) {
@@ -275,6 +283,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   // Search for a tile that lies in the range
   MapContainer *container;
   MapTile *tile=core->getMapSource()->findMapTileByGeographicArea(area,preferredNeighbor,container);
+  //DEBUG("tile=0x%08x",tile);
 
   // Tile found?
   Int searchedYNorth,searchedYSouth;
@@ -874,6 +883,9 @@ void MapEngine::updateMap() {
         newDisplayArea.setLatSouth(latSouth);
         newDisplayArea.setLngEast(lngEast);
         newDisplayArea.setLngWest(lngWest);
+        /*DEBUG("latNorth=%f latSouth=%f lngEast=%f lngWest=%f",
+              newDisplayArea.getLatNorth(),newDisplayArea.getLatSouth(),
+              newDisplayArea.getLngEast(),newDisplayArea.getLngWest());*/
 
         // Remember the current visual position
         this->visPos=*visPos;
@@ -941,8 +953,8 @@ void MapEngine::updateMap() {
         //PROFILE_ADD("tile list update");
 
         // If no tile has been found for whatever reason, reset the map
-        //DEBUG("tiles.size()=%d",tiles.size());
-        if ((tiles.size()==0)||(zoomedScreenWidth<=1)) {
+        //DEBUG("tiles.size()=%d zoomedScreenWidth=%d",tiles.size(),zoomedScreenWidth);
+        if ((!abortUpdate)&&((tiles.size()==0)||(zoomedScreenWidth<=1))) {
         	DEBUG("resetting map",NULL);
           core->getConfigStore()->setStringValue("Map/LastPosition","folder","*unknown*",__FILE__, __LINE__);
           initMap();
