@@ -29,9 +29,10 @@ class NavigationPathSegment {
 
 protected:
 
-  NavigationPath *path;     // The path that contains this segment
-  Int startIndex;           // Start index of the segment in the path
-  Int endIndex;             // End index of the segment in the path
+  NavigationPath *path;                       // The path that contains this segment
+  NavigationPathVisualization *visualization; // The visualization of the path
+  Int startIndex;                             // Start index of the segment in the path
+  Int endIndex;                               // End index of the segment in the path
 
 public:
 
@@ -64,6 +65,14 @@ public:
 
   void setStartIndex(Int startIndex) {
     this->startIndex = startIndex;
+  }
+
+  NavigationPathVisualization* getVisualization() {
+    return visualization;
+  }
+
+  void setVisualization(NavigationPathVisualization* visualization) {
+    this->visualization = visualization;
   }
 };
 

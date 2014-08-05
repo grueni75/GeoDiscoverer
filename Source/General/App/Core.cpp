@@ -403,8 +403,9 @@ void Core::updateScreen(bool forceRedraw) {
 
     // Request an update of the map
     //DEBUG("waking up map update thread",NULL);
-    if (updateRequired)
+    if (updateRequired) {
       thread->issueSignal(mapUpdateStartSignal);
+    }
 
   }
 

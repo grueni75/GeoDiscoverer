@@ -820,12 +820,14 @@ void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMa
       NavigationPathSegment *s=*i;
       s->getPath()->lockAccess(__FILE__, __LINE__);
       for(Int j=s->getStartIndex();j<=s->getEndIndex();j++) {
-        MapPosition pathPos=s->getPath()->getPoint(j);
-        double d=mapPos.computeDistance(pathPos);
-        if (d<minDistance) {
-          minDistance=d;
-          nearestPath=s->getPath();
-          nearestPathIndex=j;
+        MapPosition visPos=s->getVisualization()->getPoint(j);
+        if (visPos!=NavigationPath::getPathInterruptedPos()) {
+          double d=mapPos.computeDistance(visPos);
+          if (d<minDistance) {
+            minDistance=d;
+            nearestPath=s->getPath();
+            nearestPathIndex=visPos.getIndex();
+          }
         }
       }
       s->getPath()->unlockAccess();

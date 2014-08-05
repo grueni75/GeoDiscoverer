@@ -890,10 +890,15 @@ void NavigationEngine::updateMapGraphic() {
 
   // Process the unfinished tile list
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    //PROFILE_START;
     (*i)->lockAccess(__FILE__, __LINE__);
+    //PROFILE_ADD("path locking");
     (*i)->addVisualization(&containers);
+    //PROFILE_ADD("add visualization");
     (*i)->unlockAccess();
+    //PROFILE_ADD("path unlocking");
   }
+  //core->getProfileEngine()->outputResult("",false);
   if (recordedTrack) {
     recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->addVisualization(&containers);

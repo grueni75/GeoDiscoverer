@@ -154,7 +154,7 @@ void Thread::destroyMutex(ThreadMutexInfo *mutex) {
 }
 
 // Locks a mutex
-void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line) {
+void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line, bool debugMsgs) {
   pthread_t self = pthread_self();
   std::list<std::string*> *waitQueue=NULL;
   std::string *threadNameCopy=NULL;
@@ -197,6 +197,8 @@ void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line) {
       return;
     }
     waitQueue->push_back(threadNameCopy);
+    if (debugMsgs)
+      DEBUG("wait for lock: %s",threadNameCopy->c_str());
     pthread_mutex_unlock(&accessMutex);
   }
   pthread_mutex_lock(&mutex->pthreadMutex);
@@ -220,6 +222,8 @@ void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line) {
       }
     }
     waitQueue->push_back(threadNameLocked);
+    if (debugMsgs)
+      DEBUG("got lock: %s",threadNameLocked->c_str());
     pthread_mutex_unlock(&accessMutex);
   }
 }

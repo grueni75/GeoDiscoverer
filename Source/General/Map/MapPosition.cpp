@@ -52,6 +52,7 @@ MapPosition::MapPosition(bool doNotDelete) {
     invalidate();
     hasTimestamp=false;
     source=(char*)unknownSource;
+    index=0;
   }
 }
 

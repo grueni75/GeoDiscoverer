@@ -96,7 +96,7 @@ public:
   void destroyMutex(ThreadMutexInfo *mutex);
 
   // Locks a mutex
-  void lockMutex(ThreadMutexInfo *mutex, const char *file, int line);
+  void lockMutex(ThreadMutexInfo *mutex, const char *file, int line, bool debugMsgs=false);
 
   // Unlocks a mutex
   void unlockMutex(ThreadMutexInfo *mutex);

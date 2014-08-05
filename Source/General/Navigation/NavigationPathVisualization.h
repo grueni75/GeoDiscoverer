@@ -37,7 +37,7 @@ protected:
   Int zoomLevel;                                  // Zoom level that is represented by this visualization
   MapPosition prevLinePoint;                      // Last position used for creating the graphic line
   MapPosition prevArrowPoint;                     // Last position used for creating the direction arrow
-  std::list<MapPosition> points;                  // All used points
+  std::vector<MapPosition> points;                // All used points
   NavigationPathTileInfoMap tileInfoMap;          // Hash that holds information for each map tile
   double latScale;                                // Approximated latitude scale
   double lngScale;                                // Approximated longitude scale
@@ -75,6 +75,14 @@ public:
   void addPoint(MapPosition pos);
 
   // Getters and setters
+  MapPosition getPoint(Int index) {
+    return points[index];
+  }
+
+  Int getPointsSize() const {
+    return points.size();
+  }
+
   MapPosition getPrevArrowPoint() const
   {
       return prevArrowPoint;
@@ -95,7 +103,7 @@ public:
       this->zoomLevel = zoomLevel;
   }
 
-  std::list<MapPosition> *getPoints() {
+  std::vector<MapPosition> *getPoints() {
     return &points;
   }
 

@@ -389,12 +389,20 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
 }
 
 // Updates the crossing path segments in the map tiles of the given map containers for the new point
-void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapContainers, Int pos) {
+void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, Int pos) {
+
+  std::list<MapContainer*> foundContainers;
+
+  // Find the map containers if necessary
+  if (mapContainers==NULL) {
+    foundContainers = core->getMapSource()->findMapContainersByGeographicCoordinate(visualization->getPoint(pos),visualization->getZoomLevel());
+    mapContainers = &foundContainers;
+  }
 
   // Add this point to the path segments of all tiles it lies within
   for(std::list<MapContainer*>::iterator i=mapContainers->begin();i!=mapContainers->end();i++) {
     MapContainer* mapContainer=*i;
-    MapPosition t=mapPositions[pos];
+    MapPosition t=visualization->getPoint(pos);
     if (mapContainer->getMapCalibrator()->setPictureCoordinates(t)) {
       MapTile* mapTile=mapContainer->findMapTileByPictureCoordinate(t);
       if (mapTile) {
@@ -427,6 +435,7 @@ void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapCon
             break;
           }
           pathSegment->setPath(this);
+          pathSegment->setVisualization(visualization);
           pathSegment->setStartIndex(pos);
           pathSegment->setEndIndex(pathSegment->getStartIndex());
           mapTile->addCrossingNavigationPathSegment(this, pathSegment);
@@ -453,6 +462,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
 
   // Add the new pair
   mapPositions.push_back(pos);
+  pos.setIndex(mapPositions.size()-1);
 
   // Update the length and altitude meters
   if (endIndex==-1) {
@@ -478,6 +488,9 @@ void NavigationPath::addEndPosition(MapPosition pos) {
     if ((visualization->getPrevLinePoint()==NavigationPath::getPathInterruptedPos())||(pos==NavigationPath::getPathInterruptedPos())) {
       if ((pos==NavigationPath::getPathInterruptedPos())||(calibrator!=NULL)) {
         visualization->addPoint(pos);
+      }
+      if (calibrator!=NULL) {
+        updateCrossingTileSegments(NULL, visualization, visualization->getPointsSize()-1);
       }
       core->getMapSource()->unlockAccess();
 
@@ -513,6 +526,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
 
           // Update the previous point
           visualization->addPoint(pos);
+          updateCrossingTileSegments(NULL, visualization, visualization->getPointsSize()-1);
 
         } else {
           core->getMapSource()->unlockAccess();
@@ -525,12 +539,6 @@ void NavigationPath::addEndPosition(MapPosition pos) {
       delete calibrator;
 
   }
-
-  // Add this point to the path segments of all tiles it lies within
-  core->getMapSource()->lockAccess(__FILE__,__LINE__);
-  std::list<MapContainer*> mapContainers = core->getMapSource()->findMapContainersByGeographicCoordinate(pos);
-  updateCrossingTileSegments(&mapContainers, mapPositions.size()-1);
-  core->getMapSource()->unlockAccess();
   unlockAccess();
 
   // Inform the widgets
@@ -660,22 +668,26 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
         MapPosition prevPoint=NavigationPath::getPathInterruptedPos();
         MapPosition prevArrowPoint;
         NavigationPathVisualization *visualization = zoomLevelVisualizations[zoomLevel-1];
-        std::list<MapPosition> *points = visualization->getPoints();
-        for(std::list<MapPosition>::iterator i=points->begin();i!=points->end();i++) {
+        std::vector<MapPosition> *points = visualization->getPoints();
+        for(Int i=0;i<points->size();i++) {
 
           // Handle path interrupted positions
-          if ((*i==NavigationPath::getPathInterruptedPos())||(prevPoint==NavigationPath::getPathInterruptedPos())) {
-            prevArrowPoint=*i;
-            prevPoint=*i;
+          MapPosition p=(*points)[i];
+          if ((p==NavigationPath::getPathInterruptedPos())||(prevPoint==NavigationPath::getPathInterruptedPos())) {
+            prevArrowPoint=p;
+            prevPoint=p;
           } else {
 
             // Add visualization
-            updateTileVisualization(&mapContainersOfSameZoomLevel,visualization,prevPoint,prevArrowPoint,*i);
+            updateTileVisualization(&mapContainersOfSameZoomLevel,visualization,prevPoint,prevArrowPoint,p);
+
+            /// Update crossing tile segments
+            updateCrossingTileSegments(&mapContainersOfSameZoomLevel, visualization, i);
 
             // Remember the last point
-            prevPoint=*i;
-            if ((*i).getHasBearing())
-              prevArrowPoint=*i;
+            prevPoint=p;
+            if (p.getHasBearing())
+              prevArrowPoint=p;
           }
         }
 
@@ -696,11 +708,6 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
       zoomLevel=(*j)->getZoomLevel();
       j++;
     }
-  }
-
-  // Update the crossing path segments for this container
-  for (Int i=0;i<mapPositions.size();i++) {
-    updateCrossingTileSegments(mapContainers, i);
   }
 }
 
@@ -1026,8 +1033,8 @@ void NavigationPath::updateMetrics() {
   if (this->endIndex!=-1)
     endIndex=this->endIndex;
   if (reverse) {
-    if (endIndex<mapPositions.size()-1)
-      prevPos=mapPositions[endIndex+1];
+    if (startIndex<mapPositions.size()-1)
+      prevPos=mapPositions[startIndex+1];
   } else {
     if (startIndex>0)
       prevPos=mapPositions[startIndex-1];

@@ -61,6 +61,7 @@ protected:
   double lngScale;                                  // Scale factor for longitude
   char *source;                                     // Source of this position
   bool isUpdated;                                   // Indicates that the position has been changed
+  Int index;                                        // Index of this point within the vector it is part of
 
   // Returns the text contents of a element node
   bool getText(XMLNode node, std::string &contents);
@@ -363,6 +364,14 @@ public:
 
   void setCartesianY(double cartesianY) {
     this->cartesianY = cartesianY;
+  }
+
+  Int getIndex() const {
+    return index;
+  }
+
+  void setIndex(Int index) {
+    this->index = index;
   }
 };
 

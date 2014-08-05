@@ -95,7 +95,7 @@ protected:
   void updateTileVisualization(NavigationPathVisualizationType type, std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, bool remove, bool animate);
 
   // Updates the crossing path segments in the map tiles of the given map containers for the new point
-  void updateCrossingTileSegments(std::list<MapContainer*> *mapContainers, Int pos);
+  void updateCrossingTileSegments(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, Int pos);
 
   // Updates the metrics (altitude, length, duration, ...) of the path
   void updateMetrics();

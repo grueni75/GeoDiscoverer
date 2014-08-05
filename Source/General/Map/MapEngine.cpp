@@ -995,6 +995,8 @@ void MapEngine::updateMap() {
 
   // Indicate that the map update is finished
   updateInProgress=false;
+  if (abortUpdate)
+    setForceMapUpdate(__FILE__,__LINE__);
   abortUpdate=false;
 }
 
