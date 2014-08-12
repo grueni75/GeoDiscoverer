@@ -227,7 +227,7 @@ MapTile *MapTile::retrieve(char *&cacheData, Int &cacheSize, MapContainer *paren
   // Check if the class has changed
   Int size=sizeof(MapTile);
 #ifdef TARGET_LINUX
-  if (size!=1256) {
+  if (size!=1304) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return NULL;
   }

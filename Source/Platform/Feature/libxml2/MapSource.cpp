@@ -84,6 +84,7 @@ bool MapSource::readGDSInfo(std::string infoFilePath)
   std::vector<std::string> emptyPath;
 
   // Read the XML file
+  gdsElements.clear();
   doc = xmlReadFile(infoFilePath.c_str(), NULL, 0);
   if (!doc) {
     ERROR("can not open file <%s> for reading map source information",infoFilePath.c_str());

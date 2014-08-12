@@ -24,10 +24,10 @@
 
 namespace GEODISCOVERER {
 
-MapSourceCalibratedPictures::MapSourceCalibratedPictures(std::string mapArchivePath)  : MapSource() {
+MapSourceCalibratedPictures::MapSourceCalibratedPictures(std::list<std::string> mapArchivePaths)  : MapSource() {
   type=MapSourceTypeCalibratedPictures;
   cacheData=NULL;
-  this->mapArchivePath=mapArchivePath;
+  this->mapArchivePaths=mapArchivePaths;
 }
 
 MapSourceCalibratedPictures::~MapSourceCalibratedPictures() {
@@ -68,6 +68,11 @@ bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::li
       // Get the file name of the entry
       filename = (*i)->getEntryFilename(j);
 
+      // If the file is a legend, extract it
+      if (filename=="legend.png") {
+        (*i)->exportEntry(filename,getFolderPath() + "/legend.png");
+      }
+
       // If this file is not a calibration file, skip it
       Int pos=filename.find_last_of(".");
       std::string extension=filename.substr(pos+1);
@@ -106,6 +111,8 @@ bool MapSourceCalibratedPictures::init()
   std::string mapArchiveDir;
   std::string mapArchiveFile;
   char *mapArchivePathCStr = NULL;
+  Int progress;
+  DialogKey dialog;
 
   // Check if we can use the cache
   cacheRetrieved=false;
@@ -158,24 +165,33 @@ bool MapSourceCalibratedPictures::init()
   }
 
   // Open the zip archive that contains the maps
+  title="Reading tiles of map " + folder;
+  dialog=core->getDialog()->createProgress(title,mapArchivePaths.size());
+  progress=0;
   lockMapArchives(__FILE__, __LINE__);
-  mapArchivePathCStr=strdup(mapArchivePath.c_str());
-  mapArchiveDir=std::string(dirname(mapArchivePathCStr));
-  strcpy(mapArchivePathCStr,mapArchivePath.c_str());
-  mapArchiveFile=std::string(basename(mapArchivePathCStr));
-  free(mapArchivePathCStr);
-  if (!(mapArchive=new ZipArchive(mapArchiveDir,mapArchiveFile))) {
-    FATAL("can not create zip archive object",NULL);
-    result=false;
-    goto cleanup;
+  for(std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
+    std::string mapArchivePath=*i;
+    mapArchivePathCStr=strdup(mapArchivePath.c_str());
+    mapArchiveDir=std::string(dirname(mapArchivePathCStr));
+    strcpy(mapArchivePathCStr,mapArchivePath.c_str());
+    mapArchiveFile=std::string(basename(mapArchivePathCStr));
+    free(mapArchivePathCStr);
+    if (!(mapArchive=new ZipArchive(mapArchiveDir,mapArchiveFile))) {
+      FATAL("can not create zip archive object",NULL);
+      result=false;
+      goto cleanup;
+    }
+    if (!mapArchive->init()) {
+      ERROR("can not open tiles.gda in map directory <%s>",folder.c_str());
+      result=false;
+      goto cleanup;
+    }
+    mapArchives.push_back(mapArchive);
+    progress++;
+    core->getDialog()->updateProgress(dialog,title,progress);
   }
-  if (!mapArchive->init()) {
-    ERROR("can not open tiles.gda in map directory <%s>",folder.c_str());
-    result=false;
-    goto cleanup;
-  }
-  mapArchives.push_back(mapArchive);
   unlockMapArchives();
+  core->getDialog()->closeProgress(dialog);
 
   // Could the cache not be loaded?
   if (!cacheRetrieved) {
@@ -476,7 +492,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Check if the class has changed
   Int size=sizeof(MapSourceCalibratedPictures);
 #ifdef TARGET_LINUX
-  if (size!=288) {
+  if (size!=296) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return false;
   }

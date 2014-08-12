@@ -199,6 +199,7 @@ bool MapContainer::readGDMCalibrationFile()
       }
       (*i)->readEntry(entry,buffer,size);
       (*i)->closeEntry(entry);
+      break;
     }
   }
   core->getMapSource()->unlockMapArchives();

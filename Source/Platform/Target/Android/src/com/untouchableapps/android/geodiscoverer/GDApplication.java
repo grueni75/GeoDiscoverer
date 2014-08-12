@@ -44,7 +44,7 @@ public class GDApplication extends Application {
   public static String messages = "";
   
   /** Maximum size of the message log */
-  final static int maxMessagesSize = 2048;
+  final static int maxMessagesSize = 4096;
   
   // Severity levels for messages
   public static final int ERROR_MSG = 0;

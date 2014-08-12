@@ -35,6 +35,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import com.google.gson.Gson;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -46,6 +48,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -62,6 +65,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcel;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.widget.DrawerLayout;
@@ -107,7 +111,7 @@ public class ViewMap extends GDActivity {
   GDCore coreObject = null;
   
   // Info about the last address entered
-  String lastAddressSubject;
+  String lastAddressSubject = "";
   String lastAddressText = "";
   
   // Info about the current gpx file
@@ -122,6 +126,9 @@ public class ViewMap extends GDActivity {
   
   // Wake lock
   WakeLock wakeLock = null;
+  
+  // Prefs
+  SharedPreferences prefs = null;
   
   // Flags
   boolean compassWatchStarted = false;
@@ -427,7 +434,6 @@ public class ViewMap extends GDActivity {
     coreObject.messageHandler.sendMessage(m);
   }
 
-  
   /** Asks the user for confirmation of the address */
   void askForAddress(final String subject, final String text) {
     AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -604,6 +610,80 @@ public class ViewMap extends GDActivity {
       progressDialog.dismiss();
 
       // Restart the core to load the new routes
+      restartCore(false);
+    }
+  }
+
+  /** Imports *.gda files from external source */
+  private class ImportMapArchivesTask extends AsyncTask<Void, Integer, Void> {
+
+    ProgressDialog progressDialog;
+    public File srcFile;
+    public File mapFolder;
+    public String mapInfoFilename;
+
+    protected void onPreExecute() {
+
+      // Prepare the progress dialog
+      progressDialog = new ProgressDialog(ViewMap.this);
+      progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+      progressDialog.setMessage(getString(R.string.importing_external_map_archives,srcFile.getName()));
+      progressDialog.setCancelable(false);
+      progressDialog.show();
+    }
+
+    protected Void doInBackground(Void... params) {
+
+      // Create the map folder
+      try {
+        
+        // Find all gda files that have the pattern <name>.gda and <name>%d.gda
+        String basename = srcFile.getName().replaceAll("(\\D*)\\d*\\.gda", "$1");
+        LinkedList<String> archives = new LinkedList<String>(); 
+        File dir = new File(srcFile.getParent());
+        File[] dirListing = dir.listFiles();
+        if (dirListing != null) {
+          for (File child : dirListing) {
+            if (child.getName().matches(basename + "\\d*\\.gda")) {
+              archives.add(child.getAbsolutePath());
+            }
+          }
+        }
+        
+        // Create the info file
+        mapFolder.mkdir();
+        File cache = new File(mapFolder.getPath() + "/cache.bin");
+        cache.delete();
+        PrintWriter writer = new PrintWriter(mapInfoFilename,"UTF-8");
+        writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        writer.println("<GDS version=\"1.0\">");
+        writer.println("  <type>externalMapArchive</type>");
+        for (String archive : archives) {
+          writer.println(String.format("  <mapArchivePath>%s</mapArchivePath>",archive));
+        }
+        writer.println("</GDS>");
+        writer.close();
+        
+        // Set the new folder
+        coreObject.configStoreSetStringValue("Map", "folder", mapFolder.getName());
+        
+      }
+      catch(IOException e) {
+        errorDialog(String.format(getString(R.string.cannot_create_map_folder), mapFolder.getName()));
+      }
+      
+      return null;
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+    }
+
+    protected void onPostExecute(Void result) {
+
+      // Close the progress dialog
+      progressDialog.dismiss();
+
+      // Restart the core to load the new map folder
       restartCore(false);
     }
   }
@@ -867,7 +947,16 @@ public class ViewMap extends GDActivity {
   public void onCreate(Bundle savedInstanceState) {
     
     super.onCreate(savedInstanceState);
-
+    
+    // Restore the last processed intent from the prefs
+    prefs = getApplication().getSharedPreferences("viewMap",Context.MODE_PRIVATE);
+    if (prefs.contains("lastAddressSubject")) {
+      lastAddressSubject = prefs.getString("lastAddressSubject", "");
+    }
+    if (prefs.contains("lastAddressText")) {
+      lastAddressText = prefs.getString("lastAddressText", "");
+    }
+    
     // Get the core object
     coreObject=GDApplication.coreObject;    
     coreObject.setActivity(this);
@@ -1027,46 +1116,66 @@ public class ViewMap extends GDActivity {
     
     // Extract the file path from the intent
     intent = getIntent();
-    String srcFilename = "";
-    Uri webURI = null;
-    Uri fileURI = null;
+    Uri uri = null;
+    String subject = "";
+    String text = "";
+    boolean isAddress = false;
+    boolean isGDA = false;
+    boolean isGPXFromWeb = false;
+    boolean isGPXFromFile = false;
     if (intent!=null) {
       if (Intent.ACTION_SEND.equals(intent.getAction())) {
         Bundle extras = intent.getExtras();
         if (extras.containsKey(Intent.EXTRA_STREAM)) {
-          Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
+          uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
           if (uri.getScheme().equals("http") || uri.getScheme().equals("https")) {
-            webURI=uri;
+            isGPXFromWeb=true;
           } else {
-            fileURI=uri;
+            isGPXFromFile=true;
           }
         } else if (extras.containsKey(Intent.EXTRA_TEXT)) {
-          askForAddress(extras.getString(Intent.EXTRA_SUBJECT), extras.getString(Intent.EXTRA_TEXT));
+          subject=extras.getString(Intent.EXTRA_SUBJECT);
+          text=extras.getString(Intent.EXTRA_TEXT);
+          isAddress=true;
         } else {
           warningDialog(getString(R.string.unsupported_intent));        
         }
       }
       if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-        Uri uri = intent.getData();
+        uri = intent.getData();
         if (uri.getScheme().equals("file")&&(uri.getLastPathSegment().endsWith(".gda"))) {
-          srcFilename = uri.getPath();
+          isGDA=true;
         } else if (uri.getScheme().equals("http") || uri.getScheme().equals("https")) {
-          webURI=uri;
+          isGPXFromWeb=true;
         } else {
-          fileURI=uri;
+          isGPXFromFile=true;
         }
       }
     }
     
+    // Check if the intent was seen
+    if (intent!=null) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "intent=" + intent.toString());
+      if ((intent.getFlags()&Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY)!=0) {
+        isGDA=false;
+        isGPXFromFile=false;
+        isGPXFromWeb=false;
+        isAddress=false;
+      }
+    }
+    
     // Handle the intent
-    if (!srcFilename.equals("")) {
+    if (isAddress) {
+      askForAddress(subject, text);
+    }
+    if (isGDA) {
             
       // Ask the user if the file should be copied to the route directory
-      final File srcFile = new File(srcFilename);
+      final File srcFile = new File(uri.getPath());
       if (srcFile.exists()) {
 
         // Map archive?
-        if (srcFilename.endsWith(".gda")) {
+        if (uri.getPath().endsWith(".gda")) {
         
           // Ask the user if a new map shall be created based on the archive
           String mapFolderFilename = GDApplication.getHomeDirPath() + "/Map/" + srcFile.getName();
@@ -1085,26 +1194,11 @@ public class ViewMap extends GDActivity {
           builder.setPositiveButton(R.string.yes,
             new DialogInterface.OnClickListener() {
               public void onClick(DialogInterface dialog, int which) {
-                
-                // Create the map folder
-                try {
-                  mapFolder.mkdir();
-                  File cache = new File(mapFolder.getPath() + "/cache.bin");
-                  cache.delete();
-                  PrintWriter writer = new PrintWriter(mapInfoFilename,"UTF-8");
-                  writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-                  writer.println("<GDS version=\"1.0\">");
-                  writer.println("  <type>externalMapArchive</type>");
-                  writer.println(String.format("  <mapArchivePath>%s</mapArchivePath>",srcFile.getAbsolutePath()));
-                  writer.println("</GDS>");
-                  writer.close();
-                }
-                catch(IOException e) {
-                  errorDialog(String.format(getString(R.string.cannot_create_map_folder), mapFolder.getName()));
-                }
-                
-                // Restart the core
-                restartCore(false);
+                ImportMapArchivesTask task = new ImportMapArchivesTask();
+                task.srcFile = srcFile;
+                task.mapFolder = mapFolder;
+                task.mapInfoFilename = mapInfoFilename;
+                task.execute();
               }
             });
           builder.setNegativeButton(R.string.no, null);
@@ -1117,28 +1211,31 @@ public class ViewMap extends GDActivity {
         errorDialog(getString(R.string.file_does_not_exist));
       }
     }
-    if (webURI!=null) {
-      downloadRoute(webURI);
+    if (isGPXFromWeb) {
+      downloadRoute(uri);
     }
-    if (fileURI!=null) {
+    if (isGPXFromFile) {
 
       // Get the name of the GPX file
-      gpxName = fileURI.getLastPathSegment();
+      gpxName = uri.getLastPathSegment();
       if (!gpxName.endsWith(".gpx")) {
         gpxName = gpxName + ".gpx";
       }
-      askForRouteName(fileURI,gpxName);
+      askForRouteName(uri,gpxName);
     }
-    
-    // Reset intent
     setIntent(null);
-   
   }
   
+  /** Called before the activity is put into background (outState is non persistent!) */
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+  }
+
   /** Called when a new intent is available */
   @Override
   public void onNewIntent(Intent intent) {
     setIntent(intent);
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onNewIntent: " + intent.toString());
   }
 
   /** Called when the activity is destroyed */
@@ -1200,6 +1297,10 @@ public class ViewMap extends GDActivity {
       } 
       lastAddressSubject=subject;
       lastAddressText=text;
+      SharedPreferences.Editor prefsEditor = prefs.edit();
+      prefsEditor.putString("lastAddressSubject", lastAddressSubject);
+      prefsEditor.putString("lastAddressText", lastAddressText);
+      prefsEditor.commit();
     }
   }
   

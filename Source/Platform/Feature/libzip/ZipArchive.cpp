@@ -48,6 +48,7 @@ bool ZipArchive::init() {
     archive = zip_open(archiveFilePath.c_str(),ZIP_CREATE,&last_error);
   }
   if (archive==NULL) {
+    DEBUG("zip_open failed with error=%d",last_error);
     return false;
   } else {
     return true;

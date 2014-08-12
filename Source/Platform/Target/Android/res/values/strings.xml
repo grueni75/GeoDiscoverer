@@ -72,4 +72,5 @@
   <string name="cannot_import_route">Could not import route &lt;%1$s&gt; (I/O error)!</string>
   <string name="import_map">Import map</string>
   <string name="nav_drawer_hint">Swipe from the left edge to the right to open menu.</string>
+  <string name="importing_external_map_archives">Importing all map archives related to &lt;%1$s&gt;</string>
 </resources>

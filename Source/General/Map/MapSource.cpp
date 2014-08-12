@@ -293,7 +293,8 @@ void MapSource::closeProgress() {
 // Creates a new map source object of the correct type
 MapSource *MapSource::newMapSource() {
 
-  std::string folderPath = core->getHomePath() + "/Map/" + core->getConfigStore()->getStringValue("Map","folder", __FILE__, __LINE__);
+  std::string folder = core->getConfigStore()->getStringValue("Map","folder", __FILE__, __LINE__);
+  std::string folderPath = core->getHomePath() + "/Map/" + folder;
   std::string infoPath = folderPath + "/info.gds";
 
   // Check if the folder exists
@@ -307,13 +308,32 @@ MapSource *MapSource::newMapSource() {
   // If the info.gds file does not exist, it is an offline source
   if (access(infoPath.c_str(),F_OK)) {
 
+    // Get all the tiles of the map
+    std::list<std::string> mapArchivePaths;
+    struct dirent *dp;
+    DIR *dfd;
+    dfd=opendir(folderPath.c_str());
+    if (dfd==NULL) {
+      FATAL("can not read directory <%s>",folderPath.c_str());
+      return NULL;
+    }
+    while ((dp = readdir(dfd)) != NULL)
+    {
+      Int nr;
+
+      // Add this archive if it is valid
+      if ((sscanf(dp->d_name,"tiles%d.gda",&nr)==1)||(strcmp(dp->d_name,"tiles.gda")==0)) {
+        mapArchivePaths.push_back(folderPath + "/" + dp->d_name);
+      }
+    }
+    closedir(dfd);
+
     // Check if tiles archive exists
-    std::string mapArchivePath = folderPath + "/tiles.gda";
-    if (access(mapArchivePath.c_str(),F_OK)) {
+    if (mapArchivePaths.size()==0) {
       ERROR("map folder <%s> does not contain a tiles.gda file",NULL);
       return NULL;
     } else {
-      return new MapSourceCalibratedPictures(mapArchivePath);
+      return new MapSourceCalibratedPictures(mapArchivePaths);
     }
 
   } else {
@@ -323,7 +343,7 @@ MapSource *MapSource::newMapSource() {
 
     // Find out the kind of source
     std::string type = "tileServer";
-    std::string mapArchivePath;
+    std::list<std::string> mapArchivePaths;
     bool mapArchivePathFound = false;
     for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
       std::vector<std::string> element = *i;
@@ -331,7 +351,7 @@ MapSource *MapSource::newMapSource() {
         type = element[1];
       }
       if (element[0]=="mapArchivePath") {
-        mapArchivePath = element[1];
+        mapArchivePaths.push_back(element[1]);
         mapArchivePathFound = true;
       }
     }
@@ -345,12 +365,13 @@ MapSource *MapSource::newMapSource() {
         ERROR("map source file <%s> does not contain a mapArchivePath element",infoPath.c_str());
         return NULL;
       }
-      if (access(mapArchivePath.c_str(),F_OK)) {
-        ERROR("external map archive <%s> referenced in <%s> does not exist",mapArchivePath.c_str(),infoPath.c_str());
-        return NULL;
-      } else {
-        return new MapSourceCalibratedPictures(mapArchivePath);
+      for (std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
+        if (access((*i).c_str(),F_OK)) {
+          ERROR("external map archive <%s> referenced in <%s> does not exist",(*i).c_str(),infoPath.c_str());
+          return NULL;
+        }
       }
+      return new MapSourceCalibratedPictures(mapArchivePaths);
     }
   }
 }

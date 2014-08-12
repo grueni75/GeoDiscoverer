@@ -42,6 +42,7 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 
 public class MetaWatchApp {
 
@@ -187,6 +188,7 @@ public class MetaWatchApp {
     vibrateThread = new Thread(new Runnable() {
       public void run() {
         int currentVibrateCount = 0;
+        int fastVibrateCount = 1;
         while (!quitVibrateThread) {
           try {
             lock.lock();
@@ -195,9 +197,8 @@ public class MetaWatchApp {
             lock.unlock();
             if (quitVibrateThread)
               return;
-            int fastVibrateCount=1;
             do {
-              
+                            
               // Ensure that the app is shown
               Intent intent = new Intent("org.metawatch.manager.APPLICATION_START");
               Bundle b = new Bundle();
@@ -219,6 +220,11 @@ public class MetaWatchApp {
               if (quitVibrateThread)
                 return;
 
+              // Skip vibrate if we are not off route anymore and this is 
+              // is not the first vibrate
+              if ((!currentOffRoute)&&(fastVibrateCount>1))
+                break;
+              
               // Vibrate
               intent = new Intent("org.metawatch.manager.VIBRATE");
               b = new Bundle();
@@ -227,6 +233,11 @@ public class MetaWatchApp {
               b.putInt("vibrate_cycles", 2);
               intent.putExtras(b);
               MetaWatchApp.context.sendBroadcast(intent);
+              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch",String.format("currentOffRoute=%d fastVibrateCount=%d currentVibrateCount=%d expectedVibrateCount=%d", currentOffRoute ? 1 : 0, fastVibrateCount, currentVibrateCount, expectedVibrateCount));
+              
+              // Repeat if off route 
+              // Vibrate fast at the beginning, slow afterwards
+              // Quit if a new vibrate is requested or we are on route again
               if (currentOffRoute) {
                 int offRouteVibratePeriod;
                 if (fastVibrateCount>offRouteVibrateFastCount) {
@@ -235,13 +246,19 @@ public class MetaWatchApp {
                   offRouteVibratePeriod=offRouteVibrateFastPeriod;
                   fastVibrateCount++;
                 }
-                Thread.sleep(offRouteVibratePeriod);
+                for (int i=0;i<offRouteVibratePeriod/1000;i++) {
+                  Thread.sleep(1000);
+                  if ((!currentOffRoute)||(currentVibrateCount<expectedVibrateCount-1))
+                    break;
+                }
               }
               if (quitVibrateThread)
                 return;
             }
-            while (currentOffRoute);
+            while ((currentOffRoute)&&(currentVibrateCount==expectedVibrateCount-1));
             currentVibrateCount++;
+            if (!currentOffRoute) 
+              fastVibrateCount=1;
           }
           catch(InterruptedException e) {
             ; // repeat

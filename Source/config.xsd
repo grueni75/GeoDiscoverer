@@ -1422,7 +1422,7 @@
                   <xsd:documentation>Minimum distance that need to be travelled before the navigation information is updated.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="minDistanceToBeOffRoute" type="xsd:double" default="50">
+              <xsd:element name="minDistanceToBeOffRoute" type="xsd:double" default="75">
                 <xsd:annotation>
                   <xsd:documentation>Minimum distance from nearest route point such that navigation considers location to be off route.</xsd:documentation>
                 </xsd:annotation>
