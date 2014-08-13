@@ -301,8 +301,8 @@ MapSource *MapSource::newMapSource() {
   struct stat s;
   int err = stat(folderPath.c_str(), &s);
   if ((err!=0)||(!S_ISDIR(s.st_mode))) {
-    ERROR("map folder <%s> does not exist",NULL);
-    return NULL;
+    ERROR("map folder <%s> does not exist",folder.c_str());
+    return new MapSourceEmpty();
   }
 
   // If the info.gds file does not exist, it is an offline source
@@ -315,7 +315,7 @@ MapSource *MapSource::newMapSource() {
     dfd=opendir(folderPath.c_str());
     if (dfd==NULL) {
       FATAL("can not read directory <%s>",folderPath.c_str());
-      return NULL;
+      return new MapSourceEmpty();
     }
     while ((dp = readdir(dfd)) != NULL)
     {
@@ -331,7 +331,7 @@ MapSource *MapSource::newMapSource() {
     // Check if tiles archive exists
     if (mapArchivePaths.size()==0) {
       ERROR("map folder <%s> does not contain a tiles.gda file",NULL);
-      return NULL;
+      return new MapSourceEmpty();
     } else {
       return new MapSourceCalibratedPictures(mapArchivePaths);
     }
@@ -363,12 +363,12 @@ MapSource *MapSource::newMapSource() {
     if (type=="externalMapArchive") {
       if (!mapArchivePathFound) {
         ERROR("map source file <%s> does not contain a mapArchivePath element",infoPath.c_str());
-        return NULL;
+        return new MapSourceEmpty();
       }
       for (std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
         if (access((*i).c_str(),F_OK)) {
           ERROR("external map archive <%s> referenced in <%s> does not exist",(*i).c_str(),infoPath.c_str());
-          return NULL;
+          return new MapSourceEmpty();
         }
       }
       return new MapSourceCalibratedPictures(mapArchivePaths);
@@ -543,6 +543,10 @@ MapTile *MapSource::findMapTileByGeographicArea(MapArea area, MapTile *preferred
   MapArea bestTranslatedArea;
   double bestDistance=std::numeric_limits<double>::max();
   bool betterMapContainerFound=false;
+
+  // Abort if no search tree is available
+  if (zoomLevelSearchTrees.size()==0)
+    return NULL;
 
   // Get the search tree to use
   MapContainerTreeNode *startNode=zoomLevelSearchTrees[area.getZoomLevel()];

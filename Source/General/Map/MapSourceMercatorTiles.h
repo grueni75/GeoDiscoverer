@@ -73,13 +73,10 @@ public:
   virtual void maintenance();
 
   // Returns the scale values for the given zoom level
-  void getScales(Int zoomLevel, double &latScale, double &lngScale);
+  virtual void getScales(Int zoomLevel, double &latScale, double &lngScale);
 
   // Finds the calibrator for the given position
   virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator);
-
-  // Returns the scale values for the given zoom level
-  void getScales(Int zoomLevel, MapPosition pos, double &latScale, double &lngScale);
 
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {

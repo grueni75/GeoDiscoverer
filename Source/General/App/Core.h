@@ -396,6 +396,7 @@ extern Core *core;
 #include <MapTileServer.h>
 #include <MapDownloader.h>
 #include <MapSource.h>
+#include <MapSourceEmpty.h>
 #include <MapSourceCalibratedPictures.h>
 #include <MapSourceMercatorTiles.h>
 #include <NavigationPathTileInfo.h>

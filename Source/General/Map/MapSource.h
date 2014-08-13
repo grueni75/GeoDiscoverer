@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum { MapSourceTypeCalibratedPictures, MapSourceTypeMercatorTiles } MapSourceType;
+typedef enum { MapSourceTypeCalibratedPictures, MapSourceTypeMercatorTiles, MapSourceTypeEmpty } MapSourceType;
 
 class MapSource {
 

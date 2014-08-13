@@ -21,8 +21,8 @@
 //============================================================================
 
 
-#ifndef MAPOFFLINESOURCE_H_
-#define MAPOFFLINESOURCE_H_
+#ifndef MAPSOURCECALIBRATEDPICTURES_H_
+#define MAPSOURCECALIBRATEDPICTURES_H_
 
 namespace GEODISCOVERER {
 
@@ -70,7 +70,7 @@ public:
   virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator);
 
   // Returns the scale values for the given zoom level
-  void getScales(Int zoomLevel, double &latScale, double &lngScale);
+  virtual void getScales(Int zoomLevel, double &latScale, double &lngScale);
 
   // Getters and setters
 
@@ -78,4 +78,4 @@ public:
 
 }
 
-#endif /* MAPOFFLINESOURCE_H_ */
+#endif /* MAPSOURCECALIBRATEDPICTURES_H_ */
