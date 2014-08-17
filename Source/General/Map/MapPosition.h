@@ -96,6 +96,9 @@ public:
   // Computes the distance in meters to the given destination point
   double computeDistance(MapPosition target);
 
+  // Compute the normal distance from the locationPos to the vector spanned from the prevPos and this pos
+  double computeNormalDistance(MapPosition prevPos, MapPosition locationPos, bool insideOnly, bool debugMsgs=false);
+
   // Adds the point to the gpx xml tree
   void writeGPX(XMLNode parentNode);
 

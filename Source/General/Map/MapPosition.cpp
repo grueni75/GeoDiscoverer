@@ -323,4 +323,38 @@ bool MapPosition::invalidate() {
   lat=-std::numeric_limits<double>::max();
 }
 
+// Compute the normal distance from the locationPos to the vector spanned from the prevPos and this pos
+double MapPosition::computeNormalDistance(MapPosition prevPos, MapPosition locationPos, bool insideOnly, bool debugMsgs) {
+  double distance = std::numeric_limits<double>::max();
+  if (*this!=NavigationPath::getPathInterruptedPos()) {
+    if (prevPos!=NavigationPath::getPathInterruptedPos()) {
+      double a = prevPos.computeDistance(*this);
+      double b = locationPos.computeDistance(prevPos);
+      double c = locationPos.computeDistance(*this);
+      if ((a!=0.0)&&(b!=0.0)&&(c!=0.0)) {
+        double t = 2*a*c;
+        t = (a*a+c*c-b*b)/t;
+        double alpha = acos(t);
+        distance = sin(alpha)*c;
+        t = 2*a*b;
+        t = (a*a+b*b-c*c)/t;
+        double beta = acos(t);
+        if (debugMsgs)
+          DEBUG("a=%.2f b=%.2f c=%.2f alpha=%e beta=%e distance=%.2f",a,b,c,alpha,beta,distance);
+        if (insideOnly) {
+          if (fabs(alpha)>M_PI_2) {
+            //DEBUG("alpha=%f",alpha);
+            distance=std::numeric_limits<double>::max();
+          }
+          if (fabs(beta)>M_PI_2) {
+            //DEBUG("beta=%f",beta);
+            distance=std::numeric_limits<double>::max();
+          }
+        }
+      }
+    }
+  }
+  return distance;
+}
+
 }

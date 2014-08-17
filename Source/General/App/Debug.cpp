@@ -63,6 +63,9 @@ void Debug::replayTrace(std::string filename) {
 
     // Sleep a little bit
     usleep(1000);
+    //sleep(2);
+    /*char buffer[32];
+    gets(buffer);*/
 
   }
   in.close();
