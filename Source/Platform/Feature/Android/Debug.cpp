@@ -32,7 +32,7 @@ void GDApp_addMessage(int severity, std::string tag, std::string message);
 namespace GEODISCOVERER {
 
 // Prints a message
-void Debug::print(Verbosity verbosity, const char *file, int line, const char *fmt, ...) {
+void Debug::print(Verbosity verbosity, const char *file, int line, bool messageLogOnly, const char *fmt, ...) {
 
   va_list argp;
   const char *prefix,*postfix;
@@ -103,8 +103,10 @@ void Debug::print(Verbosity verbosity, const char *file, int line, const char *f
   } else {
 
     // Output android message
-    __android_log_write(logPrio,"GDCore",buffer);
-    GDApp_addMessage(verbosity,"GDCore",buffer2);
+    if (!messageLogOnly) {
+      __android_log_write(logPrio,"GDCore",buffer);
+      GDApp_addMessage(verbosity,"GDCore",buffer2);
+    }
     buffer2[0]=toupper(buffer2[0]);
     std::string message=std::string(buffer2);
 
@@ -116,25 +118,27 @@ void Debug::print(Verbosity verbosity, const char *file, int line, const char *f
     }
 
     // Create dialog if required
-    switch(verbosity) {
-      case verbosityError:
-        GDApp_executeAppCommand("errorDialog(\"" + message + "\")");
-        break;
-      case verbosityWarning:
-        GDApp_executeAppCommand("warningDialog(\"" + message + "\")");
-        break;
-      case verbosityFatal:
-        GDApp_executeAppCommand("fatalDialog(\"" + message + "\")");
-        break;
-      case verbosityInfo:
-        GDApp_executeAppCommand("infoDialog(\"" + message + "\")");
-        break;
+    if (!messageLogOnly) {
+      switch(verbosity) {
+        case verbosityError:
+          GDApp_executeAppCommand("errorDialog(\"" + message + "\")");
+          break;
+        case verbosityWarning:
+          GDApp_executeAppCommand("warningDialog(\"" + message + "\")");
+          break;
+        case verbosityFatal:
+          GDApp_executeAppCommand("fatalDialog(\"" + message + "\")");
+          break;
+        case verbosityInfo:
+          GDApp_executeAppCommand("infoDialog(\"" + message + "\")");
+          break;
+      }
     }
 
-    // Wait for ever after a fatal
+    /* Wait for ever after a fatal
     if (fatalOccured) {
       while(1) sleep(1);
-    }
+    }*/
   }
 }
 

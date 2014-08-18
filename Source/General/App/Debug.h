@@ -78,12 +78,12 @@ namespace GEODISCOVERER {
 enum Verbosity { verbosityError=0, verbosityWarning=1, verbosityInfo=2, verbosityDebug=3, verbosityFatal=4, verbosityTrace=5 };
 
 // Message macros
-#define DEBUG(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityDebug,__FILE__,__LINE__,msg,__VA_ARGS__)
-#define INFO(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityInfo,__FILE__,__LINE__,msg,__VA_ARGS__)
-#define WARNING(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityWarning,__FILE__,__LINE__,msg,__VA_ARGS__)
-#define ERROR(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityError,__FILE__,__LINE__,msg,__VA_ARGS__)
-#define FATAL(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityFatal,__FILE__,__LINE__,msg,__VA_ARGS__)
-#define TRACE(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityTrace,__FILE__,__LINE__,msg,__VA_ARGS__)
+#define DEBUG(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityDebug,__FILE__,__LINE__,false,msg,__VA_ARGS__)
+#define INFO(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityInfo,__FILE__,__LINE__,false,msg,__VA_ARGS__)
+#define WARNING(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityWarning,__FILE__,__LINE__,false,msg,__VA_ARGS__)
+#define ERROR(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityError,__FILE__,__LINE__,false,msg,__VA_ARGS__)
+#define FATAL(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityFatal,__FILE__,__LINE__,false,msg,__VA_ARGS__)
+#define TRACE(msg, ...) if (core->getDebug()) core->getDebug()->print(verbosityTrace,__FILE__,__LINE__,false,msg,__VA_ARGS__)
 
 // Callstack macro
 #define CALLSTACK(result) \
@@ -125,7 +125,7 @@ public:
   void init();
 
   // Prints out a message
-  void print(Verbosity verbosity, const char *file, int line, const char *fmt, ...);
+  void print(Verbosity verbosity, const char *file, int line, bool messageLogOnly, const char *fmt, ...);
 
   // Writes a message to a file
   void write(FILE *out, const char *prefix, const char *postfix, const char *relative_file, int line, const char *timestamp, const char *fmt, va_list argp);

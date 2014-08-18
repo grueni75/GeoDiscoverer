@@ -147,6 +147,9 @@ public class GDApplication extends Application {
       messages = messages.substring(messages.length() - maxMessagesSize);
     }
     if (coreObject!=null) {
+      if (!tag.equals("GDCore")) {
+        coreObject.executeCoreCommand("log(" + severityString + "," + tag + "," + message + ")");
+      }
       coreObject.executeAppCommand("updateMessages()");
     }
   }

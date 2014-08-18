@@ -423,6 +423,17 @@ std::string Commander::execute(std::string cmd) {
     core->getNavigationEngine()->setActiveRoute(nearestPath);
     cmdExecuted=true;
   }
+  if (cmdName=="log") {
+    if (core->getDebug()) {
+      if (args[0]=="DEBUG") core->getDebug()->print(verbosityDebug,args[1].c_str(),0,true,args[2].c_str());
+      if (args[0]=="INFO") core->getDebug()->print(verbosityInfo,args[1].c_str(),0,true,args[2].c_str());
+      if (args[0]=="WARNING") core->getDebug()->print(verbosityWarning,args[1].c_str(),0,true,args[2].c_str());
+      if (args[0]=="ERROR") core->getDebug()->print(verbosityError,args[1].c_str(),0,true,args[2].c_str());
+      if (args[0]=="FATAL") core->getDebug()->print(verbosityFatal,args[1].c_str(),0,true,args[2].c_str());
+      if (args[0]=="UNKNOWN") core->getDebug()->print(verbosityError,args[1].c_str(),0,true,args[2].c_str());
+    }
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

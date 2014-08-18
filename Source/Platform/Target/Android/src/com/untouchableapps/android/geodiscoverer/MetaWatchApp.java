@@ -468,7 +468,7 @@ public class MetaWatchApp {
       currentOffRoute=true;
     }
     
-    // If the turn has appeared or disapperas, force an update
+    // If the turn has appeared or disappears, force an update
     if ((currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals("-")))
       forceUpdate=true;
     if ((!currentTurnDistance.equals("-"))&&(lastTurnDistance.equals("-")))

@@ -25,7 +25,7 @@
 namespace GEODISCOVERER {
 
 // Prints a message
-void Debug::print(Verbosity verbosity, const char *file, int line, const char *fmt, ...) {
+void Debug::print(Verbosity verbosity, const char *file, int line, bool messageLogOnly, const char *fmt, ...) {
 
   va_list argp;
   const char *prefix,*postfix;
