@@ -205,17 +205,25 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     // Set positions
     separatorIcon.setX(x);
     separatorIcon.setY(y);
-    distanceLabelFontString->setX(x+(iconWidth-distanceLabelFontString->getIconWidth())/2);
-    distanceLabelFontString->setY(y+targetDistanceLabelOffsetY);
-    distanceValueFontString->setX(x+(iconWidth-distanceValueFontString->getIconWidth())/2);
-    if (showTurn)
-      distanceValueFontString->setY(y+turnDistanceValueOffsetY);
-    else
-      distanceValueFontString->setY(y+targetDistanceValueOffsetY);
-    durationLabelFontString->setX(x+(iconWidth-durationLabelFontString->getIconWidth())/2);
-    durationLabelFontString->setY(y+durationLabelOffsetY);
-    durationValueFontString->setX(x+(iconWidth-durationValueFontString->getIconWidth())/2);
-    durationValueFontString->setY(y+durationValueOffsetY);
+    if (distanceLabelFontString) {
+      distanceLabelFontString->setX(x+(iconWidth-distanceLabelFontString->getIconWidth())/2);
+      distanceLabelFontString->setY(y+targetDistanceLabelOffsetY);
+    }
+    if (distanceValueFontString) {
+      distanceValueFontString->setX(x+(iconWidth-distanceValueFontString->getIconWidth())/2);
+      if (showTurn)
+        distanceValueFontString->setY(y+turnDistanceValueOffsetY);
+      else
+        distanceValueFontString->setY(y+targetDistanceValueOffsetY);
+    }
+    if (durationLabelFontString) {
+      durationLabelFontString->setX(x+(iconWidth-durationLabelFontString->getIconWidth())/2);
+      durationLabelFontString->setY(y+durationLabelOffsetY);
+    }
+    if (durationValueFontString) {
+      durationValueFontString->setX(x+(iconWidth-durationValueFontString->getIconWidth())/2);
+      durationValueFontString->setY(y+durationValueOffsetY);
+    }
     if (prevNavigationInfo.getLocationBearing()!=navigationInfo->getLocationBearing()) {
       if (navigationInfo->getLocationBearing()==NavigationInfo::getUnknownAngle()) {
         hideCompass=true;
