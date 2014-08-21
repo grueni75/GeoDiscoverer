@@ -856,6 +856,10 @@ void WidgetEngine::onLocationChange(MapPosition mapPos) {
 // Informs the engine that a path has changed
 void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType changeType) {
   visiblePages.lockAccess(__FILE__, __LINE__);
+  if (changeType==NavigationPathChangeTypeWillBeRemoved) {
+    if (nearestPath==path)
+      nearestPath=NULL;
+  }
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onPathChange(currentPage==i->second ? true : false, path, changeType);

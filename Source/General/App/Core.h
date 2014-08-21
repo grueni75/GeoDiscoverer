@@ -87,7 +87,7 @@ class Commander;
 typedef enum { DownloadResultSuccess, DownloadResultFileNotFound, DownloadResultOtherFail } DownloadResult;
 
 // Types of changes to a navigation path object
-typedef enum {NavigationPathChangeTypeEndPositionAdded, NavigationPathChangeTypeFlagSet } NavigationPathChangeType;
+typedef enum {NavigationPathChangeTypeEndPositionAdded, NavigationPathChangeTypeFlagSet, NavigationPathChangeTypeWillBeRemoved } NavigationPathChangeType;
 
 class Core {
 

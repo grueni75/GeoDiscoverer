@@ -111,6 +111,7 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   ThreadSignalInfo *updateVisualizationSignal;
   ThreadInfo *widgetPathInfoThreadInfo;
   ThreadMutexInfo *visualizationMutex;
+  ThreadMutexInfo *widgetPathInfoThreadWorkingMutex;
   std::string visualizationPathName;
   std::string visualizationPathLength;
   std::string visualizationPathAltitudeUp;

@@ -290,6 +290,7 @@ void NavigationEngine::deinit() {
   // Save the track first
   if (recordedTrack) {
     recordedTrack->writeGPXFile(); // locking is handled within writeGPXFile()
+    core->getWidgetEngine()->onPathChange(recordedTrack,NavigationPathChangeTypeWillBeRemoved);
     lockRecordedTrack(__FILE__, __LINE__);
     delete recordedTrack;
     recordedTrack=NULL;
@@ -299,6 +300,7 @@ void NavigationEngine::deinit() {
   // Free all routes
   lockRoutes(__FILE__, __LINE__);
   for (std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    core->getWidgetEngine()->onPathChange(*i,NavigationPathChangeTypeWillBeRemoved);
     delete *i;
   }
   routes.clear();

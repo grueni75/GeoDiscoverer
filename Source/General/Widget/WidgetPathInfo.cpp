@@ -61,6 +61,7 @@ WidgetPathInfo::WidgetPathInfo() : WidgetPrimitive(), altitudeProfileAxisPointBu
   visualizationMutex=core->getThread()->createMutex("widget path info visualization mutex");
   widgetPathInfoThreadInfo=core->getThread()->createThread("widget path info thread",widgetPathInfoThread,this);
   minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute",__FILE__, __LINE__);
+  widgetPathInfoThreadWorkingMutex=core->getThread()->createMutex("widget path info thread working mutex");
   quitWidgetPathInfoThread=false;
 }
 
@@ -72,6 +73,7 @@ WidgetPathInfo::~WidgetPathInfo() {
   core->getThread()->destroyThread(widgetPathInfoThreadInfo);
   core->getThread()->destroySignal(updateVisualizationSignal);
   core->getThread()->destroyMutex(visualizationMutex);
+  core->getThread()->destroyMutex(widgetPathInfoThreadWorkingMutex);
   core->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
   if (pathNameFontString) core->getFontEngine()->destroyString(pathNameFontString);
   if (pathLengthFontString) core->getFontEngine()->destroyString(pathLengthFontString);
@@ -339,6 +341,11 @@ void WidgetPathInfo::onPathChange(bool widgetVisible, NavigationPath *path, Navi
       case NavigationPathChangeTypeFlagSet:
         resetPathVisibility(widgetVisible);
         break;
+      case NavigationPathChangeTypeWillBeRemoved:
+        core->getThread()->lockMutex(widgetPathInfoThreadWorkingMutex,__FILE__,__LINE__);
+        currentPath=NULL;
+        core->getThread()->unlockMutex(widgetPathInfoThreadWorkingMutex);
+        break;
       default:
         FATAL("navigation path change type not supported",NULL);
         break;
@@ -439,6 +446,9 @@ void WidgetPathInfo::updateVisualization() {
     core->getThread()->waitForSignal(updateVisualizationSignal);
     if (quitWidgetPathInfoThread)
       return;
+
+    // Thread is now working
+    core->getThread()->lockMutex(widgetPathInfoThreadWorkingMutex,__FILE__,__LINE__);
 
     // Variables that define the visualization
     std::string vPathName;
@@ -731,6 +741,9 @@ void WidgetPathInfo::updateVisualization() {
     this->visualizationNoAltitudeProfile=noAltitudeProfile;
     redrawRequired=true;
     core->getThread()->unlockMutex(visualizationMutex);
+
+    // Thread is not working anymore
+    core->getThread()->unlockMutex(widgetPathInfoThreadWorkingMutex);
 
   }
 }
