@@ -328,6 +328,10 @@ public:
   TimestampInMicroseconds getTargetRotateDuration() const {
     return targetRotateDuration;
   }
+
+  const NavigationPath *getActiveRoute() const {
+    return activeRoute;
+  }
 };
 
 }
