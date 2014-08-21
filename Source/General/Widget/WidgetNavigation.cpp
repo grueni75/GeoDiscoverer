@@ -363,17 +363,25 @@ void WidgetNavigation::draw(Screen *screen, TimestampInMicroseconds t) {
     // Draw the information about the target / route
     separatorIcon.setColor(color);
     separatorIcon.draw(screen,t);
-    distanceLabelFontString->setColor(color);
-    distanceLabelFontString->draw(screen,t);
-    durationLabelFontString->setColor(color);
-    durationLabelFontString->draw(screen,t);
-    durationValueFontString->setColor(color);
-    durationValueFontString->draw(screen,t);
+    if (distanceLabelFontString) {
+      distanceLabelFontString->setColor(color);
+      distanceLabelFontString->draw(screen,t);
+    }
+    if (durationLabelFontString) {
+      durationLabelFontString->setColor(color);
+      durationLabelFontString->draw(screen,t);
+    }
+    if (durationValueFontString) {
+      durationValueFontString->setColor(color);
+      durationValueFontString->draw(screen,t);
+    }
   }
 
   // Draw the distance text (independent if a turn is coming or not)
-  distanceValueFontString->setColor(color);
-  distanceValueFontString->draw(screen,t);
+  if (distanceValueFontString) {
+    distanceValueFontString->setColor(color);
+    distanceValueFontString->draw(screen,t);
+  }
 }
 
 // Called when the widget has changed its position
