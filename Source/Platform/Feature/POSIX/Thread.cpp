@@ -418,7 +418,6 @@ void Thread::debugMutexLocks() {
     pthread_mutex_lock(&accessMutex);
     Int tries;
     for(tries=0;tries<core->getFileOpenForWritingRetries();tries++) {
-      DEBUG("tries=%d",tries);
       if ((mutexDebugLog=fopen(logPath.c_str(),"w"))) {
         break;
       }
