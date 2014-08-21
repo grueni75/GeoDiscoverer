@@ -57,6 +57,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 /** Interfaces with the C++ part */
 public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorEventListener, Runnable {
@@ -498,27 +499,25 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Sends an command to the core after checking if it it is ready */
   public String executeCoreCommand(String cmd)
   {
-    lock.lock();
     String result;
     if (coreInitialized) {
       result = executeCoreCommandInt(cmd);
     } else {
       result = "";
     }
-    lock.unlock();
     return result;
   }
 
   /** Sends an command to the core if it is initialized or remembers them for execution after core is initialized */
   public void scheduleCoreCommand(String cmd)
   {
-    lock.lock();
     if (coreInitialized) {
       executeCoreCommandInt(cmd);
     } else {
+      lock.lock();
       queuedCoreCommands.add(cmd);
+      lock.unlock();
     }
-    lock.unlock();
   }
 
   //
@@ -642,12 +641,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Called when the surface changes */
   public void onSurfaceChanged(GL10 gl, int width, int height) {
     lock.lock();
-    if (activity==null) {
-      GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "onSurfaceChanged called without activity");
-    } else {
-      if (gl!=currentGL) {
-        GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "opengl context change is not supported");          
-      }
+    if (activity!=null) {
       int orientationValue = activity.getResources().getConfiguration().orientation;
       String orientationString="portrait";
       if (orientationValue==Configuration.ORIENTATION_LANDSCAPE)
@@ -662,8 +656,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   public void onSurfaceCreated(GL10 gl, EGLConfig config) {
     lock.lock();
     // Context is lost, so tell the core to recreate any textures
-    if (activity==null)
-      GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "onSurfaceCreated called without activity");
     graphicInvalidated=true;
     createGraphic=true;
     currentGL=gl;
