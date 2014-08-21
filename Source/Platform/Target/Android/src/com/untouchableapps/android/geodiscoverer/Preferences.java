@@ -23,12 +23,16 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
+
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -41,6 +45,8 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
 import android.text.method.DigitsKeyListener;
+import android.util.TimingLogger;
+import android.widget.Toast;
 
 public class Preferences extends PreferenceActivity implements
     OnPreferenceClickListener,OnPreferenceChangeListener {
@@ -54,27 +60,69 @@ public class Preferences extends PreferenceActivity implements
   // Request codes for calling other activities
   static final int SHOW_PREFERENCE_SCREEN_REQUEST = 0;
 
-  /** Indicates that the route list has changed */
-  void routesHaveChanged() {
-    coreObject.executeCoreCommand("updateRoutes()");
-    setResult(1);
-    boolean useIntent = true;
-    if (coreObject.configStoreGetStringValue("", "expertMode").equals("0")) {
-      if (currentPath.equals("")) {
-        useIntent=false;
-      }
-    } else {
-      if (currentPath.equals("Navigation")) {
-        useIntent=false;
-      }        
+  /** Copies tracks from the Track into the Route directory */
+  private class FillListPreferenceItemTask extends AsyncTask<Void, Integer, Void> {
+
+    public ListPreference entry;
+    public String key;
+    public String path;
+    public String name;
+    String[] valuesArray;
+    
+    protected void onPreExecute() {
     }
-    if (!useIntent) {
-      updatePreferences();
-    } else {
-      Intent intent = new Intent(Preferences.this, Preferences.class);
-      intent.putExtra("ShowPreferenceScreen", "Navigation");
-      startActivityForResult(intent, SHOW_PREFERENCE_SCREEN_REQUEST);
-    }    
+
+    protected Void doInBackground(Void... params) {
+
+      // Handle the different types
+      if (key.equals("Map/folder")) {
+        File dir = new File(coreObject.homePath + "/Map");
+        LinkedList<String> values = new LinkedList<String>();
+        for (File file : dir.listFiles()) {
+          if (file.isDirectory()) { 
+            values.add(file.getName());
+          }
+        }
+        valuesArray = new String[values.size()];
+        values.toArray(valuesArray);
+        Arrays.sort(valuesArray);
+      }
+      if (key.equals("Navigation/lastRecordedTrackFilename")) {
+        boolean currentValueFound=false;
+        String currentValue = coreObject.configStoreGetStringValue(path, name);
+        File dir = new File(coreObject.homePath + "/Track");
+        LinkedList<String> values = new LinkedList<String>();
+        for (File file : dir.listFiles()) {
+          if ((!file.isDirectory())
+              && (!file.getName().substring(file.getName().length() - 1)
+                  .equals("~"))) {
+            values.add(file.getName());
+            if (file.getName().equals(currentValue))
+              currentValueFound = true;
+          }
+        }
+        if (!currentValueFound) 
+          values.add(currentValue);
+        valuesArray = new String[values.size()];
+        values.toArray(valuesArray);
+        Arrays.sort(valuesArray,Collections.reverseOrder());
+      }
+      if (key.equals("Navigation/activeRoute")) {
+        valuesArray = coreObject.configStoreGetAttributeValues("Navigation/Route", "name");
+        Arrays.sort(valuesArray);
+      }
+      
+      return null;
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+    }
+
+    protected void onPostExecute(Void result) {
+      entry.setEntries(valuesArray);
+      entry.setEntryValues(valuesArray);
+      entry.setEnabled(true);
+    }
   }
 
   /** Dynamically loads the next level of preferences */
@@ -128,6 +176,7 @@ public class Preferences extends PreferenceActivity implements
   @SuppressLint("DefaultLocale")
   boolean addPreference(PreferenceGroup attributeParent, PreferenceGroup containerParent, String path, String name) {
 
+    //TimingLogger timings = new TimingLogger("GDApp", "addPreference");
     boolean attributesFound=false;
     
     // Get some information about the node
@@ -138,62 +187,30 @@ public class Preferences extends PreferenceActivity implements
       key = path + "/" + name;
     }
     Bundle info = coreObject.configStoreGetNodeInfo(key);
+    //timings.addSplit("configStoreGetNodeInfo");
 
     // Do special things for special preferences
+    boolean backgroundFill=false;
     if (key.equals("Map/folder")) {
       
       // Use an enumeration of available folders
       info.putString("type", "enumeration");
-      File dir = new File(coreObject.homePath + "/Map");
-      LinkedList<String> values = new LinkedList<String>();
-      for (File file : dir.listFiles()) {
-        if (file.isDirectory()) { 
-          values.add(file.getName());
-        }
-      }
-      String[] valuesArray = new String[values.size()];
-      values.toArray(valuesArray);
-      Arrays.sort(valuesArray);
-      for (int i=0;i<valuesArray.length;i++) {
-        info.putString(String.valueOf(i), valuesArray[i]);
-      }
+      backgroundFill=true;
+      //timings.addSplit("folder");
     }
     if (key.equals("Navigation/lastRecordedTrackFilename")) {
       
       // Use an enumeration of available files
       info.putString("type", "enumeration");
-      boolean currentValueFound=false;
-      String currentValue = coreObject.configStoreGetStringValue(path, name);
-      File dir = new File(coreObject.homePath + "/Track");
-      LinkedList<String> values = new LinkedList<String>();
-      for (File file : dir.listFiles()) {
-        if ((!file.isDirectory())
-            && (!file.getName().substring(file.getName().length() - 1)
-                .equals("~"))) {
-          values.add(file.getName());
-          if (file.getName().equals(currentValue))
-            currentValueFound = true;
-        }
-      }
-      if (!currentValueFound) 
-        values.add(currentValue);
-      String[] valuesArray = new String[values.size()];
-      values.toArray(valuesArray);
-      Arrays.sort(valuesArray,Collections.reverseOrder());
-      for (int i=0;i<valuesArray.length;i++) {
-        info.putString(String.valueOf(i), valuesArray[i]);
-      }
+      backgroundFill=true;
+      //timings.addSplit("lastRecordedTrackFilename");
     }
     if (key.equals("Navigation/activeRoute")) {
       
       // Use an enumeration of available routes
       info.putString("type", "enumeration");
-      String[] valuesArray = coreObject.configStoreGetAttributeValues("Navigation/Route", "name");
-      Arrays.sort(valuesArray);
-      info.putString("0","none");
-      for (int i=0;i<valuesArray.length;i++) {
-        info.putString(String.valueOf(i+1), valuesArray[i]);
-      }
+      backgroundFill=true;
+      //timings.addSplit("activeRoute");
     }
     
     // Prepare some variables     
@@ -209,11 +226,15 @@ public class Preferences extends PreferenceActivity implements
     }
     prettyName = prettyName.substring(0, 1).toUpperCase()
         + prettyName.substring(1);
+    //timings.addSplit("prettyName");
 
     // If the node is optional and there is no value, skip it
     if (info.containsKey("isOptional")) {
-      if (!coreObject.configStorePathExists(key))
+      if (!coreObject.configStorePathExists(key)) {
+        //timings.addSplit("is optional");
+        //timings.dumpToLog();
         return false;
+      }
     }      
 
     // Container node?
@@ -253,6 +274,7 @@ public class Preferences extends PreferenceActivity implements
             category.addPreference(childScreen);
           }
         }
+        //timings.addSplit("is unbounded");
 
       } else {
 
@@ -260,6 +282,7 @@ public class Preferences extends PreferenceActivity implements
             .createPreferenceScreen(this);
         childScreen.setOnPreferenceClickListener(this);
         entry = childScreen;
+        //timings.addSplit("is bounded");
       }
 
       // Color node?
@@ -274,6 +297,7 @@ public class Preferences extends PreferenceActivity implements
       int color = alpha << 24 | red << 16 | green << 8 | blue;
       entry.setDefaultValue(color);
       entry.setOnPreferenceChangeListener(this);
+      //timings.addSplit("color");
 
       // Text-based entry nodes?
     } else if ((type.equals("string"))
@@ -291,6 +315,7 @@ public class Preferences extends PreferenceActivity implements
         editText.getEditText().setKeyListener(listener);
       }
       entry.setOnPreferenceChangeListener(this);
+      //timings.addSplit("string");
 
       // Boolean node?
     } else if (type.equals("boolean")) {
@@ -303,6 +328,7 @@ public class Preferences extends PreferenceActivity implements
         entry.setDefaultValue(false);
       }
       entry.setOnPreferenceChangeListener(this);
+      //timings.addSplit("boolean");
 
       // Enumeration node?
     } else if (type.equals("enumeration")) {
@@ -321,6 +347,7 @@ public class Preferences extends PreferenceActivity implements
       list.setEntries(valuesArray);
       list.setEntryValues(valuesArray);
       entry.setOnPreferenceChangeListener(this);
+      //timings.addSplit("enumeration");
     }
 
     // Add the entry
@@ -331,7 +358,18 @@ public class Preferences extends PreferenceActivity implements
       entry.setPersistent(false);
       attributesFound = true;
       attributeParent.addPreference(entry);
+      if (backgroundFill) {
+        FillListPreferenceItemTask task = new FillListPreferenceItemTask();
+        task.entry = (ListPreference)entry;
+        task.key = key;
+        task.path = path;
+        task.name = name;
+        entry.setEnabled(false);
+        task.execute();
+      }
     }
+    //timings.addSplit("add entry");
+    //timings.dumpToLog();
     
     // Return result
     return attributesFound;
@@ -411,6 +449,8 @@ public class Preferences extends PreferenceActivity implements
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    //TimingLogger timings = new TimingLogger("GDApp", "onCreate");
+
     // Get the core object
     coreObject = GDApplication.coreObject;
 
@@ -422,8 +462,10 @@ public class Preferences extends PreferenceActivity implements
     currentPath = path;
 
     // Set the content
+    //timings.addSplit("init");
     addPreferencesFromResource(R.xml.preferences);
     updatePreferences();
+    //timings.addSplit("updatePreferences");
 
     // Rename the preference screen
     if (!path.equals("")) {
@@ -444,6 +486,9 @@ public class Preferences extends PreferenceActivity implements
     
     // No preferences was changed so far
     setResult(0);
+
+    //timings.addSplit("rest");
+    //timings.dumpToLog();
        
   }
 
