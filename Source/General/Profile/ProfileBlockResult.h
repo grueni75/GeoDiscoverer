@@ -48,7 +48,7 @@ public:
   void updateDuration(TimestampInMicroseconds duration);
 
   // Outputs the result
-  void outputResult(TimestampInMicroseconds totalMinDuration, TimestampInMicroseconds totalAvgDuration, TimestampInMicroseconds totalMaxDuration, bool clear);
+  void outputResult(TimestampInMicroseconds totalMinDuration, TimestampInMicroseconds totalAvgDuration, TimestampInMicroseconds totalMaxDuration, TimestampInMicroseconds totalTotalDuration, bool clear);
 
   // Getters and setters
   void setName(std::string name)
@@ -68,6 +68,9 @@ public:
       return minDuration;
   }
 
+  double getTotalDuration() const {
+    return totalDuration;
+  }
 };
 
 }

@@ -35,6 +35,7 @@ class WidgetEngine {
 
 protected:
 
+  ThreadMutexInfo *accessMutex;                         // Mutex for accessing this object
   WidgetPageMap pageMap;                                // Holds all available widget pages
   WidgetPage *currentPage;                              // The currently selected page
   GraphicColor selectedWidgetColor;                     // Color of selected widgets

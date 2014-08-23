@@ -233,7 +233,7 @@ void Screen::drawEllipse(bool filled) {
 
 // Finished the drawing of the scene
 void Screen::endScene() {
-  glFlush();
+  //glFlush();
 }
 
 // Creates a new texture id

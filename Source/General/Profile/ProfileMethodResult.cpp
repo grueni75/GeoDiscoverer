@@ -42,6 +42,7 @@ void ProfileMethodResult::outputResult(bool clear) {
   double totalAvgDuration=0;
   TimestampInMicroseconds totalMaxDuration=0;
   TimestampInMicroseconds totalMinDuration=0;
+  TimestampInMicroseconds totalTotalDuration=0;
 
   // Sort according to average duration
   std::list<ProfileBlockResult*> sortedList;
@@ -50,6 +51,7 @@ void ProfileMethodResult::outputResult(bool clear) {
     totalAvgDuration+=avgDuration;
     totalMaxDuration+=i->second->getMaxDuration();
     totalMinDuration+=i->second->getMinDuration();
+    totalTotalDuration+=i->second->getTotalDuration();
     bool inserted=false;
     for(std::list<ProfileBlockResult*>::iterator j=sortedList.begin();j!=sortedList.end();j++) {
       ProfileBlockResult *d=*j;
@@ -65,7 +67,7 @@ void ProfileMethodResult::outputResult(bool clear) {
 
   // Output result
   for(std::list<ProfileBlockResult*>::iterator j=sortedList.begin();j!=sortedList.end();j++) {
-    (*j)->outputResult(totalMinDuration,totalAvgDuration,totalMaxDuration,clear);
+    (*j)->outputResult(totalMinDuration,totalAvgDuration,totalMaxDuration,totalTotalDuration,clear);
   }
 }
 

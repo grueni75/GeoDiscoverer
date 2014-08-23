@@ -332,6 +332,8 @@ void Core::updateScreen(bool forceRedraw) {
 
   bool wakeupMapUpdateThread=false;
 
+  PROFILE_START;
+
   // Allow texture allocation
   screen->setAllowAllocation(true);
 
@@ -354,18 +356,22 @@ void Core::updateScreen(bool forceRedraw) {
       thread->unlockMutex(isInitializedMutex);
       core->getThread()->issueSignal(isInitializedSignal);
       core->getCommander()->dispatch("initComplete()");
+      PROFILE_ADD("init");
     }
 
     // Check if a new texture is ready
     if (mapCache->getTileTextureAvailable()) {
       mapCache->setNextTileTexture();
       thread->issueSignal(mapUpdateTileTextureProcessedSignal);
+      PROFILE_ADD("tile texture transfer");
     }
 
   }
+  PROFILE_ADD("pre draw");
 
   // Redraw the scene
   graphicEngine->draw(forceRedraw);
+  PROFILE_ADD("draw");
 
   // Only work if the required objects are initialized
   if (!mapUpdateStopped) {
@@ -381,9 +387,8 @@ void Core::updateScreen(bool forceRedraw) {
       if (mapEngine->mapUpdateIsRequired(visPos,NULL,NULL,NULL,false)) {
         mapEngine->setAbortUpdate();
       }
-
-
     }
+    PROFILE_ADD("map update abort check");
   }
 
   // Let the map update thread continue
@@ -406,11 +411,13 @@ void Core::updateScreen(bool forceRedraw) {
     if (updateRequired) {
       thread->issueSignal(mapUpdateStartSignal);
     }
+    PROFILE_ADD("map update trigger check");
 
   }
 
   // Disallow texture allocation
   screen->setAllowAllocation(false);
+  PROFILE_ADD("post draw");
 }
 
 // Main loop of the map update thread
@@ -520,7 +527,7 @@ void Core::maintenance(bool endlessLoop) {
 
     // Output the profiling result
 #ifdef PROFILING_ENABLED
-    core->getProfileEngine()->outputResult("",true);
+    core->getProfileEngine()->outputResult("",false);
     core->getGraphicEngine()->outputStats();
 #endif
 

@@ -64,12 +64,12 @@ MapEngine::~MapEngine() {
 // Does all action to remove a tile from the map
 void MapEngine::deinitTile(MapTile *t, const char *file, int line)
 {
-  map->lockAccess(file,line);
+  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   map->removePrimitive(t->getVisualizationKey()); // Remove it from the graphic
   t->removeGraphic();
   if (t->getIsDummy())   // Delete dummy tiles
     delete t;
-  map->unlockAccess();
+  core->getGraphicEngine()->unlockDrawing();
 }
 
 // Clear the current map
@@ -87,7 +87,7 @@ void MapEngine::deinitMap()
   // Delete all left-over primitives that were used for debugging
   //DEBUG("deleting debug primitives",NULL);
   if (map) {
-    map->lockAccess(__FILE__, __LINE__);
+    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     GraphicPrimitiveMap::iterator i;
     GraphicPrimitiveMap *primitiveMap = map->getPrimitiveMap();
     std::list<GraphicPrimitive*> primitives;
@@ -107,15 +107,15 @@ void MapEngine::deinitMap()
     for(std::list<GraphicPrimitive*>::const_iterator i=primitives.begin(); i != primitives.end(); i++) {
       delete *i;
     }
-    map->unlockAccess();
+    core->getGraphicEngine()->unlockDrawing();
   }
 
   // Free graphic objects
   //DEBUG("deleting map",NULL);
   if (map) {
-    map->lockAccess(__FILE__, __LINE__);
+    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     core->getGraphicEngine()->setMap(NULL);
-    map->unlockAccess();
+    core->getGraphicEngine()->unlockDrawing();
     delete map;
     map=NULL;
   }
@@ -189,9 +189,9 @@ void MapEngine::initMap()
   }
 
   // Inform the graphic engine about the new objects
-  map->lockAccess(__FILE__, __LINE__);
+  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   core->getGraphicEngine()->setMap(map);
-  map->unlockAccess();
+  core->getGraphicEngine()->unlockDrawing();
 
   // Force redraw
   forceMapRecreation=true;
@@ -202,7 +202,7 @@ void MapEngine::initMap()
 
 // Remove all debugging primitives
 void MapEngine::removeDebugPrimitives() {
-  map->lockAccess(__FILE__, __LINE__);
+  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   GraphicPrimitiveMap::iterator i;
   GraphicPrimitiveMap *primitiveMap = map->getPrimitiveMap();
   std::list<GraphicPrimitive*> primitives;
@@ -223,7 +223,7 @@ void MapEngine::removeDebugPrimitives() {
   for(std::list<GraphicPrimitive*>::const_iterator i=primitives.begin(); i != primitives.end(); i++) {
     delete *i;
   }
-  map->unlockAccess();
+  core->getGraphicEngine()->unlockDrawing();
 }
 
 // Fills the given area with tiles
@@ -384,9 +384,9 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
         // Add the tile to the map
         tiles.push_back(tile);
         GraphicObject *v=tile->getVisualization();
-        map->lockAccess(__FILE__, __LINE__);
+        core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
         tile->setVisualizationKey(map->addPrimitive(v));
-        map->unlockAccess();
+        core->getGraphicEngine()->unlockDrawing();
 
         // Shall the position be activated immediately?
         if (activateVisPos) {
@@ -411,9 +411,9 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
       // Activate the new visual position?
       if (activateVisPos) {
-        tile->getVisualization()->lockAccess(__FILE__, __LINE__);
+        core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
         tile->activateVisPos();
-        tile->getVisualization()->unlockAccess();
+        core->getGraphicEngine()->unlockDrawing();
       }
 
       // Tile has been processed
@@ -940,9 +940,9 @@ void MapEngine::updateMap() {
           if (!abortUpdate) {
 
             // Activate the new position
-            t->getVisualization()->lockAccess(__FILE__, __LINE__);
+            core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
             t->activateVisPos();
-            t->getVisualization()->unlockAccess();
+            core->getGraphicEngine()->unlockDrawing();
 
             // If the tile is hidden: make it visible
             if (t->getIsHidden()) {

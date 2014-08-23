@@ -42,9 +42,9 @@ NavigationTarget::~NavigationTarget() {
   for(NavigationTargetTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
     MapTile *tile = i->first;
     GraphicObject *tileVisualization = tile->getVisualization();
-    tileVisualization->lockAccess(__FILE__, __LINE__);
+    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     tileVisualization->removePrimitive(i->second,true);
-    tileVisualization->unlockAccess();
+    core->getGraphicEngine()->unlockDrawing();
   }
   tileInfoMap.clear();
 }
@@ -82,7 +82,6 @@ void NavigationTarget::updateTileVisualization(std::list<MapContainer*> *mapCont
 
       // Add the visualization to the tile
       GraphicObject *tileVisualization=tile->getVisualization();
-      tileVisualization->lockAccess(__FILE__, __LINE__);
       GraphicRectangle *icon = new GraphicRectangle(*core->getGraphicEngine()->getTargetIcon());
       if (!icon) {
         FATAL("can not create graphic rectangle object",NULL);
@@ -92,8 +91,9 @@ void NavigationTarget::updateTileVisualization(std::list<MapContainer*> *mapCont
       icon->setY(tile->getHeight()-(pos.getY()-tile->getMapY(0)-icon->getIconHeight()/2));
       icon->setZ(3); // ensure that rectangle is drawn over pathes
       icon->setDestroyTexture(false);
+      core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
       tileInfoMap.insert(NavigationTargetTileInfoPair(tile,tileVisualization->addPrimitive(icon)));
-      tileVisualization->unlockAccess();
+      core->getGraphicEngine()->unlockDrawing();
     }
   }
   core->getMapSource()->unlockAccess();
@@ -128,9 +128,9 @@ void NavigationTarget::removeVisualization(MapContainer* mapContainer) {
     j=tileInfoMap.find(tile);
     if (j!=tileInfoMap.end()) {
       GraphicObject *tileVisualization=tile->getVisualization();
-      tileVisualization->lockAccess(__FILE__, __LINE__);
+      core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
       tile->getVisualization()->removePrimitive(j->second);
-      tileVisualization->unlockAccess();
+      core->getGraphicEngine()->unlockDrawing();
       tileInfoMap.erase(j);
     }
   }

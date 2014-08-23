@@ -79,7 +79,6 @@ protected:
   bool isUpdated;                                       // Indicates that the primitive has been changed
   bool destroyTexture;                                  // Indicates if the texture shall be destroyed if the object is deleted
   TimestampInMicroseconds lifeEnd;                      // Time point at which the object can be removed from the parent container
-  ThreadMutexInfo *accessMutex;                         // Mutex for accessing the object
 
   // List of texture animations to execute on this object
   std::list<GraphicTextureAnimationParameter> textureAnimationSequence;
@@ -304,14 +303,6 @@ public:
 
   void setLifeEnd(TimestampInMicroseconds lifeEnd) {
     this->lifeEnd = lifeEnd;
-  }
-
-  void lockAccess(const char *file, int line) {
-    core->getThread()->lockMutex(accessMutex, file, line);
-  }
-
-  void unlockAccess() {
-    core->getThread()->unlockMutex(accessMutex);
   }
 };
 

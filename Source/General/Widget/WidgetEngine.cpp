@@ -43,6 +43,7 @@ WidgetEngine::WidgetEngine() {
   widgetsActiveTimeout=c->getIntValue("Graphic/Widget","widgetsActiveTimeout",__FILE__, __LINE__);
   nearestPath=NULL;
   nearestPathIndex=-1;
+  accessMutex=core->getThread()->createMutex("widget engine access mutex");
 
   // Init the rest
   init();
@@ -51,6 +52,7 @@ WidgetEngine::WidgetEngine() {
 // Destructor
 WidgetEngine::~WidgetEngine() {
   deinit();
+  core->getThread()->destroyMutex(accessMutex);
 }
 
 // Adds a widget to a page
@@ -115,7 +117,7 @@ void WidgetEngine::createGraphic() {
   ConfigStore *c=core->getConfigStore();
 
   // Only one thread please
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
 
   // Get all widget pages
   // If no exist, create the default ones
@@ -364,7 +366,7 @@ void WidgetEngine::createGraphic() {
     WidgetPage *page=new WidgetPage(*i);
     if (!page) {
       FATAL("can not create widget page object",NULL);
-      visiblePages.unlockAccess();
+      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     WidgetPagePair pair=WidgetPagePair(*i,page);
@@ -469,7 +471,7 @@ void WidgetEngine::createGraphic() {
           meter->setMeterType(WidgetMeterTypeTrackLength);
         } else {
           FATAL("unknown meter type",NULL);
-          visiblePages.unlockAccess();
+          core->getThread()->unlockMutex(accessMutex);
           return;
         }
         meter->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
@@ -552,16 +554,18 @@ void WidgetEngine::createGraphic() {
   j=pageMap.find(c->getStringValue("Graphic/Widget","selectedPage",__FILE__, __LINE__));
   if (j==pageMap.end()) {
     FATAL("default page does not exist",NULL);
-    visiblePages.unlockAccess();
+    core->getThread()->unlockMutex(accessMutex);
     return;
   } else {
     currentPage=j->second;
     visiblePages.addPrimitive(currentPage->getGraphicObject());
+    core->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
     core->getGraphicEngine()->setWidgetGraphicObject(&visiblePages);
+    core->getGraphicEngine()->unlockDrawing();
   }
 
   // Allow access by the next thread
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
 
   // Set the positions of the widgets
   updateWidgetPositions();
@@ -571,7 +575,7 @@ void WidgetEngine::createGraphic() {
 void WidgetEngine::updateWidgetPositions() {
 
   // Only one thread please
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
 
   // Find out the orientation for which we need to update the positioning
   std::string orientation="Unknown";
@@ -595,6 +599,7 @@ void WidgetEngine::updateWidgetPositions() {
 
     // Go through all widgets
     std::list<WidgetPrimitive*> primitives;
+    core->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
     GraphicPrimitiveMap *widgetMap=page->getGraphicObject()->getPrimitiveMap();
     GraphicPrimitiveMap::iterator j;
     for(j=widgetMap->begin();j!=widgetMap->end();j++) {
@@ -612,18 +617,24 @@ void WidgetEngine::updateWidgetPositions() {
     for(std::list<WidgetPrimitive*>::iterator i=primitives.begin();i!=primitives.end();i++) {
       page->addWidget(*i);
     }
+    core->getGraphicEngine()->unlockDrawing();
 
   }
 
   // Allow access by the next thread
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Clears all widget pages
 void WidgetEngine::deinit() {
 
+  // Clear the widget page
+  core->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+  core->getGraphicEngine()->setWidgetGraphicObject(NULL);
+  core->getGraphicEngine()->unlockDrawing();
+
   // Only one thread
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
 
   // No page is active
   currentPage=NULL;
@@ -639,25 +650,25 @@ void WidgetEngine::deinit() {
   pageMap.clear();
 
   // Allow access by the next thread
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Called when the screen is touched
 bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
   // Only one thread please
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
 
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
-    visiblePages.unlockAccess();
+    core->getThread()->unlockMutex(accessMutex);
     return false;
   }
 
   // First check if a widget on the page was touched
   if (currentPage->onTouchDown(t,x,y)) {
     isTouched=false;
-    visiblePages.unlockAccess();
+    core->getThread()->unlockMutex(accessMutex);
     return true;
   } else {
 
@@ -682,7 +693,7 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
   }
 
   // Allow access by the next thread
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
 
   return false;
 }
@@ -690,14 +701,14 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 // Called when the screen is untouched
 bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   if (t<=ignoreTouchesEnd) {
-    visiblePages.unlockAccess();
+    core->getThread()->unlockMutex(accessMutex);
     return false;
   }
   deselectPage();
   bool result = currentPage->onTouchUp(t,x,y);
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
   return result;
 }
 
@@ -705,22 +716,22 @@ bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 bool WidgetEngine::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff) {
 
   // Only one thread please
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
 
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
-    visiblePages.unlockAccess();
+    core->getThread()->unlockMutex(accessMutex);
     return false;
   }
 
   // First check if a widget on the page was touched
   if (currentPage->onTwoFingerGesture(t,dX,dY,angleDiff,scaleDiff)) {
-    visiblePages.unlockAccess();
+    core->getThread()->unlockMutex(accessMutex);
     return true;
   }
 
   // Allow access by the next thread
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
 
   return false;
 }
@@ -734,7 +745,7 @@ void WidgetEngine::deselectPage() {
 // Sets a new page
 void WidgetEngine::setPage(std::string name, Int direction) {
 
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
 
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   Int width = core->getScreen()->getWidth();
@@ -742,7 +753,7 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   // Check if the requested page exists
   if (pageMap.find(name)==pageMap.end()) {
     WARNING("page <%s> does not exist",name.c_str());
-    visiblePages.unlockAccess();
+    core->getThread()->unlockMutex(accessMutex);
     return;
   }
   WidgetPage *nextPage = pageMap[name];
@@ -768,8 +779,10 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   translateParameter.setInfinite(false);
   translateParameter.setAnimationType(GraphicTranslateAnimationTypeAccelerated);
   translateAnimationSequence.push_back(translateParameter);
+  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   prevPageGraphicObject->setTranslateAnimationSequence(translateAnimationSequence);
   prevPageGraphicObject->setLifeEnd(t+changePageDurationStep1);
+  core->getGraphicEngine()->unlockDrawing();
 
   // Let the new page move inside the window
   translateAnimationSequence.clear();
@@ -794,7 +807,9 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   translateAnimationSequence.push_back(translateParameter);
   nextPageGraphicObject->setTranslateAnimationSequence(translateAnimationSequence);
   nextPageGraphicObject->setLifeEnd(0);
+  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   visiblePages.addPrimitive(nextPageGraphicObject);
+  core->getGraphicEngine()->unlockDrawing();
 
   // Ignore any touches during transition
   ignoreTouchesEnd=t+changePageDurationStep1+changePageDurationStep2;
@@ -803,15 +818,15 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   currentPage=nextPage;
   nextPage->setWidgetsActive(t,true);
   core->getConfigStore()->setStringValue("Graphic/Widget","selectedPage",name,__FILE__, __LINE__);
-  visiblePages.unlockAccess();;
-
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Informs the engine that the map has changed
 void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMapTiles) {
 
   // Find the nearest path in the currently visible map tile
-  nearestPath=NULL;
+  NavigationPath *nearestPath=NULL;
+  Int nearestPathIndex=0;
   double minDistance=std::numeric_limits<double>::max();
   for(std::list<MapTile*>::iterator j=centerMapTiles->begin();j!=centerMapTiles->end();j++) {
     std::list<NavigationPathSegment*> nearbyPathSegments;
@@ -835,27 +850,29 @@ void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMa
   }
 
   // Inform the widget
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  this->nearestPath=nearestPath;
+  this->nearestPathIndex=nearestPathIndex;
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onMapChange(currentPage==i->second ? true : false, mapPos);
   }
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Informs the engine that the location has changed
 void WidgetEngine::onLocationChange(MapPosition mapPos) {
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onLocationChange(currentPage==i->second ? true : false, mapPos);
   }
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Informs the engine that a path has changed
 void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType changeType) {
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   if (changeType==NavigationPathChangeTypeWillBeRemoved) {
     if (nearestPath==path)
       nearestPath=NULL;
@@ -864,16 +881,16 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onPathChange(currentPage==i->second ? true : false, path, changeType);
   }
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Sets the widgets of the current page active
 void WidgetEngine::setWidgetsActive(bool widgetsActive) {
-  visiblePages.lockAccess(__FILE__, __LINE__);
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   if (currentPage) {
     currentPage->setWidgetsActive(core->getClock()->getMicrosecondsSinceStart(),widgetsActive);
   }
-  visiblePages.unlockAccess();
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Let the engine work

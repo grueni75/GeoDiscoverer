@@ -81,11 +81,11 @@ MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool 
 }
 
 MapTile::~MapTile() {
-  visualization.lockAccess(__FILE__, __LINE__);
+  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   if (visualization.getPrimitiveMap()->size()!=1) {
     FATAL("expected only the rectangle in the visualization object",NULL);
   }
-  visualization.unlockAccess();
+  core->getGraphicEngine()->unlockDrawing();
   for (MapTileNavigationPathMap::iterator i=crossingPathSegmentsMap.begin();i!=crossingPathSegmentsMap.end();i++) {
     std::list<NavigationPathSegment*> *pathSegments = i->second;
     for (std::list<NavigationPathSegment*>::iterator j=pathSegments->begin();j!=pathSegments->end();j++) {
@@ -295,9 +295,9 @@ void MapTile::removeGraphic() {
   setVisualizationKey(0);
 
   // Invalidate all graphic
-  visualization.lockAccess(__FILE__, __LINE__);
+  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   visualization.recreateGraphic();
-  visualization.unlockAccess();
+  core->getGraphicEngine()->unlockDrawing();
 
 }
 
@@ -384,7 +384,7 @@ bool MapTile::getNeighborPos(MapArea area, MapPosition &neighborPos) {
 // Decides if the tile is drawn on screen
 void MapTile::setIsHidden(bool isHidden, const char *file, int line, bool fadeOutAnimation) {
   this->isHidden=isHidden;
-  visualization.lockAccess(file,line);
+  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   GraphicColor startColor=visualization.getColor();
   startColor.setAlpha(0);
   GraphicColor endColor=startColor;
@@ -430,7 +430,7 @@ void MapTile::setIsHidden(bool isHidden, const char *file, int line, bool fadeOu
       rectangle.setTextureAnimationSequence(std::list<GraphicTextureAnimationParameter>());
     }
   }
-  visualization.unlockAccess();
+  core->getGraphicEngine()->unlockDrawing();
 }
 
 // Updates the cache status

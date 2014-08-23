@@ -160,7 +160,6 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
         NavigationPathTileInfo *info=visualization->findTileInfo(*k);
         GraphicLine *line=info->getPathLine();
         GraphicObject *tileVisualization=(*k)->getVisualization();
-        tileVisualization->lockAccess(__FILE__, __LINE__);
         if (!line) {
 
           // Create a new line and add it to the tile
@@ -175,7 +174,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           line->setCutWidth((*k)->getWidth());
           line->setCutHeight((*k)->getHeight());
           info->setPathLine(line);
+          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           info->setPathLineKey(tileVisualization->addPrimitive(line));
+          core->getGraphicEngine()->unlockDrawing();
 
         }
 
@@ -184,7 +185,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
         Int y1=(*k)->getHeight()-(prevPos.getY()-(*k)->getMapY(0));
         Int x2=currentPos.getX()-(*k)->getMapX(0);
         Int y2=(*k)->getHeight()-(currentPos.getY()-(*k)->getMapY(0));
+        core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
         line->addStroke(x1,y1,x2,y2);
+        core->getGraphicEngine()->unlockDrawing();
 
         // Add arrow if necessary
         if (currentPos.getHasBearing()) {
@@ -220,7 +223,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
             }
             rectangleList->setParameter(totalRadius,distanceToCenter,angleToCenter);
             info->setPathArrowList(rectangleList);
+            core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
             info->setPathArrowListKey(tileVisualization->addPrimitive(rectangleList));
+            core->getGraphicEngine()->unlockDrawing();
           }
 
           // Add the arrow
@@ -238,11 +243,11 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           double angle=FloatingPoint::computeAngle(distX,distY);
           double x=x1+dist/2*cos(angle);
           double y=y1+dist/2*sin(angle);
+          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           rectangleList->addRectangle(x,y,angle);
+          core->getGraphicEngine()->unlockDrawing();
 
         }
-        tileVisualization->unlockAccess();
-
       }
     }
   }
@@ -315,7 +320,6 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
           break;
       }
       GraphicObject *tileVisualization=k->getVisualization();
-      tileVisualization->lockAccess(__FILE__, __LINE__);
       if (!remove) {
         if (!flag) {
 
@@ -332,13 +336,11 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
               ref = core->getGraphicEngine()->getPathStartFlagIcon();
               info->setPathStartFlag(flag);
               flag->setZ(3); // ensure that start flag is drawn after tile and direction texture
-              info->setPathStartFlagKey(tileVisualization->addPrimitive(flag));
               break;
             case NavigationPathVisualizationTypeEndFlag:
               ref = core->getGraphicEngine()->getPathEndFlagIcon();
               info->setPathEndFlag(flag);
               flag->setZ(4); // ensure that end flag is drawn after start flag, tile and direction texture
-              info->setPathEndFlagKey(tileVisualization->addPrimitive(flag));
               break;
           }
           flag->setColor(GraphicColor(255,255,255,255));
@@ -360,6 +362,16 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
             flag->setX(endX);
             flag->setY(endY);
           }
+          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+          switch(type) {
+            case NavigationPathVisualizationTypeStartFlag:
+              info->setPathStartFlagKey(tileVisualization->addPrimitive(flag));
+              break;
+            case NavigationPathVisualizationTypeEndFlag:
+              info->setPathEndFlagKey(tileVisualization->addPrimitive(flag));
+              break;
+          }
+          core->getGraphicEngine()->unlockDrawing();
         }
       } else {
         if (flag) {
@@ -379,10 +391,11 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
               info->setPathEndFlagKey(0);
               break;
           }
+          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           tileVisualization->removePrimitive(key,true);
+          core->getGraphicEngine()->unlockDrawing();
         }
       }
-      tileVisualization->unlockAccess();
     }
   }
   core->getMapSource()->unlockAccess();

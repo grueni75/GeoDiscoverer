@@ -296,7 +296,9 @@ void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
 
 // Called when the location has changed
 void WidgetPathInfo::onLocationChange(bool widgetVisible, MapPosition pos) {
+  core->getThread()->lockMutex(widgetPathInfoThreadWorkingMutex,__FILE__,__LINE__);
   locationPos=pos;
+  core->getThread()->unlockMutex(widgetPathInfoThreadWorkingMutex);
   core->getThread()->issueSignal(updateVisualizationSignal);
 }
 

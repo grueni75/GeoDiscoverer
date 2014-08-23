@@ -54,7 +54,7 @@ void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
   if (i!=tileInfoMap.end()) {
     NavigationPathTileInfo *tileInfo=i->second;
     GraphicObject *tileVisualization=tile->getVisualization();
-    tileVisualization->lockAccess(__FILE__, __LINE__);
+    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (tileInfo->getPathLine())
       tileVisualization->removePrimitive(tileInfo->getPathLineKey(),true);
     if (tileInfo->getPathArrowList())
@@ -63,7 +63,7 @@ void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
       tileVisualization->removePrimitive(tileInfo->getPathStartFlagKey(),true);
     if (tileInfo->getPathEndFlag())
       tileVisualization->removePrimitive(tileInfo->getPathEndFlagKey(),true);
-    tileVisualization->unlockAccess();
+    core->getGraphicEngine()->unlockDrawing();
     tileInfoMap.erase(i);
   }
 }
@@ -134,16 +134,22 @@ void NavigationPathVisualization::createGraphic() {
 // Recreate the graphic objects to reduce the number of graphic point buffers
 void NavigationPathVisualization::optimizeGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
-    i->first->getVisualization()->lockAccess(__FILE__, __LINE__);
     GraphicLine *line=i->second->getPathLine();
+    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (line) line->optimize();
+    core->getGraphicEngine()->unlockDrawing();
     GraphicRectangleList *rectangleList=i->second->getPathArrowList();
+    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (rectangleList) rectangleList->optimize();
+    core->getGraphicEngine()->unlockDrawing();
     GraphicRectangle *rectangle=i->second->getPathStartFlag();
+    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (rectangle) rectangle->optimize();
+    core->getGraphicEngine()->unlockDrawing();
     rectangle=i->second->getPathEndFlag();
+    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (rectangle) rectangle->optimize();
-    i->first->getVisualization()->unlockAccess();
+    core->getGraphicEngine()->unlockDrawing();
   }
 }
 

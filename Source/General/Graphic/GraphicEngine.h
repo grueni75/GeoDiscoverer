@@ -88,23 +88,8 @@ protected:
   // Enable debugging mode
   Int debugMode;
 
-  // Mutex for accessing the position
-  ThreadMutexInfo *posMutex;
-
-  // Mutex for accessing the location icon
-  ThreadMutexInfo *locationIconMutex;
-
-  // Mutex for accessing the target icon
-  ThreadMutexInfo *targetIconMutex;
-
-  // Mutex for accessing the arrow icon
-  ThreadMutexInfo *arrowIconMutex;
-
-  // Mutex for accessing the compass cone icon
-  ThreadMutexInfo *compassConeIconMutex;
-
-  // Mutex for accessing the animators of pathes
-  ThreadMutexInfo *pathAnimatorsMutex;
+  // Drawing mutex
+  ThreadMutexInfo *drawingMutex;
 
   // Previous position
   GraphicPosition previousPosition;
@@ -135,7 +120,6 @@ protected:
   double maxIdleTime;
   double totalIdleTime;
   Int frameCount;
-  ThreadMutexInfo *statsMutex;
 
 public:
 
@@ -162,6 +146,14 @@ public:
   void outputStats();
 
   // Getters and setters
+  void lockDrawing(const char *file, int line) const {
+    core->getThread()->lockMutex(drawingMutex,file,line);
+  }
+
+  void unlockDrawing() const {
+    core->getThread()->unlockMutex(drawingMutex);
+  }
+
   TimestampInMicroseconds getBlinkDuration() const {
     return blinkDuration;
   }
@@ -187,12 +179,12 @@ public:
 
   GraphicObject *lockPathAnimators(const char *file, int line)
   {
-      core->getThread()->lockMutex(pathAnimatorsMutex, file, line);
+      core->getThread()->lockMutex(drawingMutex, file, line);
       return &pathAnimators;
   }
   void unlockPathAnimators()
   {
-      core->getThread()->unlockMutex(pathAnimatorsMutex);
+      core->getThread()->unlockMutex(drawingMutex);
   }
 
   void setWidgetGraphicObject(GraphicObject *widgetGraphicObject)
@@ -202,56 +194,56 @@ public:
 
   GraphicPosition *lockPos(const char *file, int line)
   {
-      core->getThread()->lockMutex(posMutex, file, line);
+      core->getThread()->lockMutex(drawingMutex, file, line);
       return &pos;
   }
   void unlockPos()
   {
-      core->getThread()->unlockMutex(posMutex);
+      core->getThread()->unlockMutex(drawingMutex);
   }
 
   GraphicRectangle *lockLocationIcon(const char *file, int line)
   {
-    core->getThread()->lockMutex(locationIconMutex, file, line);
+    core->getThread()->lockMutex(drawingMutex, file, line);
     return &locationIcon;
   }
 
   void unlockLocationIcon()
   {
-    core->getThread()->unlockMutex(locationIconMutex);
+    core->getThread()->unlockMutex(drawingMutex);
   }
 
   GraphicRectangle *lockTargetIcon(const char *file, int line)
   {
-    core->getThread()->lockMutex(targetIconMutex, file, line);
+    core->getThread()->lockMutex(drawingMutex, file, line);
     return &targetIcon;
   }
 
   void unlockTargetIcon()
   {
-    core->getThread()->unlockMutex(targetIconMutex);
+    core->getThread()->unlockMutex(drawingMutex);
   }
 
   GraphicRectangle *lockArrowIcon(const char *file, int line)
   {
-    core->getThread()->lockMutex(arrowIconMutex, file, line);
+    core->getThread()->lockMutex(drawingMutex, file, line);
     return &arrowIcon;
   }
 
   void unlockArrowIcon()
   {
-    core->getThread()->unlockMutex(arrowIconMutex);
+    core->getThread()->unlockMutex(drawingMutex);
   }
 
   GraphicRectangle *lockCompassConeIcon(const char *file, int line)
   {
-    core->getThread()->lockMutex(compassConeIconMutex, file, line);
+    core->getThread()->lockMutex(drawingMutex, file, line);
     return &compassConeIcon;
   }
 
   void unlockCompassConeIcon()
   {
-    core->getThread()->unlockMutex(compassConeIconMutex);
+    core->getThread()->unlockMutex(drawingMutex);
   }
 
   GraphicRectangle *getPathDirectionIcon()
