@@ -127,13 +127,17 @@ void WidgetScale::draw(Screen *screen, TimestampInMicroseconds t) {
 
   // Draw the scale numbers
   for (Int i=0;i<4;i++) {
-    scaledNumberFontString[i]->setColor(color);
-    scaledNumberFontString[i]->draw(screen,t);
+    if (scaledNumberFontString[i]) {
+      scaledNumberFontString[i]->setColor(color);
+      scaledNumberFontString[i]->draw(screen,t);
+    }
   }
 
   // Draw the map name
-  mapNameFontString->setColor(color);
-  mapNameFontString->draw(screen,t);
+  if (mapNameFontString) {
+    mapNameFontString->setColor(color);
+    mapNameFontString->draw(screen,t);
+  }
 
 }
 

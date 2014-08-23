@@ -141,12 +141,18 @@ void WidgetMeter::draw(Screen *screen, TimestampInMicroseconds t) {
   WidgetPrimitive::draw(screen,t);
 
   // Draw the text
-  labelFontString->setColor(color);
-  labelFontString->draw(screen,t);
-  valueFontString->setColor(color);
-  valueFontString->draw(screen,t);
-  unitFontString->setColor(color);
-  unitFontString->draw(screen,t);
+  if (labelFontString) {
+    labelFontString->setColor(color);
+    labelFontString->draw(screen,t);
+  }
+  if (valueFontString) {
+    valueFontString->setColor(color);
+    valueFontString->draw(screen,t);
+  }
+  if (unitFontString) {
+    unitFontString->setColor(color);
+    unitFontString->draw(screen,t);
+  }
 }
 
 // Sets the type of meter
