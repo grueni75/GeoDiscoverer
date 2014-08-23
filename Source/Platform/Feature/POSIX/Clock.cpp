@@ -65,35 +65,64 @@ std::string Clock::getXMLDate(TimestampInSeconds timestamp, bool asLocalTime) {
     t=time(NULL);
   if (asLocalTime)
     tmp=localtime(&t);
-  else
+  else {
     tmp=gmtime(&t);
+  }
   strftime(date,buffer_len,"%Y-%m-%dT%H:%M:%S",tmp);
   std::string result=date;
-  //WARNING("XML Date: %s",result.c_str());
+  if (!asLocalTime)
+    result=result+"Z";
   return result;
 }
 
 // Returns a timestamp from a given XML date string
 TimestampInSeconds Clock::getXMLDate(std::string timestamp, bool asLocalTime) {
   struct tm tm;
+  struct tm *tm2;
   char *tz;
-  time_t ret;
+  time_t ret,ret2;
   memset(&tm,0,sizeof(struct tm));
   strptime(timestamp.c_str(),"%Y-%m-%dT%H:%M:%S",&tm);
-  if (!asLocalTime) {
-    tz = getenv("TZ");
-    //DEBUG("tz=%s",tz);
-    setenv("TZ", "", 1);
-    tzset();
-  }
-  ret = mktime(&tm);
-  if (!asLocalTime) {
-    if (tz)
-      setenv("TZ", tz, 1);
+  if (asLocalTime) {
+    return mktime(&tm);  // result is in local time;
+  } else {
+
+    // Manual computation required
+    // Android does not set tm.tm_yday
+
+    // Is the year a leap year?
+    Int year = tm.tm_year + 1900;
+    bool leapYear;
+    if (year%4!=0)
+      leapYear=false;
+    else if (year%100!=0)
+      leapYear=true;
+    else if (year%400!=0) 
+      leapYear=false;
     else
-      unsetenv("TZ");
-    tzset();
+      leapYear=true;
+
+    // Convert month into year days
+    Int mday[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    tm.tm_yday=0;
+    for (Int i=0;i<12;i++) {
+      if (i==tm.tm_mon)
+        break;
+      tm.tm_yday+=mday[i];
+      if ((i==1)&&(leapYear))
+        tm.tm_yday++;
+    }
+
+    // Add the month days
+    tm.tm_yday+=tm.tm_mday-1;
+
+    // Convert back to time since epoch
+    ret = (time_t)tm.tm_sec + (time_t)tm.tm_min*60 + (time_t)tm.tm_hour*3600 + (time_t)tm.tm_yday*86400 +
+          (time_t)(tm.tm_year-70)*31536000 + (time_t)((tm.tm_year-69)/4)*86400 -
+          (time_t)((tm.tm_year-1)/100)*86400 + (time_t)((tm.tm_year+299)/400)*86400;
+    return ret;
   }
+
   return (TimestampInSeconds)ret;
 }
 

@@ -212,7 +212,7 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
           hasTimestamp=true;
           timestamp=core->getClock()->getXMLDate(text,false);
           timestamp*=1000;
-          //DEBUG("after conversion: %s",core->getClock()->getXMLDate(timestamp/1000).c_str());
+          //DEBUG("after conversion: %s",core->getClock()->getXMLDate(timestamp/1000,false).c_str());
         }
       }
       if (name == "extensions") {
