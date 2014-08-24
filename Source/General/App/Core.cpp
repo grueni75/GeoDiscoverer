@@ -514,14 +514,14 @@ void Core::maintenance(bool endlessLoop) {
     DEBUG("performing maintenance",NULL);
 
     // Do the backup
-    if (navigationEngine->getIsInitialized())
+    if ((navigationEngine)&&(navigationEngine->getIsInitialized()))
       navigationEngine->backup();
     if (mapEngine->getIsInitialized()) {
       mapEngine->backup();
     }
 
     // Optimize the graphic
-    if (navigationEngine->getIsInitialized()) {
+    if ((navigationEngine)&&(navigationEngine->getIsInitialized())) {
       navigationEngine->optimizeGraphic();
     }
 
@@ -532,7 +532,7 @@ void Core::maintenance(bool endlessLoop) {
 #endif
 
     // Call the maintenance in the map source
-    if (mapSource->getIsInitialized()) {
+    if ((mapSource)&&(mapSource->getIsInitialized())) {
       mapSource->maintenance();
     }
 
