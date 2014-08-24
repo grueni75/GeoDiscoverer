@@ -229,9 +229,6 @@ void MapEngine::removeDebugPrimitives() {
 // Fills the given area with tiles
 void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, bool activateVisPos) {
 
-  // Allow interrupt here
-  core->interruptAllowedHere(__FILE__, __LINE__);
-
   // If an abort has been requested, stop here
   if (abortUpdate) {
     //DEBUG("update aborted",NULL);
@@ -925,6 +922,7 @@ void MapEngine::updateMap() {
         //DEBUG("starting area fill",NULL);
         MapArea searchArea=newDisplayArea;
         centerMapTiles.clear();
+        core->interruptAllowedHere(__FILE__, __LINE__);
         fillGeographicAreaWithTiles(searchArea,NULL,(tiles.size()==0) ? true : false);
         //PROFILE_ADD("tile fill");
 
