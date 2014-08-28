@@ -131,6 +131,11 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
     png_set_palette_to_rgb(png_ptr);
   }
 
+  // Convert gray to RGB
+  if (info_ptr->color_type==PNG_COLOR_TYPE_GRAY) {
+    png_set_gray_to_rgb(png_ptr);
+  }
+
   // Set number of passes
   number_of_passes = png_set_interlace_handling(png_ptr);
   png_read_update_info(png_ptr, info_ptr);
