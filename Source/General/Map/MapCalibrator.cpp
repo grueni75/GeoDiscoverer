@@ -85,11 +85,7 @@ void MapCalibrator::sortCalibrationPoints(MapPosition &pos, bool usePictureCoord
       UInt d=dX*dX+dY*dY;
       t->setDistance(d);
     } else {
-      double dLat=pos.getLat()-t->getLat();
-      double dLng=pos.getLng()-t->getLng();
-      double d=dLat*dLat+dLng*dLng;
-      //DEBUG("dLat=%f dLng=%f d_double=%f d_uint=%d",dLat,dLng,d,(UInt)d);
-      t->setDistance(d);
+      t->setDistance(pos.computeDistance(t));
     }
     //DEBUG("d=%d",d);
   }
