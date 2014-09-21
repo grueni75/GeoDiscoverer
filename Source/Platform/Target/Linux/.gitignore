@@ -15,5 +15,6 @@ Map/OpenTopoHikeMap/*.bin
 Map/OpenTopoHikeMap/*.gda
 Map/DDorf/*.bin
 Map/DDorfExt/*.bin
+Map/External/*.bin
 Icon/240dpi/*
 Log/*
