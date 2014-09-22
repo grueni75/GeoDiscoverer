@@ -274,7 +274,7 @@ void WidgetEngine::createGraphic() {
     parameters["altitudeProfileOffsetY"]="14.0";
     parameters["altitudeProfileLineWidth"]="2.0";
     parameters["altitudeProfileAxisLineWidth"]="2.0";
-    parameters["altitudeProfileMinAltitudeDiff"]="1.0";
+    parameters["altitudeProfileMinAltitudeDiff"]="20.0";
     parameters["altitudeProfileXTickCount"]="5";
     parameters["altitudeProfileYTickCount"]="3";
     parameters["altitudeProfileXTickLabelOffsetY"]="1.5";

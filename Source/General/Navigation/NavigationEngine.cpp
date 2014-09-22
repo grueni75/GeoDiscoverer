@@ -1002,6 +1002,8 @@ void NavigationEngine::removeGraphics(MapContainer *container) {
 // Loads all pathes in the background
 void NavigationEngine::backgroundLoader() {
 
+  std::list<NavigationPath*>::iterator i;
+
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
 
@@ -1018,36 +1020,41 @@ void NavigationEngine::backgroundLoader() {
   }
 
   // Load all routes
-  for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+  i=routes.begin();
+  while(i!=routes.end()) {
     if (core->getQuitCore()) {
       goto exitThread;
     }
-    (*i)->readGPXFile(); // locking is handled within method
-    (*i)->setIsInit(true);
-    std::string routePath="Navigation/Route[@name='" + (*i)->getGpxFilename() + "']";
-    Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex", __FILE__, __LINE__);
-    if (startIndex==-1) startIndex=0;
-    Int endIndex=core->getConfigStore()->getIntValue(routePath,"endFlagIndex", __FILE__, __LINE__);
-    if (endIndex==-1) endIndex=(*i)->getSelectedSize()-1;
-    if ((*i)->getReverse()) {
-      if (startIndex>endIndex) {
-        (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
-        (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
-      } else {
-        (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
-        (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
-      }
+    if (!(*i)->readGPXFile()) { // locking is handled within method
+      i=routes.erase(i);
     } else {
-      if (startIndex<endIndex) {
-        (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
-        (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
+      (*i)->setIsInit(true);
+      std::string routePath="Navigation/Route[@name='" + (*i)->getGpxFilename() + "']";
+      Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex", __FILE__, __LINE__);
+      if (startIndex==-1) startIndex=0;
+      Int endIndex=core->getConfigStore()->getIntValue(routePath,"endFlagIndex", __FILE__, __LINE__);
+      if (endIndex==-1) endIndex=(*i)->getSelectedSize()-1;
+      if ((*i)->getReverse()) {
+        if (startIndex>endIndex) {
+          (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
+          (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
+        } else {
+          (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
+          (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
+        }
       } else {
-        (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
-        (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
+        if (startIndex<endIndex) {
+          (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
+          (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
+        } else {
+          (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
+          (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
+        }
       }
+      if (*i==activeRoute)
+        triggerNavigationInfoUpdate();
+      i++;
     }
-    if (*i==activeRoute)
-      triggerNavigationInfoUpdate();
   }
 
   // Set the active route

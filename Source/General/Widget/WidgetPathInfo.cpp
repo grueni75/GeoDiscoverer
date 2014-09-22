@@ -700,11 +700,21 @@ void WidgetPathInfo::updateVisualization() {
             }
             memset(altitudeProfileYTickFontStrings,0,altitudeProfileYTickCount*sizeof(FontString*));
           }
-          core->getUnitConverter()->formatMeters(pathMaxAltitude,value,lockedUnit);
+          std::string value1, lockedUnit1, value2, lockedUnit2;
+          double visiblePathRefAltitude;
+          core->getUnitConverter()->formatMeters(visiblePathMaxAltitude,value1,lockedUnit1);
+          core->getUnitConverter()->formatMeters(visiblePathMinAltitude,value2,lockedUnit2);
+          if (value2.size()>value1.size()) {
+            lockedUnit=lockedUnit2;
+            visiblePathRefAltitude=visiblePathMinAltitude;
+          } else {
+            lockedUnit=lockedUnit1;
+            visiblePathRefAltitude=visiblePathMaxAltitude;
+          }
           precision=-1;
           do {
             precision++;
-            core->getUnitConverter()->formatMeters(visiblePathMaxAltitude,value,unit,precision+1,lockedUnit);
+            core->getUnitConverter()->formatMeters(visiblePathRefAltitude,value,unit,precision+1,lockedUnit);
           }
           while (value.length()<=altitudeProfileYTickLabelWidth);
           for(Int i=0;i<count;i++) {
