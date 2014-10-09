@@ -30,6 +30,7 @@ GraphicEngine::GraphicEngine() {
   // Init variables
   map=NULL;
   drawingMutex=core->getThread()->createMutex("graphic engine drawing mutex");
+  posMutex=core->getThread()->createMutex("graphic engine pos mutex");
   pos=GraphicPosition();
   debugMode=core->getConfigStore()->getIntValue("Graphic","debugMode",__FILE__, __LINE__);
   noChangeFrameCount=0;
@@ -118,6 +119,11 @@ void GraphicEngine::draw(bool forceRedraw) {
 
   PROFILE_START;
 
+  // Copy the current position
+  lockPos(__FILE__,__LINE__);
+  pos=this->pos;
+  unlockPos();
+
   // Drawing starts
   lockDrawing(__FILE__,__LINE__);
 
@@ -130,11 +136,6 @@ void GraphicEngine::draw(bool forceRedraw) {
 
   // Indicate that the engine is drawing
   isDrawing=true;
-
-  // Copy the current position
-  //lockPos()->setAngle(this->pos.getAngle()+0.1);
-  //unlockPos();
-  pos=this->pos;
 
   // Force redraw if requested externally
   if (forceRedraw) {
@@ -630,6 +631,7 @@ void GraphicEngine::draw(bool forceRedraw) {
 // Destructor
 GraphicEngine::~GraphicEngine() {
   core->getThread()->destroyMutex(drawingMutex);
+  core->getThread()->destroyMutex(posMutex);
 }
 
 // Outputs statistical infos

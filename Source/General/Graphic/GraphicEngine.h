@@ -85,6 +85,9 @@ protected:
   // Current position
   GraphicPosition pos;
 
+  // Current position mutex
+  ThreadMutexInfo *posMutex;
+
   // Enable debugging mode
   Int debugMode;
 
@@ -194,12 +197,12 @@ public:
 
   GraphicPosition *lockPos(const char *file, int line)
   {
-      core->getThread()->lockMutex(drawingMutex, file, line);
+      core->getThread()->lockMutex(posMutex, file, line);
       return &pos;
   }
   void unlockPos()
   {
-      core->getThread()->unlockMutex(drawingMutex);
+      core->getThread()->unlockMutex(posMutex);
   }
 
   GraphicRectangle *lockLocationIcon(const char *file, int line)
