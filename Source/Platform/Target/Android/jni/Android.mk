@@ -4,7 +4,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdproj4
 MY_LIBPROJ4_PATH := proj-4.8.0
-LOCAL_CFLAGS := -DHAVE_CONFIG_H -I$(MY_LIBPROJ4_PATH)/src -DMUTEX_pthread -g -O2
+LOCAL_CFLAGS := -DHAVE_CONFIG_H -Ijni/$(MY_LIBPROJ4_PATH)/src -DMUTEX_pthread -g -O2
 LOCAL_LDLIBS := 
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_aeqd.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_gnom.c)
@@ -161,7 +161,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdcurl
 MY_LIBCURL_PATH := curl-7.24.0
-LOCAL_CFLAGS := -DHAVE_CONFIG_H  -I$(MY_LIBCURL_PATH)/include/curl -I$(MY_LIBCURL_PATH)/include -I$(MY_LIBCURL_PATH)/lib -I$(MY_LIBCURL_PATH)/src -g0 -O2 -Wno-system-headers
+LOCAL_CFLAGS := -DHAVE_CONFIG_H  -Ijni/$(MY_LIBCURL_PATH)/include/curl -Ijni/$(MY_LIBCURL_PATH)/include -Ijni/$(MY_LIBCURL_PATH)/lib -Ijni/$(MY_LIBCURL_PATH)/src -g0 -O2 -Wno-system-headers
 LOCAL_LDLIBS := 
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/file.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/timeval.c)
@@ -269,7 +269,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdxml
 MY_LIBXML2_PATH := libxml2-2.7.7
-LOCAL_CFLAGS := -D_REENTRANT -O2 -I$(MY_LIBXML2_PATH) -I$(MY_LIBXML2_PATH)/include 
+LOCAL_CFLAGS := -D_REENTRANT -O2 -Ijni/$(MY_LIBXML2_PATH) -Ijni/$(MY_LIBXML2_PATH)/include 
 LOCAL_LDLIBS := -lz -ldl 
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,SAX.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,entities.c)
@@ -320,7 +320,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdjpeg
 MY_JPEG_PATH := jpeg-8b
-LOCAL_CFLAGS := -I$(MY_JPEG_PATH) -DHAVE_CONFIG_H 
+LOCAL_CFLAGS := -Ijni/$(MY_JPEG_PATH) -DHAVE_CONFIG_H 
 LOCAL_LDLIBS := 
 LOCAL_SRC_FILES += $(addprefix $(MY_JPEG_PATH)/,jaricom.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_JPEG_PATH)/,jcapimin.c)
@@ -374,7 +374,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdfreetype
 MY_FREETYPE_PATH := freetype-2.4.2
-LOCAL_CFLAGS := -I$(MY_FREETYPE_PATH)/include -I$(MY_FREETYPE_PATH)/objs -I$(MY_FREETYPE_PATH)/builds/unix -DFT_CONFIG_OPTION_SYSTEM_ZLIB -DFT_CONFIG_CONFIG_H="<ftconfig.h>" -DFT2_BUILD_LIBRARY -DFT_CONFIG_MODULES_H="<ftmodule.h>" 
+LOCAL_CFLAGS := -Ijni/$(MY_FREETYPE_PATH)/include -Ijni/$(MY_FREETYPE_PATH)/objs -Ijni/$(MY_FREETYPE_PATH)/builds/unix -DFT_CONFIG_OPTION_SYSTEM_ZLIB -DFT_CONFIG_CONFIG_H="<ftconfig.h>" -DFT2_BUILD_LIBRARY -DFT_CONFIG_MODULES_H="<ftmodule.h>" 
 LOCAL_LDLIBS := 
 LOCAL_SRC_FILES += $(addprefix $(MY_FREETYPE_PATH)/,builds/unix/ftsystem.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_FREETYPE_PATH)/,src/base/ftdebug.c)
@@ -394,7 +394,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdpng
 MY_PNG_PATH := libpng-1.4.4
-LOCAL_CFLAGS :=  -DHAVE_CONFIG_H -I$(MY_PNG_PATH) -DPNG_CONFIGURE_LIBPNG 
+LOCAL_CFLAGS :=  -DHAVE_CONFIG_H -Ijni/$(MY_PNG_PATH) -DPNG_CONFIGURE_LIBPNG 
 LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,png.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngset.c)
@@ -417,7 +417,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdzip
 MY_ZIP_PATH := libzip-0.10.1/lib
-LOCAL_CFLAGS := -I$(MY_ZIP_PATH) -I$(MY_ZIP_PATH)/.. -DHAVE_CONFIG_H
+LOCAL_CFLAGS := -Ijni/$(MY_ZIP_PATH) -Ijni/$(MY_ZIP_PATH)/.. -DHAVE_CONFIG_H
 LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_add.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_add_dir.c)
@@ -496,19 +496,18 @@ include $(BUILD_SHARED_LIBRARY)
 # Build the application core
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdcore
-MY_GD_ROOT := GeoDiscoverer
-MY_GD_ABS_ROOT := $(shell cd $(MY_GD_ROOT) && pwd)
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/POSIX -name '*.cpp')
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/OpenGLES -name '*.cpp')
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libjpeg -name '*.cpp')
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libxml2 -name '*.cpp')
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libfreetype2 -name '*.cpp')
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libpng -name '*.cpp')
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libcurl -name '*.cpp')
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libzip -name '*.cpp')
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libproj4 -name '*.cpp')
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/Android -name '*.cpp')
-MY_GD_GENERAL_SRCS += $(shell find $(MY_GD_ROOT)/Source/General -name '*.cpp')
+MY_GD_ROOT := ../../../..
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/POSIX -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/OpenGLES -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libjpeg -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libxml2 -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libfreetype2 -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libpng -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libcurl -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libzip -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libproj4 -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/Android -name '*.cpp' -exec echo ../{} \;)
+MY_GD_GENERAL_SRCS += $(shell find $(MY_GD_ROOT)/Source/General -name '*.cpp' -exec echo ../{} \;)
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/POSIX
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/OpenGLES
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libjpeg
@@ -528,7 +527,7 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Widget
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Math
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Config
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Profile
-LOCAL_CFLAGS += $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ilibxml2-2.7.7/include -Ifreetype-2.4.2/include -Ijpeg-8b -Ilibpng-1.4.4 -Icurl-7.24.0/include -Ilibzip-0.10.1/lib -Iproj-4.8.0/src -DSRC_ROOT='"$(MY_GD_ABS_ROOT)/Source"' 
+LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ijni/libxml2-2.7.7/include -Ijni/freetype-2.4.2/include -Ijni/jpeg-8b -Ijni/libpng-1.4.4 -Ijni/curl-7.24.0/include -Ijni/libzip-0.10.1/lib -Ijni/proj-4.8.0/src -DSRC_ROOT='"jni/../../../../../Source"' 
 LOCAL_LDLIBS += -lz -dl -llog -lGLESv1_CM 
 LOCAL_SRC_FILES := GDCore.cpp $(MY_GD_PLATFORM_SRCS) $(MY_GD_GENERAL_SRCS)
 LOCAL_STATIC_LIBRARIES := 
