@@ -35,7 +35,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import com.cocosw.undobar.UndoBarController;
+import com.cocosw.undobar.UndoBarController.UndoListener;
+import com.cocosw.undobar.UndoBarStyle;
 import com.google.gson.Gson;
+import com.untouchableapps.android.geodiscoverer.R.drawable;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -66,6 +70,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.widget.DrawerLayout;
@@ -78,6 +83,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
@@ -87,7 +94,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class ViewMap extends GDActivity {
     
@@ -370,6 +376,27 @@ public class ViewMap extends GDActivity {
             viewMap.finish();
             commandExecuted=true;
           } 
+          if (commandFunction.equals("initComplete")) {
+
+            // Inform the user about the app drawer
+            if (!viewMap.prefs.getBoolean("navDrawerHintShown", false)) {
+              UndoBarController.UndoBar undoBar = new UndoBarController.UndoBar(viewMap);
+              undoBar.message(viewMap.getString(R.string.nav_drawer_hint));
+              undoBar.style(new UndoBarStyle(drawable.check_mark, R.string.got_it, GDApplication.MESSAGE_BAR_DURATION_LONG));
+              undoBar.listener(new UndoListener() {
+                public void onUndo(Parcelable token) {
+                  ViewMap viewMap = weakViewMap.get();
+                  if (viewMap!=null) {
+                    SharedPreferences.Editor prefsEditor = viewMap.prefs.edit();
+                    prefsEditor.putBoolean("navDrawerHintShown", true);
+                    prefsEditor.commit();
+                  }
+                }
+              });
+              undoBar.show();
+            }
+            commandExecuted=true;
+          } 
           
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
@@ -534,7 +561,7 @@ public class ViewMap extends GDActivity {
         try {
           GDApplication.copyFile(srcFilename, dstFilename);
         } catch (IOException exception) {
-          Toast.makeText(ViewMap.this,String.format(getString(R.string.cannot_copy_file), srcFilename, dstFilename), Toast.LENGTH_LONG).show();
+          GDApplication.showMessageBar(ViewMap.this, String.format(getString(R.string.cannot_copy_file), srcFilename, dstFilename), GDApplication.MESSAGE_BAR_DURATION_LONG);
         }
         progress++;
         publishProgress(progress);
@@ -593,7 +620,7 @@ public class ViewMap extends GDActivity {
           gpxContents.close();
         } 
         catch (IOException e) {
-          Toast.makeText(ViewMap.this,String.format(getString(R.string.cannot_import_route), name), Toast.LENGTH_LONG).show();          
+          GDApplication.showMessageBar(ViewMap.this, String.format(getString(R.string.cannot_import_route), name), GDApplication.MESSAGE_BAR_DURATION_LONG);
         }
         
       }
@@ -765,7 +792,7 @@ public class ViewMap extends GDActivity {
       for (String routeName : routeNames) {
         File route = new File(coreObject.homePath + "/Route/" + routeName);
         if (!route.delete()) {
-          Toast.makeText(ViewMap.this,String.format(getString(R.string.cannot_remove_file), route.getPath()), Toast.LENGTH_LONG).show();
+          GDApplication.showMessageBar(ViewMap.this, String.format(getString(R.string.cannot_remove_file), route.getPath()), GDApplication.MESSAGE_BAR_DURATION_LONG);
         }
         progress++;
         publishProgress(progress);
@@ -948,6 +975,22 @@ public class ViewMap extends GDActivity {
     
     super.onCreate(savedInstanceState);
     
+    /*
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      int id = getResources().getIdentifier("config_enableTranslucentDecor", "bool", "android");
+      if (id != 0 && getResources().getBoolean(id)) { // Translucent available
+          Window w = getWindow();
+          w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+          //   w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+      }
+      //findViewById(R.id.login_form).setPadding(0, 100, 0, 0);
+  }
+  //getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+  setContentView(R.layout.activity_message_style);
+
+  ???*/
+    
+    
     // Restore the last processed intent from the prefs
     prefs = getApplication().getSharedPreferences("viewMap",Context.MODE_PRIVATE);
     if (prefs.contains("lastAddressSubject")) {
@@ -1059,9 +1102,6 @@ public class ViewMap extends GDActivity {
     // Prepare activity for gingerbread
     onCreateGingerbread();
     
-    // Inform the user about the app drawer
-    Toast.makeText(ViewMap.this,getString(R.string.nav_drawer_hint), Toast.LENGTH_LONG).show();
-
     /* Start test thread
     new Thread(new Runnable() {
       public void run() {
@@ -1328,7 +1368,7 @@ public class ViewMap extends GDActivity {
             devicePolicyManager.lockNow();
           } 
           catch (SecurityException e) {
-            Toast.makeText(this, getString(R.string.device_admin_not_enabled), Toast.LENGTH_LONG).show();
+            GDApplication.showMessageBar(this, getString(R.string.device_admin_not_enabled), GDApplication.MESSAGE_BAR_DURATION_LONG);
           }
           return true;
         }
@@ -1351,5 +1391,5 @@ public class ViewMap extends GDActivity {
     }
     return super.onKeyUp(keyCode, event);
   }
- 
+   
 }

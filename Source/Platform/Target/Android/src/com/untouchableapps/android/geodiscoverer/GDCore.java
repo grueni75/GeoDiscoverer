@@ -541,7 +541,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           MetaWatchApp.start();
         }
       }
-      cmdExecuted=true;
+      cmdExecuted=false; // forward message to activity
     }
     if (cmd.startsWith("updateNavigationInfos(")) {
       if (metawWatchAppActive) {

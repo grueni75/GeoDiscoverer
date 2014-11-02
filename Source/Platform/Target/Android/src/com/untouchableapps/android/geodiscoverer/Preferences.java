@@ -46,7 +46,6 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
 import android.text.method.DigitsKeyListener;
 import android.util.TimingLogger;
-import android.widget.Toast;
 
 public class Preferences extends PreferenceActivity implements
     OnPreferenceClickListener,OnPreferenceChangeListener {

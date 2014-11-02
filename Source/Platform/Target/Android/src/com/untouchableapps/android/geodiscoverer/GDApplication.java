@@ -29,8 +29,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
 
+import com.cocosw.undobar.UndoBarController;
+import com.cocosw.undobar.UndoBarStyle;
+import com.cocosw.undobar.UndoBarController.UndoListener;
+import com.untouchableapps.android.geodiscoverer.R.drawable;
+
+import android.app.Activity;
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -152,5 +160,17 @@ public class GDApplication extends Application {
       }
       coreObject.executeAppCommand("updateMessages()");
     }
+  }
+  
+  public static final long MESSAGE_BAR_DURATION_SHORT = 2000;
+  public static final long MESSAGE_BAR_DURATION_LONG = 4000;
+  
+  /** Shows a toast */
+  public static void showMessageBar(Activity activity, String message, long duration) {
+    UndoBarController.UndoBar undoBar = new UndoBarController.UndoBar(activity);
+    undoBar.message(message);
+    undoBar.style(UndoBarController.MESSAGESTYLE);
+    undoBar.duration(duration);
+    undoBar.show();
   }
 }

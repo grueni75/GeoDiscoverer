@@ -27,7 +27,7 @@ void GDApp_executeAppCommand(std::string command);
 
 namespace GEODISCOVERER {
 
-// Called when the initialization is finished
+// Dispatch a command to the parent app
 void Commander::dispatch(std::string command) {
   GDApp_executeAppCommand(command);
 }

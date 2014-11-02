@@ -26,19 +26,15 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.SystemClock;
 import android.support.v4.app.FragmentActivity;
-import android.widget.Toast;
 
 /** Base class for all activities */
 public class GDActivity extends FragmentActivity {
 
   /** Current dialog */
   AlertDialog alertDialog = null;
-  
-  /** Current toast */
-  Toast warningToast = null;
-  
+    
   /** Time the last toast was shown */
-  long lastToastTimestamp;
+  long lastToastTimestamp = 0;
   
   /** Minimum distance between two toasts in milliseconds */
   int toastDistance = 5000;
@@ -52,19 +48,15 @@ public class GDActivity extends FragmentActivity {
   /** Shows a dialog  */
   public synchronized void dialog(int kind, String message) {  
     if (kind==WARNING_DIALOG) {      
-      if (warningToast!=null) {
-        long diff=SystemClock.uptimeMillis()-lastToastTimestamp;
-        if (diff<=toastDistance) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping dialog request <" + message + "> because toast is still visible");
-          return;
-        }
-        warningToast.cancel();
+      long diff=SystemClock.uptimeMillis()-lastToastTimestamp;
+      if (diff<=toastDistance) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping dialog request <" + message + "> because toast is still visible");
+        return;
       }
-      warningToast=Toast.makeText(this, message, Toast.LENGTH_LONG);
-      warningToast.show();
+      GDApplication.showMessageBar(this, message, GDApplication.MESSAGE_BAR_DURATION_LONG);
       lastToastTimestamp=SystemClock.uptimeMillis();
     } else if (kind==INFO_DIALOG) {      
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+      GDApplication.showMessageBar(this, message, GDApplication.MESSAGE_BAR_DURATION_LONG);
     } else {
       if (alertDialog == null) {
         alertDialog = new AlertDialog.Builder(this).create();

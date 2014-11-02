@@ -1,0 +1,3 @@
+[submodule "ThirdParty/UndoBar"]
+	path = ThirdParty/UndoBar
+	url = https://github.com/grueni75/UndoBar
