@@ -105,6 +105,8 @@ public class MetaWatchApp {
   static final Lock lock = new ReentrantLock();
   static final Condition triggerVibrate = lock.newCondition();
   static int expectedVibrateCount = 0;
+  static int currentVibrateCount = 0;
+  static int fastVibrateCount = 1;
   static boolean quitVibrateThread = false;
   static Thread vibrateThread = null;
   
@@ -187,8 +189,6 @@ public class MetaWatchApp {
     quitVibrateThread=false;
     vibrateThread = new Thread(new Runnable() {
       public void run() {
-        int currentVibrateCount = 0;
-        int fastVibrateCount = 1;
         while (!quitVibrateThread) {
           try {
             lock.lock();
