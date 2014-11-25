@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : MetaWatchApp.java
+// Name        : CockpitAppMetaWatch.java
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010 Matthias Gruenewald
 //
@@ -24,14 +24,11 @@ package com.untouchableapps.android.geodiscoverer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Calendar;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -42,75 +39,45 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 
-public class MetaWatchApp {
+public class CockpitAppMetaWatch implements CockpitAppInterface {
 
   // Identifies the meta watch app
-  final public static String id = "com.untouchableapps.android.geodiscoverer.MetaWatchApp";
-  final static String name = "Geo Discoverer";
+  final String id = "com.untouchableapps.android.geodiscoverer.MetaWatchApp";
+  final String name = "Geo Discoverer";
   
-  // Minimum time that must pass between updates
-  static int minUpdatePeriodNormal;
-  static int minUpdatePeriodTurn;
-  static int offRouteVibrateFastPeriod;
-  static int offRouteVibrateFastCount;
-  static int offRouteVibrateSlowPeriod;
-  
-  // Time in milliseconds to sleep before vibrating
-  static int waitTimeBeforeVibrate;
-
-  // Last time the watch was updated
-  static long lastUpdate;
-  
-  // Last infos used for updating
-  static String lastInfosAsSSV = "";
-  
-  // Distance to turn
-  static String currentTurnDistance="-";
-  static String lastTurnDistance="-";
-  
-  // Off route indication
-  static boolean currentOffRoute=false;
-  static boolean lastOffRoute=false;  
+  // Intent receiver for button events
+  BroadcastReceiver metaWatchAppReceiver = null;
   
   // Holds the current bitmap
-  static Bitmap bitmap = null;
+  Bitmap bitmap = null;
   
   // Handles to the fonts
-  static Typeface bigFontFace = null;
-  static Paint bigFontPaint = null;
-  static int bigFontSize = 16;
-  static int bigFontRealSize = 11;
-  static Typeface normalFontFace = null;
-  static Paint normalFontPaint = null;
-  static int normalFontSize = 8;
-  static int normalFontRealSize = 7;
-  static Typeface smallFontFace = null;
-  static Paint smallFontPaint = null;
-  static int smallFontSize = 8;
-  static int smallFontRealSize = 5;
+  Typeface bigFontFace = null;
+  Paint bigFontPaint = null;
+  int bigFontSize = 16;
+  int bigFontRealSize = 11;
+  Typeface normalFontFace = null;
+  Paint normalFontPaint = null;
+  int normalFontSize = 8;
+  int normalFontRealSize = 7;
+  Typeface smallFontFace = null;
+  Paint smallFontPaint = null;
+  int smallFontSize = 8;
+  int smallFontRealSize = 5;
   
   // Bitmaps
-  static Bitmap target = null;
+  Bitmap target = null;
   
   // Paints
-  static Paint compassPaint = null;
-  static Paint filledPaint = null;
+  Paint compassPaint = null;
+  Paint filledPaint = null;
   
   // Context
-  static Context context;
+  Context context;
   
-  // Thread that manages vibrations
-  static final Lock lock = new ReentrantLock();
-  static final Condition triggerVibrate = lock.newCondition();
-  static int expectedVibrateCount = 0;
-  static int currentVibrateCount = 0;
-  static int fastVibrateCount = 1;
-  static boolean quitVibrateThread = false;
-  static Thread vibrateThread = null;
-  
-  static Bitmap loadBitmapFromAssets(Context context, String path) {
+  /** Loads bitmaps from the asset directory */
+  Bitmap loadBitmapFromAssets(Context context, String path) {
     try {
       InputStream inputStream = context.getAssets().open(path);
       Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
@@ -121,22 +88,31 @@ public class MetaWatchApp {
     }
   }
   
-  static int[] makeSendableArray(final Bitmap bitmap) {
+  /** Creates an array from a bitmap that can be send to metawatch */
+  int[] makeSendableArray(final Bitmap bitmap) {
     int pixelArray[] = new int[bitmap.getWidth() * bitmap.getHeight()];
     bitmap.getPixels(pixelArray, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
     return pixelArray;
   }
 
-  public static void announce(Context context) {
-
-    // Init parameters
-    minUpdatePeriodNormal = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "minUpdatePeriodNormal"));
-    minUpdatePeriodTurn = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "minUpdatePeriodTurn"));
-    waitTimeBeforeVibrate = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "waitTimeBeforeVibrate"));
-    offRouteVibrateFastPeriod = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "offRouteVibrateFastPeriod"));
-    offRouteVibrateFastCount = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "offRouteVibrateFastCount"));
-    offRouteVibrateSlowPeriod = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("MetaWatch", "offRouteVibrateSlowPeriod"));
+  /** Draws a triangle */
+  void drawTriangle(Canvas c, Point p1, Point p2, Point p3) {
+    Path path = new Path();
+    path.setFillType(Path.FillType.EVEN_ODD);
+    path.moveTo(p1.x, p1.y);
+    path.lineTo(p2.x, p2.y);
+    path.lineTo(p3.x, p3.y);
+    path.close();
+    c.drawPath(path, filledPaint);
+  }
+  
+  /** Constructor */
+  public CockpitAppMetaWatch(Context context) {
+    super();
     
+    // Remember context
+    this.context = context;
+
     // Load bitmaps
     target = loadBitmapFromAssets(context, "MetaWatchApp/target.png");
 
@@ -167,144 +143,81 @@ public class MetaWatchApp {
     compassPaint.setStyle(Paint.Style.STROKE);
     filledPaint = new Paint();
     filledPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+  }
 
-    // Start the vibrate thread
-    if ((vibrateThread!=null)&&(vibrateThread.isAlive())) {
-      boolean repeat=true;
-      while(repeat) {
-        repeat=false;
-        try {
-          lock.lock();
-          quitVibrateThread=true;
-          triggerVibrate.signal();
-          lock.unlock();
-          vibrateThread.join();
-        }
-        catch(InterruptedException e) {
-          repeat=true;
-        }
-      }
-    }
-    MetaWatchApp.context=context;
-    quitVibrateThread=false;
-    vibrateThread = new Thread(new Runnable() {
-      public void run() {
-        while (!quitVibrateThread) {
-          try {
-            lock.lock();
-            if (currentVibrateCount==expectedVibrateCount)
-              triggerVibrate.await();
-            lock.unlock();
-            if (quitVibrateThread)
-              return;
-            do {
-                            
-              // Ensure that the app is shown
-              Intent intent = new Intent("org.metawatch.manager.APPLICATION_START");
-              Bundle b = new Bundle();
-              b.putString("id", id);
-              b.putString("name", name);
-              intent.putExtras(b);
-              MetaWatchApp.context.sendBroadcast(intent);
-              if (MetaWatchApp.bitmap!=null) {
-                intent = new Intent("org.metawatch.manager.APPLICATION_UPDATE");
-                b = new Bundle();
-                b.putString("id", id);
-                b.putIntArray("array", makeSendableArray(MetaWatchApp.bitmap));
-                intent.putExtras(b);
-                MetaWatchApp.context.sendBroadcast(intent);
-              }
-              
-              // Wait a little bit before vibrating
-              Thread.sleep(waitTimeBeforeVibrate);
-              if (quitVibrateThread)
-                return;
-
-              // Skip vibrate if we are not off route anymore and this is 
-              // is not the first vibrate
-              if ((!currentOffRoute)&&(fastVibrateCount>1))
-                break;
-              
-              // Vibrate
-              intent = new Intent("org.metawatch.manager.VIBRATE");
-              b = new Bundle();
-              b.putInt("vibrate_on", 500);
-              b.putInt("vibrate_off", 500);
-              b.putInt("vibrate_cycles", 2);
-              intent.putExtras(b);
-              MetaWatchApp.context.sendBroadcast(intent);
-              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch",String.format("currentOffRoute=%d fastVibrateCount=%d currentVibrateCount=%d expectedVibrateCount=%d", currentOffRoute ? 1 : 0, fastVibrateCount, currentVibrateCount, expectedVibrateCount));
-              
-              // Repeat if off route 
-              // Vibrate fast at the beginning, slow afterwards
-              // Quit if a new vibrate is requested or we are on route again
-              if (currentOffRoute) {
-                int offRouteVibratePeriod;
-                if (fastVibrateCount>offRouteVibrateFastCount) {
-                  offRouteVibratePeriod=offRouteVibrateSlowPeriod;
-                } else {
-                  offRouteVibratePeriod=offRouteVibrateFastPeriod;
-                  fastVibrateCount++;
-                }
-                for (int i=0;i<offRouteVibratePeriod/1000;i++) {
-                  Thread.sleep(1000);
-                  if ((!currentOffRoute)||(currentVibrateCount<expectedVibrateCount-1))
-                    break;
-                }
-              }
-              if (quitVibrateThread)
-                return;
-            }
-            while ((currentOffRoute)&&(currentVibrateCount==expectedVibrateCount-1));
-            currentVibrateCount++;
-            if (!currentOffRoute) 
-              fastVibrateCount=1;
-          }
-          catch(InterruptedException e) {
-            ; // repeat
-          }
-        }
-      }
-    });   
-    vibrateThread.start();
+  /** Inform metawatch about this app */
+  public void start() {
     
-    // Inform metawatch about this app
+    // Register metawatch broadcast receiver
+    if (metaWatchAppReceiver==null) {
+      metaWatchAppReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          if (intent.getAction()=="org.metawatch.manager.BUTTON_PRESS") {
+            inform();
+          }
+          if (intent.getAction()=="org.metawatch.manager.APPLICATION_DISCOVERY") {
+            start();
+            inform();
+            focus();
+          }
+        }
+      };
+      IntentFilter filter = new IntentFilter();
+      filter.addAction("org.metawatch.manager.BUTTON_PRESS");
+      filter.addAction("org.metawatch.manager.APPLICATION_DISCOVERY");
+      context.registerReceiver(metaWatchAppReceiver, filter);
+    }
+    
+    // Tell metawatch that we are there
+    update(null);
     Intent intent = new Intent("org.metawatch.manager.APPLICATION_ANNOUNCE");
     Bundle b = new Bundle();
     b.putString("id", id);
     b.putString("name", name);
     intent.putExtras(b);
     context.sendBroadcast(intent);
-    
+    inform();
+    focus();
   }
-  
-  public static void start() {
-    if (context==null) return;
+
+  /** Bring the app screen to foreground */
+  public void focus() {
     Intent intent = new Intent("org.metawatch.manager.APPLICATION_START");
     Bundle b = new Bundle();
     b.putString("id", id);
     b.putString("name", name);
     intent.putExtras(b);
     context.sendBroadcast(intent);
-    lastUpdate = 0;
-    update(null,true);
-    lastUpdate = 0;
   }
   
-  private static void drawTriangle(Canvas c, Point p1, Point p2, Point p3) {
-    Path path = new Path();
-    path.setFillType(Path.FillType.EVEN_ODD);
-    path.moveTo(p1.x, p1.y);
-    path.lineTo(p2.x, p2.y);
-    path.lineTo(p3.x, p3.y);
-    path.close();
-    c.drawPath(path, filledPaint);
-  }
+  /** Show the latest bitmap on screen */
+  public void inform() {
+    if (bitmap!=null) {
+      Intent intent = new Intent("org.metawatch.manager.APPLICATION_UPDATE");
+      Bundle b = new Bundle();
+      b.putString("id", id);
+      b.putIntArray("array", makeSendableArray(bitmap));
+      intent.putExtras(b);
+      context.sendBroadcast(intent);
+    }
+  }  
+
+  /** Inform the user via vibration */
+  public void alert(AlertType type) {
+    Intent intent = new Intent("org.metawatch.manager.VIBRATE");
+    Bundle b = new Bundle();
+    b.putInt("vibrate_on", 500);
+    b.putInt("vibrate_off", 500);
+    b.putInt("vibrate_cycles", 2);
+    intent.putExtras(b);
+    context.sendBroadcast(intent);
+  }  
   
-  private static void refreshApp(String[] infos) {
-    
+  /** Updates the metawatch bitmap with the latest infos (but does not yet show them) */
+  public void update(CockpitInfos infos) {
     float radius,x,y,x2,y2;
-        
+    
     // Create a new bitmap
     bitmap = Bitmap.createBitmap(96, 96, Bitmap.Config.RGB_565);
     Canvas c = new Canvas(bitmap); 
@@ -315,22 +228,22 @@ public class MetaWatchApp {
 
     // Obtain the dashboard infos
     float directionBearing=0;
-    if (!infos[0].equals("-"))
-      directionBearing = Float.parseFloat(infos[0]);
+    if ((infos!=null)&&(!infos.locationBearing.equals("-")))
+      directionBearing = Float.parseFloat(infos.locationBearing);
     float targetBearing=0;
-    if (!infos[1].equals("-")) {
-      targetBearing = (Float.parseFloat(infos[1]) - directionBearing);
+    if ((infos!=null)&&(!infos.targetBearing.equals("-"))) {
+      targetBearing = (Float.parseFloat(infos.targetBearing) - directionBearing);
     }
     
     // Draw the direction indicator
-    if (infos[6].equals("-"))
+    if ((infos==null)||(infos.turnAngle.equals("-")))
       drawTriangle(c,new Point(39,26),new Point(57,26),new Point(48,18));
 
     // Draw the compass
     //Matrix matrix = new Matrix();
     //matrix.setRotate(-directionBearing,48,48);
     //c.drawBitmap(compass, matrix, null);
-    if (!infos[0].equals("-")) {
+    if ((infos!=null)&&(!infos.locationBearing.equals("-"))) {
       float alpha = -directionBearing;
       for (int i=0;i<8;i++) {
         radius = 33;
@@ -356,7 +269,7 @@ public class MetaWatchApp {
     }
     
     // Draw the target
-    if (!infos[1].equals("-")) {
+    if ((infos!=null)&&(!infos.targetBearing.equals("-"))) {
       radius = 41;
       x = 48 + radius * (float)Math.sin(Math.toRadians(targetBearing)) - target.getWidth()/2;
       y = 48 - radius * (float)Math.cos(Math.toRadians(targetBearing)) - target.getHeight()/2;
@@ -364,25 +277,25 @@ public class MetaWatchApp {
     }
     
     // Is a turn coming?
-    if (!infos[6].equals("-")) {
+    if ((infos!=null)&&(!infos.turnAngle.equals("-"))) {
       
-    	// Draw the turn
-    	float turnAngle = Float.parseFloat(infos[6]);
-    	int mirror=1;
-    	if (turnAngle<0) {
-    	  turnAngle=-turnAngle;
-    	  mirror=-1;
-    	}
-    	String turnDistance = infos[7];
-    	float sinOfTurnAngle = (float)Math.sin(Math.toRadians(turnAngle));
-    	float cosOfTurnAngle = (float)Math.cos(Math.toRadians(turnAngle));
-    	int turnLineWidth = 12;
+      // Draw the turn
+      float turnAngle = Float.parseFloat(infos.turnAngle);
+      int mirror=1;
+      if (turnAngle<0) {
+        turnAngle=-turnAngle;
+        mirror=-1;
+      }
+      String turnDistance = infos.turnDistance;
+      float sinOfTurnAngle = (float)Math.sin(Math.toRadians(turnAngle));
+      float cosOfTurnAngle = (float)Math.cos(Math.toRadians(turnAngle));
+      int turnLineWidth = 12;
       int turnLineArrowOverhang = 6;
       int turnLineArrowHeight = 12;
-    	int turnLineStartHeight = 17;
+      int turnLineStartHeight = 17;
       int turnLineMiddleHeight = 7;
-    	int turnLineStartX = 48;
-    	int turnLineStartY = 56;
+      int turnLineStartX = 48;
+      int turnLineStartY = 56;
       Point p1 = new Point(turnLineStartX-turnLineWidth/2,turnLineStartY);
       Point p2 = new Point(turnLineStartX+turnLineWidth/2,turnLineStartY);
       Point p3 = new Point(
@@ -426,119 +339,41 @@ public class MetaWatchApp {
       drawTriangle(c,p7,p6,p10);      
       drawTriangle(c,p6,p9,p10);      
       c.drawText(turnDistance,48,70,bigFontPaint);
-    	
+      
     } else {
     
-	    // Draw the two lines of information
-	    x = 48;
-	    y = 35;
-	    if (!infos[2].equals("-")) {
-	      c.drawText(infos[2],x,y,smallFontPaint);
-	      y += bigFontRealSize+2;
-	      c.drawText(infos[3],x,y,bigFontPaint);
-	      y += smallFontRealSize+7;
-	    }
-	    c.drawLine(20, 51, 76, 51, smallFontPaint);
-	    if (!infos[4].equals("-")) {
-	      c.drawText(infos[4],x,y,smallFontPaint);
-	      y += bigFontRealSize+2;
-	      c.drawText(infos[5],x,y,bigFontPaint);
-	    }
+      // Draw the two lines of information
+      x = 48;
+      y = 35;
+      if ((infos!=null)&&(!infos.targetDistance.equals("-"))) {
+        c.drawText(context.getString(R.string.distance),x,y,smallFontPaint);
+        y += bigFontRealSize+2;
+        c.drawText(infos.targetDistance,x,y,bigFontPaint);
+        y += smallFontRealSize+7;
+      }
+      c.drawLine(20, 51, 76, 51, smallFontPaint);
+      if ((infos!=null)&&(!infos.targetDuration.equals("-"))) {
+        c.drawText(context.getString(R.string.duration),x,y,smallFontPaint);
+        y += bigFontRealSize+2;
+        c.drawText(infos.targetDuration,x,y,bigFontPaint);
+      }
     }
   }
   
-  public static void update(String infosAsSSV, boolean forceUpdate) {
+  /** Informs the metawatch app that this app is not existing anymore */
+  public void stop() {
     
-    if (context==null) return;
-    
-    // Use the last infos if no infos given
-    if (infosAsSSV == null) {
-      infosAsSSV = lastInfosAsSSV;
-    }
-    lastInfosAsSSV = infosAsSSV;
-
-    // Obtain the dashboard infos
-    if (infosAsSSV.equals(""))
-      return;
-    String[] infos = infosAsSSV.split(";");
-    currentTurnDistance=infos[7];
-    currentOffRoute=false;
-    if (infos[5].equals("off route!")) {
-      infos[5]="off rte!";
-      currentOffRoute=true;
-    }
-    
-    // If the turn has appeared or disappears, force an update
-    if ((currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals("-")))
-      forceUpdate=true;
-    if ((!currentTurnDistance.equals("-"))&&(lastTurnDistance.equals("-")))
-      forceUpdate=true;
-    if (lastOffRoute!=currentOffRoute) 
-      forceUpdate=true;
-    
-    // Check if the info is updated too fast
-    long minUpdatePeriod;
-    if (currentTurnDistance.equals("-"))
-      minUpdatePeriod = minUpdatePeriodNormal;
-    else
-      minUpdatePeriod = minUpdatePeriodTurn;
-    long t = Calendar.getInstance().getTimeInMillis();
-    long diffToLastUpdate = t - lastUpdate;
-    if ((!forceUpdate)&&(diffToLastUpdate < minUpdatePeriod)) {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Skipped update because last update was too recent");
-      return;
-    }
-        
-    // Draw the bitmap
-    refreshApp(infos);
-    
-    // Vibrate if the turn appears the first time or if off route
-    boolean vibrate=false;
-    if (((!lastOffRoute)&&currentOffRoute)) {
-      vibrate=true;
-    }
-    if ((!currentTurnDistance.equals("-"))&&(lastTurnDistance.equals("-"))) {
-      vibrate=true;
-    }
-    if (vibrate) {
-            
-      // Inform the vibrate thread to do the work
-      lock.lock();
-      expectedVibrateCount++;
-      triggerVibrate.signal();
-      lock.unlock();
-      
-    } else {
-
-      // Send the bitmap directly
-      Intent intent = new Intent("org.metawatch.manager.APPLICATION_UPDATE");
-      Bundle b = new Bundle();
-      b.putString("id", id);
-      b.putIntArray("array", makeSendableArray(bitmap));
-      intent.putExtras(b);
-      context.sendBroadcast(intent);
-      
-    }
-
-    // Remember when was updated
-    lastUpdate = Calendar.getInstance().getTimeInMillis();
-    lastTurnDistance=currentTurnDistance;
-    lastOffRoute=currentOffRoute;
-  }
-  
-  public static void stop() {
-    if (context==null) return;
+    // Tell metawatch that we are not there anymore
     Intent intent = new Intent("org.metawatch.manager.APPLICATION_STOP");
     Bundle b = new Bundle();
     b.putString("id", id);
     intent.putExtras(b);
     context.sendBroadcast(intent);
     bitmap = null;
-  }
-  
-  public static void button(int button, int type) {
-    if (context==null) return;
-    //update(context,"");
+    
+    // Unregister the event receiver
+    context.unregisterReceiver(metaWatchAppReceiver);
+    metaWatchAppReceiver=null;
   }
 
 }

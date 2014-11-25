@@ -131,6 +131,12 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   protected final Lock lock = new ReentrantLock();
   protected final Condition threadInitialized = lock.newCondition();
     
+  // Cockpit engine
+  protected CockpitEngine cockpitEngine = null;
+  
+  // Indicates if a replay is active
+  protected boolean replayTraceActive = false; 
+  
   //
   // Constructor and destructor
   //
@@ -241,9 +247,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   public static final int HOME_DIR_AVAILABLE = 3;  
   public static final int HOME_DIR_NOT_AVAILABLE = 4;  
 
-  // Variables for handling the metwatch app
-  boolean metawWatchAppActive = false;
-  
   // Handler thread
   public void run() {
     
@@ -424,16 +427,14 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       coreStopped=true;
       lock.unlock();
       
-      // Stop the metawatch app
-      if (metawWatchAppActive) {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Stopping meta watch app");
-        MetaWatchApp.stop();
-        metawWatchAppActive = false;
+      // Stop the cockpit apps
+      if (cockpitEngine!=null) { 
+        cockpitEngine.stop();
+        cockpitEngine=null;
       }
           
       // Deinit the core
       deinitCore();
-    
     }
   } 
 
@@ -452,6 +453,15 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     // Start the core
     start();
   } 
+  
+  // Checks if the cockpit engine is active
+  boolean cockpitEngineIsActive() {
+    if (cockpitEngine!=null) {
+      return cockpitEngine.isActive();
+    } else {
+      return false;
+    }
+  }
   
   //
   // Functions implemented by the native core
@@ -501,6 +511,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   {
     String result;
     if (coreInitialized) {
+      if (cmd.startsWith("replayTrace(")) {
+        replayTraceActive=true;
+      }
       result = executeCoreCommandInt(cmd);
     } else {
       result = "";
@@ -533,22 +546,13 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         executeCoreCommandInt(queuedCmd);
       }
       queuedCoreCommands.clear();
-      if (configStoreGetStringValue("MetaWatch", "activateMetaWatchApp").equals("1")) {
-        if (!metawWatchAppActive) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Starting meta watch app");
-          metawWatchAppActive = true;
-          MetaWatchApp.announce(application);      
-          MetaWatchApp.start();
-        }
-      }
+      cockpitEngine=new CockpitEngine(application);
       cmdExecuted=false; // forward message to activity
     }
     if (cmd.startsWith("updateNavigationInfos(")) {
-      if (metawWatchAppActive) {
-        String infos = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", infos);
-        MetaWatchApp.update(infos,false);
-      }
+      String infos = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
+      if (cockpitEngine!=null)
+        cockpitEngine.update(infos, false);
       cmdExecuted=true;
     }
     if (!cmdExecuted) {
@@ -664,6 +668,8 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   /** Called when a new fix is available */  
   public void onLocationChanged(Location location) {
+    if (replayTraceActive)
+      return;
     if (location!=null) {
       String cmd = "locationChanged(" + location.getProvider() + "," + location.getTime();
       cmd += "," + location.getLongitude() + "," + location.getLatitude();
@@ -703,6 +709,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Called when a the orientation sensor has changed */
   public void onSensorChanged(SensorEvent event) {
     
+    if (replayTraceActive)
+      return;
+
     // Drop the event if it is unreliable
     //if (event.accuracy==SensorManager.SENSOR_STATUS_UNRELIABLE)
     //  return;

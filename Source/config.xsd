@@ -84,33 +84,70 @@
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
-        <xsd:element name="MetaWatch">
+        <xsd:element name="Cockpit">
           <xsd:annotation>
-            <xsd:documentation>Preferences related to the metawatch app.</xsd:documentation>
+            <xsd:documentation>Preferences related to cockpit apps.</xsd:documentation>
           </xsd:annotation>
           <xsd:complexType>
             <xsd:sequence>
-              <xsd:element name="activateMetaWatchApp" type="xsd:boolean" default="0" use="required">
-                <xsd:annotation>
-                  <xsd:documentation>Activates the meta watch dashboard app.</xsd:documentation>
-                </xsd:annotation>
-              </xsd:element>
+			        <xsd:element name="App">
+			          <xsd:annotation>
+			            <xsd:documentation>List of supported cockpit apps.</xsd:documentation>
+			          </xsd:annotation>
+			          <xsd:complexType>
+			            <xsd:sequence>
+			              <xsd:element name="MetaWatch">
+			                <xsd:annotation>
+			                  <xsd:documentation>Shows cockpit infos on a meta watch.</xsd:documentation>
+			                </xsd:annotation>
+			                <xsd:complexType>
+			                  <xsd:sequence>
+			                    <xsd:element name="active" type="xsd:boolean" default="0" use="required">
+			                      <xsd:annotation>
+			                        <xsd:documentation>Enables the meta watch cockpit app.</xsd:documentation>
+			                      </xsd:annotation>
+			                    </xsd:element>
+			                  </xsd:sequence>
+			                </xsd:complexType>
+			              </xsd:element>
+                    <xsd:element name="Voice">
+                      <xsd:annotation>
+                        <xsd:documentation>Speaks cockpit infos aloud.</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="active" type="xsd:boolean" default="1" use="required">
+                            <xsd:annotation>
+                              <xsd:documentation>Enables the voice cockpit app.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="minDurationBetweenOffRouteAlerts" type="xsd:boolean" default="55">
+                            <xsd:annotation>
+                              <xsd:documentation>Minimum duration between off route alerts in seconds.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>  
               <xsd:element name="minUpdatePeriodNormal" type="xsd:integer" default="3000">
                 <xsd:annotation>
                   <xsd:documentation>Minimum time in milliseconds between meta watch app updates if no turn is shown.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="offRouteVibrateFastPeriod" type="xsd:integer" default="10000">
+              <xsd:element name="offRouteAlertFastPeriod" type="xsd:integer" default="10000">
                 <xsd:annotation>
                   <xsd:documentation>Time in milliseconds between vibrate notification if route has been just left.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="offRouteVibrateFastCount" type="xsd:integer" default="6">
+              <xsd:element name="offRouteAlertFastCount" type="xsd:integer" default="6">
                 <xsd:annotation>
                   <xsd:documentation>Number of vibrates to perform with fast period before switching to slow period.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="offRouteVibrateSlowPeriod" type="xsd:integer" default="60000">
+              <xsd:element name="offRouteAlertSlowPeriod" type="xsd:integer" default="60000">
                 <xsd:annotation>
                   <xsd:documentation>Time in milliseconds between vibrate notification if route has already been left for some time.</xsd:documentation>
                 </xsd:annotation>
@@ -120,7 +157,7 @@
                   <xsd:documentation>Minimum time in milliseconds between meta watch app updates if a turn is shown.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="waitTimeBeforeVibrate" type="xsd:integer" default="4000">
+              <xsd:element name="waitTimeBeforeAlert" type="xsd:integer" default="4000">
                 <xsd:annotation>
                   <xsd:documentation>Time in milliseconds to wait before vibrating to ensure that watch display is updated.</xsd:documentation>
                 </xsd:annotation>

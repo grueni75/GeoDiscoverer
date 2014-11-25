@@ -74,4 +74,20 @@
   <string name="nav_drawer_hint">Swipe from the left edge to the right to open menu.</string>
   <string name="importing_external_map_archives">Importing all map archives related to &lt;%1$s&gt;</string>
   <string name="got_it">Got it!</string>
+  <string name="duration">Duration</string>
+  <string name="distance">Distance</string>
+  <string name="visible_on_map">Visible on map</string>
+  <string name="hidden_on_map">Hidden on map</string>
+  <string name="tts_cannot_init">Could not init Text-To-Speech engine</string>
+  <string name="tts_cannot_set_language">Could not set Text-To-Speech language</string>
+  <string name="tts_cannot_add_alert_earcon">Could not add Text-To-Speech alert earcon</string>
+  <string name="tts_locale">en</string>
+  <string name="tts_turn_left">Please turn left in %1$s!</string>
+  <string name="tts_turn_right">Please turn right in %1$s!</string>
+  <string name="tts_off_route">You are off route!</string>
+  <string name="tts_meters">meters</string>
+  <string name="tts_kilometers">kilometers</string>
+  <string name="tts_megameters">megameters</string>
+  <string name="tts_miles">miles</string>
+  <string name="tts_yards">yards</string>
 </resources>

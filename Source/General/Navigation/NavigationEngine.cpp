@@ -1285,7 +1285,7 @@ void NavigationEngine::computeNavigationInfo() {
       infos << ";" << navigationInfo.getTargetBearing();
     else
       infos << ";-";
-    infos << ";Distance;";
+    infos << ";";
     //navigationInfo.setTargetDistance(((float)rand())*10000/(float)RAND_MAX);
     if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance()) {
       core->getUnitConverter()->formatMeters(navigationInfo.getTargetDistance(),value,unit);
@@ -1293,7 +1293,7 @@ void NavigationEngine::computeNavigationInfo() {
     } else {
       infos << "infinite";
     }
-    infos << ";Duration;";
+    infos << ";";
     //counter++;
     //if (counter%30==0)
     //  navigationInfo.setOffRoute(!navigationInfo.getOffRoute());
@@ -1312,6 +1312,14 @@ void NavigationEngine::computeNavigationInfo() {
       infos << ";" << value << " " << unit;
     } else {
       infos << ";-;-";
+    }
+    if (navigationInfo.getType() == NavigationInfoTypeRoute) {
+      if (navigationInfo.getOffRoute())
+        infos << ";off route";
+      else
+        infos << ";on route";
+    } else {
+      infos << ";no route";
     }
     core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
     //  sleep(1);

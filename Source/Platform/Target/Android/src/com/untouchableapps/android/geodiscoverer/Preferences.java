@@ -59,7 +59,7 @@ public class Preferences extends PreferenceActivity implements
   // Request codes for calling other activities
   static final int SHOW_PREFERENCE_SCREEN_REQUEST = 0;
 
-  /** Copies tracks from the Track into the Route directory */
+  /** Collects entries for a list preference item */
   private class FillListPreferenceItemTask extends AsyncTask<Void, Integer, Void> {
 
     public ListPreference entry;
@@ -268,6 +268,14 @@ public class Preferences extends PreferenceActivity implements
                 .createPreferenceScreen(this);
             childScreen.setKey(key2);
             childScreen.setTitle(value);
+            if (key.equals("Navigation/Route")) {
+              String visible = coreObject.configStoreGetStringValue(key2, "visible");
+              if (Integer.parseInt(visible)==1) {
+                childScreen.setSummary(R.string.visible_on_map);
+              } else {
+                childScreen.setSummary(R.string.hidden_on_map);                
+              }
+            }
             childScreen.setPersistent(false);
             childScreen.setOnPreferenceClickListener(this);
             category.addPreference(childScreen);
@@ -415,10 +423,15 @@ public class Preferences extends PreferenceActivity implements
       addPreference(generalCategory, generalCategory, "Map", "folder");
       addPreference(generalCategory, generalCategory, "General", "wakeLock");
       addPreference(generalCategory, generalCategory, "General", "backButtonTurnsScreenOff");
-      addPreference(generalCategory, generalCategory, "MetaWatch", "activateMetaWatchApp");
       addPreference(generalCategory, generalCategory, "", "expertMode");
-      PreferenceCategory routeCategory = new PreferenceCategory(this);
-      routeCategory.setTitle("Route list (use menu to modify)");
+      PreferenceCategory cockpitAppCategory = new PreferenceCategory(this);
+      cockpitAppCategory.setTitle("Cockpit");
+      rootScreen.addPreference(cockpitAppCategory);
+      String[] apps = coreObject.configStoreGetNodeNames("Cockpit/App");
+      Arrays.sort(apps);
+      for (String app : apps) {
+        addPreference(cockpitAppCategory, cockpitAppCategory, "Cockpit/App", app);        
+      }
       addPreference(rootScreen, rootScreen, "Navigation", "Route");
       PreferenceCategory navigationCategory = new PreferenceCategory(this);
       navigationCategory.setTitle("Navigation");

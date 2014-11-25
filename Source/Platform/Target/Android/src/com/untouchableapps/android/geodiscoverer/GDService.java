@@ -57,10 +57,6 @@ public class GDService extends Service {
   BroadcastReceiver externalStorageReceiver = null;
   boolean externalStorageAvailable = false;
   boolean externalStorageWritable = false;  
-      
-  // Variables for handling the metwatch
-  BroadcastReceiver metaWatchAppReceiver = null;
-  boolean metaWatchAppActive = false;
   
   /** Called when the external storage state changes */
   synchronized void handleExternalStorageState() {
@@ -130,26 +126,6 @@ public class GDService extends Service {
     // Prepare the notification
     Intent notificationIntent = new Intent(this, ViewMap.class);
     pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);    
-    
-    // Register metawatch broadcast receiver
-    metaWatchAppReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        if (metaWatchAppActive) {
-          if (intent.getAction()=="org.metawatch.manager.BUTTON_PRESS") {
-            MetaWatchApp.update(null, true);
-          }
-          if (intent.getAction()=="org.metawatch.manager.APPLICATION_DISCOVERY") {
-            MetaWatchApp.announce(coreObject.application);
-            MetaWatchApp.start();
-          }
-        }
-      }
-    };
-    filter = new IntentFilter();
-    filter.addAction("org.metawatch.manager.BUTTON_PRESS");
-    filter.addAction("org.metawatch.manager.APPLICATION_DISCOVERY");
-    registerReceiver(metaWatchAppReceiver, filter);
   }
   
   /** No binding supported */
@@ -192,9 +168,6 @@ public class GDService extends Service {
         serviceInForeground=true;
       }
     }
-    if (intent.getAction().equals("coreInitialized")) {
-      metaWatchAppActive = coreObject.configStoreGetStringValue("MetaWatch", "activateMetaWatchApp").equals("1");
-    }
     if (intent.getAction().equals("activityPaused")) {
       
       // Stop watching location if track recording is disabled
@@ -202,7 +175,7 @@ public class GDService extends Service {
       String state=coreObject.executeCoreCommand("getRecordTrack()");
       if (state.equals("false")||state.equals(""))
           recordingPosition = false;
-      if ((!metaWatchAppActive)&&(!recordingPosition)) {
+      if ((!coreObject.cockpitEngineIsActive())&&(!recordingPosition)) {
         locationManager.removeUpdates(coreObject);
         locationWatchStarted = false;
         if (serviceInForeground) {
@@ -229,12 +202,7 @@ public class GDService extends Service {
     externalStorageReceiver=null;
 
     // Stop watching location
-    locationManager.removeUpdates(coreObject);
-    
-    // Stop watch meta watch updates
-    unregisterReceiver(metaWatchAppReceiver);
-    metaWatchAppReceiver=null;
-    
+    locationManager.removeUpdates(coreObject);    
   }
   
   
