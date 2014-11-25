@@ -62,7 +62,7 @@ void Debug::replayTrace(std::string filename) {
       core->getCommander()->execute(cmd);
 
     // Sleep a little bit
-    usleep(1000);
+    usleep(50000);
     //sleep(2);
     /*char buffer[32];
     gets(buffer);*/

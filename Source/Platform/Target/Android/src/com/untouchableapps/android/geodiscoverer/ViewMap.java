@@ -395,6 +395,22 @@ public class ViewMap extends GDActivity {
               });
               undoBar.show();
             }
+            
+            // Replay the trace if it exists
+            if (viewMap!=null) {
+              File replayLog = new File(viewMap.coreObject.homePath + "/replay.log");
+              if (replayLog.exists()) {
+                new Thread() {
+                  public void run() {
+                    ViewMap viewMap = weakViewMap.get();
+                    if (viewMap==null)
+                      return;
+                    viewMap.coreObject.executeCoreCommand("replayTrace(" + viewMap.coreObject.homePath + "/replay.log" + ")");                    
+                  }
+                }.start();
+              }
+            }
+            
             commandExecuted=true;
           } 
           

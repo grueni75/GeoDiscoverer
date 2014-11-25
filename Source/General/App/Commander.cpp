@@ -437,6 +437,12 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="replayTrace") {
+    if (core->getDebug()) {
+      core->getDebug()->replayTrace(args[0]);
+    }
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {
