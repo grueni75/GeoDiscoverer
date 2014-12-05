@@ -893,6 +893,7 @@ public class ViewMap extends GDActivity {
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_REMOVE_ROUTES,android.R.drawable.ic_menu_delete,getString(R.string.remove_routes)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_TOGGLE_MESSAGES,android.R.drawable.ic_menu_info_details,getString(R.string.toggle_messages)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_PREFERENCES,android.R.drawable.ic_menu_preferences,getString(R.string.preferences)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_HELP,android.R.drawable.ic_menu_help,getString(R.string.help)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_RESET,android.R.drawable.ic_menu_revert,getString(R.string.reset)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_EXIT,android.R.drawable.ic_menu_close_clear_cancel,getString(R.string.exit)));
     return entries;
@@ -1099,6 +1100,10 @@ public class ViewMap extends GDActivity {
               intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
               startActivity(intent);
             }
+            break;
+          case GDNavDrawerItem.ID_SHOW_HELP:
+            Intent intent = new Intent(getApplicationContext(), ShowHelp.class);
+            startActivity(intent);
             break;
         }
         navDrawerList.setItemChecked(position, false);

@@ -85,6 +85,10 @@
         <activity android:name=".Preferences"
                   android:label="@string/preferences">
         </activity>
+        <activity android:name=".ShowHelp"
+                  android:label="@string/help"
+                  android:theme="@style/GDStyle.NoTitleBar">
+        </activity>
         <service android:name=".GDService" />
         <receiver android:name=".GDDeviceAdminReceiver"
             android:label="@string/app_name"

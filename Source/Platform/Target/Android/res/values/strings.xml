@@ -90,4 +90,5 @@
   <string name="tts_megameters">megameters</string>
   <string name="tts_miles">miles</string>
   <string name="tts_yards">yards</string>
+  <string name="help">Help</string>
 </resources>

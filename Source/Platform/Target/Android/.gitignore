@@ -3,6 +3,7 @@ gen/
 libs/
 obj/
 assets/GeoDiscoverer/Icon/*
+assets/GeoDiscoverer/Help/*
 assets/GeoDiscoverer/config.shipped.xsd
 assets/GeoDiscoverer.list
 
