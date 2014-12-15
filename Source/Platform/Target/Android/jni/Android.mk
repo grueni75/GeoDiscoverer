@@ -493,6 +493,37 @@ LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange_archive.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_ZIP_PATH)/,zip_unchange_data.c)
 include $(BUILD_SHARED_LIBRARY)
 
+# Build google breakpad client
+include $(CLEAR_VARS)
+LOCAL_MODULE := gdbreakpad
+MY_BREAKPAD_PATH := google-breakpad-r1410
+LOCAL_CPP_EXTENSION := .cc
+LOCAL_ARM_MODE := arm
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/crash_generation/crash_generation_client.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/handler/exception_handler.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/handler/minidump_descriptor.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/log/log.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/dump_writer_common/seccomp_unwinder.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/dump_writer_common/thread_info.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/dump_writer_common/ucontext_reader.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/linux_dumper.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/linux_ptrace_dumper.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/minidump_writer.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/microdump_writer/microdump_writer.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/minidump_file_writer.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/android/breakpad_getcontext.S)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/convert_UTF.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/md5.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/string_conversion.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/elfutils.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/file_id.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/guid_creator.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/linux_libc_support.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/memory_mapped_file.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/safe_readlink.cc)
+LOCAL_CFLAGS := -Ijni/$(MY_BREAKPAD_PATH)/src/common/android/include -Ijni/$(MY_BREAKPAD_PATH)/src
+include $(BUILD_STATIC_LIBRARY)
+
 # Build the application core
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdcore
@@ -527,9 +558,9 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Widget
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Math
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Config
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Profile
-LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ijni/libxml2-2.7.7/include -Ijni/freetype-2.4.2/include -Ijni/jpeg-8b -Ijni/libpng-1.4.4 -Ijni/curl-7.24.0/include -Ijni/libzip-0.10.1/lib -Ijni/proj-4.8.0/src -DSRC_ROOT='"jni/../../../../../Source"' 
+LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ijni/libxml2-2.7.7/include -Ijni/freetype-2.4.2/include -Ijni/jpeg-8b -Ijni/libpng-1.4.4 -Ijni/curl-7.24.0/include -Ijni/libzip-0.10.1/lib -Ijni/proj-4.8.0/src -Ijni/google-breakpad-r1410/src -DSRC_ROOT='"jni/../../../../../Source"' 
 LOCAL_LDLIBS += -lz -dl -llog -lGLESv1_CM 
 LOCAL_SRC_FILES := GDCore.cpp $(MY_GD_PLATFORM_SRCS) $(MY_GD_GENERAL_SRCS)
-LOCAL_STATIC_LIBRARIES := 
+LOCAL_STATIC_LIBRARIES := gdbreakpad
 LOCAL_SHARED_LIBRARIES := gdjpeg gdxml gdfreetype gdpng gdcurl gdzip gdproj4
 include $(BUILD_SHARED_LIBRARY)

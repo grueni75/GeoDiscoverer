@@ -23,6 +23,8 @@
 #include <jni.h>
 #include <Core.h>
 #include <android/log.h>
+#include <client/linux/handler/exception_handler.h>
+#include <string.h>
 
 // Prototypes
 void GDApp_executeAppCommand(std::string command);
@@ -48,11 +50,32 @@ jmethodID listAddMethodID=NULL;
 jmethodID addMessageMethodID=NULL;
 jmethodID setThreadPriorityMethodID=NULL;
 
+// Crash handler
+char *dumpDir = NULL;
+static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
+                         void* context,
+                         bool succeeded)
+{
+  char *cmd = (char*)malloc(strlen("sendNativeCrashReport()")+strlen(descriptor.path())+1);
+  if (!cmd) {
+    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create sendNativeCrashReport cmd!");
+  } else {
+    strcpy(cmd,"sendNativeCrashReport(");
+    strcat(cmd,descriptor.path());
+    strcat(cmd,")");
+    GDApp_executeAppCommand(cmd);
+    free(cmd);
+  }
+  return succeeded;
+}
+
 // Called when the library is loaded
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
-  JNIEnv *env;
+  // Remember pointers
   virtualMachine = vm;
+
+  // That's it!
   __android_log_write(ANDROID_LOG_INFO,"GDCore","dynamic library initialized.");
   return JNI_VERSION_1_6;
 }
@@ -219,6 +242,10 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_dei
 {
   // Clean up
   __android_log_write(ANDROID_LOG_DEBUG,"GDCore","deleting core.");
+  if (dumpDir) {
+    free(dumpDir);
+    dumpDir=NULL;
+  }
   if (GEODISCOVERER::core)
     delete GEODISCOVERER::core;
   GEODISCOVERER::core=NULL;
@@ -239,6 +266,19 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_ini
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitCore(env,thiz);
     exit(1);
   }
+
+  // Init crash handler
+  if (dumpDir)
+    free(dumpDir);
+  if (!(dumpDir=(char*)malloc(strlen(homePathCStr)+strlen("/Log")+1))) {
+    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create dumpDir string!");
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitCore(env,thiz);
+    exit(1);
+  }
+  strcpy(dumpDir,homePathCStr);
+  strcat(dumpDir,(const char*)"/Log");
+  google_breakpad::MinidumpDescriptor descriptor(dumpDir);
+  google_breakpad::ExceptionHandler eh(descriptor,NULL,dumpCallback,NULL,true,-1);
 
   // Create the application
   //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","before object creation.");
@@ -490,6 +530,7 @@ void GDApp_executeAppCommand(std::string command)
 
   // Get the environment pointer
   env=GDApp_obtainJNIEnv(isAttached);
+  //env=NULL;
 
   // Construct the java string
   jstring commandJavaString = env->NewStringUTF(command.c_str());

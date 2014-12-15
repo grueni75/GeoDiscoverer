@@ -29,18 +29,35 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
 
-import com.cocosw.undobar.UndoBarController;
-import com.cocosw.undobar.UndoBarStyle;
-import com.cocosw.undobar.UndoBarController.UndoListener;
-import com.untouchableapps.android.geodiscoverer.R.drawable;
+import org.acra.ACRA;
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.SharedPreferences;
+import android.content.Context;
 import android.os.Environment;
-import android.os.Parcelable;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.cocosw.undobar.UndoBarController;
+
+/* Configuration of ACRA for reporting crashes */
+@ReportsCrashes(
+    formKey = "", 
+    formUri = "https://grueni75.cloudant.com/acra-geodiscoverer/_design/acra-storage/_update/report", 
+    reportType = org.acra.sender.HttpSender.Type.JSON, 
+    httpMethod = org.acra.sender.HttpSender.Method.PUT, 
+    mode = ReportingInteractionMode.DIALOG, 
+    resDialogTitle = R.string.crash_dialog_title, 
+    resDialogText = R.string.crash_dialog_text, 
+    resDialogCommentPrompt = R.string.crash_dialog_comment_text, 
+    resDialogOkToast = R.string.crash_dialog_ok_toast_text, 
+    resDialogEmailPrompt = R.string.crash_dialog_email_text,
+    resToastText = R.string.crash_toast_text, 
+    formUriBasicAuthLogin = "tlyiessideratterandiffor", 
+    formUriBasicAuthPassword = "rhMR0V0AmdHU7If4jk2N1OIq"
+)
 
 /* Main application class */
 public class GDApplication extends Application {
@@ -60,12 +77,21 @@ public class GDApplication extends Application {
   public static final int INFO_MSG = 2;
   public static final int DEBUG_MSG = 3;
   public static final int FATAL_MSG = 4;
-    
+  
+  /** Application context */
+  public static Context appContext;
+  
   /** Called when the application starts */
   @Override
   public void onCreate() {
     super.onCreate();  
-
+    
+    // Get application context
+    appContext = getApplicationContext();
+    
+    // Init crash reporting
+    ACRA.init(this);
+    
     // Initialize the core object
     String homeDirPath = GDApplication.getHomeDirPath();
     if (homeDirPath.equals("")) {

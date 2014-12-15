@@ -1154,6 +1154,7 @@ public class ViewMap extends GDActivity {
       intent.setAction("activityPaused");
       startService(intent);
     }
+    
   }
   
   /** Called when the app resumes */

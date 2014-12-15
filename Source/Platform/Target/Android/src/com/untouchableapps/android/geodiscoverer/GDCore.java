@@ -23,8 +23,12 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,8 +43,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.acra.ACRA;
+import org.acra.ACRAConstants;
+import org.acra.ReportField;
+
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
@@ -56,6 +65,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -538,14 +548,72 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   //
   
   /** Execute an command */
-  public void executeAppCommand(String cmd)
+  @SuppressWarnings("resource")
+  public void executeAppCommand(final String cmd)
   {
     boolean cmdExecuted = false;
+    if (cmd.startsWith("sendNativeCrashReport(")) {
+
+      // Start the reporting thread
+      Thread reportThread = new Thread() {
+        public void run() {
+          
+          // Go to home 
+          Intent startMain = new Intent(Intent.ACTION_MAIN);
+          startMain.addCategory(Intent.CATEGORY_HOME);
+          startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          GDApplication.appContext.startActivity(startMain);
+          
+          // Get the content of the minidump file and format it in base64
+          String dumpBinPath = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
+          ACRA.getErrorReporter().putCustomData("nativeMinidumpPath", dumpBinPath);
+          String dumpTxtPath = dumpBinPath.concat(".base64");
+          try {
+              DataInputStream dumpBinReader = new DataInputStream(new FileInputStream(dumpBinPath));
+              long len = new File(dumpBinPath).length();
+              if (len > Integer.MAX_VALUE) throw new IOException("File "+dumpBinPath+" too large, was "+len+" bytes.");
+              byte[] bytes = new byte[(int) len];
+              dumpBinReader.readFully(bytes);
+              String dumpContents = Base64.encodeToString(bytes,Base64.DEFAULT);
+              BufferedWriter dumpTextWriter = new BufferedWriter(new FileWriter(dumpTxtPath));
+              dumpTextWriter.write(dumpContents);
+              dumpTextWriter.close();
+              String[] dumpContentsInLines = dumpContents.split("\n");
+              ReportField[] customReportFields = new ReportField[ACRAConstants.DEFAULT_REPORT_FIELDS.length+1];
+              System.arraycopy(ACRAConstants.DEFAULT_REPORT_FIELDS, 0, customReportFields, 0, ACRAConstants.DEFAULT_REPORT_FIELDS.length);
+              customReportFields[ACRAConstants.DEFAULT_REPORT_FIELDS.length]=ReportField.APPLICATION_LOG;
+              ACRA.getConfig().setCustomReportContent(customReportFields);
+              ACRA.getConfig().setApplicationLogFileLines(dumpContentsInLines.length+1);
+              ACRA.getConfig().setApplicationLogFile(dumpTxtPath);
+              dumpBinReader.close();
+          } 
+          catch (Exception e) {
+          }
+          
+          // Send report via ACRA
+          Exception e = new Exception("GDCore has crashed");
+          ACRA.getErrorReporter().handleException(e,true);          
+        }
+      };
+      reportThread.start();
+      
+      // Wait until app exits
+      while (true) {
+        try {
+          Thread.sleep(1000);
+        }
+        catch (Exception e) {
+        }
+      }
+    }
     if (cmd.equals("initComplete()")) {
       for (String queuedCmd : queuedCoreCommands) {
         executeCoreCommandInt(queuedCmd);
       }
       queuedCoreCommands.clear();
+      if (cockpitEngine!=null) {
+        cockpitEngine.stop();
+      }
       cockpitEngine=new CockpitEngine(application);
       cmdExecuted=false; // forward message to activity
     }
