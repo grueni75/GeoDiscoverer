@@ -1,0 +1,44 @@
+--- For Tiddly Wiki itself ---
+
+OpenSourceLicense
+jermolene, 20 October 2011 (created 11 February 2011)
+
+TiddlyWiki is published under a BSD OpenSourceLicense that gives you the freedom to use it pretty much however you want, including for commercial purposes, as long as you keep the copyright notice. (You can see the full license text by doing a 'view source' in your browser).
+
+--- For plugins from www.tiddlytools.com ---
+
+Copyrights:
+
+    This work is based upon TiddlyWiki 2.5.0, created by Jeremy Ruston, © 2004-2009 UnaMesa Association. Modifications and additions to this work, including (but not limited to) original programmatic components ("plugins", "macros", "scripts", "stylesheets") have been created by Eric L. Shulman and/or ELS Design Studios.
+
+    These components are distributed using an open source model; however, they are not in the public domain, and the author retains all applicable rights. You are permitted to use, copy, and/or modify individual components of this work, subject to the licensing terms and conditions specifically included within or referenced by those individual components, as well as other terms, conditions, instructions, and guidelines included herein, as well as all terms and conditions defined by the Creative Commons Attribution-ShareAlike 3.0 License.
+
+    This work may contain portions of copyrighted materials from other sources. In accordance with "fair use" principles (see United States Copyright Law, Title 17, Section 107), such materials have been reproduced without profit for purposes of criticism, comment, news reporting, instruction, scholarship, and/or research. All other original content, including (but not limited to) writings, images, and audio/video recordings, are the property of Eric L. Shulman and/or ELS Design Studios, or are used under license or agreement with third parties and, except as required for normal viewing of this work, may not be stored, displayed or re-transmitted in any form, nor used for any commercial purposes, without prior permission from the respective rights holders.
+
+    This work includes or refers to icons that from the Silk icon set of 16-by-16 pixel icons in PNG format, created by Mark James, and is licensed under a Creative Commons Attribution 2.5 License. Please visit http://www.famfamfam.com/ for further information and licensing details.
+
+Terms of use:
+
+    This work contains individual components that are intended to be selectively copied and installed into your own TiddlyWiki files in order to enhance and customize those documents. You may download and save this work for use only as a local resource to assist you in developing your own TiddlyWiki document designs. However, you may not re-distribute this document in it's entirety, nor re-use it's overall design without prior written permission.
+
+    Tiddlers can be imported from any TiddlyWiki document. As a consequence, if you share your document with even just ONE other person, you become a "re-distributor" of the tiddlers contained in that document. As such, you should avoid modifying any TiddlyTools components you have installed in your own documents unless there is a compelling, functional reason to do so and, even then, the best approach is often to simply submit a feature request to the original author/publisher and leave it up to them to determine the best way to modify and re-publish those components.
+
+    Nonetheless, if you do modify and/or share components of this work, you should always retain the original published content within those components, including all documentation, credits, licensing information, and URL references to the official distribution source for the unaltered versions of those components. In addition, all modified components must be clearly identifiable as derivative works that have been differentiated from the original versions by renaming those components, as well as adding inline comments and a "revision history" to document specific changes.
+
+    If you share a modified TiddlyTools component, you must be prepared to support it. All problems that occur within a modified component should be reported first directly to the provider of that modified component, and then only reported to TiddlyTools if it can be shown that the problem also occurs in TiddlyTools' officially-published version of the component. Any problems that are reported for undifferentiated modifications won't receive help from TiddlyTools (once they are determined to be modified, of course!), other than to direct the inquiry to wherever they got the modified components from in the first place.
+
+    Except for officially-published links to specific components of this work, you must not create or share deep links to online components of this work (e.g., images, audio, video, etc.). Instead, you should copy the desired components (subject to applicable licenses and copyrights) to your own system or online hosting service, and ensure that your document contains references to those copies.
+
+Trademarks/servicemarks:
+
+    "ELS Design Studios", "TiddlyTools", "TiddlyStudios", "TiddlyTech", "TiddlyLabs", "Small Tools for Big Ideas!", "Intuitive Interfaces for Intelligent Interactions" and the "i4" logo (in graphical and text forms) are trademarks or servicemarks of ELS Design Studios and may not be used without permission. Limited use of "ELS Design Studios" and "TiddlyTools" marks in other works is granted for attribution purposes only. Such use does not create or imply any endorsement, agency or partner relationship with Eric L. Shulman and/or ELS Design Studios, nor with any designated representatives, agents, or heirs thereof.
+
+Limits on Liability:
+
+    All materials are presented on an "as-is" basis and are subject to change without notice. The author of this document makes no claims regarding the suitability or reliability of the information presented, and assumes no liability for any damages that may occur as a result of its use.
+
+Privacy Notice:
+
+    This site limits the collection and use of non-public, personal customer information to that which is needed to offer products and services, and to file reports or financial statements as required by law. This site has physical, electronic and procedural safeguards to maintain the protections of private information, and does not provide, sell or otherwise disclose such information to non-affiliated third parties.
+
+please review these statements periodically, as they are subject to change without notice
