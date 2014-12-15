@@ -106,20 +106,7 @@ public class CockpitEngine {
 
     // Start the vibrate thread
     if ((vibrateThread!=null)&&(vibrateThread.isAlive())) {
-      boolean repeat=true;
-      while(repeat) {
-        repeat=false;
-        try {
-          lock.lock();
-          quitVibrateThread=true;
-          triggerAlert.signal();
-          lock.unlock();
-          vibrateThread.join();
-        }
-        catch(InterruptedException e) {
-          repeat=true;
-        }
-      }
+      quitVibrateThread();
     }
     quitVibrateThread=false;
     vibrateThread = new Thread(new Runnable() {
@@ -151,6 +138,7 @@ public class CockpitEngine {
                 break;
               
               // Alert the user of all registered cockpit apps
+              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "vibrateThread: currentOffRoute=" + Boolean.toString(currentOffRoute));
               for (CockpitAppInterface app : apps) {
                 if (currentOffRoute)
                   app.alert(AlertType.offRoute);
@@ -199,6 +187,26 @@ public class CockpitEngine {
     update(null,true);
     lastUpdate = 0;
   }
+
+  /** Stops the vibrate thread */
+  void quitVibrateThread() {
+    boolean repeat=true;
+    while(repeat) {
+      repeat=false;
+      try {
+        lock.lock();
+        quitVibrateThread=true;
+        triggerAlert.signal();
+        lock.unlock();
+        vibrateThread.interrupt();
+        vibrateThread.join();
+      }
+      catch(InterruptedException e) {
+        repeat=true;
+      }
+    }
+    vibrateThread=null;
+  }
   
   /** Updates the cockpit apps with new infos */
   public void update(String infosAsSSV, boolean forceUpdate) {
@@ -223,6 +231,7 @@ public class CockpitEngine {
     cockpitInfos.offRoute = infosAsArray[6].equals("off route");
     currentTurnDistance = cockpitInfos.turnDistance;
     currentOffRoute = cockpitInfos.offRoute;
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "update: currentOffRoute=" + Boolean.toString(currentOffRoute));
     
     // If the turn has appeared or disappears, force an update
     if ((currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals("-")))
@@ -241,7 +250,7 @@ public class CockpitEngine {
     long t = Calendar.getInstance().getTimeInMillis();
     long diffToLastUpdate = t - lastUpdate;
     if ((!forceUpdate)&&(diffToLastUpdate < minUpdatePeriod)) {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDMetaWatch", "Skipped update because last update was too recent");
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "CockpitEngine", "Skipped update because last update was too recent");
       return;
     }
         
@@ -283,6 +292,7 @@ public class CockpitEngine {
   
   /** Stops the cockpit apps */
   public void stop() {
+    quitVibrateThread();
     for (CockpitAppInterface app : apps) {
       app.stop();
     }
