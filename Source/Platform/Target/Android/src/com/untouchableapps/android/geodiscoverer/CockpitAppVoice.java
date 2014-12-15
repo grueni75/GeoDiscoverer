@@ -81,13 +81,15 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
     if (type==AlertType.offRoute) {
       
       // Only speak off route alert with defined distance
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "voiceApp: got off route indication");
       long diffToLastUpdate = t - lastAlert;
       if (diffToLastUpdate>minDurationBetweenOffRouteAlerts) {
         textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
         textToSpeech.speak(context.getString(R.string.tts_off_route), TextToSpeech.QUEUE_ADD, null);
         lastAlert=t;
       }
-    } else {
+    }
+    if (type==AlertType.newTurn) {
       textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
       textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);      
       lastAlert=t;

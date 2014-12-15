@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
@@ -55,6 +56,12 @@ public class Preferences extends PreferenceActivity implements
   
   /** Current path */
   String currentPath;
+  
+  /** Contains for each preference entry its parent container */
+  HashMap<String, PreferenceGroup> parentHashMap = new HashMap<String, PreferenceGroup>();
+
+  /** Preference that was requested to the next preference screen */
+  Preference clickedPreference = null;
 
   // Request codes for calling other activities
   static final int SHOW_PREFERENCE_SCREEN_REQUEST = 0;
@@ -132,6 +139,7 @@ public class Preferences extends PreferenceActivity implements
     Intent intent = new Intent(this, Preferences.class);
     intent.putExtra("ShowPreferenceScreen", key);
     startActivityForResult(intent, SHOW_PREFERENCE_SCREEN_REQUEST);
+    clickedPreference = preference;
     return true;
   }
 
@@ -171,6 +179,16 @@ public class Preferences extends PreferenceActivity implements
     return true;
   }
   
+  /** Sets the summary of the route screen */
+  void setRouteSummary(PreferenceScreen screen) {
+    String value=coreObject.configStoreGetStringValue(screen.getKey(), "visible");
+    if (Integer.parseInt(value)==1) {
+      screen.setSummary(R.string.visible_on_map);
+    } else {
+      screen.setSummary(R.string.hidden_on_map);                
+    }
+  }
+
   /** Creates the preferences entries for the given path */
   @SuppressLint("DefaultLocale")
   boolean addPreference(PreferenceGroup attributeParent, PreferenceGroup containerParent, String path, String name) {
@@ -269,12 +287,7 @@ public class Preferences extends PreferenceActivity implements
             childScreen.setKey(key2);
             childScreen.setTitle(value);
             if (key.equals("Navigation/Route")) {
-              String visible = coreObject.configStoreGetStringValue(key2, "visible");
-              if (Integer.parseInt(visible)==1) {
-                childScreen.setSummary(R.string.visible_on_map);
-              } else {
-                childScreen.setSummary(R.string.hidden_on_map);                
-              }
+              setRouteSummary(childScreen);
             }
             childScreen.setPersistent(false);
             childScreen.setOnPreferenceClickListener(this);
@@ -415,6 +428,7 @@ public class Preferences extends PreferenceActivity implements
   void updatePreferences() {
     PreferenceScreen rootScreen = getPreferenceScreen();    
     rootScreen.removeAll();
+    parentHashMap.clear();
     if ((coreObject.configStoreGetStringValue("", "expertMode").equals("0"))&&(currentPath.equals(""))) {
       PreferenceCategory generalCategory = new PreferenceCategory(this);
       generalCategory.setTitle("General");
@@ -511,6 +525,12 @@ public class Preferences extends PreferenceActivity implements
     if (requestCode == SHOW_PREFERENCE_SCREEN_REQUEST) {
       if (resultCode==1) {
         setResult(1);  // then also this activity changed prefs
+        
+        // Check if visibility of route has changed
+        if (clickedPreference.getKey().startsWith("Navigation/Route[")) {
+          setRouteSummary((PreferenceScreen)clickedPreference);
+        }
+
       }
     }
   }
