@@ -44,7 +44,7 @@ DAMAGE.
 <!--}}}-->
 
 <!--PRE-HEAD-END-->
-<title>  Geo Discoverer </title>
+<title> Geo Discoverer </title>
 <style id="styleArea" type="text/css">
 #saveTest {display:none;}
 #messageArea {display:none;}
@@ -515,55 +515,381 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 </div></div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="BottomMenu" creator="Matthias" modifier="Matthias" created="201210230547" modified="201210230711" tags="extension" changecount="9">
+<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" changecount="1">
+<pre>* Credits for tiddly wiki</pre>
+</div>
+<div title="BottomMenu" creator="Matthias" modifier="Matthias" created="201210230547" modified="201412132243" tags="extension excludeSearch" changecount="17">
 <pre>{{center{
-   {{floatright{&lt;&lt;tiddler ToggleRightSidebar&gt;&gt;}}}
+   {{floatright{Sidebar &lt;&lt;tiddler ToggleRightSidebar&gt;&gt;}}}
 }}}
 </pre>
 </div>
-<div title="Brainstorming" creator="Matthias" modifier="Matthias" created="201411280558" modified="201412050549" changecount="23">
-<pre>* UserInterface
-** Buttons
-** How to use the map
-** How to use widgets
-** Menu entries
-** How to select maps
+<div title="BreadcrumbsPlugin" creator="Matthias" modifier="Matthias" created="201412131422" tags="excludeSearch extension systemConfig" changecount="1">
+<pre>/***
+|Name|BreadcrumbsPlugin|
+|Author|Eric Shulman|
+|Source|http://www.TiddlyTools.com/#BreadcrumbsPlugin|
+|Documentation|http://www.TiddlyTools.com/#BreadcrumbsPluginInfo|
+|Version|2.1.5|
+|License|http://www.TiddlyTools.com/#LegalStatements|
+|~CoreVersion|2.1|
+|Type|plugin|
+|Description|list/jump to tiddlers viewed during this session plus &quot;back&quot; button/macro|
+This plugin provides a list of links to all tiddlers opened during the session, creating a &quot;trail of breadcrumbs&quot; from one tiddler to the next, allowing you to quickly navigate to any previously viewed tiddler, or select 'home' to reset the display to the initial set of tiddlers that were open at the start of the session (i.e., when the document was loaded into the browser).
+!!!!!Documentation
+&lt;&lt;&lt;
+see [[BreadcrumbsPluginInfo]]
+&lt;&lt;&lt;
+!!!!!Configuration
+&lt;&lt;&lt;
+&lt;&lt;option chkCreateDefaultBreadcrumbs&gt;&gt; automatically create breadcrumbs display (if needed)
+&lt;&lt;option chkShowBreadcrumbs&gt;&gt; show/hide breadcrumbs display
+&lt;&lt;option chkReorderBreadcrumbs&gt;&gt; re-order breadcrumbs when visiting a previously viewed tiddler
+&lt;&lt;option chkBreadcrumbsHideHomeLink&gt;&gt; omit 'Home' link from breadcrumbs display
+&lt;&lt;option chkBreadcrumbsSave&gt;&gt; prompt to save breadcrumbs when 'Home' link is pressed
+&lt;&lt;option chkShowStartupBreadcrumbs&gt;&gt; show breadcrumbs for 'startup' tiddlers
+&lt;&lt;option chkBreadcrumbsReverse&gt;&gt; show breadcrumbs in reverse order (most recent first)
+&lt;&lt;option chkBreadcrumbsLimit&gt;&gt; limit breadcrumbs display to {{twochar{&lt;&lt;option txtBreadcrumbsLimit&gt;&gt;}}} items
+&lt;&lt;option chkBreadcrumbsLimitOpenTiddlers&gt;&gt; limit open tiddlers to {{twochar{&lt;&lt;option txtBreadcrumbsLimitOpenTiddlers&gt;&gt;}}} items
 
-* RoutesAndTracks
-** How to work with routes
-** Importing GPX files
-** Open GPX / GDA files from file explorer / web / ...
-*** GPX from file / http / mime
-** Importing routes
-** Copying tracks
+&lt;&lt;&lt;
+!!!!!Revisions
+&lt;&lt;&lt;
+2012.06.10 2.1.5 refactored default options to eliminate global variable and use init() handling
+| Please see [[BreadcrumbsPluginInfo]] for previous revision details |
+2006.02.01 1.0.0 initial release
+&lt;&lt;&lt;
+!!!!!Code
+***/
+//{{{
+version.extensions.BreadcrumbsPlugin = { major: 2, minor: 1, revision: 5, date: new Date(2012,6,10) };
+config.macros.breadcrumbs = {
+	crumbs: [], // the list of current breadcrumbs
+	askMsg: &quot;Save current breadcrumbs before clearing?\n&quot;
+		+&quot;Press OK to save, or CANCEL to continue without saving.&quot;,
+	saveMsg: 'Enter the name of a tiddler in which to save the current breadcrumbs',
+	saveTitle: 'SavedBreadcrumbs',
+	options: {
+		chkShowBreadcrumbs:		true,
+		chkReorderBreadcrumbs:		true,
+		chkCreateDefaultBreadcrumbs:	true,
+		chkShowStartupBreadcrumbs:	false,
+		chkBreadcrumbsReverse:		false,
+		chkBreadcrumbsLimit:		false,
+		txtBreadcrumbsLimit:		5,
+		chkBreadcrumbsLimitOpenTiddlers:false,
+		txtBreadcrumbsLimitOpenTiddlers:5,
+		chkBreadcrumbsHideHomeLink:	false,
+		chkBreadcrumbsSave:		false,
+		txtBreadcrumbsHomeSeparator:	' | ',
+		txtBreadcrumbsCrumbSeparator:	' &gt; '
+	},
+	init: function() {
+		merge(config.options,this.options,true);
+	},
+	handler: function(place,macroName,params,wikifier,paramString,tiddler) {
+		var area=createTiddlyElement(place,&quot;span&quot;,null,&quot;breadCrumbs&quot;,null);
+		area.setAttribute(&quot;homeSep&quot;,params[0]||config.options.txtBreadcrumbsHomeSeparator);
+		area.setAttribute(&quot;crumbSep&quot;,params[1]||config.options.txtBreadcrumbsCrumbSeparator);
+		this.render(area);
+	},
+	add: function (title) {
+		var thisCrumb = title;
+		var ind = this.crumbs.indexOf(thisCrumb);
+		if(ind === -1)
+			this.crumbs.push(thisCrumb);
+		else if (config.options.chkReorderBreadcrumbs)
+			this.crumbs.push(this.crumbs.splice(ind,1)[0]); // reorder crumbs
+		else
+			this.crumbs=this.crumbs.slice(0,ind+1); // trim crumbs
+		if (config.options.chkBreadcrumbsLimitOpenTiddlers)
+			this.limitOpenTiddlers();
+		this.refresh();
+		return false;
+	},
+	getAreas: function() {
+		var crumbAreas=[];
+		// find all DIVs with classname==&quot;breadCrumbs&quot;
+		var all=document.getElementsByTagName(&quot;*&quot;);
+		for (var i=0; i&lt;all.length; i++)
+			try{ if (hasClass(all[i],&quot;breadCrumbs&quot;)) crumbAreas.push(all[i]); } catch(e) {;}
+		// or, find single DIV w/fixed ID (backward compatibility)
+		var byID=document.getElementById(&quot;breadCrumbs&quot;)
+		if (byID &amp;&amp; !hasClass(byID,&quot;breadCrumbs&quot;)) crumbAreas.push(byID);
+		if (!crumbAreas.length &amp;&amp; config.options.chkCreateDefaultBreadcrumbs) {
+			// no crumbs display... create one
+			var defaultArea = createTiddlyElement(null,&quot;span&quot;,null,&quot;breadCrumbs&quot;,null);
+		 	defaultArea.style.display= &quot;none&quot;;
+			var targetArea= document.getElementById(&quot;tiddlerDisplay&quot;);
+		 	targetArea.parentNode.insertBefore(defaultArea,targetArea);
+			crumbAreas.push(defaultArea);
+		}
+		return crumbAreas;
+	},
+	refresh: function() {
+		var crumbAreas=this.getAreas();
+		for (var i=0; i&lt;crumbAreas.length; i++) {
+			crumbAreas[i].style.display = config.options.chkShowBreadcrumbs?&quot;inline&quot;:&quot;none&quot;;
+			removeChildren(crumbAreas[i]);
+			this.render(crumbAreas[i]);
+		}
+	},
+	render: function(here) {
+		var co=config.options; var out=&quot;&quot;
+		if (!co.chkBreadcrumbsHideHomeLink) {
+			createTiddlyButton(here,&quot;Home&quot;,null,this.home,&quot;tiddlyLink tiddlyLinkExisting&quot;);
+			out+=here.getAttribute(&quot;homeSep&quot;)||config.options.txtBreadcrumbsHomeSeparator;
+		}
+		for (c=0; c&lt;this.crumbs.length; c++) // remove non-existing tiddlers from crumbs
+			if (!store.tiddlerExists(this.crumbs[c]) &amp;&amp; !store.isShadowTiddler(this.crumbs[c]))
+				this.crumbs.splice(c,1);
+		var count=this.crumbs.length;
+		if (co.chkBreadcrumbsLimit &amp;&amp; co.txtBreadcrumbsLimit&lt;count) count=co.txtBreadcrumbsLimit;
+		var list=[];
+		for (c=this.crumbs.length-count; c&lt;this.crumbs.length; c++) list.push('[['+this.crumbs[c]+']]');
+		if (co.chkBreadcrumbsReverse) list.reverse();
+		out+=list.join(here.getAttribute(&quot;crumbSep&quot;)||config.options.txtBreadcrumbsCrumbSeparator);
+		wikify(out,here);
+	},
+	home: function() {
+		var cmb=config.macros.breadcrumbs;
+		if (config.options.chkBreadcrumbsSave &amp;&amp; confirm(cmb.askMsg)) cmb.saveCrumbs();
+		story.closeAllTiddlers(); restart();
+		cmb.crumbs = []; var crumbAreas=cmb.getAreas();
+		for (var i=0; i&lt;crumbAreas.length; i++) crumbAreas[i].style.display = &quot;none&quot;;
+		return false;
+	},
+	saveCrumbs: function() {
+		var tid=prompt(this.saveMsg,this.saveTitle); if (!tid||!tid.length) return; // cancelled by user
+		var t=store.getTiddler(tid);
+		if(t &amp;&amp; !confirm(config.messages.overwriteWarning.format([tid]))) return;
+		var who=config.options.txtUserName;
+		var when=new Date();
+		var text='[['+this.crumbs.join(']]\n[[')+']]';
+		var tags=t?t.tags:[]; tags.pushUnique('story');
+		var fields=t?t.fields:{};
+		store.saveTiddler(tid,tid,text,who,when,tags,fields);
+		story.displayTiddler(null,tid);
+		story.refreshTiddler(tid,null,true);
+		displayMessage(tid+' has been '+(t?'updated':'created'));
+	},
+	limitOpenTiddlers: function() {
+		var limit=config.options.txtBreadcrumbsLimitOpenTiddlers; if (limit&lt;1) limit=1;
+		for (c=this.crumbs.length-1; c&gt;=0; c--) {
+			var tid=this.crumbs[c];
+			var elem=story.getTiddler(tid);
+			if (elem) { // tiddler is displayed
+				if (limit &lt;=0) { // display limit has been reached
+					if (elem.getAttribute(&quot;dirty&quot;)==&quot;true&quot;) { // tiddler is being edited
+						var msg= &quot;'&quot;+tid+&quot;' is currently being edited.\n\n&quot;
+							+&quot;Press OK to save and close this tiddler\n&quot;
+							+&quot;or press Cancel to leave it opened&quot;;
+						if (confirm(msg)) {
+							story.saveTiddler(tid);
+							story.closeTiddler(tid);
+						}
+					}
+					else story.closeTiddler(this.crumbs[c]);
+				}
+				limit--;
+			}
+		}
+	}
+};
+//}}}
+// // PreviousTiddler ('back') command and macro
+//{{{
+config.commands.previousTiddler = {
+	text: 'back',
+	tooltip: 'view the previous tiddler',
+	handler: function(event,src,title) {
+		var crumbs=config.macros.breadcrumbs.crumbs;
+		if (crumbs.length&lt;2) config.macros.breadcrumbs.home();
+		else story.displayTiddler(story.findContainingTiddler(src),crumbs[crumbs.length-2]);
+		return false;
+	}
+};
+config.macros.previousTiddler= {
+	label: 'back',
+	prompt: 'view the previous tiddler',
+	handler: function(place,macroName,params,wikifier,paramString,tiddler) {
+		var label=params.shift(); if (!label) label=this.label;
+		var prompt=params.shift(); if (!prompt) prompt=this.prompt;
+		createTiddlyButton(place,label,prompt,function(ev){
+			return config.commands.previousTiddler.handler(ev,this)
+		});
+	}
+}
+//}}}
+// // HIJACKS
+//{{{
+// update crumbs when a tiddler is displayed
+if (Story.prototype.breadCrumbs_coreDisplayTiddler==undefined)
+	Story.prototype.breadCrumbs_coreDisplayTiddler=Story.prototype.displayTiddler;
+Story.prototype.displayTiddler = function(srcElement,tiddler) {
+	var title=(tiddler instanceof Tiddler)?tiddler.title:tiddler;
+	this.breadCrumbs_coreDisplayTiddler.apply(this,arguments);
+	if (!startingUp || config.options.chkShowStartupBreadcrumbs)
+		config.macros.breadcrumbs.add(title);
+}
 
-* NavigationTasks
-** How to use Meta Watch
-** How to use voice navigation
-** Send address to geo discoverer (e.g., from maps)
-
-* MapCreation
-** How to create new offline map
-** How to create new online map
-** Open GPX / GDA files from file explorer / web / ...
-*** GDA from file
-** Import gda files
-** legends in gda files
-
-* [[About]]
-** Acknowledgements for third party assets
-
-* DebugAids
-** How to record messages and traces
-** How to replay traces
-
-* AppSettings
-** back button turns screen off
-
-* HomeDirectory
-</pre>
+// update crumbs when a tiddler is deleted
+if (TiddlyWiki.prototype.breadCrumbs_coreRemoveTiddler==undefined)
+	TiddlyWiki.prototype.breadCrumbs_coreRemoveTiddler=TiddlyWiki.prototype.removeTiddler;
+TiddlyWiki.prototype.removeTiddler= function() {
+	this.breadCrumbs_coreRemoveTiddler.apply(this,arguments);
+	config.macros.breadcrumbs.refresh();
+}
+//}}}</pre>
 </div>
-<div title="CollapseTiddlersPlugin" creator="Matthias" modifier="Matthias" created="201210240500" modified="201210240504" tags="extension systemConfig" changecount="2">
+<div title="BreadcrumbsPluginInfo" creator="Matthias" modifier="Matthias" created="201412131424" tags="extension excludeSearch" changecount="1">
+<pre>/***
+|Name|BreadcrumbsPluginInfo|
+|Author|Eric Shulman|
+|Source|http://www.TiddlyTools.com/#BreadcrumbsPlugin|
+|Documentation|http://www.TiddlyTools.com/#BreadcrumbsPluginInfo|
+|Version|2.1.5|
+|License|http://www.TiddlyTools.com/#LegalStatements|
+|~CoreVersion|2.1|
+|Type|documentation|
+|Description|Documentation for BreadcrumbsPlugin|
+This plugin provides a list of links to all tiddlers opened during the session, creating a &quot;trail of breadcrumbs&quot; from one tiddler to the next, allowing you to quickly navigate to any previously viewed tiddler, or select 'home' to reset the display to the initial set of tiddlers that were open at the start of the session (i.e., when the document was loaded into the browser).
+!!!!!Usage
+&lt;&lt;&lt;
+{{{
+&lt;&lt;breadcrumbs homeSeparator crumbSeparator&gt;&gt;
+}}}
+By default, the breadcrumbs are displayed as a continuous, //horizontal// word-wrapped line of text, using default character sequences for ''homeSeparator'' (&quot; | &quot;) and ''crumbSeparator'' (&quot; &gt; &quot;).  The //optional// ''homeSeparator'' and ''crumbSeparator'' macro parameters allow you to specify alternative separators.  For example, to display the breadcrumbs //vertically// (in a stack, rather than a row), set the separator values to use {{{[[&lt;br&gt;]]}}}... and, to display a horizontal line as the home separator, use {{{[[&lt;html&gt;&lt;hr&gt;&lt;/html&gt;]]}}}.
+{{{
+&lt;&lt;previousTiddler&gt;&gt;
+}}}
+This macro embeds a 'back' button in your content.  Clicking the button opens/scrolls to the most recent previously viewed tiddler.  You can also add the {{{previousTiddler}}} keyword to the ~ViewToolbar slice definition in ToolbarCommands.  This adds a 'back' button directly to the toolbar of each tiddler that is displayed.
+&lt;&lt;&lt;
+!!!!!Examples:
+&lt;&lt;&lt;
+{{{
+&lt;&lt;breadcrumbs&gt;&gt;
+}}}
+&lt;&lt;breadcrumbs&gt;&gt;
+{{{
+&lt;&lt;breadcrumbs [[&lt;html&gt;&lt;hr&gt;&lt;/html&gt;]] [[&lt;br&gt;]]&gt;&gt;
+}}}
+&lt;&lt;breadcrumbs [[&lt;html&gt;&lt;hr&gt;&lt;/html&gt;]] [[&lt;br&gt;]]&gt;&gt;
+&lt;&lt;&lt;
+!!!!!Customization
+&lt;&lt;&lt;
+Using CSS and a few of the plugin configuration options (see below), you can make the breadcrumbs display resemble browser tabs by adding the following to your [[StyleSheet]]:
+{{{
+.breadCrumbs { border-bottom:1px solid; }
+.breadCrumbs a {
+	border: 1px solid; padding: 0px 1em;
+	-moz-border-radius-topleft:.5em; -moz-border-radius-topright:.5em;
+	-webkit-border-top-left-radius:.5em; -webkit-border-top-right-radius:.5em;
+}
+}}}
+and this in [[ConfigTweaks]] (tagged with systemConfig, of course):
+{{{
+config.options.chkShowStartupBreadcrumbs=true;
+config.options.chkBreadcrumbsLimitOpenTiddlers=true;
+config.options.txtBreadcrumbsLimitOpenTiddlers=1;
+config.macros.breadcrumbs.homeSeparator=&quot; &quot;;
+config.macros.breadcrumbs.crumbSeparator=&quot; &quot;;
+}}}
+&lt;&lt;&lt;
+!!!!!Configuration
+&lt;&lt;&lt;
+__''display placement:''__
+&lt;&lt;option chkCreateDefaultBreadcrumbs&gt;&gt; automatically create breadcrumbs display (if needed)
+{{{&lt;&lt;option chkCreateDefaultBreadcrumbs&gt;&gt;}}}
+&gt;By default, the plugin automatically creates the &quot;breadCrumbs&quot; display element at the top of the story column, just above the tiddlerDisplay area.  To manually control the display and placement of the breadcrumbs display, you can define a DIV with class=&quot;breadCrumbs&quot; in a custom [[PageTemplate]] or embed the {{{&lt;&lt;breadcrumbs&gt;&gt;}}} macro in specific tiddler content.
+&gt;
+&gt;For example, to add the breadcrumbs below the mainMenu, change this:
+{{{
+&lt;div id='mainMenu' refresh='content' tiddler='MainMenu'&gt;&lt;/div&gt;
+}}}
+&gt;to:
+{{{
+&lt;div id='mainMenu'&gt;
+	&lt;div refresh='content' tiddler='MainMenu'&gt;&lt;/div&gt;
+	&lt;div id='breadCrumbs' class='breadCrumbs'&gt;&lt;/div&gt;
+&lt;/div&gt;
+}}}
+&gt;You can also block automatic creation of the breadcrumbs display by setting
+{{{
+config.options.chkCreateDefaultBreadcrumbs=false;
+}}}
+&gt;in a [[CookieJar]]/[[ConfigTweaks]] plugin tiddler.
+
+__''other settings:''__
+&lt;&lt;option chkShowBreadcrumbs&gt;&gt; show/hide breadcrumbs display
+{{{&lt;&lt;option chkShowBreadcrumbs&gt;&gt;}}}
+&gt;This checkbox toggles the visibility of the breadcrumbs display.  However, the display is not updated until the next crumb is added (or a previous crumb is clicked on).  For immediate effect, you can use [[ToggleBreadcrumbs]] to synchronize the checkbox setting and the breadcrumbs display.
+&lt;&lt;option chkReorderBreadcrumbs&gt;&gt; re-order breadcrumbs when visiting a previously viewed tiddler
+{{{&lt;&lt;option chkReorderBreadcrumbs&gt;&gt;}}}
+&gt;When visiting a previously viewed tiddler, the title of the most-recently displayed tiddler is simply moved to the end of the list and individual breadcrumbs are not removed from the list unless the underlying tiddler is deleted.  When ''re-ordering'' is disabled, the breadcrumbs list is ''trimmed'' so that all crumbs following that tiddler are removed from the list.
+&lt;&lt;option chkBreadcrumbsHideHomeLink&gt;&gt; omit 'Home' link from breadcrumbs display
+{{{&lt;&lt;option chkBreadcrumbsHideHomeLink&gt;&gt;}}}
+&gt;Enabling this option suppresses the automatic display of the &quot;Home&quot; link (and home separator).  To manually add the home link elsewhere in your document, use the following HTML:
+{{{
+&lt;html&gt;&lt;a href=&quot;javascript:;&quot; onclick=&quot;config.macros.breadcrumbs.home()&quot;&gt;home&lt;/a&gt;&lt;/html&gt;
+}}}
+&lt;&lt;option chkBreadcrumbsSave&gt;&gt; prompt to save breadcrumbs when 'Home' link is pressed
+{{{&lt;&lt;option chkBreadcrumbsSave&gt;&gt;}}}
+&gt;Whenever you press the 'home' button, you can be prompted to save the current breadcrumbs in a tiddler as a space-separated list of tiddler links (default title=&quot;SavedBreadcrumbs&quot;).  
+&lt;&lt;option chkShowStartupBreadcrumbs&gt;&gt; show breadcrumbs for 'startup' tiddlers
+{{{&lt;&lt;option chkShowStartupBreadcrumbs&gt;&gt;}}}
+&gt;Breadcrumbs are usually only added for tiddlers that are opened after the document has been loaded, and not for tiddlers displayed during initial startup (e.g., [[DefaultTiddlers]]).  Enabling this option displays breadcrumbs for all viewed tiddlers, regardless of when they are opened.
+&lt;&lt;option chkBreadcrumbsReverse&gt;&gt; show breadcrumbs in reverse order
+{{{&lt;&lt;option chkBreadcrumbsReverse&gt;&gt;}}}
+&gt;As tiddlers are displayed, breadcrumbs are usually added to the //end// of the list.  Enabling this option displays breadcrumbs in reverse order, so that the most recently visited tiddlers are listed first.
+&lt;&lt;option chkBreadcrumbsLimit&gt;&gt; limit breadcrumbs display to {{twochar{&lt;&lt;option txtBreadcrumbsLimit&gt;&gt;}}} items
+{{{&lt;&lt;option chkBreadcrumbsLimit&gt;&gt;}}} and {{{&lt;&lt;option txtBreadcrumbsLimit&gt;&gt;}}}
+&gt;By default, breadcrumbs are displayed for all tiddlers that have been visited (unless the list is being 'trimmed' by disabling the chkReorderBreadcrumbs option above).  Enabling this option limits the display of the list to a maximum specified number of breadcrumbs.
+&lt;&lt;option chkBreadcrumbsLimitOpenTiddlers&gt;&gt; limit open tiddlers to {{twochar{&lt;&lt;option txtBreadcrumbsLimitOpenTiddlers&gt;&gt;}}} items
+{{{&lt;&lt;option chkBreadcrumbsLimitOpenTiddlers&gt;&gt;}}} and {{{&lt;&lt;option txtBreadcrumbsLimitOpenTiddlers&gt;&gt;}}}
+&gt;By default, tiddlers remain open (e.g., displayed in the story column) until you explicitly close them.  When this option is enabled, only the most recently opened tiddlers will remain open: ''any tiddlers in excess of the specified limit are automatically closed.''  //Note: for 'data safety', if a tiddler is being edited, you will be asked for permission to &quot;save-and-close&quot; that tiddler or leave it open (even if that would exceed the specified limit).//
+&lt;&lt;&lt;
+!!!!!Revisions
+&lt;&lt;&lt;
+2012.06.10 2.1.5 refactored default options to eliminate global variable and use init() handling
+2011.02.16 2.1.4 in refresh(), use 'inline' instead of 'block' style (avoids unwanted linebreak).  In previousTiddler(), allow handling even if not in a tiddler so that back button can be placed in ~MainMenu or ~SidebarOptions.
+2010.11.30 2.1.3 use story.getTiddler()
+2009.10.19 2.1.2 code reduction
+2009.03.22 2.1.0 added 'save breadcrumbs to tiddler' feature
+2008.05.01 2.0.0 added 'limit open tiddlers' feature (with safety check for tiddler in edit mode)
+2008.04.06 1.9.1 corrected 'limit' logic so that //last// N crumbs are shown instead of //first// N crumbs.  Also, added chkBreadcrumbsHideHomeLink
+2008.04.04 1.9.0 added chkBreadcrumbsReverse and chk/txtBreadcrumbsLimit
+2008.03.29 1.8.4 in displayTiddler(), get title from tiddler object (if needed).  Fixes errors caused when calling function passes a tiddler *object* instead of a tiddler *title*
+2008.03.24 1.8.3 include shadow tiddlers in breadcrumbs list.  Also changed settings so that &quot;reordering&quot; breadcrumbs is the default, instead of &quot;trimming&quot; the list
+2007.12.04 [*.*.*] update for TW2.3.0: replaced deprecated core functions, regexps, and macros
+2007.10.26 1.8.2 documentation cleanup
+2007.10.18 1.8.1 in GetAreas(), use try/catch to avoid &quot;Bad NPObject as private data&quot; fatal error caused when embedded QuickTime player element is accessed by hasClass() function.
+2007.10.02 1.8.0 major documentation and code cleanup.  Moved config.breadCrumbs.* to config.macros.breadcrumbs.* to consolidate objects.  Also, fixed homeSeparator and crumbSeparator default handling.
+2007.10.02 1.7.0 added config.options.chkShowStartupBreadcrumbs option
+2007.09.16 1.6.1 in getAreas(), removed errant use of 'place' (was causing fatal error when creating default breadcrumbs display element).  Also, added chkCreateDefaultBreadcrumbs configuration setting to enable/disable automatic creation of a default breadcrumbs display.
+2007.09.16 1.6.0 re-wrote refresh() to enable multiple display instances, by finding elements with &quot;breadCrumbs&quot; classname.  Fallback to fixed ID (=&quot;breadCrumbs&quot;) is still used for backward-compatibility.  move rendering code from refresh() to separate render() function, and added definition for {{{&lt;&lt;breadCrumbs&gt;&gt;}}} macro to support embedding breadcrumbs displays in tiddler content.
+2007.09.15 [1.5.9.1] updated documentation
+2007.09.15 1.5.9 defined homeSeparator (&quot; | &quot;) and crumbSeparator (&quot; &gt; &quot;) as object properties so that they can be redefined as desired for different layouts (e.g., using 'newline' for the crumbSeparator will arrange crumbs in a column rather than a row.
+2007.06.21 [1.5.8.1] in home(), return false to prevent IE from attempting to navigate away...
+2007.05.26 1.5.8 added support for {{{&lt;&lt;option chkReorderBreadcrumbs&gt;&gt;}}} to toggle trim vs. re-order behavior when visiting previously viewed tiddlers
+2007.05.25 1.5.7 added support for {{{&lt;&lt;option chkShowBreadcrumbs&gt;&gt;}}} to toggle //display// of breadcrumbs
+2007.05.24 1.5.6 in refresh(), remove non-existing tiddler titles from crumb list.  Also, hijack removeTiddler() so crumbs can be updated after tiddler is deleted.
+2007.04.11 1.5.5 added optional params to previousTiddler macro handler() to allow alternative label and tooltip text (instead of default &quot;back&quot;)
+2007.03.02 1.5.4 in refresh(), for TW2.2, look for &quot;storyDisplay&quot; instead of &quot;tiddlerDisplay&quot; but keep fallback to &quot;tiddlerDisplay&quot; for TW2.1 or earlier
+2007.02.24 1.5.3 changed from hijack of onClickTiddlerLink to hijack of displayTiddler() so that ALL displayed tiddlers are recorded in the crumbs, including programmatically displayed tiddlers opened by macros, scripts, etc., (such as [[GotoPlugin]], among many others) in addition to those opened by clicks on links.
+2007.02.24 [1.5.2.0] eliminated global space clutter by moving function and data declarations so they are contained inside config.breadCrumbs object.
+2007.02.06 1.5.1 added &quot;previousTiddler&quot; macro (for use in sidebar)
+2007.02.05 1.5.0 added &quot;previousTiddler&quot; toolbar command (aka, &quot;back&quot;)
+2006.08.04 [1.4.0.1] change spaces to tabs
+2006.08.04 1.4.0 modified from 1.4.0 distro: in refresh(), set {{{display:none/block}}} instead of {{{visibility:hidden/visible}}}.  In home(), check for valid crumbArea before setting style.
+2006.08.02 1.4.0 Fixed bug, the redefined onClickTiddlerLink_orig_breadCrumbs works incorrectly on IE
+2006.07.20 1.3.0 Runs compatibly with TW 2.1.0 (rev #403+)
+2006.02.07 1.2.0 change global array breadCrumbs to config.breadCrumbs by Eric's suggestion
+2006.02.04 1.1.0 JSLint checked
+2006.02.01 1.0.0 initial release
+&lt;&lt;&lt;</pre>
+</div>
+<div title="CollapseTiddlersPlugin" creator="Matthias" modifier="Matthias" created="201210240500" modified="201210240504" tags="extension systemConfig excludeSearch" changecount="3">
 <pre>/***
 |Name|CollapseTiddlersPlugin|
 |Source|http://www.TiddlyTools.com/#CollapseTiddlersPlugin|
@@ -734,25 +1060,29 @@ config.macros.foldFirst = {
 }
 //}}}</pre>
 </div>
-<div title="CollapsedTemplate" creator="Matthias" modifier="Matthias" created="201210240506" modified="201210290737" tags="extension" changecount="3">
+<div title="CollapsedTemplate" creator="Matthias" modifier="Matthias" created="201210240506" modified="201210290737" tags="extension excludeSearch" changecount="4">
 <pre>&lt;!--{{{--&gt;
 &lt;div class='toolbar' macro='toolbar [[ToolbarCommands::CollapsedToolbar]]'&gt;&lt;/div&gt;
 &lt;div class='title' macro='view title'&gt;&lt;/div&gt;
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="ConfigTweaks" creator="Matthias" modifier="Matthias" created="201210230617" modified="201411260635" tags="systemConfig" changecount="26">
+<div title="ConfigTweaks" creator="Matthias" modifier="Matthias" created="201210230617" modified="201412132216" tags="systemConfig excludeSearch" changecount="33">
 <pre>//{{{
 var ua = navigator.userAgent.toLowerCase();
 //alert(ua);
 var isAndroid = ua.indexOf(&quot;android&quot;) &gt; -1; //&amp;&amp; ua.indexOf(&quot;mobile&quot;);
 readOnly=false; // TW core setting
+showBackstage=false;
 config.options.chkInsertTabs=true; // TW core option
 config.options.txtMaxEditRows=&quot;20&quot;; // TW core option
 config.options.txtUserName=&quot;Matthias&quot;; // User name
 config.options.chkAutoSave=true; // Auto save file
 config.options.chkSaveBackups=false; // Backups
 config.options.chkSnapshotHTMLOnly=true; // Use HTML output by default
+config.options.chkShowBreadcrumbs=true;
+config.options.chkReorderBreadcrumbs=false;
+config.options.chkShowStartupBreadcrumbs=false;
 if(isAndroid) {
 	config.options.chkShowRightSidebar=false; // ToggleRightSidebar
 	config.options.chkShowQuickEdit=false;
@@ -764,7 +1094,7 @@ if(isAndroid) {
 
 </pre>
 </div>
-<div title="CopyTiddlerPlugin" creator="Matthias" modifier="Matthias" created="201210250540" tags="extension systemConfig" changecount="1">
+<div title="CopyTiddlerPlugin" creator="Matthias" modifier="Matthias" created="201210250540" tags="extension systemConfig excludeSearch" changecount="2">
 <pre>/***
 |Name|CopyTiddlerPlugin|
 |Source|http://www.TiddlyTools.com/#CopyTiddlerPlugin|
@@ -946,12 +1276,14 @@ config.macros.copyTiddler = {
 };
 //}}}</pre>
 </div>
-<div title="DefaultTiddlers" creator="Matthias" modifier="Matthias" created="201210240614" modified="201411280558" tags="extension" changecount="5">
+<div title="DefaultTiddlers" creator="Matthias" modifier="Matthias" created="201210240614" modified="201412131344" tags="extension excludeSearch" changecount="8">
 <pre>GettingStarted
-Brainstorming
+MissingDocumentation
+RevisionHistory
+
 </pre>
 </div>
-<div title="EditTemplate" creator="Matthias" modifier="Matthias" created="201210240527" modified="201305212043" tags="extension" changecount="6">
+<div title="EditTemplate" creator="Matthias" modifier="Matthias" created="201210240527" modified="201412071653" tags="extension excludeSearch" changecount="8">
 <pre>&lt;!--{{{--&gt;
 &lt;div class='toolbar' macro='toolbar [[ToolbarCommands::EditToolbar]]'&gt;&lt;/div&gt;
 &lt;div class='title' macro='view title'&gt;&lt;/div&gt;
@@ -960,19 +1292,34 @@ Brainstorming
 &lt;div macro='tiddler QuickEditToolbar'&gt;&lt;/div&gt;
 &lt;div class='editor' macro='edit text'&gt;&lt;/div&gt;
 &lt;div class='editor' macro='edit tags'&gt;&lt;/div&gt;&lt;div class='editorFooter'&gt;&lt;span macro='message views.editor.tagPrompt'&gt;&lt;/span&gt;&lt;span macro='tagChooser excludeLists'&gt;&lt;/span&gt;&lt;/div&gt;
-&lt;span macro='autosizeEditor'&gt;&lt;/span&gt;
+&lt;!--&lt;span macro='autosizeEditor'&gt;&lt;/span&gt;--&gt;
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201210220653" changecount="3">
-<pre>To get started with this blank [[TiddlyWiki]], you'll need to modify the following tiddlers:
-* [[SiteTitle]] &amp; [[SiteSubtitle]]: The title and subtitle of the site, as shown above (after saving, they will also appear in the browser title bar)
-* [[MainMenu]]: The menu (usually on the left)
-* [[DefaultTiddlers]]: Contains the names of the tiddlers that you want to appear when the TiddlyWiki is opened
-You'll also need to enter your username for signing your edits: &lt;&lt;option txtUserName&gt;&gt;
+<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201412120706" changecount="28">
+<pre>! Introduction
+Geo Discoverer displays an online map after its first start. The map consists of many small tiles (pictures) that are downloaded from the internet. It will take a few seconds before the contents of the map is displayed. Once the tiles are downloaded, they are stored on the device for fast retrieval. If you want to understand the map view and its interacting possibilities, the MapView tiddler explains all the details.
+! Acknowledgements
+Geo Discoverer is using many contributios from others. See the [[About]] tiddler for a full list of all the related projects. Without those contributions, Geo Discover would not have been possible. So a big @@''&quot;Thank You!&quot;''@@ to the people behind those projects!
+! Other information in this Wiki
+&lt;&lt;tiddler MainMenu&gt;&gt;</pre>
+</div>
+<div title="HomeDirectory" creator="Matthias" modifier="Matthias" created="201412131328" modified="201412131331" changecount="7">
+<pre>Geo Discoverer stores all its file in the internal storage of your device. The directory is called &quot;[[GeoDiscoverer|About]]&quot;. It has the following content.
+|!Directory/File |!Purpose |
+|Font/|Contains all the fonts used for drawing text on the screen.|
+|Help/|Contains this HTML file and related media.|
+|Icon/|Contains all graphics for the widgets and map overlays.|
+|Log/|Contains all kinds of log files that can be used for debugging.|
+|Map/|Contains all maps. Each map is stored in an own directory. See MapCreation for more info how to create own maps.|
+|Route/|Contains all routes that are loaded during startup. Tip: You can create sub folders for storing routes that you currently don't need. Geo Discoverer does not load GPX files from sub directories.|
+|Track/|Contains all recorded tracks in GPX format.|
+|config.current.xsd|Current configuration schema.|
+|config.shipped.xsd|Configuration schema shipped with the app. This is used for upgrading the preferences if a new app version is installed.|
+|config.xml|Contains the complete preferences. If you select &quot;Expert Mode&quot; in the AppPreferences, the contents of this file can be edited within the app.|
 </pre>
 </div>
-<div title="InlineJavascriptPlugin" creator="Matthias" modifier="Matthias" created="201210250606" tags="extension systemConfig" changecount="1">
+<div title="InlineJavascriptPlugin" creator="Matthias" modifier="Matthias" created="201210250606" tags="extension systemConfig excludeSearch" changecount="2">
 <pre>/***
 |Name|InlineJavascriptPlugin|
 |Source|http://www.TiddlyTools.com/#InlineJavascriptPlugin|
@@ -1073,7 +1420,7 @@ if (typeof(wikifyPlainText)==&quot;undefined&quot;) window.wikifyPlainText=funct
 if (typeof($)=='undefined') { function $(id) { return document.getElementById(id.replace(/^#/,'')); } }
 //}}}</pre>
 </div>
-<div title="InlineJavascriptPluginInfo" creator="Matthias" modifier="Matthias" created="201210250607" tags="extension" changecount="1">
+<div title="InlineJavascriptPluginInfo" creator="Matthias" modifier="Matthias" created="201210250607" tags="extension excludeSearch" changecount="2">
 <pre>/***
 |Name|InlineJavascriptPluginInfo|
 |Source|http://www.TiddlyTools.com/#InlineJavascriptPlugin|
@@ -1244,24 +1591,162 @@ loading a script from a source url:
 2005.11.08 1.0.0 initial release
 &lt;&lt;&lt;</pre>
 </div>
-<div title="MainMenu" creator="Matthias" modifier="Matthias" created="201210231450" modified="201412050650" tags="extension" changecount="39">
-<pre>[[About]]
-&lt;&lt;search&gt;&gt;</pre>
+<div title="MainMenu" creator="Matthias" modifier="Matthias" created="201210231450" modified="201412120710" changecount="64">
+<pre>|borderless|k
+|[[About]]@@margin-right:1em;@@|Who contributed to this project|
+|MapView@@margin-right:1em;@@|How to work with maps|
+|RoutesAndTracks@@margin-right:1em;@@|How to work with routes and tracks|
+|NavigationTasks@@margin-right:1em;@@|How to use the navigation features|
+|AppPreferences@@margin-right:1em;@@|How to change preferences|
+|MapCreation@@margin-right:1em;@@|How to create your own map|
+|HomeDirectory@@margin-right:1em;@@|How is the home directory structured|
+|DebugAids@@margin-right:1em;@@|How to help the developer in finding bugs|
+</pre>
 </div>
-<div title="PageTemplate" creator="Matthias" modifier="Matthias" created="201210220641" modified="201412050656" tags="extension" changecount="28">
+<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201412131418" changecount="186">
+<pre>The map view is the main activity of the app. It shows the map selected in the AppPreferences on the screen. The map can be moved by using one finger and zoomed by using two fingers. Each map can consist of multiple layers at different zoom levels. The app automatically selects the best layer depending on the zoom ratio. You can also create your own map. See MapCreation.
+! Elements on the map
+Besides the map itself, different graphical elements are placed on top of it. Here is an explanation:
+|!Element|!Purpose |
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/tileImageNotDownloaded.png&quot; style=&quot;height: 6em&quot;/&gt;&lt;/html&gt; |Indicates that the map tile has not yet been fetched from the internet.|
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/tileImageNotCached.png&quot; style=&quot;height: 6em&quot;/&gt;&lt;/html&gt; |Indicates that the map tile is available on the internal storage but not yet loaded.|
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/center.svg&quot; style=&quot;height: 3em&quot;/&gt;&lt;/html&gt; |The view center. It appears if you interact with the map. Some buttons use this center for their action. For example, if you set a new target, it is set to the center of the map view.|
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/location.svg&quot; style=&quot;height: 3em&quot;/&gt;&lt;/html&gt; |Your current location. The tip indicates your GPS direction.|
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/compassCone.svg&quot; style=&quot;vertical-align:+50%; height: 4em&quot;/&gt;&lt;/html&gt; |Your current compass direction. The GPS direction is only updated while you move. The compass direction is also updated if you just turn without moving.|
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/path.svg&quot; style=&quot;height: 4em&quot;/&gt;&lt;/html&gt; |Recorded tracks and routes are displayed as paths with different colors. A path contains arrows that indicate its direction. Recorded tracks have an orange color while routes have a magenta color. The colors can be changed in the AppPreferences.|
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/pathStartFlag.svg&quot; style=&quot;height: 3em&quot;/&gt;&lt;/html&gt; |The start of a route can be set to any position on its path. This is indicated by a green flag.|
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/pathEndFlag.svg&quot; style=&quot;height: 3em&quot;/&gt;&lt;/html&gt; |The end of a route can also be set to any position on its path. This is indicated by a red flag.|
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/target.svg&quot; style=&quot;height: 3em&quot;/&gt;&lt;/html&gt; |If you have set a target, this icon shows where it is on the map.|
+| &lt;html&gt;&lt;img src=&quot;MapView/MapElement/arrow.svg&quot; style=&quot;height: 3em&quot;/&gt;&lt;/html&gt; |The arrow appears if you set a target and it is outside the currently visible map. It shows in which direction you need to move.|
+! Widgets
+The user interface also contains widgets. They display information and trigger changes when tapping them. If you interact with the map, the fade out such that they are not in the way. Once you tap on them, the fade in again. Widgets are organized in multiple pages. You can change the current page with the arrow widgets (&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/pageLeft.svg&quot; style=&quot;vertical-align:-25%;height:1.5em&quot;/&gt;&lt;/img&gt; &lt;img src=&quot;MapView/MapWidget/pageRight.svg&quot; style=&quot;vertical-align:-25%;height:1.5em&quot;/&gt;&lt;/img&gt;&lt;/html&gt;). Here is a full list of widgets:
+!! Legend
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/legend.png&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+The legend shows the current scale of the map. The name of the map folder that contains the tiles is shown on top of the scale. The distance between each segment of the scale is shown below. The used unit is given in the brackets next to the map name. You can change the unit system (imperial or metric) in the AppPreferences.
+!! Status
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/status.png&quot; style=&quot;height: 3em&quot;/&gt;&lt;/html&gt;
+If Geo Discoverer has something to do in the background, it shows this yellow status icon. It explains the operation currently done. Examples are loading of GPX paths and downloading of map tiles.
+!! Meter
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/meterAltitude.png&quot; style=&quot;height:4em&quot;/&gt;&lt;img src=&quot;MapView/MapWidget/meterSpeed.png&quot; style=&quot;height:4em&quot;/&gt;&lt;img src=&quot;MapView/MapWidget/meterTrackLength.png&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+These meters shows your current altitude, your current speed and the length of the recorded track.
+!! Navigation
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/navigationDefault.png&quot; style=&quot;height: 8em&quot;/&gt;&lt;img src=&quot;MapView/MapWidget/navigationTurn.png&quot; style=&quot;height: 8em&quot;/&gt;&lt;/html&gt;
+The navigation widget helps you to find your way. The small triangle shows your current heading, as reported by the GPS. The red circle shows the direction to your target. This can either be a point on the map or a route. Information such as the distance and the duration to the target is shown within the circle. This also includes arrows in case you approach a turn on the route. See the NavigationTasks tiddler for more information how to navigate with Geo Discoverer.
+!! Path info
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/pathInfo.png&quot; style=&quot;height: 8em&quot;/&gt;&lt;/html&gt;
+This widget shows information about the focused path. The focused path is the one nearest to the map view center. It is also possible to lock the widget to a specific path with the &quot;path info lock widget&quot;. The path name is indicated in the top line. The right side shows the total length, the total altitude difference upward and downward, and the total duration of the path. The left side visualize its altitude profile. The small black triangle shows your current position on the path. The widget displays the information only for the path segment between the start and end flag. You can modify the altitude profile by using your fingers. Two fingers modify the zoom and one finger the visible part.
+!! Path info lock
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/pathInfoLockOn.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+The currently shown path in the path info widget can be locked with this toggle widget. By tapping on it, the green light switches on and off. If it is on, the currently shown path does not change if the map is moved. If it is off, the path nearest to the map view center is shown.
+!! Set target at center&lt;html&gt;&lt;a name=&quot;SetTargetAtCenter&quot;/&gt;&lt;/html&gt;
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/setTargetAtMapCenter.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+This button sets the target to the map view center if you tap on it.
+!! Set target at address&lt;html&gt;&lt;a name=&quot;SetTargetAtAddress&quot;/&gt;&lt;/html&gt;
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/setTargetAtAddress.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+This button sets the target to an address if you tap on it. A dialog appears where you can enter the address or point-of-interest as text.
+!! Toggle target visibility&lt;html&gt;&lt;a name=&quot;ToggleTargetVisibility&quot;/&gt;&lt;/html&gt;
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/targetOn.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+This toggle widget changes the visibility of the target. If the light is green, the target is visible. Otherwise, the target is not shown. If the visibility changes from hidden to visible, the map is centered at the target. Navigation  is always performed to the visble target, even if a route is currently active.
+!! Set active route
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/setActiveRoute.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+This button selects the path nearest to the map view center as the active route. An active route periodically changes its color from its normal color (default: magenta) to its highlight color (default: turquoise). If the nearest route is the active one and you press the button again, the active route is disabled.
+!! Set start or end flag
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/setPathStartFlag.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;img src=&quot;MapView/MapWidget/setPathEndFlag.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+These buttons set the start flag (green) or the end flag (red) to the path point that is nearest to the view center.
+!! Return to location
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/returnToLocationOn.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+This toggle widget decides if the map is automatically re-centered. If the green light is on, the map is centered at your current location after 20 seconds of inactivity. If the light is off, the map stays where you moved it to. You can also use this widget to re-center the map at your location manually. Change the light from off to on and the map is re-centered.
+!! Track recording&lt;html&gt;&lt;a name=&quot;TrackRecording&quot;/&gt;&lt;/html&gt;
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/trackRecordingOn.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+This toggle widget switches track recording on and off. If the green light is on, your current position is periodically append to the current track.
+!! Create new track&lt;html&gt;&lt;a name=&quot;CreateNewTrack&quot;/&gt;&lt;/html&gt;
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/createNewTrack.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+This button removes the current track from the map and starts a new one. The track name is set to the current date and time.
+!! Zoom level lock
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/zoomLevelLockOn.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+This toggle widget defines if the current map layer is locked. If the green light is on, the map layer is not changed if you zoom in or out. For example, you can be use this feature to increase the text on the map for easier reading or to stay at a given scale. Please note that Geo Discoverer has a fixed number of tiles that it can be displayed on the screen. If you zoom out and you reach this limit, the complete screen can not be filled with tiles.
+!! Wake lock
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/wakeLockOn.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+This toggle widget defines if the screen is kept on. If the light bulb is illuminated, the screen is not switched off after inactivity. Please note that track recording and/or navigation continues in the background even if the screen is off or the app is not visible.
+!! Zoom in or out
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/zoomIn.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;img src=&quot;MapView/MapWidget/zoomOut.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+These buttons increase (+) or decrease (-) the zoom of the map.
+!! Rotate left or right
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/rotateLeft.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;img src=&quot;MapView/MapWidget/rotateRight.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
+These buttons rotate the map to the left or to the right.
+!! Page left or right
+&lt;html&gt;&lt;img src=&quot;MapView/MapWidget/pageLeft.svg&quot; style=&quot;height:6em&quot;/&gt;&lt;img src=&quot;MapView/MapWidget/pageRight.svg&quot; style=&quot;height:6em&quot;/&gt;&lt;/html&gt;
+These buttons change to the widget page on the left or right side.
+! Menu
+There is also a menu available if you press the hardware menu button or if you swipe from the left edge of the screen to the right. The menu has the following entries:
+|!Menu entry|!Purpose |
+|Show legend|If the map has a legend, it is displayed in an external image viewer. See MapCreation if you want to add your own legend.|
+|Add tracks as routes|Shows a dialog that allows you to convert previously recorded tracks into routes.|
+|Remove routes|Shows a dialog that allows you to delete routes. Attention: The routes are deleted permanently!|
+|Toggle messages|Overlays the map with debug messages|
+|Preferences|Opens the preferences of the app. See AppPreferences for more info.|
+|Help|Shows this help.|
+|Reset|Resets the app preferences to their defaults.|
+|Exit|Exits the app.|
+</pre>
+</div>
+<div title="MissingDocumentation" creator="Matthias" modifier="Matthias" created="201411280558" modified="201412131343" changecount="35">
+<pre>* NavigationTasks
+** How to select maps
+** Select route for navigation
+** Set target
+** How to use Meta Watch
+** How to use voice navigation
+** Send address to geo discoverer (e.g., from maps)
+
+* MapCreation
+** How to create new offline map
+** How to create new online map
+** Open GPX / GDA files from file explorer / web / ...
+*** GDA from file
+** Import gda files
+** legends in gda files
+** Directory structure on the sdcard
+** Open GDA files from file explorer
+
+* [[About]]
+** Acknowledgements for third party assets
+
+* DebugAids
+** How to record messages and traces
+** How to replay traces
+
+* AppPreferences
+** back button turns screen off
+</pre>
+</div>
+<div title="NavigationTasks" creator="Matthias" modifier="Matthias" created="201412131407" modified="201412131410" changecount="3">
+<pre>You can use Geo Discoverer to navigate to a given target position or along a given route.
+!Navigating to a target
+You have several options for setting a target:
+* Use the [[&quot;Set target at center&quot; widget|MapView##SetTargetAtCenter]] to set the target to the view center of the map. 
+* Use the [[&quot;Set target at address&quot;|MapView##SetTargetAtAddress]] widget to set the target at an address. A dialog pops up where can you enter the address. 
+* Send a text from another app that contains an address. Example: Search for a place in the Google Maps app. Once you have found it, use the &quot;Share&quot; button in the menu. Select Geo Discoverer from the list.
+</pre>
+</div>
+<div title="PageTemplate" creator="Matthias" modifier="Matthias" created="201210220641" modified="201412132217" tags="extension excludeSearch" changecount="75">
 <pre>&lt;!--{{{--&gt;
-&lt;div class='header' macro='gradient vert [[ColorPalette::TertiaryLight]] [[ColorPalette::TertiaryMid]]'&gt;
-	&lt;div class='headerShadow'&gt;
-		&lt;span class='siteTitle' refresh='content' tiddler='SiteTitle'&gt;&lt;/span&gt;&amp;nbsp;
-		&lt;span class='siteSubtitle' refresh='content' tiddler='SiteSubtitle'&gt;&lt;/span&gt;
+&lt;!-- &lt;div class='header' macro='gradient vert [[ColorPalette::TertiaryLight]] [[ColorPalette::TertiaryMid]]'&gt; --&gt;
+&lt;div class='header'&gt;
+	&lt;div class='headerTable'&gt;
+		&lt;div class='headerRow'&gt;
+			&lt;div class='siteIcon' refresh='content' tiddler='SiteIcon'&gt;&lt;/div&gt;
+			&lt;div class='siteTitle' refresh='content' tiddler='SiteTitle'&gt;&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class='headerRow'&gt;
+			&lt;div class='siteMenu' refresh='content' tiddler='SiteMenu'&gt;&lt;/div&gt;
+			&lt;div class='siteSearch' refresh='content' tiddler='SiteSearch'&gt;&lt;/div&gt;
+		&lt;/div&gt;
 	&lt;/div&gt;
-	&lt;div class='headerForeground'&gt;
-		&lt;span class='siteTitle' refresh='content' tiddler='SiteTitle'&gt;&lt;/span&gt;&amp;nbsp;
-		&lt;span class='siteSubtitle' refresh='content' tiddler='SiteSubtitle'&gt;&lt;/span&gt;
-	&lt;/div&gt;
+	&lt;!--&lt;span class='siteSubtitle' refresh='content' tiddler='SiteSubtitle'&gt;&lt;/span&gt;--&gt;
+	&lt;!-- horizontal MainMenu --&gt;
+	&lt;!--&lt;div id='topMenu' refresh='content' tiddler='MainMenu'&gt;&lt;/div&gt;--&gt;
 &lt;/div&gt;
-&lt;!-- horizontal MainMenu --&gt;
-&lt;div id='topMenu' refresh='content' tiddler='MainMenu'&gt;&lt;/div&gt;
 &lt;!-- original MainMenu menu --&gt;
 &lt;!-- &lt;div id='mainMenu' refresh='content' tiddler='MainMenu'&gt;&lt;/div&gt; --&gt;
 &lt;div id='sidebar'&gt;
@@ -1270,13 +1755,14 @@ loading a script from a source url:
 &lt;/div&gt;
 &lt;div id='displayArea'&gt;
 	&lt;div id='messageArea'&gt;&lt;/div&gt;
-        &lt;div id='bottomMenu' refresh='content' force='true' tiddler='BottomMenu'&gt;&lt;/div&gt;
+       	&lt;div id='bottomMenu' refresh='content' force='true' tiddler='BottomMenu'&gt;&lt;/div&gt;
 	&lt;div id='tiddlerDisplay'&gt;&lt;/div&gt;
 &lt;/div&gt;
+&lt;div id='breadCrumbs'&gt;&lt;/div&gt;
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="QuickEditPackage" creator="Matthias" modifier="Matthias" created="201210260710" tags="extension" changecount="1">
+<div title="QuickEditPackage" creator="Matthias" modifier="Matthias" created="201210260710" tags="extension excludeSearch" changecount="2">
 <pre>This package provides a toolbar of interactive 'power tools' that you can use while editing a tiddler to quickly insert TiddlyWiki tiddler links, images, macros, etc. or common formatting sequences directly into tiddler content, as well as perform other functions (such as find/replace, sort, split, convert, etc.) that can be used to modify the current tiddler's source content in a variety of ways.
 
 &lt;&lt;tiddler QuickEditToolbar with: show&gt;&gt;
@@ -1308,7 +1794,7 @@ Alternatively, if you want the toolbar to //always// be displayed, regardless of
 }}}
 &lt;&lt;&lt;</pre>
 </div>
-<div title="QuickEditPlugin" creator="Matthias" modifier="Matthias" created="201210260710" tags="extension systemConfig" changecount="1">
+<div title="QuickEditPlugin" creator="Matthias" modifier="Matthias" created="201210260710" tags="extension systemConfig excludeSearch" changecount="2">
 <pre>/***
 |Name|QuickEditPlugin|
 |Source|http://www.TiddlyTools.com/#QuickEditPlugin|
@@ -1463,7 +1949,7 @@ try{removeEvent(document,&quot;click&quot;,Popup.onDocumentClick);}catch(e){};
 try{addEvent(document,&quot;click&quot;,Popup.stickyPopup_onDocumentClick);}catch(e){};
 //}}}</pre>
 </div>
-<div title="QuickEditToolbar" creator="Matthias" modifier="Matthias" created="201210260711" modified="201210271718" tags="extension" changecount="4">
+<div title="QuickEditToolbar" creator="Matthias" modifier="Matthias" created="201210260711" modified="201210271718" tags="extension excludeSearch" changecount="5">
 <pre>/%
 |Name|QuickEditToolbar|
 |Source|http://www.TiddlyTools.com/#QuickEditToolbar|
@@ -1519,7 +2005,7 @@ TOOLBAR DEFINITION - add, remove, or re-order items as desired:
 %/&lt;&lt;tiddler QuickEdit_image&gt;&gt;/%
 %/}}}</pre>
 </div>
-<div title="QuickEdit_align" creator="Matthias" modifier="Matthias" created="201210260716" tags="extension" changecount="1">
+<div title="QuickEdit_align" creator="Matthias" modifier="Matthias" created="201210260716" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_align|
 |Source|http://www.TiddlyTools.com/#QuickEdit_align|
@@ -1560,7 +2046,7 @@ onclick=&quot;var p=Popup.create(this); if (!p) return false; p.className+=' sti
 	return config.quickEdit.processed(event);&quot;
 &gt;align&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_color" creator="Matthias" modifier="Matthias" created="201210260717" tags="extension" changecount="1">
+<div title="QuickEdit_color" creator="Matthias" modifier="Matthias" created="201210260717" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_color|
 |Source|http://www.TiddlyTools.com/#QuickEdit_color|
@@ -1650,7 +2136,7 @@ onclick=&quot;var p=Popup.create(this,null,'popup sticky smallform'); if (!p) re
 	event.cancelBubble=true;if(event.stopPropagation)event.stopPropagation();return false;&quot;
 &gt;color&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_convert" creator="Matthias" modifier="Matthias" created="201210260718" tags="extension" changecount="1">
+<div title="QuickEdit_convert" creator="Matthias" modifier="Matthias" created="201210260718" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_convert|
 |Source|http://www.TiddlyTools.com/#QuickEdit_convert|
@@ -1725,7 +2211,7 @@ onclick=&quot;var e=config.quickEdit.getField(this);
 	return config.quickEdit.processed(event);&quot;
 &gt;convert&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_custom" creator="Matthias" modifier="Matthias" created="201210260718" tags="extension" changecount="1">
+<div title="QuickEdit_custom" creator="Matthias" modifier="Matthias" created="201210260718" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_custom|
 |Source|http://www.TiddlyTools.com/#QuickEdit_custom|
@@ -1786,7 +2272,7 @@ onclick=&quot;var p=Popup.create(this); if (!p) return false; p.className+=' sti
 	return config.quickEdit.processed(event);&quot;
 &gt;custom&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_customList" creator="Matthias" modifier="Matthias" created="201210260719" tags="extension" changecount="1">
+<div title="QuickEdit_customList" creator="Matthias" modifier="Matthias" created="201210260719" tags="extension excludeSearch" changecount="2">
 <pre>timestamp
 $[[enter a date|{{new Date().formatString('DDD, MMM DDth, YYYY hh12:0mm:0ssam')}}]]
 ----
@@ -1801,7 +2287,7 @@ big red
 ----
 </pre>
 </div>
-<div title="QuickEdit_font" creator="Matthias" modifier="Matthias" created="201210260719" tags="extension" changecount="1">
+<div title="QuickEdit_font" creator="Matthias" modifier="Matthias" created="201210260719" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_font|
 |Source|http://www.TiddlyTools.com/#QuickEdit_font|
@@ -1841,12 +2327,12 @@ onclick=&quot;var p=Popup.create(this); if (!p) return false; p.className+=' sti
 	return config.quickEdit.processed(event);&quot;
 &gt;font&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_fontList" creator="Matthias" modifier="Matthias" created="201210260720" tags="extension" changecount="1">
+<div title="QuickEdit_fontList" creator="Matthias" modifier="Matthias" created="201210260720" tags="extension excludeSearch" changecount="2">
 <pre>Arial,helvetica,sans-serif
 Times New Roman,times,serif
 Courier,monospaced</pre>
 </div>
-<div title="QuickEdit_format" creator="Matthias" modifier="Matthias" created="201210260720" tags="extension" changecount="1">
+<div title="QuickEdit_format" creator="Matthias" modifier="Matthias" created="201210260720" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_format|
 |Source|http://www.TiddlyTools.com/#QuickEdit_format|
@@ -1937,7 +2423,7 @@ onclick=&quot;var p=Popup.create(this); if (!p) return false; p.className+=' sti
 	return config.quickEdit.processed(event);&quot;
 &gt;format&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_image" creator="Matthias" modifier="Matthias" created="201210260721" tags="extension" changecount="1">
+<div title="QuickEdit_image" creator="Matthias" modifier="Matthias" created="201210260721" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_image|
 |Source|http://www.TiddlyTools.com/#QuickEdit_image|
@@ -1961,7 +2447,7 @@ Usage: see  http://www.TiddlyTools.com/#QuickEditToolbar
 	return config.quickEdit.setSelection(this,'[img['+tip+fn+']]');&quot;
 &gt;image&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_indent" creator="Matthias" modifier="Matthias" created="201210260748" modified="201210291616" tags="extension" changecount="22">
+<div title="QuickEdit_indent" creator="Matthias" modifier="Matthias" created="201210260748" modified="201210291616" tags="extension excludeSearch" changecount="23">
 <pre>/%
 |Name|QuickEdit_indent|
 |Version|2.4.3|
@@ -1992,7 +2478,7 @@ onclick=&quot;
 	return config.quickEdit.processed(event);&quot;
 &gt;indent&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_insert" creator="Matthias" modifier="Matthias" created="201210260721" tags="extension" changecount="1">
+<div title="QuickEdit_insert" creator="Matthias" modifier="Matthias" created="201210260721" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_insert|
 |Source|http://www.TiddlyTools.com/#QuickEdit_insert|
@@ -2068,7 +2554,7 @@ onclick=&quot;var p=Popup.create(this); if (!p) return false; p.className+=' sti
 	return config.quickEdit.processed(event);&quot;
 &gt;insert&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_link" creator="Matthias" modifier="Matthias" created="201210260721" tags="extension" changecount="1">
+<div title="QuickEdit_link" creator="Matthias" modifier="Matthias" created="201210260721" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_link|
 |Source|http://www.TiddlyTools.com/#QuickEdit_link|
@@ -2140,7 +2626,7 @@ onclick=&quot;var p=Popup.create(this); if (!p) return false; p.className+=' sti
 	return config.quickEdit.processed(event);&quot;
 &gt;link&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_macro" creator="Matthias" modifier="Matthias" created="201210260722" tags="extension" changecount="1">
+<div title="QuickEdit_macro" creator="Matthias" modifier="Matthias" created="201210260722" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_macro|
 |Source|http://www.TiddlyTools.com/#QuickEdit_macro|
@@ -2189,7 +2675,7 @@ onclick=&quot;var p=Popup.create(this); if (!p) return false; p.className+=' sti
 	return config.quickEdit.processed(event);&quot;
 &gt;macro&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_replace" creator="Matthias" modifier="Matthias" created="201210260722" tags="extension" changecount="1">
+<div title="QuickEdit_replace" creator="Matthias" modifier="Matthias" created="201210260722" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_replace|
 |Source|http://www.TiddlyTools.com/#QuickEdit_replace|
@@ -2286,7 +2772,7 @@ onclick=&quot;var p=Popup.create(this,null,'popup sticky smallform'); if (!p) re
 	event.cancelBubble=true;if(event.stopPropagation)event.stopPropagation();return false;&quot;
 &gt;replace&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_sort" creator="Matthias" modifier="Matthias" created="201210260723" tags="extension" changecount="1">
+<div title="QuickEdit_sort" creator="Matthias" modifier="Matthias" created="201210260723" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_sort|
 |Source|http://www.TiddlyTools.com/#QuickEdit_sort|
@@ -2323,7 +2809,7 @@ onclick=&quot;var p=Popup.create(this); if (!p) return false; p.className+=' sti
 	return config.quickEdit.processed(event);&quot;
 &gt;sort&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_split" creator="Matthias" modifier="Matthias" created="201210260723" tags="extension" changecount="1">
+<div title="QuickEdit_split" creator="Matthias" modifier="Matthias" created="201210260723" tags="extension excludeSearch" changecount="2">
 <pre>/%
 |Name|QuickEdit_split|
 |Source|http://www.TiddlyTools.com/#QuickEdit_split|
@@ -2386,7 +2872,7 @@ onclick=&quot;var p=Popup.create(this); if (!p) return false; p.className+=' sti
 	event.cancelBubble=true;if(event.stopPropagation)event.stopPropagation();return false;&quot;
 &gt;split&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="QuickEdit_unindent" creator="Matthias" modifier="Matthias" created="201210271717" modified="201210291615" tags="extension" changecount="3">
+<div title="QuickEdit_unindent" creator="Matthias" modifier="Matthias" created="201210271717" modified="201210291615" tags="extension excludeSearch" changecount="4">
 <pre>/%
 |Name|QuickEdit_unindent|
 |Version|2.4.3|
@@ -2418,7 +2904,7 @@ onclick=&quot;
 	return config.quickEdit.processed(event);&quot;
 &gt;unindent&lt;/a&gt;&lt;/html&gt;</pre>
 </div>
-<div title="RearrangeTiddlersPlugin" creator="Matthias" modifier="Matthias" created="201210240532" tags="extension systemConfig" changecount="1">
+<div title="RearrangeTiddlersPlugin" creator="Matthias" modifier="Matthias" created="201210240532" tags="extension systemConfig excludeSearch" changecount="2">
 <pre>/***
 |Name|RearrangeTiddlersPlugin|
 |Source|http://www.TiddlyTools.com/#RearrangeTiddlersPlugin|
@@ -2597,826 +3083,292 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="ReminderMacros" creator="Matthias" modifier="Matthias" created="201210240607" modified="201210290724" tags="extension systemConfig" changecount="10">
-<pre>/***
-|''Name:''|ReminderPlugin|
-|''Version:''|2.3.10 (Jun 28, 2007)|
-|''Source:''|http://remindermacros.tiddlyspot.com|
-|''Author:''|Jeremy Sheeley(pop1280 [at] excite [dot] com)&lt;&lt;br&gt;&gt;Maintainer: simon.baird@gmail.com|
-|''Licence:''|[[BSD open source license]]|
-|''Macros:''|reminder, showreminders, displayTiddlersWithReminders, newReminder|
-|''TiddlyWiki:''|2.0+|
-|''Browser:''|Firefox 1.0.4+; InternetExplorer 6.0|
-
-!Description
-This plugin provides macros for tagging a date with a reminder.  Use the {{{reminder}}} macro to do this.  The {{{showReminders}}} and {{{displayTiddlersWithReminder}}} macros automatically search through all available tiddlers looking for upcoming reminders.
-
-!Installation
-* Create a new tiddler in your tiddlywiki titled ReminderPlugin and give it the {{{systemConfig}}} tag.  The tag is important because it tells TW that this is executable code.
-* Double click this tiddler, and copy all the text from the tiddler's body.
-* Paste the text into the body of the new tiddler in your TW.
-* Save and reload your TW.
-* You can copy some examples into your TW as well.  See [[Simple examples]], [[Holidays]], [[showReminders]] and [[Personal Reminders]]
-
-!Syntax:
-|&gt;|See [[ReminderSyntax]] and [[showRemindersSyntax]]|
-
-!Revision history
-* v2.3.10 (Jun 28, 2007)
-** Removed window.story = window backwards compatibility hacks since they were breaking TW 2.2
-* v2.3.9 (Apr 26, 2007)
-** allow bracketed list format in tags param lets you use tags with spaces
-* v2.3.8 (Mar 9, 2006)
-**Bug fix: A global variable had snuck in, which was killing FF 1.5.0.1
-**Feature: You can now use TIDDLER and TIDDLERNAME in a regular reminder format
-* v2.3.6 (Mar 1, 2006)
-**Bug fix: Reminders for today weren't being matched sometimes.
-**Feature:  Solidified integration with DatePlugin and CalendarPlugin
-**Feature:  Recurring reminders will now return multiple hits in showReminders and the calendar.
-**Feature:  Added TIDDLERNAME to the replacements for showReminders format, for plugins that need the title without brackets.
-* v2.3.5 (Feb 8, 2006)
-**Bug fix: Sped up reminders lots.  Added a caching mechanism for reminders that have already been matched.
-* v2.3.4 (Feb 7, 2006)
-**Bug fix: Cleaned up code to hopefully prevent the Firefox 1.5.0.1 crash that was causing lots of plugins 
-to crash Firefox.  Thanks to http://www.jslint.com
-* v2.3.3 (Feb 2, 2006)
-**Feature: newReminder now has drop down lists instead of text boxes.
-**Bug fix:  A trailing space in a title would trigger an infinite loop.
-**Bug fix:  using tag:&quot;birthday !reminder&quot; would filter differently than tag:&quot;!reminder birthday&quot;
-* v2.3.2 (Jan 21, 2006)
-**Feature: newReminder macro, which will let you easily add a reminder to a tiddler. Thanks to Eric Shulman (http://www.elsdesign.com) for the code to do this.
-** Bug fix: offsetday was not working sometimes
-** Bug fix: when upgrading to 2.0, I included a bit to exclude tiddlers tagged with excludeSearch.  I've reverted back to searching through all tiddlers
-* v2.3.1 (Jan 7, 2006)
-**Feature: 2.0 compatibility
-**Feature AlanH sent some code to make sure that showReminders prints a message if no reminders are found.
-* v2.3.0 (Jan 3, 2006)
-** Bug Fix:  Using &quot;Last Sunday (-0)&quot; as a offsetdayofweek wasn't working.
-** Bug Fix:  Daylight Savings time broke offset based reminders (for example year:2005 month:8 day:23 recurdays:7 would match Monday instead of Tuesday during DST.
-
-!Code
-***/
-//{{{
-
-//============================================================================
-//============================================================================
-//           ReminderPlugin
-//============================================================================
-//============================================================================
-
-version.extensions.ReminderPlugin = {major: 2, minor: 3, revision: 8, date: new Date(2006,3,9), source: &quot;http://remindermacros.tiddlyspot.com/&quot;};
-
-//============================================================================
-// Configuration
-// Modify this section to change the defaults for 
-// leadtime and display strings
-//============================================================================
-
-config.macros.reminders = {};
-config.macros[&quot;reminder&quot;] = {};
-config.macros[&quot;newReminder&quot;] = {};
-config.macros[&quot;showReminders&quot;] = {};
-config.macros[&quot;displayTiddlersWithReminders&quot;] = {};
-
-config.macros.reminders[&quot;defaultLeadTime&quot;] = [0,6000];
-config.macros.reminders[&quot;defaultReminderMessage&quot;] = &quot;DIFF: TITLE on DATE ANNIVERSARY&quot;;
-config.macros.reminders[&quot;defaultShowReminderMessage&quot;] = &quot;DIFF: TITLE on DATE ANNIVERSARY -- TIDDLER&quot;;
-config.macros.reminders[&quot;defaultAnniversaryMessage&quot;] = &quot;(DIFF)&quot;;
-config.macros.reminders[&quot;untitledReminder&quot;] = &quot;Untitled Reminder&quot;;
-config.macros.reminders[&quot;noReminderFound&quot;] = &quot;Couldn't find a match for TITLE in the next LEADTIMEUPPER days.&quot;
-config.macros.reminders[&quot;todayString&quot;] = &quot;Today&quot;;
-config.macros.reminders[&quot;tomorrowString&quot;] = &quot;Tomorrow&quot;;
-config.macros.reminders[&quot;ndaysString&quot;] = &quot;DIFF days&quot;;
-config.macros.reminders[&quot;emtpyShowRemindersString&quot;] = &quot;There are no upcoming events&quot;;
-
-
-//============================================================================
-//  Code
-// You should not need to edit anything 
-// below this.  Make sure to edit this tiddler and copy 
-// the code from the text box, to make sure that 
-// tiddler rendering doesn't interfere with the copy 
-// and paste.
-//============================================================================
-
-//this object will hold the cache of reminders, so that we don't
-//recompute the same reminder over again.
-var reminderCache = {};
-
-config.macros.showReminders.handler = function showReminders(place,macroName,params)
-{
-   var now = new Date().getMidnight();
-   var paramHash = {};
-   var leadtime = [0,14];
-   paramHash = getParamsForReminder(params);
-   var bProvidedDate = (paramHash[&quot;year&quot;] != null) || 
-			(paramHash[&quot;month&quot;] != null) || 
-			(paramHash[&quot;day&quot;] != null) || 
-			(paramHash[&quot;dayofweek&quot;] != null);
-   if (paramHash[&quot;leadtime&quot;] != null)
-   {
-      leadtime = paramHash[&quot;leadtime&quot;];
-      if (bProvidedDate)
-      {
-         //If they've entered a day, we need to make 
-         //sure to find it.  We'll reset the 
-         //leadtime a few lines down.
-         paramHash[&quot;leadtime&quot;] = [-10000, 10000];
-      }
-   }
-   var matchedDate = now;
-   if (bProvidedDate)
-   {
-      var leadTimeLowerBound = new Date().getMidnight().addDays(paramHash[&quot;leadtime&quot;][0]);
-      var leadTimeUpperBound = new Date().getMidnight().addDays(paramHash[&quot;leadtime&quot;][1]);
-      matchedDate = findDateForReminder(paramHash, new Date().getMidnight(), leadTimeLowerBound, leadTimeUpperBound); 
-   }
-
-   var arr = findTiddlersWithReminders(matchedDate, leadtime, paramHash[&quot;tag&quot;], paramHash[&quot;limit&quot;]);
-   var elem = createTiddlyElement(place,&quot;span&quot;,null,null, null);
-   var mess = &quot;&quot;;
-   if (arr.length == 0)
-   {
-      mess += config.macros.reminders.emtpyShowRemindersString; 
-   }
-   for (var j = 0; j &lt; arr.length; j++)
-   {
-      if (paramHash[&quot;format&quot;] != null)
-      {
-         arr[j][&quot;params&quot;][&quot;format&quot;] = paramHash[&quot;format&quot;];
-      }
-      else
-      {
-         arr[j][&quot;params&quot;][&quot;format&quot;] = config.macros.reminders[&quot;defaultShowReminderMessage&quot;];
-      }
-      mess += getReminderMessageForDisplay(arr[j][&quot;diff&quot;], arr[j][&quot;params&quot;], arr[j][&quot;matchedDate&quot;], arr[j][&quot;tiddler&quot;]);
-      mess += &quot;\n&quot;;
-   }
-   wikify(mess, elem, null, null);
-};
-
-
-config.macros.displayTiddlersWithReminders.handler = function displayTiddlersWithReminders(place,macroName,params)
-{
-   var now = new Date().getMidnight();
-   var paramHash = {};
-   var leadtime = [0,14];
-   paramHash = getParamsForReminder(params);
-   var bProvidedDate = (paramHash[&quot;year&quot;] != null) || 
-			(paramHash[&quot;month&quot;] != null) || 
-			(paramHash[&quot;day&quot;] != null) || 
-			(paramHash[&quot;dayofweek&quot;] != null);
-   if (paramHash[&quot;leadtime&quot;] != null)
-   {
-      leadtime = paramHash[&quot;leadtime&quot;];
-      if (bProvidedDate)
-      {
-         //If they've entered a day, we need to make 
-         //sure to find it.  We'll reset the leadtime 
-         //a few lines down.
-         paramHash[&quot;leadtime&quot;] = [-10000,10000];
-      }
-   }
-   var matchedDate = now;
-   if (bProvidedDate)
-   {
-      var leadTimeLowerBound = new Date().getMidnight().addDays(paramHash[&quot;leadtime&quot;][0]);
-      var leadTimeUpperBound = new Date().getMidnight().addDays(paramHash[&quot;leadtime&quot;][1]);
-      matchedDate = findDateForReminder(paramHash, new Date().getMidnight(), leadTimeLowerBound, leadTimeUpperBound); 
-   }
-   var arr = findTiddlersWithReminders(matchedDate, leadtime, paramHash[&quot;tag&quot;], paramHash[&quot;limit&quot;]);
-   for (var j = 0; j &lt; arr.length; j++)
-   {
-      displayTiddler(null, arr[j][&quot;tiddler&quot;], 0, null, false, false, false);
-   }
-};
-
-config.macros.reminder.handler = function reminder(place,macroName,params)
-{
-   var dateHash = getParamsForReminder(params);
-   if (dateHash[&quot;hidden&quot;] != null)
-   {
-      return;
-   }
-   var leadTime = dateHash[&quot;leadtime&quot;];
-   if (leadTime == null)
-   {
-      leadTime = config.macros.reminders[&quot;defaultLeadTime&quot;]; 
-   }
-   var leadTimeLowerBound = new Date().getMidnight().addDays(leadTime[0]);
-   var leadTimeUpperBound = new Date().getMidnight().addDays(leadTime[1]);
-   var matchedDate = findDateForReminder(dateHash, new Date().getMidnight(), leadTimeLowerBound, leadTimeUpperBound);
-   if (!store.getTiddler) 
-   {
-      store.getTiddler=function(title) {return this.tiddlers[title];};
-   }
-   var title = window.story.findContainingTiddler(place).id.substr(7);
-   if (matchedDate != null)
-   {
-      var diff = matchedDate.getDifferenceInDays(new Date().getMidnight());
-      var elem = createTiddlyElement(place,&quot;span&quot;,null,null, null);
-      var mess = getReminderMessageForDisplay(diff, dateHash, matchedDate, title);
-      wikify(mess, elem, null, null);
-   }
-   else
-   {
-      createTiddlyElement(place,&quot;span&quot;,null,null, config.macros.reminders[&quot;noReminderFound&quot;].replace(&quot;TITLE&quot;, dateHash[&quot;title&quot;]).replace(&quot;LEADTIMEUPPER&quot;, leadTime[1]).replace(&quot;LEADTIMELOWER&quot;, leadTime[0]).replace(&quot;TIDDLERNAME&quot;, title).replace(&quot;TIDDLER&quot;, &quot;[[&quot; + title + &quot;]]&quot;) );
-   }
-};
-
-config.macros.newReminder.handler = function newReminder(place,macroName,params)
-{
-  var today=new Date().getMidnight();
-  var formstring = '&lt;html&gt;&lt;p&gt;&lt;form&gt;Year: &lt;select name=&quot;year&quot;&gt;&lt;option value=&quot;&quot;&gt;Every year&lt;/option&gt;';
-  for (var i = 0; i &lt; 5; i++)
-  {
-    formstring += '&lt;option' + ((i == 0) ? ' selected' : '') + ' value=&quot;' + (today.getFullYear() +i) + '&quot;&gt;' + (today.getFullYear() + i) + '&lt;/option&gt;';
-  }
-  formstring += '&lt;/select&gt;&amp;nbsp;&amp;nbsp;Month:&lt;select name=&quot;month&quot;&gt;&lt;option value=&quot;&quot;&gt;Every month&lt;/option&gt;';
-  for (i = 0; i &lt; 12; i++)
-  {
-    formstring += '&lt;option' + ((i == today.getMonth()) ? ' selected' : '') + ' value=&quot;' + (i+1) + '&quot;&gt;' + config.messages.dates.months[i] + '&lt;/option&gt;';
-  }
-  formstring += '&lt;/select&gt;&amp;nbsp;&amp;nbsp;Day:&lt;select name=&quot;day&quot;&gt;&lt;option value=&quot;&quot;&gt;Every day&lt;/option&gt;';
-  for (i = 1; i &lt; 32; i++)
-  {
-    formstring += '&lt;option' + ((i == (today.getDate() )) ? ' selected' : '') + ' value=&quot;' + i + '&quot;&gt;' + i + '&lt;/option&gt;';
-  }
-
-  formstring += '&lt;/select&gt;&amp;nbsp;&amp;nbsp;Reminder Title:&lt;input type=&quot;text&quot; size=&quot;40&quot; name=&quot;title&quot; value=&quot;please enter a title&quot; onfocus=&quot;this.select();&quot;&gt;&lt;input type=&quot;button&quot; value=&quot;ok&quot; onclick=&quot;addReminderToTiddler(this.form)&quot;&gt;&lt;/form&gt;&lt;/p&gt;&lt;/html&gt;';
-
-  var panel = config.macros.slider.createSlider(place,null,&quot;reminder&quot;,&quot;Open a form to add a new reminder to this tiddler&quot;);
-  wikify(formstring ,panel,null,store.getTiddler(params[1]));
-};
-
-// onclick: process input and insert reminder at 'marker'
-window.addReminderToTiddler = function(form) {
-   if (!store.getTiddler) 
-   {
-      store.getTiddler=function(title) {return this.tiddlers[title];};
-   }
-   var title = window.story.findContainingTiddler(form).id.substr(7);
-   var tiddler=store.getTiddler(title);
-  var txt='\n&lt;&lt;reminder ';
-  if (form.year.value != &quot;&quot;)
-    txt += 'year:'+form.year.value + ' ';
-  if (form.month.value != &quot;&quot;)
-    txt += 'month:'+form.month.value + ' ';
-  if (form.day.value != &quot;&quot;)
-    txt += 'day:'+form.day.value + ' ';
-  txt += 'title:&quot;'+form.title.value+'&quot; ';
-  txt +='&gt;&gt;';
-   tiddler.set(null,tiddler.text + txt);
-   window.story.refreshTiddler(title,1,true);
-   store.setDirty(true);
-};
-
-function hasTag(tiddlerTags, tagFilters)
-{
-  //Make sure we respond well to empty tiddlerTaglists or tagFilterlists
-  if (tagFilters.length==0 || tiddlerTags.length==0)
-  {
-    return true;
-  }
-
-  var bHasTag = false;
-  
-  /*bNoPos says: &quot;'till now there has been no check using a positive filter&quot;
-     Imagine a filterlist consisting of 1 negative filter:
-         If the filter isn't matched, we want hasTag to be true.
-         Yet bHasTag is still false ('cause only positive filters cause bHasTag to change)
-         
-     If no positive filters are present bNoPos is true, and no negative filters are matched so we have not returned false
-         Thus: hasTag returns true.
-      
-      If at any time a positive filter is encountered, we want at least one of the tags to match it, so we turn bNoPos to false, which
-      means bHasTag must be true for hasTag to return true*/
-  var bNoPos=true;
-  
-for (var t3 = 0; t3 &lt; tagFilters.length; t3++)
-  {
-      for(var t2=0; t2&lt;tiddlerTags.length; t2++)
-      {
-           if (tagFilters[t3].length &gt; 1 &amp;&amp; tagFilters[t3].charAt(0) == '!') 
-           {
-              if (tiddlerTags[t2] == tagFilters[t3].substring(1))
-              {
-                 //If at any time a negative filter is matched, we return false
-                  return false;
-              }
-           }
-           else 
-           {
-              if (bNoPos)
-              {
-                 //We encountered the first positive filter
-                 bNoPos=false;
-              }
-              if (tiddlerTags[t2] == tagFilters[t3])
-              {
-                  //A positive filter is matched. As long as no negative filter is matched, hasTag will return true
-                  bHasTag=true;
-              }
-           }
-        }
-    }
-    return (bNoPos || bHasTag);
-};
-
-//This function searches all tiddlers for the reminder  //macro.  It is intended that other plugins (like //calendar) will use this function to query for 
-//upcoming reminders.
-//The arguments to this function filter out reminders //based on when they will fire.
-//
-//ARGUMENTS:
-//baseDate is the date that is used as &quot;now&quot;.  
-//leadtime is a two element int array, with leadtime[0] 
-//         as the lower bound and leadtime[1] as the
-//         upper bound.  A reasonable default is [0,14]
-//tags is a space-separated list of tags to use to filter 
-//         tiddlers.  If a tag name begins with an !, then 
-//         only tiddlers which do not have that tag will 
-//         be considered.  For example &quot;examples holidays&quot;  
-//         will search for reminders in any tiddlers that  
-//         are tagged with examples or holidays and 
-//         &quot;!examples !holidays&quot; will search for reminders 
-//         in any tiddlers that are not tagged with 
-//         examples or holidays.  Pass in null to search 
-//         all tiddlers.
-//limit.  If limit is null, individual reminders can 
-//        override the leadtime specified earlier.  
-//        Pass in 1 in order to override that behavior.
-
-window.findTiddlersWithReminders = function findTiddlersWithReminders(baseDate, leadtime, tags, limit)
-{
-//function(searchRegExp,sortField,excludeTag)
-//   var macroPattern = &quot;&lt;&lt;([^&gt;\\]+)(?:\\*)([^&gt;]*)&gt;&gt;&quot;;
-   var macroPattern = &quot;&lt;&lt;(reminder)(.*)&gt;&gt;&quot;;
-   var macroRegExp = new RegExp(macroPattern,&quot;mg&quot;);
-   var matches = store.search(macroRegExp,&quot;title&quot;,&quot;&quot;);
-   var arr = [];
-   var tagsArray = null;
-   if (tags != null)
-   {
-      // tagsArray = tags.split(&quot; &quot;);
-      tagsArray = tags.readBracketedList(); // allows tags with spaces. thanks Robin Summerhill, 4-Oct-06.
-   }
-   for(var t=matches.length-1; t&gt;=0; t--)
-   {
-      if (tagsArray != null)
-      {
-         //If they specified tags to filter on, and this tiddler doesn't 
-	 //match, skip it entirely.
-         if ( ! hasTag(matches[t].tags, tagsArray))
-         {
-            continue;
-         }
-      }
-
-      var targetText = matches[t].text;
-      do {
-         // Get the next formatting match
-         var formatMatch = macroRegExp.exec(targetText);
-         if(formatMatch &amp;&amp; formatMatch[1] != null &amp;&amp; formatMatch[1].toLowerCase() == &quot;reminder&quot;)
-         {
-            //Find the matching date.
-            
-            var params = formatMatch[2] != null ? formatMatch[2].readMacroParams() : {};
-            var dateHash = getParamsForReminder(params);
-            if (limit != null || dateHash[&quot;leadtime&quot;] == null)
-            {
-               if (leadtime == null)
-                   dateHash[&quot;leadtime&quot;] = leadtime;
-               else
-               {
-                  dateHash[&quot;leadtime&quot;] = [];
-                  dateHash[&quot;leadtime&quot;][0] = leadtime[0];
-                  dateHash[&quot;leadtime&quot;][1] = leadtime[1];
-               }
-            }
-	    if (dateHash[&quot;leadtime&quot;] == null)
-               dateHash[&quot;leadtime&quot;] = config.macros.reminders[&quot;defaultLeadTime&quot;]; 
-            var leadTimeLowerBound = baseDate.addDays(dateHash[&quot;leadtime&quot;][0]);
-            var leadTimeUpperBound = baseDate.addDays(dateHash[&quot;leadtime&quot;][1]);
-            var matchedDate = findDateForReminder(dateHash, baseDate, leadTimeLowerBound, leadTimeUpperBound);
-            while (matchedDate != null)
-            {
-               var hash = {};
-               hash[&quot;diff&quot;] = matchedDate.getDifferenceInDays(baseDate);
-               hash[&quot;matchedDate&quot;] = new Date(matchedDate.getFullYear(), matchedDate.getMonth(), matchedDate.getDate(), 0, 0);
-               hash[&quot;params&quot;] = cloneParams(dateHash);
-               hash[&quot;tiddler&quot;] = matches[t].title;
-               hash[&quot;tags&quot;] = matches[t].tags;
-               arr.pushUnique(hash);
-	       if (dateHash[&quot;recurdays&quot;] != null || (dateHash[&quot;year&quot;] == null))
-	       {
-	         leadTimeLowerBound = leadTimeLowerBound.addDays(matchedDate.getDifferenceInDays(leadTimeLowerBound)+ 1);
-                 matchedDate = findDateForReminder(dateHash, baseDate, leadTimeLowerBound, leadTimeUpperBound);
-	       }
-	       else matchedDate = null;
-            }
-         }
-      }while(formatMatch);
-   }
-   if(arr.length &gt; 1)  //Sort the array by number of days remaining.
-   {
-      arr.sort(function (a,b) {if(a[&quot;diff&quot;] == b[&quot;diff&quot;]) {return(0);} else {return (a[&quot;diff&quot;] &lt; b[&quot;diff&quot;]) ? -1 : +1; } });
-   }
-   return arr;
-};
-
-//This function takes the reminder macro parameters and
-//generates the string that is used for display.
-//This function is not intended to be called by 
-//other plugins.
- window.getReminderMessageForDisplay= function getReminderMessageForDisplay(diff, params, matchedDate, tiddlerTitle)
-{
-   var anniversaryString = &quot;&quot;;
-   var reminderTitle = params[&quot;title&quot;];
-   if (reminderTitle == null)
-   {
-      reminderTitle = config.macros.reminders[&quot;untitledReminder&quot;];
-   }
-   if (params[&quot;firstyear&quot;] != null)
-   {
-      anniversaryString = config.macros.reminders[&quot;defaultAnniversaryMessage&quot;].replace(&quot;DIFF&quot;, (matchedDate.getFullYear() - params[&quot;firstyear&quot;]));
-   }
-   var mess = &quot;&quot;;
-   var diffString = &quot;&quot;;
-   if (diff == 0)
-   {
-      diffString = config.macros.reminders[&quot;todayString&quot;];
-   }
-   else if (diff == 1)
-   {
-      diffString = config.macros.reminders[&quot;tomorrowString&quot;];
-   }
-   else
-   {
-      diffString = config.macros.reminders[&quot;ndaysString&quot;].replace(&quot;DIFF&quot;, diff);
-   }
-   var format = config.macros.reminders[&quot;defaultReminderMessage&quot;];
-   if (params[&quot;format&quot;] != null)
-   {
-      format = params[&quot;format&quot;];
-   }
-   mess = format;
-//HACK!  -- Avoid replacing DD in TIDDLER with the date
-   mess = mess.replace(/TIDDLER/g, &quot;TIDELER&quot;);
-   mess = matchedDate.formatStringDateOnly(mess);
-   mess = mess.replace(/TIDELER/g, &quot;TIDDLER&quot;);
-   if (tiddlerTitle != null)
-   {
-      mess = mess.replace(/TIDDLERNAME/g, tiddlerTitle);
-      mess = mess.replace(/TIDDLER/g, &quot;[[&quot; + tiddlerTitle + &quot;]]&quot;);
-   }
-   
-   mess = mess.replace(&quot;DIFF&quot;, diffString).replace(&quot;TITLE&quot;, reminderTitle).replace(&quot;DATE&quot;, matchedDate.formatString(&quot;DDD MMM DD, YYYY&quot;)).replace(&quot;ANNIVERSARY&quot;, anniversaryString);
-   return mess;
-};
-
-// Parse out the macro parameters into a hashtable.  This
-// handles the arguments for reminder, showReminders and 
-// displayTiddlersWithReminders.
-window.getParamsForReminder = function getParamsForReminder(params)
-{
-   var dateHash = {};
-   var type = &quot;&quot;;
-   var num = 0;
-   var title = &quot;&quot;;
-   for(var t=0; t&lt;params.length; t++)
-   {
-      var split = params[t].split(&quot;:&quot;);
-      type = split[0].toLowerCase();
-      var value = split[1];
-      for (var i=2; i &lt; split.length; i++)
-      {
-         value += &quot;:&quot; + split[i];
-      }
-      if (type == &quot;nolinks&quot; || type == &quot;limit&quot; || type == &quot;hidden&quot;)
-      {
-         num = 1;
-      }
-      else if (type == &quot;leadtime&quot;)
-      {
-         var leads = value.split(&quot;...&quot;);
-         if (leads.length == 1)
-         {
-            leads[1]= leads[0];
-            leads[0] = 0;
-         }
-         leads[0] = parseInt(leads[0], 10);
-         leads[1] = parseInt(leads[1], 10);
-         num = leads;
-      }
-      else if (type == &quot;offsetdayofweek&quot;)
-      {
-          if (value.substr(0,1) == &quot;-&quot;)
-          {
-             dateHash[&quot;negativeOffsetDayOfWeek&quot;] = 1;
-	     value = value.substr(1);
-          }
-          num = parseInt(value, 10);
-      }
-      else if (type != &quot;title&quot; &amp;&amp; type != &quot;tag&quot; &amp;&amp; type != &quot;format&quot;)
-      {
-         num = parseInt(value, 10);
-      }
-      else
-      {
-         title = value;
-         t++;
-         while (title.substr(0,1) == '&quot;' &amp;&amp; title.substr(title.length - 1,1) != '&quot;' &amp;&amp; params[t] != undefined)
-         {
-            title += &quot; &quot; + params[t++];
-         }
-         //Trim off the leading and trailing quotes
-         if (title.substr(0,1) == &quot;\&quot;&quot; &amp;&amp; title.substr(title.length - 1,1)== &quot;\&quot;&quot;)
-         {
-            title = title.substr(1, title.length - 2);
-            t--;
-         }
-         num = title;
-      }
-      dateHash[type] = num;
-   }
-   //date is synonymous with day
-   if (dateHash[&quot;day&quot;] == null)
-   {
-      dateHash[&quot;day&quot;] = dateHash[&quot;date&quot;];
-   }
-   return dateHash;
-};
-
-//This function finds the date specified in the reminder 
-//parameters.  It will return null if no match can be
-//found.  This function is not intended to be used by
-//other plugins.
-window.findDateForReminder= function findDateForReminder( dateHash, baseDate, leadTimeLowerBound, leadTimeUpperBound)
-{
-   if (baseDate == null)
-   {
-     baseDate = new Date().getMidnight();
-   }
-   var hashKey = baseDate.convertToYYYYMMDDHHMM();
-   for (var k in dateHash)
-   {
-      hashKey += &quot;,&quot; + k + &quot;|&quot; + dateHash[k];
-   }
-   hashKey += &quot;,&quot; + leadTimeLowerBound.convertToYYYYMMDDHHMM();
-   hashKey += &quot;,&quot; + leadTimeUpperBound.convertToYYYYMMDDHHMM();
-   if (reminderCache[hashKey] == null)
-   {
-      //If we don't find a match in this run, then we will
-      //cache that the reminder can't be matched.
-      reminderCache[hashKey] = false;
-   }
-   else if (reminderCache[hashKey] == false)
-   {
-      //We've already tried this date and failed
-      return null;
-   }
-   else
-   {
-      return reminderCache[hashKey];
-   }
-   
-   var bOffsetSpecified = dateHash[&quot;offsetyear&quot;] != null || 
-				dateHash[&quot;offsetmonth&quot;] != null || 
-				dateHash[&quot;offsetday&quot;] != null || 
-				dateHash[&quot;offsetdayofweek&quot;] != null || 
-				dateHash[&quot;recurdays&quot;] != null;
-   
-   // If we are matching the base date for a dayofweek offset, look for the base date a 
-   //little further back.
-   var tmp1leadTimeLowerBound = leadTimeLowerBound;  
-   if ( dateHash[&quot;offsetdayofweek&quot;] != null)
-   {
-      tmp1leadTimeLowerBound = leadTimeLowerBound.addDays(-6);  
-   }
-   var matchedDate = baseDate.findMatch(dateHash, tmp1leadTimeLowerBound, leadTimeUpperBound);
-   if (matchedDate != null)
-   {
-      var newMatchedDate = matchedDate;
-      if (dateHash[&quot;recurdays&quot;] != null)
-      {
-         while (newMatchedDate.getTime() &lt; leadTimeLowerBound.getTime())
-         {
-            newMatchedDate = newMatchedDate.addDays(dateHash[&quot;recurdays&quot;]);
-         }
-      }
-      else if (dateHash[&quot;offsetyear&quot;] != null || 
-		dateHash[&quot;offsetmonth&quot;] != null || 
-		dateHash[&quot;offsetday&quot;] != null || 
-		dateHash[&quot;offsetdayofweek&quot;] != null)
-      {
-         var tmpdateHash = cloneParams(dateHash);
-         tmpdateHash[&quot;year&quot;] = dateHash[&quot;offsetyear&quot;];
-         tmpdateHash[&quot;month&quot;] = dateHash[&quot;offsetmonth&quot;];
-         tmpdateHash[&quot;day&quot;] = dateHash[&quot;offsetday&quot;];
-         tmpdateHash[&quot;dayofweek&quot;] = dateHash[&quot;offsetdayofweek&quot;];
-	 var tmpleadTimeLowerBound = leadTimeLowerBound;
-	 var tmpleadTimeUpperBound = leadTimeUpperBound;
-	 if (tmpdateHash[&quot;offsetdayofweek&quot;] != null)
-	 {
-	 	if (tmpdateHash[&quot;negativeOffsetDayOfWeek&quot;] == 1)
-		{
-		   tmpleadTimeLowerBound = matchedDate.addDays(-6);
-		   tmpleadTimeUpperBound = matchedDate;
-
-		}
-		else
-		{
-		   tmpleadTimeLowerBound = matchedDate;
-		   tmpleadTimeUpperBound = matchedDate.addDays(6);
-		}
-
-	 }
-	 newMatchedDate = matchedDate.findMatch(tmpdateHash, tmpleadTimeLowerBound, tmpleadTimeUpperBound);
-         //The offset couldn't be matched.  return null.
-         if (newMatchedDate == null)
-         {
-            return null;
-         }
-      }
-      if (newMatchedDate.isBetween(leadTimeLowerBound, leadTimeUpperBound))
-      {
-         reminderCache[hashKey] = newMatchedDate;
-         return newMatchedDate;
-      }
-   }
-   return null;
-};
-
-//This does much the same job as findDateForReminder, but
-//this one doesn't deal with offsets or recurring 
-//reminders.
-Date.prototype.findMatch = function findMatch(dateHash, leadTimeLowerBound, leadTimeUpperBound)
-{
-
-   var bSpecifiedYear =     (dateHash[&quot;year&quot;] != null);
-   var bSpecifiedMonth =     (dateHash[&quot;month&quot;] != null);
-   var bSpecifiedDay =     (dateHash[&quot;day&quot;] != null);
-   var bSpecifiedDayOfWeek =     (dateHash[&quot;dayofweek&quot;] != null);
-   if (bSpecifiedYear &amp;&amp; bSpecifiedMonth &amp;&amp; bSpecifiedDay)
-   {
-      return new Date(dateHash[&quot;year&quot;], dateHash[&quot;month&quot;]-1, dateHash[&quot;day&quot;], 0, 0);
-   }
-   var bMatchedYear = !bSpecifiedYear;
-   var bMatchedMonth = !bSpecifiedMonth;
-   var bMatchedDay = !bSpecifiedDay;
-   var bMatchedDayOfWeek = !bSpecifiedDayOfWeek;
-   if (bSpecifiedDay &amp;&amp; bSpecifiedMonth &amp;&amp; !bSpecifiedYear &amp;&amp; !bSpecifiedDayOfWeek)
-   {
-
-      //Shortcut -- First try this year.  If it's too small, try next year.
-      var tmpMidnight = this.getMidnight();
-      var tmpDate = new Date(this.getFullYear(), dateHash[&quot;month&quot;]-1, dateHash[&quot;day&quot;], 0,0);
-      if (tmpDate.getTime() &lt; leadTimeLowerBound.getTime())
-      {
-         tmpDate = new Date((this.getFullYear() + 1), dateHash[&quot;month&quot;]-1, dateHash[&quot;day&quot;], 0,0);
-      }
-      if ( tmpDate.isBetween(leadTimeLowerBound, leadTimeUpperBound))
-      {
-         return tmpDate;
-      }
-      else
-      {
-         return null;
-      }
-   }
-
-   var newDate = leadTimeLowerBound; 
-   while (newDate.isBetween(leadTimeLowerBound, leadTimeUpperBound))
-   {
-      var tmp = testDate(newDate, dateHash, bSpecifiedYear, bSpecifiedMonth, bSpecifiedDay, bSpecifiedDayOfWeek);
-      if (tmp != null)
-        return tmp;
-      newDate = newDate.addDays(1);
-   }
-};
-
-function testDate(testMe, dateHash, bSpecifiedYear, bSpecifiedMonth, bSpecifiedDay, bSpecifiedDayOfWeek)
-{
-   var bMatchedYear = !bSpecifiedYear;
-   var bMatchedMonth = !bSpecifiedMonth;
-   var bMatchedDay = !bSpecifiedDay;
-   var bMatchedDayOfWeek = !bSpecifiedDayOfWeek;
-   if (bSpecifiedYear)
-   {
-      bMatchedYear = (dateHash[&quot;year&quot;] == testMe.getFullYear());
-   }
-   if (bSpecifiedMonth)
-   {
-      bMatchedMonth = ((dateHash[&quot;month&quot;] - 1)  == testMe.getMonth() );
-   }
-   if (bSpecifiedDay)
-   {
-      bMatchedDay = (dateHash[&quot;day&quot;] == testMe.getDate());
-   }
-   if (bSpecifiedDayOfWeek)
-   {
-      bMatchedDayOfWeek = (dateHash[&quot;dayofweek&quot;] == testMe.getDay());
-   }
-
-   if (bMatchedYear &amp;&amp; bMatchedMonth &amp;&amp; bMatchedDay &amp;&amp; bMatchedDayOfWeek)
-   {
-      return testMe;
-   }
-};
-
-//Returns true if the date is in between two given dates
-Date.prototype.isBetween = function isBetween(lowerBound, upperBound)
-{
-  return (this.getTime() &gt;= lowerBound.getTime() &amp;&amp; this.getTime() &lt;= upperBound.getTime());
-}
-//Return a new date, with the time set to midnight (0000)
-Date.prototype.getMidnight = function getMidnight()
-{
-   return new Date(this.getFullYear(), this.getMonth(), this.getDate(), 0, 0);
-};
-// Add the specified number of days to a date.
-Date.prototype.addDays = function addDays(numberOfDays)
-{
-   return new Date(this.getFullYear(), this.getMonth(), this.getDate() + numberOfDays, 0, 0);
-};
-//Return the number of days between two dates.
-Date.prototype.getDifferenceInDays = function getDifferenceInDays(otherDate)
-{
-//I have to do it this way, because this way ignores daylight savings
-   var tmpDate = this.addDays(0);
-   if (this.getTime() &gt; otherDate.getTime())
-   {
-      var i = 0;
-      for (i = 0; tmpDate.getTime() &gt; otherDate.getTime(); i++)
-      {
-         tmpDate = tmpDate.addDays(-1);
-      }
-      return i;
-   }
-   else
-   {
-      var i = 0;
-      for (i = 0; tmpDate.getTime() &lt; otherDate.getTime(); i++)
-      {
-         tmpDate = tmpDate.addDays(1);
-      }
-      return i * -1;
-   }
-   return 0;
-};
-function cloneParams(what) {
-    var tmp = {};
-    for (var i in what) {
-        tmp[i] = what[i];
-    }
-    return tmp;
-}
-// Substitute date components into a string
-Date.prototype.formatStringDateOnly = function formatStringDateOnly(template)
-{
-	template = template.replace(&quot;YYYY&quot;,this.getFullYear());
-	template = template.replace(&quot;YY&quot;,String.zeroPad(this.getFullYear()-2000,2));
-	template = template.replace(&quot;MMM&quot;,config.messages.dates.months[this.getMonth()]);
-	template = template.replace(&quot;0MM&quot;,String.zeroPad(this.getMonth()+1,2));
-	template = template.replace(&quot;MM&quot;,this.getMonth()+1);
-	template = template.replace(&quot;DDD&quot;,config.messages.dates.days[this.getDay()]);
-	template = template.replace(&quot;0DD&quot;,String.zeroPad(this.getDate(),2));
-	template = template.replace(&quot;DD&quot;,this.getDate());
-	return template;
-};
-
-//}}}</pre>
-</div>
-<div title="ReminderSyntax" creator="Matthias" modifier="Matthias" created="201210240610" tags="extension" changecount="1">
-<pre>The reminder macro can take the following arguments.
-
-!!!!date syntax
-* @@{{{year:NUMBER}}}@@ - The four digit representation of the year (for example {{{year:2046}}} or {{{year:1999}}}
-* @@{{{month:NUMBER}}}@@ - The numerical representation of the month (for example {{{month:1}}} for January, {{{month:12}}} for December)
-* @@{{{day:NUMBER}}}@@ - The numerical representation of the day of the month (for example {{{day:15}}} will match the 15th day of the month)
-* @@{{{dayofweek:NUMBER}}}@@ - The numerical representation of the day of the week.  Valid values are in the range of 0-6.  {{{dayofweek:0}}} will match Sunday, and {{{dayofweek:6}}} will match Saturday.
-
-!!!!offsets
-* @@{{{offsetdayofweek:NUMBER}}}@@ - The numerical representation of a day of the week.  Valid values are in the range of 0-6.  0 will match Sunday, and 6 will match Saturday.  If offsetdayofweek is specified, the year, month, day and dayofweek will be matched as usual, and the reminder will be set to the next occurence of the day of the week specified by offsetdayofweek. For example, the first Thursday of the month can be specified as {{{day:1 offsetdayofweek:4}}} and the second Thursday can be specified as {{{day:8 offsetdayofweek4}}} If offsetdayofweek is negative, the search will be performed backward.  For example, the last Thursday in August can be found by {{{month:8 day:31 offsetdayofweek:-4}}}
-* @@{{{recurdays:NUMBER}}}@@ - If recurdays is set, then the reminder will fire on the base date specified by year, month, day, and dayofweek and also every N days afterward.  For example, if the reminder is specified with {{{year:2005 month:8 day:16 recurdays:2}}} it will match August 16, 18, 20, etc.  Please make sure that you fully specify year, month and day in any recurring reminder.
-
-!!!!leadtime
-* @@{{{leadtime:NUMBER}}}@@ - Use this to specify when this reminder will appear in [[showReminders]].  If a reminder has a leadtime of 2, it will only show up in showReminders if it will be matched in the next two days.  Likewise, a reminder with a leadtime of 60 will show up in showReminders even if showReminders has a lower leadtime.  showReminders can override this behavior with the limit argument.
-
-!!!!Reminder display options
-* @@{{{title:&quot;STRING&quot;}}}@@ - A string used to identify this reminder when it is shown in a list of reminders. For example, {{{title:&quot;New Year's Day&quot;}}} or {{{title:&quot;Elvis' Birthday&quot;}}}.  You can put standard TiddlyWiki formatting in the title.
-* @@{{{format:&quot;STRING&quot;}}}@@ - Use this argument to override the default string used for display.  You can put standard TiddlyWiki formatting in the format.  The following substitutions will be made in the string before it is displayed.
-** DIFF will be replaced with the one of the strings &quot;Today&quot;, &quot;Tommorrow&quot;, or &quot;N days&quot;, where N is the number of days between now and the date of the reminder.  
-** TITLE will be replaced with the title of the reminder
-** DATE will be replaced with the matched date of the reminder.
-** ANNIVERSARY will be replaced with the number of years since between the matched date and firstyear
-The default string is &quot;DIFF: TITLE on DATE ANNIVERSARY&quot;
-* @@{{{firstyear:NUMBER}}}@@ - The first year that a reminder occurred, in four digit format.  For example {{{firstyear:2001}}}.  This is used when calculating the number of years that a reminder has happened.
-* @@{{{hidden}}}@@ - If this option is present, the reminder will not be displayed in the regular view of the tiddler.  You can use this to have reminders for [[displayTiddlersWithReminders]] to find, without having the countdown appear.  See [[Season's Greetings example]] for an example.
-
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201412131345" changecount="3">
+<pre>|! Revision |!Date |!Changes |
+|V1.0|2014-12-13|Initial version.|
 </pre>
 </div>
-<div title="SimpleSearchPlugin" creator="Matthias" modifier="Matthias" created="201210231941" tags="systemConfig extension" changecount="1">
+<div title="RoutesAndTracks" creator="Matthias" modifier="Matthias" created="201412120607" modified="201412131311" changecount="39">
+<pre>Geo Discoverer can display paths on top of the map. A path can either be a track or a route. A track is a path that is recorded by Geo Discover while you move. A route is a path that is loaded during startup. 
+!Tracks
+Only one track can be recorded at a time. You can start and stop recording by using the [[track recording widget|MapView##TrackRecording]]. Geo Discover requires that GPS is enabled in order to record tracks. Track recording is done even if the screen is turned off. Be aware that the GPS will affect battery lifetime! The [[create new track widget|MapView##CreateNewTrack]] finsihes the current track and creates a new one with the current date and time. All tracks are stored in the [[&quot;Track&quot;|HomeDirectory]] directory. 
+!Routes
+Routes are stored in the [[&quot;Route&quot;|HomeDirectory]] directory. When Geo Discover starts, it loads all the routes from this directory and displays them on the map. You can hide  routes you don't need in the AppPreferences. There are several widgets dedicated to routes. You can set start and end flags, display the length and altitude profile of a route, navigate along a route, and many more. See MapView for a summary.
+!!Importing routes
+Both routes and tracks are stored as GPX files in the HomeDirectory. GPX is a widely used file format. You can find many routes in the internet. If you want to use a GPX file as a route in Geo Discoverer, you have several options:
+* Copy the GPX file into the [[&quot;Route&quot;|HomeDirectory]] directory. You can do this with your PC or with a file explorer on your Android device. A restart of Geo Discoverer is required. You can use the &quot;Exit&quot; [[menu entry|MapView##Menu]] and reopen Geo Discover in your launcher. 
+* Open the GPX file with a file explorer on your Android device. If a dialog pops up, choose Geo Discoverer for opening the file. The file is copied into the [[&quot;Route&quot;|HomeDirectory]] directory automatically.
+* Go to the web page that contains the route with a browser on your Android device. Click on the link and select Geo Discoverer for opening the GPX file. The file is automatically downloaded to the [[&quot;Route&quot;|HomeDirectory]]. Please note that some browsers download the file only. In this case, go to the download section and click on the file. Or use the file explorer method as explained before. 
+!! Using tracks as routes
+You can also use a recorded track as a route. Use the [[menu entry &quot;Add tracks as routes&quot;|MapView##Menu]] for this purpose.</pre>
+</div>
+<div title="SectionLinksPlugin" creator="Matthias" modifier="Matthias" created="201412120643" modified="201412131335" tags="extension systemConfig excludeSearch" changecount="3">
+<pre>/***
+|Name|SectionLinksPlugin|
+|Source|http://www.TiddlyTools.com/#SectionLinksPlugin|
+|Documentation|http://www.TiddlyTools.com/#SectionLinksPlugin|
+|Version|1.4.2|
+|Author|Eric Shulman|
+|License|http://www.TiddlyTools.com/#LegalStatements|
+|~CoreVersion|2.1|
+|Type|plugin|
+|Description|allow tiddler sections in TiddlyLinks to be used as anchor points|
+This plugin enhances tiddler links so that they can include section references that ''auto-scroll to the indicated section heading'' within a tiddler (i.e., similar to the 'anchor' behavior provided in HTML by {{{&lt;a name=&quot;foo&quot;&gt;}}} and {{{&lt;a href=&quot;#foo&quot;&gt;...&lt;/a&gt;}}}).  The {{{&lt;&lt;tiddler&gt;&gt;}}} macro syntax has also be extended to allow section references without a tiddler name, so that transclusion of //hidden sections from the same tiddler// can be easily accomplished.  The plugin also adds a new macro, &lt;&lt;sectionTOC&gt;&gt; which can auto-generate and embed a 'Table of Contents' outline view into a tiddler to enable quick navigation to sections within that tiddler.
+!!!Usage
+&lt;&lt;&lt;
+!!!!~TiddlyLink syntax
+You can link to a section of a tiddler by adding the &quot;##sectionname&quot; syntax to the tiddlername:
+{{{
+[[SomeTiddler##SomeSection]]
+}}}
+When clicked, the tiddler is displayed and the specified section heading is automatically scrolled into view. If the tiddler title is omitted or the 'here' keyword is used, e.g.,
+{{{
+[[##SomeSection]] or [[here##SomeSection]]&gt;&gt;
+}}}
+then the current containing tiddler is implied by default.
+!!!!HTML anchor syntax
+You can use HTML syntax to create a scrollable 'anchor' location within a tiddler without use of the standard TW section heading syntax:
+{{{
+&lt;html&gt;&lt;a name=&quot;sectionname&quot; /&gt;&lt;/html&gt;
+}}}
+You can then link to that section using the enhanced TiddlyLink syntax as above.
+!!!!{{{&lt;&lt;tiddler&gt;&gt;}}} macro 
+The {{{&lt;&lt;tiddler&gt;&gt;}}} syntax has been extended so that when the tiddler title is omitted or the 'here' keyword is used, e.g.,
+{{{
+&lt;&lt;tiddler ##SomeSection&gt;&gt; or &lt;&lt;tiddler here##SomeSection&gt;&gt;
+}}}
+then the current containing tiddler is implied by default.
+!!!!&quot;&quot;&quot;&lt;&lt;sectionTOC&gt;&gt;&quot;&quot;&quot; macro
+This macro generates a 'Table of Contents' outline-style bullet list with links to all sections within the current tiddler.  Simply place the following macro at the //end of the tiddler content// (i.e., following all section headings).  Important note: //''The {{{&lt;&lt;sectionTOC&gt;&gt;}}} macro must occur at the end of the tiddler in order to locate the rendered section headings that precede it.''//
+{{{
+&lt;&lt;sectionTOC&gt;&gt; or &lt;&lt;sectionTOC className&gt;&gt;
+}}}
+To position the macro's //output// within the tiddler, you must create a special 'target element' that uses a specific classname (default='sectionTOC'), like this:
+{{{
+{{sectionTOC{}}}
+}}}
+When the {{{&lt;&lt;sectionTOC&gt;&gt;}}} macro is rendered, it will find the matching 'sectionTOC'-classed element and writes it's output there.  You can also add the macro and/or target elements directly to the [[ViewTemplate]] definition, so that every tiddler can automatically display the table of contents:
+{{{
+&lt;span class='sectionTOC'&gt;&lt;/span&gt; &lt;!-- target element --&gt;
+...
+&lt;span macro='sectionTOC'&gt;&lt;/span&gt; &lt;!-- must be at end of tiddler --&gt;
+}}}
+&lt;&lt;&lt;
+!!!Configuration
+&lt;&lt;&lt;
+You can change the {{{&lt;&lt;SectionTOC&gt;&gt;}}} output link format by adding the following statement to a tiddler tagged with &lt;&lt;tag systemConfig&gt;&gt;
+{{{
+config.macros.sectionTOC.linkFormat='[[%0|##%0]]';
+}}}
+The default value (shown above) produces a link to each section within the tiddler, using &quot;%0&quot; to insert the section name into the link.  You can add extra formatting to generate additional output to suit your purposes.  For example, if you have EditSectionPlugin installed, you could include a link that invokes that plugin's popup editor directly from each item in the TOC display, like this:
+{{{
+config.macros.sectionTOC.linkFormat='[[%0|##%0]] &lt;&lt;editSection [[##%0]] [[(edit)]]&gt;&gt;';
+}}}
+&lt;&lt;&lt;
+!!!Examples
+&lt;&lt;&lt;
+links to sections defined by ''TW heading syntax'' (e.g, {{{!!!sectionname}}}):{{indent{
+[[SectionLinksPlugin##onClickTiddlerLink]]
+[[##onClickTiddlerLink]] //(current tiddler implied)//}}}
+links to anchors defined by ''HTML syntax'' (e.g., {{{&lt;html&gt;&lt;a href=&quot;anchorname&quot;&gt;&lt;/html&gt;}}}):{{indent{
+[[SectionLinksPlugin##sampleanchorlink]]
+[[##sampleanchorlink]] //(current tiddler implied)//}}}
+&lt;&lt;&lt;
+!!!Revisions
+&lt;&lt;&lt;
+2011.12.21 1.4.2 refactor sectionTOCformat to permit customization
+2011.02.08 1.4.1 in isExternalLink() hijack, strip section references before testing for external link
+2010.08.09 1.4.0 in scrollToSection(), added support for using HTML &lt;a name=&quot;...&quot;&gt; anchor elements
+2009.08.21 1.3.4 added handling to ignore leading/trailing whitespace in section references
+2009.08.21 1.3.3 in createTiddlyLink(), add tiddlyLinkNonExistingSection class if matching section is not found
+2009.08.14 1.3.2 in createTiddlyLink(), don't override core value for ~TiddlyLink attribute
+2009.08.02 1.3.1 in sectionTOC.handler(), trim leading/trailing whitespace from generated section links
+2009.08.01 1.3.0 in scrollToSection(), apply 3-tier section matching (exact, startsWith, contains)
+2009.07.06 1.2.2 fixed displayTiddler() hijack
+2009.07.03 1.2.1 in {{{&lt;&lt;sectionTOC&gt;&gt;}}}, suppress output if target is not found
+2009.06.02 1.2.0 added support for 'here' keyword in {{{[[here##section]]}}} links and {{{&lt;&lt;tiddler here##section&gt;&gt;}}} macro
+2009.04.09 1.1.1 in sectionTOC macro, make target visible when TOC is rendered.
+2009.01.18 1.1.0 added {{{&lt;&lt;sectionTOC&gt;&gt;}}} macro to generate numbered-bullet links to sections of current tiddler
+2009.01.06 1.0.0 converted to stand-alone plugin
+2008.10.14 0.0.0 initial release (as [[CoreTweaks]] #784 - http://trac.tiddlywiki.org/ticket/784)
+&lt;&lt;&lt;
+!!!Code
+***/
+//{{{
+version.extensions.SectionLinksPlugin= {major: 1, minor: 4, revision: 2, date: new Date(2011,12,21)};
+
+Story.prototype.scrollToSection = function(title,section) {
+	if (!title||!section) return; var t=this.getTiddler(title); if (!t) return null;
+	var elems=t.getElementsByTagName('*');
+	var heads=[]; var anchors=[];
+	for (var i=0; i&lt;elems.length; i++)
+		if (['H1','H2','H3','H4','H5'].contains(elems[i].nodeName)) heads.push(elems[i]);
+	for (var i=0; i&lt;elems.length; i++)
+		if (elems[i].nodeName=='A' &amp;&amp; (elems[i].getAttribute('name')||'').length) anchors.push(elems[i]);
+	var found=null;
+	for (var i=0; i&lt;heads.length; i++)
+		if (getPlainText(heads[i]).trim()==section) { found=heads[i]; break; }
+	if (!found) for (var i=0; i&lt;heads.length; i++)
+		if (getPlainText(heads[i]).trim().startsWith(section)) { found=heads[i]; break; }
+	if (!found) for (var i=0; i&lt;heads.length; i++)
+		if (getPlainText(heads[i]).trim().indexOf(section)!=-1) { found=heads[i]; break; }
+	if (!found) for (var i=0; i&lt;anchors.length; i++)
+		if (anchors[i].getAttribute('name')==section) { found=anchors[i]; break; }
+	if (!found) for (var i=0; i&lt;anchors.length; i++)
+		if (anchors[i].getAttribute('name').startsWith(section)) { found=anchors[i]; break; }
+	if (!found) for (var i=0; i&lt;anchors.length; i++)
+		if (anchors[i].getAttribute('name').indexOf(section)!=-1) { found=anchors[i]; break; }
+	if (found) {
+		// if section heading is collapsed, click to expand it - see [[FoldHeadingsPlugin]]
+		if (hasClass(found,'foldable') &amp;&amp; found.nextSibling.style.display=='none') found.onclick();
+		// scroll *after* tiddler animation
+		var delay=config.options.chkAnimate?config.animDuration+100:0;
+		setTimeout('window.scrollTo('+findPosX(found)+','+findPosY(found)+')',delay);
+		return found;
+	}
+}
+//}}}
+/***
+!!!!core hijacks
+***/
+/***
+!!!!!createTiddlyLink
+***/
+//{{{
+// [[tiddlername##section]] and [[##section]]
+if (!window.createTiddlyLink_section)
+	window.createTiddlyLink_section=window.createTiddlyLink;
+window.createTiddlyLink=function(place,title) {
+	var t=story.findContainingTiddler(place); var tid=t?t.getAttribute('tiddler'):'';
+	var parts=title.split(config.textPrimitives.sectionSeparator);
+	var title=parts[0]; var section=parts[1]; if (section) section=section.trim();
+	if (!title.length || title.toLowerCase()=='here') title=tid;  // default=current tiddler
+	arguments[1]=title;
+	var btn=createTiddlyLink_section.apply(this,arguments);
+	if (section) {
+		btn.setAttribute('section',section);
+		if (store.getTiddlerText(title+config.textPrimitives.sectionSeparator+section)===null)
+			addClass(btn,'tiddlyLinkNonExistingSection');
+	}
+	return btn;
+}
+//}}}
+/***
+!!!!!onClickTiddlerLink
+***/
+//{{{
+if (!window.onClickTiddlerLink_section)
+	window.onClickTiddlerLink_section=window.onClickTiddlerLink;
+window.onClickTiddlerLink=function(ev) {
+	var e=ev||window.event;	var target=resolveTarget(e); var title=null;
+	while (target!=null &amp;&amp; title==null) {
+		title=target.getAttribute('tiddlyLink');
+		section=target.getAttribute('section');
+		target=target.parentNode;
+	} 
+	var t=story.findContainingTiddler(target); var tid=t?t.getAttribute('tiddler'):'';
+	if (title!=tid||!section) // avoid excess scrolling for intra-tiddler links
+		onClickTiddlerLink_section.apply(this,arguments);
+	story.scrollToSection(title,section);
+	return false;
+}
+//}}}
+/***
+!!!!! displayTiddler
+***/
+//{{{
+if (!Story.prototype.displayTiddler_section)
+	Story.prototype.displayTiddler_section=Story.prototype.displayTiddler;
+Story.prototype.displayTiddler = function(srcElement,tiddler)
+{
+	var title=(tiddler instanceof Tiddler)?tiddler.title:tiddler;
+	var parts=title.split(config.textPrimitives.sectionSeparator);
+	var title=parts[0]; var section=parts[1]; if (section) section=section.trim();
+	if (!title.length || title.toLowerCase()=='here') {
+		var t=story.findContainingTiddler(place);
+		title=t?t.getAttribute('tiddler'):'';
+	}
+	arguments[1]=title;  // default=current tiddler
+	this.displayTiddler_section.apply(this,arguments);
+	story.scrollToSection(title,section);
+}
+//}}}
+/***
+&lt;html&gt;&lt;a name=&quot;sampleanchorlink&quot; /&gt;&lt;/html&gt;This is a sample ''anchor link'': {{{&lt;html&gt;&lt;a name=&quot;sampleanchorlink&quot; /&gt;&lt;/html&gt;}}}
+!!!!!isExternalLink
+***/
+//{{{
+if (!config.formatterHelpers.isExternalLink_section)
+	config.formatterHelpers.isExternalLink_section=config.formatterHelpers.isExternalLink;
+config.formatterHelpers.isExternalLink=function(link) {  // remove section references before testing
+	var l=link.split(config.textPrimitives.sectionSeparator)[0];
+	return config.formatterHelpers.isExternalLink_section(l);
+}
+//}}}
+/***
+!!!!!tiddler.handler
+***/
+//{{{
+if (!config.macros.tiddler.handler_section)
+	config.macros.tiddler.handler_section=config.macros.tiddler.handler;
+config.macros.tiddler.handler=function(place,macroName,params,wikifier,paramString,tiddler)
+{
+	if (!params[0]) return;
+	var sep=config.textPrimitives.sectionSeparator;
+	var parts=params[0].split(sep); var tid=parts[0]; var sec=parts[1]; if (sec) sec=sec.trim();
+	if ((tid.toLowerCase()=='here'||!tid.length) &amp;&amp; sec) { // fixup for 'here##section' and '##section'
+		var here=story.findContainingTiddler(place)
+		var tid=here?here.getAttribute('tiddler'):tiddler?tiddler.title:'';
+		arguments[2][0]=tid+sep+sec;
+		arguments[4]=paramString.replace(new RegExp('(here)?'+sep+sec),tid+sep+sec);
+	}
+	config.macros.tiddler.handler_section.apply(this,arguments);
+}
+//}}}
+/***
+!!!!sectionTOC macro
+***/
+//{{{
+config.macros.sectionTOC = {
+	targetClass: 'sectionTOC',
+	linkFormat: '[[%0|##%0]]',
+	handler: function(place,macroName,params,wikifier,paramString,tiddler) {
+		var out=[];
+		var targetClass=params[0]||this.targetClass;
+		var t=story.findContainingTiddler(place); if (!t) return;
+		var elems=t.getElementsByTagName('*');
+		var level=5; // topmost heading level
+		for (var i=0; i&lt;elems.length; i++) {
+			var txt=getPlainText(elems[i]).trim();
+			var link=this.linkFormat.format([txt]);
+			switch(elems[i].nodeName) {
+				case 'H1': out.push('#'+link);		level=1; break;
+				case 'H2': out.push('##'+link);		level=level&lt;2?level:2; break;
+				case 'H3': out.push('###'+link);	level=level&lt;3?level:3; break;
+				case 'H4': out.push('####'+link);	level=level&lt;4?level:4; break;
+				case 'H5': out.push('#####'+link);	level=level&lt;5?level:5; break;
+				default: if (hasClass(elems[i],targetClass)) var target=elems[i];
+			}
+		}
+		// trim excess bullet levels
+		if (level&gt;1) for (var i=0; i&lt;out.length; i++) out[i]=out[i].substr(level-1);
+		// show numbered list
+		if (out.length &amp;&amp; target) {
+			if (target.style.display=='none') target.style.display='block';
+			wikify(out.join('\n'),target);
+		}
+	}
+}
+//}}}
+/***
+!!!Invoke macro
+{{{
+&lt;&lt;sectionTOC&gt;&gt;
+}}}
+***/
+// //&lt;&lt;sectionTOC&gt;&gt;</pre>
+</div>
+<div title="SimpleSearchPlugin" creator="Matthias" modifier="Matthias" created="201210231941" tags="systemConfig extension excludeSearch" changecount="2">
 <pre>/***
 |''Name''|SimpleSearchPlugin|
 |''Description''|displays search results as a simple list of matching tiddlers|
@@ -3571,13 +3523,23 @@ TiddlyWiki.prototype.search = function(searchRegExp, sortField, excludeTag, matc
 } //# end of &quot;install only once&quot;
 //}}}</pre>
 </div>
-<div title="SiteSubtitle" creator="Matthias" modifier="Matthias" created="201210231447" modified="201411260554" tags="extension" changecount="4">
+<div title="SiteIcon" creator="Matthias" modifier="Matthias" created="201412080706" modified="201412131340" tags="extension excludeSearch" changecount="6">
+<pre>&lt;html&gt;&lt;img src=&quot;Title/icon.svg&quot; style=&quot;width: 3em;&quot;/&gt;&lt;/html&gt;</pre>
+</div>
+<div title="SiteMenu" creator="Matthias" modifier="Matthias" created="201412120545" modified="201412131340" tags="extension excludeSearch" changecount="6">
+<pre>[[Menu|MainMenu]]
+</pre>
+</div>
+<div title="SiteSearch" creator="Matthias" modifier="Matthias" created="201412092033" modified="201412131341" tags="extension excludeSearch" changecount="3">
+<pre>&lt;&lt;search&gt;&gt;</pre>
+</div>
+<div title="SiteSubtitle" creator="Matthias" modifier="Matthias" created="201210231447" modified="201411260554" tags="extension excludeSearch" changecount="5">
 <pre></pre>
 </div>
-<div title="SiteTitle" creator="Matthias" modifier="Matthias" created="201210231446" modified="201411280629" tags="extension" changecount="42">
-<pre>&lt;html&gt;&lt;img src=&quot;Title/icon.svg&quot; style=&quot;vertical-align:-40%; height: 1.5em&quot;/&gt; Geo Discoverer&lt;/html&gt;</pre>
+<div title="SiteTitle" creator="Matthias" modifier="Matthias" created="201412080637" modified="201412131341" tags="extension excludeSearch" changecount="25">
+<pre>Geo Discoverer</pre>
 </div>
-<div title="SnapshotPlugin" creator="Matthias" modifier="Matthias" created="201210290734" tags="extension systemConfig" changecount="1">
+<div title="SnapshotPlugin" creator="Matthias" modifier="Matthias" created="201210290734" tags="extension systemConfig excludeSearch" changecount="2">
 <pre>/***
 |Name|SnapshotPlugin|
 |Source|http://www.TiddlyTools.com/#SnapshotPlugin|
@@ -3909,7 +3871,7 @@ try{removeEvent(document,&quot;click&quot;,Popup.onDocumentClick);}catch(e){};
 try{addEvent(document,&quot;click&quot;,Popup.stickyPopup_onDocumentClick);}catch(e){};
 //}}}</pre>
 </div>
-<div title="SnapshotPluginInfo" creator="Matthias" modifier="Matthias" created="201210290734" tags="extension" changecount="1">
+<div title="SnapshotPluginInfo" creator="Matthias" modifier="Matthias" created="201210290734" tags="extension excludeSearch" changecount="2">
 <pre>/***
 |Name|SnapshotPluginInfo|
 |Source|http://www.TiddlyTools.com/#SnapshotPlugin|
@@ -3999,35 +3961,147 @@ __Excerpted revisions from [[NewDocumentPlugin]] (obsolete)__
 2006.02.03 1.0.0 Created.
 &lt;&lt;&lt;</pre>
 </div>
-<div title="StyleSheet" creator="Matthias" modifier="Matthias" created="201210220639" modified="201412050659" tags="extension" changecount="152">
+<div title="StyleSheet" creator="Matthias" modifier="Matthias" created="201210220639" modified="201412141709" tags="extension excludeSearch" changecount="649">
 <pre>/*{{{*/
-/* a contrasting background so I can see where one tiddler ends and the other begins */
+
+#bottomMenu {
+	height: 1.5rem;
+}
+
+#breadCrumbs {
+	padding-left:1.5rem;
+	padding-right:1.5rem;
+	width:100%;
+	position: fixed;
+	bottom: 0px;
+	background: [[ColorPalette::TertiaryMid]];
+	font-size: 0.75rem;
+	color: [[ColorPalette::TertiaryPale]];
+}
+#breadCrumbs .button, #breadCrumbs .tiddlyLink, #breadCrumbs a {
+	color: [[ColorPalette::TertiaryPale]];
+	font-size: 100%;
+}
+
+
+/* Ensure that header stays on top */
+.header {
+    	position: fixed;
+    	left: 0px;
+	right: 0px;
+	top: 0px;
+	z-index: 5;
+}
+#backstageButton {
+	position: fixed;
+	right: 0px;
+	top: 0px;
+}
+#backstageArea {
+	position: fixed;
+	right: 0px;
+	left: 0px;
+	top: 0px;
+}
 body {
-	background: [[ColorPalette::TertiaryLight]];
+    	position: absolute;
+	top: 4.9rem;
+    	left: 0px;
+	right: 0px;
+	bottom: 0.8rem;
+  	overflow: scroll;
+}
+
+/* Display the more command inline with the other commands */
+.moreCommand {
+	display: inline;
+}
+
+/* Fonts */
+body {
+	font-size:0.9em;
+}
+
+/* Background image for header */
+.header {
+	background: [[ColorPalette::TertiaryMid]];
+	background: url(Title/background.jpg);
+	background-size: cover;
+	background-repeat: repeat;
+	display: table;
+	width: 100%;
+}
+
+/* Header contains a table with rows */
+.headerTable {
+	display: table;
+	margin-bottom: 0.1rem;
+	margin-top: 0.1rem;
+	padding-left: 1.5rem;
+}
+.headerRow {
+	display: table-row;
 }
 
 /* sexy colours and font for the header */
-.headerForeground {
+.header {
 	color: [[ColorPalette::TertiaryPale]];
+	display: table;
 }
-.headerShadow, .headerShadow a {
-	color: [[ColorPalette::TertiaryMid]];
-}
-.headerForeground, .headerShadow {
-	padding: 1em 1em 0;
+.header {
 	font-weight:bold;
 }
-.headerForeground .siteSubtitle {
+.header .siteSubtitle {
 	color: [[ColorPalette::TertiaryLight]];
 }
-.headerShadow .siteSubtitle {
-	color: [[ColorPalette::TertiaryMid]];
+
+/* Header table */
+.siteIcon {
+	position:relative;
+	display:table-cell;
+	vertical-align:middle;
+	text-align:center;
+	padding-right:1rem;
+}
+.siteTitle {
+	position:relative;
+	width:20rem;
+	display:table-cell;
+	font-size: 210%;
+	vertical-align:middle;
+}
+.siteMenu {
+	position:relative;
+	display:table-cell;
+	height:1.5rem;
+	text-align:center;
+	vertical-align:middle;
+	padding-right:1rem;
+}
+.siteSearch {
+	position:relative;
+	width:20rem;
+	height:1.5rem;
+	display:table-cell;
+	vertical-align:middle;
 }
 
-/* make shadow go and down right instead of up and left */
-.headerShadow {
-	left: 1px;
-	top: 1px;
+.header .button, .header .tiddlyLink, .header a {
+	color: [[ColorPalette::TertiaryLight]];
+	font-size: 100%;
+}
+
+.siteSearch a {
+	margin-right: 1em;
+}
+
+.header .button:hover, .header .tiddlyLink:hover, .header a:hover {
+	background: [[ColorPalette::PrimaryMid]];
+}
+
+/* a contrasting background so I can see where one tiddler ends and the other begins */
+body {
+	background: [[ColorPalette::TertiaryLight]];
 }
 
 /* prefer monospace for editing */
@@ -4142,7 +4216,7 @@ h1,h2,h3,h4,h5,h6 {
 }
 #topMenu {
 	color:[[ColorPalette::TertiaryDark]];
-	background:[[ColorPalette::TertiaryMid]];
+&lt;!--	background:[[ColorPalette::TertiaryMid]];--&gt;
 }
 #topMenu {
 	padding:0px;
@@ -4154,7 +4228,7 @@ h1,h2,h3,h4,h5,h6 {
 	padding-left: 3px;
 	padding-right: 3px;
 	color: [[ColorPalette::TertiaryPale]];
-	font-size: 115%;
+	font-size: 100%;
 }
 #topMenu .button:hover, #topMenu .tiddlyLink:hover {
 	background: [[ColorPalette::PrimaryMid]];
@@ -4193,7 +4267,7 @@ h1,h2,h3,h4,h5,h6 {
 
 /*}}}*/</pre>
 </div>
-<div title="StyleSheetShortcuts" creator="Matthias" modifier="Matthias" created="201210260713" modified="201210260714" tags="extension" changecount="2">
+<div title="StyleSheetShortcuts" creator="Matthias" modifier="Matthias" created="201210260713" modified="201412120602" tags="extension excludeSearch" changecount="10">
 <pre>/***
 |Name|StyleSheetShortcuts|
 |Source|http://www.TiddlyTools.com/#StyleSheetShortcuts|
@@ -4313,6 +4387,7 @@ These 'style tweaks' can be easily included in other stylesheet tiddler so they 
 /* borderless tables */
 .borderless, .borderless table, .borderless td, .borderless tr, .borderless th, .borderless tbody
 	{ border:0 !important; margin:0 !important; padding:0 !important; }
+
 .widetable, .widetable table
 	{ width:100%; }
 
@@ -4430,7 +4505,7 @@ These 'style tweaks' can be easily included in other stylesheet tiddler so they 
 .BGError	  { background-color:[[ColorPalette::Error]];	 	}
 /*}}}*/</pre>
 </div>
-<div title="TextAreaPlugin" creator="Matthias" modifier="Matthias" created="201210250618" modified="201301202109" tags="extension systemConfig" changecount="4">
+<div title="TextAreaPlugin" creator="Matthias" modifier="Matthias" created="201210250618" modified="201301202109" tags="extension systemConfig excludeSearch" changecount="5">
 <pre>/***
 |Name|TextAreaPlugin|
 |Source|http://www.TiddlyTools.com/#TextAreaPlugin|
@@ -4723,7 +4798,7 @@ window.TextAreaResizer.prototype = {
 };
 //}}}</pre>
 </div>
-<div title="TextAreaPluginInfo" creator="Matthias" modifier="Matthias" created="201210250617" tags="extension" changecount="1">
+<div title="TextAreaPluginInfo" creator="Matthias" modifier="Matthias" created="201210250617" tags="extension excludeSearch" changecount="2">
 <pre>/***
 |Name|TextAreaPluginInfo|
 |Source|http://www.TiddlyTools.com/#TextAreaPlugin|
@@ -4816,7 +4891,7 @@ added option to enable/disable textarea keydown extensions (default is &quot;sta
 2006.01.22 1.0.0 Moved from temporary &quot;System Tweaks&quot; tiddler into 'real' TextAreaPlugin tiddler.
 &lt;&lt;&lt;</pre>
 </div>
-<div title="TiddlerEncryptionPlugin" creator="Matthias" modifier="Matthias" created="201210240600" tags="extension systemConfig" changecount="1">
+<div title="TiddlerEncryptionPlugin" creator="Matthias" modifier="Matthias" created="201210240600" tags="extension systemConfig excludeSearch" changecount="2">
 <pre>/***
 |Name|TiddlerEncryptionPlugin|
 |Author|Lyall Pearce|
@@ -5551,7 +5626,7 @@ function unescCtrlCh(str) {  // unescape potentially problematic nulls and contr
 //}}}
 </pre>
 </div>
-<div title="TiddlerTweakerPlugin" creator="Matthias" modifier="Matthias" created="201210271756" tags="extension systemConfig" changecount="1">
+<div title="TiddlerTweakerPlugin" creator="Matthias" modifier="Matthias" created="201210271756" tags="extension systemConfig excludeSearch" changecount="2">
 <pre>/***
 |Name|TiddlerTweakerPlugin|
 |Source|http://www.TiddlyTools.com/#TiddlerTweakerPlugin|
@@ -5971,7 +6046,7 @@ config.macros.tiddlerTweaker = {
 ***/
  </pre>
 </div>
-<div title="ToggleRightSidebar" creator="YourName" modifier="Matthias" created="201210222134" modified="201210230611" tags="extension" changecount="20">
+<div title="ToggleRightSidebar" creator="YourName" modifier="Matthias" created="201210222134" modified="201210230611" tags="extension excludeSearch" changecount="21">
 <pre>/%
 !info
 |Name|ToggleRightSidebar|
@@ -6050,16 +6125,16 @@ onclick=&quot;
 	'$2'!='$'+'2'?'$2':tip;
 }}&gt;&gt;</pre>
 </div>
-<div title="ToolbarCommands" creator="Matthias" modifier="Matthias" created="201210240502" modified="201210290739" tags="extension" changecount="27">
-<pre>|~ViewToolbar|collapseTiddler collapseOthers closeTiddler closeOthers snapshotPrint +editTiddler &gt; fields permalink references jump|
-|~CollapsedToolbar|expandTiddler collapseOthers closeTiddler closeOthers snapshotPrint +editTiddler &gt; fields permalink references jump|
+<div title="ToolbarCommands" creator="Matthias" modifier="Matthias" created="201210240502" modified="201412100617" tags="extension excludeSearch" changecount="32">
+<pre>|~ViewToolbar|closeTiddler closeOthers +editTiddler &gt; snapshotPrint permalink collapseTiddler collapseOthers references jump|
+|~CollapsedToolbar|expandTiddler closeTiddler closeOthers +editTiddler &gt; snapshotPrint permalink collapseOthers references jump|
 |~EditToolbar|+saveTiddler -cancelTiddler toggleQuickEdit deleteTiddler copyTiddler autosizeEditor|</pre>
 </div>
-<div title="ViewTemplate" creator="Matthias" modifier="Matthias" created="201210281629" modified="201210290729" tags="extension" changecount="15">
+<div title="ViewTemplate" creator="Matthias" modifier="Matthias" created="201210281629" modified="201412100602" tags="extension excludeSearch" changecount="19">
 <pre>&lt;!--{{{--&gt;
 &lt;div class='toolbar' role='navigation' macro='toolbar [[ToolbarCommands::ViewToolbar]]'&gt;&lt;/div&gt;
 &lt;div class='title' macro='view title'&gt;&lt;/div&gt;
-&lt;div class='subtitle'&gt;&lt;!--&lt;span macro='view modifier link'&gt;&lt;/span&gt;, --&gt;&lt;span macro='view modified date'&gt;&lt;/span&gt; (&lt;span macro='message views.wikified.createdPrompt'&gt;&lt;/span&gt; &lt;span macro='view created date'&gt;&lt;/span&gt;) &lt;span macro='newReminder'&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;div class='subtitle'&gt;&lt;!--&lt;span macro='view modifier link'&gt;&lt;/span&gt;, --&gt;&lt;span macro='view modified date'&gt;&lt;/span&gt; (&lt;span macro='message views.wikified.createdPrompt'&gt;&lt;/span&gt; &lt;span macro='view created date'&gt;&lt;/span&gt;)&lt;/div&gt;
 &lt;div class='tagging' macro='tagging'&gt;&lt;/div&gt;
 &lt;div class='tagged' macro='tags'&gt;&lt;/div&gt;
 &lt;div class='viewer' macro='view text wikified'&gt;&lt;/div&gt;
@@ -6067,26 +6142,8 @@ onclick=&quot;
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="WindowTitle" creator="Matthias" modifier="Matthias" created="201210240455" modified="201210240456" tags="extension" changecount="2">
+<div title="WindowTitle" creator="Matthias" modifier="Matthias" created="201210240455" modified="201210240456" tags="extension excludeSearch" changecount="3">
 <pre>&lt;&lt;tiddler SiteTitle&gt;&gt;</pre>
-</div>
-<div title="showRemindersSyntax" creator="Matthias" modifier="Matthias" created="201210240611" tags="extension" changecount="1">
-<pre>* @@{{{leadtime:NUMBER}}}@@ or @@{{{leadtime:NUMBER...NUMBER}}}@@ - Use this to specify a lower and upper bound for reminders that will be shown.  If only one number is specified, then it is treated as the upper bound, and zero is assumed for the lower bound.  These bounds can be negative, in order to show past due reminders.  For example, {{{leadtime:-5...-1}}} will show all reminders that matched in the last five days.  If reminders specify a leadtime, then they may show up, even when they don't fit into showReminder's leadtime bounds.  Use the limit argument to showReminders to override this behavior.  If the leadtime parameter is missing, then {{{leadtime:0...14}}} will be assumed.
-
-* @@{{{nolinks}}}@@ - Deprecated.  Override the format argument to control what the output looks like.
-
-* @@{{{limit}}}@@ - By default, individual reminders can override the leadtime specified by showReminders.  Use this argument to override that behavior.
-
-* @@{{{tag:&quot;STRING&quot;}}}@@ - This filters out tiddlers based on the tag applied to them.  Supply a space-separated list of tags.  If a tag name begins with an {{{!}}}, then only tiddlers which do not have that tag will be considered.  For example {{{tag:&quot;examples holidays&quot;}}} will search for reminders in any tiddlers that are tagged with examples or holidays and {{{tag:&quot;!examples !holidays&quot;}}} will search for reminders in any tiddlers that are not tagged with examples or holidays.
-
-* @@{{{format:&quot;STRING&quot;}}}@@ - Use this argument to override the default string used for display.  You can put standard TiddlyWiki formatting in the format.  The following substitutions will be made in the string before it is displayed.
-** DIFF will be replaced with the one of the strings &quot;Today&quot;, &quot;Tommorrow&quot;, or &quot;N days&quot;, where N is the number of days between now and the date of the reminder.  
-** TITLE will be replaced with the title of the reminder
-** DATE will be replaced with the matched date of the reminder.
-** ANNIVERSARY will be replaced with the number of years since between the matched date and firstyear
-** TIDDLER will be replaced with a link to the tiddler that contains the reminder. For example: [[Hello there]]
-** TIDDLERNAME will be replaced with the text of the tiddler title contains the reminder.  For example: Hello there
-The default string is &quot;DIFF: TITLE on DATE ANNIVERSARY -- TIDDLER&quot;</pre>
 </div>
 </div>
 <!--POST-STOREAREA-->
@@ -8898,7 +8955,7 @@ config.macros.toolbar.invokeCommand = function(place,className,event)
 config.macros.toolbar.onClickMore = function(ev)
 {
 	var e = this.nextSibling;
-	e.style.display = "inline";
+	e.style.display = "block";
 	this.style.display = "none";
 	return false;
 };
