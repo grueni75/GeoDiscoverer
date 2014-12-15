@@ -66,7 +66,6 @@ public class GoogleFormSender implements ReportSender {
         mFormUri = Uri.parse(String.format(ACRA.getConfig().googleFormUrlFormat(), formKey));
     }
 
-    @Override
     public void send(CrashReportData report) throws ReportSenderException {
         Uri formUri = mFormUri == null ? Uri.parse(String.format(ACRA.getConfig().googleFormUrlFormat(), ACRA
                 .getConfig().formKey())) : mFormUri;

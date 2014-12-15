@@ -159,6 +159,7 @@ final class SendWorker extends Thread {
             reportsSentCount++;
         }
         Log.d(LOG_TAG, "#checkAndSendReports - finish");
+        ErrorReporter.crashReportSendWaitEnded = true;
     }
 
     /**

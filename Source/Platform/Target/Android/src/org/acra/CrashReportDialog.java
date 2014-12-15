@@ -19,6 +19,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.EditText;
@@ -40,6 +41,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
     private EditText userEmail;
     String mReportFileName;
     AlertDialog mDialog;
+    static boolean dialogDone = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +79,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
     }
 
     private View buildCustomView(Bundle savedInstanceState) {
+        final float textSize = 16;
         final LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(10, 10, 10, 10);
@@ -93,6 +96,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
         final TextView text = new TextView(this);
         final int dialogTextId = ACRA.getConfig().resDialogText();
         if (dialogTextId != 0) {
+            text.setTextSize(textSize);
             text.setText(getText(dialogTextId));
         }
         scrollable.addView(text);
@@ -101,6 +105,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
         final int commentPromptId = ACRA.getConfig().resDialogCommentPrompt();
         if (commentPromptId != 0) {
             final TextView label = new TextView(this);
+            label.setTextSize(textSize);
             label.setText(getText(commentPromptId));
 
             label.setPadding(label.getPaddingLeft(), 10, label.getPaddingRight(), label.getPaddingBottom());
@@ -108,7 +113,9 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
                     LayoutParams.WRAP_CONTENT));
 
             userComment = new EditText(this);
-            userComment.setLines(2);
+            userComment.setTextSize(textSize);
+            userComment.setLines(3);
+            userComment.setGravity(Gravity.TOP);
             if (savedInstanceState != null) {
                 String savedValue = savedInstanceState.getString(STATE_COMMENT);
                 if (savedValue != null) {
@@ -123,6 +130,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
         if (emailPromptId != 0) {
             final TextView label = new TextView(this);
             label.setText(getText(emailPromptId));
+            label.setTextSize(textSize);
 
             label.setPadding(label.getPaddingLeft(), 10, label.getPaddingRight(), label.getPaddingBottom());
             scrollable.addView(label);
@@ -130,6 +138,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
             userEmail = new EditText(this);
             userEmail.setSingleLine();
             userEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+            userEmail.setTextSize(textSize);
 
             prefs = getSharedPreferences(ACRA.getConfig().sharedPreferencesName(), ACRA.getConfig()
                     .sharedPreferencesMode());
@@ -156,7 +165,6 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
         notificationManager.cancel(ACRAConstants.NOTIF_CRASH_ID);
     }
 
-    @Override
     public void onClick(DialogInterface dialog, int which) {
         if (which == DialogInterface.BUTTON_POSITIVE)
             sendCrash();
@@ -164,6 +172,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
             cancelReports();
         }
         finish();
+        ErrorReporter.dialogWaitEnded = true;
     }
 
     private void cancelReports() {
@@ -223,7 +232,6 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
         }
     }
 
-    @Override
     public void onDismiss(DialogInterface dialog) {
         finish();
     }

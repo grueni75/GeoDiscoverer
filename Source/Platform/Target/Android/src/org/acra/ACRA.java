@@ -153,7 +153,6 @@ public class ACRA {
         // http://stackoverflow.com/questions/2542938/sharedpreferences-onsharedpreferencechangelistener-not-being-called-consistently/3104265#3104265
         mPrefListener = new OnSharedPreferenceChangeListener() {
 
-            @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 if (PREF_DISABLE_ACRA.equals(key) || PREF_ENABLE_ACRA.equals(key)) {
                     final boolean enableAcra = !shouldDisableACRA(sharedPreferences);

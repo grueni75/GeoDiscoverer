@@ -541,7 +541,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         mReportsCrashes = defaults;
     }
 
-    @Override
     public String[] additionalDropBoxTags() {
         if (mAdditionalDropboxTags != null) {
             return mAdditionalDropboxTags;
@@ -555,7 +554,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return defaultValue;
     }
 
-    @Override
     public String[] additionalSharedPreferences() {
         if (mAdditionalSharedPreferences != null) {
             return mAdditionalSharedPreferences;
@@ -569,12 +567,10 @@ public class ACRAConfiguration implements ReportsCrashes {
         return defaultValue;
     }
 
-    @Override
     public Class<? extends Annotation> annotationType() {
         return mReportsCrashes.annotationType();
     }
 
-    @Override
     public int connectionTimeout() {
         if (mConnectionTimeout != null) {
             return mConnectionTimeout;
@@ -587,7 +583,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_CONNECTION_TIMEOUT;
     }
 
-    @Override
     public ReportField[] customReportContent() {
         if (mCustomReportContent != null) {
             return mCustomReportContent;
@@ -601,7 +596,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return defaultValue;
     }
 
-    @Override
     public boolean deleteUnapprovedReportsOnApplicationStart() {
         if (mDeleteUnapprovedReportsOnApplicationStart != null) {
             return mDeleteUnapprovedReportsOnApplicationStart;
@@ -614,7 +608,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_DELETE_UNAPPROVED_REPORTS_ON_APPLICATION_START;
     }
 
-    @Override
     public boolean deleteOldUnsentReportsOnApplicationStart() {
         if (mDeleteOldUnsentReportsOnApplicationStart != null) {
             return mDeleteOldUnsentReportsOnApplicationStart;
@@ -627,7 +620,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_DELETE_OLD_UNSENT_REPORTS_ON_APPLICATION_START;
     }
 
-    @Override
     public int dropboxCollectionMinutes() {
         if (mDropboxCollectionMinutes != null) {
             return mDropboxCollectionMinutes;
@@ -640,7 +632,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_DROPBOX_COLLECTION_MINUTES;
     }
 
-    @Override
     public boolean forceCloseDialogAfterToast() {
         if (mForceCloseDialogAfterToast != null) {
             return mForceCloseDialogAfterToast;
@@ -653,7 +644,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_FORCE_CLOSE_DIALOG_AFTER_TOAST;
     }
 
-    @Override
     public String formKey() {
         if (mFormKey != null) {
             return mFormKey;
@@ -666,7 +656,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_STRING_VALUE;
     }
 
-    @Override
     public String formUri() {
         if (mFormUri != null) {
             return mFormUri;
@@ -679,7 +668,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_STRING_VALUE;
     }
 
-    @Override
     public String formUriBasicAuthLogin() {
         if (mFormUriBasicAuthLogin != null) {
             return mFormUriBasicAuthLogin;
@@ -692,7 +680,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return NULL_VALUE;
     }
 
-    @Override
     public String formUriBasicAuthPassword() {
         if (mFormUriBasicAuthPassword != null) {
             return mFormUriBasicAuthPassword;
@@ -705,7 +692,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return NULL_VALUE;
     }
 
-    @Override
     public boolean includeDropBoxSystemTags() {
         if (mIncludeDropboxSystemTags != null) {
             return mIncludeDropboxSystemTags;
@@ -718,7 +704,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_INCLUDE_DROPBOX_SYSTEM_TAGS;
     }
 
-    @Override
     public String[] logcatArguments() {
         if (mLogcatArguments != null) {
             return mLogcatArguments;
@@ -732,7 +717,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return defaultValues;
     }
 
-    @Override
     public String mailTo() {
         if (mMailTo != null) {
             return mMailTo;
@@ -745,7 +729,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_STRING_VALUE;
     }
 
-    @Override
     public int maxNumberOfRequestRetries() {
         if (mMaxNumberOfRequestRetries != null) {
             return mMaxNumberOfRequestRetries;
@@ -758,7 +741,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_MAX_NUMBER_OF_REQUEST_RETRIES;
     }
 
-    @Override
     public ReportingInteractionMode mode() {
         if (mMode != null) {
             return mMode;
@@ -771,7 +753,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return ReportingInteractionMode.SILENT;
     }
 
-    @Override
     public int resDialogCommentPrompt() {
         if (mResDialogCommentPrompt != null) {
             return mResDialogCommentPrompt;
@@ -784,7 +765,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_RES_VALUE;
     }
 
-    @Override
+
     public int resDialogEmailPrompt() {
         if (mResDialogEmailPrompt != null) {
             return mResDialogEmailPrompt;
@@ -797,7 +778,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_RES_VALUE;
     }
 
-    @Override
+    
     public int resDialogIcon() {
         if (mResDialogIcon != null) {
             return mResDialogIcon;
@@ -810,7 +791,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_DIALOG_ICON;
     }
 
-    @Override
+    
     public int resDialogOkToast() {
         if (mResDialogOkToast != null) {
             return mResDialogOkToast;
@@ -823,7 +804,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_RES_VALUE;
     }
 
-    @Override
+    
     public int resDialogText() {
         if (mResDialogText != null) {
             return mResDialogText;
@@ -836,7 +817,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_RES_VALUE;
     }
 
-    @Override
+    
     public int resDialogTitle() {
         if (mResDialogTitle != null) {
             return mResDialogTitle;
@@ -849,7 +830,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_RES_VALUE;
     }
 
-    @Override
+    
     public int resNotifIcon() {
         if (mResNotifIcon != null) {
             return mResNotifIcon;
@@ -862,7 +843,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_NOTIFICATION_ICON;
     }
 
-    @Override
+    
     public int resNotifText() {
         if (mResNotifText != null) {
             return mResNotifText;
@@ -875,7 +856,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_RES_VALUE;
     }
 
-    @Override
+    
     public int resNotifTickerText() {
         if (mResNotifTickerText != null) {
             return mResNotifTickerText;
@@ -888,7 +869,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_RES_VALUE;
     }
 
-    @Override
+    
     public int resNotifTitle() {
         if (mResNotifTitle != null) {
             return mResNotifTitle;
@@ -901,7 +882,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_RES_VALUE;
     }
 
-    @Override
+    
     public int resToastText() {
         if (mResToastText != null) {
             return mResToastText;
@@ -914,7 +895,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_RES_VALUE;
     }
 
-    @Override
+    
     public int sharedPreferencesMode() {
         if (mSharedPreferenceMode != null) {
             return mSharedPreferenceMode;
@@ -927,7 +908,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_SHARED_PREFERENCES_MODE;
     }
 
-    @Override
+    
     public String sharedPreferencesName() {
         if (mSharedPreferenceName != null) {
             return mSharedPreferenceName;
@@ -940,7 +921,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_STRING_VALUE;
     }
 
-    @Override
+    
     public int socketTimeout() {
         if (mSocketTimeout != null) {
             return mSocketTimeout;
@@ -953,7 +934,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_SOCKET_TIMEOUT;
     }
 
-    @Override
+    
     public boolean logcatFilterByPid() {
         if (mLogcatFilterByPid != null) {
             return mLogcatFilterByPid;
@@ -966,7 +947,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_LOGCAT_FILTER_BY_PID;
     }
 
-    @Override
+    
     public boolean sendReportsInDevMode() {
         if (mSendReportsInDevMode != null) {
             return mSendReportsInDevMode;
@@ -979,7 +960,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_SEND_REPORTS_IN_DEV_MODE;
     }
 
-    @Override
+    
     public String[] excludeMatchingSharedPreferencesKeys() {
         if (mExcludeMatchingSharedPreferencesKeys != null) {
             return mExcludeMatchingSharedPreferencesKeys;
@@ -994,7 +975,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return defaultValue;
     }
 
-    @Override
+    
     public String[] excludeMatchingSettingsKeys() {
         if (mExcludeMatchingSettingsKeys != null) {
             return mExcludeMatchingSettingsKeys;
@@ -1009,7 +990,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return defaultValue;
     }
 
-    @Override
     public String applicationLogFile() {
         if (mApplicationLogFile != null) {
             return mApplicationLogFile;
@@ -1022,7 +1002,6 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_APPLICATION_LOGFILE;
     }
 
-    @Override
     public int applicationLogFileLines() {
         if (mApplicationLogFileLines != null) {
             return mApplicationLogFileLines;
@@ -1035,7 +1014,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_APPLICATION_LOGFILE_LINES;
     }
 
-    @Override
+    
     public String googleFormUrlFormat() {
         if (mGoogleFormUrlFormat != null) {
             return mGoogleFormUrlFormat;
@@ -1048,7 +1027,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_GOOGLE_FORM_URL_FORMAT;
     }
 
-    @Override
+    
     public boolean disableSSLCertValidation() {
         if (mDisableSSLCertValidation != null) {
             return mDisableSSLCertValidation;
@@ -1061,7 +1040,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return DEFAULT_DISABLE_SSL_CERT_VALIDATION;
     }
 
-    @Override
+    
     public Method httpMethod() {
         if (mHttpMethod != null) {
             return mHttpMethod;
@@ -1074,7 +1053,7 @@ public class ACRAConfiguration implements ReportsCrashes {
         return Method.POST;
     }
 
-    @Override
+    
     public Type reportType() {
         if (mReportType != null) {
             return mReportType;

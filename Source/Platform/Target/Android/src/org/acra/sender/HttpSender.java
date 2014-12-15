@@ -177,7 +177,6 @@ public class HttpSender implements ReportSender {
         mType = type;
     }
 
-    @Override
     public void send(CrashReportData report) throws ReportSenderException {
 
         try {

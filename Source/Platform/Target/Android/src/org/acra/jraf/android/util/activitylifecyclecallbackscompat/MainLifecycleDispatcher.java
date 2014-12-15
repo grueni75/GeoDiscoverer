@@ -70,7 +70,6 @@ public class MainLifecycleDispatcher implements ActivityLifecycleCallbacksCompat
         return callbacks;
     }
 
-    @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -80,7 +79,6 @@ public class MainLifecycleDispatcher implements ActivityLifecycleCallbacksCompat
         }
     }
 
-    @Override
     public void onActivityStarted(Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -90,7 +88,6 @@ public class MainLifecycleDispatcher implements ActivityLifecycleCallbacksCompat
         }
     }
 
-    @Override
     public void onActivityResumed(Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -100,7 +97,6 @@ public class MainLifecycleDispatcher implements ActivityLifecycleCallbacksCompat
         }
     }
 
-    @Override
     public void onActivityPaused(Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -110,7 +106,6 @@ public class MainLifecycleDispatcher implements ActivityLifecycleCallbacksCompat
         }
     }
 
-    @Override
     public void onActivityStopped(Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -120,7 +115,6 @@ public class MainLifecycleDispatcher implements ActivityLifecycleCallbacksCompat
         }
     }
 
-    @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
@@ -130,7 +124,6 @@ public class MainLifecycleDispatcher implements ActivityLifecycleCallbacksCompat
         }
     }
 
-    @Override
     public void onActivityDestroyed(Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {

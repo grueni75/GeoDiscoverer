@@ -37,7 +37,6 @@ public class FakeSocketFactory implements SocketFactory, LayeredSocketFactory {
         return this.sslcontext;
     }
 
-    @Override
     public Socket connectSocket(Socket sock, String host, int port, InetAddress localAddress, int localPort, HttpParams params) throws IOException {
         final int connTimeout = HttpConnectionParams.getConnectionTimeout(params);
         final int soTimeout = HttpConnectionParams.getSoTimeout(params);
@@ -60,17 +59,14 @@ public class FakeSocketFactory implements SocketFactory, LayeredSocketFactory {
         return sslsock;
     }
 
-    @Override
     public Socket createSocket() throws IOException {
         return getSSLContext().getSocketFactory().createSocket();
     }
 
-    @Override
     public boolean isSecure(Socket arg0) throws IllegalArgumentException {
         return true;
     }
 
-    @Override
     public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException {
         return getSSLContext().getSocketFactory().createSocket(socket, host, port, autoClose);
     }

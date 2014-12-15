@@ -61,7 +61,6 @@ public final class HttpRequest {
             this.maxNrRetries = maxNrRetries;
         }
 
-        @Override
         public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
             if (exception instanceof SocketTimeoutException) {
                 if (executionCount <= maxNrRetries) {

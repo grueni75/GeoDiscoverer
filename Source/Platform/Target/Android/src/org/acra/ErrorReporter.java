@@ -108,6 +108,18 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
      * before killing the Application.
      */
     private static boolean toastWaitEnded = true;
+    
+    /**
+     * This is used to wait for the dialog
+     * before killing the Application.
+     */
+    static boolean dialogWaitEnded = false;
+
+    /**
+     * This is used to wait for the crash report sending
+     * before killing the Application.
+     */
+    static boolean crashReportSendWaitEnded = false;
 
     /**
      * Used to create a new (non-cached) PendingIntent each time a new crash occurs. 
@@ -143,7 +155,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
         if (Compatibility.getAPILevel() >= 14) { // ActivityLifecycleCallback
                                                  // only available for API14+
             ApplicationHelper.registerActivityLifecycleCallbacks(context, new ActivityLifecycleCallbacksCompat() {
-                @Override
+                
                 public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
                     if (ACRA.DEV_LOGGING)
                         ACRA.log.d(ACRA.LOG_TAG, "onActivityCreated " + activity.getClass());
@@ -155,37 +167,37 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
                     }
                 }
 
-                @Override
+                
                 public void onActivityStarted(Activity activity) {
                     if (ACRA.DEV_LOGGING)
                         ACRA.log.d(ACRA.LOG_TAG, "onActivityStarted " + activity.getClass());
                 }
 
-                @Override
+                
                 public void onActivityResumed(Activity activity) {
                     if (ACRA.DEV_LOGGING)
                         ACRA.log.d(ACRA.LOG_TAG, "onActivityResumed " + activity.getClass());
                 }
 
-                @Override
+                
                 public void onActivityPaused(Activity activity) {
                     if (ACRA.DEV_LOGGING)
                         ACRA.log.d(ACRA.LOG_TAG, "onActivityPaused " + activity.getClass());
                 }
 
-                @Override
+                
                 public void onActivityStopped(Activity activity) {
                     if (ACRA.DEV_LOGGING)
                         ACRA.log.d(ACRA.LOG_TAG, "onActivityStopped " + activity.getClass());
                 }
 
-                @Override
+                
                 public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
                     if (ACRA.DEV_LOGGING)
                         ACRA.log.i(ACRA.LOG_TAG, "onActivitySaveInstanceState " + activity.getClass());
                 }
 
-                @Override
+                
                 public void onActivityDestroyed(Activity activity) {
                     if (ACRA.DEV_LOGGING)
                         ACRA.log.i(ACRA.LOG_TAG, "onActivityDestroyed " + activity.getClass());
@@ -393,8 +405,11 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
             // If ACRA handles user notifications with a Toast or a Notification
             // the Force Close dialog is one more notification to the user...
             // We choose to close the process ourselves using the same actions.
-            Log.e(LOG_TAG, mContext.getPackageName() + " fatal error : " + unhandledThrowable.getMessage(),
-                    unhandledThrowable);
+            if (unhandledThrowable!=null) 
+              Log.e(LOG_TAG, mContext.getPackageName() + " fatal error : " + unhandledThrowable.getMessage(),
+                  unhandledThrowable);
+            else
+              Log.e(LOG_TAG, mContext.getPackageName() + " fatal error");
 
             // Trying to solve
             // https://github.com/ACRA/acra/issues/42#issuecomment-12134144
@@ -637,7 +652,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
                  * 
                  * @see java.lang.Thread#run()
                  */
-                @Override
+                
                 public void run() {
                     Looper.prepare();
                     ToastSender.sendToast(mContext, ACRA.getConfig().resToastText(), Toast.LENGTH_LONG);
@@ -679,7 +694,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
             toastWaitEnded = false;
             new Thread() {
 
-                @Override
+                
                 public void run() {
                     final Time beforeWait = new Time();
                     final Time currentTime = new Time();
@@ -710,7 +725,7 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
 
         new Thread() {
 
-            @Override
+            
             public void run() {
                 // We have to wait for BOTH the toast display wait AND
                 // the worker job to be completed.
@@ -728,8 +743,20 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
                     // This new task will be persisted on application restart
                     // right
                     // after its death.
+                    crashReportSendWaitEnded = false;
+                    dialogWaitEnded = false;
                     Log.d(ACRA.LOG_TAG, "About to create DIALOG from #handleException");
                     notifyDialog(reportFileName);
+                    
+                    // Wait until the dialog is done
+                    while (!dialogWaitEnded || !crashReportSendWaitEnded) {
+                      try {
+                          Thread.sleep(100);
+                      } catch (InterruptedException e1) {
+                          Log.e(LOG_TAG, "Error : ", e1);
+                      }
+                  }
+                    
                 }
 
                 Log.d(LOG_TAG, "Wait for Toast + worker ended. Kill Application ? " + endApplication);
