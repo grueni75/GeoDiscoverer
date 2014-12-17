@@ -127,14 +127,14 @@ void NavigationEngine::init() {
   targetIcon->setRotateAnimation(0,0,360,true,targetRotateDuration,GraphicRotateAnimationTypeLinear);
   core->getGraphicEngine()->unlockTargetIcon();
 
-  // Set the color of the recorded track
+  // Create a new recorded track
+  NavigationPath *recordedTrack;
   ConfigStore *c=core->getConfigStore();
-  lockRecordedTrack(__FILE__, __LINE__);
   if (!(recordedTrack=new NavigationPath)) {
     FATAL("can not create track",NULL);
     return;
   }
-  recordedTrack->setNormalColor(c->getGraphicColorValue("Navigation/TrackColor", __FILE__, __LINE__), __FILE__, __LINE__);
+  recordedTrack->setNormalColor (c->getGraphicColorValue("Navigation/TrackColor", __FILE__, __LINE__), __FILE__, __LINE__);
 
   // Prepare the last recorded track if it does exist
   std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename", __FILE__, __LINE__);
@@ -147,6 +147,10 @@ void NavigationEngine::init() {
     c->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename(), __FILE__, __LINE__);
     recordedTrack->setIsInit(true);
   }
+
+  // Set the new recorded track
+  lockRecordedTrack(__FILE__, __LINE__);
+  this->recordedTrack=recordedTrack;
   unlockRecordedTrack();
 
   // Set the track recording
@@ -156,7 +160,7 @@ void NavigationEngine::init() {
   updateRoutes();
 
   // Prepare any routes
-  lockRoutes(__FILE__, __LINE__);
+  std::list<NavigationPath*> routes;
   std::string path="Navigation/Route";
   std::list<std::string> routeNames=c->getAttributeValues(path,"name",__FILE__,__LINE__);
   std::list<std::string>::iterator j;
@@ -189,6 +193,10 @@ void NavigationEngine::init() {
 
     }
   }
+
+  // Set the new routes
+  lockRoutes(__FILE__, __LINE__);
+  this->routes=routes;
   unlockRoutes();
 
   // Prepare the target
