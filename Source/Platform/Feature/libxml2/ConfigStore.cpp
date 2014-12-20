@@ -211,8 +211,8 @@ void ConfigStore::rememberUserConfig(std::string path, XMLNode nodes) {
             if (std::string((const char *)j->name)=="name") {
               name=std::string((const char *)j->children->content);
             }
-            if (std::string((const char *)j->name)=="use") {
-              if (std::string((const char *)j->children->content)=="required") {
+            if (std::string((const char *)j->name)=="upgrade") {
+              if (std::string((const char *)j->children->content)=="restore") {
                 rememberConfig=true;
               }
             }
@@ -235,7 +235,8 @@ void ConfigStore::rememberUserConfig(std::string path, XMLNode nodes) {
                 FATAL("only one attribute per element is supported",NULL);
               } else {
                 attributeName=std::string((const char *)j->children->content);
-                attributeValues=getAttributeValues(path,attributeName, __FILE__, __LINE__);
+                if (path!="")
+                  attributeValues=getAttributeValues(path,attributeName, __FILE__, __LINE__);
                 oneAttributeFound=true;
               }
             }

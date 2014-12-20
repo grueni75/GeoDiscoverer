@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:gpx="http://www.topografix.com/GPX/1/1" xmlns="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" targetNamespace="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0" elementFormDefault="qualified">
+<xsd:schema
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:gd="http://www.untouchableapps.de/GeoDiscoverer/GDXMLSchemaExtension"
+  xmlns="http://www.untouchableapps.de/GeoDiscoverer/config/1/0"
+  targetNamespace="http://www.untouchableapps.de/GeoDiscoverer/config/1/0"
+  elementFormDefault="qualified">
   <xsd:annotation>
-    <xsd:documentation>GeoDiscoverer config schema</xsd:documentation>
+    <xsd:documentation>Geo Discoverer Config schema</xsd:documentation>
   </xsd:annotation>
   <xsd:element name="GDC">
     <xsd:annotation>
@@ -9,7 +14,7 @@
     </xsd:annotation>
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="expertMode" type="xsd:boolean" default="0" use="required">
+        <xsd:element name="expertMode" type="xsd:boolean" default="0" gd:upgrade="restore">
           <xsd:annotation>
             <xsd:documentation>Shows all available preferences if ticked.</xsd:documentation>
           </xsd:annotation>
@@ -20,7 +25,7 @@
           </xsd:annotation>
           <xsd:complexType>
             <xsd:sequence>
-              <xsd:element name="unitSystem" default="metric" use="required">
+              <xsd:element name="unitSystem" default="metric" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>System of unit to use for reporting length and speed.</xsd:documentation>
                 </xsd:annotation>
@@ -46,27 +51,27 @@
                   <xsd:documentation>Time in seconds between maintenance operations (storing unsaved data, optimizing data structures, ...).</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="wakeLock" type="xsd:boolean" default="0" use="required">
+              <xsd:element name="wakeLock" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Screen backlight is kept on if ticked.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="backButtonTurnsScreenOff" type="xsd:boolean" default="0" use="required">
+              <xsd:element name="backButtonTurnsScreenOff" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Turns off the screen if the back button is pressed.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="createTraceLog" type="xsd:boolean" default="0" use="required">
+              <xsd:element name="createTraceLog" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Writes trace messages into a file in the log directory if ticked. The trace file allows a replay of the session for debugging purposes.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="createMessageLog" type="xsd:boolean" default="0" use="required">
+              <xsd:element name="createMessageLog" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Writes debug messages into a file in the log directory if ticked.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="createMutexLog" type="xsd:boolean" default="0" use="required">
+              <xsd:element name="createMutexLog" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Writes mutex locking messages into a file in the log directory if ticked.</xsd:documentation>
                 </xsd:annotation>
@@ -102,7 +107,7 @@
 			                </xsd:annotation>
 			                <xsd:complexType>
 			                  <xsd:sequence>
-			                    <xsd:element name="active" type="xsd:boolean" default="0" use="required">
+			                    <xsd:element name="active" type="xsd:boolean" default="0" gd:upgrade="restore">
 			                      <xsd:annotation>
 			                        <xsd:documentation>Enables the meta watch cockpit app.</xsd:documentation>
 			                      </xsd:annotation>
@@ -116,12 +121,12 @@
                       </xsd:annotation>
                       <xsd:complexType>
                         <xsd:sequence>
-                          <xsd:element name="active" type="xsd:boolean" default="1" use="required">
+                          <xsd:element name="active" type="xsd:boolean" default="1" gd:upgrade="restore">
                             <xsd:annotation>
                               <xsd:documentation>Enables the voice cockpit app.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="minDurationBetweenOffRouteAlerts" type="xsd:boolean" default="55">
+                          <xsd:element name="minDurationBetweenOffRouteAlerts" type="xsd:integer" default="55">
                             <xsd:annotation>
                               <xsd:documentation>Minimum duration between off route alerts in seconds.</xsd:documentation>
                             </xsd:annotation>
@@ -295,7 +300,7 @@
                         <xsd:documentation>Distance in percent of the screen width that the page change shall overshoot.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="selectedPage" type="xsd:string" default="Default" use="required">
+                    <xsd:element name="selectedPage" type="xsd:string" default="Default" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Name of the currently selected widget page.</xsd:documentation>
                       </xsd:annotation>
@@ -1116,7 +1121,7 @@
           </xsd:annotation>
           <xsd:complexType>
             <xsd:sequence>
-              <xsd:element name="folder" type="xsd:string" default="Default" use="required">
+              <xsd:element name="folder" type="xsd:string" default="Default" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Folder that contains map images.</xsd:documentation>
                 </xsd:annotation>
@@ -1151,12 +1156,12 @@
                   <xsd:documentation>Time in microseconds that must elapse before the map is repositioned to the current location.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="returnToLocation" type="xsd:boolean" default="1" use="required">
+              <xsd:element name="returnToLocation" type="xsd:boolean" default="1" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="zoomLevelLock" type="xsd:boolean" default="0" use="required">
+              <xsd:element name="zoomLevelLock" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Indicates if the zoom level of the map shall not be changed when zooming.</xsd:documentation>
                 </xsd:annotation>
@@ -1167,42 +1172,42 @@
                 </xsd:annotation>
                 <xsd:complexType>
                   <xsd:sequence>
-                    <xsd:element name="folder" type="xsd:string" default="*unknown*" use="required">
+                    <xsd:element name="folder" type="xsd:string" default="*unknown*" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Last used map folder.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="lng" type="xsd:double" default="0" use="required">
+                    <xsd:element name="lng" type="xsd:double" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Longitude of the last position in the map.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="lat" type="xsd:double" default="0" use="required">
+                    <xsd:element name="lat" type="xsd:double" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Latitude of the last position in the map.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="latScale" type="xsd:double" default="0" use="required">
+                    <xsd:element name="latScale" type="xsd:double" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Latitude scale of the last position in the map.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="lngScale" type="xsd:double" default="0" use="required">
+                    <xsd:element name="lngScale" type="xsd:double" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Longitude scale of the last position in the map.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="zoom" type="xsd:double" default="1" use="required">
+                    <xsd:element name="zoom" type="xsd:double" default="1" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Zoom value used in the graphic engine when the last position was active.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="angle" type="xsd:double" default="0" use="required">
+                    <xsd:element name="angle" type="xsd:double" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Angle value used in the graphic engine when the last position was active.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="zoomLevel" type="xsd:integer" default="1" use="required">
+                    <xsd:element name="zoomLevel" type="xsd:integer" default="1" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Map zoom level used in the map engine when the last position was active.</xsd:documentation>
                       </xsd:annotation>
@@ -1283,22 +1288,22 @@
                   </xsd:sequence>
                 </xsd:complexType>
               </xsd:element>
-              <xsd:element name="recordTrack" type="xsd:boolean" default="0" use="required">
+              <xsd:element name="recordTrack" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Indicates if track recording is enabled.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="pathInfoName" type="xsd:string" default="." use="required">
+              <xsd:element name="pathInfoName" type="xsd:string" default="." gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Name of the path that is currently shown.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="pathInfoLocked" type="xsd:boolean" default="0" use="required">
+              <xsd:element name="pathInfoLocked" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Indicates if path info widget does not change the path if the map is moved.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="lastRecordedTrackFilename" type="xsd:string" default="unknown" use="required">
+              <xsd:element name="lastRecordedTrackFilename" type="xsd:string" default="unknown" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Filename of the last recorded track.</xsd:documentation>
                 </xsd:annotation>
@@ -1314,17 +1319,17 @@
                 </xsd:annotation>
                 <xsd:complexType>
                   <xsd:sequence>
-                    <xsd:element name="lng" type="xsd:double" default="0" use="required">
+                    <xsd:element name="lng" type="xsd:double" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Longitude in degrees.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="lat" type="xsd:double" default="0" use="required">
+                    <xsd:element name="lat" type="xsd:double" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Latitude in degrees.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="visible" type="xsd:boolean" default="0" use="required">
+                    <xsd:element name="visible" type="xsd:boolean" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Target is drawn if ticked.</xsd:documentation>
                       </xsd:annotation>
@@ -1396,22 +1401,22 @@
                         </xsd:sequence>
                       </xsd:complexType>
                     </xsd:element>
-                    <xsd:element name="reverse" type="xsd:boolean" default="0" use="required">
+                    <xsd:element name="reverse" type="xsd:boolean" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Route is reversed if ticked.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="visible" type="xsd:boolean" default="1" use="required">
+                    <xsd:element name="visible" type="xsd:boolean" default="1" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Route is drawn on map if ticked.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="startFlagIndex" type="xsd:integer" default="-1" use="required">
+                    <xsd:element name="startFlagIndex" type="xsd:integer" default="-1" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Position of the start flag.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="endFlagIndex" type="xsd:integer" default="-1" use="required">
+                    <xsd:element name="endFlagIndex" type="xsd:integer" default="-1" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Position of the end flag.</xsd:documentation>
                       </xsd:annotation>
@@ -1424,7 +1429,7 @@
                   </xsd:attribute>
                 </xsd:complexType>
               </xsd:element>
-              <xsd:element name="activeRoute" type="xsd:string" default="none" use="required">
+              <xsd:element name="activeRoute" type="xsd:string" default="none" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Name of the route to navigate along.</xsd:documentation>
                 </xsd:annotation>
@@ -1473,6 +1478,11 @@
           </xsd:complexType>
         </xsd:element>
       </xsd:sequence>
+		  <xsd:attribute name="version">
+		    <xsd:annotation>
+		      <xsd:documentation>Config version.</xsd:documentation>
+		    </xsd:annotation>
+		  </xsd:attribute>
     </xsd:complexType>
   </xsd:element>
 </xsd:schema>
