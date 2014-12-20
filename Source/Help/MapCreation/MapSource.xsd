@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified">
+  
+  <xsd:annotation>
+    <xsd:documentation>Geo Discoverer map Source (GDS) schema</xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:element name="GDS">
+    <xsd:annotation>
+      <xsd:documentation>Defines a map source for Geo Discoverer.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+		    <xsd:element name="type" minOccurs="0" default="tileServer">
+		      <xsd:annotation>
+		        <xsd:documentation>
+		          Type of map source.
+		          Two types are currently supported: 
+		          - tileServer          => expects that sequence with the ID "tileServer" appears in this file
+		          - externalMapArchive  => expects the sequence with the ID "externalMapArchive" appears in this file
+		          If this element is not present, Geo Discoverer assume that this file defines tile servers.
+		        </xsd:documentation>
+		      </xsd:annotation>
+          <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+              <xsd:enumeration value="tileServer"/>
+              <xsd:enumeration value="externalMapArchive"/>
+            </xsd:restriction>
+          </xsd:simpleType>
+		    </xsd:element>  
+		    <xsd:choice>
+		    
+          <xsd:sequence id="tileServer">
+			      <xsd:element name="TileServer" minOccurs="0" maxOccurs="unbounded">
+			        <xsd:annotation>
+			          <xsd:documentation>
+			            Defines a (Open Stree Map compatible) server from which to download map tiles.
+			            The tiles are overlayed in the order given in this file.
+			          </xsd:documentation>
+			        </xsd:annotation>
+			        <xsd:complexType>
+			          <xsd:sequence>
+			            <xsd:element name="serverURL" type="xsd:string">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Universal Resource Locator of the tile on the server.
+			                  The tile can be either in PNG or JPG format. 
+			                  The following variables can be used: 
+			                    ${z} = zoom level, 
+			                    ${x} = horizontal tile number, 
+			                    ${y} = vertical tile number.
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>
+			            <xsd:element name="overlayAlpha" type="xsd:double">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Alpha value to use when overlaying the tile.
+			                  A value of 0.0 makes the tile invisible.
+			                  A value of 1.0 makes the tile fully visible.
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>
+			          </xsd:sequence>
+			        </xsd:complexType>
+			      </xsd:element>
+			      <xsd:element name="minZoomLevel" type="xsd:integer">
+			        <xsd:annotation>
+			          <xsd:documentation>
+			            Minimum zoom level supported by the tile servers.
+			          </xsd:documentation>
+			        </xsd:annotation>
+			      </xsd:element>
+			      <xsd:element name="maxZoomLevel" type="xsd:integer">
+			        <xsd:annotation>
+			          <xsd:documentation>
+			            Maximum zoom level supported by the tile servers.
+			          </xsd:documentation>
+			        </xsd:annotation>
+			      </xsd:element>
+          </xsd:sequence>
+          
+          <xsd:sequence id="externalMapArchive">
+            <xsd:element name="mapArchivePath" type="xsd:string">
+              <xsd:annotation>
+                <xsd:documentation>
+                  Path to the GDA file to use this map source.
+                </xsd:documentation>
+              </xsd:annotation>
+            </xsd:element>
+          </xsd:sequence>
+          
+        </xsd:choice>
+      </xsd:sequence>
+      <xsd:attribute name="version" type="xsd:double" default="1.0">
+        <xsd:annotation>
+          <xsd:documentation>Version of the used schema for this file.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>

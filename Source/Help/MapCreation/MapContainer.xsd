@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified">
+  
+  <xsd:annotation>
+    <xsd:documentation>Geo Discoverer Map container (GDM) schema</xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:element name="GDM">
+    <xsd:annotation>
+      <xsd:documentation>Defines a map container for Geo Discoverer.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:sequence>
+		    <xsd:element name="mapProjection" minOccurs="0" default="linear">
+		      <xsd:annotation>
+		        <xsd:documentation>
+		          Type of map projection.
+		          Four types are currently supported: 
+		          - linear                  => the picture coordinates depend linearly on the geographic coordinates (x=a*longitude+b, y=c*latitude+d)
+		          - sphericalNormalMercator => the map uses a spherical normal mercator projection of geographic coordinates to picture coordinates (as used by OSM tile server)
+		          - mercator                => same as sphericalNormalMercator
+		          - proj4                   => use a proj.4 (http://trac.osgeo.org/proj/) string to define the map projection. Requires that the element "mapProjectionArgs" is present.
+		        </xsd:documentation>
+		      </xsd:annotation>
+          <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+              <xsd:enumeration value="linear"/>
+              <xsd:enumeration value="mercator"/>
+              <xsd:enumeration value="sphericalNormalMercator"/>
+              <xsd:enumeration value="proj4"/>
+            </xsd:restriction>
+          </xsd:simpleType>
+		    </xsd:element>  
+        <xsd:element name="mapProjectionArgs" minOccurs="0" type="xsd:string">
+          <xsd:annotation>
+            <xsd:documentation>
+              Arguments for the proj.4 library that define the map projection. 
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+	      <xsd:element name="calibrationPoint" minOccurs="3" maxOccurs="unbounded">
+	        <xsd:annotation>
+	          <xsd:documentation>
+               Defines a calibration point.
+	          </xsd:documentation>
+	        </xsd:annotation>
+	        <xsd:complexType>
+	          <xsd:sequence>
+	            <xsd:element name="latitude" type="xsd:double">
+	              <xsd:annotation>
+	                <xsd:documentation>
+	                  Latitude of the calibration point.
+	                </xsd:documentation>
+	              </xsd:annotation>
+	            </xsd:element>
+               <xsd:element name="longitude" type="xsd:double">
+                 <xsd:annotation>
+                   <xsd:documentation>
+                     Longitude of the calibration point.
+                   </xsd:documentation>
+                 </xsd:annotation>
+               </xsd:element>
+               <xsd:element name="x" type="xsd:integer">
+                 <xsd:annotation>
+                   <xsd:documentation>
+                     x coordinate of the calibration point.
+                   </xsd:documentation>
+                 </xsd:annotation>
+               </xsd:element>
+               <xsd:element name="y" type="xsd:integer">
+                 <xsd:annotation>
+                   <xsd:documentation>
+                     y coordinate of the calibration point.
+                   </xsd:documentation>
+                 </xsd:annotation>
+               </xsd:element>
+	          </xsd:sequence>
+	        </xsd:complexType>
+	      </xsd:element>
+	      <xsd:element name="imageFileName" type="xsd:string">
+	        <xsd:annotation>
+	          <xsd:documentation>
+	            Filename of the image representing this map.
+	            Images in PNG or JPG format are supported.
+	          </xsd:documentation>
+	        </xsd:annotation>
+	      </xsd:element>
+        <xsd:element name="zoomLevel" type="xsd:integer">
+          <xsd:annotation>
+            <xsd:documentation>
+              Zoom level this image belongs to.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
+      </xsd:sequence>
+      <xsd:attribute name="version" type="xsd:double" default="1.0">
+        <xsd:annotation>
+          <xsd:documentation>Version of the used schema for this file.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
+    </xsd:complexType>
+  </xsd:element>
+</xsd:schema>
