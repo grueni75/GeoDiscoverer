@@ -24,8 +24,10 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Window;
 import android.webkit.WebChromeClient;
@@ -38,6 +40,7 @@ public class ShowHelp extends GDActivity {
   WebView webview;
   
   /** Called when the activity is first created. */
+  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   @SuppressLint("SetJavaScriptEnabled")
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -54,8 +57,11 @@ public class ShowHelp extends GDActivity {
     //setProgressBarIndeterminateVisibility(true);
     //setProgressBarVisibility(true);
     webview.getSettings().setJavaScriptEnabled(true);
-    webview.getSettings().setBuiltInZoomControls(true);
-    final Activity activity = this;
+    webview.getSettings().setSupportZoom(false);
+    webview.getSettings().setBuiltInZoomControls(false);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+      webview.getSettings().setDisplayZoomControls(false);
+    }
     /*webview.setWebChromeClient(new WebChromeClient() {
       public void onProgressChanged(WebView view, int progress) {
         activity.setProgress(progress*100);

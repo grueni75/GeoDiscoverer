@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="hello">Hello World, ViewMap!</string>
   <string name="app_name">Geo Discoverer</string>
 	<string name="fatal_home_directory_creation">Could not create home directory!</string>
 	<string name="home_directory">GeoDiscoverer</string>

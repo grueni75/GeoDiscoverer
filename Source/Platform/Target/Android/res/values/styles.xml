@@ -4,6 +4,8 @@
   </style> 
   <style name="GDStyle.NoTitleBar" parent="android:Theme.Black.NoTitleBar">
   </style> 
+  <style name="GDStyle.NoTitleBar.Fullscreen" parent="android:Theme.Black.NoTitleBar.Fullscreen">
+  </style> 
   <style name="GDStyle.Dialog" parent="android:Theme.Dialog">
   </style> 
 </resources>
