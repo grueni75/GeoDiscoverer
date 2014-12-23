@@ -2,12 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.untouchableapps.android.geodiscoverer"
       android:versionCode="10"
-      android:versionName="20141220">
+      android:versionName="20141223">
   <uses-feature android:glEsVersion="0x00010001"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
 	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+	<!--  <uses-permission android:name="com.android.vending.BILLING"></uses-permission> -->
 	<uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19"/>
 	<application 
 	    android:allowBackup="true"
@@ -15,11 +16,13 @@
 	    android:label="@string/app_name" 
 	    android:name=".GDApplication"
 	    android:theme="@style/GDStyle">
+        <activity android:name=".Donate"
+                  android:theme="@style/GDStyle.Dialog"/>     
 				<activity android:name="org.acra.CrashReportDialog"
-				          android:theme="@style/GDStyle.Dialog"
-				          android:launchMode="singleInstance"
-				          android:excludeFromRecents="true"
-				          android:finishOnTaskLaunch="true"/>	    
+									android:theme="@style/GDStyle.Dialog"
+									android:launchMode="singleInstance"
+									android:excludeFromRecents="true"
+									android:finishOnTaskLaunch="true"/>	    
         <activity android:name=".ViewMap"
                   android:configChanges="orientation|keyboardHidden"
                   android:label="@string/app_name"
@@ -91,7 +94,7 @@
                   android:label="@string/preferences">
         </activity>
         <activity android:name=".ShowHelp"
-                  android:label="@string/help"
+                  android:label="@string/button_label_help"
                   android:theme="@style/GDStyle.NoTitleBar.Fullscreen">
         </activity>
         <service android:name=".GDService" />

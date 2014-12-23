@@ -12,8 +12,14 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -25,11 +31,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import com.cocosw.undobar.UndoBarController;
-import com.cocosw.undobar.UndoBarController.UndoListener;
-import com.cocosw.undobar.UndoBarStyle;
-import com.google.gson.Gson;
-import com.untouchableapps.android.geodiscoverer.R.drawable;
+import org.acra.ACRA;
+import org.acra.ACRAConfigurationException;
+import org.acra.ACRAConstants;
+import org.acra.ReportField;
+import org.acra.ReportingInteractionMode;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -45,38 +51,28 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.Path.FillType;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.widget.DrawerLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
+import android.util.Base64;
+import android.util.LogPrinter;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
@@ -84,6 +80,11 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.cocosw.undobar.UndoBarController;
+import com.cocosw.undobar.UndoBarController.UndoListener;
+import com.cocosw.undobar.UndoBarStyle;
+import com.untouchableapps.android.geodiscoverer.R.drawable;
 
 public class ViewMap extends GDActivity {
     
@@ -590,6 +591,69 @@ public class ViewMap extends GDActivity {
     }
   }
 
+  /** Sends logs via ACRA in the background */
+  private class SendLogsTask extends AsyncTask<Void, Integer, Void> {
+
+    public String[] logNames;
+
+    protected void onPreExecute() {
+    }
+
+    protected Void doInBackground(Void... params) {
+      
+      int lineCount = 0;
+      String sendLogPath = coreObject.homePath + "/Log/send.log";
+      try {
+        // Create a text file that contains all logs
+        BufferedWriter sendLogWriter = new BufferedWriter(new FileWriter(sendLogPath));
+        for (String logName : logNames) {
+          String logPath = coreObject.homePath + "/Log/" + logName;
+          sendLogWriter.write(logPath + ":\n");
+          lineCount++;
+          BufferedReader logReader = new BufferedReader(new FileReader(logPath));
+          String inputLine; 
+          while ((inputLine=logReader.readLine())!=null) {
+            sendLogWriter.write(inputLine + "\n");
+            lineCount++;
+          }
+          sendLogWriter.write("\n");
+          lineCount++;
+          logReader.close();
+        }
+        sendLogWriter.close();        
+      }
+      catch (IOException e) {
+        errorDialog(getString(R.string.send_logs_failed, e.getMessage()));
+      }
+      
+      // Tell ACRA to upload the complete log 
+      ReportField[] customReportFields = new ReportField[ACRAConstants.DEFAULT_REPORT_FIELDS.length+1];
+      System.arraycopy(ACRAConstants.DEFAULT_REPORT_FIELDS, 0, customReportFields, 0, ACRAConstants.DEFAULT_REPORT_FIELDS.length);
+      customReportFields[ACRAConstants.DEFAULT_REPORT_FIELDS.length]=ReportField.APPLICATION_LOG;
+      ACRA.getConfig().setCustomReportContent(customReportFields);
+      ACRA.getConfig().setApplicationLogFileLines(lineCount);
+      ACRA.getConfig().setApplicationLogFile(sendLogPath);
+
+      // Send report via ACRA
+      try {
+        ACRA.getConfig().setMode(ReportingInteractionMode.DIALOG);
+        Exception e = new Exception("User has sent logs");
+        ACRA.getErrorReporter().handleException(e,false);  
+        ACRA.getConfig().setMode(ReportingInteractionMode.NOTIFICATION);
+      }
+      catch (ACRAConfigurationException e) {
+      }
+      
+      return null;
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+    }
+
+    protected void onPostExecute(Void result) {
+    }
+  }
+
   /** Copies tracks from the Track into the Route directory */
   private class ImportRouteTask extends AsyncTask<Void, Integer, Void> {
 
@@ -719,6 +783,93 @@ public class ViewMap extends GDActivity {
       // Restart the core to load the new map folder
       restartCore(false);
     }
+  }
+  
+  /** Send logs via ACRA */
+  void sendLogs() {
+
+    // Obtain the list of file in the folder
+    File folderFile = new File(coreObject.homePath + "/Log");
+    LinkedList<String> logs = new LinkedList<String>();
+    for (File file : folderFile.listFiles()) {
+      if ((!file.isDirectory())
+          && (!file.getName().substring(file.getName().length() - 1)
+              .equals("~"))) {
+        logs.add(file.getName());
+      }
+    }
+    final String[] items = new String[logs.size()];
+    logs.toArray(items);
+    Arrays.sort(items, Collections.reverseOrder());
+
+    // Create the state array
+    final boolean[] checkedItems = new boolean[logs.size()];
+
+    // Create the dialog
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setTitle(R.string.log_selection_question);
+    builder.setMultiChoiceItems(items, checkedItems,
+        new DialogInterface.OnMultiChoiceClickListener() {
+          public void onClick(DialogInterface dialog, int which,
+              boolean isChecked) {
+          }
+        });
+    builder.setCancelable(true);
+    builder.setPositiveButton(R.string.finished,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            SendLogsTask sendLogsTask = new SendLogsTask();
+            LinkedList<String> logNames = new LinkedList<String>();
+            for (int i = 0; i < items.length; i++) {
+              if (checkedItems[i]) {
+                logNames.add(items[i]);
+              }
+            }
+            if (logNames.size() == 0)
+              return;
+            sendLogsTask.logNames = new String[logNames.size()];
+            logNames.toArray(sendLogsTask.logNames);
+            sendLogsTask.execute();
+          }
+        });
+    builder.setNegativeButton(R.string.cancel, null);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
+    AlertDialog alert = builder.create();
+    alert.show();
+  }
+
+  /** Opens the donate activity */
+  void donate() {
+    //Intent intent = new Intent(getApplicationContext(), Donate.class);
+    //startActivity(intent);
+    warningDialog("Coming soon!");
+  }
+
+  /** Show welcome dialog */
+  void openWelcomeDialog() {
+
+    // Create the dialog
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setTitle(R.string.welcome_dialog_title);
+    builder.setMessage(R.string.welcome_dialog_message);
+    builder.setCancelable(true);
+    builder.setPositiveButton(R.string.button_label_ok,null);
+    builder.setNeutralButton(R.string.button_label_donate,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            donate();
+          }
+        });
+    builder.setNegativeButton(R.string.button_label_help,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            Intent intent = new Intent(getApplicationContext(), ShowHelp.class);
+            startActivity(intent);
+          }
+        });
+    builder.setIcon(android.R.drawable.ic_dialog_info);
+    AlertDialog alert = builder.create();
+    alert.show();
   }
   
   /** Copies tracks to the route directory */
@@ -883,7 +1034,9 @@ public class ViewMap extends GDActivity {
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_REMOVE_ROUTES,android.R.drawable.ic_menu_delete,getString(R.string.remove_routes)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_TOGGLE_MESSAGES,android.R.drawable.ic_menu_info_details,getString(R.string.toggle_messages)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_PREFERENCES,android.R.drawable.ic_menu_preferences,getString(R.string.preferences)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_HELP,android.R.drawable.ic_menu_help,getString(R.string.help)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_HELP,android.R.drawable.ic_menu_help,getString(R.string.button_label_help)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SEND_LOGS,android.R.drawable.ic_menu_upload,getString(R.string.send_logs)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_DONATE,android.R.drawable.ic_menu_send,getString(R.string.button_label_donate)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_RESET,android.R.drawable.ic_menu_revert,getString(R.string.reset)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_EXIT,android.R.drawable.ic_menu_close_clear_cancel,getString(R.string.exit)));
     return entries;
@@ -982,22 +1135,6 @@ public class ViewMap extends GDActivity {
     
     super.onCreate(savedInstanceState);
     
-    /*
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      int id = getResources().getIdentifier("config_enableTranslucentDecor", "bool", "android");
-      if (id != 0 && getResources().getBoolean(id)) { // Translucent available
-          Window w = getWindow();
-          w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-          //   w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-      }
-      //findViewById(R.id.login_form).setPadding(0, 100, 0, 0);
-  }
-  //getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-  setContentView(R.layout.activity_message_style);
-
-  ???*/
-    
-    
     // Restore the last processed intent from the prefs
     prefs = getApplication().getSharedPreferences("viewMap",Context.MODE_PRIVATE);
     if (prefs.contains("lastAddressSubject")) {
@@ -1033,6 +1170,7 @@ public class ViewMap extends GDActivity {
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         GDNavDrawerAdapter adapter = (GDNavDrawerAdapter)parent.getAdapter();
         GDNavDrawerItem item = adapter.entries.get(position);
+        Intent intent;
         switch (item.id) {
           case GDNavDrawerItem.ID_PREFERENCES:
             if (mapSurfaceView!=null) {
@@ -1085,15 +1223,21 @@ public class ViewMap extends GDActivity {
             if (!legendPathFile.exists()) {
               errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder()"),legendPath));
             } else {
-              Intent intent = new Intent();
+              intent = new Intent();
               intent.setAction(Intent.ACTION_VIEW);
               intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
               startActivity(intent);
             }
             break;
           case GDNavDrawerItem.ID_SHOW_HELP:
-            Intent intent = new Intent(getApplicationContext(), ShowHelp.class);
+            intent = new Intent(getApplicationContext(), ShowHelp.class);
             startActivity(intent);
+            break;
+          case GDNavDrawerItem.ID_SEND_LOGS:
+            sendLogs();
+            break;
+          case GDNavDrawerItem.ID_DONATE:
+            donate();
             break;
         }
         navDrawerList.setItemChecked(position, false);
@@ -1130,6 +1274,8 @@ public class ViewMap extends GDActivity {
       }
     }).start();*/
     
+    // Show welcome dialog
+    //openWelcomeDialog();
   }
     
   /** Called when the app suspends */
