@@ -2,7 +2,7 @@
 <?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.android.toolchain.gcc.1635521471">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.android.toolchain.gcc.1635521471" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.android.toolchain.gcc.1635521471" moduleId="org.eclipse.cdt.core.settings" name="SingleARMTarget">
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -17,11 +17,11 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildProperties="" description="" id="com.android.toolchain.gcc.1635521471" name="Debug" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration artifactName="${ProjName}" buildProperties="" description="" id="com.android.toolchain.gcc.1635521471" name="SingleARMTarget" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.android.toolchain.gcc.1635521471.713208975" name="/" resourcePath="">
 						<toolChain id="com.android.toolchain.gcc.1011192163" name="Android GCC" superClass="com.android.toolchain.gcc">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="com.android.targetPlatform.925029707" isAbstract="false" superClass="com.android.targetPlatform"/>
-							<builder arguments="APP_ABI=armeabi" buildPath="${workspace_loc:/GeoDiscovererAndroid}" command="ndk-build" id="com.android.builder.1350077864" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Android Builder" superClass="com.android.builder">
+							<builder arguments="APP_ABI=armeabi-v7a" buildPath="${workspace_loc:/GeoDiscovererAndroid}" command="ndk-build" id="com.android.builder.1350077864" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Android Builder" superClass="com.android.builder">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="obj"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="libs"/>
@@ -40,7 +40,7 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
 		<cconfiguration id="com.android.toolchain.gcc.1635521471.1988426771">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.android.toolchain.gcc.1635521471.1988426771" moduleId="org.eclipse.cdt.core.settings" name="Release">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.android.toolchain.gcc.1635521471.1988426771" moduleId="org.eclipse.cdt.core.settings" name="AllTargets">
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -55,11 +55,11 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildProperties="" description="" id="com.android.toolchain.gcc.1635521471.1988426771" name="Release" parent="org.eclipse.cdt.build.core.emptycfg">
+				<configuration artifactName="${ProjName}" buildProperties="" description="" id="com.android.toolchain.gcc.1635521471.1988426771" name="AllTargets" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="com.android.toolchain.gcc.1635521471.1988426771." name="/" resourcePath="">
 						<toolChain id="com.android.toolchain.gcc.1751791368" name="Android GCC" superClass="com.android.toolchain.gcc">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="com.android.targetPlatform.416172677" isAbstract="false" superClass="com.android.targetPlatform"/>
-							<builder arguments="APP_ABI=all" buildPath="${workspace_loc:/GeoDiscovererAndroid}" command="ndk-build" id="com.android.builder.36553664" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Android Builder" superClass="com.android.builder">
+							<builder arguments="" buildPath="${workspace_loc:/GeoDiscovererAndroid}" command="ndk-build" id="com.android.builder.36553664" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Android Builder" superClass="com.android.builder">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="obj"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="libs"/>
@@ -90,6 +90,10 @@
 	</storageModule>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Default">
+			<resource resourceType="PROJECT" workspacePath="/GeoDiscovererAndroid"/>
+		</configuration>
+		<configuration configurationName="Release"/>
+		<configuration configurationName="AllTargets">
 			<resource resourceType="PROJECT" workspacePath="/GeoDiscovererAndroid"/>
 		</configuration>
 		<configuration configurationName="Debug">

@@ -12,6 +12,7 @@
 
 #include <jni.h>
 #include <Core.h>
+#include <sys/user.h>
 #include <android/log.h>
 #include <client/linux/handler/exception_handler.h>
 #include <string.h>

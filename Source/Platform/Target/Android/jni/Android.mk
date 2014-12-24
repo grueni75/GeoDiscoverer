@@ -528,7 +528,7 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdcore
 MY_GD_ROOT := ../../../..
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/POSIX -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS = $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/POSIX -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/OpenGLES -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libjpeg -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libxml2 -name '*.cpp' -exec echo ../{} \;)
@@ -538,8 +538,8 @@ MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libcur
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libzip -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libproj4 -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/Android -name '*.cpp' -exec echo ../{} \;)
-MY_GD_GENERAL_SRCS += $(shell find $(MY_GD_ROOT)/Source/General -name '*.cpp' -exec echo ../{} \;)
-MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/POSIX
+MY_GD_GENERAL_SRCS = $(shell find $(MY_GD_ROOT)/Source/General -name '*.cpp' -exec echo ../{} \;)
+MY_GD_INCLUDES = -I$(MY_GD_ROOT)/Source/Platform/Feature/POSIX
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/OpenGLES
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libjpeg
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libxml2
@@ -558,9 +558,13 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Widget
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Math
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Config
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Profile
-LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ijni/libxml2-2.7.7/include -Ijni/freetype-2.4.2/include -Ijni/jpeg-8b -Ijni/libpng-1.4.4 -Ijni/curl-7.24.0/include -Ijni/libzip-0.10.1/lib -Ijni/proj-4.8.0/src -Ijni/google-breakpad-r1410/src -DSRC_ROOT='"jni/../../../../../Source"' 
+LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ijni/$(MY_BREAKPAD_PATH)/src/common/android/include -Ijni/libxml2-2.7.7/include -Ijni/freetype-2.4.2/include -Ijni/jpeg-8b -Ijni/libpng-1.4.4 -Ijni/curl-7.24.0/include -Ijni/libzip-0.10.1/lib -Ijni/proj-4.8.0/src -Ijni/google-breakpad-r1410/src -DSRC_ROOT='"jni/../../../../../Source"' 
 LOCAL_LDLIBS += -lz -dl -llog -lGLESv1_CM 
 LOCAL_SRC_FILES := GDCore.cpp $(MY_GD_PLATFORM_SRCS) $(MY_GD_GENERAL_SRCS)
 LOCAL_STATIC_LIBRARIES := gdbreakpad
 LOCAL_SHARED_LIBRARIES := gdjpeg gdxml gdfreetype gdpng gdcurl gdzip gdproj4
+#test:
+#	@echo $(MY_GD_PLATFORM_SRCS)
 include $(BUILD_SHARED_LIBRARY)
+
+
