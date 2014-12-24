@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GDS version="1.0">
   <TileServer>
-    <serverURL>http://toolserver.org/tiles/hikebike/${z}/${x}/${y}.png</serverURL>
+    <serverURL>http://a.tiles.wmflabs.org/hikebike/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>1.0</overlayAlpha>
   </TileServer>
   <TileServer>
-    <serverURL>http://toolserver.org/~cmarqu/hill/${z}/${x}/${y}.png</serverURL>
+    <serverURL>http://b.tiles.wmflabs.org/hillshading/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>1.0</overlayAlpha>
   </TileServer>
   <TileServer>
