@@ -145,8 +145,14 @@ public class GDService extends Service {
 
       // Start watching the location
       if (!locationWatchStarted) {
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, coreObject);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, coreObject);
+        try {
+          locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, coreObject);
+        } 
+        catch (Exception e) {};
+        try {
+          locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, coreObject);
+        }
+        catch (Exception e) {};
         locationWatchStarted = true;
       }
             

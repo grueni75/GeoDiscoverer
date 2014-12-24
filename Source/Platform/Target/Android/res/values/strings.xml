@@ -97,7 +97,7 @@
   <string name="help">Help</string>
   <string name="send_logs">Send logs</string>
   <string name="send_logs_failed">Send logs failed: %1$s</string>
-  <string name="crash_dialog_title">Geo Discoverer has crashed!</string>
+  <string name="crash_dialog_title">Geo Discoverer has crashed</string>
   <string name="crash_dialog_text">Sorry for that! Please help the developer to fix this. This dialog sends a bug report with collected information to him.</string>
   <string name="crash_dialog_comment_text">You can add an optional comment that explains the bug.</string>
   <string name="crash_dialog_email_text">If you add your email address, the author can contact you with further questions.</string>
