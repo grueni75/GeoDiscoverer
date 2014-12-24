@@ -43,7 +43,7 @@ void FontString::draw(Screen *screen, TimestampInMicroseconds t) {
     s=fontStringReference;
   if (s->getTexture()==core->getScreen()->getTextureNotDefined()) {
     font->setTexture(s);
-    screen->setTextureImage(s->texture,s->textureBitmap,s->width,s->height,graphicTextureFormatRGBA4);
+    screen->setTextureImage(s->texture,s->textureBitmap,s->width,s->height,GraphicTextureFormatRGBA4);
   }
   if (getTexture()==core->getScreen()->getTextureNotDefined()) {
     setTexture(s->getTexture());

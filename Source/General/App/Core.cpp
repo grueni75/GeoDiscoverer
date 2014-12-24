@@ -36,11 +36,12 @@ void *lateInitThread(void *args) {
 }
 
 // Constructor of the main application
-Core::Core(std::string homePath, Int screenDPI) {
+Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
 
   // Set variables
   this->homePath=homePath;
   this->screenDPI=screenDPI;
+  this->screenDiagonal=screenDiagonal;
 
   // Reset variables
   this->maintenanceThreadInfo=NULL;
@@ -245,7 +246,7 @@ bool Core::init() {
     return false;
   }
   DEBUG("initializing screen",NULL);
-  if (!(screen=new Screen(screenDPI))) {
+  if (!(screen=new Screen(screenDPI,screenDiagonal))) {
     FATAL("can not create screen object",NULL);
     return false;
   }

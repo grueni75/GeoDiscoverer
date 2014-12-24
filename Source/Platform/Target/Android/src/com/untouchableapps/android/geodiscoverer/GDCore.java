@@ -81,6 +81,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** DPI of the screen */
   protected int screenDPI = 0;
   
+  /** Diagonal of the screen in inches */
+  protected double screenDiagonal;
+  
   /** Indicates that the core is stopped */
   protected boolean coreStopped = true;
 
@@ -371,6 +374,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       DisplayMetrics metrics = new DisplayMetrics();
       activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
       this.screenDPI=metrics.densityDpi;
+      double a=metrics.widthPixels/metrics.xdpi;
+      double b=metrics.heightPixels/metrics.ydpi;
+      this.screenDiagonal=Math.sqrt(a*a+b*b);
     }
     lock.unlock();
   }
@@ -382,18 +388,21 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     boolean isInitialized=coreInitialized;
     lock.unlock();
     if (!isInitialized) {
-  
-      // Copy the assets files
-      if (!updateHome())
-        return;
-      
-      // Init the core
+
+      // Check if home dir is available
       boolean initialized=false;
-      if (homeDirAvailable) {
-        initCore(homePath,screenDPI);    
-        initialized=true;
-      } else {
+      if (!homeDirAvailable) {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","home dir not available");
+      } else {
+        
+        // Copy the assets files
+        if (!updateHome())
+          return;
+        
+        // Init the core
+        initCore(homePath,screenDPI,screenDiagonal);    
+        initialized=true;
+
       }
   
       // Ensure that the screen is recreated
@@ -474,7 +483,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   protected native void deinitJNI();
 
   /** Starts the C++ part */
-  protected native void initCore(String homePath, int DPI);
+  protected native void initCore(String homePath, int DPI, double diagonal);
   
   /** Stops the C++ part */
   protected native void deinitCore();

@@ -21,11 +21,12 @@ std::list<TextureDebugInfo> Screen::unusedTextureInfos;
 std::list<GraphicBufferInfo> Screen::unusedBufferInfos;
 
 // Constructor: open window and init opengl
-Screen::Screen(Int DPI) {
+Screen::Screen(Int DPI, double diagonal) {
   this->allowDestroying=false;
   this->allowAllocation=false;
   this->DPI=DPI;
-  this->orientation=graphicScreenOrientationProtrait;
+  this->diagonal=diagonal;
+  this->orientation=GraphicScreenOrientationProtrait;
   this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock",__FILE__, __LINE__);
   this->ellipseCoordinatesBuffer=bufferNotDefined;
 }
@@ -263,17 +264,17 @@ void Screen::setTextureImage(GraphicTextureInfo texture, UShort *image, Int widt
   GLenum imageContents;
   GLenum imageDataType;
   switch(format) {
-    case graphicTextureFormatRGB:
+    case GraphicTextureFormatRGB:
       imageFormat=GL_RGB;
       imageContents=GL_RGB;
       imageDataType=GL_UNSIGNED_SHORT_5_6_5;
       break;
-    case graphicTextureFormatRGBA4:
+    case GraphicTextureFormatRGBA4:
       imageFormat=GL_RGBA;
       imageContents=GL_RGBA;
       imageDataType=GL_UNSIGNED_SHORT_4_4_4_4;
       break;
-    case graphicTextureFormatRGBA1:
+    case GraphicTextureFormatRGBA1:
       imageFormat=GL_RGBA;
       imageContents=GL_RGBA;
       imageDataType=GL_UNSIGNED_SHORT_5_5_5_1;

@@ -329,55 +329,70 @@
                                       <xsd:enumeration value="scale"/>
                                       <xsd:enumeration value="status"/>
                                       <xsd:enumeration value="navigation"/>
+                                      <xsd:enumeration value="pathInfo"/>                                      
                                     </xsd:restriction>
                                   </xsd:simpleType>
                                 </xsd:element>
-                                <xsd:element name="Portrait">
-                                  <xsd:annotation>
-                                    <xsd:documentation>Position of the widget in portrait orientation.</xsd:documentation>
-                                  </xsd:annotation>
-                                  <xsd:complexType>
-                                    <xsd:sequence>
-                                      <xsd:element name="x" type="xsd:double" default="0">
-                                        <xsd:annotation>
-                                          <xsd:documentation>X coordinate in percent.</xsd:documentation>
-                                        </xsd:annotation>
-                                      </xsd:element>
-                                      <xsd:element name="y" type="xsd:double" default="0">
-                                        <xsd:annotation>
-                                          <xsd:documentation>Y coordinate in percent.</xsd:documentation>
-                                        </xsd:annotation>
-                                      </xsd:element>
-                                      <xsd:element name="z" type="xsd:double" default="0">
-                                        <xsd:annotation>
-                                          <xsd:documentation>Z coordinate in percent.</xsd:documentation>
-                                        </xsd:annotation>
-                                      </xsd:element>
+			                          <xsd:element name="Position" maxOccurs="unbounded">
+			                            <xsd:annotation>
+			                              <xsd:documentation>Defines the position of the widget for a given screen diagonal.</xsd:documentation>
+			                            </xsd:annotation>
+			                            <xsd:complexType>
+			                              <xsd:sequence>
+			                                <xsd:element name="Portrait">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Position of the widget in portrait orientation.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                  <xsd:complexType>
+			                                    <xsd:sequence>
+			                                      <xsd:element name="x" type="xsd:double" default="0">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>X coordinate in percent.</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                      <xsd:element name="y" type="xsd:double" default="0">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>Y coordinate in percent.</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                      <xsd:element name="z" type="xsd:double" default="0">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>Z coordinate in percent.</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                    </xsd:sequence>
+			                                  </xsd:complexType>
+			                                </xsd:element>
+			                                <xsd:element name="Landscape">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Position of the widget in landscape orientation.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                  <xsd:complexType>
+			                                    <xsd:sequence>
+			                                      <xsd:element name="x" type="xsd:double" default="0">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>X coordinate in percent.</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                      <xsd:element name="y" type="xsd:double" default="0">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>Y coordinate in percent.</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                      <xsd:element name="z" type="xsd:double" default="0">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>Z coordinate in percent.</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                    </xsd:sequence>
+			                                  </xsd:complexType>
+			                                </xsd:element>
                                     </xsd:sequence>
-                                  </xsd:complexType>
-                                </xsd:element>
-                                <xsd:element name="Landscape">
-                                  <xsd:annotation>
-                                    <xsd:documentation>Position of the widget in landscape orientation.</xsd:documentation>
-                                  </xsd:annotation>
-                                  <xsd:complexType>
-                                    <xsd:sequence>
-                                      <xsd:element name="x" type="xsd:double" default="0">
-                                        <xsd:annotation>
-                                          <xsd:documentation>X coordinate in percent.</xsd:documentation>
-                                        </xsd:annotation>
-                                      </xsd:element>
-                                      <xsd:element name="y" type="xsd:double" default="0">
-                                        <xsd:annotation>
-                                          <xsd:documentation>Y coordinate in percent.</xsd:documentation>
-                                        </xsd:annotation>
-                                      </xsd:element>
-                                      <xsd:element name="z" type="xsd:double" default="0">
-                                        <xsd:annotation>
-                                          <xsd:documentation>Z coordinate in percent.</xsd:documentation>
-                                        </xsd:annotation>
-                                      </xsd:element>
-                                    </xsd:sequence>
+						                        <xsd:attribute name="refScreenDiagonal">
+						                          <xsd:annotation>
+						                            <xsd:documentation>Screen diagonal in inch this widget position was designed for.</xsd:documentation>
+						                          </xsd:annotation>
+						                        </xsd:attribute>
                                   </xsd:complexType>
                                 </xsd:element>
                                 <xsd:element name="ActiveColor">

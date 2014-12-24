@@ -243,7 +243,7 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_dei
 
 // Inits the core
 JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_initCore
-  (JNIEnv *env, jobject thiz, jstring homePath, jint screenDPI)
+  (JNIEnv *env, jobject thiz, jstring homePath, jint screenDPI, jdouble screenDiagonal)
 {
   std::stringstream out;
 
@@ -272,7 +272,7 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_ini
 
   // Create the application
   //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","before object creation.");
-  if (!(GEODISCOVERER::core=new GEODISCOVERER::Core(homePathCStr,screenDPI))) {
+  if (!(GEODISCOVERER::core=new GEODISCOVERER::Core(homePathCStr,screenDPI,screenDiagonal))) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create core object!");
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitCore(env,thiz);
     exit(1);

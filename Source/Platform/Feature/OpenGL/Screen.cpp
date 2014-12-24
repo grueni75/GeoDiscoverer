@@ -106,7 +106,7 @@ void motionFunc(int x, int y)
 namespace GEODISCOVERER {
 
 // Constructor: open window and init opengl
-Screen::Screen(Int DPI) {
+Screen::Screen(Int DPI, double diagonal) {
   int argc = 0;
   char **argv = NULL;
 
@@ -114,6 +114,7 @@ Screen::Screen(Int DPI) {
   this->allowDestroying=false;
   this->allowAllocation=false;
   this->DPI=DPI;
+  this->diagonal=diagonal;
   this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock", __FILE__, __LINE__);
   setWakeLock(wakeLock, __FILE__, __LINE__);
 
@@ -153,7 +154,7 @@ void Screen::mainLoop() {
 
 // Get the width of the screen
 Int Screen::getWidth() {
-  if (getOrientation()==graphicScreenOrientationProtrait)
+  if (getOrientation()==GraphicScreenOrientationProtrait)
     return 480;
   else
     return 768;
@@ -161,7 +162,7 @@ Int Screen::getWidth() {
 
 // Get the height of the screen
 Int Screen::getHeight() {
-  if (getOrientation()==graphicScreenOrientationProtrait)
+  if (getOrientation()==GraphicScreenOrientationProtrait)
     return 768;
   else
     return 480;
@@ -169,8 +170,8 @@ Int Screen::getHeight() {
 
 // Gets the orientation of the screen
 GraphicScreenOrientation Screen::getOrientation() {
-  return graphicScreenOrientationProtrait;
-  //return graphicScreenOrientationLandscape;
+  return GraphicScreenOrientationProtrait;
+  //return GraphicScreenOrientationLandscape;
 }
 
 // Inits the screen
@@ -368,17 +369,17 @@ void Screen::setTextureImage(GraphicTextureInfo texture, UShort *image, Int widt
   GLenum imageContents;
   GLenum imageDataType;
   switch(format) {
-    case graphicTextureFormatRGB:
+    case GraphicTextureFormatRGB:
       imageFormat=GL_RGB;
       imageContents=GL_RGB;
       imageDataType=GL_UNSIGNED_SHORT_5_6_5;
       break;
-    case graphicTextureFormatRGBA4:
+    case GraphicTextureFormatRGBA4:
       imageFormat=GL_RGBA;
       imageContents=GL_RGBA;
       imageDataType=GL_UNSIGNED_SHORT_4_4_4_4;
       break;
-    case graphicTextureFormatRGBA1:
+    case GraphicTextureFormatRGBA1:
       imageFormat=GL_RGBA;
       imageContents=GL_RGBA;
       imageDataType=GL_UNSIGNED_SHORT_5_5_5_1;

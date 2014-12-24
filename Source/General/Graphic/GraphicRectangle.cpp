@@ -87,7 +87,7 @@ void GraphicRectangle::setTextureFromIcon(std::string iconFilename) {
   //  core->getScreen()->destroyTextureInfo(getTexture());
   //}
   setTexture(core->getScreen()->createTextureInfo());
-  core->getScreen()->setTextureImage(getTexture(),textureImage,textureWidth,textureHeight,graphicTextureFormatRGBA1);
+  core->getScreen()->setTextureImage(getTexture(),textureImage,textureWidth,textureHeight,GraphicTextureFormatRGBA1);
   free(textureImage);
 }
 

@@ -21,8 +21,8 @@ namespace GEODISCOVERER {
 // Data types
 typedef GLuint GraphicTextureInfo;
 typedef GLuint GraphicBufferInfo;
-enum GraphicTextureFormat { graphicTextureFormatRGB, graphicTextureFormatRGBA1, graphicTextureFormatRGBA4  };
-enum GraphicScreenOrientation { graphicScreenOrientationProtrait, graphicScreenOrientationLandscape  };
+enum GraphicTextureFormat { GraphicTextureFormatRGB, GraphicTextureFormatRGBA1, GraphicTextureFormatRGBA4  };
+enum GraphicScreenOrientation { GraphicScreenOrientationProtrait, GraphicScreenOrientationLandscape  };
 typedef struct {
   GraphicTextureInfo textureInfo;
   std::string source;
@@ -58,6 +58,9 @@ protected:
   // Density of the screen
   Int DPI;
 
+  // Diagonal of the screen
+  double diagonal;
+
   // Indicates if wake lock is on or off
   bool wakeLock;
 
@@ -73,7 +76,7 @@ protected:
 public:
 
   // Constructor
-  Screen(Int DPI);
+  Screen(Int DPI, double diagonal);
 
   // Destructor
   virtual ~Screen();
@@ -133,7 +136,7 @@ public:
   GraphicTextureInfo createTextureInfo();
 
   // Sets the image of a texture
-  void setTextureImage(GraphicTextureInfo texture, UShort *image, Int width, Int height, GraphicTextureFormat format=graphicTextureFormatRGB);
+  void setTextureImage(GraphicTextureInfo texture, UShort *image, Int width, Int height, GraphicTextureFormat format=GraphicTextureFormatRGB);
 
   // Frees a texture id
   void destroyTextureInfo(GraphicTextureInfo i, std::string source);
@@ -205,6 +208,9 @@ public:
       this->allowAllocation=allowAllocation;
   }
 
+  double getDiagonal() const {
+    return diagonal;
+  }
 };
 
 }

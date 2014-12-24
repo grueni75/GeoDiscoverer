@@ -89,6 +89,9 @@ protected:
   // Density of the screen
   Int screenDPI;
 
+  // Diagonal of the screen
+  Int screenDiagonal;
+
   // Current thread info about the maintenance thread
   ThreadInfo *maintenanceThreadInfo;
 
@@ -156,7 +159,7 @@ protected:
 public:
 
   // Constructor and destructor
-  Core(std::string homePath, Int screenDPI);
+  Core(std::string homePath, Int screenDPI, double screenDiagonal);
   virtual ~Core();
 
   // Called when the process is killed
@@ -372,6 +375,8 @@ extern Core *core;
 #include <WidgetPathInfo.h>
 #include <WidgetStatus.h>
 #include <WidgetPage.h>
+#include <WidgetPosition.h>
+#include <WidgetConfig.h>
 #include <GraphicEngine.h>
 #include <WidgetEngine.h>
 #include <MapArea.h>

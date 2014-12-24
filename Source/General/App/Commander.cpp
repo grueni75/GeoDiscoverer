@@ -190,9 +190,9 @@ std::string Commander::execute(std::string cmd) {
   }
   //DEBUG("after: x=%d y=%d",pos->getX(),pos->getY());
   if (cmdName=="screenChanged") {
-    GraphicScreenOrientation orientation=graphicScreenOrientationProtrait;
+    GraphicScreenOrientation orientation=GraphicScreenOrientationProtrait;
     if (args[0] == "landscape") {
-      orientation=graphicScreenOrientationLandscape;
+      orientation=GraphicScreenOrientationLandscape;
     }
     core->getScreen()->init(orientation,atoi(args[1].c_str()),atoi(args[2].c_str()));
     core->getWidgetEngine()->updateWidgetPositions();

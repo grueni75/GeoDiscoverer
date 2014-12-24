@@ -18,8 +18,6 @@ namespace GEODISCOVERER {
 
 typedef std::map<std::string, WidgetPage*> WidgetPageMap;
 typedef std::pair<std::string, WidgetPage*> WidgetPagePair;
-typedef std::map<std::string, std::string> ParameterMap;
-typedef std::pair<std::string, std::string> ParameterPair;
 
 class WidgetEngine {
 
@@ -46,15 +44,7 @@ protected:
   Int nearestPathIndex;                                 // Index of the nearest point on the nearest path
 
   // Adds a widget to a page
-  void addWidgetToPage(
-    std::string pageName,
-    WidgetType widgetType,
-    std::string widgetName,
-    double portraitX, double portraitY, Int portraitZ,
-    double landscapeX, double landscapeY, Int landscapeZ,
-    UByte activeRed, UByte activeGreen, UByte activeBlue, UByte activeAlpha,
-    UByte inactiveRed, UByte inactiveGreen, UByte inactiveBlue, UByte inactiveAlpha,
-    ParameterMap parameters);
+  void addWidgetToPage(WidgetConfig config);
 
   // Deselects the currently selected page
   void deselectPage();
