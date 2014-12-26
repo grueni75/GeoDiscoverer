@@ -68,25 +68,27 @@ public class GDNavDrawerAdapter extends ArrayAdapter<GDNavDrawerItem> {
   @Override
   public View getView(int position, View convertView, final ViewGroup parent) {
     GDNavDrawerItem item;
+    GDNavDrawerViewHolder viewHolder;
+    item = entries.get(position);
     if (convertView==null) {
-      item = entries.get(position);
+      viewHolder = new GDNavDrawerViewHolder();
       if (item.id!=GDNavDrawerItem.ID_APP_INFO) {
         convertView = inflater.inflate(R.layout.nav_drawer_item, parent, false);
-        item.iconView = (ImageView) convertView.findViewById(R.id.nav_drawer_item_icon);
-        item.titleView = (TextView) convertView.findViewById(R.id.nav_drawer_item_title);
+        viewHolder.iconView = (ImageView) convertView.findViewById(R.id.nav_drawer_item_icon);
+        viewHolder.titleView = (TextView) convertView.findViewById(R.id.nav_drawer_item_title);
       } else {
         convertView = inflater.inflate(R.layout.nav_drawer_app_info, parent, false);
-        item.appVersionView = (TextView) convertView.findViewById(R.id.nav_drawer_app_version);
+        viewHolder.appVersionView = (TextView) convertView.findViewById(R.id.nav_drawer_app_version);
       }
-      convertView.setTag(item);
+      convertView.setTag(viewHolder);
     } else {
-      item=(GDNavDrawerItem) convertView.getTag();
+      viewHolder=(GDNavDrawerViewHolder) convertView.getTag();
     }
     if (item.id!=GDNavDrawerItem.ID_APP_INFO) {
-      item.iconView.setImageResource(item.icon);
-      item.titleView.setText(item.title);
+      viewHolder.iconView.setImageResource(item.icon);
+      viewHolder.titleView.setText(item.title);
     } else {
-      item.appVersionView.setText(appVersion);
+      viewHolder.appVersionView.setText(appVersion);
     }
     return convertView;
   }

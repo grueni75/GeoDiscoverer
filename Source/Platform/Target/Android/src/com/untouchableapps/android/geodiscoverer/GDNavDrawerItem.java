@@ -36,12 +36,7 @@ public class GDNavDrawerItem {
   int id;
   int icon;
   String title;
-  
-  // Views
-  ImageView iconView=null;
-  TextView titleView=null;
-  TextView appVersionView=null;
-  
+    
   // Constructor
   public GDNavDrawerItem(int id, int icon, String title) {
     super();
