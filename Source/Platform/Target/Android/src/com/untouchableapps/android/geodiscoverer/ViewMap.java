@@ -27,6 +27,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -793,14 +794,31 @@ public class ViewMap extends GDActivity {
     LinkedList<String> logs = new LinkedList<String>();
     for (File file : folderFile.listFiles()) {
       if ((!file.isDirectory())
-          && (!file.getName().substring(file.getName().length() - 1)
-              .equals("~"))) {
+          && (!file.getName().substring(file.getName().length() - 1).equals("~"))
+          && (!file.getName().equals("send.log"))
+          && (!file.getName().endsWith(".dmp"))) {
         logs.add(file.getName());
       }
     }
     final String[] items = new String[logs.size()];
     logs.toArray(items);
-    Arrays.sort(items, Collections.reverseOrder());
+    Arrays.sort(items, new Comparator<String>() {
+
+      Comparator<String> stringComparator = Collections.reverseOrder();
+        
+      @Override
+      public int compare(String lhs, String rhs) {
+        String pattern = "^(.*)-(\\d\\d\\d\\d\\d\\d\\d\\d-\\d\\d\\d\\d\\d\\d)\\.log$";
+        if (lhs.matches(pattern)) {
+          lhs = lhs.replaceAll(pattern, "$2-$1.log");
+        }
+        if (rhs.matches(pattern)) {
+          rhs = rhs.replaceAll(pattern, "$2-$1.log");
+        }
+        return stringComparator.compare(lhs, rhs);
+      }
+      
+    });
 
     // Create the state array
     final boolean[] checkedItems = new boolean[logs.size()];
@@ -1164,7 +1182,8 @@ public class ViewMap extends GDActivity {
     messageLayout = (LinearLayout) findViewById(R.id.view_map_message_layout);
     splashLayout = (LinearLayout) findViewById(R.id.view_map_splash_layout);
     navDrawerList = (ListView) findViewById(R.id.view_map_nav_drawer);
-    navDrawerList.setAdapter(new GDNavDrawerAdapter((GDActivity)this,createNavDrawerEntries()));
+    ArrayList<GDNavDrawerItem> entries = createNavDrawerEntries();
+    navDrawerList.setAdapter(new GDNavDrawerAdapter((GDActivity)this,entries));
     navDrawerList.setOnItemClickListener(new OnItemClickListener() {
 
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
