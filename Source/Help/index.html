@@ -1136,7 +1136,7 @@ config.macros.foldFirst = {
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="ConfigTweaks" creator="Matthias" modifier="Matthias" created="201210230617" modified="201412132216" tags="systemConfig excludeSearch" changecount="33">
+<div title="ConfigTweaks" creator="Matthias" modifier="Matthias" created="201210230617" modified="201412261916" tags="systemConfig excludeSearch" changecount="45">
 <pre>//{{{
 var ua = navigator.userAgent.toLowerCase();
 //alert(ua);
@@ -1152,19 +1152,18 @@ config.options.chkSnapshotHTMLOnly=true; // Use HTML output by default
 config.options.chkShowBreadcrumbs=true;
 config.options.chkReorderBreadcrumbs=false;
 config.options.chkShowStartupBreadcrumbs=false;
+config.options.chkShowQuickEdit=true;
+config.options.chkShowRightSidebar=true; 
 if(isAndroid) {
-	config.options.chkShowRightSidebar=false; // ToggleRightSidebar
 	config.options.chkShowQuickEdit=false;
-} else {
-	config.options.chkShowRightSidebar=true; // ToggleRightSidebar
-	config.options.chkShowQuickEdit=true;
+	config.options.chkShowRightSidebar=false;
 }
 //}}}
 
 </pre>
 </div>
-<div title="ContactDeveloper" creator="Matthias" modifier="Matthias" created="201412221343" modified="201412221346" changecount="2">
-<pre>You can follow the developer on his [[Google+ page|https://plus.google.com/u/1/116970120177270246182/posts]]. You can also contact him [[by email|mailto:geodiscoverer@gmail.com]].
+<div title="ContactDeveloper" creator="Matthias" modifier="Matthias" created="201412221343" modified="201412270853" changecount="3">
+<pre>Bugs and features can be reported via the [[issue tracker|https://www.hostedredmine.com/projects/geo-discoverer/issues/new]]. You can follow the developer on his [[Google+ page|https://plus.google.com/u/1/116970120177270246182/posts]]. You can also contact him [[by email|mailto:geodiscoverer@gmail.com]].
 </pre>
 </div>
 <div title="CopyTiddlerPlugin" creator="Matthias" modifier="Matthias" created="201210250540" tags="extension systemConfig excludeSearch" changecount="2">
@@ -1349,7 +1348,7 @@ config.macros.copyTiddler = {
 };
 //}}}</pre>
 </div>
-<div title="DebugAids" creator="Matthias" modifier="Matthias" created="201412221309" modified="201412221735" changecount="17">
+<div title="DebugAids" creator="Matthias" modifier="Matthias" created="201412221309" modified="201412270853" changecount="18">
 <pre>Geo Discoverer offers several features that help to fix problems. You can also contact the developer by mail. See ContactDeveloper for more info.
 ! Crash reports
 If the app crashes, a report about the crash is created. The next time Geo Discoverer starts, it displays a notification that this report can be sent to the developer. If you select the notification, a dialog is opened. If you press &quot;OK&quot;, the crash report is sent to the developer. You can also enter additional information about the bug and your email address. This helps the developer to find the bug and he can contact you in case of questions. Please also send the crash report if you don't want to give additional information. The automatically collected report helps the developer already.
@@ -2719,7 +2718,7 @@ This product includes software (package org.acra.jraf.android.util.activitylifec
    (Android Weather Forecast - Google Weather API) 
 </pre>
 </div>
-<div title="PageTemplate" creator="Matthias" modifier="Matthias" created="201210220641" modified="201412160703" tags="extension excludeSearch" changecount="82">
+<div title="PageTemplate" creator="Matthias" modifier="Matthias" created="201210220641" modified="201412261909" tags="extension excludeSearch" changecount="84">
 <pre>&lt;!--{{{--&gt;
 &lt;!-- &lt;div class='header' macro='gradient vert [[ColorPalette::TertiaryLight]] [[ColorPalette::TertiaryMid]]'&gt; --&gt;
 &lt;div id='header' class='header'&gt;
@@ -4073,9 +4072,10 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201412261509" changecount="5">
-<pre>|! Revision |!Date |!Changes |
-|V1.0|2014-12-26|Initial version.|
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201412291507" changecount="7">
+<pre>|!Date |!Changes |
+|2014-12-26|Initial version.|
+|2014-12-29|Added issue tracker to ContactDeveloper|
 </pre>
 </div>
 <div title="RoutesAndTracks" creator="Matthias" modifier="Matthias" created="201412120607" modified="201412180609" changecount="41">
