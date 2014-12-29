@@ -100,6 +100,7 @@ protected:
   // Parameters for the arrow animation
   TimestampInMicroseconds arrowInitialTranslateDuration;
   TimestampInMicroseconds arrowNormalTranslateDuration;
+  Int arrowMinPositionDiffForRestartingAnimation;
 
   // Parameters for the target animation
   TimestampInMicroseconds targetInitialScaleDuration;

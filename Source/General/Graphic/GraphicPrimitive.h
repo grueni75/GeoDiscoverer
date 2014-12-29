@@ -294,6 +294,54 @@ public:
   void setLifeEnd(TimestampInMicroseconds lifeEnd) {
     this->lifeEnd = lifeEnd;
   }
+
+  Int getTranslateEndX() const {
+    return translateEndX;
+  }
+
+  void setTranslateEndX(Int translateEndX) {
+    this->translateEndX = translateEndX;
+  }
+
+  Int getTranslateEndY() const {
+    return translateEndY;
+  }
+
+  void setTranslateEndY(Int translateEndY) {
+    this->translateEndY = translateEndY;
+  }
+
+  Int getTranslateStartX() const {
+    return translateStartX;
+  }
+
+  void setTranslateStartX(Int translateStartX) {
+    this->translateStartX = translateStartX;
+  }
+
+  Int getTranslateStartY() const {
+    return translateStartY;
+  }
+
+  void setTranslateStartY(Int translateStartY) {
+    this->translateStartY = translateStartY;
+  }
+
+  TimestampInMicroseconds getTranslateEndTime() const {
+    return translateEndTime;
+  }
+
+  void setTranslateEndTime(TimestampInMicroseconds translateEndTime) {
+    this->translateEndTime = translateEndTime;
+  }
+
+  TimestampInMicroseconds getTranslateStartTime() const {
+    return translateStartTime;
+  }
+
+  void setTranslateStartTime(TimestampInMicroseconds translateStartTime) {
+    this->translateStartTime = translateStartTime;
+  }
 };
 
 }

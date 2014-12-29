@@ -57,6 +57,7 @@ NavigationEngine::NavigationEngine() {
   arrowDiameter=0;
   arrowInitialTranslateDuration=core->getConfigStore()->getIntValue("Graphic","arrowInitialTranslateDuration", __FILE__, __LINE__);
   arrowNormalTranslateDuration=core->getConfigStore()->getIntValue("Graphic","arrowNormalTranslateDuration", __FILE__, __LINE__);
+  arrowMinPositionDiffForRestartingAnimation=core->getConfigStore()->getIntValue("Graphic","arrowMinPositionDiffForRestartingAnimation", __FILE__, __LINE__);
   targetInitialScaleDuration=core->getConfigStore()->getIntValue("Graphic","targetInitialScaleDuration", __FILE__, __LINE__);
   targetNormalScaleDuration=core->getConfigStore()->getIntValue("Graphic","targetNormalScaleDuration", __FILE__, __LINE__);
   targetRotateDuration=core->getConfigStore()->getIntValue("Graphic","targetRotateDuration", __FILE__, __LINE__);
@@ -69,6 +70,7 @@ NavigationEngine::NavigationEngine() {
   forceNavigationInfoUpdate=false;
   computeNavigationInfoThreadInfo=NULL;
   computeNavigationInfoSignal=core->getThread()->createSignal();
+
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -803,53 +805,74 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon(__FILE__, __LINE__);
   if (showCursor) {
     if ((arrowX!=visPosX)||((arrowY!=visPosY))||(arrowAngle!=visAngle)) {
-      arrowX=visPosX;
-      arrowY=visPosY;
-      arrowAngle=visAngle;
       if (scaleHasChanged) {
         arrowIcon->setX(visPosX);
         arrowIcon->setY(visPosY);
         arrowIcon->setAngle(visAngle);
-        arrowIcon->setIsUpdated(true);
         arrowIcon->setTranslateAnimationSequence(std::list<GraphicTranslateAnimationParameter>());
         arrowIcon->setTranslateAnimation(core->getClock()->getMicrosecondsSinceStart(),visPosX,visPosY,translateEndX,translateEndY,true,arrowNormalTranslateDuration,GraphicTranslateAnimationTypeLinear);
       } else {
-        std::list<GraphicTranslateAnimationParameter> translateAnimationSequence = arrowIcon->getTranslateAnimationSequence();
-        TimestampInMicroseconds startTime = core->getClock()->getMicrosecondsSinceStart();
-        if (translateAnimationSequence.size()>0) {
-          translateAnimationSequence.pop_back(); // remove the last inifinite translation
+        Int diffX=abs(visPosX-arrowX);
+        Int diffY=abs(visPosY-arrowY);
+        DEBUG("diffX=%d diffY=%d",diffX,diffY);
+        if ((arrowIcon->getTranslateAnimationSequence().size()==0)&&(diffX<arrowMinPositionDiffForRestartingAnimation)&&(diffY<arrowMinPositionDiffForRestartingAnimation)) {
+          if ((arrowIcon->getTranslateEndX()==arrowX)&&(arrowIcon->getTranslateEndY()==arrowY)) {
+            arrowIcon->setTranslateEndX(visPosX);
+            arrowIcon->setTranslateEndY(visPosY);
+            arrowIcon->setTranslateStartX(translateEndX);
+            arrowIcon->setTranslateStartY(translateEndY);
+          } else {
+            arrowIcon->setTranslateStartX(visPosX);
+            arrowIcon->setTranslateStartY(visPosY);
+            arrowIcon->setTranslateEndX(translateEndX);
+            arrowIcon->setTranslateEndY(translateEndY);
+          }
+          if ((arrowIcon->getTranslateEndTime()==arrowIcon->getTranslateStartTime())) {
+            arrowIcon->setX(arrowIcon->getTranslateEndX());
+            arrowIcon->setY(arrowIcon->getTranslateEndY());
+          }
+          arrowIcon->setAngle(visAngle);
+        } else {
+          std::list<GraphicTranslateAnimationParameter> translateAnimationSequence = arrowIcon->getTranslateAnimationSequence();
+          TimestampInMicroseconds startTime = core->getClock()->getMicrosecondsSinceStart();
+          if (translateAnimationSequence.size()>0) {
+            translateAnimationSequence.pop_back(); // remove the last infinite translation
+          }
+          if (translateAnimationSequence.size()>0) {
+            startTime=translateAnimationSequence.back().getStartTime()+translateAnimationSequence.back().getDuration();
+          }
+          GraphicTranslateAnimationParameter translateParameter;
+          translateParameter.setStartTime(startTime);
+          translateParameter.setStartX(arrowIcon->getX());
+          translateParameter.setStartY(arrowIcon->getY());
+          translateParameter.setEndX(visPosX);
+          translateParameter.setEndY(visPosY);
+          translateParameter.setDuration(arrowInitialTranslateDuration);
+          translateParameter.setInfinite(false);
+          translateAnimationSequence.push_back(translateParameter);
+          translateParameter.setStartTime(startTime+arrowInitialTranslateDuration);
+          translateParameter.setStartX(visPosX);
+          translateParameter.setStartY(visPosY);
+          translateParameter.setEndX(translateEndX);
+          translateParameter.setEndY(translateEndY);
+          translateParameter.setDuration(arrowNormalTranslateDuration);
+          translateParameter.setInfinite(true);
+          translateAnimationSequence.push_back(translateParameter);
+          arrowIcon->setTranslateAnimationSequence(translateAnimationSequence);
+          std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = arrowIcon->getRotateAnimationSequence();
+          GraphicRotateAnimationParameter rotateParameter;
+          rotateParameter.setStartTime(startTime);
+          rotateParameter.setStartAngle(arrowIcon->getAngle());
+          rotateParameter.setEndAngle(visAngle);
+          rotateParameter.setDuration(arrowInitialTranslateDuration);
+          rotateParameter.setInfinite(false);
+          rotateAnimationSequence.push_back(rotateParameter);
+          arrowIcon->setRotateAnimationSequence(rotateAnimationSequence);
         }
-        if (translateAnimationSequence.size()>0) {
-          startTime=translateAnimationSequence.back().getStartTime()+translateAnimationSequence.back().getDuration();
-        }
-        GraphicTranslateAnimationParameter translateParameter;
-        translateParameter.setStartTime(startTime);
-        translateParameter.setStartX(arrowIcon->getX());
-        translateParameter.setStartY(arrowIcon->getY());
-        translateParameter.setEndX(visPosX);
-        translateParameter.setEndY(visPosY);
-        translateParameter.setDuration(arrowInitialTranslateDuration);
-        translateParameter.setInfinite(false);
-        translateAnimationSequence.push_back(translateParameter);
-        translateParameter.setStartTime(startTime+arrowInitialTranslateDuration);
-        translateParameter.setStartX(visPosX);
-        translateParameter.setStartY(visPosY);
-        translateParameter.setEndX(translateEndX);
-        translateParameter.setEndY(translateEndY);
-        translateParameter.setDuration(arrowNormalTranslateDuration);
-        translateParameter.setInfinite(true);
-        translateAnimationSequence.push_back(translateParameter);
-        arrowIcon->setTranslateAnimationSequence(translateAnimationSequence);
-        std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = arrowIcon->getRotateAnimationSequence();
-        GraphicRotateAnimationParameter rotateParameter;
-        rotateParameter.setStartTime(startTime);
-        rotateParameter.setStartAngle(arrowIcon->getAngle());
-        rotateParameter.setEndAngle(visAngle);
-        rotateParameter.setDuration(arrowInitialTranslateDuration);
-        rotateParameter.setInfinite(false);
-        rotateAnimationSequence.push_back(rotateParameter);
-        arrowIcon->setRotateAnimationSequence(rotateAnimationSequence);
       }
+      arrowX=visPosX;
+      arrowY=visPosY;
+      arrowAngle=visAngle;
       arrowIcon->setIsUpdated(true);
     }
     if (updateAnimation) {
