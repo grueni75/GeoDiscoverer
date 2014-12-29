@@ -31,6 +31,9 @@ void Debug::replayTrace(std::string filename) {
   Int x,y;
   double zoom,angle;
 
+  // Time in microseconds to wait before executing the next command during replay
+  TimestampInMicroseconds replayPeriod = core->getConfigStore()->getIntValue("General","replayPeriod",__FILE__,__LINE__);
+
   // Open the file
   in.open (filename.c_str());
   if (!in.is_open()) {
@@ -48,11 +51,14 @@ void Debug::replayTrace(std::string filename) {
     cmd=cmd.substr(0,cmd.size()-1);
 
     // And execute it
-    if (cmd!="createGraphic()")
+    if (cmd!="createGraphic()") {
+      if (!core->getIsInitialized())
+        return;
       core->getCommander()->execute(cmd);
+    }
 
     // Sleep a little bit
-    usleep(50000);
+    usleep(replayPeriod);
     //sleep(2);
     /*char buffer[32];
     gets(buffer);*/
