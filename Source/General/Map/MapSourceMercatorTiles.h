@@ -27,7 +27,6 @@ protected:
   bool downloadWarningOccured;                      // Indicates that a warning has occured
   static const double latBound;                     // Maximum allowed latitude value
   static const double lngBound;                     // Maximum allowed longitude value
-  MapDownloader *mapDownloader;                     // Downlads missing tiles from the tileserver
 
   // Fetches the map tile in which the given position lies from disk or server
   MapTile *fetchMapTile(MapPosition pos, Int zoomLevel);

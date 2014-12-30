@@ -45,8 +45,8 @@ MapSourceMercatorTiles::~MapSourceMercatorTiles() {
 
 // Deinitializes the map source
 void MapSourceMercatorTiles::deinit() {
-  MapSource::deinit();
   if (mapDownloader) mapDownloader->deinit();
+  MapSource::deinit();
 }
 
 // Initializes the map source

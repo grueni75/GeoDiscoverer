@@ -21,7 +21,7 @@ MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, UInt orderNr, st
   this->imageType = imageType;
   this->orderNr = orderNr;
   std::stringstream imagePathStream;
-  imagePathStream << mapSource->getFolderPath() << "/download." << orderNr << ".bin";
+  imagePathStream << mapSource->getFolderPath() << "/download." << orderNr;
   this->imagePath = imagePathStream.str();
 }
 
@@ -42,7 +42,7 @@ bool MapTileServer::replaceVariableInServerURL(std::string &url, std::string var
 }
 
 // Downloads a map image from the server
-DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, UInt nr) {
+DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int threadNr) {
 
   Int imageWidth, imageHeight;
 
@@ -60,13 +60,15 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, UInt
   lastDownloadURL=url;
 
   // Download the file
-  DownloadResult result = core->downloadURL(url,imagePath,!mapSource->getDownloadWarningOccured(),true);
+  std::stringstream threadImagePath;
+  threadImagePath << imagePath << "." << threadNr << ".bin";
+  DownloadResult result = core->downloadURL(url,threadImagePath.str(),!mapSource->getDownloadWarningOccured(),true);
   switch (result) {
     case DownloadResultSuccess:
 
       // Check if the image can be loaded
-      if ((!core->getImage()->queryPNG(imagePath,imageWidth,imageHeight))&&
-         (!core->getImage()->queryJPEG(imagePath,imageWidth,imageHeight))) {
+      if ((!core->getImage()->queryPNG(threadImagePath.str(),imageWidth,imageHeight))&&
+         (!core->getImage()->queryJPEG(threadImagePath.str(),imageWidth,imageHeight))) {
         WARNING("downloaded map from <%s> is not a valid image",url.c_str());
         return DownloadResultOtherFail;
       } else {
@@ -87,24 +89,26 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, UInt
 }
 
 // Loads a map image in RGBA format
-bool MapTileServer::composeTileImage(ImagePixel* &composedTileImage, Int &composedImageWidth, Int &composedImageHeight) {
+bool MapTileServer::composeTileImage(ImagePixel* &composedTileImage, Int &composedImageWidth, Int &composedImageHeight, Int threadNr) {
 
   ImagePixel *tileImage;
   UInt pixelSize;
   Int width,height;
   struct stat stat_buffer;
+  std::stringstream threadImagePath;
+  threadImagePath << imagePath << "." << threadNr << ".bin";
 
   // Check if the path exist
-  if (stat(imagePath.c_str(),&stat_buffer)!=0)
+  if (stat(threadImagePath.str().c_str(),&stat_buffer)!=0)
     return true;  // download was aborted but not flagged as error, so continue with image processing
 
   // Read in the image
   switch(imageType) {
     case ImageTypeJPEG:
-      tileImage=core->getImage()->loadJPEG(imagePath,width,height,pixelSize,false);
+      tileImage=core->getImage()->loadJPEG(threadImagePath.str(),width,height,pixelSize,false);
       break;
     case ImageTypePNG:
-      tileImage=core->getImage()->loadPNG(imagePath,width,height,pixelSize,false);
+      tileImage=core->getImage()->loadPNG(threadImagePath.str(),width,height,pixelSize,false);
       break;
   }
   if (!tileImage)

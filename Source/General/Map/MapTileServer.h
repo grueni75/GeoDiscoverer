@@ -39,10 +39,10 @@ public:
   virtual ~MapTileServer();
 
   // Downloads a map image from the server
-  DownloadResult downloadTileImage(MapContainer *mapContainer, UInt nr);
+  DownloadResult downloadTileImage(MapContainer *mapContainer, Int threadNr);
 
   // Loads a map image and overlays it atop of imagePixel
-  bool composeTileImage(ImagePixel* &composedTileImage, Int &composedImageWidth, Int &composedImageHeight);
+  bool composeTileImage(ImagePixel* &composedTileImage, Int &composedImageWidth, Int &composedImageHeight, Int threadNr);
 
 };
 

@@ -26,6 +26,7 @@ MapSource::MapSource() {
   contentsChanged=false;
   centerPosition=NULL;
   mapArchivesMutex=core->getThread()->createMutex("map archives mutex");
+  mapDownloader=NULL;
 }
 
 MapSource::~MapSource() {

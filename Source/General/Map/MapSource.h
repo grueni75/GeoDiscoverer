@@ -40,6 +40,7 @@ protected:
   bool contentsChanged;                     // Indicates if the users of the map source need to update their data structures
   std::list<std::string> status;            // Status of the map source
   ThreadMutexInfo *statusMutex;             // Mutex for accessing the status
+  MapDownloader *mapDownloader;             // Downlads missing tiles from the tileserver
 
   // Lists of map containers sorted by their boundaries
   std::vector<Int> mapsIndexByLatNorth;
@@ -209,6 +210,11 @@ public:
   void unlockMapArchives() {
     core->getThread()->unlockMutex(mapArchivesMutex);
   }
+
+  MapDownloader* getMapDownloader() {
+    return mapDownloader;
+  }
+
 };
 
 }
