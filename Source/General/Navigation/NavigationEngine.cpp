@@ -814,7 +814,6 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       } else {
         Int diffX=abs(visPosX-arrowX);
         Int diffY=abs(visPosY-arrowY);
-        DEBUG("diffX=%d diffY=%d",diffX,diffY);
         if ((arrowIcon->getTranslateAnimationSequence().size()==0)&&(diffX<arrowMinPositionDiffForRestartingAnimation)&&(diffY<arrowMinPositionDiffForRestartingAnimation)) {
           if ((arrowIcon->getTranslateEndX()==arrowX)&&(arrowIcon->getTranslateEndY()==arrowY)) {
             arrowIcon->setTranslateEndX(visPosX);
