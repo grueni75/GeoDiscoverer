@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GDS version="1.0">
   <TileServer>
-    <serverURL>http://a.tile.opentopomap.org/${z}/${x}/${y}.png</serverURL>
+    <serverURL>http://a.tiles.wmflabs.org/hikebike/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>1.0</overlayAlpha>
   </TileServer>
   <TileServer>
-    <serverURL>http://tile.waymarkedtrails.org/hiking/${z}/${x}/${y}.png</serverURL>
-    <overlayAlpha>0.5</overlayAlpha>
+    <serverURL>http://b.tiles.wmflabs.org/hillshading/${z}/${x}/${y}.png</serverURL>
+    <overlayAlpha>1.0</overlayAlpha>
   </TileServer>
-  <minZoomLevel>7</minZoomLevel>
-  <maxZoomLevel>15</maxZoomLevel>
+  <minZoomLevel>0</minZoomLevel>
+  <maxZoomLevel>18</maxZoomLevel>
 </GDS>
