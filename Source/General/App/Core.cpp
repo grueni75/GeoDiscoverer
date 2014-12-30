@@ -75,8 +75,8 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   commander = NULL;
   fontEngine = NULL;
   navigationEngine = NULL;
-  fileOpenForWritingRetries = 10;
-  fileOpenForWritingWaitTime = 100;
+  fileAccessRetries = 10;
+  fileAccessWaitTime = 100;
 
   // Create core objects that are required early
   if (!(thread=new Thread())) {
@@ -293,8 +293,8 @@ bool Core::init() {
 
   // Get config
   maintenancePeriod=configStore->getIntValue("General","maintenancePeriod", __FILE__, __LINE__);
-  fileOpenForWritingRetries=configStore->getIntValue("General","fileOpenForWritingRetries", __FILE__, __LINE__);
-  fileOpenForWritingWaitTime=configStore->getIntValue("General","fileOpenForWritingWaitTime", __FILE__, __LINE__);
+  fileAccessRetries=configStore->getIntValue("General","fileOpenForWritingRetries", __FILE__, __LINE__);
+  fileAccessWaitTime=configStore->getIntValue("General","fileOpenForWritingWaitTime", __FILE__, __LINE__);
 
   // Create mutexes and signals for thread communication
   mapUpdateStartSignal=thread->createSignal();
@@ -650,6 +650,17 @@ void Core::continueMapUpdate() {
 // Called when the process is killed
 void Core::unload() {
   ConfigStore::unload();
+}
+
+// Waits until the file is available
+void Core::waitForFile(std::string path) {
+  struct stat stat_buffer;
+  for (int i=0;i<fileAccessRetries;i++) {
+    if (stat(path.c_str(),&stat_buffer)==0)
+      return;
+    usleep(fileAccessWaitTime);
+  }
+  DEBUG("max retries reached but file still not available",NULL);
 }
 
 }

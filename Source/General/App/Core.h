@@ -133,9 +133,9 @@ protected:
   // Time in seconds between storing of unsaved data
   Int maintenancePeriod;
 
-  // Handling of retries when opening a file for writing
-  Int fileOpenForWritingRetries;
-  TimestampInMicroseconds fileOpenForWritingWaitTime;
+  // Handling of retries when opening a file for writing or accessing it
+  Int fileAccessRetries;
+  TimestampInMicroseconds fileAccessWaitTime;
 
   // Components
   Debug *debug;
@@ -199,6 +199,9 @@ public:
 
   // Downloads a URL
   DownloadResult downloadURL(std::string url, std::string filePath, bool generateMessages=true, bool ignoreFileNotFoundErrors=false);
+
+  // Waits until the file is available
+  void waitForFile(std::string path);
 
   // Waits until the core is initialized
   void waitForInitialization() {
@@ -316,11 +319,11 @@ public:
   }
 
   Int getFileOpenForWritingRetries() const {
-    return fileOpenForWritingRetries;
+    return fileAccessRetries;
   }
 
   TimestampInMicroseconds getFileOpenForWritingWaitTime() const {
-    return fileOpenForWritingWaitTime;
+    return fileAccessWaitTime;
   }
 };
 
