@@ -1050,6 +1050,7 @@ public class ViewMap extends GDActivity {
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_LEGEND,android.R.drawable.ic_menu_view,getString(R.string.show_legend)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_ADD_TRACKS_AS_ROUTES,android.R.drawable.ic_menu_add,getString(R.string.add_tracks_as_routes)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_REMOVE_ROUTES,android.R.drawable.ic_menu_delete,getString(R.string.remove_routes)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_FORCE_MAP_REDOWNLOAD,android.R.drawable.ic_menu_mapmode,getString(R.string.force_map_redownload)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_TOGGLE_MESSAGES,android.R.drawable.ic_menu_info_details,getString(R.string.toggle_messages)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_PREFERENCES,android.R.drawable.ic_menu_preferences,getString(R.string.preferences)));
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_HELP,android.R.drawable.ic_menu_help,getString(R.string.button_label_help)));
@@ -1257,6 +1258,9 @@ public class ViewMap extends GDActivity {
             break;
           case GDNavDrawerItem.ID_DONATE:
             donate();
+            break;
+          case GDNavDrawerItem.ID_FORCE_MAP_REDOWNLOAD:
+            coreObject.executeCoreCommand("forceMapRedownload()");
             break;
         }
         navDrawerList.setItemChecked(position, false);

@@ -117,4 +117,5 @@
 	  <item>20 €</item>
   </string-array>
   <string name="support_geodiscoverer">Support Geo Discoverer!</string>
+  <string name="force_map_redownload">Refresh visible map</string>
 </resources>

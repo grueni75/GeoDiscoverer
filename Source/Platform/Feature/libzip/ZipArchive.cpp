@@ -70,6 +70,14 @@ Int ZipArchive::getEntrySize(std::string filename) {
   }
 }
 
+// Removes the entry from the zip archive
+void ZipArchive::removeEntry(std::string filename) {
+  struct zip_stat stat;
+  if (zip_stat(archive,filename.c_str(),0,&stat)==0) {
+    zip_delete(archive,stat.index);
+  }
+}
+
 // Opens an entry
 ZipArchiveEntry ZipArchive::openEntry(std::string filename) {
   return zip_fopen(archive,filename.c_str(),0);

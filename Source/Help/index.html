@@ -2580,7 +2580,7 @@ Geo Discoverer is bundled with a set of small tools that can create the contents
 |[[GrabMaps.py|MapCreation/GrabMaps.py]]|Grabs map pictures from windows applications and creates &quot;.gdm&quot; files for them. The calibration data is also copied from the windows application. It contains support for Google Maps running in Firefox and Garmin's &quot;Deutschland Digital Topographische Karte&quot;. The script requires the software packages ~ActivePython-2.7.2.5, ~PIL-1.1.7 and ~MiniCap.|
 </pre>
 </div>
-<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201412221855" changecount="192">
+<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201501031315" changecount="194">
 <pre>The map view is the main activity of the app. It shows the map selected in the AppPreferences on the screen. The map can be moved by using one finger and zoomed by using two fingers. Each map can consist of multiple layers at different zoom levels. The app automatically selects the best layer depending on the zoom ratio. You can also create your own map. See MapCreation.
 ! Elements on the map&lt;html&gt;&lt;a name=&quot;ElementsOnTheMap&quot;/&gt;&lt;/html&gt;
 Besides the map itself, different graphical elements are placed on top of it. Here is an explanation:
@@ -2660,6 +2660,7 @@ There is also a menu available if you press the hardware menu button or if you s
 |Show legend|If the map has a legend, it is displayed in an external image viewer. See MapCreation if you want to add your own legend.|
 |Add tracks as routes|Shows a dialog that allows you to convert previously recorded tracks into routes.|
 |Remove routes|Shows a dialog that allows you to delete routes. Attention: The routes are deleted permanently!|
+|Re-download visible map|Reloads the images for the visible tiles from the tile server(s). This can be used in case the map image is outdated or wrongly downloaded.|
 |Toggle messages|Overlays the map with debug messages|
 |Preferences|Opens the preferences of the app. See AppPreferences for more info.|
 |Help|Shows this help.|
@@ -4082,10 +4083,12 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201412291507" changecount="7">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201501031340" changecount="14">
 <pre>|!Date |!Changes |
 |2014-12-26|Initial version.|
 |2014-12-29|Added issue tracker to ContactDeveloper|
+|2015-01-03|Described new menu entry &quot;Re-download visible map&quot; in MapView.|
+
 </pre>
 </div>
 <div title="RoutesAndTracks" creator="Matthias" modifier="Matthias" created="201412120607" modified="201412180609" changecount="41">

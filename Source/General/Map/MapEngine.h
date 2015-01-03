@@ -44,8 +44,10 @@ protected:
   bool forceMapUpdate;                            // Force an update of the map on the next call
   bool forceMapRecreation;                        // Force a complete recreation of the map on the next call
   bool forceCacheUpdate;                          // Force an update of the map cache on the next call
+  bool forceMapRedownload;                        // Forces a redownload of all visble tiles
   ThreadMutexInfo *forceMapUpdateMutex;           // Mutex for accessing the force map update flag
   ThreadMutexInfo *forceCacheUpdateMutex;         // Mutex for accessing the force cache update flag
+  ThreadMutexInfo *forceMapRedownloadMutex;       // Mutex for accessing the force map redownload flag
   TimestampInMicroseconds returnToLocationTimeout; // Time that must elapse before the map is repositioned to the current location
   bool returnToLocation;                          // Indicates if the map shall be centered around the location if the returnToLocationTimeout has elapsed
   bool zoomLevelLock;                             // Indicates if the zoom level of the map shall not be changed when zooming
@@ -119,6 +121,12 @@ public:
   void setForceMapRecreation()
   {
     forceMapRecreation=true;
+  }
+  void setForceMapRedownload(const char *file, int line)
+  {
+    core->getThread()->lockMutex(forceMapRedownloadMutex, file, line);
+    forceMapRedownload=true;
+    core->getThread()->unlockMutex(forceMapRedownloadMutex);
   }
   void setForceMapUpdate(const char *file, int line)
   {

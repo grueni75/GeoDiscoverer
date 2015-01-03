@@ -305,6 +305,11 @@ std::string Commander::execute(std::string cmd) {
     core->getMapEngine()->setZoomLevelLock(atoi(args[0].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="forceMapRedownload") {
+    core->getMapEngine()->setForceMapRedownload(__FILE__,__LINE__);
+    core->getMapEngine()->setForceMapUpdate(__FILE__,__LINE__);
+    cmdExecuted=true;
+  }
   if (cmdName=="updateRoutes") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->updateRoutes();

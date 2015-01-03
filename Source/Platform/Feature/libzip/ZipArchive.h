@@ -68,6 +68,9 @@ public:
   // Returns the size of the archive on disk
   Int getUnchangedSize();
 
+  // Removes the entry from the zip archive
+  void removeEntry(std::string filename);
+
   // Getters and setters
   const std::string& getArchiveFolder() const {
     return archiveFolder;

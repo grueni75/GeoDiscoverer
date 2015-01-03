@@ -845,5 +845,14 @@ void MapSource::createSearchDataStructures(bool showProgressDialog) {
 
 }
 
+// Marks a map container as obsolete
+// Please note that other objects might still use this map container
+// Call unlinkMapContainer to solve this afterwards
+void MapSource::markMapContainerObsolete(MapContainer *c) {
+}
+
+// Removes all obsolete map containers
+void MapSource::removeObsoleteMapContainers(bool removeFromMapArchive) {
+}
 
 }

@@ -357,6 +357,13 @@ public:
     }
   }
 
+  char* getCalibrationFileName() const {
+    return calibrationFileName;
+  }
+
+  char* getCalibrationFilePath() const {
+    return calibrationFilePath;
+  }
 };
 
 }

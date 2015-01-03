@@ -31,6 +31,7 @@ public class GDNavDrawerItem {
   public static final int ID_SHOW_HELP = 8;
   public static final int ID_SEND_LOGS = 9;
   public static final int ID_DONATE = 10;
+  public static final int ID_FORCE_MAP_REDOWNLOAD = 11;
   
   // Fields
   int id;

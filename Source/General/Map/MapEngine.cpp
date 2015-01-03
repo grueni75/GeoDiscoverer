@@ -35,9 +35,11 @@ MapEngine::MapEngine() {
   displayAreaMutex=core->getThread()->createMutex("map engine display area mutex");
   forceCacheUpdateMutex=core->getThread()->createMutex("map engine force cache update mutex");
   forceMapUpdateMutex=core->getThread()->createMutex("map engine force map update mutex");
+  forceMapRedownloadMutex=core->getThread()->createMutex("map engine force map redownload mutex");
   prevCompassBearing=-std::numeric_limits<double>::max();
   compassBearing=prevCompassBearing;
   isInitialized=false;
+  forceMapRedownload=false;
 }
 
 // Destructor
@@ -49,6 +51,7 @@ MapEngine::~MapEngine() {
   core->getThread()->destroyMutex(displayAreaMutex);
   core->getThread()->destroyMutex(forceCacheUpdateMutex);
   core->getThread()->destroyMutex(forceMapUpdateMutex);
+  core->getThread()->destroyMutex(forceMapRedownloadMutex);
 }
 
 // Does all action to remove a tile from the map
@@ -642,6 +645,50 @@ void MapEngine::updateMap() {
   // Indicate that the map is currently updated
   updateInProgress=true;
 
+  // Check if the tile images shall be updated
+  if (forceMapRedownload) {
+    MapDownloader *mapDownloader=core->getMapSource()->getMapDownloader();
+    if (mapDownloader) {
+
+      // Remove the visible tiles and remember the map container
+      std::list<MapContainer*> visibleMapContainers;
+      while (tiles.size()>0) {
+        MapTile *t=tiles.back();
+        bool found=false;
+        for (std::list<MapContainer*>::iterator j=visibleMapContainers.begin();j!=visibleMapContainers.end();j++) {
+          if (*j==t->getParentMapContainer()) {
+            found=true;
+            break;
+          }
+        }
+        if (t->getParentMapContainer()->getDownloadComplete()) {
+          if (!found) {
+            visibleMapContainers.push_back(t->getParentMapContainer());
+          }
+          deinitTile(t, __FILE__, __LINE__);
+          tiles.pop_back();
+        }
+      }
+
+      // Tell the map source that the map containers are obsolete and shall also be deleted from the gda archive
+      MapSource *mapSource = core->getMapSource();
+      mapSource->lockAccess(__FILE__, __LINE__);
+      for (std::list<MapContainer*>::iterator j=visibleMapContainers.begin();j!=visibleMapContainers.end();j++) {
+        mapSource->markMapContainerObsolete(*j);
+      }
+      mapSource->unlockAccess();
+
+      // Finally remove the map containers
+      mapSource->removeObsoleteMapContainers(true);
+
+      // Map has changed
+      mapChanged=true;
+    }
+    core->getThread()->lockMutex(forceMapRedownloadMutex,__FILE__, __LINE__);
+    forceMapRedownload=false;
+    core->getThread()->unlockMutex(forceMapRedownloadMutex);
+  }
+
   // Check if a cache update is required
   if (forceCacheUpdate) {
     mapChanged=true;
@@ -649,6 +696,7 @@ void MapEngine::updateMap() {
     forceCacheUpdate=false;
     core->getThread()->unlockMutex(forceCacheUpdateMutex);
   }
+
 
   // Get the current position from the graphic engine
   GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);

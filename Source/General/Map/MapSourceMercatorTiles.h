@@ -27,6 +27,7 @@ protected:
   bool downloadWarningOccured;                      // Indicates that a warning has occured
   static const double latBound;                     // Maximum allowed latitude value
   static const double lngBound;                     // Maximum allowed longitude value
+  std::list<MapContainer*> obsoleteMapContainers;   // List of obsolete map containers
 
   // Fetches the map tile in which the given position lies from disk or server
   MapTile *fetchMapTile(MapPosition pos, Int zoomLevel);
@@ -66,6 +67,14 @@ public:
 
   // Finds the calibrator for the given position
   virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator);
+
+  // Marks a map container as obsolete
+  // Please note that other objects might still use this map container
+  // Call unlinkMapContainer to solve this afterwards
+  virtual void markMapContainerObsolete(MapContainer *c);
+
+  // Removes all obsolete map containers
+  virtual void removeObsoleteMapContainers(bool removeFromMapArchive);
 
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {

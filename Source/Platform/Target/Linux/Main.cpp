@@ -83,6 +83,10 @@ void *debugThread(void *args) {
   //sleep(5);
   //GEODISCOVERER::core->getCommander()->execute("hideTarget()");
 
+  // Redownload the visible map
+  sleep(3);
+  GEODISCOVERER::core->getCommander()->execute("forceMapRedownload()");
+
   // Use the replay log if it exists
   GEODISCOVERER::core->getDebug()->replayTrace("replay.log");
 

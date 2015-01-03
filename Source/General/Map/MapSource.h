@@ -131,6 +131,14 @@ public:
   // Finds the calibrator for the given position
   virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator) = 0;
 
+  // Marks a map container as obsolete
+  // Please note that other objects might still use this map container
+  // Call unlinkMapContainer to solve this afterwards
+  virtual void markMapContainerObsolete(MapContainer *c);
+
+  // Removes all obsolete map containers
+  virtual void removeObsoleteMapContainers(bool removeFromMapArchive);
+
   // Getters and setters
   Int getMapTileLength() const {
     return mapTileLength;

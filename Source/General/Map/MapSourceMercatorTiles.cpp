@@ -374,6 +374,62 @@ MapTile *MapSourceMercatorTiles::findMapTileByGeographicArea(MapArea area, MapTi
   }
 }
 
+// Marks a map container as obsolete
+// Please note that other objects might still use this map container
+// Call unlinkMapContainer to solve this afterwards
+void MapSourceMercatorTiles::markMapContainerObsolete(MapContainer *c) {
+  obsoleteMapContainers.push_back(c);
+  for(std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
+    if (*i==c) {
+      mapContainers.erase(i);
+      break;
+    }
+  }
+}
+
+// Removes all obsolete map containers
+void MapSourceMercatorTiles::removeObsoleteMapContainers(bool removeFromMapArchive) {
+
+  // Get a copy of the currently selected obsolete map containers
+  lockAccess(__FILE__, __LINE__);
+  std::list<MapContainer*> obsoleteMapContainers = this->obsoleteMapContainers;
+  this->obsoleteMapContainers.clear();
+  unlockAccess();
+
+  // Recreate the search tree to get rid of all the references to obsolete map containers
+  lockAccess(__FILE__, __LINE__);
+  createSearchDataStructures();
+  unlockAccess();
+
+  // Shall we remove the container also from the map archive?
+  if (removeFromMapArchive) {
+    lockMapArchives(__FILE__, __LINE__);
+    for(std::list<MapContainer*>::iterator j=obsoleteMapContainers.begin();j!=obsoleteMapContainers.end();j++) {
+      MapContainer *c=*j;
+      for(std::list<ZipArchive*>::iterator i=mapArchives.begin();i!=mapArchives.end();i++) {
+        ZipArchive *mapArchive = *i;
+        if (mapArchive->getEntrySize(c->getImageFilePath())>0) {
+          mapArchive->removeEntry(c->getImageFilePath());
+          mapArchive->removeEntry(c->getCalibrationFilePath());
+          mapArchive->writeChanges();
+          break;
+        }
+      }
+    }
+    unlockMapArchives();
+
+  }
+
+  // Delete the obsolete map containers
+  for(std::list<MapContainer*>::iterator i=obsoleteMapContainers.begin();i!=obsoleteMapContainers.end();i++) {
+    MapContainer *c=*i;
+    //DEBUG("deleting map container 0x%08x",c);
+    core->getMapCache()->removeTile(c->getMapTiles()->front());
+    core->getNavigationEngine()->removeGraphics(c);
+    delete c;
+  }
+}
+
 // Performs maintenance (e.g., recreate degraded search tree)
 void MapSourceMercatorTiles::maintenance() {
 
@@ -381,7 +437,6 @@ void MapSourceMercatorTiles::maintenance() {
   if (contentsChanged) {
 
     // Remove map containers from list until cache size is reached again
-    std::list<MapContainer*> obsoleteMapContainers;
     lockAccess(__FILE__, __LINE__);
     for(std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();) {
       if (mapContainers.size()>mapContainerCacheSize) {
@@ -389,8 +444,7 @@ void MapSourceMercatorTiles::maintenance() {
         // Remove container if it is not currently downloaded and if it is not visible
         MapContainer *c=*i;
         if ((!c->isDrawn())&&(c->getDownloadComplete()&&(!c->getOverlayGraphicInvalid()))) {
-          obsoleteMapContainers.push_back(c);
-          i=mapContainers.erase(i);
+          markMapContainerObsolete(c);
         } else {
           i++;
         }
@@ -399,19 +453,10 @@ void MapSourceMercatorTiles::maintenance() {
         break;
       }
     }
-
-    // Recreate the search tree
-    createSearchDataStructures();
     unlockAccess();
 
-    // Delete the map containers
-    for(std::list<MapContainer*>::iterator i=obsoleteMapContainers.begin();i!=obsoleteMapContainers.end();i++) {
-      MapContainer *c=*i;
-      //DEBUG("deleting map container 0x%08x",c);
-      core->getMapCache()->removeTile(c->getMapTiles()->front());
-      core->getNavigationEngine()->removeGraphics(c);
-      delete c;
-    }
+    // Remove the obsolete map containers
+    removeObsoleteMapContainers(false);
 
   }
 
