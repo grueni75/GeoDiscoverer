@@ -642,9 +642,12 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
         break;
       case 1:
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND+Process.THREAD_PRIORITY_LESS_FAVORABLE);
         break;
       case 2:
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        break;
+      case 3:
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND+Process.THREAD_PRIORITY_LESS_FAVORABLE);
         break;
       default:

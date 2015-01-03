@@ -30,7 +30,7 @@ typedef struct ThreadSignalInfo {
   bool issued;
   bool oneTimeOnly;
 } ThreadSignalInfo;
-enum ThreadPriority { threadPriorityForeground=0, threadPriorityBackgroundHigh=1, threadPriorityBackgroundLow=2 };
+enum ThreadPriority { threadPriorityForegroundHigh=0, threadPriorityForegroundLow=1, threadPriorityBackgroundHigh=2, threadPriorityBackgroundLow=3 };
 
 typedef std::map<ThreadInfo, std::string*> ThreadNameMap;
 typedef std::pair<ThreadInfo, std::string*> ThreadNamePair;

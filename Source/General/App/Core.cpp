@@ -415,7 +415,7 @@ void Core::updateScreen(bool forceRedraw) {
 void Core::updateMap() {
 
   // This is a background thread
-  core->getThread()->setThreadPriority(threadPriorityBackgroundHigh);
+  core->getThread()->setThreadPriority(threadPriorityForegroundLow);
 
   // Do an endless loop
   while (1) {
