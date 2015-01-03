@@ -1261,7 +1261,7 @@
                   <xsd:documentation>Maximum size in bytes a zip file with tile images shall have before switching to a new one.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="numerOfDownloadThreads" type="xsd:integer" default="16">
+              <xsd:element name="numerOfDownloadThreads" type="xsd:integer" default="8">
                 <xsd:annotation>
                   <xsd:documentation>Number of threads to spawn that download images.</xsd:documentation>
                 </xsd:annotation>
