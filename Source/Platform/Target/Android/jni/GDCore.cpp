@@ -43,6 +43,7 @@ jmethodID setThreadPriorityMethodID=NULL;
 
 // Crash handler
 char *dumpDir = NULL;
+google_breakpad::ExceptionHandler *google_breakpad_exception_handler = NULL;
 static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
                          void* context,
                          bool succeeded)
@@ -240,6 +241,8 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_dei
   if (GEODISCOVERER::core)
     delete GEODISCOVERER::core;
   GEODISCOVERER::core=NULL;
+  if (google_breakpad_exception_handler)
+    delete google_breakpad_exception_handler;
 }
 
 // Inits the core
@@ -269,7 +272,11 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_ini
   strcpy(dumpDir,homePathCStr);
   strcat(dumpDir,(const char*)"/Log");
   google_breakpad::MinidumpDescriptor descriptor(dumpDir);
-  google_breakpad::ExceptionHandler eh(descriptor,NULL,dumpCallback,NULL,true,-1);
+  if (!(google_breakpad_exception_handler = new google_breakpad::ExceptionHandler(descriptor,NULL,dumpCallback,NULL,true,-1))) {
+    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create google breakpad exception handler!");
+    Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitCore(env,thiz);
+    exit(1);
+  }
 
   // Create the application
   //__android_log_write(ANDROID_LOG_DEBUG,"GDCore","before object creation.");
