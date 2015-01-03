@@ -1165,6 +1165,7 @@ public class ViewMap extends GDActivity {
     
     // Get the core object
     coreObject=GDApplication.coreObject;    
+    coreObject.setDisplayMetrics(getResources().getDisplayMetrics());
     coreObject.setActivity(this);
 
     // Get important handles

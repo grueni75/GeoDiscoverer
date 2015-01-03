@@ -366,18 +366,20 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     return true;
   }
   
+  /** Sets the display metrics */
+  public void setDisplayMetrics(DisplayMetrics metrics) {
+    lock.lock();
+    this.screenDPI=metrics.densityDpi;
+    double a=metrics.widthPixels/metrics.xdpi;
+    double b=metrics.heightPixels/metrics.ydpi;
+    this.screenDiagonal=Math.sqrt(a*a+b*b);
+    lock.unlock();
+  }
+  
   /** Sets the view map activity */
   public void setActivity(ViewMap activity) {
     lock.lock();
     this.activity = activity;
-    if (activity!=null) {
-      DisplayMetrics metrics = new DisplayMetrics();
-      activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-      this.screenDPI=metrics.densityDpi;
-      double a=metrics.widthPixels/metrics.xdpi;
-      double b=metrics.heightPixels/metrics.ydpi;
-      this.screenDiagonal=Math.sqrt(a*a+b*b);
-    }
     lock.unlock();
   }
   

@@ -24,6 +24,7 @@ import android.location.LocationManager;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.widget.Toast;
 
 public class GDService extends Service {
@@ -92,6 +93,9 @@ public class GDService extends Service {
     
     // Get the core object
     coreObject=GDApplication.coreObject;
+    
+    // Set the screen DPI
+    coreObject.setDisplayMetrics(getResources().getDisplayMetrics());
     
     // Get the location manager
     locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
