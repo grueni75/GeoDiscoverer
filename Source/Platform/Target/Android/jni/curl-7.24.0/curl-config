@@ -82,7 +82,7 @@ while test $# -gt 0; do
 	;;
 
     --feature|--features)
-        for feature in IPv6 ""; do
+        for feature in IPv6 AsynchDNS ""; do
             test -n "$feature" && echo "$feature"
         done
 	;;
@@ -142,18 +142,18 @@ while test $# -gt 0; do
 	   CURLLIBDIR=""
 	fi
 	if test "Xno" = "Xyes"; then
-	  echo ${CURLLIBDIR}-lcurl  -lrt 
+	  echo ${CURLLIBDIR}-lcurl   
 	else
 	  echo ${CURLLIBDIR}-lcurl  
 	fi
 	;;
 
     --static-libs)
-	echo ${exec_prefix}/lib/libcurl.a  -lrt 
+	echo ${exec_prefix}/lib/libcurl.a   
 	;;
 
     --configure)
-      echo " '--disable-ldap' '--disable-ldaps' '--disable-rtsp' '--disable-dict' '--disable-telnet' '--disable-pop3' '--disable-imap' '--disable-smtp' '--disable-gopher' '--disable-ntlm-wb' '--without-libssh2' '--without-ssl' '--without-librtmp'"
+      echo " '--build=i686-pc-linux-gnu' 'CFLAGS=-m32' 'CXXFLAGS=-m32' 'LDLFLAGS=-m32--disable-ldap' '--disable-ldaps' '--disable-rtsp' '--disable-dict' '--disable-telnet' '--disable-pop3' '--disable-imap' '--disable-smtp' '--disable-gopher' '--disable-ntlm-wb' '--without-libssh2' '--without-ssl' '--without-librtmp' '--enable-threaded-resolver' 'build_alias=i686-pc-linux-gnu'"
     ;;
 
     *)

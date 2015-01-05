@@ -95,7 +95,7 @@
 #define GETNAMEINFO_TYPE_ARG46 size_t
 
 /* Define to the type of arg 7 for getnameinfo. */
-#define GETNAMEINFO_TYPE_ARG7 unsigned int
+#define GETNAMEINFO_TYPE_ARG7 int
 
 /* Specifies the number of arguments to getservbyport_r */
 #define GETSERVBYPORT_R_ARGS 6
@@ -363,13 +363,13 @@
 /* #undef HAVE_KRB_H */
 
 /* Define to 1 if you have the lber.h header file. */
-/* #undef HAVE_LBER_H */
+#define HAVE_LBER_H 1
 
 /* Define to 1 if you have the ldapssl.h header file. */
 /* #undef HAVE_LDAPSSL_H */
 
 /* Define to 1 if you have the ldap.h header file. */
-/* #undef HAVE_LDAP_H */
+#define HAVE_LDAP_H 1
 
 /* Define to 1 if you have the `ldap_init_fd' function. */
 /* #undef HAVE_LDAP_INIT_FD */
@@ -520,7 +520,7 @@
 #define HAVE_POSIX_STRERROR_R 1
 
 /* if you have <pthread.h> */
-/* #undef HAVE_PTHREAD_H */
+#define HAVE_PTHREAD_H 1
 
 /* Define to 1 if you have the <pwd.h> header file. */
 #define HAVE_PWD_H 1
@@ -827,7 +827,7 @@
 /* #undef NTLM_WB_FILE */
 
 /* cpu-machine-OS */
-#define OS "armv7l-unknown-linux-gnueabi"
+#define OS "i686-pc-linux-gnu"
 
 /* Name of package */
 #define PACKAGE "curl"
@@ -1010,7 +1010,7 @@
 /* #undef USE_SSLEAY */
 
 /* if you want POSIX threaded DNS lookup */
-/* #undef USE_THREADS_POSIX */
+#define USE_THREADS_POSIX 1
 
 /* Use TLS-SRP authentication */
 /* #undef USE_TLS_SRP */
