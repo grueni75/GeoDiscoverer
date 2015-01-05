@@ -650,6 +650,9 @@ void MapEngine::updateMap() {
     MapDownloader *mapDownloader=core->getMapSource()->getMapDownloader();
     if (mapDownloader) {
 
+      // Open a busy dialog
+      DialogKey busyDialog = core->getDialog()->createProgress("Cleaning map archives",0);
+
       // Remove the visible tiles and remember the map container
       std::list<MapContainer*> visibleMapContainers;
       while (tiles.size()>0) {
@@ -680,6 +683,9 @@ void MapEngine::updateMap() {
 
       // Finally remove the map containers
       mapSource->removeObsoleteMapContainers(true);
+
+      // Close busy dialog
+      core->getDialog()->closeProgress(busyDialog);
 
       // Map has changed
       mapChanged=true;
