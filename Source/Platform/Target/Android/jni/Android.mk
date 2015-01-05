@@ -4,7 +4,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdproj4
 MY_LIBPROJ4_PATH := proj-4.8.0
-LOCAL_CFLAGS := -DHAVE_CONFIG_H -Ijni/$(MY_LIBPROJ4_PATH)/src -DMUTEX_pthread -g -O2
+LOCAL_CFLAGS := -DHAVE_CONFIG_H -Ijni/$(MY_LIBPROJ4_PATH)/src -DMUTEX_pthread 
 LOCAL_LDLIBS := 
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_aeqd.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBPROJ4_PATH)/,src/PJ_gnom.c)
@@ -161,7 +161,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdcurl
 MY_LIBCURL_PATH := curl-7.24.0
-LOCAL_CFLAGS := -DHAVE_CONFIG_H  -Ijni/$(MY_LIBCURL_PATH)/include/curl -Ijni/$(MY_LIBCURL_PATH)/include -Ijni/$(MY_LIBCURL_PATH)/lib -Ijni/$(MY_LIBCURL_PATH)/src -g0 -O2 -Wno-system-headers
+LOCAL_CFLAGS := -DHAVE_CONFIG_H  -Ijni/$(MY_LIBCURL_PATH)/include/curl -Ijni/$(MY_LIBCURL_PATH)/include -Ijni/$(MY_LIBCURL_PATH)/lib -Ijni/$(MY_LIBCURL_PATH)/src -Wno-system-headers
 LOCAL_LDLIBS := 
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/file.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/timeval.c)
@@ -269,7 +269,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdxml
 MY_LIBXML2_PATH := libxml2-2.7.7
-LOCAL_CFLAGS := -D_REENTRANT -O2 -Ijni/$(MY_LIBXML2_PATH) -Ijni/$(MY_LIBXML2_PATH)/include 
+LOCAL_CFLAGS := -D_REENTRANT -Ijni/$(MY_LIBXML2_PATH) -Ijni/$(MY_LIBXML2_PATH)/include 
 LOCAL_LDLIBS := -lz -ldl 
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,SAX.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,entities.c)
