@@ -105,7 +105,7 @@
   <string name="crash_toast_text">Creating crash report!</string>
   <string name="crash_notification_ticker_text">Crash reports available for Geo Discoverer!</string>
   <string name="crash_notification_title">Geo Discoverer crashed</string>
-  <string name="crash_notification_text">Please touch to send a crash report</string>
+  <string name="crash_notification_text">Please touch to send a report</string>
   <string name="welcome_dialog_title">Welcome to Geo Discoverer!</string>
   <string name="welcome_dialog_message">Geo Discoverer is a free navigation app. It comes with an extensive help that explains all features. If you like this app, please donate to support the development! </string>
   <string-array name="donation_google_catalog_values">
