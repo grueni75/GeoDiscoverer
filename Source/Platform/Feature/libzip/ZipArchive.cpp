@@ -107,6 +107,7 @@ bool ZipArchive::addEntry(std::string filename, void *buffer, Int size) {
   // Add the data to the archive
   Int result=zip_add(archive,filename.c_str(),source);
   if (result<0) {
+    DEBUG("zip_add result = %d",result);
     zip_source_free(source);
     free(buffer);
     return false;

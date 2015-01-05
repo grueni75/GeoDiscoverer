@@ -85,18 +85,19 @@ bool MapSourceMercatorTiles::init() {
   {
     Int nr;
 
-    // Add this archive if it is valid
-    if (sscanf(dp->d_name,"tiles%d.gda",&nr)==1) {
-      ZipArchive *archive = new ZipArchive(mapPath,dp->d_name);
-      if ((archive)&&(archive->init())) {
-        mapArchives.push_back(archive);
-      }
-    }
-
     // Remove any left over write tries
     std::string filename(dp->d_name);
-    if ((filename.find(".zip.")!=std::string::npos)&&(filename.find("tiles")!=std::string::npos)) {
+    if ((filename.find(".gda.")!=std::string::npos)&&(filename.find("tiles")!=std::string::npos)) {
       remove((mapPath + "/" + filename).c_str());
+    } else {
+
+      // Add this archive if it is valid
+      if (sscanf(dp->d_name,"tiles%d.gda",&nr)==1) {
+        ZipArchive *archive = new ZipArchive(mapPath,dp->d_name);
+        if ((archive)&&(archive->init())) {
+          mapArchives.push_back(archive);
+        }
+      }
     }
   }
   closedir(dfd);
