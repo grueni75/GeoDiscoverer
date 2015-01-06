@@ -423,6 +423,7 @@ void Thread::debugMutexLocks() {
           std::string *mutexName = mutexNameMap[i->first];
           std::stringstream buffer;
           buffer << "-----------------------------------------------------------------------------" << "\n";
+          DEBUG("mutexName=0x%08x",mutexName);
           buffer << *mutexName << "\n";
           buffer << "-----------------------------------------------------------------------------" << "\n";
           for(std::list<std::string*>::iterator i=waitQueue->begin();i!=waitQueue->end();i++) {
