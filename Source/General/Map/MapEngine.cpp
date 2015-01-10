@@ -668,6 +668,11 @@ void MapEngine::updateMap() {
           if (!found) {
             visibleMapContainers.push_back(t->getParentMapContainer());
           }
+          lockMapPos(__FILE__, __LINE__);
+          if (mapPos.getMapTile()==t) {
+            mapPos.setMapTile(NULL);
+          }
+          unlockMapPos();
           deinitTile(t, __FILE__, __LINE__);
           tiles.pop_back();
         }

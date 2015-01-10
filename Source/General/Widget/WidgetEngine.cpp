@@ -1263,6 +1263,12 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
   // Only one thread please
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
 
+  // Do we have an active page?
+  if (!currentPage) {
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
     core->getThread()->unlockMutex(accessMutex);
@@ -1306,6 +1312,10 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  if (!currentPage) {
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
   if (t<=ignoreTouchesEnd) {
     core->getThread()->unlockMutex(accessMutex);
     return false;
@@ -1321,6 +1331,12 @@ bool WidgetEngine::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY,
 
   // Only one thread please
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+
+  // Do we have an active page?
+  if (!currentPage) {
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
 
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
@@ -1350,6 +1366,12 @@ void WidgetEngine::deselectPage() {
 void WidgetEngine::setPage(std::string name, Int direction) {
 
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+
+  // Do we have an active page?
+  if (!currentPage) {
+    core->getThread()->unlockMutex(accessMutex);
+    return;
+  }
 
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   Int width = core->getScreen()->getWidth();

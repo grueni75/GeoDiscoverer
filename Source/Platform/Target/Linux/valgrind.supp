@@ -1,0 +1,65 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:__sin_avx
+   fun:_ZN13GEODISCOVERER11MapPosition15computeDistanceES0_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__sin_avx
+   fun:_ZN13GEODISCOVERER11MapPosition15computeDistanceES0_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:__cos_avx
+   fun:_ZN13GEODISCOVERER11MapPosition15computeDistanceES0_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:sqrt
+   fun:_ZN13GEODISCOVERER11MapPosition15computeDistanceES0_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:atan2
+   fun:_ZN13GEODISCOVERER11MapPosition15computeDistanceES0_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:__ieee754_atan2_avx
+   fun:_ZN13GEODISCOVERER11MapPosition15computeDistanceES0_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__ieee754_atan2_avx
+   fun:_ZN13GEODISCOVERER11MapPosition15computeDistanceES0_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:__dubsin
+   fun:__sin_avx
+   fun:_ZN13GEODISCOVERER11MapPosition15computeDistanceES0_
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:__dubsin
+   fun:__sin_avx
+   fun:_ZN13GEODISCOVERER11MapPosition15computeDistanceES0_
+}
+
