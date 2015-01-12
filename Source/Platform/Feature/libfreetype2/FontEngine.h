@@ -28,6 +28,7 @@ class FontEngine {
 protected:
 
   FT_Library freeTypeLib;     // Pointer to the library
+  Screen *screen;             // Screen this font engine renders for
   FontTypeMap fontTypeMap;    // Holds all available fonts
   Font *currentFont;          // Font that is currently used for drawing
   Int backgroundStrokeWidth;  // Width of the stroke (for 12 pt font) behind the font letters for better contrast on black background
@@ -44,7 +45,7 @@ protected:
 public:
 
   // Constructor
-  FontEngine();
+  FontEngine(Screen *screen);
 
   // Destructor
   virtual ~FontEngine();

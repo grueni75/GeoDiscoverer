@@ -105,31 +105,82 @@ void motionFunc(int x, int y)
 
 namespace GEODISCOVERER {
 
+// Static variables
+bool Screen::allowAllocation=false;
+bool Screen::allowDestroying=false;
+
 // Constructor: open window and init opengl
-Screen::Screen(Int DPI, double diagonal) {
-  int argc = 0;
-  char **argv = NULL;
+Screen::Screen(Int DPI, double diagonal, bool separateFramebuffer) {
 
   // Set variables
-  this->allowDestroying=false;
-  this->allowAllocation=false;
   this->DPI=DPI;
   this->diagonal=diagonal;
   this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock", __FILE__, __LINE__);
+  this->separateFramebuffer=separateFramebuffer;
+  framebuffer=0;
+  renderbuffer=0;
   setWakeLock(wakeLock, __FILE__, __LINE__);
+}
 
-  // Open window
-  glutInit(&argc, argv);
-  glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-  glutInitWindowSize(getWidth(), getHeight());
-  glutInitWindowPosition(600, 50);
-  glutCreateWindow("GeoDiscoverer");
-  glutDisplayFunc(displayFunc);
-  glutKeyboardFunc(keyboardFunc);
-  glutIdleFunc(idleFunc);
-  glutMouseFunc(mouseFunc);
-  glutMotionFunc(motionFunc);
+// Main loop
+void Screen::mainLoop() {
+  glutMainLoop();
+}
+
+// Get the width of the screen
+Int Screen::getWidth() {
+  return width;
+}
+
+// Get the height of the screen
+Int Screen::getHeight() {
+  return height;
+}
+
+// Gets the orientation of the screen
+GraphicScreenOrientation Screen::getOrientation() {
+  return orientation;
+}
+
+// Inits the screen
+void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
+
+  int argc = 0;
+  char **argv = NULL;
+
+  // Update variables
+  this->width=width;
+  this->height=height;
+  this->orientation=orientation;
+  DEBUG("dpi=%d width=%d height=%d",DPI,width,height);
+
+  // Shall we do off-screen rendering?
+  if (!separateFramebuffer) {
+
+    // Open window
+    glutInit(&argc, argv);
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(getWidth(), getHeight());
+    glutInitWindowPosition(600, 50);
+    glutCreateWindow("GeoDiscoverer");
+    glutDisplayFunc(displayFunc);
+    glutKeyboardFunc(keyboardFunc);
+    glutIdleFunc(idleFunc);
+    glutMouseFunc(mouseFunc);
+    glutMotionFunc(motionFunc);
+
+  } else {
+
+    // Create a suitable frame buffer
+    glGenFramebuffers(1,&framebuffer);
+    glGenRenderbuffers(1,&renderbuffer);
+    glBindRenderbuffer(framebuffer,renderbuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_BGR, getWidth(), getHeight());
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,framebuffer);
+    glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
+
+  }
 
   // Init display
   glClearColor(0.0f,0.0f,0.0f,0.0f);
@@ -145,41 +196,33 @@ Screen::Screen(Int DPI, double diagonal) {
   glEnable (GL_BLEND);
   //glEnable (GL_LINE_SMOOTH);
   setColorModeAlpha();
-}
-
-// Main loop
-void Screen::mainLoop() {
-  glutMainLoop();
-}
-
-// Get the width of the screen
-Int Screen::getWidth() {
-  if (getOrientation()==GraphicScreenOrientationProtrait)
-    return 480;
-  else
-    return 768;
-}
-
-// Get the height of the screen
-Int Screen::getHeight() {
-  if (getOrientation()==GraphicScreenOrientationProtrait)
-    return 768;
-  else
-    return 480;
-}
-
-// Gets the orientation of the screen
-GraphicScreenOrientation Screen::getOrientation() {
-  return GraphicScreenOrientationProtrait;
-  //return GraphicScreenOrientationLandscape;
-}
-
-// Inits the screen
-void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
 
   // Compute the maximum tiles to show
   core->getMapEngine()->setMaxTiles();
 
+}
+
+// Activates the screen for drawing
+void Screen::activate() {
+  if (separateFramebuffer)
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,framebuffer);
+  else
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
+}
+
+// Writes the screen content as a png
+void Screen::writePNG(std::string path) {
+
+  // Get the screen pixels
+  GLvoid *pixels;
+  if (!(pixels=malloc(width*height*Image::getRGBPixelSize()))) {
+    FATAL("can not reserve memory for screen pixels",NULL);
+    return;
+  }
+  glReadBuffer(GL_COLOR_ATTACHMENT0);
+  glReadPixels(0,0,width,height,GL_BGR,GL_UNSIGNED_BYTE,pixels);
+  core->getImage()->writePNG((ImagePixel*)pixels,path,width,height,core->getImage()->getRGBPixelSize());
+  free(pixels);
 }
 
 void Screen::clear() {
@@ -464,6 +507,10 @@ void Screen::destroyGraphic() {
 // Destructor
 Screen::~Screen() {
   graphicInvalidated();
+  if (separateFramebuffer) {
+    glDeleteRenderbuffers(1,&renderbuffer);
+    glDeleteFramebuffers(1,&framebuffer);
+  }
 }
 
 }

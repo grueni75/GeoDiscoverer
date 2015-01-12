@@ -339,7 +339,7 @@ public:
       this->isProcessed = isProcessed;
   }
 
-  void setIsCached(bool isCached, GraphicTextureInfo texture=core->getScreen()->getTextureNotDefined(), bool fadeOutAnimation=true);
+  void setIsCached(bool isCached, GraphicTextureInfo texture=Screen::getTextureNotDefined(), bool fadeOutAnimation=true);
 
   double getLatNorthMax() const
 {

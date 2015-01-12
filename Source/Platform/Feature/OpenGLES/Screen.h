@@ -76,13 +76,19 @@ protected:
 public:
 
   // Constructor
-  Screen(Int DPI, double diagonal);
+  Screen(Int DPI, double diagonal, bool separateFramebuffer);
 
   // Destructor
   virtual ~Screen();
 
   // Inits the screen
   void init(GraphicScreenOrientation orientation, Int width, Int height);
+
+  // Activates the screen for drawing
+  void activate();
+
+  // Writes the screen content as a png
+  void writePNG(std::string path);
 
   // Clears the screen
   void clear();

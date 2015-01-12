@@ -114,8 +114,8 @@ std::string Commander::execute(std::string cmd) {
     Int x,y;
     x=atoi(args[0].c_str());
     y=atoi(args[1].c_str());
-    x=x-core->getScreen()->getWidth()/2;
-    y=core->getScreen()->getHeight()/2-1-y;
+    x=x-core->getDefaultScreen()->getWidth()/2;
+    y=core->getDefaultScreen()->getHeight()/2-1-y;
     core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
     Int dX=lastTouchedX-x;
     Int dY=lastTouchedY-y;
@@ -150,8 +150,8 @@ std::string Commander::execute(std::string cmd) {
     y=atoi(args[1].c_str());
 
     // Convert the coordinates to screen coordinates
-    x=x-core->getScreen()->getWidth()/2;
-    y=core->getScreen()->getHeight()/2-1-y;
+    x=x-core->getDefaultScreen()->getWidth()/2;
+    y=core->getDefaultScreen()->getHeight()/2-1-y;
 
     // First check if a widget was touched
     bool widgetTouched=false;
@@ -194,7 +194,7 @@ std::string Commander::execute(std::string cmd) {
     if (args[0] == "landscape") {
       orientation=GraphicScreenOrientationLandscape;
     }
-    core->getScreen()->init(orientation,atoi(args[1].c_str()),atoi(args[2].c_str()));
+    core->getDefaultScreen()->init(orientation,atoi(args[1].c_str()),atoi(args[2].c_str()));
     core->getWidgetEngine()->updateWidgetPositions();
     cmdExecuted=true;
   }
@@ -278,11 +278,11 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setWakeLock") {
-    core->getScreen()->setWakeLock(atoi(args[0].c_str()), __FILE__, __LINE__);
+    core->getDefaultScreen()->setWakeLock(atoi(args[0].c_str()), __FILE__, __LINE__);
     cmdExecuted=true;
   }
   if (cmdName=="getWakeLock") {
-    if (core->getScreen()->getWakeLock()) {
+    if (core->getDefaultScreen()->getWakeLock()) {
       result="true";
     } else {
       result="false";

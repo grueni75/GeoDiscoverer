@@ -30,6 +30,13 @@ class Screen {
 
 protected:
 
+  // Current width and height of the screen
+  Int width;
+  Int height;
+
+  // Orientation of the screen
+  GraphicScreenOrientation orientation;
+
   // Density of the screen
   Int DPI;
 
@@ -38,6 +45,15 @@ protected:
 
   // Indicates if wake lock is on or off
   bool wakeLock;
+
+  // Indicates that this screen is drawing into a buffer
+  bool separateFramebuffer;
+
+  // Framebuffer ID
+  GLuint framebuffer;
+
+  // Renderbuffer ID
+  GLuint renderbuffer;
 
   // Number of steps to approximate an ellipse
   const static Int ellipseSegments = 32;
@@ -49,15 +65,15 @@ protected:
   const static GraphicBufferInfo bufferNotDefined = 0;
 
   // Decides if resource destroying is allowed
-  bool allowDestroying;
+  static bool allowDestroying;
 
   // Decides if resource allocation is allowed
-  bool allowAllocation;
+  static bool allowAllocation;
 
 public:
 
   // Constructor: Init screen (show window)
-  Screen(Int DPI, double diagonal);
+  Screen(Int DPI, double diagonal, bool separateFramebuffer);
 
   // Inits the screen
   void init(GraphicScreenOrientation orientation, Int width, Int height);
@@ -72,10 +88,16 @@ public:
   GraphicScreenOrientation getOrientation();
 
   // Main loop that handles events
-  void mainLoop();
+  static void mainLoop();
 
   // Destructor: clean up everything (close window)
   virtual ~Screen();
+
+  // Activates the screen for drawing
+  void activate();
+
+  // Writes the screen content as a png
+  void writePNG(std::string path);
 
   // Clears the screen
   void clear();
@@ -129,22 +151,22 @@ public:
   void endScene();
 
   // Returns a new texture id
-  GraphicTextureInfo createTextureInfo();
+  static GraphicTextureInfo createTextureInfo();
 
   // Sets the image of a texture
-  void setTextureImage(GraphicTextureInfo texture, UShort *image, Int width, Int height, GraphicTextureFormat format=GraphicTextureFormatRGB);
+  static void setTextureImage(GraphicTextureInfo texture, UShort *image, Int width, Int height, GraphicTextureFormat format=GraphicTextureFormatRGB);
 
   // Frees a texture id
-  void destroyTextureInfo(GraphicTextureInfo i, std::string source);
+  static void destroyTextureInfo(GraphicTextureInfo i, std::string source);
 
   // Returns a new buffer id
-  GraphicBufferInfo createBufferInfo();
+  static GraphicBufferInfo createBufferInfo();
 
   // Sets the data of an array buffer
-  void setArrayBufferData(GraphicBufferInfo buffer, Byte *data, Int size);
+  static void setArrayBufferData(GraphicBufferInfo buffer, Byte *data, Int size);
 
   // Frees an buffer id
-  void destroyBufferInfo(GraphicBufferInfo buffer);
+  static void destroyBufferInfo(GraphicBufferInfo buffer);
 
   // If set to one, the screen is not turned off
   void setWakeLock(bool state, const char *file, int line, bool persistent=true);
@@ -159,12 +181,12 @@ public:
   void destroyGraphic();
 
   // Getters and setters
-  const GraphicTextureInfo getTextureNotDefined()
+  static const GraphicTextureInfo getTextureNotDefined()
   {
       return textureNotDefined;
   }
 
-  const GraphicBufferInfo getBufferNotDefined()
+  static const GraphicBufferInfo getBufferNotDefined()
   {
       return bufferNotDefined;
   }
@@ -179,14 +201,14 @@ public:
       return wakeLock;
   }
 
-  void setAllowDestroying(bool allowDestroying)
+  static void setAllowDestroying(bool allowDestroying)
   {
-      this->allowDestroying=allowDestroying;
+      Screen::allowDestroying=allowDestroying;
   }
 
-  void setAllowAllocation(bool allowAllocation)
+  static void setAllowAllocation(bool allowAllocation)
   {
-      this->allowAllocation=allowAllocation;
+      Screen::allowAllocation=allowAllocation;
   }
 
   double getDiagonal() const {

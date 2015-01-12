@@ -40,8 +40,8 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
 
   // Set variables
   this->homePath=homePath;
-  this->screenDPI=screenDPI;
-  this->screenDiagonal=screenDiagonal;
+  this->defaultScreenDPI=screenDPI;
+  this->defaultScreenDiagonal=screenDiagonal;
 
   // Reset variables
   this->maintenanceThreadInfo=NULL;
@@ -53,6 +53,7 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   this->mapUpdateTileTextureProcessedSignal=NULL;
   this->isInitializedMutex=NULL;
   this->isInitializedSignal=NULL;
+  this->maintenancePeriod=0;
   isInitialized=false;
   quitMapUpdateThread=false;
   mapUpdateStopped=true;
@@ -64,7 +65,6 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   thread = NULL;
   dialog = NULL;
   clock = NULL;
-  screen = NULL;
   graphicEngine = NULL;
   widgetEngine = NULL;
   mapCache = NULL;
@@ -153,7 +153,7 @@ Core::~Core() {
   }
 
   // Delete the components
-  screen->setAllowDestroying(true);
+  Screen::setAllowDestroying(true);
   DEBUG("deleting commander",NULL);
   if (commander) delete commander;
   DEBUG("deleting navigationEngine",NULL);
@@ -170,8 +170,12 @@ Core::~Core() {
   if (graphicEngine) delete graphicEngine;
   DEBUG("deleting fontEngine",NULL);
   if (fontEngine) delete fontEngine;
-  DEBUG("deleting screen",NULL);
-  if (screen) delete screen;
+  DEBUG("deleting devices",NULL);
+  for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
+    Device *d = *i;
+    delete d;
+  }
+  devices.clear();
   DEBUG("deleting unit converter",NULL);
   if (unitConverter) delete unitConverter;
   DEBUG("deleting image",NULL);
@@ -245,13 +249,15 @@ bool Core::init() {
     FATAL("can not create dialog object",NULL);
     return false;
   }
-  DEBUG("initializing screen",NULL);
-  if (!(screen=new Screen(screenDPI,screenDiagonal))) {
+  DEBUG("initializing default device",NULL);
+  Device *device;
+  if (!(device=new Device(defaultScreenDPI,defaultScreenDiagonal,0,false))) {
     FATAL("can not create screen object",NULL);
     return false;
   }
+  devices.push_back(device);
   DEBUG("initializing fontEngine",NULL);
-  if (!(fontEngine=new FontEngine())) {
+  if (!(fontEngine=new FontEngine(getDefaultScreen()))) {
     FATAL("can not create font engine object",NULL);
     return false;
   }
@@ -326,7 +332,7 @@ void Core::updateScreen(bool forceRedraw) {
   PROFILE_START;
 
   // Allow texture allocation
-  screen->setAllowAllocation(true);
+  Screen::setAllowAllocation(true);
 
   // Check if all objects are initialized
   if ((mapSource->getIsInitialized())&&(navigationEngine->getIsInitialized())) {
@@ -407,7 +413,7 @@ void Core::updateScreen(bool forceRedraw) {
   }
 
   // Disallow texture allocation
-  screen->setAllowAllocation(false);
+  Screen::setAllowAllocation(false);
   PROFILE_ADD("post draw");
 }
 
@@ -603,27 +609,33 @@ void Core::updateGraphic(bool graphicInvalidated) {
   }
 
   // First deinit everything
-  screen->setAllowDestroying(true);
+  Screen::setAllowDestroying(true);
   navigationEngine->destroyGraphic();
   if (isInitialized)
     mapCache->destroyGraphic();
   widgetEngine->destroyGraphic();
   graphicEngine->destroyGraphic();
   fontEngine->destroyGraphic();
-  screen->destroyGraphic();
-  if (graphicInvalidated) {
-    screen->graphicInvalidated();
+  for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
+    Device *d = *i;
+    d->getScreen()->destroyGraphic();
+    if (graphicInvalidated) {
+      d->getScreen()->graphicInvalidated();
+    }
   }
-  screen->setAllowDestroying(false);
-  screen->setAllowAllocation(true);
-  screen->createGraphic();
+  Screen::setAllowDestroying(false);
+  Screen::setAllowAllocation(true);
+  for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
+    Device *d = *i;
+    d->getScreen()->createGraphic();
+  }
   fontEngine->createGraphic();
   graphicEngine->createGraphic();
   widgetEngine->createGraphic();
   if (isInitialized)
     mapCache->createGraphic();
   navigationEngine->createGraphic();
-  screen->setAllowAllocation(false);
+  Screen::setAllowAllocation(false);
 
   // Trigger an update of the map
   mapEngine->setForceMapRecreation();
@@ -661,6 +673,11 @@ void Core::waitForFile(std::string path) {
     usleep(fileAccessWaitTime);
   }
   DEBUG("max retries reached but file still not available",NULL);
+}
+
+// Returns the default screen
+Screen *Core::getDefaultScreen() {
+  return devices.front()->getScreen();
 }
 
 }

@@ -60,6 +60,7 @@ class ConfigStore;
 class Thread;
 class Clock;
 class Screen;
+class Device;
 class FontEngine;
 class GraphicEngine;
 class WidgetEngine;
@@ -87,10 +88,10 @@ protected:
   std::string homePath;
 
   // Density of the screen
-  Int screenDPI;
+  Int defaultScreenDPI;
 
   // Diagonal of the screen
-  Int screenDiagonal;
+  Int defaultScreenDiagonal;
 
   // Current thread info about the maintenance thread
   ThreadInfo *maintenanceThreadInfo;
@@ -143,8 +144,8 @@ protected:
   ConfigStore *configStore;
   Thread *thread;
   Clock *clock;
-  Screen *screen;
   UnitConverter *unitConverter;
+  std::list<Device*> devices;
   FontEngine *fontEngine;
   GraphicEngine *graphicEngine;
   WidgetEngine *widgetEngine;
@@ -274,9 +275,9 @@ public:
       return fontEngine;
   }
 
-  Screen *getScreen() const
+  std::list<Device*> *getDevices()
   {
-      return screen;
+      return &devices;
   }
 
   Thread *getThread() const
@@ -325,6 +326,8 @@ public:
   TimestampInMicroseconds getFileOpenForWritingWaitTime() const {
     return fileAccessWaitTime;
   }
+
+  Screen *getDefaultScreen();
 };
 
 // Pointer to the core
@@ -404,5 +407,6 @@ extern Core *core;
 #include <NavigationTarget.h>
 #include <NavigationEngine.h>
 #include <Commander.h>
+#include <Device.h>
 
 #endif /* MAIN_H_ */

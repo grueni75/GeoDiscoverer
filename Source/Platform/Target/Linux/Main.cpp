@@ -31,7 +31,7 @@ void *mainThread(void *args) {
   GEODISCOVERER::core->getCommander()->execute("screenChanged(landscape,768,480)");
 
   // Start the main loop
-  GEODISCOVERER::core->getScreen()->mainLoop();
+  GEODISCOVERER::Screen::mainLoop();
 
   // Exit the thread
   mainThreadHasExited=true;

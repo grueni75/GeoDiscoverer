@@ -82,6 +82,7 @@ class Font {
 protected:
 
   FT_Library freeTypeLib;                         // Pointer to the library
+  Screen *screen;                                 // Screen this font is rendered for
   FT_Face face;                                   // Holds the font data
   Int size;                                       // Size of the font
   Int height;                                     // Height of the font
@@ -108,7 +109,7 @@ protected:
 public:
 
   // Constructor
-  Font(FT_Library freeTypeLib, std::string filename, Int size);
+  Font(FT_Library freeTypeLib, std::string filename, Int size, Screen *screen);
 
   // Destructor
   virtual ~Font();

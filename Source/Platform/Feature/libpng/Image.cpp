@@ -187,7 +187,7 @@ cleanup:
 }
 
 // Loads a png-based icon by considering the DPI of the screen
-ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &imageHeight, double &dpiScale, UInt &pixelSize) {
+ImagePixel *Image::loadPNGIcon(Screen *screen, std::string filename, Int &imageWidth, Int &imageHeight, double &dpiScale, UInt &pixelSize) {
 
   FILE *in;
   std::string bestIconPath="";
@@ -195,7 +195,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
 
   // First check if the icon in the device's native screen dpi is available
   std::stringstream s;
-  bestDPI=core->getScreen()->getDPI();
+  bestDPI=screen->getDPI();
   s << iconFolder << "/" << bestDPI << "dpi/" << filename;
   //DEBUG("checking existance of icon <%s>",s.str().c_str());
   if (access(s.str().c_str(),F_OK)==0) {
@@ -231,7 +231,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
             std::string t=dirp->d_name;
             t=t.substr(0,dirpath.find_first_of("dpi"));
             Int dpi=atoi(t.c_str());
-            Int dpiDistance=abs(core->getScreen()->getDPI()-dpi);
+            Int dpiDistance=abs(screen->getDPI()-dpi);
             if (dpiDistance<bestDPIDistance) {
               bestIconPath=iconPath;
               bestDPIDistance=dpiDistance;
@@ -257,7 +257,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
     return NULL;
 
   // Compute the width and height of the scaled icon
-  dpiScale=(double)core->getScreen()->getDPI()/(double)bestDPI;
+  dpiScale=(double)screen->getDPI()/(double)bestDPI;
 
   // That's it
   return icon;

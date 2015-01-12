@@ -39,10 +39,11 @@
 namespace GEODISCOVERER {
 
 // Constructor
-Font::Font(FT_Library freeTypeLib, std::string filename, Int size) {
+Font::Font(FT_Library freeTypeLib, std::string filename, Int size, Screen *screen) {
 
   // Set variables
   this->freeTypeLib=freeTypeLib;
+  this->screen=screen;
 
   // Load the font
   FT_Error error=FT_New_Face( freeTypeLib, filename.c_str(), 0, &face );
@@ -53,7 +54,7 @@ Font::Font(FT_Library freeTypeLib, std::string filename, Int size) {
 
   // Set the size of the font
   this->size=size;
-  double multiplier=(double)core->getScreen()->getDPI()/120.0;
+  double multiplier=(double)screen->getDPI()/120.0;
   height=multiplier*size;
   if (FT_Set_Pixel_Sizes(face,0,height)) {
     FATAL("can not set font size",NULL);
@@ -111,7 +112,7 @@ void Font::destroyGraphic() {
 
   // Release all textures
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
-    core->getScreen()->destroyTextureInfo(*i,"Font");
+    Screen::destroyTextureInfo(*i,"Font");
   }
   unusedTextures.clear();
 }
@@ -125,12 +126,12 @@ void Font::setTexture(FontString *fontString) {
 
   // Get the texture from the unused texture list
   // If the unused texture list is empty, create a new texture
-  if (fontString->getTexture()==core->getScreen()->getTextureNotDefined()) {
+  if (fontString->getTexture()==Screen::getTextureNotDefined()) {
     if (unusedTextures.size()>0) {
       fontString->setTexture(unusedTextures.front());
       unusedTextures.pop_front();
     } else {
-      fontString->setTexture(core->getScreen()->createTextureInfo());
+      fontString->setTexture(Screen::createTextureInfo());
     }
   }
 
@@ -441,7 +442,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
     k->second->increaseUseCount();
 
     // Copy the contents from the used font string (you also need to update the cache code in createString if you change this)
-    if (!(fontString=new FontString(this,k->second))) {
+    if (!(fontString=new FontString(screen,this,k->second))) {
       FATAL("can not create font string object",NULL);
       return NULL;
     }
@@ -472,7 +473,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
 
   // Create a new font string
   //DEBUG("creating new string",NULL);
-  if (!(fontString=new FontString(this,NULL))) {
+  if (!(fontString=new FontString(screen,this,NULL))) {
     FATAL("can not create font string object",NULL);
     return NULL;
   }
@@ -503,7 +504,7 @@ void Font::destroyString(FontString *fontString) {
 
     // Destroy the handed over string if it is not from the map
     if (k->second!=fontString) {
-      fontString->setTexture(core->getScreen()->getTextureNotDefined());
+      fontString->setTexture(Screen::getTextureNotDefined());
       delete fontString;
     }
     fontString=k->second;
@@ -538,9 +539,9 @@ void Font::destroyString(FontString *fontString) {
       FATAL("can not erase font string in cached string map",NULL);
       return;
     }
-		if (oldestFontString->getTexture()!=core->getScreen()->getTextureNotDefined())
+		if (oldestFontString->getTexture()!=Screen::getTextureNotDefined())
 		  unusedTextures.push_back(oldestFontString->getTexture());
-    oldestFontString->setTexture(core->getScreen()->getTextureNotDefined());
+    oldestFontString->setTexture(Screen::getTextureNotDefined());
     delete oldestFontString;
   }
 
