@@ -43,11 +43,11 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
     // Init parameters
     minDurationBetweenOffRouteAlerts = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "minDurationBetweenOffRouteAlerts")) *  1000;
 
-    // Prepare the text to speech engine
-    textToSpeech = new TextToSpeech(context, this);
-    
     // Remember context
     this.context = context;
+
+    // Prepare the text to speech engine
+    textToSpeech = new TextToSpeech(context, this);
   }
 
   /** Prepare voice output */
