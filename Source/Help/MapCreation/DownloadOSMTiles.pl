@@ -106,6 +106,7 @@ if ( $opt{dumptilelist} ) {
 }
 else {
     downloadtiles($tilelist);
+    print "Tip: re-execute the script to check if all tiles have been downloaded!\n";
 }
 
 # Select tiles from command line options
@@ -207,13 +208,14 @@ sub downloadtiles {
 
     for my $zoom ( sort { $a <=> $b } keys %$tiles ) {
 
-        printf "Download %d tiles for zoom level %d ...\n",
+        printf "Download %d tiles for zoom level %d ",
           scalar( @{ $tiles->{$zoom} } ), $zoom
           unless $opt{quiet};
 
         for my $t ( @{ $tiles->{$zoom} } ) {
             downloadtile( $lwpua, @{ $t->{xyz} } );
         }
+        print "\n" unless $opt{quiet};
     }
 }
 
@@ -311,6 +313,7 @@ sub downloadtile {
     }
 
     # Download the image
+    print "." unless $opt{quiet};
     mkpath( dirname($fname) );
     my $repeat = 1;
     while ($repeat) {
@@ -320,7 +323,7 @@ sub downloadtile {
         unlink $fname . "." . $i;
         my $res = $lwpua->get( $url, ':content_file' => $fname . "." . $i );
         $repeat = 0;
-        if ($res->status_line =~ m/^500 /) {
+        if (($res->status_line =~ m/^500 /)||($res->status_line =~ m/^504 /)) {
           $repeat = 1;
         } else {
           die $res->status_line unless $res->is_success;
