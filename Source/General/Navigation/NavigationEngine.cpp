@@ -290,7 +290,7 @@ void NavigationEngine::deinit() {
   // Save the track first
   if (recordedTrack) {
     recordedTrack->writeGPXFile(); // locking is handled within writeGPXFile()
-    core->getWidgetEngine()->onPathChange(recordedTrack,NavigationPathChangeTypeWillBeRemoved);
+    core->onPathChange(recordedTrack,NavigationPathChangeTypeWillBeRemoved);
     lockRecordedTrack(__FILE__, __LINE__);
     delete recordedTrack;
     recordedTrack=NULL;
@@ -300,7 +300,7 @@ void NavigationEngine::deinit() {
   // Free all routes
   lockRoutes(__FILE__, __LINE__);
   for (std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    core->getWidgetEngine()->onPathChange(*i,NavigationPathChangeTypeWillBeRemoved);
+    core->onPathChange(*i,NavigationPathChangeTypeWillBeRemoved);
     delete *i;
   }
   routes.clear();
@@ -404,7 +404,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     //PROFILE_ADD("track update");
 
     // Inform the widget engine
-    core->getWidgetEngine()->onLocationChange(locationPos);
+    core->onLocationChange(locationPos);
 
     // Update the graphics
     updateScreenGraphic(false);
@@ -677,8 +677,8 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   bool updateAnimation=false;
   double screenZoom=visPos.getZoom();
   double screenAngle=FloatingPoint::degree2rad(visPos.getAngle());
-  Int zoomedScreenWidth=floor(((double)core->getScreen()->getWidth())/screenZoom);
-  Int zoomedScreenHeight=floor(((double)core->getScreen()->getHeight())/screenZoom);
+  Int zoomedScreenWidth=floor(((double)core->getDefaultScreen()->getWidth())/screenZoom);
+  Int zoomedScreenHeight=floor(((double)core->getDefaultScreen()->getHeight())/screenZoom);
   //DEBUG("screenZoom=%f zoomedScreenWidth=%d zoomedScreenHeight=%d",screenZoom,zoomedScreenWidth,zoomedScreenHeight);
   if ((targetPos.isValid())&&(mapPos.getMapTile())) {
     showCursor=true;

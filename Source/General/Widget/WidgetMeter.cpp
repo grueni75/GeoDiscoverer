@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetMeter::WidgetMeter() : WidgetPrimitive() {
+WidgetMeter::WidgetMeter(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
   widgetType=WidgetTypeMeter;
   valueFontString=NULL;
   unitFontString=NULL;
@@ -29,21 +29,21 @@ WidgetMeter::WidgetMeter() : WidgetPrimitive() {
 
 // Destructor
 WidgetMeter::~WidgetMeter() {
-  core->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
-  if (unitFontString) core->getFontEngine()->destroyString(unitFontString);
-  core->getFontEngine()->unlockFont();
-  core->getFontEngine()->lockFont("sansBoldNormal",__FILE__, __LINE__);
-  if (labelFontString) core->getFontEngine()->destroyString(labelFontString);
-  core->getFontEngine()->unlockFont();
-  core->getFontEngine()->lockFont("sansLarge",__FILE__, __LINE__);
-  if (valueFontString) core->getFontEngine()->destroyString(valueFontString);
-  core->getFontEngine()->unlockFont();
+  widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
+  if (unitFontString) widgetPage->getFontEngine()->destroyString(unitFontString);
+  widgetPage->getFontEngine()->unlockFont();
+  widgetPage->getFontEngine()->lockFont("sansBoldNormal",__FILE__, __LINE__);
+  if (labelFontString) widgetPage->getFontEngine()->destroyString(labelFontString);
+  widgetPage->getFontEngine()->unlockFont();
+  widgetPage->getFontEngine()->lockFont("sansLarge",__FILE__, __LINE__);
+  if (valueFontString) widgetPage->getFontEngine()->destroyString(valueFontString);
+  widgetPage->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetMeter::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   std::string value;
   std::string unit;
   bool update;
@@ -148,7 +148,7 @@ void WidgetMeter::draw(Screen *screen, TimestampInMicroseconds t) {
 // Sets the type of meter
 void WidgetMeter::setMeterType(WidgetMeterType meterType)
 {
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
 
   // Set the type
   this->meterType=meterType;

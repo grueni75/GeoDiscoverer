@@ -343,7 +343,7 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
           Int endX=pos.getX()-k->getMapX(0)-flag->getIconWidth()/2;
           Int endY=k->getHeight()-(pos.getY()-k->getMapY(0))-flag->getIconHeight()/2;
           Int startX=endX;
-          Int startY=endY+core->getScreen()->getHeight();
+          Int startY=endY+core->getDefaultScreen()->getHeight();
           if (animate) {
             flag->setX(startX);
             flag->setY(startY);
@@ -545,7 +545,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   unlockAccess();
 
   // Inform the widgets
-  core->getWidgetEngine()->onPathChange(this,NavigationPathChangeTypeEndPositionAdded);
+  core->onPathChange(this,NavigationPathChangeTypeEndPositionAdded);
 }
 
 // Clears the graphical representation
@@ -1131,7 +1131,7 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
   unlockAccess();
 
   // Inform the widget engine
-  core->getWidgetEngine()->onPathChange(this, NavigationPathChangeTypeFlagSet);
+  core->onPathChange(this, NavigationPathChangeTypeFlagSet);
 }
 
 // Sets the end flag at the given index
@@ -1190,7 +1190,7 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
   unlockAccess();
 
   // Inform the widget engine
-  core->getWidgetEngine()->onPathChange(this, NavigationPathChangeTypeFlagSet);
+  core->onPathChange(this, NavigationPathChangeTypeFlagSet);
 }
 
 // Returns the points selected by the flags

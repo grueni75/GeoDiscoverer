@@ -33,6 +33,11 @@ protected:
 
   // Components of the device
   Screen *screen;
+  FontEngine *fontEngine;
+  WidgetEngine *widgetEngine;
+
+  // Number of frames without any change
+  Int noChangeFrameCount;
 
 public:
 
@@ -51,8 +56,24 @@ public:
     return screen;
   }
 
+  FontEngine *getFontEngine() {
+    return fontEngine;
+  }
+
+  WidgetEngine *getWidgetEngine() {
+    return widgetEngine;
+  }
+
   TimestampInMicroseconds getUpdateInterval() const {
     return updateInterval;
+  }
+
+  Int getNoChangeFrameCount() const {
+    return noChangeFrameCount;
+  }
+
+  void setNoChangeFrameCount(Int noChangeFrameCount) {
+    this->noChangeFrameCount = noChangeFrameCount;
   }
 };
 

@@ -100,7 +100,7 @@ protected:
 public:
 
   // Constructor
-  WidgetNavigation();
+  WidgetNavigation(WidgetPage *widgetPage);
 
   // Destructor
   virtual ~WidgetNavigation();

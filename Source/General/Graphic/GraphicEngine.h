@@ -87,9 +87,6 @@ protected:
   // Previous position
   GraphicPosition previousPosition;
 
-  // Number of frames without any change
-  Int noChangeFrameCount;
-
   // Last start time of the center icon fade
   TimestampInMicroseconds lastCenterIconFadeStartTime;
 
@@ -127,13 +124,13 @@ public:
   void destroyGraphic();
 
   // Creates all graphic
-  void createGraphic();
+  void createGraphic(Device *device);
 
   // Deinits dynamic data
   void deinit();
 
   // Does the drawing
-  void draw(bool forceRedraw);
+  void draw(Device *device, bool forceRedraw);
 
   // Outputs statistical infos
   void outputStats();

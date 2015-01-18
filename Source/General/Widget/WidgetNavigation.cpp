@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetNavigation::WidgetNavigation() : WidgetPrimitive(), turnArrowPointBuffer(24) {
+WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage), turnArrowPointBuffer(24) {
   widgetType=WidgetTypeNavigation;
   updateInterval=1000000;
   nextUpdateTime=0;
@@ -27,7 +27,7 @@ WidgetNavigation::WidgetNavigation() : WidgetPrimitive(), turnArrowPointBuffer(2
   locationBearingActual=0;
   locationBearingActual=0;
   directionChangeDuration=0;
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   fontEngine->updateString(&distanceLabelFontString,"Distance");
   fontEngine->updateString(&durationLabelFontString,"Duration");
@@ -52,18 +52,18 @@ WidgetNavigation::WidgetNavigation() : WidgetPrimitive(), turnArrowPointBuffer(2
 
 // Destructor
 WidgetNavigation::~WidgetNavigation() {
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
-  if (distanceLabelFontString) core->getFontEngine()->destroyString(distanceLabelFontString);
-  if (durationLabelFontString) core->getFontEngine()->destroyString(durationLabelFontString);
+  if (distanceLabelFontString) fontEngine->destroyString(distanceLabelFontString);
+  if (durationLabelFontString) fontEngine->destroyString(durationLabelFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
-  if (distanceValueFontString) core->getFontEngine()->destroyString(distanceValueFontString);
-  if (durationValueFontString) core->getFontEngine()->destroyString(durationValueFontString);
+  if (distanceValueFontString) fontEngine->destroyString(distanceValueFontString);
+  if (durationValueFontString) fontEngine->destroyString(durationValueFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++) {
-    if (orientationLabelFontStrings[i]) core->getFontEngine()->destroyString(orientationLabelFontStrings[i]);
+    if (orientationLabelFontStrings[i]) fontEngine->destroyString(orientationLabelFontStrings[i]);
   }
   fontEngine->unlockFont();
 }
@@ -72,7 +72,7 @@ WidgetNavigation::~WidgetNavigation() {
 bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
   bool update;
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   NavigationEngine *navigationEngine=core->getNavigationEngine();
   UnitConverter *unitConverter=core->getUnitConverter();
   std::string value, unit;
@@ -273,7 +273,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     }
 
     // Activate widget if not already
-    if (!core->getWidgetEngine()->getWidgetsActive()) {
+    if (!widgetPage->getWidgetEngine()->getWidgetsActive()) {
       if (activateWidget!=active) {
         if (activateWidget) {
           setFadeAnimation(t,getColor(),getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());

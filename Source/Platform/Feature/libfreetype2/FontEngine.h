@@ -28,7 +28,7 @@ class FontEngine {
 protected:
 
   FT_Library freeTypeLib;     // Pointer to the library
-  Screen *screen;             // Screen this font engine renders for
+  Int DPI;                    // DPI of the screen this font engine renders for
   FontTypeMap fontTypeMap;    // Holds all available fonts
   Font *currentFont;          // Font that is currently used for drawing
   Int backgroundStrokeWidth;  // Width of the stroke (for 12 pt font) behind the font letters for better contrast on black background
@@ -45,7 +45,7 @@ protected:
 public:
 
   // Constructor
-  FontEngine(Screen *screen);
+  FontEngine(Int DPI);
 
   // Destructor
   virtual ~FontEngine();
@@ -98,6 +98,10 @@ public:
 
   Int getFadeOutOffset() const {
     return fadeOutOffset;
+  }
+
+  Int getDPI() const {
+    return DPI;
   }
 };
 

@@ -25,7 +25,7 @@ void *widgetPathInfoThread(void *args) {
 }
 
 // Constructor
-WidgetPathInfo::WidgetPathInfo() : WidgetPrimitive(), altitudeProfileAxisPointBuffer(8*6) {
+WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage), altitudeProfileAxisPointBuffer(8*6) {
   widgetType=WidgetTypePathInfo;
   pathNameFontString=NULL;
   pathLengthFontString=NULL;
@@ -64,33 +64,33 @@ WidgetPathInfo::~WidgetPathInfo() {
   core->getThread()->destroySignal(updateVisualizationSignal);
   core->getThread()->destroyMutex(visualizationMutex);
   core->getThread()->destroyMutex(widgetPathInfoThreadWorkingMutex);
-  core->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
-  if (pathNameFontString) core->getFontEngine()->destroyString(pathNameFontString);
-  if (pathLengthFontString) core->getFontEngine()->destroyString(pathLengthFontString);
-  if (pathAltitudeUpFontString) core->getFontEngine()->destroyString(pathAltitudeUpFontString);
-  if (pathAltitudeDownFontString) core->getFontEngine()->destroyString(pathAltitudeDownFontString);
-  if (pathDurationFontString) core->getFontEngine()->destroyString(pathDurationFontString);
-  core->getFontEngine()->unlockFont();
+  widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
+  if (pathNameFontString) widgetPage->getFontEngine()->destroyString(pathNameFontString);
+  if (pathLengthFontString) widgetPage->getFontEngine()->destroyString(pathLengthFontString);
+  if (pathAltitudeUpFontString) widgetPage->getFontEngine()->destroyString(pathAltitudeUpFontString);
+  if (pathAltitudeDownFontString) widgetPage->getFontEngine()->destroyString(pathAltitudeDownFontString);
+  if (pathDurationFontString) widgetPage->getFontEngine()->destroyString(pathDurationFontString);
+  widgetPage->getFontEngine()->unlockFont();
   if (altitudeProfileFillPointBuffer) delete altitudeProfileFillPointBuffer;
   if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
-  core->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
+  widgetPage->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
   if (altitudeProfileXTickFontStrings) {
     for (Int i=0;i<altitudeProfileXTickCount;i++)
-      if (altitudeProfileXTickFontStrings[i]) core->getFontEngine()->destroyString(altitudeProfileXTickFontStrings[i]);
+      if (altitudeProfileXTickFontStrings[i]) widgetPage->getFontEngine()->destroyString(altitudeProfileXTickFontStrings[i]);
     free(altitudeProfileXTickFontStrings);
   }
   if (altitudeProfileYTickFontStrings) {
     for (Int i=0;i<altitudeProfileYTickCount;i++)
-      if (altitudeProfileYTickFontStrings[i]) core->getFontEngine()->destroyString(altitudeProfileYTickFontStrings[i]);
+      if (altitudeProfileYTickFontStrings[i]) widgetPage->getFontEngine()->destroyString(altitudeProfileYTickFontStrings[i]);
     free(altitudeProfileYTickFontStrings);
   }
-  core->getFontEngine()->unlockFont();
+  widgetPage->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetPathInfo::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   Int textX, textY;
   std::list<std::string> status;
 
@@ -102,7 +102,7 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
   if (redrawRequired) {
 
     // Update the labels
-    FontEngine *fontEngine=core->getFontEngine();
+    FontEngine *fontEngine=widgetPage->getFontEngine();
     fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
     fontEngine->updateString(&pathNameFontString,visualizationPathName,pathNameWidth);
     pathNameFontString->setX(x+pathNameOffsetX);
@@ -111,7 +111,7 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
     fontEngine->updateString(&pathAltitudeUpFontString,visualizationPathAltitudeUp,pathValuesWidth);
     fontEngine->updateString(&pathAltitudeDownFontString,visualizationPathAltitudeDown,pathValuesWidth);
     fontEngine->updateString(&pathDurationFontString,visualizationPathDuration,pathValuesWidth);
-    core->getFontEngine()->unlockFont();
+    widgetPage->getFontEngine()->unlockFont();
     Int maxWidth=pathLengthFontString->getIconWidth();
     if (pathAltitudeUpFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeUpFontString->getIconWidth();
     if (pathAltitudeDownFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeDownFontString->getIconWidth();
@@ -270,14 +270,14 @@ void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
     return;
 
   // Visualize the nearest path if it has changed
-  NavigationPath* nearestPath = core->getWidgetEngine()->getNearestPath();
+  NavigationPath* nearestPath = widgetPage->getWidgetEngine()->getNearestPath();
   if ((nearestPath)&&(nearestPath!=currentPath)) {
 
     // Remember the selected path
     currentPath=nearestPath;
     resetPathVisibility(widgetVisible);
     if (widgetVisible) {
-      core->getWidgetEngine()->setWidgetsActive(true);
+      widgetPage->getWidgetEngine()->setWidgetsActive(true);
     }
 
   }

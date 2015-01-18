@@ -36,6 +36,8 @@ std::string Commander::execute(std::string cmd) {
   core->getThread()->unlockMutex(accessMutex);
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
 
+  FATAL("zoom in/out does not set next zoom level",NULL);
+
   // Set the default result
   std::string result="";
 
@@ -105,7 +107,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setPage") {
-    core->getWidgetEngine()->setPage(args[0],atoi(args[1].c_str()));
+    core->getDefaultWidgetEngine()->setPage(args[0],atoi(args[1].c_str()));
     cmdExecuted=true;
   }
   if (cmdName=="twoFingerGesture") {
@@ -123,7 +125,7 @@ std::string Commander::execute(std::string cmd) {
 
     // First check if a widget was two fingure gestured
     bool widgetTouched=false;
-    if (core->getWidgetEngine()->onTwoFingerGesture(t,dX,dY,atof(args[2].c_str()),atof(args[3].c_str()))) {
+    if (core->getDefaultWidgetEngine()->onTwoFingerGesture(t,dX,dY,atof(args[2].c_str()),atof(args[3].c_str()))) {
       widgetTouched=true;
     }
 
@@ -157,12 +159,12 @@ std::string Commander::execute(std::string cmd) {
     bool widgetTouched=false;
     if ((cmdName=="touchDown")||(cmdName=="touchMove")) {
       //DEBUG("touchDown(%d,%d)",x,y);
-      if (core->getWidgetEngine()->onTouchDown(t,x,y))
+      if (core->getDefaultWidgetEngine()->onTouchDown(t,x,y))
         widgetTouched=true;
     }
     if (cmdName=="touchUp") {
       //DEBUG("touchUp(%d,%d)",x,y);
-      if (core->getWidgetEngine()->onTouchUp(t,x,y))
+      if (core->getDefaultWidgetEngine()->onTouchUp(t,x,y))
         widgetTouched=true;
     }
 
@@ -195,7 +197,7 @@ std::string Commander::execute(std::string cmd) {
       orientation=GraphicScreenOrientationLandscape;
     }
     core->getDefaultScreen()->init(orientation,atoi(args[1].c_str()),atoi(args[2].c_str()));
-    core->getWidgetEngine()->updateWidgetPositions();
+    core->getDefaultWidgetEngine()->updateWidgetPositions();
     cmdExecuted=true;
   }
   if (cmdName=="graphicInvalidated") {
@@ -367,15 +369,15 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="showContextMenu") {
-    core->getWidgetEngine()->showContextMenu();
+    core->getDefaultWidgetEngine()->showContextMenu();
     cmdExecuted=true;
   }
   if (cmdName=="setTargetAtAddress") {
-    core->getWidgetEngine()->setTargetAtAddress();
+    core->getDefaultWidgetEngine()->setTargetAtAddress();
     cmdExecuted=true;
   }
   if ((cmdName=="newNavigationInfos")||(cmdName=="initComplete")) {
-    core->getWidgetEngine()->showContextMenu();
+    core->getDefaultWidgetEngine()->showContextMenu();
     cmdExecuted=true;
   }
   if (cmdName=="setPathInfoLock") {
@@ -391,8 +393,8 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setPathStartFlag") {
-    NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
-    Int nearestPathIndex = core->getWidgetEngine()->getNearestPathIndex();
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath();
+    Int nearestPathIndex = core->getDefaultWidgetEngine()->getNearestPathIndex();
     if (nearestPath==NULL) {
       WARNING("cannot set start flag: no path near to the current map center found",NULL);
     } else {
@@ -401,8 +403,8 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setPathEndFlag") {
-    NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
-    Int nearestPathIndex = core->getWidgetEngine()->getNearestPathIndex();
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath();
+    Int nearestPathIndex = core->getDefaultWidgetEngine()->getNearestPathIndex();
     if (nearestPath==NULL) {
       WARNING("cannot set end flag: no path near to the current map center found",NULL);
     } else {
@@ -411,7 +413,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setActiveRoute") {
-    NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath();
     if (nearestPath==NULL) {
       WARNING("no path near to the current map center found: disabling active route",NULL);
     }

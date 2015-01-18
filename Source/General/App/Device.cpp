@@ -22,10 +22,19 @@ Device::Device(Int DPI, double diagonal, TimestampInMicroseconds updateInterval,
   this->updateInterval=updateInterval;
   this->DPI=DPI;
   this->diagonal=diagonal;
+  this->noChangeFrameCount=0;
 
   // Create components
   if (!(screen=new Screen(DPI,diagonal,updateInterval==0 ? false : true))) {
     FATAL("can not create screen object",NULL);
+    return;
+  }
+  if (!(fontEngine=new FontEngine(screen->getDPI()))) {
+    FATAL("can not create font engine object",NULL);
+    return;
+  }
+  if (!(widgetEngine=new WidgetEngine(screen, fontEngine))) {
+    FATAL("can not create widget engine object",NULL);
     return;
   }
 
@@ -33,6 +42,15 @@ Device::Device(Int DPI, double diagonal, TimestampInMicroseconds updateInterval,
 
 // Destructor
 Device::~Device() {
+
+  // Delete components
+  DEBUG("deleting widgetEngine",NULL);
+  if (widgetEngine) delete widgetEngine;
+  DEBUG("deleting fontEngine",NULL);
+  if (fontEngine) delete fontEngine;
+  DEBUG("deleting screen",NULL);
+  if (screen) delete screen;
+
 }
 
 } /* namespace GEODISCOVERER */

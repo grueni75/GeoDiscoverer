@@ -39,11 +39,11 @@
 namespace GEODISCOVERER {
 
 // Constructor
-Font::Font(FT_Library freeTypeLib, std::string filename, Int size, Screen *screen) {
+Font::Font(FontEngine *fontEngine, FT_Library freeTypeLib, std::string filename, Int size) {
 
   // Set variables
   this->freeTypeLib=freeTypeLib;
-  this->screen=screen;
+  this->fontEngine=fontEngine;
 
   // Load the font
   FT_Error error=FT_New_Face( freeTypeLib, filename.c_str(), 0, &face );
@@ -54,7 +54,7 @@ Font::Font(FT_Library freeTypeLib, std::string filename, Int size, Screen *scree
 
   // Set the size of the font
   this->size=size;
-  double multiplier=(double)screen->getDPI()/120.0;
+  double multiplier=(double)fontEngine->getDPI()/120.0;
   height=multiplier*size;
   if (FT_Set_Pixel_Sizes(face,0,height)) {
     FATAL("can not set font size",NULL);
@@ -155,7 +155,7 @@ void Font::createStringBitmap(FontString *fontString) {
   UShort *textureBitmap=NULL;
   Int top,left,bottom,right,width,height;
   Int textureWidth,textureHeight;
-  Int fadeOutOffset=core->getFontEngine()->getFadeOutOffset();
+  Int fadeOutOffset=fontEngine->getFadeOutOffset();
 	
   // Reset variables
   top=std::numeric_limits<Int>::min();
@@ -218,7 +218,7 @@ void Font::createStringBitmap(FontString *fontString) {
       // Add a border around the glyph
       FT_Stroker_New(freeTypeLib, &stroker);
       FT_Stroker_Set(stroker,
-                     core->getFontEngine()->getBackgroundStrokeWidth() * 64 * size / 12,
+                     fontEngine->getBackgroundStrokeWidth() * 64 * size / 12,
                      FT_STROKER_LINECAP_ROUND,
                      FT_STROKER_LINEJOIN_ROUND,
                      0);
@@ -442,7 +442,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
     k->second->increaseUseCount();
 
     // Copy the contents from the used font string (you also need to update the cache code in createString if you change this)
-    if (!(fontString=new FontString(screen,this,k->second))) {
+    if (!(fontString=new FontString(this,k->second))) {
       FATAL("can not create font string object",NULL);
       return NULL;
     }
@@ -473,7 +473,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
 
   // Create a new font string
   //DEBUG("creating new string",NULL);
-  if (!(fontString=new FontString(screen,this,NULL))) {
+  if (!(fontString=new FontString(this,NULL))) {
     FATAL("can not create font string object",NULL);
     return NULL;
   }
@@ -523,7 +523,7 @@ void Font::destroyString(FontString *fontString) {
   }
 
   // Delete the oldest entry from the cache if it has reached its size
-  if (cachedStringMap.size()>=core->getFontEngine()->getStringCacheSize()) {
+  if (cachedStringMap.size()>=fontEngine->getStringCacheSize()) {
     //DEBUG("reducing font cache",NULL);
     TimestampInSeconds oldestFontStringAccess=std::numeric_limits<TimestampInSeconds>::max();
     FontString *oldestFontString;

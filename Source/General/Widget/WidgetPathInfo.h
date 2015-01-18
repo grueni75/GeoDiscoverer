@@ -121,7 +121,7 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
 public:
 
   // Constructors and destructor
-  WidgetPathInfo();
+  WidgetPathInfo(WidgetPage *widgetPage);
   virtual ~WidgetPathInfo();
 
   // Let the widget work

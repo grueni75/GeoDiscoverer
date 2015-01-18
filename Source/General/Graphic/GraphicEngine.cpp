@@ -23,7 +23,6 @@ GraphicEngine::GraphicEngine() {
   posMutex=core->getThread()->createMutex("graphic engine pos mutex");
   pos=GraphicPosition();
   debugMode=core->getConfigStore()->getIntValue("Graphic","debugMode",__FILE__, __LINE__);
-  noChangeFrameCount=0;
   locationAccuracyBackgroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyBackgroundColor",__FILE__, __LINE__);
   locationAccuracyCircleColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyCircleColor",__FILE__, __LINE__);
   locationAccuracyRadiusX=0;
@@ -65,18 +64,18 @@ void GraphicEngine::destroyGraphic() {
 }
 
 // Creates all graphic
-void GraphicEngine::createGraphic() {
+void GraphicEngine::createGraphic(Device *device) {
   lockDrawing(__FILE__, __LINE__);
-  centerIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","centerIconFilename",__FILE__, __LINE__));
-  locationIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","locationIconFilename",__FILE__, __LINE__));
-  pathDirectionIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathDirectionIconFilename",__FILE__, __LINE__));
-  pathStartFlagIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathStartFlagIconFilename",__FILE__, __LINE__));
-  pathEndFlagIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","pathEndFlagIconFilename",__FILE__, __LINE__));
-  compassConeIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","compassConeFilename",__FILE__, __LINE__));
-  targetIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","targetIconFilename",__FILE__, __LINE__));
-  arrowIcon.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","arrowIconFilename",__FILE__, __LINE__));
-  tileImageNotCachedImage.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","tileImageNotCachedFilename",__FILE__, __LINE__));
-  tileImageNotDownloadedFilename.setTextureFromIcon(core->getConfigStore()->getStringValue("Graphic","tileImageNotDownloadedFilename",__FILE__, __LINE__));
+  centerIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","centerIconFilename",__FILE__, __LINE__));
+  locationIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","locationIconFilename",__FILE__, __LINE__));
+  pathDirectionIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","pathDirectionIconFilename",__FILE__, __LINE__));
+  pathStartFlagIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","pathStartFlagIconFilename",__FILE__, __LINE__));
+  pathEndFlagIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","pathEndFlagIconFilename",__FILE__, __LINE__));
+  compassConeIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","compassConeFilename",__FILE__, __LINE__));
+  targetIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","targetIconFilename",__FILE__, __LINE__));
+  arrowIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","arrowIconFilename",__FILE__, __LINE__));
+  tileImageNotCachedImage.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","tileImageNotCachedFilename",__FILE__, __LINE__));
+  tileImageNotDownloadedFilename.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","tileImageNotDownloadedFilename",__FILE__, __LINE__));
   unlockDrawing();
 }
 
@@ -98,13 +97,14 @@ void GraphicEngine::deinit() {
 }
 
 // Does the drawing
-void GraphicEngine::draw(bool forceRedraw) {
+void GraphicEngine::draw(Device *device, bool forceRedraw) {
 
   GraphicPosition pos;
   TimestampInMicroseconds currentTime,idleTime,drawingTime;
   bool redrawScene=false;
   Int x1,y1,x2,y2,x,y;
-  Screen *screen = core->getScreen();
+  Screen *screen = device->getScreen();
+  bool isDefaultScreen = core->getDefaultScreen() == screen;
   double scale,backScale;
 
   PROFILE_START;
@@ -134,28 +134,93 @@ void GraphicEngine::draw(bool forceRedraw) {
   }
   PROFILE_ADD("int");
 
-  // Let the map primitives work
-  if (map) {
-    if (map->work(currentTime)) {
-      //DEBUG("requesting scene redraw due to map work result",NULL);
-      redrawScene=true;
-    }
-    if (map->getIsUpdated()) {
-      //DEBUG("requesting scene redraw due to changed map object",NULL);
-      redrawScene=true;
-      map->setIsUpdated(false);
-    }
-  }
+  // Do stuff for the default screen
+  if (isDefaultScreen) {
 
-  // Let the path animators primitives work
-  if (pathAnimators.work(currentTime)) {
-    //DEBUG("requesting scene redraw due to paths work result",NULL);
-    redrawScene=true;
-  }
-  if (pathAnimators.getIsUpdated()) {
-    //DEBUG("requesting scene redraw due to changed paths object",NULL);
-    redrawScene=true;
-    pathAnimators.setIsUpdated(false);
+    // Let the map primitives work
+    if (map) {
+      if (map->work(currentTime)) {
+        //DEBUG("requesting scene redraw due to map work result",NULL);
+        redrawScene=true;
+      }
+      if (map->getIsUpdated()) {
+        //DEBUG("requesting scene redraw due to changed map object",NULL);
+        redrawScene=true;
+        map->setIsUpdated(false);
+      }
+    }
+
+    // Let the path animators primitives work
+    if (pathAnimators.work(currentTime)) {
+      //DEBUG("requesting scene redraw due to paths work result",NULL);
+      redrawScene=true;
+    }
+    if (pathAnimators.getIsUpdated()) {
+      //DEBUG("requesting scene redraw due to changed paths object",NULL);
+      redrawScene=true;
+      pathAnimators.setIsUpdated(false);
+    }
+
+    // Handle the hiding of the center icon
+    if (isDefaultScreen) {
+      TimestampInMicroseconds fadeStartTime=pos.getLastUserModification()+centerIconTimeout;
+      if (fadeStartTime!=lastCenterIconFadeStartTime) {
+        centerIcon.setColor(GraphicColor(255,255,255,255));
+        centerIcon.setFadeAnimation(fadeStartTime,centerIcon.getColor(),GraphicColor(255,255,255,0),false,core->getGraphicEngine()->getFadeDuration());
+      }
+      lastCenterIconFadeStartTime=fadeStartTime;
+    }
+
+    // Let the center primitive work
+    if (centerIcon.work(currentTime)) {
+      //DEBUG("requesting scene redraw due to center icon work result",NULL);
+      redrawScene=true;
+    }
+
+    // Let the target primitive work
+    if (targetIcon.work(currentTime)) {
+      //DEBUG("requesting scene redraw due to target icon work result",NULL);
+      redrawScene=true;
+    }
+    if (targetIcon.getIsUpdated()) {
+      //DEBUG("requesting scene redraw due to changed location icon",NULL);
+      redrawScene=true;
+      targetIcon.setIsUpdated(false);
+    }
+
+    // Let the arrow primitive work
+    if (arrowIcon.work(currentTime)) {
+      //DEBUG("requesting scene redraw due to arrow icon work result",NULL);
+      redrawScene=true;
+    }
+    if (arrowIcon.getIsUpdated()) {
+      //DEBUG("requesting scene redraw due to changed location icon",NULL);
+      redrawScene=true;
+      arrowIcon.setIsUpdated(false);
+    }
+
+    // Did the pos change?
+    if (pos!=previousPosition) {
+
+      // Scene must be redrawn
+      //DEBUG("requesting scene redraw due to pos change",NULL);
+      redrawScene=true;
+
+    }
+
+    // Did the location icon change?
+    if (locationIcon.getIsUpdated()) {
+      //DEBUG("requesting scene redraw due to changed location icon",NULL);
+      redrawScene=true;
+      locationIcon.setIsUpdated(false);
+    }
+
+    // Did the compass cone icon change?
+    if (compassConeIcon.getIsUpdated()) {
+      //DEBUG("requesting scene redraw due to changed compass cone icon",NULL);
+      redrawScene=true;
+      compassConeIcon.setIsUpdated(false);
+    }
   }
 
   // Let the widget primitives work
@@ -163,76 +228,17 @@ void GraphicEngine::draw(bool forceRedraw) {
     //DEBUG("requesting scene redraw due to widget page work result",NULL);
     redrawScene=true;
   }
-  core->getWidgetEngine()->work(currentTime);
-
-  // Handle the hiding of the center icon
-  TimestampInMicroseconds fadeStartTime=pos.getLastUserModification()+centerIconTimeout;
-  if (fadeStartTime!=lastCenterIconFadeStartTime) {
-    centerIcon.setColor(GraphicColor(255,255,255,255));
-    centerIcon.setFadeAnimation(fadeStartTime,centerIcon.getColor(),GraphicColor(255,255,255,0),false,core->getGraphicEngine()->getFadeDuration());
-  }
-  lastCenterIconFadeStartTime=fadeStartTime;
-
-  // Let the center primitive work
-  if (centerIcon.work(currentTime)) {
-    //DEBUG("requesting scene redraw due to center icon work result",NULL);
-    redrawScene=true;
-  }
-
-  // Let the target primitive work
-  if (targetIcon.work(currentTime)) {
-    //DEBUG("requesting scene redraw due to target icon work result",NULL);
-    redrawScene=true;
-  }
-  if (targetIcon.getIsUpdated()) {
-    //DEBUG("requesting scene redraw due to changed location icon",NULL);
-    redrawScene=true;
-    targetIcon.setIsUpdated(false);
-  }
-
-  // Let the arrow primitive work
-  if (arrowIcon.work(currentTime)) {
-    //DEBUG("requesting scene redraw due to arrow icon work result",NULL);
-    redrawScene=true;
-  }
-  if (arrowIcon.getIsUpdated()) {
-    //DEBUG("requesting scene redraw due to changed location icon",NULL);
-    redrawScene=true;
-    arrowIcon.setIsUpdated(false);
-  }
-
-  // Did the pos change?
-  if (pos!=previousPosition) {
-
-    // Scene must be redrawn
-    //DEBUG("requesting scene redraw due to pos change",NULL);
-    redrawScene=true;
-
-  }
-
-  // Did the location icon change?
-  if (locationIcon.getIsUpdated()) {
-    //DEBUG("requesting scene redraw due to changed location icon",NULL);
-    redrawScene=true;
-    locationIcon.setIsUpdated(false);
-  }
-
-  // Did the compass cone icon change?
-  if (compassConeIcon.getIsUpdated()) {
-    //DEBUG("requesting scene redraw due to changed compass cone icon",NULL);
-    redrawScene=true;
-    compassConeIcon.setIsUpdated(false);
-  }
+  device->getWidgetEngine()->work(currentTime);
 
   // Check if two frames without any change have been drawn
   if (!redrawScene) {
-    if (noChangeFrameCount<2) {
+    if (device->getNoChangeFrameCount()<2) {
       //DEBUG("requesting scene redraw due to not enough unchanged frames",NULL);
       redrawScene=true;
-      noChangeFrameCount++;
+      device->setNoChangeFrameCount(device->getNoChangeFrameCount()+1);
     }
   } else {
-    noChangeFrameCount=0;
+    device->setNoChangeFrameCount(0);
   }
 
   PROFILE_ADD("drawing work and update check");
@@ -265,273 +271,277 @@ void GraphicEngine::draw(bool forceRedraw) {
 
     PROFILE_ADD("drawing init");
 
-    // Draw all primitives of the map object
-    if (map) {
+    // Do the stuff for the default screen
+    if (isDefaultScreen) {
 
-      for(Int z=0;z<=4;z++) {
-        std::list<GraphicPrimitive*> *mapDrawList=map->getDrawList();
-        //DEBUG("tile count = %d",mapDrawList->size());
-        for(std::list<GraphicPrimitive *>::iterator i=mapDrawList->begin(); i != mapDrawList->end(); i++) {
+      // Draw all primitives of the map object
+      if (map) {
 
-          //DEBUG("inside primitive draw",NULL);
-          switch((*i)->getType()) {
+        for(Int z=0;z<=4;z++) {
+          std::list<GraphicPrimitive*> *mapDrawList=map->getDrawList();
+          //DEBUG("tile count = %d",mapDrawList->size());
+          for(std::list<GraphicPrimitive *>::iterator i=mapDrawList->begin(); i != mapDrawList->end(); i++) {
 
-            case GraphicTypeObject:
-            {
-              // Get graphic object
-              GraphicObject *tileVisualization;
-              tileVisualization=(GraphicObject*)*i;
+            //DEBUG("inside primitive draw",NULL);
+            switch((*i)->getType()) {
 
-              // Skip drawing if primitive is invisible
-              UByte alpha=tileVisualization->getColor().getAlpha();
-              if (alpha!=0) {
+              case GraphicTypeObject:
+              {
+                // Get graphic object
+                GraphicObject *tileVisualization;
+                tileVisualization=(GraphicObject*)*i;
 
-                // Position the object
-                screen->startObject();
-                screen->translate(tileVisualization->getX(),tileVisualization->getY(),tileVisualization->getZ());
+                // Skip drawing if primitive is invisible
+                UByte alpha=tileVisualization->getColor().getAlpha();
+                if (alpha!=0) {
 
-                // Go through all objects of the tile visualization for the requested z
-                std::list<GraphicPrimitive*>::iterator j=tileVisualization->getFirstElementInDrawList(z);
-                //DEBUG("tile count = %d",mapDrawList->size());
-                while(j!=tileVisualization->getDrawList()->end()&&((*j)->getZ()==z)) {
+                  // Position the object
+                  screen->startObject();
+                  screen->translate(tileVisualization->getX(),tileVisualization->getY(),tileVisualization->getZ());
 
-                  // Which type of primitive?
-                  GraphicPrimitive *primitive=*j;
-                  switch(primitive->getType()) {
+                  // Go through all objects of the tile visualization for the requested z
+                  std::list<GraphicPrimitive*>::iterator j=tileVisualization->getFirstElementInDrawList(z);
+                  //DEBUG("tile count = %d",mapDrawList->size());
+                  while(j!=tileVisualization->getDrawList()->end()&&((*j)->getZ()==z)) {
 
-                    // Rectangle primitive?
-                    case GraphicTypeRectangle:
-                    {
-                      GraphicRectangle *rectangle=(GraphicRectangle*)primitive;
+                    // Which type of primitive?
+                    GraphicPrimitive *primitive=*j;
+                    switch(primitive->getType()) {
 
-                      // Set color
-                      screen->setColor(rectangle->getColor().getRed(),rectangle->getColor().getGreen(),rectangle->getColor().getBlue(),rectangle->getColor().getAlpha());
+                      // Rectangle primitive?
+                      case GraphicTypeRectangle:
+                      {
+                        GraphicRectangle *rectangle=(GraphicRectangle*)primitive;
 
-                      // Dimm the color in debug mode
-                      // This allows to differntiate the tiles
-                      GraphicColor originalColor;
-                      if ((debugMode)&&(primitive->getName().size()!=0)) {
-                        originalColor=rectangle->getColor();
-                        GraphicColor modifiedColor=originalColor;
-                        modifiedColor.setRed(originalColor.getRed()/2);
-                        modifiedColor.setGreen(originalColor.getGreen()/2);
-                        modifiedColor.setBlue(originalColor.getBlue()/2);
-                        rectangle->setColor(modifiedColor);
-                      }
+                        // Set color
+                        screen->setColor(rectangle->getColor().getRed(),rectangle->getColor().getGreen(),rectangle->getColor().getBlue(),rectangle->getColor().getAlpha());
 
-                      // Draw the rectangle
-                      rectangle->draw(screen,currentTime);
-
-                      // Restore the color
-                      if ((debugMode)&&(primitive->getName().size()!=0)) {
-                        rectangle->setColor(originalColor);
-                      }
-
-                      //DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
-
-                      // If the texture is not defined, draw a box around it and it's name inside the box
-                      if ((primitive->getName().size()!=0)&&(debugMode)) {
-
-                        // Draw the name of the tile
-                        //std::string name=".";
-                        if (debugMode) {
-                          std::list<std::string> name=rectangle->getName();
-                          FontEngine *fontEngine=core->getFontEngine();
-                          fontEngine->lockFont("sansSmall", __FILE__, __LINE__);
-                          Int nameHeight=name.size()*fontEngine->getLineHeight();
-                          Int lineNr=name.size()-1;
-                          x1=rectangle->getX();
-                          y1=rectangle->getY();
-                          x2=x1+rectangle->getWidth();
-                          y2=y1+rectangle->getHeight();
-                          for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
-                            //DEBUG("text=%s",(*i).c_str());
-                            FontString *fontString=fontEngine->createString(*i);
-                            fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
-                            fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
-                            fontString->draw(screen,currentTime);
-                            fontEngine->destroyString(fontString);
-                            lineNr--;
-                          }
-                          fontEngine->unlockFont();
+                        // Dimm the color in debug mode
+                        // This allows to differntiate the tiles
+                        GraphicColor originalColor;
+                        if ((debugMode)&&(primitive->getName().size()!=0)) {
+                          originalColor=rectangle->getColor();
+                          GraphicColor modifiedColor=originalColor;
+                          modifiedColor.setRed(originalColor.getRed()/2);
+                          modifiedColor.setGreen(originalColor.getGreen()/2);
+                          modifiedColor.setBlue(originalColor.getBlue()/2);
+                          rectangle->setColor(modifiedColor);
                         }
 
-                        // Draw the borders of the tile
-                        screen->setColor(255,255,255,255);
-                        screen->setLineWidth(1);
-                        screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
+                        // Draw the rectangle
+                        rectangle->draw(screen,currentTime);
+
+                        // Restore the color
+                        if ((debugMode)&&(primitive->getName().size()!=0)) {
+                          rectangle->setColor(originalColor);
+                        }
+
+                        //DEBUG("rectangle->getTexture()=%d screen->getTextureNotDefined()=%d",rectangle->getTexture(),screen->getTextureNotDefined());
+
+                        // If the texture is not defined, draw a box around it and it's name inside the box
+                        if ((primitive->getName().size()!=0)&&(debugMode)) {
+
+                          // Draw the name of the tile
+                          //std::string name=".";
+                          if (debugMode) {
+                            std::list<std::string> name=rectangle->getName();
+                            FontEngine *fontEngine=device->getFontEngine();
+                            fontEngine->lockFont("sansSmall", __FILE__, __LINE__);
+                            Int nameHeight=name.size()*fontEngine->getLineHeight();
+                            Int lineNr=name.size()-1;
+                            x1=rectangle->getX();
+                            y1=rectangle->getY();
+                            x2=x1+rectangle->getWidth();
+                            y2=y1+rectangle->getHeight();
+                            for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
+                              //DEBUG("text=%s",(*i).c_str());
+                              FontString *fontString=fontEngine->createString(*i);
+                              fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
+                              fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
+                              fontString->draw(screen, currentTime);
+                              fontEngine->destroyString(fontString);
+                              lineNr--;
+                            }
+                            fontEngine->unlockFont();
+                          }
+
+                          // Draw the borders of the tile
+                          screen->setColor(255,255,255,255);
+                          screen->setLineWidth(1);
+                          screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
+                        }
+                        break;
                       }
-                      break;
-                    }
 
-                    // Line primitive?
-                    case GraphicTypeLine:
-                    {
-                      GraphicLine *line=(GraphicLine*)primitive;
-                      screen->setColorModeMultiply();
-                      GraphicColor color=line->getAnimator()->getColor();
-                      screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
-                      line->draw(screen);
-                      screen->setColorModeAlpha();
-                      break;
-                    }
+                      // Line primitive?
+                      case GraphicTypeLine:
+                      {
+                        GraphicLine *line=(GraphicLine*)primitive;
+                        screen->setColorModeMultiply();
+                        GraphicColor color=line->getAnimator()->getColor();
+                        screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
+                        line->draw(screen);
+                        screen->setColorModeAlpha();
+                        break;
+                      }
 
-                    // Rectangle list primitive?
-                    case GraphicTypeRectangleList:
-                    {
-                      GraphicRectangleList *rectangleList=(GraphicRectangleList*)primitive;
-                      GraphicColor color=rectangleList->getAnimator()->getColor();
-                      screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
-                      rectangleList->draw(screen);
-                      break;
-                    }
+                      // Rectangle list primitive?
+                      case GraphicTypeRectangleList:
+                      {
+                        GraphicRectangleList *rectangleList=(GraphicRectangleList*)primitive;
+                        GraphicColor color=rectangleList->getAnimator()->getColor();
+                        screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
+                        rectangleList->draw(screen);
+                        break;
+                      }
 
-                    default:
-                      FATAL("unknown primitive type",NULL);
-                      break;
+                      default:
+                        FATAL("unknown primitive type",NULL);
+                        break;
+                    }
+                    j++;
                   }
-                  j++;
+
+                  // That's it
+                  screen->endObject();
                 }
 
-                // That's it
-                screen->endObject();
+                // Unlock the visualization
+                break;
               }
 
-              // Unlock the visualization
-              break;
-            }
-
-            case GraphicTypeRectangle:
-            {
-              GraphicRectangle *r=(GraphicRectangle*)*i;
-              if (r->getZ()==z) {
-                x1=r->getX();
-                y1=r->getY();
-                x2=(GLfloat)(r->getWidth()+x1);
-                y2=(GLfloat)(r->getHeight()+y1);
-                screen->startObject();
-                screen->setColor(r->getColor().getRed(),r->getColor().getGreen(),r->getColor().getBlue(),r->getColor().getAlpha());
-                screen->setLineWidth(1);
-                screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
-                screen->endObject();
+              case GraphicTypeRectangle:
+              {
+                GraphicRectangle *r=(GraphicRectangle*)*i;
+                if (r->getZ()==z) {
+                  x1=r->getX();
+                  y1=r->getY();
+                  x2=(GLfloat)(r->getWidth()+x1);
+                  y2=(GLfloat)(r->getHeight()+y1);
+                  screen->startObject();
+                  screen->setColor(r->getColor().getRed(),r->getColor().getGreen(),r->getColor().getBlue(),r->getColor().getAlpha());
+                  screen->setLineWidth(1);
+                  screen->drawRectangle(x1,y1,x2,y2,screen->getTextureNotDefined(),false);
+                  screen->endObject();
+                }
+                break;
               }
-              break;
-            }
 
-            default:
-              FATAL("unknown primitive type",NULL);
-              break;
+              default:
+                FATAL("unknown primitive type",NULL);
+                break;
+            }
           }
         }
       }
-    }
 
-    PROFILE_ADD("map drawing");
+      PROFILE_ADD("map drawing");
 
-    // Draw the location icon and the compass cone
-    //DEBUG("locationIcon.getColor().getAlpha()=%d locationIcon.getX()=%d locationIcon.getY()=%d",locationIcon.getColor().getAlpha(),locationIcon.getX(),locationIcon.getY());
-    if (locationIcon.getColor().getAlpha()>0) {
+      // Draw the location icon and the compass cone
+      //DEBUG("locationIcon.getColor().getAlpha()=%d locationIcon.getX()=%d locationIcon.getY()=%d",locationIcon.getColor().getAlpha(),locationIcon.getX(),locationIcon.getY());
+      if (locationIcon.getColor().getAlpha()>0) {
 
-      // Translate to the current location
-      screen->startObject();
-      screen->translate(locationIcon.getX(),locationIcon.getY(),0);
-      screen->scale(backScale,backScale,1.0);
-
-      // Draw the accuracy circle
-      screen->startObject();
-      screen->setColor(locationAccuracyBackgroundColor.getRed(),locationAccuracyBackgroundColor.getGreen(),locationAccuracyBackgroundColor.getBlue(),locationAccuracyBackgroundColor.getAlpha());
-      screen->scale(locationAccuracyRadiusX*scale,locationAccuracyRadiusY*scale,1.0);
-      screen->drawEllipse(true);
-      screen->endObject();
-
-      // Draw the location icon
-      screen->startObject();
-      x1=-locationIcon.getIconWidth()/2;
-      y1=-locationIcon.getIconHeight()/2;
-      x2=x1+locationIcon.getWidth();
-      y2=y1+locationIcon.getHeight();
-      screen->rotate(locationIcon.getAngle(),0,0,1);
-      screen->setColor(locationIcon.getColor().getRed(),locationIcon.getColor().getGreen(),locationIcon.getColor().getBlue(),locationIcon.getColor().getAlpha());
-      screen->drawRectangle(x1,y1,x2,y2,locationIcon.getTexture(),true);
-      screen->endObject();
-
-      // Draw the compass cone
-      if (compassConeIcon.getAngle()!=std::numeric_limits<double>::max()) {
+        // Translate to the current location
         screen->startObject();
-        screen->setColor(compassConeIcon.getColor().getRed(),compassConeIcon.getColor().getGreen(),compassConeIcon.getColor().getBlue(),compassConeIcon.getColor().getAlpha());
-        x1=-compassConeIcon.getIconWidth()/2;
-        y1=0;
-        x2=x1+compassConeIcon.getWidth();
-        y2=y1+compassConeIcon.getHeight();
-        screen->rotate(compassConeIcon.getAngle(),0,0,1);
-        screen->drawRectangle(x1,y1,x2,y2,compassConeIcon.getTexture(),true);
+        screen->translate(locationIcon.getX(),locationIcon.getY(),0);
+        screen->scale(backScale,backScale,1.0);
+
+        // Draw the accuracy circle
+        screen->startObject();
+        screen->setColor(locationAccuracyBackgroundColor.getRed(),locationAccuracyBackgroundColor.getGreen(),locationAccuracyBackgroundColor.getBlue(),locationAccuracyBackgroundColor.getAlpha());
+        screen->scale(locationAccuracyRadiusX*scale,locationAccuracyRadiusY*scale,1.0);
+        screen->drawEllipse(true);
+        screen->endObject();
+
+        // Draw the location icon
+        screen->startObject();
+        x1=-locationIcon.getIconWidth()/2;
+        y1=-locationIcon.getIconHeight()/2;
+        x2=x1+locationIcon.getWidth();
+        y2=y1+locationIcon.getHeight();
+        screen->rotate(locationIcon.getAngle(),0,0,1);
+        screen->setColor(locationIcon.getColor().getRed(),locationIcon.getColor().getGreen(),locationIcon.getColor().getBlue(),locationIcon.getColor().getAlpha());
+        screen->drawRectangle(x1,y1,x2,y2,locationIcon.getTexture(),true);
+        screen->endObject();
+
+        // Draw the compass cone
+        if (compassConeIcon.getAngle()!=std::numeric_limits<double>::max()) {
+          screen->startObject();
+          screen->setColor(compassConeIcon.getColor().getRed(),compassConeIcon.getColor().getGreen(),compassConeIcon.getColor().getBlue(),compassConeIcon.getColor().getAlpha());
+          x1=-compassConeIcon.getIconWidth()/2;
+          y1=0;
+          x2=x1+compassConeIcon.getWidth();
+          y2=y1+compassConeIcon.getHeight();
+          screen->rotate(compassConeIcon.getAngle(),0,0,1);
+          screen->drawRectangle(x1,y1,x2,y2,compassConeIcon.getTexture(),true);
+          screen->endObject();
+        }
         screen->endObject();
       }
-      screen->endObject();
-    }
-    //WARNING("enable location icon",NULL);
-    //DEBUG("locationAccuradyRadiusX=%d locationAccuracyRadiusY=%d",locationAccuracyRadiusX,locationAccuracyRadiusY);
-    PROFILE_ADD("location drawing");
-
-    // Draw the target icon
-    if (targetIcon.getColor().getAlpha()>0) {
-
-      // Translate to the target location
-      screen->startObject();
-      screen->translate(targetIcon.getX(),targetIcon.getY(),0);
-      screen->scale(backScale,backScale,1.0);
+      //WARNING("enable location icon",NULL);
+      //DEBUG("locationAccuradyRadiusX=%d locationAccuracyRadiusY=%d",locationAccuracyRadiusX,locationAccuracyRadiusY);
+      PROFILE_ADD("location drawing");
 
       // Draw the target icon
+      if (targetIcon.getColor().getAlpha()>0) {
+
+        // Translate to the target location
+        screen->startObject();
+        screen->translate(targetIcon.getX(),targetIcon.getY(),0);
+        screen->scale(backScale,backScale,1.0);
+
+        // Draw the target icon
+        screen->startObject();
+        screen->scale(targetIcon.getScale(),targetIcon.getScale(),1.0);
+        screen->rotate(targetIcon.getAngle(),0,0,1);
+        x1=-targetIcon.getIconWidth()/2;
+        y1=-targetIcon.getIconHeight()/2;
+        x2=x1+targetIcon.getWidth();
+        y2=y1+targetIcon.getHeight();
+        screen->setColor(targetIcon.getColor().getRed(),targetIcon.getColor().getGreen(),targetIcon.getColor().getBlue(),targetIcon.getColor().getAlpha());
+        screen->drawRectangle(x1,y1,x2,y2,targetIcon.getTexture(),true);
+        screen->endObject();
+        screen->endObject();
+      }
+      PROFILE_ADD("target icon drawing");
+
+      // Draw the arrow icon
+      if (arrowIcon.getColor().getAlpha()>0) {
+
+        // Translate to the target location
+        screen->startObject();
+        screen->translate(arrowIcon.getX(),arrowIcon.getY(),0);
+        screen->scale(backScale,backScale,1.0);
+
+        // Draw the target icon
+        screen->startObject();
+        screen->scale(arrowIcon.getScale(),arrowIcon.getScale(),1.0);
+        screen->rotate(arrowIcon.getAngle(),0,0,1);
+        x1=-arrowIcon.getIconWidth()/2;
+        y1=-arrowIcon.getIconHeight()/2;
+        x2=x1+arrowIcon.getWidth();
+        y2=y1+arrowIcon.getHeight();
+        screen->setColor(arrowIcon.getColor().getRed(),arrowIcon.getColor().getGreen(),arrowIcon.getColor().getBlue(),arrowIcon.getColor().getAlpha());
+        screen->drawRectangle(x1,y1,x2,y2,arrowIcon.getTexture(),true);
+        screen->endObject();
+        screen->endObject();
+      }
+      PROFILE_ADD("arrow drawing");
+
+      // End the map object
+      screen->endObject();
+
+      // Draw the cursor
       screen->startObject();
-      screen->scale(targetIcon.getScale(),targetIcon.getScale(),1.0);
-      screen->rotate(targetIcon.getAngle(),0,0,1);
-      x1=-targetIcon.getIconWidth()/2;
-      y1=-targetIcon.getIconHeight()/2;
-      x2=x1+targetIcon.getWidth();
-      y2=y1+targetIcon.getHeight();
-      screen->setColor(targetIcon.getColor().getRed(),targetIcon.getColor().getGreen(),targetIcon.getColor().getBlue(),targetIcon.getColor().getAlpha());
-      screen->drawRectangle(x1,y1,x2,y2,targetIcon.getTexture(),true);
+      screen->setColor(centerIcon.getColor().getRed(),centerIcon.getColor().getGreen(),centerIcon.getColor().getBlue(),centerIcon.getColor().getAlpha());
+      x1=-centerIcon.getIconWidth()/2;
+      x2=x1+centerIcon.getWidth();
+      y1=-centerIcon.getIconHeight()/2;
+      y2=y1+centerIcon.getHeight();
+      screen->drawRectangle(x1,y1,x2,y2,centerIcon.getTexture(),true);
       screen->endObject();
-      screen->endObject();
+      PROFILE_ADD("cursor drawing");
     }
-    PROFILE_ADD("target icon drawing");
-
-    // Draw the arrow icon
-    if (arrowIcon.getColor().getAlpha()>0) {
-
-      // Translate to the target location
-      screen->startObject();
-      screen->translate(arrowIcon.getX(),arrowIcon.getY(),0);
-      screen->scale(backScale,backScale,1.0);
-
-      // Draw the target icon
-      screen->startObject();
-      screen->scale(arrowIcon.getScale(),arrowIcon.getScale(),1.0);
-      screen->rotate(arrowIcon.getAngle(),0,0,1);
-      x1=-arrowIcon.getIconWidth()/2;
-      y1=-arrowIcon.getIconHeight()/2;
-      x2=x1+arrowIcon.getWidth();
-      y2=y1+arrowIcon.getHeight();
-      screen->setColor(arrowIcon.getColor().getRed(),arrowIcon.getColor().getGreen(),arrowIcon.getColor().getBlue(),arrowIcon.getColor().getAlpha());
-      screen->drawRectangle(x1,y1,x2,y2,arrowIcon.getTexture(),true);
-      screen->endObject();
-      screen->endObject();
-    }
-    PROFILE_ADD("arrow drawing");
-
-    // End the map object
-    screen->endObject();
-
-    // Draw the cursor
-    screen->startObject();
-    screen->setColor(centerIcon.getColor().getRed(),centerIcon.getColor().getGreen(),centerIcon.getColor().getBlue(),centerIcon.getColor().getAlpha());
-    x1=-centerIcon.getIconWidth()/2;
-    x2=x1+centerIcon.getWidth();
-    y1=-centerIcon.getIconHeight()/2;
-    y2=y1+centerIcon.getHeight();
-    screen->drawRectangle(x1,y1,x2,y2,centerIcon.getTexture(),true);
-    screen->endObject();
-    PROFILE_ADD("cursor drawing");
 
     // Draw all widgets
     if (widgetGraphicObject) {

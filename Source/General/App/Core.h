@@ -73,12 +73,15 @@ class Image;
 class Dialog;
 class NavigationEngine;
 class Commander;
+class MapPosition;
+class MapTile;
+class NavigationPath;
 
 // Error types for downloads
 typedef enum { DownloadResultSuccess, DownloadResultFileNotFound, DownloadResultOtherFail } DownloadResult;
 
 // Types of changes to a navigation path object
-typedef enum {NavigationPathChangeTypeEndPositionAdded, NavigationPathChangeTypeFlagSet, NavigationPathChangeTypeWillBeRemoved } NavigationPathChangeType;
+typedef enum { NavigationPathChangeTypeEndPositionAdded, NavigationPathChangeTypeFlagSet, NavigationPathChangeTypeWillBeRemoved } NavigationPathChangeType;
 
 class Core {
 
@@ -146,9 +149,7 @@ protected:
   Clock *clock;
   UnitConverter *unitConverter;
   std::list<Device*> devices;
-  FontEngine *fontEngine;
   GraphicEngine *graphicEngine;
-  WidgetEngine *widgetEngine;
   MapCache *mapCache;
   MapEngine *mapEngine;
   MapSource *mapSource;
@@ -190,7 +191,14 @@ public:
   // Does a late initialization of certain objects
   void lateInit();
 
-  // Called
+  // Informs the engines that the map has changed
+  void onMapChange(MapPosition pos, std::list<MapTile*> *centerMapTiles);
+
+  // Informs the engines that the location has changed
+  void onLocationChange(MapPosition mapPos);
+
+  // Informs the engines that a path has changed
+  void onPathChange(NavigationPath *path, NavigationPathChangeType changeType);
 
   // Stops the map update thread
   void interruptMapUpdate(const char *file, int line);
@@ -245,11 +253,6 @@ public:
       return graphicEngine;
   }
 
-  WidgetEngine *getWidgetEngine() const
-  {
-      return widgetEngine;
-  }
-
   Image *getImage() const
   {
       return image;
@@ -268,11 +271,6 @@ public:
   MapSource *getMapSource() const
   {
       return mapSource;
-  }
-
-  FontEngine *getFontEngine() const
-  {
-      return fontEngine;
   }
 
   std::list<Device*> *getDevices()
@@ -328,6 +326,9 @@ public:
   }
 
   Screen *getDefaultScreen();
+
+  WidgetEngine *getDefaultWidgetEngine();
+
 };
 
 // Pointer to the core

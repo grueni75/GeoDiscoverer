@@ -69,7 +69,7 @@ void MapCache::createGraphic() {
 
   // Create texture infos
   for (int i=0;i<size;i++) {
-    GraphicTextureInfo t=core->getScreen()->createTextureInfo();
+    GraphicTextureInfo t=Screen::createTextureInfo();
     unusedTextures.push_back(t);
   }
 
@@ -83,7 +83,7 @@ void MapCache::createGraphic() {
     for (std::vector<MapTile*>::const_iterator j=(*tiles).begin();j!=(*tiles).end();j++) {
       MapTile *t=*j;
       //DEBUG("adding tile at position <%d,%d> to uncached tile list",t->getMapX(),t->getMapY());
-      t->setIsCached(false,core->getScreen()->getTextureNotDefined(),false);
+      t->setIsCached(false,Screen::getTextureNotDefined(),false);
       uncachedTiles.push_back(t);
     }
   }
@@ -106,15 +106,15 @@ void MapCache::deinit() {
   // Clear all list
   for(std::list<MapTile*>::iterator i=cachedTiles.begin();i!=cachedTiles.end();i++) {
     MapTile *t=*i;
-    t->getRectangle()->setTextureAnimation(0,core->getScreen()->getTextureNotDefined(),core->getScreen()->getTextureNotDefined(),false,0);
+    t->getRectangle()->setTextureAnimation(0,Screen::getTextureNotDefined(),Screen::getTextureNotDefined(),false,0);
   }
   cachedTiles.clear();
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
-    core->getScreen()->destroyTextureInfo(*i,"MapCache (unused texture)");
+    Screen::destroyTextureInfo(*i,"MapCache (unused texture)");
   }
   unusedTextures.clear();
   for(std::list<GraphicTextureInfo>::iterator i=usedTextures.begin();i!=usedTextures.end();i++) {
-    core->getScreen()->destroyTextureInfo(*i,"MapCache (used texture)");
+    Screen::destroyTextureInfo(*i,"MapCache (used texture)");
   }
   usedTextures.clear();
   uncachedTiles.clear();
@@ -152,7 +152,7 @@ void MapCache::removeTile(MapTile *tile) {
     core->getThread()->unlockMutex(accessMutex);
     core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     GraphicRectangle *r=tile->getRectangle();
-    r->setTextureAnimation(0,core->getScreen()->getTextureNotDefined(),core->getScreen()->getTextureNotDefined(),false,0);
+    r->setTextureAnimation(0,Screen::getTextureNotDefined(),Screen::getTextureNotDefined(),false,0);
     r->setZ(0);
     core->getGraphicEngine()->unlockDrawing();
     core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
@@ -327,7 +327,7 @@ void MapCache::updateMapTileImages() {
 void MapCache::setNextTileTexture()
 {
   GraphicTextureInfo m=usedTextures.back();
-  core->getScreen()->setTextureImage(m,tileImageScratch,currentTile->getWidth(),currentTile->getHeight());
+  Screen::setTextureImage(m,tileImageScratch,currentTile->getWidth(),currentTile->getHeight());
   tileTextureAvailable=false;
 }
 

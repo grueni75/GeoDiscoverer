@@ -882,8 +882,8 @@ void MapEngine::updateMap() {
 
         // Compute the required display length
         //DEBUG("screenHeight=%d screenWidth=%d",core->getScreen()->getHeight(),core->getScreen()->getWidth());
-        double alpha=atan((double)core->getScreen()->getHeight()/(double)core->getScreen()->getWidth());
-        double screenLength=ceil(core->getScreen()->getHeight()/sin(alpha));
+        double alpha=atan((double)core->getDefaultScreen()->getHeight()/(double)core->getDefaultScreen()->getWidth());
+        double screenLength=ceil(core->getDefaultScreen()->getHeight()/sin(alpha));
 
         // Compute the height and width to fill
         Int zoomedScreenHeight=ceil(screenLength/newZoom);
@@ -1034,7 +1034,7 @@ void MapEngine::updateMap() {
     core->getNavigationEngine()->updateMapGraphic();
 
     // Update any widgets
-    core->getWidgetEngine()->onMapChange(mapPos,&centerMapTiles);
+    core->onMapChange(mapPos,&centerMapTiles);
 
     // Inform the cache
     core->getMapCache()->tileVisibilityChanged();
@@ -1078,9 +1078,9 @@ void MapEngine::backup() {
 
 // Sets the maximum number of tiles to show
 void MapEngine::setMaxTiles() {
-  int len=core->getScreen()->getHeight();
-  if (core->getScreen()->getWidth()>len)
-    len=core->getScreen()->getWidth();
+  int len=core->getDefaultScreen()->getHeight();
+  if (core->getDefaultScreen()->getWidth()>len)
+    len=core->getDefaultScreen()->getWidth();
   maxTiles=ceil(((double)len)/((double)core->getMapSource()->getMapTileLength())*((double)core->getConfigStore()->getIntValue("Map","visibleTileLimit", __FILE__, __LINE__)));
   maxTiles=maxTiles*maxTiles;
 }

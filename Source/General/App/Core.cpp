@@ -66,14 +66,12 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   dialog = NULL;
   clock = NULL;
   graphicEngine = NULL;
-  widgetEngine = NULL;
   mapCache = NULL;
   mapEngine = NULL;
   mapSource = NULL;
   unitConverter = NULL;
   image = NULL;
   commander = NULL;
-  fontEngine = NULL;
   navigationEngine = NULL;
   fileAccessRetries = 10;
   fileAccessWaitTime = 100;
@@ -164,12 +162,8 @@ Core::~Core() {
   if (mapCache) delete mapCache;
   DEBUG("deleting mapSource",NULL);
   if (mapSource) delete mapSource;
-  DEBUG("deleting widgetEngine",NULL);
-  if (widgetEngine) delete widgetEngine;
   DEBUG("deleting graphicEngine",NULL);
   if (graphicEngine) delete graphicEngine;
-  DEBUG("deleting fontEngine",NULL);
-  if (fontEngine) delete fontEngine;
   DEBUG("deleting devices",NULL);
   for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
     Device *d = *i;
@@ -256,19 +250,9 @@ bool Core::init() {
     return false;
   }
   devices.push_back(device);
-  DEBUG("initializing fontEngine",NULL);
-  if (!(fontEngine=new FontEngine(getDefaultScreen()))) {
-    FATAL("can not create font engine object",NULL);
-    return false;
-  }
   DEBUG("initializing graphicEngine",NULL);
   if (!(graphicEngine=new GraphicEngine())) {
     FATAL("can not create graphic engine object",NULL);
-    return false;
-  }
-  DEBUG("initializing widgetEngine",NULL);
-  if (!(widgetEngine=new WidgetEngine())) {
-    FATAL("can not create widget engine object",NULL);
     return false;
   }
   DEBUG("initializing mapSource",NULL);
@@ -367,7 +351,7 @@ void Core::updateScreen(bool forceRedraw) {
   PROFILE_ADD("pre draw");
 
   // Redraw the scene
-  graphicEngine->draw(forceRedraw);
+  graphicEngine->draw(devices.front(),forceRedraw);
   PROFILE_ADD("draw");
 
   // Only work if the required objects are initialized
@@ -613,13 +597,13 @@ void Core::updateGraphic(bool graphicInvalidated) {
   navigationEngine->destroyGraphic();
   if (isInitialized)
     mapCache->destroyGraphic();
-  widgetEngine->destroyGraphic();
   graphicEngine->destroyGraphic();
-  fontEngine->destroyGraphic();
   for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
     Device *d = *i;
     d->getScreen()->destroyGraphic();
     if (graphicInvalidated) {
+      d->getWidgetEngine()->destroyGraphic();
+      d->getFontEngine()->destroyGraphic();
       d->getScreen()->graphicInvalidated();
     }
   }
@@ -628,10 +612,10 @@ void Core::updateGraphic(bool graphicInvalidated) {
   for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
     Device *d = *i;
     d->getScreen()->createGraphic();
+    d->getFontEngine()->createGraphic();
+    d->getWidgetEngine()->createGraphic();
+    graphicEngine->createGraphic(d);
   }
-  fontEngine->createGraphic();
-  graphicEngine->createGraphic();
-  widgetEngine->createGraphic();
   if (isInitialized)
     mapCache->createGraphic();
   navigationEngine->createGraphic();
@@ -678,6 +662,32 @@ void Core::waitForFile(std::string path) {
 // Returns the default screen
 Screen *Core::getDefaultScreen() {
   return devices.front()->getScreen();
+}
+
+// Returns the default widget engine
+WidgetEngine *Core::getDefaultWidgetEngine() {
+  return devices.front()->getWidgetEngine();
+}
+
+// Informs the engines that the map has changed
+void Core::onMapChange(MapPosition pos, std::list<MapTile*> *centerMapTiles) {
+  for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
+    (*i)->getWidgetEngine()->onMapChange(pos,centerMapTiles);
+  }
+}
+
+// Informs the engines that the location has changed
+void Core::onLocationChange(MapPosition mapPos) {
+  for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
+    (*i)->getWidgetEngine()->onLocationChange(mapPos);
+  }
+}
+
+// Informs the engines that a path has changed
+void Core::onPathChange(NavigationPath *path, NavigationPathChangeType changeType) {
+  for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
+    (*i)->getWidgetEngine()->onPathChange(path,changeType);
+  }
 }
 
 }

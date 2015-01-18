@@ -23,7 +23,6 @@ class FontString : public GraphicRectangle {
 protected:
 
   Font *font;                      // Font used to create this string
-  Screen *screen;                  // Screen this font string belongs to
   FontString *fontStringReference; // Reference to the font string that holds the graphic data
   TimestampInSeconds lastAccess;   // Timestamp of the last access to the string
   std::string contents;            // String to display
@@ -35,13 +34,13 @@ protected:
 public:
 
   // Constructor
-  FontString(Screen *screen, Font *font, FontString *fontStringRef);
+  FontString(Font *font, FontString *fontStringRef);
 
   // Destructor
   virtual ~FontString();
 
   // Called when the widget must be drawn
-  virtual void draw(TimestampInMicroseconds t);
+  virtual void draw(Screen *screen, TimestampInMicroseconds t);
 
   // Getters and setters
   TimestampInSeconds getLastAccess() const

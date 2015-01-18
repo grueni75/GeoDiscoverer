@@ -22,7 +22,7 @@ std::list<GraphicBufferInfo> GraphicPointBuffer::unusedBuffers;
 GraphicPointBuffer::GraphicPointBuffer(Int numberOfPoints) {
   this->numberOfPoints=numberOfPoints;
   insertPos=0;
-  buffer=core->getScreen()->getBufferNotDefined();
+  buffer=Screen::getBufferNotDefined();
   bufferOutdated=true;
   if (!(points=(Short*)malloc(sizeof(*points)*2*numberOfPoints))) {
     FATAL("can not create point array",NULL);
@@ -79,7 +79,7 @@ void GraphicPointBuffer::updateBuffer(Screen *screen) {
         buffer=GraphicPointBuffer::unusedBuffers.front();
         GraphicPointBuffer::unusedBuffers.pop_front();
       } else {
-        buffer=core->getScreen()->createBufferInfo();
+        buffer=Screen::createBufferInfo();
       }
     }
     //DEBUG("insertPos=%d buffer=0x%08x",insertPos,buffer);
@@ -91,7 +91,7 @@ void GraphicPointBuffer::updateBuffer(Screen *screen) {
 // Frees all used buffer objects
 void GraphicPointBuffer::destroyBuffers() {
   for(std::list<GraphicBufferInfo>::iterator i=unusedBuffers.begin();i!=unusedBuffers.end();i++) {
-    core->getScreen()->destroyBufferInfo(*i);
+    Screen::destroyBufferInfo(*i);
   }
   unusedBuffers.clear();
 }
@@ -99,9 +99,9 @@ void GraphicPointBuffer::destroyBuffers() {
 // Recreates any textures or buffers
 void GraphicPointBuffer::invalidate() {
   bufferOutdated=true;
-  if (buffer!=core->getScreen()->getBufferNotDefined()) {
+  if (buffer!=Screen::getBufferNotDefined()) {
     unusedBuffers.push_back(buffer);
-    buffer=core->getScreen()->getBufferNotDefined();
+    buffer=Screen::getBufferNotDefined();
   }
 }
 

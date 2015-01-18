@@ -15,7 +15,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetStatus::WidgetStatus() : WidgetPrimitive() {
+WidgetStatus::WidgetStatus(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
   widgetType=WidgetTypeStatus;
   updateInterval=100000;
   labelWidth=0;
@@ -27,16 +27,16 @@ WidgetStatus::WidgetStatus() : WidgetPrimitive() {
 
 // Destructor
 WidgetStatus::~WidgetStatus() {
-  core->getFontEngine()->lockFont("sansSmall",__FILE__, __LINE__);
-  if (firstStatusFontString) core->getFontEngine()->destroyString(firstStatusFontString);
-  if (secondStatusFontString) core->getFontEngine()->destroyString(secondStatusFontString);
-  core->getFontEngine()->unlockFont();
+  widgetPage->getFontEngine()->lockFont("sansSmall",__FILE__, __LINE__);
+  if (firstStatusFontString) widgetPage->getFontEngine()->destroyString(firstStatusFontString);
+  if (secondStatusFontString) widgetPage->getFontEngine()->destroyString(secondStatusFontString);
+  widgetPage->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetStatus::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   Int textX, textY;
   std::list<std::string> status;
 
@@ -68,11 +68,11 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
       textX=x+(iconWidth/2)-(secondStatusFontString->getIconWidth())/2;
       secondStatusFontString->setX(textX);
       secondStatusFontString->setY(textY);
-      core->getFontEngine()->unlockFont();
+      widgetPage->getFontEngine()->unlockFont();
 
       // Start fade animation if the status was not displayed before
       if ((color.getAlpha()==0)&&(fadeStartTime==fadeEndTime)) {
-        if (core->getWidgetEngine()->getWidgetsActive())
+        if (widgetPage->getWidgetEngine()->getWidgetsActive())
           setFadeAnimation(t,color,this->activeColor,false,core->getGraphicEngine()->getFadeDuration());
         else
           setFadeAnimation(t,color,this->inactiveColor,false,core->getGraphicEngine()->getFadeDuration());

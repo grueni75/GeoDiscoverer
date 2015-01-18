@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetScale::WidgetScale() : WidgetPrimitive() {
+WidgetScale::WidgetScale(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
   widgetType=WidgetTypeScale;
   updateInterval=1000000;
   nextUpdateTime=0;
@@ -31,12 +31,12 @@ WidgetScale::WidgetScale() : WidgetPrimitive() {
 
 // Destructor
 WidgetScale::~WidgetScale() {
-  core->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
-  if (mapNameFontString) core->getFontEngine()->destroyString(mapNameFontString);
+  widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
+  if (mapNameFontString) widgetPage->getFontEngine()->destroyString(mapNameFontString);
   for(Int i=0;i<4;i++) {
-    if (scaledNumberFontString[i]) core->getFontEngine()->destroyString(scaledNumberFontString[i]);
+    if (scaledNumberFontString[i]) widgetPage->getFontEngine()->destroyString(scaledNumberFontString[i]);
   }
-  core->getFontEngine()->unlockFont();
+  widgetPage->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
@@ -44,7 +44,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
 
   bool update;
   Int textX,textY;
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   double meters;
   std::string value,unit,lockedUnit;
 
@@ -98,7 +98,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     mapNameFontString->setY(textY);
 
     // Unlock the used font
-    core->getFontEngine()->unlockFont();
+    widgetPage->getFontEngine()->unlockFont();
 
     // Set the next update time
     nextUpdateTime=t+updateInterval;

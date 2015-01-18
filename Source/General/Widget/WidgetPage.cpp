@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetPage::WidgetPage(std::string name) {
+WidgetPage::WidgetPage(WidgetEngine *widgetEngine, std::string name) {
   this->name=name;
   widgetsActive=false;
   touchStartedOutside=false;
@@ -24,6 +24,7 @@ WidgetPage::WidgetPage(std::string name) {
   selectedWidget=NULL;
   touchEndTime=0;
   lastTouchStartedOutside=true;
+  this->widgetEngine=widgetEngine;
 }
 
 // Destructor
@@ -52,7 +53,7 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
         if (widgetsActive) {
           if (primitive==selectedWidget) {
             core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            primitive->setFadeAnimation(t,primitive->getColor(),core->getWidgetEngine()->getSelectedWidgetColor(),false,core->getGraphicEngine()->getFadeDuration());
+            primitive->setFadeAnimation(t,primitive->getColor(),widgetEngine->getSelectedWidgetColor(),false,core->getGraphicEngine()->getFadeDuration());
             core->getGraphicEngine()->unlockDrawing();
           } else {
             core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
@@ -114,7 +115,7 @@ bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     }
     if (selectedWidget) {
       core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),core->getWidgetEngine()->getSelectedWidgetColor(),false,core->getGraphicEngine()->getFadeDuration());
+      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),widgetEngine->getSelectedWidgetColor(),false,core->getGraphicEngine()->getFadeDuration());
       core->getGraphicEngine()->unlockDrawing();
     }
   }
@@ -206,11 +207,15 @@ void WidgetPage::deselectWidget(TimestampInMicroseconds t) {
 
 // Let the page work
 bool WidgetPage::work(TimestampInMicroseconds t) {
-  if ((widgetsActive)&&(firstTouch)&&(t>touchEndTime+core->getWidgetEngine()->getWidgetsActiveTimeout())) {
+  if ((widgetsActive)&&(firstTouch)&&(t>touchEndTime+widgetEngine->getWidgetsActiveTimeout())) {
     setWidgetsActive(t,false);
     return true;
   }
   return false;
+}
+
+FontEngine *WidgetPage::getFontEngine() {
+  return widgetEngine->getFontEngine();
 }
 
 }

@@ -16,10 +16,12 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetEngine::WidgetEngine() {
+WidgetEngine::WidgetEngine(Screen *screen, FontEngine *fontEngine) {
 
   // Get global config
   ConfigStore *c=core->getConfigStore();
+  this->screen=screen;
+  this->fontEngine=fontEngine;
   selectedWidgetColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/SelectedColor",__FILE__, __LINE__);
   buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay",__FILE__, __LINE__);
   buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod",__FILE__, __LINE__);
@@ -952,7 +954,7 @@ void WidgetEngine::createGraphic() {
     //DEBUG("found a widget page with name %s",(*i).c_str());
 
     // Create the page
-    WidgetPage *page=new WidgetPage(*i);
+    WidgetPage *page=new WidgetPage(this,*i);
     if (!page) {
       FATAL("can not create widget page object",NULL);
       core->getThread()->unlockMutex(accessMutex);
@@ -979,31 +981,31 @@ void WidgetEngine::createGraphic() {
       WidgetNavigation *navigation;
       WidgetPathInfo *pathInfo;
       if (widgetType=="button") {
-        button=new WidgetButton();
+        button=new WidgetButton(page);
         primitive=button;
       }
       if (widgetType=="checkbox") {
-        checkbox=new WidgetCheckbox();
+        checkbox=new WidgetCheckbox(page);
         primitive=checkbox;
       }
       if (widgetType=="meter") {
-        meter=new WidgetMeter();
+        meter=new WidgetMeter(page);
         primitive=meter;
       }
       if (widgetType=="scale") {
-        scale=new WidgetScale();
+        scale=new WidgetScale(page);
         primitive=scale;
       }
       if (widgetType=="status") {
-        status=new WidgetStatus();
+        status=new WidgetStatus(page);
         primitive=status;
       }
       if (widgetType=="navigation") {
-        navigation=new WidgetNavigation();
+        navigation=new WidgetNavigation(page);
         primitive=navigation;
       }
       if (widgetType=="pathInfo") {
-        pathInfo=new WidgetPathInfo();
+        pathInfo=new WidgetPathInfo(page);
         primitive=pathInfo;
       }
 
@@ -1017,23 +1019,23 @@ void WidgetEngine::createGraphic() {
 
       // Load the image of the widget
       if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")) {
-        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
+        primitive->setTextureFromIcon(screen,c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {
-        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"checkedIconFilename",__FILE__, __LINE__));
+        primitive->setTextureFromIcon(screen,c->getStringValue(widgetPath,"checkedIconFilename",__FILE__, __LINE__));
         checkbox->setCheckedTexture(primitive->getTexture());
-        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"uncheckedIconFilename",__FILE__, __LINE__));
+        primitive->setTextureFromIcon(screen,c->getStringValue(widgetPath,"uncheckedIconFilename",__FILE__, __LINE__));
         checkbox->setUncheckedTexture(primitive->getTexture());
         checkbox->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
       }
       if (widgetType=="navigation") {
-        navigation->getDirectionIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"directionIconFilename",__FILE__, __LINE__));
+        navigation->getDirectionIcon()->setTextureFromIcon(screen,c->getStringValue(widgetPath,"directionIconFilename",__FILE__, __LINE__));
         navigation->getDirectionIcon()->setX(-navigation->getDirectionIcon()->getIconWidth()/2);
         navigation->getDirectionIcon()->setY(-navigation->getDirectionIcon()->getIconHeight()/2);
-        navigation->getTargetIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"targetIconFilename",__FILE__, __LINE__));
+        navigation->getTargetIcon()->setTextureFromIcon(screen,c->getStringValue(widgetPath,"targetIconFilename",__FILE__, __LINE__));
         navigation->getTargetIcon()->setX(-navigation->getTargetIcon()->getIconWidth()/2);
         navigation->getTargetIcon()->setY(-navigation->getTargetIcon()->getIconHeight()/2);
-        navigation->getSeparatorIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
+        navigation->getSeparatorIcon()->setTextureFromIcon(screen,c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
         navigation->getSeparatorIcon()->setX(0);
         navigation->getSeparatorIcon()->setY(0);
       }
@@ -1114,8 +1116,8 @@ void WidgetEngine::createGraphic() {
         pathInfo->setAltitudeProfileHeight(c->getDoubleValue(widgetPath,"altitudeProfileHeight",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
-        pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth",__FILE__, __LINE__)*((double)core->getScreen()->getDPI())/160.0);
-        pathInfo->setAltitudeProfileAxisLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileAxisLineWidth",__FILE__, __LINE__)*((double)core->getScreen()->getDPI())/160.0);
+        pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth",__FILE__, __LINE__)*((double)screen->getDPI())/160.0);
+        pathInfo->setAltitudeProfileAxisLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileAxisLineWidth",__FILE__, __LINE__)*((double)screen->getDPI())/160.0);
         pathInfo->setNoAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setNoAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileFillColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileFillColor",__FILE__, __LINE__));
@@ -1128,7 +1130,7 @@ void WidgetEngine::createGraphic() {
         pathInfo->setAltitudeProfileYTickLabelOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileYTickLabelOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setAltitudeProfileXTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileXTickLabelWidth",__FILE__, __LINE__));
         pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth",__FILE__, __LINE__));
-        pathInfo->getLocationIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
+        pathInfo->getLocationIcon()->setTextureFromIcon(screen,c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
       }
 
       // Add the widget to the page
@@ -1168,18 +1170,18 @@ void WidgetEngine::updateWidgetPositions() {
 
   // Find out the orientation for which we need to update the positioning
   std::string orientation="Unknown";
-  switch(core->getScreen()->getOrientation()) {
+  switch(screen->getOrientation()) {
     case GraphicScreenOrientationLandscape: orientation="Landscape"; break;
     case GraphicScreenOrientationProtrait: orientation="Portrait"; break;
   }
   //DEBUG("orientation=%s",orientation.c_str());
-  Int width=core->getScreen()->getWidth();
-  Int height=core->getScreen()->getHeight();
-  double diagonal=core->getScreen()->getDiagonal();
+  Int width=screen->getWidth();
+  Int height=screen->getHeight();
+  double diagonal=screen->getDiagonal();
   DEBUG("width=%d height=%d diagonal=%f",width,height,diagonal);
 
   // Set global variables that depend on the screen configuration
-  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*core->getScreen()->getWidth()/100.0);
+  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*screen->getWidth()/100.0);
 
   // Go through all pages
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
@@ -1374,7 +1376,7 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   }
 
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
-  Int width = core->getScreen()->getWidth();
+  Int width = screen->getWidth();
 
   // Check if the requested page exists
   if (pageMap.find(name)==pageMap.end()) {

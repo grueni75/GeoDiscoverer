@@ -31,14 +31,14 @@ GraphicRectangle::~GraphicRectangle() {
 }
 
 // Loads an icon and sets it as the texture of the primitive
-void GraphicRectangle::setTextureFromIcon(std::string iconFilename) {
+void GraphicRectangle::setTextureFromIcon(Screen *screen, std::string iconFilename) {
 
   // Load the icon
   iconFilename+=".png";
   Int imageWidth, imageHeight;
   UInt pixelSize;
   double dpiScale;
-  ImagePixel *iconImage=core->getImage()->loadPNGIcon(iconFilename,imageWidth,imageHeight,dpiScale,pixelSize);
+  ImagePixel *iconImage=core->getImage()->loadPNGIcon(screen, iconFilename,imageWidth,imageHeight,dpiScale,pixelSize);
   if (!iconImage)
     return;
   if (pixelSize!=Image::getRGBAPixelSize()) {
@@ -86,8 +86,8 @@ void GraphicRectangle::setTextureFromIcon(std::string iconFilename) {
   //if (getTexture()!=core->getScreen()->getTextureNotDefined()) {
   //  core->getScreen()->destroyTextureInfo(getTexture());
   //}
-  setTexture(core->getScreen()->createTextureInfo());
-  core->getScreen()->setTextureImage(getTexture(),textureImage,textureWidth,textureHeight,GraphicTextureFormatRGBA1);
+  setTexture(Screen::createTextureInfo());
+  Screen::setTextureImage(getTexture(),textureImage,textureWidth,textureHeight,GraphicTextureFormatRGBA1);
   free(textureImage);
 }
 

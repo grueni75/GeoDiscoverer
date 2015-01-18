@@ -33,7 +33,7 @@ class WidgetStatus: public GEODISCOVERER::WidgetPrimitive {
 public:
 
   // Constructors and destructor
-  WidgetStatus();
+  WidgetStatus(WidgetPage *widgetPage);
   virtual ~WidgetStatus();
 
   // Let the widget work

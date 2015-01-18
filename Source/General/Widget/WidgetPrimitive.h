@@ -18,11 +18,14 @@ namespace GEODISCOVERER {
 
 typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale, WidgetTypeStatus, WidgetTypeNavigation, WidgetTypePathInfo} WidgetType;
 
+class WidgetPage;
+
 class WidgetPrimitive : public GraphicRectangle {
 
 protected:
 
-  WidgetType widgetType;       // Type of widget
+  WidgetType widgetType;        // Type of widget
+  WidgetPage *widgetPage;       // Parent widget page
   GraphicColor activeColor;     // Color if the widget is active
   GraphicColor inactiveColor;   // Color if the widget is inactive
   bool isFirstTimeSelected;     // Indicates that the widget has just been selected
@@ -36,7 +39,7 @@ protected:
 public:
 
   // Constructors and destructor
-  WidgetPrimitive();
+  WidgetPrimitive(WidgetPage *widgetPage);
   virtual ~WidgetPrimitive();
 
   // Called when a two fingure gesture is done on the widget

@@ -62,7 +62,7 @@ MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool 
   this->visX=visualization.getX();
   this->visY=visualization.getY();
   this->visZ=visualization.getZ();
-  endTexture=core->getScreen()->getTextureNotDefined();
+  endTexture=Screen::getTextureNotDefined();
   visualization.setColor(GraphicColor(255,255,255,0));
 
   // Init the remaining object
