@@ -36,8 +36,6 @@ std::string Commander::execute(std::string cmd) {
   core->getThread()->unlockMutex(accessMutex);
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
 
-  FATAL("zoom in/out does not set next zoom level",NULL);
-
   // Set the default result
   std::string result="";
 

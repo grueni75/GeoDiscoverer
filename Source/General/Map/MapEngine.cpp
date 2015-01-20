@@ -782,6 +782,7 @@ void MapEngine::updateMap() {
     } else {
       zoomLevel=0;
     }
+    //DEBUG("diffZoom=%f zoomLevelLock=%d zoomLevel=%d",diffZoom,zoomLevelLock,zoomLevel);
 
     // Check if visual position is near to overflow
     Int dX;

@@ -26,9 +26,6 @@ protected:
   // Path animators object
   GraphicObject pathAnimators;
 
-  // Widget graphic object
-  GraphicObject *widgetGraphicObject;
-
   // Center icon
   GraphicRectangle centerIcon;
 
@@ -175,11 +172,6 @@ public:
   void unlockPathAnimators()
   {
       core->getThread()->unlockMutex(drawingMutex);
-  }
-
-  void setWidgetGraphicObject(GraphicObject *widgetGraphicObject)
-  {
-      this->widgetGraphicObject = widgetGraphicObject;
   }
 
   GraphicPosition *lockPos(const char *file, int line)

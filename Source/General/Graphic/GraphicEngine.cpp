@@ -48,7 +48,6 @@ GraphicEngine::GraphicEngine() {
   tileImageNotDownloadedFilename.setColor(GraphicColor(255,255,255,0));
   fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration",__FILE__, __LINE__);
   blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration",__FILE__, __LINE__);
-  widgetGraphicObject=NULL;
 
   // Init the dynamic data
   init();
@@ -106,6 +105,7 @@ void GraphicEngine::draw(Device *device, bool forceRedraw) {
   Screen *screen = device->getScreen();
   bool isDefaultScreen = core->getDefaultScreen() == screen;
   double scale,backScale;
+  GraphicObject *widgetGraphicObject = device->getVisibleWidgetPages();
 
   PROFILE_START;
 

@@ -24,8 +24,7 @@ class WidgetEngine {
 protected:
 
   ThreadMutexInfo *accessMutex;                         // Mutex for accessing this object
-  Screen *screen;                                       // Screen that shall be used for this widget engine
-  FontEngine *fontEngine;                               // Font engine that shall be used for this widget engine
+  Device *device;                                       // Device that shall be used for this widget engine
   WidgetPageMap pageMap;                                // Holds all available widget pages
   WidgetPage *currentPage;                              // The currently selected page
   GraphicColor selectedWidgetColor;                     // Color of selected widgets
@@ -54,7 +53,7 @@ protected:
 public:
 
   // Constructors and destructor
-  WidgetEngine(Screen *screen, FontEngine *fontEngine);
+  WidgetEngine(Device *device);
   virtual ~WidgetEngine();
 
   // Inits the object
@@ -137,9 +136,7 @@ public:
     return nearestPathIndex;
   }
 
-  FontEngine *getFontEngine() const {
-    return fontEngine;
-  }
+  FontEngine *getFontEngine();
 };
 
 }

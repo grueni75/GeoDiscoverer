@@ -16,12 +16,11 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetEngine::WidgetEngine(Screen *screen, FontEngine *fontEngine) {
+WidgetEngine::WidgetEngine(Device *device) {
 
   // Get global config
   ConfigStore *c=core->getConfigStore();
-  this->screen=screen;
-  this->fontEngine=fontEngine;
+  this->device=device;
   selectedWidgetColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/SelectedColor",__FILE__, __LINE__);
   buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay",__FILE__, __LINE__);
   buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod",__FILE__, __LINE__);
@@ -51,7 +50,7 @@ WidgetEngine::~WidgetEngine() {
 void WidgetEngine::addWidgetToPage(WidgetConfig config) {
 
   // Iterate through all positions
-  std::string path="Graphic/Widget/Page[@name='" + config.getPageName() + "']/Primitive[@name='" + config.getName() + "']";
+  std::string path="Graphic/Widget/Device[@name='" + device->getName() + "']/Page[@name='" + config.getPageName() + "']/Primitive[@name='" + config.getName() + "']";
   ConfigStore *c=core->getConfigStore();
   std::string widgetTypeString="unknown";
   switch(config.getType()) {
@@ -110,7 +109,8 @@ void WidgetEngine::createGraphic() {
 
   // Get all widget pages
   // If no exist, create the default ones
-  std::list<std::string> pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
+  std::string deviceName = device->getName();
+  std::list<std::string> pageNames=c->getAttributeValues("Graphic/Widget/Device[@name='" + deviceName + "']/Page","name",__FILE__, __LINE__);
   WidgetConfig config;
   WidgetPosition position;
   if (pageNames.size()==0) {
@@ -944,11 +944,10 @@ void WidgetEngine::createGraphic() {
     config.addParameter("stateConfigName","pathInfoLocked");
     config.addParameter("updateInterval","250000");
     addWidgetToPage(config);
-    pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
   }
 
   // Create the widgets from the config
-  pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
+  pageNames=c->getAttributeValues("Graphic/Widget/Device[@name='" + deviceName + "']/Page","name",__FILE__, __LINE__);
   std::list<std::string>::iterator i;
   for(i=pageNames.begin();i!=pageNames.end();i++) {
     //DEBUG("found a widget page with name %s",(*i).c_str());
@@ -964,7 +963,7 @@ void WidgetEngine::createGraphic() {
     pageMap.insert(pair);
 
     // Go through all widgets of this page
-    std::string path="Graphic/Widget/Page[@name='" + *i + "']/Primitive";
+    std::string path="Graphic/Widget/Device[@name='" + deviceName + "']/Page[@name='" + *i + "']/Primitive";
     std::list<std::string> widgetNames=c->getAttributeValues(path,"name",__FILE__, __LINE__);
     std::list<std::string>::iterator j;
     for(j=widgetNames.begin();j!=widgetNames.end();j++) {
@@ -1019,23 +1018,23 @@ void WidgetEngine::createGraphic() {
 
       // Load the image of the widget
       if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")) {
-        primitive->setTextureFromIcon(screen,c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
+        primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {
-        primitive->setTextureFromIcon(screen,c->getStringValue(widgetPath,"checkedIconFilename",__FILE__, __LINE__));
+        primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"checkedIconFilename",__FILE__, __LINE__));
         checkbox->setCheckedTexture(primitive->getTexture());
-        primitive->setTextureFromIcon(screen,c->getStringValue(widgetPath,"uncheckedIconFilename",__FILE__, __LINE__));
+        primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"uncheckedIconFilename",__FILE__, __LINE__));
         checkbox->setUncheckedTexture(primitive->getTexture());
         checkbox->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
       }
       if (widgetType=="navigation") {
-        navigation->getDirectionIcon()->setTextureFromIcon(screen,c->getStringValue(widgetPath,"directionIconFilename",__FILE__, __LINE__));
+        navigation->getDirectionIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"directionIconFilename",__FILE__, __LINE__));
         navigation->getDirectionIcon()->setX(-navigation->getDirectionIcon()->getIconWidth()/2);
         navigation->getDirectionIcon()->setY(-navigation->getDirectionIcon()->getIconHeight()/2);
-        navigation->getTargetIcon()->setTextureFromIcon(screen,c->getStringValue(widgetPath,"targetIconFilename",__FILE__, __LINE__));
+        navigation->getTargetIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"targetIconFilename",__FILE__, __LINE__));
         navigation->getTargetIcon()->setX(-navigation->getTargetIcon()->getIconWidth()/2);
         navigation->getTargetIcon()->setY(-navigation->getTargetIcon()->getIconHeight()/2);
-        navigation->getSeparatorIcon()->setTextureFromIcon(screen,c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
+        navigation->getSeparatorIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
         navigation->getSeparatorIcon()->setX(0);
         navigation->getSeparatorIcon()->setY(0);
       }
@@ -1116,8 +1115,8 @@ void WidgetEngine::createGraphic() {
         pathInfo->setAltitudeProfileHeight(c->getDoubleValue(widgetPath,"altitudeProfileHeight",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
-        pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth",__FILE__, __LINE__)*((double)screen->getDPI())/160.0);
-        pathInfo->setAltitudeProfileAxisLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileAxisLineWidth",__FILE__, __LINE__)*((double)screen->getDPI())/160.0);
+        pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth",__FILE__, __LINE__)*((double)device->getScreen()->getDPI())/160.0);
+        pathInfo->setAltitudeProfileAxisLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileAxisLineWidth",__FILE__, __LINE__)*((double)device->getScreen()->getDPI())/160.0);
         pathInfo->setNoAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setNoAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileFillColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileFillColor",__FILE__, __LINE__));
@@ -1130,7 +1129,7 @@ void WidgetEngine::createGraphic() {
         pathInfo->setAltitudeProfileYTickLabelOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileYTickLabelOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setAltitudeProfileXTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileXTickLabelWidth",__FILE__, __LINE__));
         pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth",__FILE__, __LINE__));
-        pathInfo->getLocationIcon()->setTextureFromIcon(screen,c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
+        pathInfo->getLocationIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
       }
 
       // Add the widget to the page
@@ -1142,7 +1141,7 @@ void WidgetEngine::createGraphic() {
 
   // Set the default page on the graphic engine
   WidgetPageMap::iterator j;
-  j=pageMap.find(c->getStringValue("Graphic/Widget","selectedPage",__FILE__, __LINE__));
+  j=pageMap.find(c->getStringValue("Graphic/Widget/Device[@name='" + deviceName + "']","selectedPage",__FILE__, __LINE__));
   if (j==pageMap.end()) {
     FATAL("default page does not exist",NULL);
     core->getThread()->unlockMutex(accessMutex);
@@ -1151,7 +1150,7 @@ void WidgetEngine::createGraphic() {
     currentPage=j->second;
     visiblePages.addPrimitive(currentPage->getGraphicObject());
     core->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-    core->getGraphicEngine()->setWidgetGraphicObject(&visiblePages);
+    device->setVisibleWidgetPages(&visiblePages);
     core->getGraphicEngine()->unlockDrawing();
   }
 
@@ -1162,7 +1161,7 @@ void WidgetEngine::createGraphic() {
   updateWidgetPositions();
 }
 
-// Updates the positions of the widgets in dependence of the current screen dimension
+// Updates the positions of the widgets in dependence of the current device->getScreen() dimension
 void WidgetEngine::updateWidgetPositions() {
 
   // Only one thread please
@@ -1170,18 +1169,18 @@ void WidgetEngine::updateWidgetPositions() {
 
   // Find out the orientation for which we need to update the positioning
   std::string orientation="Unknown";
-  switch(screen->getOrientation()) {
+  switch(device->getScreen()->getOrientation()) {
     case GraphicScreenOrientationLandscape: orientation="Landscape"; break;
     case GraphicScreenOrientationProtrait: orientation="Portrait"; break;
   }
   //DEBUG("orientation=%s",orientation.c_str());
-  Int width=screen->getWidth();
-  Int height=screen->getHeight();
-  double diagonal=screen->getDiagonal();
+  Int width=device->getScreen()->getWidth();
+  Int height=device->getScreen()->getHeight();
+  double diagonal=device->getScreen()->getDiagonal();
   DEBUG("width=%d height=%d diagonal=%f",width,height,diagonal);
 
-  // Set global variables that depend on the screen configuration
-  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*screen->getWidth()/100.0);
+  // Set global variables that depend on the device->getScreen() configuration
+  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*device->getScreen()->getWidth()/100.0);
 
   // Go through all pages
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
@@ -1197,9 +1196,9 @@ void WidgetEngine::updateWidgetPositions() {
     GraphicPrimitiveMap::iterator j;
     for(j=widgetMap->begin();j!=widgetMap->end();j++) {
       WidgetPrimitive *primitive=(WidgetPrimitive*)j->second;
-      std::string path="Graphic/Widget/Page[@name='" + page->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/Position";
+      std::string path="Graphic/Widget/Device[@name='" + device->getName() + "']/Page[@name='" + page->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/Position";
 
-      // Find the position that is closest to the reference screen diagonal
+      // Find the position that is closest to the reference device->getScreen() diagonal
       std::list<std::string> refScreenDiagonals = c->getAttributeValues(path,"refScreenDiagonal",__FILE__,__LINE__);
       double nearestValue = std::numeric_limits<double>::max();
       std::string nearestString;
@@ -1236,7 +1235,7 @@ void WidgetEngine::deinit() {
 
   // Clear the widget page
   core->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-  core->getGraphicEngine()->setWidgetGraphicObject(NULL);
+  device->setVisibleWidgetPages(NULL);
   core->getGraphicEngine()->unlockDrawing();
 
   // Only one thread
@@ -1376,7 +1375,7 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   }
 
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
-  Int width = screen->getWidth();
+  Int width = device->getScreen()->getWidth();
 
   // Check if the requested page exists
   if (pageMap.find(name)==pageMap.end()) {
@@ -1445,7 +1444,7 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   // Set the new page
   currentPage=nextPage;
   nextPage->setWidgetsActive(t,true);
-  core->getConfigStore()->setStringValue("Graphic/Widget","selectedPage",name,__FILE__, __LINE__);
+  core->getConfigStore()->setStringValue("Graphic/Widget/Device[@name='" + device->getName() + "']","selectedPage",name,__FILE__, __LINE__);
   core->getThread()->unlockMutex(accessMutex);
 }
 
@@ -1528,6 +1527,11 @@ bool WidgetEngine::work(TimestampInMicroseconds t) {
   } else {
     return false;
   }
+}
+
+// Returns the font engine
+FontEngine *WidgetEngine::getFontEngine() {
+  return device->getFontEngine();
 }
 
 }

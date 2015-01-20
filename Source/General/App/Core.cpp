@@ -245,7 +245,7 @@ bool Core::init() {
   }
   DEBUG("initializing default device",NULL);
   Device *device;
-  if (!(device=new Device(defaultScreenDPI,defaultScreenDiagonal,0,false))) {
+  if (!(device=new Device("Default",defaultScreenDPI,defaultScreenDiagonal,0))) {
     FATAL("can not create screen object",NULL);
     return false;
   }

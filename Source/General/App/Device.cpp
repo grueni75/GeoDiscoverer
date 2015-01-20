@@ -15,14 +15,19 @@
 namespace GEODISCOVERER {
 
 // Constructor
-Device::Device(Int DPI, double diagonal, TimestampInMicroseconds updateInterval, bool cockpit) {
+Device::Device(std::string name, Int DPI, double diagonal, TimestampInMicroseconds updateInterval) {
 
   // Update variables
-  this->cockpit=cockpit;
+  this->name=name;
+  if (name=="Default")
+    this->cockpit=false;
+  else
+    this->cockpit=true;
   this->updateInterval=updateInterval;
   this->DPI=DPI;
   this->diagonal=diagonal;
   this->noChangeFrameCount=0;
+  visibleWidgetPages=NULL;
 
   // Create components
   if (!(screen=new Screen(DPI,diagonal,updateInterval==0 ? false : true))) {
@@ -33,7 +38,7 @@ Device::Device(Int DPI, double diagonal, TimestampInMicroseconds updateInterval,
     FATAL("can not create font engine object",NULL);
     return;
   }
-  if (!(widgetEngine=new WidgetEngine(screen, fontEngine))) {
+  if (!(widgetEngine=new WidgetEngine(this))) {
     FATAL("can not create widget engine object",NULL);
     return;
   }

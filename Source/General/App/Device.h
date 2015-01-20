@@ -19,6 +19,9 @@ class Device {
 
 protected:
 
+  // Name of the device
+  std::string name;
+
   // Density of the screen
   Int DPI;
 
@@ -39,10 +42,13 @@ protected:
   // Number of frames without any change
   Int noChangeFrameCount;
 
+  // The currently visible pages
+  GraphicObject *visibleWidgetPages;
+
 public:
 
   // Constructor
-  Device(Int DPI, double diagonal, TimestampInMicroseconds updateInterval, bool cockpit);
+  Device(std::string name, Int DPI, double diagonal, TimestampInMicroseconds updateInterval);
 
   // Destructor
   virtual ~Device();
@@ -75,6 +81,19 @@ public:
   void setNoChangeFrameCount(Int noChangeFrameCount) {
     this->noChangeFrameCount = noChangeFrameCount;
   }
+
+  const std::string& getName() const {
+    return name;
+  }
+
+  GraphicObject *getVisibleWidgetPages() {
+    return visibleWidgetPages;
+  }
+
+  void setVisibleWidgetPages(GraphicObject *visiblePages) {
+    this->visibleWidgetPages = visiblePages;
+  }
+
 };
 
 } /* namespace GEODISCOVERER */
