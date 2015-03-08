@@ -137,6 +137,43 @@ void Font::setTexture(FontString *fontString) {
 
 }
 
+// Copies the characters to the bitmap
+void Font::copyCharacters(FontString *fontString, std::list<FontCharacterPosition> *drawingList, bool useStrokeBitmap, UShort *textureBitmap, Int textureWidth, Int textureHeight, Int top, Int left, Int width, Int height, Int fadeOutOffset) {
+  for(std::list<FontCharacterPosition>::iterator i=drawingList->begin();i!=drawingList->end();i++) {
+    FontCharacterPosition pos=*i;
+    Int offsetX=pos.getX()-left;
+    Int offsetY=top-pos.getY();
+    offsetY+=(textureHeight-height);
+    FontCharacter *c=pos.getCharacter();
+    //DEBUG("textureWidth=%d textureHeight=%d width=%d height=%d offsetX=%d offsetY=%d characterWidth=%d characterHeight=%d",textureWidth,textureHeight,width,height,offsetX,offsetY,c->getWidth(),c->getHeight());
+    UShort *characterBitmap;
+    if (useStrokeBitmap)
+      characterBitmap=c->getStrokeBitmap();
+    else
+      characterBitmap=c->getNormalBitmap();
+    for(Int y=0;y<c->getHeight();y++) {
+      for(Int x=0;x<c->getWidth();x++) {
+        UShort value=characterBitmap[y*c->getWidth()+x];
+        if ((value&0xF)!=0) {
+          Int absX=offsetX+x;
+          bool copyValue=true;
+          if ((fontString->getWidthLimit()!=-1)&&(width==fontString->getWidthLimit())) {
+            if (absX>=width)
+              copyValue=false;
+            else if (absX>=width-fadeOutOffset) {
+              Int t=width-1-absX;
+              Int alpha=(value&0xF)*t/fadeOutOffset;
+              value=(value&0xFFF0)|alpha;
+            }
+          }
+          if (copyValue)
+            textureBitmap[(offsetY+y)*textureWidth+offsetX+x]=value;
+        }
+      }
+    }
+  }
+}
+
 // Creates the bitmap for the font string
 void Font::createStringBitmap(FontString *fontString) {
 
@@ -146,7 +183,8 @@ void Font::createStringBitmap(FontString *fontString) {
   ConversionResult result;
   Int penX=0;
   Int penY=0;
-  UShort *characterBitmap=NULL;
+  UShort *normalCharacterBitmap=NULL;
+  UShort *strokeCharacterBitmap=NULL;
   FT_UInt glyphIndex,previousGlyphIndex;
   FT_Stroker stroker;
   FT_Glyph strokeGlyph=NULL;
@@ -249,8 +287,9 @@ void Font::createStringBitmap(FontString *fontString) {
       FontCharacterPair p=FontCharacterPair(c,fontCharacter);
       characterMap.insert(p);
 
-      // Merge the bitmaps
-      characterBitmap=fontCharacter->getBitmap();
+      // Copy the bitmaps
+      normalCharacterBitmap=fontCharacter->getNormalBitmap();
+      strokeCharacterBitmap=fontCharacter->getStrokeBitmap();
       FT_BitmapGlyph normalBGlyph=(FT_BitmapGlyph)normalGlyph;
       FT_Bitmap *normalBitmap=&normalBGlyph->bitmap;
       Int normalBitmapWidth=normalBitmap->width/3;
@@ -275,15 +314,14 @@ void Font::createStringBitmap(FontString *fontString) {
             normalRed=15-normalRed;
             normalGreen=15-normalGreen;
             normalBlue=15-normalBlue;
-            if (normalAlpha>0) {
-              red=normalRed;
-              green=normalGreen;
-              blue=normalBlue;
-              alpha=15;
-            }
+            if (normalAlpha>0)
+              normalAlpha=15;
+            normalCharacterBitmap[y*strokeBitmapWidth+x]=normalRed<<12|normalGreen<<8|normalBlue<<4|normalAlpha;
+          } else {
+            normalCharacterBitmap[y*strokeBitmapWidth+x]=0;
           }
           UShort value=red<<12|green<<8|blue<<4|alpha;
-          characterBitmap[y*strokeBitmapWidth+x]=value;
+          strokeCharacterBitmap[y*strokeBitmapWidth+x]=value;
         }
       }
 
@@ -376,35 +414,8 @@ void Font::createStringBitmap(FontString *fontString) {
   memset(textureBitmap,0,sizeof(*textureBitmap)*textureWidth*textureHeight);
 
   // Copy the characters to the bitmap
-  for(std::list<FontCharacterPosition>::iterator i=drawingList.begin();i!=drawingList.end();i++) {
-    FontCharacterPosition pos=*i;
-    Int offsetX=pos.getX()-left;
-    Int offsetY=top-pos.getY();
-    offsetY+=(textureHeight-height);
-    //DEBUG("textureWidth=%d textureHeight=%d width=%d height=%d offsetX=%d offsetY=%d characterWidth=%d characterHeight=%d",textureWidth,textureHeight,width,height,offsetX,offsetY,c->getWidth(),c->getHeight());
-    FontCharacter *c=pos.getCharacter();
-    UShort *characterBitmap=c->getBitmap();
-    for(Int y=0;y<c->getHeight();y++) {
-      for(Int x=0;x<c->getWidth();x++) {
-        UShort value=characterBitmap[y*c->getWidth()+x];
-        if ((value&0xF)!=0) {
-          Int absX=offsetX+x;
-          bool copyValue=true;
-          if ((fontString->getWidthLimit()!=-1)&&(width==fontString->getWidthLimit())) {
-            if (absX>=width)
-              copyValue=false;
-            else if (absX>=width-fadeOutOffset) {
-              Int t=width-1-absX;
-              Int alpha=(value&0xF)*t/fadeOutOffset;
-              value=(value&0xFFF0)|alpha;
-            }
-          }
-          if (copyValue)
-            textureBitmap[(offsetY+y)*textureWidth+offsetX+x]=value;
-        }
-      }
-    }
-  }
+  copyCharacters(fontString,&drawingList,true,textureBitmap,textureWidth,textureHeight,top,left,width,height,fadeOutOffset);
+  copyCharacters(fontString,&drawingList,false,textureBitmap,textureWidth,textureHeight,top,left,width,height,fadeOutOffset);
 
   // Update the font string object (you also need to update the cache code in createString if you change this)
   fontString->setTextureBitmap(textureBitmap);

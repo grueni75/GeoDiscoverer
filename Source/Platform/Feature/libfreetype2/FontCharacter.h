@@ -23,7 +23,8 @@ class FontCharacter {
   Int penAdvanceX;                 // Distance to move the pen after the character has been drawn
   Int width;                       // Width of the character
   Int height;                      // Height of the character
-  UShort *bitmap;                  // Bitmap of the character
+  UShort *normalBitmap;            // Bitmap of the normal character
+  UShort *strokeBitmap;            // Bitmap of the stroke character
 
 public:
 
@@ -74,11 +75,13 @@ public:
       return width;
   }
 
-  UShort *getBitmap() const
-  {
-      return bitmap;
+  UShort* getNormalBitmap() const {
+    return normalBitmap;
   }
 
+  UShort* getStrokeBitmap() const {
+    return strokeBitmap;
+  }
 };
 
 }

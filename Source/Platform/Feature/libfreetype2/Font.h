@@ -106,6 +106,9 @@ protected:
   ConversionResult convertUTF8toUTF32 (const UTF8** sourceStart, const UTF8* sourceEnd,
   UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
 
+  // Copies the characters to the bitmap
+  void copyCharacters(FontString *fontString, std::list<FontCharacterPosition> *drawingList, bool useStrokeBitmap, UShort *textureBitmap, Int textureWidth, Int textureHeight, Int top, Int left, Int width, Int height, Int fadeOutOffset);
+
 public:
 
   // Constructor
