@@ -105,21 +105,37 @@ void motionFunc(int x, int y)
 
 namespace GEODISCOVERER {
 
+// Background thread that stores images of the screen
+void *writeScreenShotThread(void *args) {
+  ((Screen*)args)->writeScreenShot();
+  return NULL;
+}
+
 // Static variables
 bool Screen::allowAllocation=false;
 bool Screen::allowDestroying=false;
 
 // Constructor: open window and init opengl
-Screen::Screen(Int DPI, double diagonal, bool separateFramebuffer) {
+Screen::Screen(Int DPI, double diagonal, bool separateFramebuffer, bool whiteBackground, std::string screenShotPath) {
 
   // Set variables
   this->DPI=DPI;
   this->diagonal=diagonal;
   this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock", __FILE__, __LINE__);
   this->separateFramebuffer=separateFramebuffer;
+  this->whiteBackground=whiteBackground;
+  this->screenShotPath=screenShotPath;
   framebuffer=0;
-  renderbuffer=0;
+  colorRenderbuffer=0;
   setWakeLock(wakeLock, __FILE__, __LINE__);
+  for (Int i=0;i<2;i++) {
+    screenShotPixels[i]=NULL;
+  }
+  nextScreenShotPixelsIndex=0;
+  nextScreenShotPixelsMutex=core->getThread()->createMutex("current screen shot pixels mutex");
+  writeScreenShotSignal=core->getThread()->createSignal();
+  writeScreenShotThreadInfo=core->getThread()->createThread("screen shot write thread",writeScreenShotThread,this);
+
 }
 
 // Main loop
@@ -147,6 +163,7 @@ void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
 
   int argc = 0;
   char **argv = NULL;
+  GLenum error;
 
   // Update variables
   this->width=width;
@@ -174,16 +191,49 @@ void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
 
     // Create a suitable frame buffer
     glGenFramebuffers(1,&framebuffer);
-    glGenRenderbuffers(1,&renderbuffer);
-    glBindRenderbuffer(framebuffer,renderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_BGR, getWidth(), getHeight());
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,framebuffer);
-    glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER,framebuffer);
+    glGenRenderbuffers(1,&colorRenderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER,colorRenderbuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, getWidth(), getHeight());
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE)
+      FATAL("can not create off-screen frame buffer",NULL);
+
+    // Reserve memory for the screen shot buffers
+    core->getThread()->lockMutex(nextScreenShotPixelsMutex,__FILE__,__LINE__);
+    for (Int i=0;i<2;i++) {
+      if (screenShotPixels[i])
+        free(screenShotPixels[i]);
+      if (!(screenShotPixels[i]=malloc(width*height*Image::getRGBPixelSize()))) {
+        FATAL("can not reserve memory for screen shot pixels",NULL);
+        return;
+      }
+    }
+    nextScreenShotPixelsIndex=0;
+    core->getThread()->unlockMutex(nextScreenShotPixelsMutex);
 
   }
 
+  // Compute the maximum tiles to show
+  if (!separateFramebuffer)
+    core->getMapEngine()->setMaxTiles();
+}
+
+// Activates the screen for drawing
+void Screen::startScene() {
+
+  // Set frame buffer
+  if (separateFramebuffer)
+    glBindFramebuffer(GL_FRAMEBUFFER,framebuffer);
+  else
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+
   // Init display
-  glClearColor(0.0f,0.0f,0.0f,0.0f);
+  if (whiteBackground)
+    glClearColor(1.0f,1.0f,1.0f,0.0f);
+  else
+    glClearColor(0.0f,0.0f,0.0f,0.0f);
   glViewport(0, 0, (GLsizei) getWidth(), (GLsizei) getHeight());
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -193,36 +243,51 @@ void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
   glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );      // select modulate to mix texture with color for shading
 
   // Enable transparency
-  glEnable (GL_BLEND);
+  glEnable(GL_BLEND);
   //glEnable (GL_LINE_SMOOTH);
   setColorModeAlpha();
-
-  // Compute the maximum tiles to show
-  core->getMapEngine()->setMaxTiles();
-
 }
 
-// Activates the screen for drawing
-void Screen::activate() {
-  if (separateFramebuffer)
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,framebuffer);
-  else
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
-}
-
-// Writes the screen content as a png
-void Screen::writePNG(std::string path) {
+// Creates a screen shot
+void Screen::createScreenShot() {
 
   // Get the screen pixels
-  GLvoid *pixels;
-  if (!(pixels=malloc(width*height*Image::getRGBPixelSize()))) {
-    FATAL("can not reserve memory for screen pixels",NULL);
-    return;
-  }
   glReadBuffer(GL_COLOR_ATTACHMENT0);
-  glReadPixels(0,0,width,height,GL_BGR,GL_UNSIGNED_BYTE,pixels);
-  core->getImage()->writePNG((ImagePixel*)pixels,path,width,height,core->getImage()->getRGBPixelSize());
-  free(pixels);
+  core->getThread()->lockMutex(nextScreenShotPixelsMutex,__FILE__,__LINE__);
+  GLvoid *nextScreenShotPixels=screenShotPixels[nextScreenShotPixelsIndex];
+  if (nextScreenShotPixels!=NULL)
+    glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,nextScreenShotPixels);
+  core->getThread()->unlockMutex(nextScreenShotPixelsMutex);
+  if (nextScreenShotPixels!=NULL)
+    core->getThread()->issueSignal(writeScreenShotSignal);
+}
+
+// Writes the screen shot as a png
+void Screen::writeScreenShot() {
+
+  GLvoid *pixels;
+
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+
+  // This thread can be cancelled at any time
+  core->getThread()->setThreadCancable();
+
+  // Do an endless loop
+  while (true) {
+
+    // Wait for the trigger
+    core->getThread()->waitForSignal(writeScreenShotSignal);
+
+    // Copy the screen shot pixels
+    core->getThread()->lockMutex(nextScreenShotPixelsMutex,__FILE__,__LINE__);
+    pixels=screenShotPixels[nextScreenShotPixelsIndex];
+    nextScreenShotPixelsIndex=(nextScreenShotPixelsIndex+1)%2;
+    core->getThread()->unlockMutex(nextScreenShotPixelsMutex);
+
+    // Write the PNG
+    core->getImage()->writePNG((ImagePixel*)pixels,screenShotPath,width,height,core->getImage()->getRGBPixelSize(),true);
+  }
 }
 
 void Screen::clear() {
@@ -508,9 +573,18 @@ void Screen::destroyGraphic() {
 Screen::~Screen() {
   graphicInvalidated();
   if (separateFramebuffer) {
-    glDeleteRenderbuffers(1,&renderbuffer);
+    glDeleteRenderbuffers(1,&colorRenderbuffer);
     glDeleteFramebuffers(1,&framebuffer);
   }
+  for (Int i=0;i<2;i++)
+    if (screenShotPixels[i])
+      free(screenShotPixels[i]);
+  core->getThread()->lockMutex(nextScreenShotPixelsMutex, __FILE__, __LINE__);
+  core->getThread()->cancelThread(writeScreenShotThreadInfo);
+  core->getThread()->waitForThread(writeScreenShotThreadInfo);
+  core->getThread()->destroyThread(writeScreenShotThreadInfo);
+  core->getThread()->destroyMutex(nextScreenShotPixelsMutex);
+  core->getThread()->destroySignal(writeScreenShotSignal);
 }
 
 }

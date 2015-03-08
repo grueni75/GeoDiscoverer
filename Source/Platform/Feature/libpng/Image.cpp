@@ -264,7 +264,7 @@ ImagePixel *Image::loadPNGIcon(Screen *screen, std::string filename, Int &imageW
 }
 
 // Writes a png
-bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize) {
+bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize, bool inverseRows) {
 
   png_structp png_ptr=NULL;
   png_infop info_ptr=NULL;
@@ -311,7 +311,8 @@ bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int hei
     goto cleanup;
   }
   for (y=0;y<height;y++) {
-    rows[y]=&image[y*width*pixelSize];
+    Int y2=inverseRows ? height-1-y : y;
+    rows[y]=&image[y2*width*pixelSize];
   }
   png_set_rows(png_ptr,info_ptr,rows);
 

@@ -150,11 +150,11 @@ void MapCache::removeTile(MapTile *tile) {
       FATAL("tile found in cached list but not marked as cached",NULL);
     }
     core->getThread()->unlockMutex(accessMutex);
-    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     GraphicRectangle *r=tile->getRectangle();
     r->setTextureAnimation(0,Screen::getTextureNotDefined(),Screen::getTextureNotDefined(),false,0);
     r->setZ(0);
-    core->getGraphicEngine()->unlockDrawing();
+    core->getDefaultGraphicEngine()->unlockDrawing();
     core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
     usedTextures.remove(tile->getEndTexture());
     unusedTextures.push_back(tile->getEndTexture());
@@ -253,10 +253,10 @@ void MapCache::updateMapTileImages() {
       uncachedTiles.push_back(t);
       core->getThread()->unlockMutex(accessMutex);
       GraphicTextureInfo m=t->getEndTexture();
-      core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+      core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
       GraphicRectangle *r=t->getRectangle();
       r->setZ(0);
-      core->getGraphicEngine()->unlockDrawing();
+      core->getDefaultGraphicEngine()->unlockDrawing();
       t->setIsCached(false);
       core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
       usedTextures.remove(m);

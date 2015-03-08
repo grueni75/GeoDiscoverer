@@ -41,9 +41,9 @@ NavigationPath::NavigationPath() {
   init();
 
   // Add the animator to the graphic engine
-  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   animatorKey=pathAnimators->addPrimitive(&animator);
-  core->getGraphicEngine()->unlockPathAnimators();
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
 }
 
 // Destructor
@@ -53,9 +53,9 @@ NavigationPath::~NavigationPath() {
   deinit();
 
   // Remove the animator
-  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   pathAnimators->removePrimitive(animatorKey,false);
-  core->getGraphicEngine()->unlockPathAnimators();
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
 
   // Free variables
   core->getThread()->destroyMutex(accessMutex);
@@ -164,9 +164,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           line->setCutWidth((*k)->getWidth());
           line->setCutHeight((*k)->getHeight());
           info->setPathLine(line);
-          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+          core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           info->setPathLineKey(tileVisualization->addPrimitive(line));
-          core->getGraphicEngine()->unlockDrawing();
+          core->getDefaultGraphicEngine()->unlockDrawing();
 
         }
 
@@ -175,9 +175,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
         Int y1=(*k)->getHeight()-(prevPos.getY()-(*k)->getMapY(0));
         Int x2=currentPos.getX()-(*k)->getMapX(0);
         Int y2=(*k)->getHeight()-(currentPos.getY()-(*k)->getMapY(0));
-        core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+        core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
         line->addStroke(x1,y1,x2,y2);
-        core->getGraphicEngine()->unlockDrawing();
+        core->getDefaultGraphicEngine()->unlockDrawing();
 
         // Add arrow if necessary
         if (currentPos.getHasBearing()) {
@@ -194,15 +194,15 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
             }
             rectangleList->setAnimator(&animator);
             rectangleList->setZ(2); // ensure that arrow is drawn after line texture
-            rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
+            rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
             rectangleList->setDestroyTexture(false);
             rectangleList->setCutEnabled(true);
             rectangleList->setCutWidth((*k)->getWidth());
             rectangleList->setCutHeight((*k)->getHeight());
-            Int arrowWidth=core->getGraphicEngine()->getPathDirectionIcon()->getWidth();
-            Int arrowHeight=core->getGraphicEngine()->getPathDirectionIcon()->getHeight();
-            Int arrowXToCenter=arrowWidth/2-core->getGraphicEngine()->getPathDirectionIcon()->getIconWidth()/2;
-            Int arrowYToCenter=arrowHeight/2-core->getGraphicEngine()->getPathDirectionIcon()->getIconHeight()/2;
+            Int arrowWidth=core->getDefaultGraphicEngine()->getPathDirectionIcon()->getWidth();
+            Int arrowHeight=core->getDefaultGraphicEngine()->getPathDirectionIcon()->getHeight();
+            Int arrowXToCenter=arrowWidth/2-core->getDefaultGraphicEngine()->getPathDirectionIcon()->getIconWidth()/2;
+            Int arrowYToCenter=arrowHeight/2-core->getDefaultGraphicEngine()->getPathDirectionIcon()->getIconHeight()/2;
             double totalRadius=sqrt((double)(arrowWidth*arrowWidth/4+arrowHeight*arrowHeight/4));
             double distanceToCenter=sqrt((double)(arrowXToCenter*arrowXToCenter+arrowYToCenter*arrowYToCenter));
             double angleToCenter;
@@ -213,9 +213,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
             }
             rectangleList->setParameter(totalRadius,distanceToCenter,angleToCenter);
             info->setPathArrowList(rectangleList);
-            core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
             info->setPathArrowListKey(tileVisualization->addPrimitive(rectangleList));
-            core->getGraphicEngine()->unlockDrawing();
+            core->getDefaultGraphicEngine()->unlockDrawing();
           }
 
           // Add the arrow
@@ -233,9 +233,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           double angle=FloatingPoint::computeAngle(distX,distY);
           double x=x1+dist/2*cos(angle);
           double y=y1+dist/2*sin(angle);
-          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+          core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           rectangleList->addRectangle(x,y,angle);
-          core->getGraphicEngine()->unlockDrawing();
+          core->getDefaultGraphicEngine()->unlockDrawing();
 
         }
       }
@@ -323,12 +323,12 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
           GraphicRectangle *ref = NULL;
           switch(type) {
             case NavigationPathVisualizationTypeStartFlag:
-              ref = core->getGraphicEngine()->getPathStartFlagIcon();
+              ref = core->getDefaultGraphicEngine()->getPathStartFlagIcon();
               info->setPathStartFlag(flag);
               flag->setZ(3); // ensure that start flag is drawn after tile and direction texture
               break;
             case NavigationPathVisualizationTypeEndFlag:
-              ref = core->getGraphicEngine()->getPathEndFlagIcon();
+              ref = core->getDefaultGraphicEngine()->getPathEndFlagIcon();
               info->setPathEndFlag(flag);
               flag->setZ(4); // ensure that end flag is drawn after start flag, tile and direction texture
               break;
@@ -352,7 +352,7 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
             flag->setX(endX);
             flag->setY(endY);
           }
-          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+          core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           switch(type) {
             case NavigationPathVisualizationTypeStartFlag:
               info->setPathStartFlagKey(tileVisualization->addPrimitive(flag));
@@ -361,7 +361,7 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
               info->setPathEndFlagKey(tileVisualization->addPrimitive(flag));
               break;
           }
-          core->getGraphicEngine()->unlockDrawing();
+          core->getDefaultGraphicEngine()->unlockDrawing();
         }
       } else {
         if (flag) {
@@ -381,9 +381,9 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
               info->setPathEndFlagKey(0);
               break;
           }
-          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+          core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           tileVisualization->removePrimitive(key,true);
-          core->getGraphicEngine()->unlockDrawing();
+          core->getDefaultGraphicEngine()->unlockDrawing();
         }
       }
     }
@@ -569,9 +569,9 @@ void NavigationPath::deinit() {
   core->getMapSource()->unlockAccess();
 
   // Force a redraw
-  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   pathAnimators->setIsUpdated(true);
-  core->getGraphicEngine()->unlockPathAnimators();
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
 
   // Is not initialized
   setIsInit(false);
@@ -599,9 +599,9 @@ void NavigationPath::init() {
   updateMetrics();
 
   // Configure the animator
-  core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
-  core->getGraphicEngine()->unlockPathAnimators();
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
 
   // Create a visualization object for each zoom level
   core->getMapSource()->lockAccess(__FILE__,__LINE__);

@@ -52,19 +52,19 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
       if (!primitive->getIsHidden()) {
         if (widgetsActive) {
           if (primitive==selectedWidget) {
-            core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            primitive->setFadeAnimation(t,primitive->getColor(),widgetEngine->getSelectedWidgetColor(),false,core->getGraphicEngine()->getFadeDuration());
-            core->getGraphicEngine()->unlockDrawing();
+            widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            primitive->setFadeAnimation(t,primitive->getColor(),getWidgetEngine()->getSelectedWidgetColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+            widgetEngine->getGraphicEngine()->unlockDrawing();
           } else {
-            core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            primitive->setFadeAnimation(t,primitive->getColor(),primitive->getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
+            widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            primitive->setFadeAnimation(t,primitive->getColor(),primitive->getActiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
             //primitive->setColor(primitive->getActiveColor());
-            core->getGraphicEngine()->unlockDrawing();
+            widgetEngine->getGraphicEngine()->unlockDrawing();
           }
         } else {
-          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-          primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor(),false,core->getGraphicEngine()->getFadeDuration());
-          core->getGraphicEngine()->unlockDrawing();
+          widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+          primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+          widgetEngine->getGraphicEngine()->unlockDrawing();
           //primitive->setColor(primitive->getInactiveColor());
         }
       }
@@ -109,14 +109,14 @@ bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
   }
   if (previousSelectedWidget!=selectedWidget) {
     if (previousSelectedWidget) {
-      core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      previousSelectedWidget->setFadeAnimation(t,previousSelectedWidget->getColor(),previousSelectedWidget->getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
-      core->getGraphicEngine()->unlockDrawing();
+      widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+      previousSelectedWidget->setFadeAnimation(t,previousSelectedWidget->getColor(),previousSelectedWidget->getActiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+      widgetEngine->getGraphicEngine()->unlockDrawing();
     }
     if (selectedWidget) {
-      core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),widgetEngine->getSelectedWidgetColor(),false,core->getGraphicEngine()->getFadeDuration());
-      core->getGraphicEngine()->unlockDrawing();
+      widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),getWidgetEngine()->getSelectedWidgetColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+      widgetEngine->getGraphicEngine()->unlockDrawing();
     }
   }
 
@@ -195,9 +195,9 @@ void WidgetPage::onPathChange(bool pageVisible, NavigationPath *path, Navigation
 void WidgetPage::deselectWidget(TimestampInMicroseconds t) {
   if (!touchStartedOutside) {
     if (selectedWidget) {
-      core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),selectedWidget->getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
-      core->getGraphicEngine()->unlockDrawing();
+      widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),selectedWidget->getActiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+      widgetEngine->getGraphicEngine()->unlockDrawing();
     }
     selectedWidget=NULL;
   }
@@ -207,7 +207,7 @@ void WidgetPage::deselectWidget(TimestampInMicroseconds t) {
 
 // Let the page work
 bool WidgetPage::work(TimestampInMicroseconds t) {
-  if ((widgetsActive)&&(firstTouch)&&(t>touchEndTime+widgetEngine->getWidgetsActiveTimeout())) {
+  if ((widgetsActive)&&(firstTouch)&&(t>touchEndTime+getWidgetEngine()->getWidgetsActiveTimeout())) {
     setWidgetsActive(t,false);
     return true;
   }
@@ -216,6 +216,14 @@ bool WidgetPage::work(TimestampInMicroseconds t) {
 
 FontEngine *WidgetPage::getFontEngine() {
   return widgetEngine->getFontEngine();
+}
+
+WidgetEngine *WidgetPage::getWidgetEngine() {
+  return widgetEngine;
+}
+
+GraphicEngine *WidgetPage::getGraphicEngine() {
+  return widgetEngine->getGraphicEngine();
 }
 
 }

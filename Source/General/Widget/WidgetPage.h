@@ -85,10 +85,9 @@ public:
 
   FontEngine *getFontEngine();
 
-  WidgetEngine *getWidgetEngine() const {
-    return widgetEngine;
-  }
+  WidgetEngine *getWidgetEngine();
 
+  GraphicEngine *getGraphicEngine();
 };
 
 }

@@ -85,7 +85,7 @@ public:
   void init(GraphicScreenOrientation orientation, Int width, Int height);
 
   // Activates the screen for drawing
-  void activate();
+  void startScene();
 
   // Writes the screen content as a png
   void writePNG(std::string path);

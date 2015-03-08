@@ -276,9 +276,9 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     if (!widgetPage->getWidgetEngine()->getWidgetsActive()) {
       if (activateWidget!=active) {
         if (activateWidget) {
-          setFadeAnimation(t,getColor(),getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
         } else {
-          setFadeAnimation(t,getColor(),getInactiveColor(),false,core->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,getColor(),getInactiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
         }
         active=activateWidget;
       }

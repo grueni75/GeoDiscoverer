@@ -15,9 +15,10 @@
 
 namespace GEODISCOVERER {
 
-GraphicEngine::GraphicEngine() {
+GraphicEngine::GraphicEngine(Device *device) {
 
   // Init variables
+  this->device=device;
   map=NULL;
   drawingMutex=core->getThread()->createMutex("graphic engine drawing mutex");
   posMutex=core->getThread()->createMutex("graphic engine pos mutex");
@@ -63,7 +64,7 @@ void GraphicEngine::destroyGraphic() {
 }
 
 // Creates all graphic
-void GraphicEngine::createGraphic(Device *device) {
+void GraphicEngine::createGraphic() {
   lockDrawing(__FILE__, __LINE__);
   centerIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","centerIconFilename",__FILE__, __LINE__));
   locationIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","locationIconFilename",__FILE__, __LINE__));
@@ -96,7 +97,7 @@ void GraphicEngine::deinit() {
 }
 
 // Does the drawing
-void GraphicEngine::draw(Device *device, bool forceRedraw) {
+void GraphicEngine::draw(bool forceRedraw) {
 
   GraphicPosition pos;
   TimestampInMicroseconds currentTime,idleTime,drawingTime;
@@ -106,6 +107,14 @@ void GraphicEngine::draw(Device *device, bool forceRedraw) {
   bool isDefaultScreen = core->getDefaultScreen() == screen;
   double scale,backScale;
   GraphicObject *widgetGraphicObject = device->getVisibleWidgetPages();
+
+  // Check if we need to draw
+  currentTime=core->getClock()->getMicrosecondsSinceStart();
+  if (device->getUpdatePeriod()>0) {
+    if (device->getNextUpdateTime()>currentTime)
+      return;
+    device->setNextUpdateTime(device->getNextUpdateTime()+device->getUpdatePeriod());
+  }
 
   PROFILE_START;
 
@@ -118,7 +127,6 @@ void GraphicEngine::draw(Device *device, bool forceRedraw) {
   lockDrawing(__FILE__,__LINE__);
 
   // Start measuring of drawing time and utilization
-  currentTime=core->getClock()->getMicrosecondsSinceStart();
 #ifdef PROFILING_ENABLED
   idleTime=currentTime-lastDrawingStartTime;
   lastDrawingStartTime=currentTime;
@@ -162,14 +170,12 @@ void GraphicEngine::draw(Device *device, bool forceRedraw) {
     }
 
     // Handle the hiding of the center icon
-    if (isDefaultScreen) {
-      TimestampInMicroseconds fadeStartTime=pos.getLastUserModification()+centerIconTimeout;
-      if (fadeStartTime!=lastCenterIconFadeStartTime) {
-        centerIcon.setColor(GraphicColor(255,255,255,255));
-        centerIcon.setFadeAnimation(fadeStartTime,centerIcon.getColor(),GraphicColor(255,255,255,0),false,core->getGraphicEngine()->getFadeDuration());
-      }
-      lastCenterIconFadeStartTime=fadeStartTime;
+    TimestampInMicroseconds fadeStartTime=pos.getLastUserModification()+centerIconTimeout;
+    if (fadeStartTime!=lastCenterIconFadeStartTime) {
+      centerIcon.setColor(GraphicColor(255,255,255,255));
+      centerIcon.setFadeAnimation(fadeStartTime,centerIcon.getColor(),GraphicColor(255,255,255,0),false,getFadeDuration());
     }
+    lastCenterIconFadeStartTime=fadeStartTime;
 
     // Let the center primitive work
     if (centerIcon.work(currentTime)) {
@@ -246,33 +252,36 @@ void GraphicEngine::draw(Device *device, bool forceRedraw) {
   // Redraw required?
   if (redrawScene) {
 
+    // Activate the screen
+    screen->startScene();
+
     // Clear the scene
     screen->clear();
 
     // Set default line width
     screen->setLineWidth(1);
 
-    // Start the map object
-    screen->startObject();
-
-    // Set rotation factor
-    //DEBUG("pos.getAngle()=%f",pos.getAngle());
-    screen->rotate(pos.getAngle(),0,0,1);
-
-    // Set scaling factor
-    scale=pos.getZoom();
-    backScale=1.0/pos.getZoom();
-    //std::cout << "scale=" << scale << std::endl;
-    //scale=scale/2;
-    screen->scale(scale,scale,1.0);
-
-    // Set translation factors
-    screen->translate(-pos.getX(),-pos.getY(),0);
-
     PROFILE_ADD("drawing init");
 
     // Do the stuff for the default screen
     if (isDefaultScreen) {
+
+      // Start the map object
+      screen->startObject();
+
+      // Set rotation factor
+      //DEBUG("pos.getAngle()=%f",pos.getAngle());
+      screen->rotate(pos.getAngle(),0,0,1);
+
+      // Set scaling factor
+      scale=pos.getZoom();
+      backScale=1.0/pos.getZoom();
+      //std::cout << "scale=" << scale << std::endl;
+      //scale=scale/2;
+      screen->scale(scale,scale,1.0);
+
+      // Set translation factors
+      screen->translate(-pos.getX(),-pos.getY(),0);
 
       // Draw all primitives of the map object
       if (map) {
@@ -592,6 +601,12 @@ void GraphicEngine::draw(Device *device, bool forceRedraw) {
 
     // Finish the drawing
     screen->endScene();
+
+    // Write a png if this is not the default screen
+    if (!isDefaultScreen) {
+      screen->createScreenShot();
+    }
+
 
   }
 

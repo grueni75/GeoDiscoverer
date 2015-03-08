@@ -140,6 +140,51 @@
                         </xsd:sequence>
                       </xsd:complexType>
                     </xsd:element>
+                    <xsd:element name="Network">
+                      <xsd:annotation>
+                        <xsd:documentation>Sends cockpit infos to a device in the network.</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="active" type="xsd:boolean" default="1" gd:upgrade="restore">
+                            <xsd:annotation>
+                              <xsd:documentation>Enables the network cockpit app.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="width" type="xsd:integer" default="1024">
+                            <xsd:annotation>
+                              <xsd:documentation>Width of the remote screen.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="height" type="xsd:integer" default="768">
+                            <xsd:annotation>
+                              <xsd:documentation>Height of the remote screen.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="DPI" type="xsd:integer" default="320">
+                            <xsd:annotation>
+                              <xsd:documentation>Dots Per Inch of the remote screen.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="whiteBackground" type="xsd:boolean" default="1">
+                            <xsd:annotation>
+                              <xsd:documentation>Use a white background instead of a black one for the remote screen.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+						              <xsd:element name="orientation" default="landscape">
+						                <xsd:annotation>
+						                  <xsd:documentation>Orientation of the remote screen in the network.</xsd:documentation>
+						                </xsd:annotation>
+						                <xsd:simpleType>
+						                  <xsd:restriction base="xsd:string">
+						                    <xsd:enumeration value="landscape"/>
+						                    <xsd:enumeration value="portrait"/>
+						                  </xsd:restriction>
+						                </xsd:simpleType>
+						              </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
                   </xsd:sequence>
                 </xsd:complexType>
               </xsd:element>  
@@ -662,36 +707,46 @@
 			                                    <xsd:documentation>Width of the path name in percent of the widget width.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
-			                                <xsd:element name="pathValuesOffsetX" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Horizontal offset of the path info values in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
 			                                <xsd:element name="pathValuesWidth" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Width of the path info values in percent of the widget width.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+                                      <xsd:element name="pathLengthOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the path length value in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
 			                                <xsd:element name="pathLengthOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Vertical offset of the path length value in percent of the widget height.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+                                      <xsd:element name="pathAltitudeUpOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the altitude up value in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
 			                                <xsd:element name="pathAltitudeUpOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Vertical offset of the altitude up value in percent of the widget height.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+                                      <xsd:element name="pathAltitudeDownOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the altitude down value in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
 			                                <xsd:element name="pathAltitudeDownOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Vertical offset of the altitude down value in percent of the widget height.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
-			                                <xsd:element name="pathDurationOffsetX" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Horizontal offset of the duration value in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
+                                      <xsd:element name="pathDurationOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the duration value in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
 			                                <xsd:element name="pathDurationOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Vertical offset of the duration value in percent of the widget height.</xsd:documentation>

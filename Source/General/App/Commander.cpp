@@ -80,24 +80,24 @@ std::string Commander::execute(std::string cmd) {
   bool cmdExecuted=false;
   //DEBUG("before: x=%d y=%d",pos->getX(),pos->getY());
   if (cmdName=="zoom") {
-    GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+    GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
     pos->zoom(atof(args[0].c_str()));
     pos->updateLastUserModification();
-    core->getGraphicEngine()->unlockPos();
+    core->getDefaultGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
   if (cmdName=="pan") {
-    GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+    GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
     pos->pan(atoi(args[0].c_str()),atoi(args[1].c_str()));
     pos->updateLastUserModification();
-    core->getGraphicEngine()->unlockPos();
+    core->getDefaultGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
   if (cmdName=="rotate") {
-    GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+    GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
     pos->rotate(atof(args[0].c_str()));
     pos->updateLastUserModification();
-    core->getGraphicEngine()->unlockPos();
+    core->getDefaultGraphicEngine()->unlockPos();
     // Map is not update if rotation only, so we need to update screen graphic of navigation engine here
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->updateScreenGraphic(false);
@@ -129,12 +129,12 @@ std::string Commander::execute(std::string cmd) {
 
     // Then do the map scrolling
     if (!widgetTouched) {
-      GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+      GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
       pos->rotate(atof(args[2].c_str()));
       pos->zoom(atof(args[3].c_str()));
       pos->pan(dX,dY);
       pos->updateLastUserModification();
-      core->getGraphicEngine()->unlockPos();
+      core->getDefaultGraphicEngine()->unlockPos();
     }
 
     // Update some variables
@@ -174,10 +174,10 @@ std::string Commander::execute(std::string cmd) {
         Int dY=lastTouchedY-y;
         core->getThread()->unlockMutex(accessMutex);
         //DEBUG("pan(%d,%d)",dX,dY);
-        GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+        GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
         pos->pan(dX,dY);
         pos->updateLastUserModification();
-        core->getGraphicEngine()->unlockPos();
+        core->getDefaultGraphicEngine()->unlockPos();
       }
     }
 
@@ -194,8 +194,13 @@ std::string Commander::execute(std::string cmd) {
     if (args[0] == "landscape") {
       orientation=GraphicScreenOrientationLandscape;
     }
-    core->getDefaultScreen()->init(orientation,atoi(args[1].c_str()),atoi(args[2].c_str()));
-    core->getDefaultWidgetEngine()->updateWidgetPositions();
+    core->getDefaultDevice()->setOrientation(orientation);
+    core->getDefaultDevice()->setWidth(atoi(args[1].c_str()));
+    core->getDefaultDevice()->setHeight(atoi(args[2].c_str()));
+    for (std::list<Device*>::iterator i=core->getDevices()->begin();i!=core->getDevices()->end();i++) {
+      (*i)->initScreen();
+      (*i)->getWidgetEngine()->updateWidgetPositions();
+    }
     cmdExecuted=true;
   }
   if (cmdName=="graphicInvalidated") {
@@ -336,9 +341,9 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="showTarget") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->showTarget(true);
-      GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+      GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
       visPos->updateLastUserModification();
-      core->getGraphicEngine()->unlockPos();
+      core->getDefaultGraphicEngine()->unlockPos();
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
@@ -347,9 +352,9 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setTargetAtMapCenter") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->setTargetAtMapCenter();
-      GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+      GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
       visPos->updateLastUserModification();
-      core->getGraphicEngine()->unlockPos();
+      core->getDefaultGraphicEngine()->unlockPos();
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
@@ -358,9 +363,9 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setTargetAtGeographicCoordinate") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->setTargetAtGeographicCoordinate(atof(args[0].c_str()),atof(args[1].c_str()),true);
-      GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+      GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
       visPos->updateLastUserModification();
-      core->getGraphicEngine()->unlockPos();
+      core->getDefaultGraphicEngine()->unlockPos();
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
     }

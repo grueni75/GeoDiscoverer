@@ -20,6 +20,9 @@ class GraphicEngine {
 
 protected:
 
+  // Device this engine renders for
+  Device *device;
+
   // Map object
   GraphicObject *map;
 
@@ -111,7 +114,7 @@ protected:
 public:
 
   // Constructors and destructor
-  GraphicEngine();
+  GraphicEngine(Device *device);
   virtual ~GraphicEngine();
 
   // Inits dynamic data
@@ -121,13 +124,13 @@ public:
   void destroyGraphic();
 
   // Creates all graphic
-  void createGraphic(Device *device);
+  void createGraphic();
 
   // Deinits dynamic data
   void deinit();
 
   // Does the drawing
-  void draw(Device *device, bool forceRedraw);
+  void draw(bool forceRedraw);
 
   // Outputs statistical infos
   void outputStats();

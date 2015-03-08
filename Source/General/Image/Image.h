@@ -63,7 +63,7 @@ public:
   ImagePixel *loadPNGIcon(Screen *screen, std::string filename, Int &imageWidth, Int &imageHeight, double &dpiScale, UInt &pixelSize);
 
   // Writes a png
-  bool writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize);
+  bool writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize, bool inverseRows=false);
 
   // Aborts the current jpeg image loading
   void setAbortLoad()

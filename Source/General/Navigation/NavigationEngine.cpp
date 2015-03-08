@@ -115,9 +115,9 @@ NavigationEngine::~NavigationEngine() {
 void NavigationEngine::init() {
 
   // Set the animation of the target
-  GraphicRectangle *targetIcon = core->getGraphicEngine()->lockTargetIcon(__FILE__, __LINE__);
+  GraphicRectangle *targetIcon = core->getDefaultGraphicEngine()->lockTargetIcon(__FILE__, __LINE__);
   targetIcon->setRotateAnimation(0,0,360,true,targetRotateDuration,GraphicRotateAnimationTypeLinear);
-  core->getGraphicEngine()->unlockTargetIcon();
+  core->getDefaultGraphicEngine()->unlockTargetIcon();
 
   // Create a new recorded track
   NavigationPath *recordedTrack;
@@ -574,8 +574,8 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   //DEBUG("after display area lock",NULL);
 
   // Copy the current visual position
-  GraphicPosition visPos=*(core->getGraphicEngine()->lockPos(__FILE__, __LINE__));
-  core->getGraphicEngine()->unlockPos();
+  GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+  core->getDefaultGraphicEngine()->unlockPos();
 
   // Update the location icon
   //DEBUG("before location pos lock",NULL);
@@ -625,19 +625,19 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   unlockLocationPos();
   //DEBUG("after location pos to vis pos lock",NULL);
   //DEBUG("before location icon lock",NULL);
-  GraphicRectangle *locationIcon=core->getGraphicEngine()->lockLocationIcon(__FILE__, __LINE__);
+  GraphicRectangle *locationIcon=core->getDefaultGraphicEngine()->lockLocationIcon(__FILE__, __LINE__);
   if (showCursor) {
     if (updatePosition) {
       if ((locationIcon->getX()!=visPosX)||(locationIcon->getY()!=visPosY)||
           (locationIcon->getAngle()!=visAngle)||
-          (core->getGraphicEngine()->getLocationAccuracyRadiusX()!=visRadiusX)||
-          (core->getGraphicEngine()->getLocationAccuracyRadiusY()!=visRadiusY)) {
+          (core->getDefaultGraphicEngine()->getLocationAccuracyRadiusX()!=visRadiusX)||
+          (core->getDefaultGraphicEngine()->getLocationAccuracyRadiusY()!=visRadiusY)) {
         locationIcon->setX(visPosX);
         locationIcon->setY(visPosY);
         locationIcon->setAngle(visAngle);
         //DEBUG("locationIcon.getX()=%d locationIcon.getY()=%d",locationIcon->getX(),locationIcon->getY());
-        core->getGraphicEngine()->setLocationAccuracyRadiusX(visRadiusX);
-        core->getGraphicEngine()->setLocationAccuracyRadiusY(visRadiusY);
+        core->getDefaultGraphicEngine()->setLocationAccuracyRadiusX(visRadiusX);
+        core->getDefaultGraphicEngine()->setLocationAccuracyRadiusY(visRadiusY);
         locationIcon->setIsUpdated(true);
       }
 
@@ -652,7 +652,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       locationIcon->setIsUpdated(true);
     }
   }
-  core->getGraphicEngine()->unlockLocationIcon();
+  core->getDefaultGraphicEngine()->unlockLocationIcon();
   //DEBUG("after location icon lock",NULL);
 
   // Update the compass bearing
@@ -662,10 +662,10 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   unlockCompassBearing();
   //DEBUG("after compass bearing lock",NULL);
   //DEBUG("before compass cone icon lock",NULL);
-  GraphicRectangle *compassConeIcon=core->getGraphicEngine()->lockCompassConeIcon(__FILE__, __LINE__);
+  GraphicRectangle *compassConeIcon=core->getDefaultGraphicEngine()->lockCompassConeIcon(__FILE__, __LINE__);
   compassConeIcon->setAngle(-compassBearing-mapPos.getMapTile()->getNorthAngle());
   compassConeIcon->setIsUpdated(true);
-  core->getGraphicEngine()->unlockCompassConeIcon();
+  core->getDefaultGraphicEngine()->unlockCompassConeIcon();
   //DEBUG("after compass cone icon lock",NULL);
 
   // Update the target icon
@@ -715,7 +715,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     }
   }
   unlockTargetPos();
-  GraphicRectangle *targetIcon=core->getGraphicEngine()->lockTargetIcon(__FILE__, __LINE__);
+  GraphicRectangle *targetIcon=core->getDefaultGraphicEngine()->lockTargetIcon(__FILE__, __LINE__);
   if (updateAnimation) {
     std::list<GraphicScaleAnimationParameter> scaleAnimationSequence;
     TimestampInMicroseconds startTime = core->getClock()->getMicrosecondsSinceStart();
@@ -746,7 +746,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (!targetVisible) {
       GraphicColor endColor=targetIcon->getColor();
       endColor.setAlpha(255);
-      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getGraphicEngine()->getFadeDuration());
+      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
       targetIcon->setIsUpdated(true);
     }
     targetVisible=true;
@@ -754,12 +754,12 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (targetVisible) {
       GraphicColor endColor=targetIcon->getColor();
       endColor.setAlpha(0);
-      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getGraphicEngine()->getFadeDuration());
+      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
       targetIcon->setIsUpdated(true);
       targetVisible=false;
     }
   }
-  core->getGraphicEngine()->unlockTargetIcon();
+  core->getDefaultGraphicEngine()->unlockTargetIcon();
 
   // Update the arrow icon
   //DEBUG("before location pos lock",NULL);
@@ -802,7 +802,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     showCursor=false;
   }
   unlockTargetPos();
-  GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon(__FILE__, __LINE__);
+  GraphicRectangle *arrowIcon=core->getDefaultGraphicEngine()->lockArrowIcon(__FILE__, __LINE__);
   if (showCursor) {
     if ((arrowX!=visPosX)||((arrowY!=visPosY))||(arrowAngle!=visAngle)) {
       if (scaleHasChanged) {
@@ -877,7 +877,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (updateAnimation) {
       GraphicColor endColor=arrowIcon->getColor();
       endColor.setAlpha(255);
-      arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getGraphicEngine()->getFadeDuration());
+      arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
       arrowIcon->setIsUpdated(true);
     }
     arrowVisible=true;
@@ -886,13 +886,13 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       if (updateAnimation) {
         GraphicColor endColor=arrowIcon->getColor();
         endColor.setAlpha(0);
-        arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getGraphicEngine()->getFadeDuration());
+        arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
         arrowIcon->setIsUpdated(true);
       }
       arrowVisible=false;
     }
   }
-  core->getGraphicEngine()->unlockArrowIcon();
+  core->getDefaultGraphicEngine()->unlockArrowIcon();
 
   // Unlock the drawing mutex
   core->getThread()->unlockMutex(updateGraphicsMutex);
@@ -955,9 +955,9 @@ void NavigationEngine::destroyGraphic() {
 void NavigationEngine::createGraphic() {
 
   // Get the radius of the arrow icon
-  GraphicRectangle *arrowIcon=core->getGraphicEngine()->lockArrowIcon(__FILE__, __LINE__);
+  GraphicRectangle *arrowIcon=core->getDefaultGraphicEngine()->lockArrowIcon(__FILE__, __LINE__);
   arrowDiameter=sqrt((double)(arrowIcon->getIconWidth()*arrowIcon->getIconWidth()+arrowIcon->getIconHeight()*arrowIcon->getIconHeight()));
-  core->getGraphicEngine()->unlockArrowIcon();
+  core->getDefaultGraphicEngine()->unlockArrowIcon();
 
   // Creates the buffers used in the path object
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {

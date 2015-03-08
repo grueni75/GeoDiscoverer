@@ -65,7 +65,6 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   thread = NULL;
   dialog = NULL;
   clock = NULL;
-  graphicEngine = NULL;
   mapCache = NULL;
   mapEngine = NULL;
   mapSource = NULL;
@@ -162,8 +161,6 @@ Core::~Core() {
   if (mapCache) delete mapCache;
   DEBUG("deleting mapSource",NULL);
   if (mapSource) delete mapSource;
-  DEBUG("deleting graphicEngine",NULL);
-  if (graphicEngine) delete graphicEngine;
   DEBUG("deleting devices",NULL);
   for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
     Device *d = *i;
@@ -245,15 +242,24 @@ bool Core::init() {
   }
   DEBUG("initializing default device",NULL);
   Device *device;
-  if (!(device=new Device("Default",defaultScreenDPI,defaultScreenDiagonal,0))) {
-    FATAL("can not create screen object",NULL);
+  if (!(device=new Device("Default",defaultScreenDPI,defaultScreenDiagonal,0,false,""))) {
+    FATAL("can not create default device object",NULL);
     return false;
   }
   devices.push_back(device);
-  DEBUG("initializing graphicEngine",NULL);
-  if (!(graphicEngine=new GraphicEngine())) {
-    FATAL("can not create graphic engine object",NULL);
-    return false;
+  if (configStore->getIntValue("Cockpit/App/Network","active",__FILE__,__LINE__)) {
+    Device *cockpitDevice;
+    Int DPI = configStore->getIntValue("Cockpit/App/Network","DPI",__FILE__,__LINE__);
+    Int whiteBackground = configStore->getIntValue("Cockpit/App/Network","whiteBackground",__FILE__,__LINE__);
+    TimestampInMicroseconds period = configStore->getIntValue("Cockpit","minUpdatePeriodTurn",__FILE__,__LINE__) * 1000;
+    if (!(cockpitDevice=new Device("Cockpit",DPI,0,period,whiteBackground,homePath + "/Icon/cockpit.png"))) {
+      FATAL("can not create cockpit device object",NULL);
+      return false;
+    }
+    cockpitDevice->setOrientation(configStore->getStringValue("Cockpit/App/Network","orientation",__FILE__,__LINE__) == "landscape" ? GraphicScreenOrientationLandscape : GraphicScreenOrientationProtrait);
+    cockpitDevice->setWidth(configStore->getIntValue("Cockpit/App/Network","width",__FILE__,__LINE__));
+    cockpitDevice->setHeight(configStore->getIntValue("Cockpit/App/Network","height",__FILE__,__LINE__));
+    devices.push_back(cockpitDevice);
   }
   DEBUG("initializing mapSource",NULL);
   if (!(mapSource=MapSource::newMapSource())) {
@@ -351,7 +357,9 @@ void Core::updateScreen(bool forceRedraw) {
   PROFILE_ADD("pre draw");
 
   // Redraw the scene
-  graphicEngine->draw(devices.front(),forceRedraw);
+  for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
+    (*i)->getGraphicEngine()->draw(forceRedraw);
+  }
   PROFILE_ADD("draw");
 
   // Only work if the required objects are initialized
@@ -363,8 +371,8 @@ void Core::updateScreen(bool forceRedraw) {
     } else {
 
       // Abort the update if the pos has changed
-      GraphicPosition visPos=*(graphicEngine->lockPos(__FILE__, __LINE__));
-      graphicEngine->unlockPos();
+      GraphicPosition visPos=*(getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+      getDefaultGraphicEngine()->unlockPos();
       if (mapEngine->mapUpdateIsRequired(visPos,NULL,NULL,NULL,false)) {
         mapEngine->setAbortUpdate();
       }
@@ -382,8 +390,8 @@ void Core::updateScreen(bool forceRedraw) {
 
     // Check if an update of the map is required
     bool updateRequired=false;
-    GraphicPosition visPos=*(graphicEngine->lockPos(__FILE__, __LINE__));
-    graphicEngine->unlockPos();
+    GraphicPosition visPos=*(getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+    getDefaultGraphicEngine()->unlockPos();
     if (mapEngine->mapUpdateIsRequired(visPos))
       updateRequired=true;
 
@@ -597,9 +605,9 @@ void Core::updateGraphic(bool graphicInvalidated) {
   navigationEngine->destroyGraphic();
   if (isInitialized)
     mapCache->destroyGraphic();
-  graphicEngine->destroyGraphic();
   for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
     Device *d = *i;
+    d->getGraphicEngine()->destroyGraphic();
     d->getScreen()->destroyGraphic();
     if (graphicInvalidated) {
       d->getWidgetEngine()->destroyGraphic();
@@ -614,7 +622,7 @@ void Core::updateGraphic(bool graphicInvalidated) {
     d->getScreen()->createGraphic();
     d->getFontEngine()->createGraphic();
     d->getWidgetEngine()->createGraphic();
-    graphicEngine->createGraphic(d);
+    d->getGraphicEngine()->createGraphic();
   }
   if (isInitialized)
     mapCache->createGraphic();
@@ -661,12 +669,22 @@ void Core::waitForFile(std::string path) {
 
 // Returns the default screen
 Screen *Core::getDefaultScreen() {
-  return devices.front()->getScreen();
+  return getDefaultDevice()->getScreen();
+}
+
+// Returns the default device
+Device *Core::getDefaultDevice() {
+  return devices.front();
 }
 
 // Returns the default widget engine
 WidgetEngine *Core::getDefaultWidgetEngine() {
-  return devices.front()->getWidgetEngine();
+  return getDefaultDevice()->getWidgetEngine();
+}
+
+// Returns the default graphic engine
+GraphicEngine *Core::getDefaultGraphicEngine() {
+  return getDefaultDevice()->getGraphicEngine();
 }
 
 // Informs the engines that the map has changed

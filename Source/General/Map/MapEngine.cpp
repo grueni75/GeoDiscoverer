@@ -57,12 +57,12 @@ MapEngine::~MapEngine() {
 // Does all action to remove a tile from the map
 void MapEngine::deinitTile(MapTile *t, const char *file, int line)
 {
-  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   map->removePrimitive(t->getVisualizationKey()); // Remove it from the graphic
   t->removeGraphic();
   if (t->getIsDummy())   // Delete dummy tiles
     delete t;
-  core->getGraphicEngine()->unlockDrawing();
+  core->getDefaultGraphicEngine()->unlockDrawing();
 }
 
 // Clear the current map
@@ -80,7 +80,7 @@ void MapEngine::deinitMap()
   // Delete all left-over primitives that were used for debugging
   //DEBUG("deleting debug primitives",NULL);
   if (map) {
-    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     GraphicPrimitiveMap::iterator i;
     GraphicPrimitiveMap *primitiveMap = map->getPrimitiveMap();
     std::list<GraphicPrimitive*> primitives;
@@ -100,15 +100,15 @@ void MapEngine::deinitMap()
     for(std::list<GraphicPrimitive*>::const_iterator i=primitives.begin(); i != primitives.end(); i++) {
       delete *i;
     }
-    core->getGraphicEngine()->unlockDrawing();
+    core->getDefaultGraphicEngine()->unlockDrawing();
   }
 
   // Free graphic objects
   //DEBUG("deleting map",NULL);
   if (map) {
-    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-    core->getGraphicEngine()->setMap(NULL);
-    core->getGraphicEngine()->unlockDrawing();
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->setMap(NULL);
+    core->getDefaultGraphicEngine()->unlockDrawing();
     delete map;
     map=NULL;
   }
@@ -124,9 +124,9 @@ void MapEngine::initMap()
   deinitMap();
 
   // Get the current position from the graphic engine
-  GraphicPosition *graphicEngineVisPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+  GraphicPosition *graphicEngineVisPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
   visPos=*graphicEngineVisPos;
-  core->getGraphicEngine()->unlockPos();
+  core->getDefaultGraphicEngine()->unlockPos();
 
   // Set the current position
   std::string lastMapFolder=core->getConfigStore()->getStringValue("Map/LastPosition","folder", __FILE__, __LINE__);
@@ -170,9 +170,9 @@ void MapEngine::initMap()
   backup();
 
   // Update the visual position in the graphic engine
-  graphicEngineVisPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+  graphicEngineVisPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
   *graphicEngineVisPos=visPos;
-  core->getGraphicEngine()->unlockPos();
+  core->getDefaultGraphicEngine()->unlockPos();
 
   // Create new graphic objects
   map=new GraphicObject();
@@ -182,9 +182,9 @@ void MapEngine::initMap()
   }
 
   // Inform the graphic engine about the new objects
-  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-  core->getGraphicEngine()->setMap(map);
-  core->getGraphicEngine()->unlockDrawing();
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+  core->getDefaultGraphicEngine()->setMap(map);
+  core->getDefaultGraphicEngine()->unlockDrawing();
 
   // Force redraw
   forceMapRecreation=true;
@@ -195,7 +195,7 @@ void MapEngine::initMap()
 
 // Remove all debugging primitives
 void MapEngine::removeDebugPrimitives() {
-  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   GraphicPrimitiveMap::iterator i;
   GraphicPrimitiveMap *primitiveMap = map->getPrimitiveMap();
   std::list<GraphicPrimitive*> primitives;
@@ -216,7 +216,7 @@ void MapEngine::removeDebugPrimitives() {
   for(std::list<GraphicPrimitive*>::const_iterator i=primitives.begin(); i != primitives.end(); i++) {
     delete *i;
   }
-  core->getGraphicEngine()->unlockDrawing();
+  core->getDefaultGraphicEngine()->unlockDrawing();
 }
 
 // Fills the given area with tiles
@@ -374,9 +374,9 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
         // Add the tile to the map
         tiles.push_back(tile);
         GraphicObject *v=tile->getVisualization();
-        core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+        core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
         tile->setVisualizationKey(map->addPrimitive(v));
-        core->getGraphicEngine()->unlockDrawing();
+        core->getDefaultGraphicEngine()->unlockDrawing();
 
         // Shall the position be activated immediately?
         if (activateVisPos) {
@@ -401,9 +401,9 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
       // Activate the new visual position?
       if (activateVisPos) {
-        core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+        core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
         tile->activateVisPos();
-        core->getGraphicEngine()->unlockDrawing();
+        core->getDefaultGraphicEngine()->unlockDrawing();
       }
 
       // Tile has been processed
@@ -710,12 +710,12 @@ void MapEngine::updateMap() {
 
 
   // Get the current position from the graphic engine
-  GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+  GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
 
   // Do not update map graphic if not required
   //DEBUG("diffVisX=%d diffVisY=%d diffZoom=%f",diffVisX,diffVisY,diffZoom);
   if (!mapUpdateIsRequired(*visPos,&diffVisX,&diffVisY,&diffZoom)) {
-    core->getGraphicEngine()->unlockPos();
+    core->getDefaultGraphicEngine()->unlockPos();
     //PROFILE_ADD("no update required");
   } else {
 
@@ -841,7 +841,7 @@ void MapEngine::updateMap() {
         mapPos.setMapTile(NULL);
         unlockMapPos();
         *visPos=this->visPos;
-        core->getGraphicEngine()->unlockPos();
+        core->getDefaultGraphicEngine()->unlockPos();
         //PROFILE_ADD("negative map tile existance check");
 
       } else {
@@ -936,7 +936,7 @@ void MapEngine::updateMap() {
 
         // Remember the current visual position
         this->visPos=*visPos;
-        core->getGraphicEngine()->unlockPos();
+        core->getDefaultGraphicEngine()->unlockPos();
         lockMapPos(__FILE__, __LINE__);
         mapPos=newMapPos;
         unlockMapPos();
@@ -988,9 +988,9 @@ void MapEngine::updateMap() {
           if (!abortUpdate) {
 
             // Activate the new position
-            core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
             t->activateVisPos();
-            core->getGraphicEngine()->unlockDrawing();
+            core->getDefaultGraphicEngine()->unlockDrawing();
 
             // If the tile is hidden: make it visible
             if (t->getIsHidden()) {
@@ -1020,7 +1020,7 @@ void MapEngine::updateMap() {
       mapPos.setMapTile(NULL);
       unlockMapPos();
       *visPos=this->visPos;
-      core->getGraphicEngine()->unlockPos();
+      core->getDefaultGraphicEngine()->unlockPos();
       //PROFILE_ADD("no tile found");
 
     }
@@ -1063,8 +1063,8 @@ void MapEngine::backup() {
   lockDisplayArea(__FILE__, __LINE__);
   MapArea displayArea=this->displayArea;
   unlockDisplayArea();
-  GraphicPosition visPos=*(core->getGraphicEngine()->lockPos(__FILE__, __LINE__));
-  core->getGraphicEngine()->unlockPos();
+  GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+  core->getDefaultGraphicEngine()->unlockPos();
 
   // Store the position
   core->getConfigStore()->setStringValue("Map/LastPosition","folder",core->getMapSource()->getFolder(), __FILE__, __LINE__);

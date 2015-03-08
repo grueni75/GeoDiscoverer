@@ -248,34 +248,34 @@ public:
   void setHighlightColor(GraphicColor highlightColor, const char *file, int line)
   {
       this->highlightColor = highlightColor;
-      core->getGraphicEngine()->lockPathAnimators(file, line);
+      core->getDefaultGraphicEngine()->lockPathAnimators(file, line);
       if (blinkMode)
-        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getGraphicEngine()->getBlinkDuration());
+        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getDefaultGraphicEngine()->getBlinkDuration());
       else
         animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
-      core->getGraphicEngine()->unlockPathAnimators();
+      core->getDefaultGraphicEngine()->unlockPathAnimators();
   }
 
   void setNormalColor(GraphicColor normalColor, const char *file, int line)
   {
       this->normalColor = normalColor;
-      core->getGraphicEngine()->lockPathAnimators(file, line);
+      core->getDefaultGraphicEngine()->lockPathAnimators(file, line);
       if (blinkMode)
-        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getGraphicEngine()->getBlinkDuration());
+        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getDefaultGraphicEngine()->getBlinkDuration());
       else
         animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
-      core->getGraphicEngine()->unlockPathAnimators();
+      core->getDefaultGraphicEngine()->unlockPathAnimators();
   }
 
   void setBlinkMode(bool blinkMode, const char *file, int line)
   {
       this->blinkMode = blinkMode;
-      core->getGraphicEngine()->lockPathAnimators(file, line);
+      core->getDefaultGraphicEngine()->lockPathAnimators(file, line);
       if (blinkMode)
-        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getGraphicEngine()->getBlinkDuration());
+        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getDefaultGraphicEngine()->getBlinkDuration());
       else
         animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
-      core->getGraphicEngine()->unlockPathAnimators();
+      core->getDefaultGraphicEngine()->unlockPathAnimators();
   }
 
   bool getIsInit() {

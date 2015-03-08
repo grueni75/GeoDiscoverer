@@ -149,7 +149,6 @@ protected:
   Clock *clock;
   UnitConverter *unitConverter;
   std::list<Device*> devices;
-  GraphicEngine *graphicEngine;
   MapCache *mapCache;
   MapEngine *mapEngine;
   MapSource *mapSource;
@@ -248,11 +247,6 @@ public:
       return unitConverter;
   }
 
-  GraphicEngine *getGraphicEngine() const
-  {
-      return graphicEngine;
-  }
-
   Image *getImage() const
   {
       return image;
@@ -327,8 +321,11 @@ public:
 
   Screen *getDefaultScreen();
 
+  Device *getDefaultDevice();
+
   WidgetEngine *getDefaultWidgetEngine();
 
+  GraphicEngine *getDefaultGraphicEngine();
 };
 
 // Pointer to the core

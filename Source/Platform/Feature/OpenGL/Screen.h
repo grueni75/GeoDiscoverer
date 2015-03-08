@@ -49,11 +49,14 @@ protected:
   // Indicates that this screen is drawing into a buffer
   bool separateFramebuffer;
 
+  // Indicates that the background shall be white
+  bool whiteBackground;
+
   // Framebuffer ID
   GLuint framebuffer;
 
-  // Renderbuffer ID
-  GLuint renderbuffer;
+  // Color renderbuffer ID
+  GLuint colorRenderbuffer;
 
   // Number of steps to approximate an ellipse
   const static Int ellipseSegments = 32;
@@ -70,10 +73,28 @@ protected:
   // Decides if resource allocation is allowed
   static bool allowAllocation;
 
+  // Path to use for the screen shot
+  std::string screenShotPath;
+
+  // Index to the buffer for the next screen shot
+  Int nextScreenShotPixelsIndex;
+
+  // Screen shot pixel buffers
+  GLvoid *screenShotPixels[2];
+
+  // Semaphore for accessing the current screen shot pixels
+  ThreadMutexInfo *nextScreenShotPixelsMutex;
+
+  // Signal for triggering the screen shot thread
+  ThreadSignalInfo *writeScreenShotSignal;
+
+  // Thread that writes the screen shot
+  ThreadInfo *writeScreenShotThreadInfo;
+
 public:
 
   // Constructor: Init screen (show window)
-  Screen(Int DPI, double diagonal, bool separateFramebuffer);
+  Screen(Int DPI, double diagonal, bool separateFramebuffer, bool whiteBackground, std::string screenShotPath);
 
   // Inits the screen
   void init(GraphicScreenOrientation orientation, Int width, Int height);
@@ -94,7 +115,13 @@ public:
   virtual ~Screen();
 
   // Activates the screen for drawing
-  void activate();
+  void startScene();
+
+  // Creates a screen shot
+  void createScreenShot();
+
+  // Writes a screen shot
+  void writeScreenShot();
 
   // Writes the screen content as a png
   void writePNG(std::string path);

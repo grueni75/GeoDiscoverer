@@ -25,7 +25,7 @@ void *widgetPathInfoThread(void *args) {
 }
 
 // Constructor
-WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage), altitudeProfileAxisPointBuffer(8*6) {
+WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
   widgetType=WidgetTypePathInfo;
   pathNameFontString=NULL;
   pathLengthFontString=NULL;
@@ -35,6 +35,7 @@ WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) : WidgetPrimitive(widgetP
   currentPath=NULL;
   altitudeProfileFillPointBuffer=NULL;
   altitudeProfileLinePointBuffer=NULL;
+  altitudeProfileAxisPointBuffer=NULL;
   noAltitudeProfileFontString=NULL;
   altitudeProfileXTickFontStrings=NULL;
   altitudeProfileYTickFontStrings=NULL;
@@ -73,6 +74,7 @@ WidgetPathInfo::~WidgetPathInfo() {
   widgetPage->getFontEngine()->unlockFont();
   if (altitudeProfileFillPointBuffer) delete altitudeProfileFillPointBuffer;
   if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
+  if (altitudeProfileAxisPointBuffer) delete altitudeProfileAxisPointBuffer;
   widgetPage->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
   if (altitudeProfileXTickFontStrings) {
     for (Int i=0;i<altitudeProfileXTickCount;i++)
@@ -102,28 +104,34 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
   if (redrawRequired) {
 
     // Update the labels
+    /*visualizationPathName="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+    visualizationPathLength="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+    visualizationPathAltitudeUp="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+    visualizationPathAltitudeDown="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+    visualizationPathDuration="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";*/
     FontEngine *fontEngine=widgetPage->getFontEngine();
     fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
     fontEngine->updateString(&pathNameFontString,visualizationPathName,pathNameWidth);
-    pathNameFontString->setX(x+pathNameOffsetX);
+    Int maxWidth=pathNameFontString->getIconWidth();
+    pathNameFontString->setX(x+pathNameOffsetX+(pathNameWidth-maxWidth)/2);
     pathNameFontString->setY(y+pathNameOffsetY);
     fontEngine->updateString(&pathLengthFontString,visualizationPathLength,pathValuesWidth);
     fontEngine->updateString(&pathAltitudeUpFontString,visualizationPathAltitudeUp,pathValuesWidth);
     fontEngine->updateString(&pathAltitudeDownFontString,visualizationPathAltitudeDown,pathValuesWidth);
     fontEngine->updateString(&pathDurationFontString,visualizationPathDuration,pathValuesWidth);
     widgetPage->getFontEngine()->unlockFont();
-    Int maxWidth=pathLengthFontString->getIconWidth();
+    maxWidth=pathLengthFontString->getIconWidth();
     if (pathAltitudeUpFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeUpFontString->getIconWidth();
     if (pathAltitudeDownFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeDownFontString->getIconWidth();
     if (pathDurationFontString->getIconWidth()>maxWidth) maxWidth=pathDurationFontString->getIconWidth();
     //maxWidth=pathValuesWidth;
-    pathLengthFontString->setX(x+pathValuesOffsetX+(pathValuesWidth-maxWidth)/2);
+    pathLengthFontString->setX(x+pathLengthOffsetX+(pathValuesWidth-maxWidth)/2);
     pathLengthFontString->setY(y+pathLengthOffsetY);
-    pathAltitudeUpFontString->setX(x+pathValuesOffsetX+(pathValuesWidth-maxWidth)/2);
+    pathAltitudeUpFontString->setX(x+pathAltitudeUpOffsetX+(pathValuesWidth-maxWidth)/2);
     pathAltitudeUpFontString->setY(y+pathAltitudeUpOffsetY);
-    pathAltitudeDownFontString->setX(x+pathValuesOffsetX+(pathValuesWidth-maxWidth)/2);
+    pathAltitudeDownFontString->setX(x+pathAltitudeDownOffsetX+(pathValuesWidth-maxWidth)/2);
     pathAltitudeDownFontString->setY(y+pathAltitudeDownOffsetY);
-    pathDurationFontString->setX(x+pathValuesOffsetX+(pathValuesWidth-maxWidth)/2);
+    pathDurationFontString->setX(x+pathDurationOffsetX+(pathValuesWidth-maxWidth)/2);
     pathDurationFontString->setY(y+pathDurationOffsetY);
 
     // Show only text if no altitude profile is present
@@ -160,8 +168,10 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
 
       // Create the axis
       fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
-      altitudeProfileAxisPointBuffer.reset();
-      altitudeProfileAxisPointBuffer.addPoints(visualizationAltitudeProfileAxisPoints);
+      if (altitudeProfileAxisPointBuffer) {
+        altitudeProfileAxisPointBuffer->reset();
+        altitudeProfileAxisPointBuffer->addPoints(visualizationAltitudeProfileAxisPoints);
+      }
       for(Int i=0;i<visualizationAltitudeProfileXTickLabels.size();i++) {
         fontEngine->updateString(&altitudeProfileXTickFontStrings[i],visualizationAltitudeProfileXTickLabels[i]);
         altitudeProfileXTickFontStrings[i]->setX(visualizationAltitudeProfileXTickPoints[i].getX()-altitudeProfileXTickFontStrings[i]->getIconWidth()/2);
@@ -218,7 +228,8 @@ void WidgetPathInfo::draw(Screen *screen, TimestampInMicroseconds t) {
       screen->setColor(altitudeProfileLineColor.getRed(),altitudeProfileLineColor.getGreen(),altitudeProfileLineColor.getBlue(),color.getAlpha());
       altitudeProfileLinePointBuffer->drawAsTriangles(screen);
       screen->setColor(altitudeProfileAxisColor.getRed(),altitudeProfileAxisColor.getGreen(),altitudeProfileAxisColor.getBlue(),altitudeProfileAxisColor.getAlpha()*color.getAlpha()/255);
-      altitudeProfileAxisPointBuffer.drawAsTriangles(screen);
+      if (altitudeProfileAxisPointBuffer)
+        altitudeProfileAxisPointBuffer->drawAsTriangles(screen);
       screen->endObject();
       for(Int i=0;i<altitudeProfileXTickCount;i++) {
         altitudeProfileXTickFontStrings[i]->setColor(color);
@@ -544,10 +555,12 @@ void WidgetPathInfo::updateVisualization() {
         if ((pixelPerLen!=std::numeric_limits<double>::infinity())&&(pixelPerHeight!=std::numeric_limits<double>::infinity())) {
 
           // Compute the profile points from the path positions
-          Int prevX=0,curX=0;
-          Int prevY=0,curY=0;
-          Int prevXU=0, prevXU2=0, prevXD=0, prevXD2=0, curXU=0, curXD=0;
-          Int prevYU=0, prevYU2=0, prevYD=0, prevYD2=0, curYU=0, curYD=0;
+          double prevX=0,curX=0;
+          double prevY=0,curY=0;
+          double prevXU=0, prevXD=0, curXU=0, curXD=0;
+          Int prevXU2i=0, prevXD2i=0;
+          double prevYU=0, prevYD=0, curYU=0, curYD=0;
+          Int prevYU2i=0, prevYD2i=0;
           noAltitudeProfile=false;
           double curLen = 0, startLen = 0;
           prevPos = pathReversed ? pathPoints[pathMaxEndIndex] : pathPoints[0];
@@ -563,29 +576,33 @@ void WidgetPathInfo::updateVisualization() {
               // Only draw the requested horizontal part of the profile
               if ((i>=pathStartIndex)&&(i<=pathEndIndex)) {
                 firstVisiblePointSeen=true;
-                curX=round((curLen-startLen)*pixelPerLen);
+                curX=(curLen-startLen)*pixelPerLen;
                 //DEBUG("curX=%d curLen=%f",curX,curLen);
                 if (curX>prevX) {
 
                   // Compute the current Y positions
                   if (curPos.getHasAltitude()) {
-                    curY=round(((double)curPos.getAltitude()-visiblePathMinAltitude)*pixelPerHeight);
+                    curY=((double)curPos.getAltitude()-visiblePathMinAltitude)*pixelPerHeight;
                   }
                   if (prevPos.getHasAltitude()) {
-                    prevY=round(((double)prevPos.getAltitude()-visiblePathMinAltitude)*pixelPerHeight);
+                    prevY=((double)prevPos.getAltitude()-visiblePathMinAltitude)*pixelPerHeight;
                   }
                   //DEBUG("curX=%d curY=%d curLen=%f  pixelPerLen=%f pixelPerHeight=%f",curX,curY,curLen,pixelPerLen,pixelPerHeight);
 
                   // Add the new point to the profile
-                  altitudeProfileFillPoints.push_back(GraphicPoint(prevX,0));
-                  altitudeProfileFillPoints.push_back(GraphicPoint(prevX,prevY));
-                  altitudeProfileFillPoints.push_back(GraphicPoint(curX,0));
-                  altitudeProfileFillPoints.push_back(GraphicPoint(curX,0));
-                  altitudeProfileFillPoints.push_back(GraphicPoint(prevX,prevY));
-                  altitudeProfileFillPoints.push_back(GraphicPoint(curX,curY));
+                  Int curXi=round(curX);
+                  Int curYi=round(curY);
+                  Int prevXi=round(prevX);
+                  Int prevYi=round(prevY);
+                  altitudeProfileFillPoints.push_back(GraphicPoint(prevXi,0));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(prevXi,prevYi));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(curXi,0));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(curXi,0));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(prevXi,prevYi));
+                  altitudeProfileFillPoints.push_back(GraphicPoint(curXi,curYi));
                   double alpha=atan(((double)(curY-prevY))/((double)(curX-prevX)));
-                  Int dX=round(sin(alpha)*(((double)altitudeProfileLineWidth)/2));
-                  Int dY=round(cos(alpha)*(((double)altitudeProfileLineWidth)/2));
+                  double dX=sin(alpha)*(((double)altitudeProfileLineWidth)/2);
+                  double dY=cos(alpha)*(((double)altitudeProfileLineWidth)/2);
                   curXU=curX-dX;
                   curYU=curY+dY;
                   curXD=curX+dX;
@@ -594,26 +611,34 @@ void WidgetPathInfo::updateVisualization() {
                   prevYU=prevY+dY;
                   prevXD=prevX+dX;
                   prevYD=prevY-dY;
-                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXU,prevYU));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(curXU,curYU));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXD,prevYD));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXD,prevYD));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(curXD,curYD));
-                  altitudeProfileLinePoints.push_back(GraphicPoint(curXU,curYU));
+                  Int curXUi=round(curXU);
+                  Int curYUi=round(curYU);
+                  Int curXDi=round(curXD);
+                  Int curYDi=round(curYD);
+                  Int prevXUi=round(prevXU);
+                  Int prevYUi=round(prevYU);
+                  Int prevXDi=round(prevXD);
+                  Int prevYDi=round(prevYD);
+                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXUi,prevYUi));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(curXUi,curYUi));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXDi,prevYDi));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(prevXDi,prevYDi));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(curXDi,curYDi));
+                  altitudeProfileLinePoints.push_back(GraphicPoint(curXUi,curYUi));
                   if (pathReversed?i<=pathEndIndex-1:i>=pathStartIndex+1) {
-                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXD2,prevYD2));
-                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXD,prevYD));
-                    altitudeProfileLinePoints.push_back(GraphicPoint(prevX,prevY));
-                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXU2,prevYU2));
-                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXU,prevYU));
-                    altitudeProfileLinePoints.push_back(GraphicPoint(prevX,prevY));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXD2i,prevYD2i));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXDi,prevYDi));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXi,prevYi));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXU2i,prevYU2i));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXUi,prevYUi));
+                    altitudeProfileLinePoints.push_back(GraphicPoint(prevXi,prevYi));
                   }
                   prevY=curY;
                   prevX=curX;
-                  prevXU2=curXU;
-                  prevYU2=curYU;
-                  prevXD2=curXD;
-                  prevYD2=curYD;
+                  prevXU2i=curXUi;
+                  prevYU2i=curYUi;
+                  prevXD2i=curXDi;
+                  prevYD2i=curYDi;
                 }
               }
 

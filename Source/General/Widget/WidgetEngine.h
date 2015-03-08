@@ -137,6 +137,9 @@ public:
   }
 
   FontEngine *getFontEngine();
+
+  GraphicEngine *getGraphicEngine();
+
 };
 
 }
