@@ -7,7 +7,8 @@
   <TileServer>
     <serverURL>http://toolserver.org/~cmarqu/hill/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>1.0</overlayAlpha>
-  </TileServer>  <TileServer>
+    </TileServer>  
+  <TileServer>
     <serverURL>http://tile.waymarkedtrails.org/cycling/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>0.5</overlayAlpha>
   </TileServer>
