@@ -47,7 +47,7 @@ public:
   void deinit();
 
   // Adds a server url to the list of URLs a tile consists  of
-  bool addTileServer(std::string serverURL, double overlayAlpha);
+  bool addTileServer(std::string serverURL, double overlayAlpha, ImageType imageType);
 
   // Adds a map container to the download queue
   void queueMapContainerDownload(MapContainer *mapContainer);

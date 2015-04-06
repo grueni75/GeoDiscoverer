@@ -365,6 +365,7 @@ MapSource *MapSource::newMapSource() {
       return new MapSourceCalibratedPictures(mapArchivePaths);
     }
   }
+  return NULL;
 }
 
 // Returns the map tile in which the position lies

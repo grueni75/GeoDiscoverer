@@ -17,7 +17,7 @@
 namespace GEODISCOVERER {
 
 typedef enum { GeographicBorderLatNorth, GeographicBorderLatSouth, GeographicBorderLngEast, GeographicBorderLngWest } GeographicBorder;
-typedef enum { ImageTypeJPEG=0, ImageTypePNG=1 } ImageType;
+typedef enum { ImageTypeJPEG=0, ImageTypePNG=1, ImageTypeUnknown=2 } ImageType;
 
 class MapContainer {
 

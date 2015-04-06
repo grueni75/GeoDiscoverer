@@ -159,24 +159,25 @@ void MapDownloader::queueMapContainerDownload(MapContainer *mapContainer)
 }
 
 // Adds a server url to the list of URLs a tile consists of
-bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha) {
+bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, ImageType imageType) {
   MapTileServer *mapTileServer;
 
   // Check if the image is supported
-  std::string imageFileExtension = serverURL.substr(serverURL.find_last_of(".")+1);
-  ImageType imageType;
-  std::string imageFileExtensionLC=imageFileExtension;
-  std::transform(imageFileExtensionLC.begin(),imageFileExtensionLC.end(),imageFileExtensionLC.begin(),::tolower);
-  if (imageFileExtensionLC=="png") {
-    imageType=ImageTypePNG;
-  } else if (imageFileExtensionLC=="jpg") {
-    imageType=ImageTypeJPEG;
-  } else if (imageFileExtensionLC=="jpeg") {
-    imageType=ImageTypeJPEG;
-  } else {
-    ERROR("unsupported image file extension <%s> in tile server url %s",imageFileExtension.c_str(),serverURL.c_str());
-    mapSource->setErrorOccured(true);
-    return false;
+  if (imageType==ImageTypeUnknown) {
+    std::string imageFileExtension = serverURL.substr(serverURL.find_last_of(".")+1);
+    std::string imageFileExtensionLC=imageFileExtension;
+    std::transform(imageFileExtensionLC.begin(),imageFileExtensionLC.end(),imageFileExtensionLC.begin(),::tolower);
+    if (imageFileExtensionLC=="png") {
+      imageType=ImageTypePNG;
+    } else if (imageFileExtensionLC=="jpg") {
+      imageType=ImageTypeJPEG;
+    } else if (imageFileExtensionLC=="jpeg") {
+      imageType=ImageTypeJPEG;
+    } else {
+      ERROR("unsupported image file extension <%s> in tile server url %s",imageFileExtension.c_str(),serverURL.c_str());
+      mapSource->setErrorOccured(true);
+      return false;
+    }
   }
 
   // Remember the map tile server

@@ -510,6 +510,8 @@ bool MapSourceMercatorTiles::parseGDSInfo()
   bool serverURLFound=false;
   double overlayAlpha;
   bool overlayAlphaFound=false;
+  std::string imageFormat;
+  bool imageFormatFound=false;
   for (std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
     std::vector<std::string> element = *i;
     if (element[0]=="TileServer") {
@@ -523,6 +525,12 @@ bool MapSourceMercatorTiles::parseGDSInfo()
         in >> overlayAlpha;
         overlayAlphaFound=true;
       }
+      if (element[1]=="imageFormat") {
+        in.str(element[2]);
+        in.clear();
+        in >> imageFormat;
+        imageFormatFound=true;
+      }
     }
     if (element[0]=="/TileServer") {
       if (!serverURLFound) {
@@ -533,10 +541,18 @@ bool MapSourceMercatorTiles::parseGDSInfo()
         ERROR("one TileServer element has no overlayAlpha element in <%s>",infoFilePath.c_str());
         goto cleanup;
       }
-      mapDownloader->addTileServer(serverURL,overlayAlpha);
+      ImageType imageType = ImageTypeUnknown;
+      if (imageFormatFound) {
+        if (imageFormat=="jpeg")
+          imageType = ImageTypeJPEG;
+        if (imageFormat=="png")
+          imageType = ImageTypePNG;
+      }
+      mapDownloader->addTileServer(serverURL,overlayAlpha,imageType);
       tileServerFound=true;
       serverURLFound=false;
       overlayAlphaFound=false;
+      imageFormatFound=false;
     }
     if (element[0]=="minZoomLevel") {
       minZoomLevelFound=true;
