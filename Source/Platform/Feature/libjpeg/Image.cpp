@@ -51,7 +51,7 @@ bool Image::queryJPEG(std::string filepath, Int &width, Int &height) {
   bool result=true;
 
   if ((file = fopen(filepath.c_str(), "rb")) == NULL) {
-    ERROR("can not open <%s> for reading",filepath.c_str());
+    DEBUG("can not open <%s> for reading",filepath.c_str());
     return false;
   }
   cinfo.err = jpeg_std_error(&jerr.mgr);
@@ -85,13 +85,13 @@ ImagePixel *Image::loadJPEG(std::string filepath, Int &width, Int &height, UInt 
   // Prepare the decompression
   abortLoad=false;
   if ((file = fopen(filepath.c_str(), "rb")) == NULL) {
-    ERROR("can not open <%s> for reading",filepath.c_str());
+    DEBUG("can not open <%s> for reading",filepath.c_str());
     return NULL;
   }
   cinfo.err = jpeg_std_error(&jerr.mgr);
   jerr.mgr.error_exit=jpegErrorHandler;
   if (setjmp(jerr.setjmpBuffer)) {
-    ERROR("jpeg image <%s> can not be read",NULL);
+    DEBUG("jpeg image <%s> can not be read",NULL);
     goto cleanup;
   }
   jpeg_create_decompress(&cinfo);
@@ -102,11 +102,11 @@ ImagePixel *Image::loadJPEG(std::string filepath, Int &width, Int &height, UInt 
   // Check type of image
   pixelSize=sizeof(JSAMPLE)*cinfo.output_components;
   if (cinfo.out_color_space != JCS_RGB) {
-    ERROR("the image <%s> does not use the RGB color space",filepath.c_str());
+    DEBUG("the image <%s> does not use the RGB color space",filepath.c_str());
     goto cleanup;
   }
   if (cinfo.out_color_components != 3) {
-    ERROR("the image <%s> does not use three samples per pixel",filepath.c_str());
+    DEBUG("the image <%s> does not use three samples per pixel",filepath.c_str());
     goto cleanup;
   }
   if (cinfo.output_components!=cinfo.out_color_components) {

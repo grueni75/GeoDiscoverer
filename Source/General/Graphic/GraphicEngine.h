@@ -130,7 +130,7 @@ public:
   void deinit();
 
   // Does the drawing
-  void draw(bool forceRedraw);
+  bool draw(bool forceRedraw);
 
   // Outputs statistical infos
   void outputStats();

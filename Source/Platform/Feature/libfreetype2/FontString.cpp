@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-FontString::FontString(Font *font, FontString *fontStringReference) : GraphicRectangle() {
+FontString::FontString(Screen *screen, Font *font, FontString *fontStringReference) : GraphicRectangle(screen) {
   this->font=font;
   this->fontStringReference=fontStringReference;
   this->baselineOffsetY=0;
@@ -36,7 +36,7 @@ FontString::~FontString() {
 }
 
 // Called when the font must be drawn
-void FontString::draw(Screen *screen, TimestampInMicroseconds t) {
+void FontString::draw(TimestampInMicroseconds t) {
 
   // Update the texture
   FontString *s=this;
@@ -44,14 +44,16 @@ void FontString::draw(Screen *screen, TimestampInMicroseconds t) {
     s=fontStringReference;
   if (s->getTexture()==Screen::getTextureNotDefined()) {
     font->setTexture(s);
-    screen->setTextureImage(s->texture,s->textureBitmap,s->width,s->height,GraphicTextureFormatRGBA4);
+    if (!(screen->setTextureImage(s->texture,(UByte*)s->textureBitmap,s->width,s->height,GraphicTextureFormatRGBA4444))) {
+      FATAL("can not update texture image",NULL);
+    }
   }
   if (getTexture()==Screen::getTextureNotDefined()) {
     setTexture(s->getTexture());
   }
 
   // Call parent function
-  GraphicRectangle::draw(screen,t);
+  GraphicRectangle::draw(t);
 
 }
 

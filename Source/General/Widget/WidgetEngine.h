@@ -140,6 +140,9 @@ public:
 
   GraphicEngine *getGraphicEngine();
 
+  Screen *getScreen();
+
+  Device *getDevice();
 };
 
 }

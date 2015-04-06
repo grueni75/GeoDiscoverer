@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetPrimitive::WidgetPrimitive(WidgetPage *widgetPage) : GraphicRectangle() {
+WidgetPrimitive::WidgetPrimitive(WidgetPage *widgetPage) : GraphicRectangle(widgetPage->getScreen()) {
   type=GraphicTypeWidget;
   this->widgetPage=widgetPage;
   widgetType=WidgetTypePrimitive;

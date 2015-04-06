@@ -35,6 +35,7 @@ protected:
   Int stringCacheSize;        // Maximum size of the cache string map
   Int fadeOutOffset;          // Distance to the right border when to start fading out the character
   ThreadMutexInfo *accessMutex; // Mutex to access the font engine
+  Screen *screen;             // The screen this engine renders for
 
   // Loads a font
   bool loadFont(std::string fontType, std::string fontFilename, Int fontSize);
@@ -45,7 +46,7 @@ protected:
 public:
 
   // Constructor
-  FontEngine(Int DPI);
+  FontEngine(Screen *screen);
 
   // Destructor
   virtual ~FontEngine();
@@ -102,6 +103,10 @@ public:
 
   Int getDPI() const {
     return DPI;
+  }
+
+  Screen* getScreen() {
+    return screen;
   }
 };
 

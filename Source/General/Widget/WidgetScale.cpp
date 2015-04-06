@@ -110,23 +110,23 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
 }
 
 // Executed every time the graphic engine needs to draw
-void WidgetScale::draw(Screen *screen, TimestampInMicroseconds t) {
+void WidgetScale::draw(TimestampInMicroseconds t) {
 
   // Let the primitive draw the background
-  WidgetPrimitive::draw(screen,t);
+  WidgetPrimitive::draw(t);
 
   // Draw the scale numbers
   for (Int i=0;i<4;i++) {
     if (scaledNumberFontString[i]) {
       scaledNumberFontString[i]->setColor(color);
-      scaledNumberFontString[i]->draw(screen,t);
+      scaledNumberFontString[i]->draw(t);
     }
   }
 
   // Draw the map name
   if (mapNameFontString) {
     mapNameFontString->setColor(color);
-    mapNameFontString->draw(screen,t);
+    mapNameFontString->draw(t);
   }
 
 }

@@ -131,7 +131,7 @@ public:
   virtual bool work(TimestampInMicroseconds t);
 
   // Called when the widget must be drawn
-  virtual void draw(Screen *screen, TimestampInMicroseconds t);
+  virtual void draw(TimestampInMicroseconds t);
 
   // Called when the map has changed
   virtual void onMapChange(bool widgetVisible, MapPosition pos);
@@ -234,17 +234,9 @@ public:
     this->altitudeProfileMinAltitudeDiff = altitudeProfileMinAltitudeDiff;
   }
 
-  void setAltitudeProfileXTickCount(Int altitudeProfileXTickCount) {
-    this->altitudeProfileXTickCount = altitudeProfileXTickCount;
-    if (altitudeProfileAxisPointBuffer) delete altitudeProfileAxisPointBuffer;
-    altitudeProfileAxisPointBuffer=new GraphicPointBuffer((altitudeProfileXTickCount+altitudeProfileYTickCount)*6);
-  }
+  void setAltitudeProfileXTickCount(Int altitudeProfileXTickCount);
 
-  void setAltitudeProfileYTickCount(Int altitudeProfileYTickCount) {
-    this->altitudeProfileYTickCount = altitudeProfileYTickCount;
-    if (altitudeProfileAxisPointBuffer) delete altitudeProfileAxisPointBuffer;
-    altitudeProfileAxisPointBuffer=new GraphicPointBuffer((altitudeProfileXTickCount+altitudeProfileYTickCount)*6);
-  }
+  void setAltitudeProfileYTickCount(Int altitudeProfileYTickCount);
 
   void setAltitudeProfileXTickLabelOffsetY(
       Int altitudeProfileXTickLabelOffsetY) {

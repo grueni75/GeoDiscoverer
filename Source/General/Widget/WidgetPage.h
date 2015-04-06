@@ -88,6 +88,8 @@ public:
   WidgetEngine *getWidgetEngine();
 
   GraphicEngine *getGraphicEngine();
+
+  Screen *getScreen();
 };
 
 }

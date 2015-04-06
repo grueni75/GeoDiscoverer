@@ -558,8 +558,18 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Widget
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Math
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Config
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Profile
-LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -Ijni/$(MY_BREAKPAD_PATH)/src/common/android/include -Ijni/libxml2-2.7.7/include -Ijni/freetype-2.4.2/include -Ijni/jpeg-8b -Ijni/libpng-1.4.4 -Ijni/curl-7.24.0/include -Ijni/libzip-0.10.1/lib -Ijni/proj-4.8.0/src -Ijni/google-breakpad-r1410/src -DSRC_ROOT='"jni/../../../../../Source"' 
-LOCAL_LDLIBS += -lz -dl -llog -lGLESv1_CM 
+LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -DSRC_ROOT='"jni/../../../../../Source"'
+LOCAL_CFLAGS += -Ijni/$(MY_BREAKPAD_PATH)/src/common/android/include 
+LOCAL_CFLAGS += -Ijni/libxml2-2.7.7/include 
+LOCAL_CFLAGS += -Ijni/freetype-2.4.2/include 
+LOCAL_CFLAGS += -Ijni/jpeg-8b 
+LOCAL_CFLAGS += -Ijni/libpng-1.4.4 
+LOCAL_CFLAGS += -Ijni/curl-7.24.0/include 
+LOCAL_CFLAGS += -Ijni/libzip-0.10.1/lib 
+LOCAL_CFLAGS += -Ijni/proj-4.8.0/src 
+LOCAL_CFLAGS += -Ijni/google-breakpad-r1410/src
+LOCAL_CFLAGS += -Ijni/glm-0.9.6.3
+LOCAL_LDLIBS += -lz -dl -llog -lGLESv2 -lEGL
 LOCAL_SRC_FILES := GDCore.cpp $(MY_GD_PLATFORM_SRCS) $(MY_GD_GENERAL_SRCS)
 LOCAL_STATIC_LIBRARIES := gdbreakpad
 LOCAL_SHARED_LIBRARIES := gdjpeg gdxml gdfreetype gdpng gdcurl gdzip gdproj4

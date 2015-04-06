@@ -16,10 +16,11 @@
 namespace GEODISCOVERER {
 
 // Constructor
-FontEngine::FontEngine(Int DPI) {
+FontEngine::FontEngine(Screen *screen) {
 
   // Set variables
-  this->DPI=DPI;
+  this->screen=screen;
+  this->DPI=screen->getDPI();
 
   // Init the free type 2 library
   if (FT_Init_FreeType(&freeTypeLib)) {

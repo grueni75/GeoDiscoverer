@@ -112,7 +112,7 @@ void Font::destroyGraphic() {
 
   // Release all textures
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
-    Screen::destroyTextureInfo(*i,"Font");
+    fontEngine->getScreen()->destroyTextureInfo(*i,"Font");
   }
   unusedTextures.clear();
 }
@@ -131,7 +131,7 @@ void Font::setTexture(FontString *fontString) {
       fontString->setTexture(unusedTextures.front());
       unusedTextures.pop_front();
     } else {
-      fontString->setTexture(Screen::createTextureInfo());
+      fontString->setTexture(fontEngine->getScreen()->createTextureInfo());
     }
   }
 
@@ -453,7 +453,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
     k->second->increaseUseCount();
 
     // Copy the contents from the used font string (you also need to update the cache code in createString if you change this)
-    if (!(fontString=new FontString(this,k->second))) {
+    if (!(fontString=new FontString(fontEngine->getScreen(),this,k->second))) {
       FATAL("can not create font string object",NULL);
       return NULL;
     }
@@ -484,7 +484,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
 
   // Create a new font string
   //DEBUG("creating new string",NULL);
-  if (!(fontString=new FontString(this,NULL))) {
+  if (!(fontString=new FontString(fontEngine->getScreen(),this,NULL))) {
     FATAL("can not create font string object",NULL);
     return NULL;
   }

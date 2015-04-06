@@ -13,16 +13,23 @@
 #ifndef SCREEN_H_
 #define SCREEN_H_
 
-#include <GLES/gl.h>
-#include <GLES/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
+#include "OpenGLES3Stub.h"
 
 namespace GEODISCOVERER {
 
 // Data types
 typedef GLuint GraphicTextureInfo;
 typedef GLuint GraphicBufferInfo;
-enum GraphicTextureFormat { GraphicTextureFormatRGB, GraphicTextureFormatRGBA1, GraphicTextureFormatRGBA4  };
-enum GraphicScreenOrientation { GraphicScreenOrientationProtrait, GraphicScreenOrientationLandscape  };
+enum GraphicTextureFormat { GraphicTextureFormatRGB565, GraphicTextureFormatRGBA5551, GraphicTextureFormatRGBA4444, GraphicTextureFormatRGB888, GraphicTextureFormatRGBA8888  };
+enum GraphicScreenOrientation { GraphicScreenOrientationProtrait = 0, GraphicScreenOrientationLandscape = 1  };
 typedef struct {
   GraphicTextureInfo textureInfo;
   std::string source;
@@ -33,8 +40,11 @@ class Screen {
 
 protected:
 
+  // Pointer to the device this screen belongs to
+  Device *device;
+
   // Value indicating that no texture is available
-  static const  GraphicTextureInfo textureNotDefined = 0;
+  static const GraphicTextureInfo textureNotDefined = 0;
 
   // Value indicating that no buffer is available
   const static GraphicBufferInfo bufferNotDefined = 0;
@@ -46,20 +56,14 @@ protected:
   GraphicBufferInfo ellipseCoordinatesBuffer;
 
   // List of cached texture infos
-  static std::list<TextureDebugInfo> unusedTextureInfos;
+  std::list<TextureDebugInfo> unusedTextureInfos;
 
   // List of cached buffer infos
-  static std::list<GraphicBufferInfo> unusedBufferInfos;
+  std::list<GraphicBufferInfo> unusedBufferInfos;
 
   // Current width and height of the screen
   Int width;
   Int height;
-
-  // Density of the screen
-  Int DPI;
-
-  // Diagonal of the screen
-  double diagonal;
 
   // Indicates if wake lock is on or off
   bool wakeLock;
@@ -73,19 +77,97 @@ protected:
   // Decides if resource allocation is allowed
   bool allowAllocation;
 
+  // Indicates that this screen is drawing into a buffer
+  bool separateFramebuffer;
+
+  // Framebuffer ID
+  GLuint framebuffer;
+
+  // Color renderbuffer ID
+  GLuint colorRenderbuffer;
+
+  // Pixel buffer ID
+  GLuint pixelBuffer;
+
+  // Size of the pixel buffer
+  GLsizeiptr pixelBufferSize;
+
+  // Screen shot pixel buffer
+  GLvoid *screenShotPixel;
+
+  // Matrixes for OpenGL transformations
+  glm::tmat4x4<GLfloat> viewMatrix;
+  glm::tmat4x4<GLfloat> projectionMatrix;
+  glm::tmat4x4<GLfloat> modelMatrix;
+  glm::tmat4x4<GLfloat> vpMatrix;
+  glm::tmat4x4<GLfloat> mvpMatrix;
+
+  // Stack of matrixes that are used for drawing
+  std::list<glm::tmat4x4<float> > modelMatrixStack;
+
+  // Programs for the vertex and fragment shaders
+  static const char *vertexShaderProgram;
+  static const char *fragmentShaderProgram;
+
+  // Handles for the shaders
+  GLuint vertexShaderHandle;
+  GLuint fragmentShaderHandle;
+  GLuint shaderProgramHandle;
+  GLint mvpMatrixHandle;
+  GLint colorInHandle;
+  GLint positionInHandle;
+  GLint textureCoordinateInHandle;
+  GLint textureImageInHandle;
+  GLint textureEnabledHandle;
+
+  // Compiles a shader program
+  void compileShaderProgram(GLuint handle, const char *program);
+
+  // Width of the line
+  Int lineWidth;
+
+  // Drawing color
+  glm::tvec4<GLfloat> drawingColor;
+
+  // Checks if an extension is available
+  bool queryExtension(const char *extName);
+
+  // Indicates if RGBA8888 image format can be used
+  GraphicTextureInfo testTextureInfo;
+  bool textureFormatRGBA8888Supported;
+  bool textureFormatRGB888Supported;
+
+  // Indicates if OpenGL ES 3.0 is available
+  bool openglES30Supported;
+
+  // EGL context
+  static EGLConfig eglConfig;
+  static EGLSurface eglSurface;
+  static EGLContext eglContext;
+  static EGLDisplay eglDisplay;
+
 public:
 
   // Constructor
-  Screen(Int DPI, double diagonal, bool separateFramebuffer);
+  Screen(Device *device);
 
   // Destructor
   virtual ~Screen();
+
+  // Setups the EGL context
+  static bool setupContext();
+
+  // Destroys the EGL context
+  static void shutdownContext();
 
   // Inits the screen
   void init(GraphicScreenOrientation orientation, Int width, Int height);
 
   // Activates the screen for drawing
   void startScene();
+
+  // Creates a screen shot
+  bool createScreenShot();
 
   // Writes the screen content as a png
   void writePNG(std::string path);
@@ -126,12 +208,6 @@ public:
   // Draws multiple triangles
   void drawTriangles(Int numberOfTriangles, GraphicBufferInfo pointCoordinatesBuffer, GraphicTextureInfo textureInfo=textureNotDefined, GraphicBufferInfo textureCoordinatesBuffer=bufferNotDefined);
 
-  // Draws a line
-  void drawLine(Int x1, Int y1, Int x2, Int y2);
-
-  // Draws a line consisting of multiple points
-  void drawLines(Int numberOfPoints, Short *pointArray);
-
   // Draws a ellipse
   void drawEllipse(bool filled);
 
@@ -142,7 +218,7 @@ public:
   GraphicTextureInfo createTextureInfo();
 
   // Sets the image of a texture
-  void setTextureImage(GraphicTextureInfo texture, UShort *image, Int width, Int height, GraphicTextureFormat format=GraphicTextureFormatRGB);
+  bool setTextureImage(GraphicTextureInfo texture, UByte *image, Int width, Int height, GraphicTextureFormat format=GraphicTextureFormatRGB565);
 
   // Frees a texture id
   void destroyTextureInfo(GraphicTextureInfo i, std::string source);
@@ -160,7 +236,7 @@ public:
   void setWakeLock(bool state, const char *file, int line, bool persistent=true);
 
   // Frees any internal textures or buffers
-  void graphicInvalidated();
+  void graphicInvalidated(bool contextLost);
 
   // Creates the graphic
   void createGraphic();
@@ -169,12 +245,12 @@ public:
   void destroyGraphic();
 
   // Getters and setters
-  const GraphicBufferInfo getBufferNotDefined()
+  static const GraphicBufferInfo getBufferNotDefined()
   {
       return bufferNotDefined;
   }
 
-  const GraphicTextureInfo getTextureNotDefined()
+  static const GraphicTextureInfo getTextureNotDefined()
   {
       return textureNotDefined;
   }
@@ -187,11 +263,6 @@ public:
   Int getWidth() const
   {
       return width;
-  }
-
-  Int getDPI() const
-  {
-      return DPI;
   }
 
   GraphicScreenOrientation getOrientation() const
@@ -214,9 +285,18 @@ public:
       this->allowAllocation=allowAllocation;
   }
 
-  double getDiagonal() const {
-    return diagonal;
+  bool isTextureFormatRGB888Supported() const {
+    return textureFormatRGB888Supported;
   }
+
+  bool isTextureFormatRGBA8888Supported() const {
+    return textureFormatRGBA8888Supported;
+  }
+
+  double getDiagonal() const;
+
+  Int getDPI() const;
+
 };
 
 }

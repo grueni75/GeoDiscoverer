@@ -16,12 +16,12 @@
 namespace GEODISCOVERER {
 
 // Constructor
-GraphicRectangleListSegment::GraphicRectangleListSegment(Int numberOfRectangles) {
-  if (!(textureCoordinates=new GraphicPointBuffer(2*3*numberOfRectangles))) {
+GraphicRectangleListSegment::GraphicRectangleListSegment(Screen *screen, Int numberOfRectangles) {
+  if (!(textureCoordinates=new GraphicPointBuffer(screen, 2*3*numberOfRectangles))) {
     FATAL("can not create texture coordinate buffer",NULL);
     return;
   }
-  if (!(triangleCoordinates=new GraphicPointBuffer(2*3*numberOfRectangles))) {
+  if (!(triangleCoordinates=new GraphicPointBuffer(screen, 2*3*numberOfRectangles))) {
     FATAL("can not create triangle coordinate buffer",NULL);
     return;
   }
@@ -56,8 +56,8 @@ bool GraphicRectangleListSegment::addRectangle(Short x[4], Short y[4]) {
 }
 
 // Draws the rectangle list
-void GraphicRectangleListSegment::draw(Screen *screen, GraphicTextureInfo textureInfo) {
-  triangleCoordinates->drawAsTexturedTriangles(screen,textureInfo,textureCoordinates);
+void GraphicRectangleListSegment::draw(GraphicTextureInfo textureInfo) {
+  triangleCoordinates->drawAsTexturedTriangles(textureInfo,textureCoordinates);
 }
 
 // Copies the contents to an other segment

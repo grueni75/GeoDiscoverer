@@ -30,11 +30,11 @@ WidgetCheckbox::~WidgetCheckbox() {
 void WidgetCheckbox::deinit() {
   texture=Screen::getTextureNotDefined();
   if ((checkedTexture!=Screen::getTextureNotDefined())&&(destroyTexture)) {
-    Screen::destroyTextureInfo(checkedTexture,"WidgetCheckbox (checked texture)");
+    screen->destroyTextureInfo(checkedTexture,"WidgetCheckbox (checked texture)");
     checkedTexture=Screen::getTextureNotDefined();
   }
   if ((uncheckedTexture!=Screen::getTextureNotDefined())&&(destroyTexture)) {
-    Screen::destroyTextureInfo(uncheckedTexture,"WidgetCheckbox (unchecked texture)");
+    screen->destroyTextureInfo(uncheckedTexture,"WidgetCheckbox (unchecked texture)");
     uncheckedTexture=Screen::getTextureNotDefined();
   }
 }

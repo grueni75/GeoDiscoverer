@@ -40,7 +40,7 @@ protected:
 
 public:
 
-  GraphicLine(Int numberOfStrokes, Short width);
+  GraphicLine(Screen *screen, Int numberOfStrokes, Short width);
   virtual ~GraphicLine();
 
   // Adds two points to the line
@@ -50,7 +50,7 @@ public:
   void deinit();
 
   // Draws the line
-  void draw(Screen *screen);
+  void draw();
 
   // Recreates any textures or buffers
   virtual void invalidate();

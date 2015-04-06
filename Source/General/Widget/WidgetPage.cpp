@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetPage::WidgetPage(WidgetEngine *widgetEngine, std::string name) {
+WidgetPage::WidgetPage(WidgetEngine *widgetEngine, std::string name) : graphicObject(widgetEngine->getScreen()){
   this->name=name;
   widgetsActive=false;
   touchStartedOutside=false;
@@ -224,6 +224,10 @@ WidgetEngine *WidgetPage::getWidgetEngine() {
 
 GraphicEngine *WidgetPage::getGraphicEngine() {
   return widgetEngine->getGraphicEngine();
+}
+
+Screen *WidgetPage::getScreen() {
+  return widgetEngine->getScreen();
 }
 
 }

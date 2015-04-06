@@ -16,8 +16,9 @@
 namespace GEODISCOVERER {
 
 // Constructor
-GraphicPrimitive::GraphicPrimitive() {
+GraphicPrimitive::GraphicPrimitive(Screen *screen) {
   type=GraphicTypePrimitive;
+  this->screen=screen;
   setTexture(Screen::getTextureNotDefined());
   setX(0);
   setY(0);
@@ -57,7 +58,7 @@ void GraphicPrimitive::deinit() {
   if ((texture!=Screen::getTextureNotDefined())&&(destroyTexture)) {
     std::stringstream source;
     source << "GraphicPrimitive (type=" << type << ")";
-    Screen::destroyTextureInfo(texture,source.str());
+    screen->destroyTextureInfo(texture,source.str());
     texture=Screen::getTextureNotDefined();
   }
 }

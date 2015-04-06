@@ -71,6 +71,9 @@ public class GDApplication extends Application {
   public static final int DEBUG_MSG = 3;
   public static final int FATAL_MSG = 4;
   
+  /** Dashboard network service type */
+  public static final String dashboardNetworkServiceType = "_geodashboard._tcp.local.";
+  
   /** Application context */
   public static Context appContext;
   

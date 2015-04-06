@@ -22,20 +22,26 @@ protected:
   // Name of the device
   std::string name;
 
+  // Use white background
+  bool whiteBackground;
+
+  // Device can do animations nicely
+  bool animationFriendly;
+
+  // IP address of the server
+  std::string host;
+
+  // TCP port at the server
+  Int port;
+
+  // File descriptor of the socket that communicates with the server
+  Int socketfd;
+
   // Density of the screen
   Int DPI;
 
   // Diagonal of the screen
   double diagonal;
-
-  // Indicates if this device is rendering for a remote cockpit app
-  bool cockpit;
-
-  // Update period
-  TimestampInMicroseconds updatePeriod;
-
-  // Next time to draw
-  TimestampInMicroseconds nextUpdateTime;
 
   // Components of the device
   Screen *screen;
@@ -54,22 +60,42 @@ protected:
   Int width;
   Int height;
 
+  // Opens a connection to the device
+  bool openSocket();
+
+  // Closes the connection to the device
+  void closeSocket();
+
 public:
 
   // Constructor
-  Device(std::string name, Int DPI, double diagonal, TimestampInMicroseconds updatePeriod, bool whiteBackground, std::string screenShotPath);
+  Device(std::string name, bool whiteBackround, bool animationFriendly);
 
   // Destructor
   virtual ~Device();
 
-  // Inits the screen
-  void initScreen();
+  // Creates the components
+  void init();
+
+  // Reconfigures the device based on the new dimension
+  void reconfigure();
+
+  // Finds out the device details from a network device
+  bool discover();
+
+  // Performs the drawing on this device
+  bool draw();
+
+  // Informs the device that a PNG is sent
+  bool announcePNGImage();
+
+  // Sends data to a network device
+  bool send(UByte *buffer, Int length);
+
+  // Destroys the device
+  void destroy(bool contextLost);
 
   // Getters and setters
-  bool isCockpit() const {
-    return cockpit;
-  }
-
   Screen* getScreen() {
     return screen;
   }
@@ -84,10 +110,6 @@ public:
 
   GraphicEngine *getGraphicEngine() {
     return graphicEngine;
-  }
-
-  TimestampInMicroseconds getUpdatePeriod() const {
-    return updatePeriod;
   }
 
   Int getNoChangeFrameCount() const {
@@ -110,14 +132,6 @@ public:
     this->visibleWidgetPages = visiblePages;
   }
 
-  TimestampInMicroseconds getNextUpdateTime() const {
-    return nextUpdateTime;
-  }
-
-  void setNextUpdateTime(TimestampInMicroseconds nextUpdateTime) {
-    this->nextUpdateTime = nextUpdateTime;
-  }
-
   void setHeight(Int height) {
     this->height = height;
   }
@@ -128,6 +142,38 @@ public:
 
   void setWidth(Int width) {
     this->width = width;
+  }
+
+  void setHost(std::string host) {
+    this->host = host;
+  }
+
+  void setPort(Int port) {
+    this->port = port;
+  }
+
+  void setDiagonal(double diagonal) {
+    this->diagonal = diagonal;
+  }
+
+  void setDPI(Int DPI) {
+    this->DPI = DPI;
+  }
+
+  double getDiagonal() const {
+    return diagonal;
+  }
+
+  Int getDPI() const {
+    return DPI;
+  }
+
+  bool getWhiteBackground() const {
+    return whiteBackground;
+  }
+
+  bool isAnimationFriendly() const {
+    return animationFriendly;
   }
 };
 

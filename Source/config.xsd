@@ -140,48 +140,32 @@
                         </xsd:sequence>
                       </xsd:complexType>
                     </xsd:element>
-                    <xsd:element name="Network">
+                    <xsd:element name="Dashboard">
                       <xsd:annotation>
-                        <xsd:documentation>Sends cockpit infos to a device in the network.</xsd:documentation>
+                        <xsd:documentation>Sends cockpit infos to a device in the network that runs the Geo Dashboard app.</xsd:documentation>
                       </xsd:annotation>
                       <xsd:complexType>
                         <xsd:sequence>
-                          <xsd:element name="active" type="xsd:boolean" default="1" gd:upgrade="restore">
+                          <xsd:element name="active" type="xsd:boolean" default="0" gd:upgrade="restore">
                             <xsd:annotation>
                               <xsd:documentation>Enables the network cockpit app.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="width" type="xsd:integer" default="1024">
+                          <xsd:element name="dotsPerInch" type="xsd:integer" default="320" gd:upgrade="restore">
                             <xsd:annotation>
-                              <xsd:documentation>Width of the remote screen.</xsd:documentation>
+                              <xsd:documentation>Density to use when drawing the dashboard.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="height" type="xsd:integer" default="768">
+                          <xsd:element name="whiteBackground" type="xsd:integer" default="1" gd:upgrade="restore">
                             <xsd:annotation>
-                              <xsd:documentation>Height of the remote screen.</xsd:documentation>
+                              <xsd:documentation>Decides if a black or white background is used when drawing the dashboard.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="DPI" type="xsd:integer" default="320">
+                          <xsd:element name="port" type="xsd:integer" default="11111" gd:upgrade="restore">
                             <xsd:annotation>
-                              <xsd:documentation>Dots Per Inch of the remote screen.</xsd:documentation>
+                              <xsd:documentation>Network port to use when communicating with the dashboard app.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="whiteBackground" type="xsd:boolean" default="1">
-                            <xsd:annotation>
-                              <xsd:documentation>Use a white background instead of a black one for the remote screen.</xsd:documentation>
-                            </xsd:annotation>
-                          </xsd:element>
-						              <xsd:element name="orientation" default="landscape">
-						                <xsd:annotation>
-						                  <xsd:documentation>Orientation of the remote screen in the network.</xsd:documentation>
-						                </xsd:annotation>
-						                <xsd:simpleType>
-						                  <xsd:restriction base="xsd:string">
-						                    <xsd:enumeration value="landscape"/>
-						                    <xsd:enumeration value="portrait"/>
-						                  </xsd:restriction>
-						                </xsd:simpleType>
-						              </xsd:element>
                         </xsd:sequence>
                       </xsd:complexType>
                     </xsd:element>
@@ -190,7 +174,7 @@
               </xsd:element>  
               <xsd:element name="minUpdatePeriodNormal" type="xsd:integer" default="3000">
                 <xsd:annotation>
-                  <xsd:documentation>Minimum time in milliseconds between meta watch app updates if no turn is shown.</xsd:documentation>
+                  <xsd:documentation>Minimum time in milliseconds between app updates if no turn is shown.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="offRouteAlertFastPeriod" type="xsd:integer" default="10000">
@@ -210,12 +194,12 @@
               </xsd:element>
               <xsd:element name="minUpdatePeriodTurn" type="xsd:integer" default="1000">
                 <xsd:annotation>
-                  <xsd:documentation>Minimum time in milliseconds between meta watch app updates if a turn is shown.</xsd:documentation>
+                  <xsd:documentation>Minimum time in milliseconds between app updates if a turn is shown.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="waitTimeBeforeAlert" type="xsd:integer" default="4000">
                 <xsd:annotation>
-                  <xsd:documentation>Time in milliseconds to wait before vibrating to ensure that watch display is updated.</xsd:documentation>
+                  <xsd:documentation>Time in milliseconds to wait before vibrating to ensure that app is updated.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
             </xsd:sequence>

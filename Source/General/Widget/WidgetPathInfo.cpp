@@ -25,8 +25,14 @@ void *widgetPathInfoThread(void *args) {
 }
 
 // Constructor
-WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
+WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) :
+  WidgetPrimitive(widgetPage),
+  locationIcon(screen)
+{
+
   widgetType=WidgetTypePathInfo;
+  altitudeProfileXTickCount=0;
+  altitudeProfileYTickCount=0;
   pathNameFontString=NULL;
   pathLengthFontString=NULL;
   pathAltitudeUpFontString=NULL;
@@ -149,14 +155,14 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
 
       // Create the altitude profile
       if (altitudeProfileFillPointBuffer) delete altitudeProfileFillPointBuffer;
-      altitudeProfileFillPointBuffer=new GraphicPointBuffer(visualizationAltitudeProfileFillPoints.size());
+      altitudeProfileFillPointBuffer=new GraphicPointBuffer(screen,visualizationAltitudeProfileFillPoints.size());
       if (!altitudeProfileFillPointBuffer) {
         FATAL("can not create point buffer for altitude profile",NULL);
         return changed;
       }
       altitudeProfileFillPointBuffer->addPoints(visualizationAltitudeProfileFillPoints);
       if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
-      altitudeProfileLinePointBuffer=new GraphicPointBuffer(visualizationAltitudeProfileLinePoints.size());
+      altitudeProfileLinePointBuffer=new GraphicPointBuffer(screen,visualizationAltitudeProfileLinePoints.size());
       if (!altitudeProfileLinePointBuffer) {
         FATAL("can not create point buffer for altitude profile",NULL);
         return changed;
@@ -197,10 +203,10 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
 }
 
 // Executed every time the graphic engine needs to draw
-void WidgetPathInfo::draw(Screen *screen, TimestampInMicroseconds t) {
+void WidgetPathInfo::draw(TimestampInMicroseconds t) {
 
   // Let the primitive draw the background
-  WidgetPrimitive::draw(screen,t);
+  WidgetPrimitive::draw(t);
 
   // Shall the widget be shown
   if (color.getAlpha()!=0) {
@@ -208,15 +214,15 @@ void WidgetPathInfo::draw(Screen *screen, TimestampInMicroseconds t) {
     // Draw the path infos
     if (pathNameFontString) {
       pathNameFontString->setColor(color);
-      pathNameFontString->draw(screen,t);
+      pathNameFontString->draw(t);
       pathLengthFontString->setColor(color);
-      pathLengthFontString->draw(screen,t);
+      pathLengthFontString->draw(t);
       pathAltitudeUpFontString->setColor(color);
-      pathAltitudeUpFontString->draw(screen,t);
+      pathAltitudeUpFontString->draw(t);
       pathAltitudeDownFontString->setColor(color);
-      pathAltitudeDownFontString->draw(screen,t);
+      pathAltitudeDownFontString->draw(t);
       pathDurationFontString->setColor(color);
-      pathDurationFontString->draw(screen,t);
+      pathDurationFontString->draw(t);
     }
 
     // Draw the altitude profile
@@ -224,29 +230,29 @@ void WidgetPathInfo::draw(Screen *screen, TimestampInMicroseconds t) {
       screen->startObject();
       screen->translate(getX()+altitudeProfileOffsetX,getY()+altitudeProfileOffsetY,getZ());
       screen->setColor(altitudeProfileFillColor.getRed(),altitudeProfileFillColor.getGreen(),altitudeProfileFillColor.getBlue(),color.getAlpha());
-      altitudeProfileFillPointBuffer->drawAsTriangles(screen);
+      altitudeProfileFillPointBuffer->drawAsTriangles();
       screen->setColor(altitudeProfileLineColor.getRed(),altitudeProfileLineColor.getGreen(),altitudeProfileLineColor.getBlue(),color.getAlpha());
-      altitudeProfileLinePointBuffer->drawAsTriangles(screen);
+      altitudeProfileLinePointBuffer->drawAsTriangles();
       screen->setColor(altitudeProfileAxisColor.getRed(),altitudeProfileAxisColor.getGreen(),altitudeProfileAxisColor.getBlue(),altitudeProfileAxisColor.getAlpha()*color.getAlpha()/255);
       if (altitudeProfileAxisPointBuffer)
-        altitudeProfileAxisPointBuffer->drawAsTriangles(screen);
+        altitudeProfileAxisPointBuffer->drawAsTriangles();
       screen->endObject();
       for(Int i=0;i<altitudeProfileXTickCount;i++) {
         altitudeProfileXTickFontStrings[i]->setColor(color);
-        altitudeProfileXTickFontStrings[i]->draw(screen,t);
+        altitudeProfileXTickFontStrings[i]->draw(t);
       }
       for(Int i=0;i<altitudeProfileYTickCount;i++) {
         altitudeProfileYTickFontStrings[i]->setColor(color);
-        altitudeProfileYTickFontStrings[i]->draw(screen,t);
+        altitudeProfileYTickFontStrings[i]->draw(t);
       }
       if (!hideLocationIcon) {
         locationIcon.setColor(color);
-        locationIcon.draw(screen,t);
+        locationIcon.draw(t);
       }
     } else {
       if (noAltitudeProfileFontString) {
         noAltitudeProfileFontString->setColor(color);
-        noAltitudeProfileFontString->draw(screen,t);
+        noAltitudeProfileFontString->draw(t);
       }
     }
   }
@@ -348,6 +354,9 @@ void WidgetPathInfo::onPathChange(bool widgetVisible, NavigationPath *path, Navi
         core->getThread()->lockMutex(widgetPathInfoThreadWorkingMutex,__FILE__,__LINE__);
         currentPath=NULL;
         core->getThread()->unlockMutex(widgetPathInfoThreadWorkingMutex);
+        break;
+      case NavigationPathChangeTypeWidgetEngineInit:
+        // Already handled by the prefix code
         break;
       default:
         FATAL("navigation path change type not supported",NULL);
@@ -775,5 +784,18 @@ void WidgetPathInfo::updateVisualization() {
   }
 }
 
+// Set the x tick count for the altitude profile
+void WidgetPathInfo::setAltitudeProfileXTickCount(Int altitudeProfileXTickCount) {
+  this->altitudeProfileXTickCount = altitudeProfileXTickCount;
+  if (altitudeProfileAxisPointBuffer) delete altitudeProfileAxisPointBuffer;
+  altitudeProfileAxisPointBuffer=new GraphicPointBuffer(screen,(altitudeProfileXTickCount+altitudeProfileYTickCount)*6);
+}
+
+// Set the y tick count for the altitude profile
+void WidgetPathInfo::setAltitudeProfileYTickCount(Int altitudeProfileYTickCount) {
+  this->altitudeProfileYTickCount = altitudeProfileYTickCount;
+  if (altitudeProfileAxisPointBuffer) delete altitudeProfileAxisPointBuffer;
+  altitudeProfileAxisPointBuffer=new GraphicPointBuffer(screen,(altitudeProfileXTickCount+altitudeProfileYTickCount)*6);
+}
 
 } /* namespace GEODISCOVERER */

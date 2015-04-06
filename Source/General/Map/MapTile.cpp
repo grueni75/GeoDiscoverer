@@ -15,7 +15,7 @@
 
 namespace GEODISCOVERER {
 
-MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool doNotDelete) {
+MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool doNotDelete) : rectangle(core->getDefaultScreen()), visualization(core->getDefaultScreen()) {
 
   //PROFILE_START
 

@@ -197,10 +197,7 @@ std::string Commander::execute(std::string cmd) {
     core->getDefaultDevice()->setOrientation(orientation);
     core->getDefaultDevice()->setWidth(atoi(args[1].c_str()));
     core->getDefaultDevice()->setHeight(atoi(args[2].c_str()));
-    for (std::list<Device*>::iterator i=core->getDevices()->begin();i!=core->getDevices()->end();i++) {
-      (*i)->initScreen();
-      (*i)->getWidgetEngine()->updateWidgetPositions();
-    }
+    core->getDefaultDevice()->reconfigure();
     cmdExecuted=true;
   }
   if (cmdName=="graphicInvalidated") {
@@ -441,6 +438,14 @@ std::string Commander::execute(std::string cmd) {
     if (core->getDebug()) {
       core->getDebug()->replayTrace(args[0]);
     }
+    cmdExecuted=true;
+  }
+  if (cmdName=="addDashboardDevice") {
+    //if (core->getIsInitialized()) {
+      core->addDashboardDevice(args[0],atoi(args[1].c_str()));
+    //} else {
+    //  DEBUG("addDashboardDevice command ignored because core is not yet initialized",NULL);
+    //}
     cmdExecuted=true;
   }
 

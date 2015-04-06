@@ -24,7 +24,7 @@ MapCache::MapCache() {
 
   // Reserve the memory for preparing a tile image
   //DEBUG("sizeof(*tileImageScratch)=%d",sizeof(*tileImageScratch));
-  tileImageScratch=(UShort *)malloc(sizeof(*tileImageScratch)*core->getMapSource()->getMapTileWidth()*core->getMapSource()->getMapTileHeight());
+  tileImageScratch=(UByte *)malloc(core->getImage()->getRGBAPixelSize()*core->getMapSource()->getMapTileWidth()*core->getMapSource()->getMapTileHeight());
   if (!tileImageScratch) {
     FATAL("could not reserve memory for the tile image",NULL);
     return;
@@ -69,7 +69,7 @@ void MapCache::createGraphic() {
 
   // Create texture infos
   for (int i=0;i<size;i++) {
-    GraphicTextureInfo t=Screen::createTextureInfo();
+    GraphicTextureInfo t=core->getDefaultScreen()->createTextureInfo();
     unusedTextures.push_back(t);
   }
 
@@ -110,11 +110,11 @@ void MapCache::deinit() {
   }
   cachedTiles.clear();
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
-    Screen::destroyTextureInfo(*i,"MapCache (unused texture)");
+    core->getDefaultScreen()->destroyTextureInfo(*i,"MapCache (unused texture)");
   }
   unusedTextures.clear();
   for(std::list<GraphicTextureInfo>::iterator i=usedTextures.begin();i!=usedTextures.end();i++) {
-    Screen::destroyTextureInfo(*i,"MapCache (used texture)");
+    core->getDefaultScreen()->destroyTextureInfo(*i,"MapCache (used texture)");
   }
   usedTextures.clear();
   uncachedTiles.clear();
@@ -270,14 +270,28 @@ void MapCache::updateMapTileImages() {
       break;
     }
 
-    // Copy the image of the map tile from the map image
-    // Do the conversion to RGB565
-    //DEBUG("copying tile image from map image",NULL);
-    for (Int y=0;y<t->getHeight();y++) {
-      for (Int x=0;x<t->getWidth();x++) {
-        Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
-        Int scratchPos=y*t->getWidth()+x;
-        tileImageScratch[scratchPos]=((currentImage[imagePos]>>3)<<11 | (currentImage[imagePos+1]>>2)<<5 | (currentImage[imagePos+2]>>3));
+    // Do the image conversion depending on the supported texture format
+    if (core->getDefaultScreen()->isTextureFormatRGB888Supported()) {
+      // Copy the image of the map tile from the map image
+      for (Int y=0;y<t->getHeight();y++) {
+        for (Int x=0;x<t->getWidth();x++) {
+          Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
+          Int scratchPos=(y*t->getWidth()+x)*3;
+          tileImageScratch[scratchPos+0]=currentImage[imagePos+0];
+          tileImageScratch[scratchPos+1]=currentImage[imagePos+1];
+          tileImageScratch[scratchPos+2]=currentImage[imagePos+2];
+        }
+      }
+    } else {
+      // Copy the image of the map tile from the map image
+      // Do the conversion to RGB565
+      UShort *scratch=(UShort*)tileImageScratch;
+      for (Int y=0;y<t->getHeight();y++) {
+        for (Int x=0;x<t->getWidth();x++) {
+          Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
+          Int scratchPos=(y*t->getWidth()+x);
+          scratch[scratchPos]=((currentImage[imagePos]>>3)<<11 | (currentImage[imagePos+1]>>2)<<5 | (currentImage[imagePos+2]>>3));
+        }
       }
     }
 
@@ -327,7 +341,15 @@ void MapCache::updateMapTileImages() {
 void MapCache::setNextTileTexture()
 {
   GraphicTextureInfo m=usedTextures.back();
-  Screen::setTextureImage(m,tileImageScratch,currentTile->getWidth(),currentTile->getHeight());
+  if (core->getDefaultScreen()->isTextureFormatRGB888Supported()) {
+    if (!(core->getDefaultScreen()->setTextureImage(m,(UByte*)tileImageScratch,currentTile->getWidth(),currentTile->getHeight(),GraphicTextureFormatRGB888))) {
+      FATAL("can not update texture image",NULL);
+    }
+  } else {
+    if (!(core->getDefaultScreen()->setTextureImage(m,(UByte*)tileImageScratch,currentTile->getWidth(),currentTile->getHeight(),GraphicTextureFormatRGB565))) {
+      FATAL("can not update texture image",NULL);
+    }
+  }
   tileTextureAvailable=false;
 }
 

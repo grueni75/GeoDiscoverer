@@ -125,23 +125,23 @@ bool WidgetMeter::work(TimestampInMicroseconds t) {
 }
 
 // Executed every time the graphic engine needs to draw
-void WidgetMeter::draw(Screen *screen, TimestampInMicroseconds t) {
+void WidgetMeter::draw(TimestampInMicroseconds t) {
 
   // Let the primitive draw the background
-  WidgetPrimitive::draw(screen,t);
+  WidgetPrimitive::draw(t);
 
   // Draw the text
   if (labelFontString) {
     labelFontString->setColor(color);
-    labelFontString->draw(screen,t);
+    labelFontString->draw(t);
   }
   if (valueFontString) {
     valueFontString->setColor(color);
-    valueFontString->draw(screen,t);
+    valueFontString->draw(t);
   }
   if (unitFontString) {
     unitFontString->setColor(color);
-    unitFontString->draw(screen,t);
+    unitFontString->draw(t);
   }
 }
 

@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-GraphicObject::GraphicObject(bool deletePrimitivesOnDestruct) : GraphicPrimitive() {
+GraphicObject::GraphicObject(Screen *screen, bool deletePrimitivesOnDestruct) : GraphicPrimitive(screen) {
 
   // Init variables
   type=GraphicTypeObject;
@@ -111,10 +111,11 @@ bool GraphicObject::work(TimestampInMicroseconds currentTime) {
   std::list<GraphicPrimitive*> toBeRemovedPrimitives;
 
   // Let this object work
-  GraphicPrimitive::work(currentTime);
+  bool redrawScene=false;
+  if (GraphicPrimitive::work(currentTime))
+    redrawScene=true;
 
   // Let the primitives work
-  bool redrawScene=false;
   for(std::list<GraphicPrimitive*>::iterator i=drawList.begin();i!=drawList.end();i++) {
     GraphicPrimitive *p=*i;
     if ((p->getLifeEnd()!=0)&&(currentTime>p->getLifeEnd())) {
@@ -125,7 +126,7 @@ bool GraphicObject::work(TimestampInMicroseconds currentTime) {
         o=(GraphicObject*)p;
       }
       if (p->work(currentTime)) {
-        //DEBUG("requesting scene redraw due to animation",NULL);
+        //DEBUG("requesting scene redraw due to animation of graphic primitive",NULL);
         redrawScene=true;
       }
     }

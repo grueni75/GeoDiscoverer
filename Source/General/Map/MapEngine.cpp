@@ -36,6 +36,7 @@ MapEngine::MapEngine() {
   forceCacheUpdateMutex=core->getThread()->createMutex("map engine force cache update mutex");
   forceMapUpdateMutex=core->getThread()->createMutex("map engine force map update mutex");
   forceMapRedownloadMutex=core->getThread()->createMutex("map engine force map redownload mutex");
+  centerMapTilesMutex=core->getThread()->createMutex("map engine center map tiles mutex");
   prevCompassBearing=-std::numeric_limits<double>::max();
   compassBearing=prevCompassBearing;
   isInitialized=false;
@@ -52,6 +53,7 @@ MapEngine::~MapEngine() {
   core->getThread()->destroyMutex(forceCacheUpdateMutex);
   core->getThread()->destroyMutex(forceMapUpdateMutex);
   core->getThread()->destroyMutex(forceMapRedownloadMutex);
+  core->getThread()->destroyMutex(centerMapTilesMutex);
 }
 
 // Does all action to remove a tile from the map
@@ -175,7 +177,7 @@ void MapEngine::initMap()
   core->getDefaultGraphicEngine()->unlockPos();
 
   // Create new graphic objects
-  map=new GraphicObject();
+  map=new GraphicObject(core->getDefaultScreen());
   if (!map) {
     FATAL("can not create graphic object for the map",NULL);
     return;
@@ -240,7 +242,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
   // Check if the maximum number of tiles to display are reached
   if (tiles.size()>=maxTiles) {
-    //DEBUG("too many tiles",NULL);
+    //DEBUG("too many tiles (maxTiles=%d)",maxTiles);
     return;
   }
 
@@ -363,7 +365,9 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
            (tile->getVisY(1)>area.getRefPos().getY()-core->getMapSource()->getMapTileHeight())
          ))
       {
+        lockCenterMapTiles(__FILE__,__LINE__);
         centerMapTiles.push_back(tile);
+        unlockCenterMapTiles();
       }
 
       // Tile not in draw list?
@@ -739,6 +743,7 @@ void MapEngine::updateMap() {
       // If it lies within the area, set the difference in pixels
       // If not, force a recreation of the map
       if (mapPos.getMapTile()) {
+        //DEBUG("map tile found",NULL);
         if (mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator()->setPictureCoordinates(requestedMapPos)) {
           //DEBUG("refX=%d refY=%d newX=%d newY=%d",mapPos.getX(),mapPos.getY(),requestedMapPos.getX(),requestedMapPos.getY());
           diffVisX=requestedMapPos.getX()-mapPos.getX();
@@ -757,6 +762,7 @@ void MapEngine::updateMap() {
           forceMapRecreation=true;
         }
       } else {
+        //DEBUG("no map tile found",NULL);
         forceMapRecreation=true;
       }
       if (forceMapRecreation) {
@@ -897,6 +903,7 @@ void MapEngine::updateMap() {
         MapPosition refPos=newMapPos;
         refPos.setX(visPos->getX());
         refPos.setY(visPos->getY());
+        //DEBUG("refPos.getX()=%d refPos.getY()=%d",refPos.getX(),refPos.getY());
         refPos.setLngScale(bestMapTile->getLngScale());
         refPos.setLatScale(bestMapTile->getLatScale());
         newDisplayArea.setRefPos(refPos);
@@ -971,7 +978,9 @@ void MapEngine::updateMap() {
         // Fill the complete area
         //DEBUG("starting area fill",NULL);
         MapArea searchArea=newDisplayArea;
+        lockCenterMapTiles(__FILE__,__LINE__);
         centerMapTiles.clear();
+        unlockCenterMapTiles();
         core->interruptAllowedHere(__FILE__, __LINE__);
         fillGeographicAreaWithTiles(searchArea,NULL,(tiles.size()==0) ? true : false);
         //PROFILE_ADD("tile fill");
@@ -1035,7 +1044,9 @@ void MapEngine::updateMap() {
     core->getNavigationEngine()->updateMapGraphic();
 
     // Update any widgets
+    lockCenterMapTiles(__FILE__,__LINE__);
     core->onMapChange(mapPos,&centerMapTiles);
+    unlockCenterMapTiles();
 
     // Inform the cache
     core->getMapCache()->tileVisibilityChanged();

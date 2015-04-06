@@ -12,6 +12,7 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -21,6 +22,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.MulticastLock;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.Message;
@@ -32,11 +38,11 @@ public class GDService extends Service {
   // Managers
   LocationManager locationManager;
   NotificationManager notificationManager;
-  
+
   // Flags
   boolean locationWatchStarted = false;
   boolean serviceInForeground = false;
-
+  
   /** Reference to the core object */
   GDCore coreObject = null;
   
@@ -86,6 +92,7 @@ public class GDService extends Service {
   }
     
   /** Called when the service is created the first time */
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   @Override
   public void onCreate() {
    
@@ -190,6 +197,7 @@ public class GDService extends Service {
   }
   
   /** Called when the service is stopped */
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   @Override
   public void onDestroy() {
     
@@ -202,7 +210,7 @@ public class GDService extends Service {
     externalStorageReceiver=null;
 
     // Stop watching location
-    locationManager.removeUpdates(coreObject);    
+    locationManager.removeUpdates(coreObject);
   }
   
   

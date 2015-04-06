@@ -15,7 +15,19 @@
 
 namespace GEODISCOVERER {
 
-GraphicEngine::GraphicEngine(Device *device) {
+GraphicEngine::GraphicEngine(Device *device) :
+    pathAnimators(device->getScreen()),
+    centerIcon(device->getScreen()),
+    locationIcon(device->getScreen()),
+    targetIcon(device->getScreen()),
+    arrowIcon(device->getScreen()),
+    pathDirectionIcon(device->getScreen()),
+    pathStartFlagIcon(device->getScreen()),
+    pathEndFlagIcon(device->getScreen()),
+    compassConeIcon(device->getScreen()),
+    tileImageNotCachedImage(device->getScreen()),
+    tileImageNotDownloadedFilename(device->getScreen())
+{
 
   // Init variables
   this->device=device;
@@ -92,29 +104,53 @@ void GraphicEngine::deinit() {
   compassConeIcon.deinit();
   tileImageNotCachedImage.deinit();
   tileImageNotDownloadedFilename.deinit();
-  GraphicPointBuffer::destroyBuffers();
   unlockDrawing();
 }
 
 // Does the drawing
-void GraphicEngine::draw(bool forceRedraw) {
+bool GraphicEngine::draw(bool forceRedraw) {
 
+  bool result=true;
+  Screen *screen = device->getScreen();
   GraphicPosition pos;
   TimestampInMicroseconds currentTime,idleTime,drawingTime;
   bool redrawScene=false;
   Int x1,y1,x2,y2,x,y;
-  Screen *screen = device->getScreen();
   bool isDefaultScreen = core->getDefaultScreen() == screen;
   double scale,backScale;
   GraphicObject *widgetGraphicObject = device->getVisibleWidgetPages();
 
-  // Check if we need to draw
-  currentTime=core->getClock()->getMicrosecondsSinceStart();
-  if (device->getUpdatePeriod()>0) {
-    if (device->getNextUpdateTime()>currentTime)
-      return;
-    device->setNextUpdateTime(device->getNextUpdateTime()+device->getUpdatePeriod());
+  /* Activate the screen
+  screen->startScene();
+
+  // Clear the scene
+  screen->clear();
+
+  // Set default line width
+  screen->setLineWidth(1);
+
+  // Testing
+  screen->setColor(255,0,255,255);
+  screen->setLineWidth(10);
+  screen->drawRectangle(-100,-100,+100,+100,Screen::getTextureNotDefined(),false);
+  /*screen->startObject();
+  screen->setLineWidth(10);
+  screen->setColor(255,0,255,255);
+  screen->scale(100,100,1.0);
+  screen->drawEllipse(false);
+  screen->endObject();
+
+  screen->endScene();
+
+  // Write a png if this is not the default screen
+  if (!isDefaultScreen) {
+    screen->createScreenShot();
   }
+
+  return;*/
+
+  // Get the time
+  currentTime=core->getClock()->getMicrosecondsSinceStart();
 
   PROFILE_START;
 
@@ -261,6 +297,17 @@ void GraphicEngine::draw(bool forceRedraw) {
     // Set default line width
     screen->setLineWidth(1);
 
+    /* Testing
+    screen->setColor(255,255,255,255);
+    screen->setLineWidth(10);
+    screen->drawRectangle(-100,-100,+100,+100,Screen::getTextureNotDefined(),false);
+    screen->startObject();
+    screen->setLineWidth(10);
+    screen->setColor(255,0,255,255);
+    screen->scale(100,100,1.0);
+    screen->drawEllipse(false);
+    screen->endObject();*/
+
     PROFILE_ADD("drawing init");
 
     // Do the stuff for the default screen
@@ -274,6 +321,7 @@ void GraphicEngine::draw(bool forceRedraw) {
       screen->rotate(pos.getAngle(),0,0,1);
 
       // Set scaling factor
+      //DEBUG("pos.getZoom()=%f",pos.getZoom());
       scale=pos.getZoom();
       backScale=1.0/pos.getZoom();
       //std::cout << "scale=" << scale << std::endl;
@@ -281,6 +329,7 @@ void GraphicEngine::draw(bool forceRedraw) {
       screen->scale(scale,scale,1.0);
 
       // Set translation factors
+      //DEBUG("pos.getX()=%d pos.getY()=%d",pos.getX(),pos.getY());
       screen->translate(-pos.getX(),-pos.getY(),0);
 
       // Draw all primitives of the map object
@@ -338,7 +387,7 @@ void GraphicEngine::draw(bool forceRedraw) {
                         }
 
                         // Draw the rectangle
-                        rectangle->draw(screen,currentTime);
+                        rectangle->draw(currentTime);
 
                         // Restore the color
                         if ((debugMode)&&(primitive->getName().size()!=0)) {
@@ -367,7 +416,7 @@ void GraphicEngine::draw(bool forceRedraw) {
                               FontString *fontString=fontEngine->createString(*i);
                               fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
                               fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
-                              fontString->draw(screen, currentTime);
+                              fontString->draw(currentTime);
                               fontEngine->destroyString(fontString);
                               lineNr--;
                             }
@@ -389,7 +438,7 @@ void GraphicEngine::draw(bool forceRedraw) {
                         screen->setColorModeMultiply();
                         GraphicColor color=line->getAnimator()->getColor();
                         screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
-                        line->draw(screen);
+                        line->draw();
                         screen->setColorModeAlpha();
                         break;
                       }
@@ -400,7 +449,7 @@ void GraphicEngine::draw(bool forceRedraw) {
                         GraphicRectangleList *rectangleList=(GraphicRectangleList*)primitive;
                         GraphicColor color=rectangleList->getAnimator()->getColor();
                         screen->setColor(color.getRed(),color.getGreen(),color.getBlue(),color.getAlpha());
-                        rectangleList->draw(screen);
+                        rectangleList->draw();
                         break;
                       }
 
@@ -541,12 +590,15 @@ void GraphicEngine::draw(bool forceRedraw) {
       screen->endObject();
 
       // Draw the cursor
+      //DEBUG("cursor drawing!",NULL);
       screen->startObject();
       screen->setColor(centerIcon.getColor().getRed(),centerIcon.getColor().getGreen(),centerIcon.getColor().getBlue(),centerIcon.getColor().getAlpha());
+      //DEBUG("texture=%d",centerIcon.getTexture());
       x1=-centerIcon.getIconWidth()/2;
       x2=x1+centerIcon.getWidth();
       y1=-centerIcon.getIconHeight()/2;
       y2=y1+centerIcon.getHeight();
+      //DEBUG("x1=%d y1=%d x2=%d y2=%d",x1,y1,x2,y2);
       screen->drawRectangle(x1,y1,x2,y2,centerIcon.getTexture(),true);
       screen->endObject();
       PROFILE_ADD("cursor drawing");
@@ -565,34 +617,7 @@ void GraphicEngine::draw(bool forceRedraw) {
           // Draw the widget
           WidgetPrimitive *widget;
           widget=(WidgetPrimitive*)*i;
-          widget->draw(screen,currentTime);
-          /*switch(widget->getWidgetType()) {
-            case WidgetTypeButton:
-              PROFILE_ADD("widget button");
-              break;
-            case WidgetTypeCheckbox:
-              PROFILE_ADD("widget checkbox");
-              break;
-            case WidgetTypeMeter:
-              PROFILE_ADD("widget meter");
-              break;
-            case WidgetTypeNavigation:
-              PROFILE_ADD("widget navigation");
-              break;
-            case WidgetTypePathInfo:
-              PROFILE_ADD("widget path info");
-              break;
-            case WidgetTypeScale:
-              PROFILE_ADD("widget scale");
-              break;
-            case WidgetTypeStatus:
-              PROFILE_ADD("widget status");
-              break;
-            default:
-              PROFILE_ADD("widget unknown");
-              break;
-          }*/
-
+          widget->draw(currentTime);
         }
         screen->endObject();
       }
@@ -604,7 +629,7 @@ void GraphicEngine::draw(bool forceRedraw) {
 
     // Write a png if this is not the default screen
     if (!isDefaultScreen) {
-      screen->createScreenShot();
+      result = screen->createScreenShot();
     }
 
 
@@ -641,6 +666,8 @@ void GraphicEngine::draw(bool forceRedraw) {
 
   //PROFILE_END;
   PROFILE_ADD("cleanup");
+
+  return result;
 }
 
 // Destructor

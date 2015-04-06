@@ -54,6 +54,7 @@ protected:
   bool returnToLocationOneTime;                   // Return immediately to the current location the next time
   bool isInitialized;                             // Indicates if the map source is initialized
   std::list<MapTile*> centerMapTiles;             // All tiles around the neighborhood of the map center
+  ThreadMutexInfo *centerMapTilesMutex;           // Mutex to access the center map tiles
 
   // Does all action to remove a tile from the map
   void deinitTile(MapTile *t, const char *file, int line);
@@ -151,6 +152,16 @@ public:
       core->getThread()->unlockMutex(mapPosMutex);
   }
   void setMapPos(MapPosition mapPos);
+
+  std::list<MapTile*> *lockCenterMapTiles(const char *file, int line)
+  {
+      core->getThread()->lockMutex(centerMapTilesMutex, file, line);
+      return &centerMapTiles;
+  }
+  void unlockCenterMapTiles()
+  {
+      core->getThread()->unlockMutex(centerMapTilesMutex);
+  }
 
   MapArea *lockDisplayArea(const char *file, int line)
   {

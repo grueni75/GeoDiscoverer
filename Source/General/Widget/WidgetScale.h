@@ -54,7 +54,7 @@ public:
   virtual bool work(TimestampInMicroseconds t);
 
   // Called when the widget must be drawn
-  virtual void draw(Screen *screen, TimestampInMicroseconds t);
+  virtual void draw(TimestampInMicroseconds t);
 
   // Called when the widget has changed his position
   virtual void updatePosition(Int x, Int y, Int z);

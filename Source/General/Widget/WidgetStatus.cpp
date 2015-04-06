@@ -98,20 +98,20 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
 }
 
 // Executed every time the graphic engine needs to draw
-void WidgetStatus::draw(Screen *screen, TimestampInMicroseconds t) {
+void WidgetStatus::draw(TimestampInMicroseconds t) {
 
   // Let the primitive draw the background
-  WidgetPrimitive::draw(screen,t);
+  WidgetPrimitive::draw(t);
 
   // Draw the status
   if (color.getAlpha()!=0) {
     if (firstStatusFontString) {
       firstStatusFontString->setColor(color);
-      firstStatusFontString->draw(screen,t);
+      firstStatusFontString->draw(t);
     }
     if (secondStatusFontString) {
       secondStatusFontString->setColor(color);
-      secondStatusFontString->draw(screen,t);
+      secondStatusFontString->draw(t);
     }
   }
 

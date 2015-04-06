@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetEngine::WidgetEngine(Device *device) {
+WidgetEngine::WidgetEngine(Device *device) : visiblePages(device->getScreen()){
 
   // Get global config
   ConfigStore *c=core->getConfigStore();
@@ -421,7 +421,7 @@ void WidgetEngine::createGraphic() {
       config.addPosition(position);
       config.setInactiveColor(GraphicColor(255,255,255,100));
     }
-    if (deviceName=="Cockpit") {
+    if (deviceName!="Default") {
       position=WidgetPosition();
       position.setRefScreenDiagonal(0.0);
       position.setPortraitX(0.0);
@@ -467,7 +467,7 @@ void WidgetEngine::createGraphic() {
       config.addPosition(position);
       config.setInactiveColor(GraphicColor(255,255,255,100));
     }
-    if (deviceName=="Cockpit") {
+    if (deviceName!="Default") {
       position=WidgetPosition();
       position.setRefScreenDiagonal(0.0);
       position.setPortraitX(0.0);
@@ -513,7 +513,7 @@ void WidgetEngine::createGraphic() {
       config.addPosition(position);
       config.setInactiveColor(GraphicColor(255,255,255,100));
     }
-    if (deviceName=="Cockpit") {
+    if (deviceName!="Default") {
       position=WidgetPosition();
       position.setRefScreenDiagonal(0.0);
       position.setPortraitX(0.0);
@@ -641,7 +641,7 @@ void WidgetEngine::createGraphic() {
       config.addPosition(position);
       config.setInactiveColor(GraphicColor(255,255,255,100));
     }
-    if (deviceName=="Cockpit") {
+    if (deviceName!="Default") {
       position=WidgetPosition();
       position.setRefScreenDiagonal(0.0);
       position.setPortraitX(0.0);
@@ -726,7 +726,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("altitudeProfileXTickCount","5");
       config.setParameter("altitudeProfileYTickCount","3");
     }
-    if (deviceName=="Cockpit") {
+    if (deviceName!="Default") {
       config.setPageName("Default");
       position=WidgetPosition();
       position.setRefScreenDiagonal(0.0);
@@ -1229,7 +1229,7 @@ void WidgetEngine::updateWidgetPositions() {
   Int width=device->getScreen()->getWidth();
   Int height=device->getScreen()->getHeight();
   double diagonal=device->getScreen()->getDiagonal();
-  DEBUG("width=%d height=%d diagonal=%f",width,height,diagonal);
+  //DEBUG("width=%d height=%d diagonal=%f",width,height,diagonal);
 
   // Set global variables that depend on the device->getScreen() configuration
   changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*device->getScreen()->getWidth()/100.0);
@@ -1589,6 +1589,16 @@ FontEngine *WidgetEngine::getFontEngine() {
 // Returns the graphic engine
 GraphicEngine *WidgetEngine::getGraphicEngine() {
   return device->getGraphicEngine();
+}
+
+// Returns the screen
+Screen *WidgetEngine::getScreen() {
+  return device->getScreen();
+}
+
+// Returns the device
+Device *WidgetEngine::getDevice() {
+  return device;
 }
 
 }

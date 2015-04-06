@@ -81,7 +81,7 @@ class NavigationPath;
 typedef enum { DownloadResultSuccess, DownloadResultFileNotFound, DownloadResultOtherFail } DownloadResult;
 
 // Types of changes to a navigation path object
-typedef enum { NavigationPathChangeTypeEndPositionAdded, NavigationPathChangeTypeFlagSet, NavigationPathChangeTypeWillBeRemoved } NavigationPathChangeType;
+typedef enum { NavigationPathChangeTypeEndPositionAdded, NavigationPathChangeTypeFlagSet, NavigationPathChangeTypeWillBeRemoved, NavigationPathChangeTypeWidgetEngineInit } NavigationPathChangeType;
 
 class Core {
 
@@ -108,6 +108,12 @@ protected:
   // Current thread info about the late init thread
   ThreadInfo *lateInitThreadInfo;
 
+  // Current thread info about the dashboard rendering thread
+  ThreadInfo *updateDashboardScreensThreadInfo;
+
+  // Used to wakeup the dashboard rendering thread
+  ThreadSignalInfo *updateDashboardScreensWakeupSignal;
+
   // Used to interrupt the map update thread
   ThreadMutexInfo *mapUpdateInterruptMutex;
 
@@ -119,11 +125,23 @@ protected:
   ThreadMutexInfo *isInitializedMutex;
   ThreadSignalInfo *isInitializedSignal;
 
+  // Default device
+  Device *defaultDevice;
+
+  // The dashboard device list
+  std::list<Device*> dashboardDevices;
+
+  // Used to control access to the devices list
+  ThreadMutexInfo *dashboardDevicesMutex;
+
   // Indicates if the core is initialized
   bool isInitialized;
 
   // Used to force an exit of the map update thread
   bool quitMapUpdateThread;
+
+  // Used to force an exit of the update cockpit screens thread
+  bool quitUpdateDashboardScreensThread;
 
   // Used to force an exit of the core
   bool quitCore;
@@ -148,7 +166,6 @@ protected:
   Thread *thread;
   Clock *clock;
   UnitConverter *unitConverter;
-  std::list<Device*> devices;
   MapCache *mapCache;
   MapEngine *mapEngine;
   MapSource *mapSource;
@@ -172,7 +189,10 @@ public:
   // Updates the screen
   void updateScreen(bool forceRedraw);
 
-  // Allows an external interrupt
+  // Updates the screen of cockpits
+  void updateDashboardScreens();
+
+    // Allows an external interrupt
   void interruptAllowedHere(const char *file, int line);
 
   // Updates the map
@@ -215,6 +235,9 @@ public:
   void waitForInitialization() {
     thread->waitForSignal(isInitializedSignal);
   }
+
+  // Adds a new dashboard device
+  void addDashboardDevice(std::string host, Int port);
 
   // Getters and setters
   std::string getHomePath() const
@@ -265,11 +288,6 @@ public:
   MapSource *getMapSource() const
   {
       return mapSource;
-  }
-
-  std::list<Device*> *getDevices()
-  {
-      return &devices;
   }
 
   Thread *getThread() const

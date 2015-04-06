@@ -16,13 +16,13 @@
 namespace GEODISCOVERER {
 
 // Constructor
-GraphicRectangleList::GraphicRectangleList(Int numberOfRectangles) : GraphicPrimitive() {
+GraphicRectangleList::GraphicRectangleList(Screen *screen, Int numberOfRectangles) : GraphicPrimitive(screen) {
   type=GraphicTypeRectangleList;
   this->numberOfRectanglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","rectangleListNumberOfRectanglesOtherSegemnts",__FILE__, __LINE__);
   if (numberOfRectangles==0) {
     numberOfRectangles=numberOfRectanglesOtherSegments;
   }
-  if (!(currentSegment=new GraphicRectangleListSegment(numberOfRectangles))) {
+  if (!(currentSegment=new GraphicRectangleListSegment(screen, numberOfRectangles))) {
     FATAL("can not create rectangle list entry",NULL);
     return;
   }
@@ -71,7 +71,7 @@ void GraphicRectangleList::addRectangle(double x, double y, double angle) {
 
   // Add the rectangle
   if (!currentSegment->addRectangle(rx,ry)) {
-    if (!(currentSegment=new GraphicRectangleListSegment(numberOfRectanglesOtherSegments))) {
+    if (!(currentSegment=new GraphicRectangleListSegment(screen, numberOfRectanglesOtherSegments))) {
       FATAL("can not create rectangle list entry",NULL);
       return;
     }
@@ -81,9 +81,9 @@ void GraphicRectangleList::addRectangle(double x, double y, double angle) {
 }
 
 // Draws the rectangle list
-void GraphicRectangleList::draw(Screen *screen) {
+void GraphicRectangleList::draw() {
   for(std::list<GraphicRectangleListSegment*>::iterator i=segments.begin();i!=segments.end();i++) {
-    (*i)->draw(screen,texture);
+    (*i)->draw(texture);
   }
 }
 
@@ -108,7 +108,7 @@ void GraphicRectangleList::optimize() {
   }
 
   // Create a new segment that holds all points
-  if (!(currentSegment=new GraphicRectangleListSegment(totalPoints))) {
+  if (!(currentSegment=new GraphicRectangleListSegment(screen, totalPoints))) {
     FATAL("can not create rectangle list segment",NULL);
     return;
   }
