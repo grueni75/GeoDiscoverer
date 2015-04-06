@@ -40,6 +40,7 @@ import org.acra.ReportingInteractionMode;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
@@ -50,6 +51,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.hardware.Sensor;
@@ -1154,6 +1156,16 @@ public class ViewMap extends GDActivity {
     
     super.onCreate(savedInstanceState);
     
+    // Check for OpenGL ES 2.00
+    final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+    final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
+    final boolean supportsEs2 = configurationInfo.reqGlEsVersion >= 0x20000;
+    if (!supportsEs2)
+    {
+      fatalDialog(getString(R.string.opengles20_required));
+      return;
+    }
+
     // Restore the last processed intent from the prefs
     prefs = getApplication().getSharedPreferences("viewMap",Context.MODE_PRIVATE);
     if (prefs.contains("lastAddressSubject")) {
@@ -1173,7 +1185,7 @@ public class ViewMap extends GDActivity {
     sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
     powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
     devicePolicyManager = (DevicePolicyManager)this.getSystemService(Context.DEVICE_POLICY_SERVICE);
-    
+         
     // Prepare the window contents
     setContentView(R.layout.view_map);
     mapSurfaceView = (GDMapSurfaceView) findViewById(R.id.view_map_map_surface_view);
@@ -1307,6 +1319,7 @@ public class ViewMap extends GDActivity {
   public void onPause() {
     super.onPause();
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onPause called by " + Thread.currentThread().getName());
+    mapSurfaceView.onPause();
     stopWatchingCompass();
     coreObject.executeCoreCommand("maintenance()");
     if (!exitRequested) {
@@ -1324,6 +1337,7 @@ public class ViewMap extends GDActivity {
     
     // Resume all components
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onResume called by " + Thread.currentThread().getName());
+    mapSurfaceView.onResume();
     startWatchingCompass();
     updateWakeLock();
     Intent intent = new Intent(this, GDService.class);

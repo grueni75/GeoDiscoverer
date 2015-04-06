@@ -33,7 +33,7 @@ protected:
 public:
 
   // Constructor
-  GraphicRectangleList(Int numberOfRectangles);
+  GraphicRectangleList(Screen *screen, Int numberOfRectangles);
 
   // Destructor
   virtual ~GraphicRectangleList();
@@ -45,7 +45,7 @@ public:
   void deinit();
 
   // Draws the rectangles
-  void draw(Screen *screen);
+  void draw();
 
   // Recreates any textures or buffers
   virtual void invalidate();

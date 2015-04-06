@@ -517,7 +517,7 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 </div></div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201412260915" changecount="108">
+<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201504020610" changecount="113">
 <pre>! Copyright (C) Matthias Grünewald - All Rights Reserved
 Geo Discoverer has been developed by Matthias Grünewald. He owns the copyright for the application, this help and all the media used. The app uses also many libraries and media from others. See [[Acknowledgements|About##Acknowledgements]]. 
 ! License
@@ -584,7 +584,11 @@ Geo Discoverer uses code for converting ~UTF8 encoded sequences to ~UTF32 encode
 !! GPS Daemon 
 The height reported by the location service in Android is reported as a ~WGS84 height. For navigation purposes, height above mean sea level is more meaningful. The code to convert ~WGS84 height to height above mean sea level has been copied from the file geoid.c of the GPSD project. The project is licensed under the BSD license. See License-GPSD for more information.
 !! Android Donation Library
-Donations are handled via the Android Donation Library. The copyright for this library is owned by Dominik Schürmann. He has licensed his work under the Apache License V2.0. See License-Apache-V20 and for more information.</pre>
+Donations are handled via the Android Donation Library. The copyright for this library is owned by Dominik Schürmann. He has licensed his work under the Apache License V2.0. See License-Apache-V20 for more information.
+!! ~OpenGL Mathematics
+Matrix computations for ~OpenGL graphics are performed via the ~OpenGL Mathematics (GLM) library. The copyright for this library is owned by ~G-Truc Creation. See License-GLM for more information.
+!! ~JmDNS
+Network service discovery is handled via the ~JmDNS library. The project was originally developed by Arthur van Hoff under the GNU Lesser General Public License as ~jRendevous.  It was moved to Sourceforge by Rick Blair and renamed to ~JmDNS with the Arthur's kind permission. Currently it has  been re-released under the Apache License, Version 2.0. See License-Apache-V20 for more information.</pre>
 </div>
 <div title="AppPreferences" creator="Matthias" modifier="Matthias" created="201412221203" changecount="1">
 <pre>The preferences of Geo Discoverer can be opened via the [[menu entry &quot;Preferences&quot;|MapView##Menu]]. Every entry has an explanation. So the preferences should be self explaining. By default, only the most important preferences are shown. An expert mode can be enabled that shows all available preferences. Please note that not all preferences are remembered if the app version is upgraded. If you think that your favorite preferences shall survive an app upgrade, please [[contact the developer|ContactDeveloper]]. </pre>
@@ -1384,9 +1388,9 @@ RevisionHistory
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201412221345" changecount="31">
+<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201503130546" changecount="32">
 <pre>! Introduction
-Geo Discoverer displays an online map after its first start. The map consists of many small tiles (pictures) that are downloaded from the internet. It will take a few seconds before the contents of the map is displayed. Once the tiles are downloaded, they are stored on the device for fast retrieval. If you want to understand the map view and its interacting possibilities, the MapView tiddler explains all the details.
+Geo Discoverer is an navigation app for hikers and bikers. It can be downloaded in the [[Google Play Store|https://play.google.com/store/apps/details?id=com.untouchableapps.android.geodiscoverer]]. After its first start, it displays an online map. The map consists of many small tiles (pictures) that are downloaded from the internet. It will take a few seconds before the contents of the map is displayed. Once the tiles are downloaded, they are stored on the device for fast retrieval. If you want to understand the map view and its interacting possibilities, the MapView tiddler explains all the details.
 ! Acknowledgements
 Geo Discoverer is using many contributios from others. See the [[About]] tiddler for a full list of all the related projects. Without those contributions, Geo Discover would not have been possible. So a big @@''&quot;Thank You!&quot;''@@ to the people behind those projects!
 ! News
@@ -2105,6 +2109,63 @@ Legal Terms
   Our home page can be found at
 
     http://www.freetype.org
+</pre>
+</div>
+<div title="License-GLM" creator="Matthias" modifier="Matthias" created="201503130540" modified="201503130623" changecount="2">
+<pre>================================================================================
+OpenGL Mathematics (GLM)
+--------------------------------------------------------------------------------
+GLM is licensed under The Happy Bunny License and MIT License
+
+================================================================================
+The Happy Bunny License (Modified MIT License)
+--------------------------------------------------------------------------------
+Copyright (c) 2005 - 2014 G-Truc Creation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+Restrictions:
+ By making use of the Software for military purposes, you choose to make a
+ Bunny unhappy.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+================================================================================
+The MIT License
+--------------------------------------------------------------------------------
+Copyright (c) 2005 - 2014 G-Truc Creation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 </pre>
 </div>
 <div title="License-GPSD" creator="Matthias" modifier="Matthias" created="201412211444" modified="201412211444" changecount="2">
@@ -4083,11 +4144,14 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201501031340" changecount="14">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201504020612" changecount="19">
 <pre>|!Date |!Changes |
-|2014-12-26|Initial version.|
-|2014-12-29|Added issue tracker to ContactDeveloper|
+|2015-04-02|Added acknowledge for ~JmDNS library to [[About]].|
+|2015-03-13|Added Google Play Store link to GettingStarted.|
+|2015-03-13|Added acknowledge for GLM to [[About]].|
 |2015-01-03|Described new menu entry &quot;Re-download visible map&quot; in MapView.|
+|2014-12-29|Added issue tracker to ContactDeveloper|
+|2014-12-26|Initial version.|
 
 </pre>
 </div>

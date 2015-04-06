@@ -85,7 +85,7 @@ public:
     return &parameters;
   }
 
-  void addParameter(std::string name, std::string value) {
+  void setParameter(std::string name, std::string value) {
     parameters[name]=value;
   }
 
@@ -95,6 +95,10 @@ public:
 
   void addPosition(const WidgetPosition position) {
     this->positions.push_back(position);
+  }
+
+  void clearPositions() {
+    this->positions.clear();
   }
 
   WidgetType getType() const {

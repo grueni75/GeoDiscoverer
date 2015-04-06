@@ -23,7 +23,7 @@ protected:
   // Timestamp of the last modification by the user
   TimestampInMicroseconds lastUserModification;
 
-  // The current angle
+  // The current angle in degrees
   double valueAngle;
 
   // The current zoom

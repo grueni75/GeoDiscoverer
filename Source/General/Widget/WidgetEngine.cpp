@@ -16,10 +16,11 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetEngine::WidgetEngine() {
+WidgetEngine::WidgetEngine(Device *device) : visiblePages(device->getScreen()){
 
   // Get global config
   ConfigStore *c=core->getConfigStore();
+  this->device=device;
   selectedWidgetColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/SelectedColor",__FILE__, __LINE__);
   buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay",__FILE__, __LINE__);
   buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod",__FILE__, __LINE__);
@@ -49,7 +50,7 @@ WidgetEngine::~WidgetEngine() {
 void WidgetEngine::addWidgetToPage(WidgetConfig config) {
 
   // Iterate through all positions
-  std::string path="Graphic/Widget/Page[@name='" + config.getPageName() + "']/Primitive[@name='" + config.getName() + "']";
+  std::string path="Graphic/Widget/Device[@name='" + device->getName() + "']/Page[@name='" + config.getPageName() + "']/Primitive[@name='" + config.getName() + "']";
   ConfigStore *c=core->getConfigStore();
   std::string widgetTypeString="unknown";
   switch(config.getType()) {
@@ -108,7 +109,8 @@ void WidgetEngine::createGraphic() {
 
   // Get all widget pages
   // If no exist, create the default ones
-  std::list<std::string> pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
+  std::string deviceName = device->getName();
+  std::list<std::string> pageNames=c->getAttributeValues("Graphic/Widget/Device[@name='" + deviceName + "']/Page","name",__FILE__, __LINE__);
   WidgetConfig config;
   WidgetPosition position;
   if (pageNames.size()==0) {
@@ -139,820 +141,867 @@ void WidgetEngine::createGraphic() {
     }
     double tabletLandscapeMeterGridY=86.0;
     // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Page Left");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(0);
-    position.setPortraitX(3.5);
-    position.setPortraitY(50.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(3.0);
-    position.setLandscapeY(50.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","pageLeft");
-    config.addParameter("command","setPage(Path Tools,+1)");
-    config.addParameter("repeat","0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Page Right");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(0);
-    position.setPortraitX(96.5);
-    position.setPortraitY(50.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(97.0);
-    position.setLandscapeY(50.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","pageRight");
-    config.addParameter("command","setPage(Path Tools,-1)");
-    config.addParameter("repeat","0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Zoom In");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4);
-    position.setPortraitX(87.5);
-    position.setPortraitY(23.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(89.5);
-    position.setLandscapeY(87.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7);
-    position.setPortraitX(tabletPortraitButtonGridX[0]);
-    position.setPortraitY(tabletPortraitButtonGridY[0]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[0]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","zoomIn");
-    config.addParameter("command","zoom(1.125)");
-    config.addParameter("repeat","1");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Zoom Out");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(62.5);
-    position.setPortraitY(23.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(89.5);
-    position.setLandscapeY(62.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[1]);
-    position.setPortraitY(tabletPortraitButtonGridY[0]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","zoomOut");
-    config.addParameter("command","zoom(0.875)");
-    config.addParameter("repeat","1");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Track Recording");
-    config.setType(WidgetTypeCheckbox);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(84.0);
-    position.setPortraitY(80.5);
-    position.setPortraitZ(0);
-    position.setLandscapeX(10.5);
-    position.setLandscapeY(37.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[0]);
-    position.setPortraitY(tabletPortraitButtonGridY[1]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[0]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[1]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("uncheckedIconFilename","trackRecordingOff");
-    config.addParameter("uncheckedCommand","setRecordTrack(0)");
-    config.addParameter("checkedIconFilename","trackRecordingOn");
-    config.addParameter("checkedCommand","setRecordTrack(1)");
-    config.addParameter("stateConfigPath","Navigation");
-    config.addParameter("stateConfigName","recordTrack");
-    config.addParameter("updateInterval","250000");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Create New Track");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(57.0);
-    position.setPortraitY(80.5);
-    position.setPortraitZ(0);
-    position.setLandscapeX(10.5);
-    position.setLandscapeY(12.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[1]);
-    position.setPortraitY(tabletPortraitButtonGridY[1]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[1]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","createNewTrack");
-    config.addParameter("command","createNewTrack()");
-    config.addParameter("repeat","0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Return To Location");
-    config.setType(WidgetTypeCheckbox);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(37.5);
-    position.setPortraitY(23.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(89.5);
-    position.setLandscapeY(37.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[2]);
-    position.setPortraitY(tabletPortraitButtonGridY[0]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[2]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("uncheckedIconFilename","returnToLocationOff");
-    config.addParameter("uncheckedCommand","setReturnToLocation(0)");
-    config.addParameter("checkedIconFilename","returnToLocationOn");
-    config.addParameter("checkedCommand","setReturnToLocation(1)");
-    config.addParameter("stateConfigPath","Map");
-    config.addParameter("stateConfigName","returnToLocation");
-    config.addParameter("updateInterval","250000");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Zoom Level Lock");
-    config.setType(WidgetTypeCheckbox);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(12.5);
-    position.setPortraitY(23.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(89.5);
-    position.setLandscapeY(12.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[2]);
-    position.setPortraitY(tabletPortraitButtonGridY[1]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[2]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[1]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("uncheckedIconFilename","zoomLevelLockOff");
-    config.addParameter("uncheckedCommand","setZoomLevelLock(0)");
-    config.addParameter("checkedIconFilename","zoomLevelLockOn");
-    config.addParameter("checkedCommand","setZoomLevelLock(1)");
-    config.addParameter("stateConfigPath","Map");
-    config.addParameter("stateConfigName","zoomLevelLock");
-    config.addParameter("updateInterval","250000");
-    addWidgetToPage(config);
+    if (deviceName=="Default") {
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Page Left");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(0);
+      position.setPortraitX(3.5);
+      position.setPortraitY(50.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(3.0);
+      position.setLandscapeY(50.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","pageLeft");
+      config.setParameter("command","setPage(Path Tools,+1)");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      config.setPageName("Path Tools");
+      config.setParameter("command","setPage(Default,+1)");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Page Right");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(0);
+      position.setPortraitX(96.5);
+      position.setPortraitY(50.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(97.0);
+      position.setLandscapeY(50.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","pageRight");
+      config.setParameter("command","setPage(Path Tools,-1)");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      config.setPageName("Path Tools");
+      config.setParameter("command","setPage(Default,-1)");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Zoom In");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4);
+      position.setPortraitX(87.5);
+      position.setPortraitY(23.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(89.5);
+      position.setLandscapeY(87.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7);
+      position.setPortraitX(tabletPortraitButtonGridX[0]);
+      position.setPortraitY(tabletPortraitButtonGridY[0]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[0]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","zoomIn");
+      config.setParameter("command","zoom(1.125)");
+      config.setParameter("repeat","1");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Zoom Out");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(62.5);
+      position.setPortraitY(23.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(89.5);
+      position.setLandscapeY(62.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[1]);
+      position.setPortraitY(tabletPortraitButtonGridY[0]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[1]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","zoomOut");
+      config.setParameter("command","zoom(0.875)");
+      config.setParameter("repeat","1");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Track Recording");
+      config.setType(WidgetTypeCheckbox);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(84.0);
+      position.setPortraitY(80.5);
+      position.setPortraitZ(0);
+      position.setLandscapeX(10.5);
+      position.setLandscapeY(37.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[0]);
+      position.setPortraitY(tabletPortraitButtonGridY[1]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[0]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[1]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("uncheckedIconFilename","trackRecordingOff");
+      config.setParameter("uncheckedCommand","setRecordTrack(0)");
+      config.setParameter("checkedIconFilename","trackRecordingOn");
+      config.setParameter("checkedCommand","setRecordTrack(1)");
+      config.setParameter("stateConfigPath","Navigation");
+      config.setParameter("stateConfigName","recordTrack");
+      config.setParameter("updateInterval","250000");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Create New Track");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(57.0);
+      position.setPortraitY(80.5);
+      position.setPortraitZ(0);
+      position.setLandscapeX(10.5);
+      position.setLandscapeY(12.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[1]);
+      position.setPortraitY(tabletPortraitButtonGridY[1]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[1]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[1]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","createNewTrack");
+      config.setParameter("command","createNewTrack()");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Return To Location");
+      config.setType(WidgetTypeCheckbox);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(37.5);
+      position.setPortraitY(23.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(89.5);
+      position.setLandscapeY(37.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[2]);
+      position.setPortraitY(tabletPortraitButtonGridY[0]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[2]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("uncheckedIconFilename","returnToLocationOff");
+      config.setParameter("uncheckedCommand","setReturnToLocation(0)");
+      config.setParameter("checkedIconFilename","returnToLocationOn");
+      config.setParameter("checkedCommand","setReturnToLocation(1)");
+      config.setParameter("stateConfigPath","Map");
+      config.setParameter("stateConfigName","returnToLocation");
+      config.setParameter("updateInterval","250000");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Zoom Level Lock");
+      config.setType(WidgetTypeCheckbox);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(12.5);
+      position.setPortraitY(23.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(89.5);
+      position.setLandscapeY(12.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[2]);
+      position.setPortraitY(tabletPortraitButtonGridY[1]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[2]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[1]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("uncheckedIconFilename","zoomLevelLockOff");
+      config.setParameter("uncheckedCommand","setZoomLevelLock(0)");
+      config.setParameter("checkedIconFilename","zoomLevelLockOn");
+      config.setParameter("checkedCommand","setZoomLevelLock(1)");
+      config.setParameter("stateConfigPath","Map");
+      config.setParameter("stateConfigName","zoomLevelLock");
+      config.setParameter("updateInterval","250000");
+      addWidgetToPage(config);
+      config.setPageName("Path Tools");
+      config.clearPositions();
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(12.5);
+      position.setPortraitY(93.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(10.5);
+      position.setLandscapeY(12.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[3]);
+      position.setPortraitY(tabletPortraitButtonGridY[1]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[3]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[1]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      addWidgetToPage(config);
+    }
     // ---------------------------------------------------------
     config=WidgetConfig();
     config.setPageName("Default");
     config.setName("Current altitude");
     config.setType(WidgetTypeMeter);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(17.0);
-    position.setPortraitY(9.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(26.5);
-    position.setLandscapeY(14.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitMeterGridX[1]);
-    position.setPortraitY(tabletPortraitMeterGridY);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeMeterGridX[1]);
-    position.setLandscapeY(tabletLandscapeMeterGridY);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
+    if (deviceName=="Default") {
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(17.0);
+      position.setPortraitY(9.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(26.5);
+      position.setLandscapeY(14.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitMeterGridX[1]);
+      position.setPortraitY(tabletPortraitMeterGridY);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeMeterGridX[1]);
+      position.setLandscapeY(tabletLandscapeMeterGridY);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+    }
+    if (deviceName!="Default") {
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(0.0);
+      position.setPortraitX(0.0);
+      position.setPortraitY(0.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(40.5);
+      position.setLandscapeY(80.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,255));
+    }
     config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","meterBackground");
-    config.addParameter("meterType","altitude");
-    config.addParameter("updateInterval","1000000");
-    config.addParameter("labelY","78.0");
-    config.addParameter("valueY","40.0");
-    config.addParameter("unitY","10.0");
+    config.setParameter("iconFilename","meterBackground");
+    config.setParameter("meterType","altitude");
+    config.setParameter("updateInterval","1000000");
+    config.setParameter("labelY","78.0");
+    config.setParameter("valueY","40.0");
+    config.setParameter("unitY","10.0");
     addWidgetToPage(config);
     // ---------------------------------------------------------
     config=WidgetConfig();
     config.setPageName("Default");
     config.setName("Current speed");
     config.setType(WidgetTypeMeter);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(50.0);
-    position.setPortraitY(9.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(50.0);
-    position.setLandscapeY(14.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitMeterGridX[2]);
-    position.setPortraitY(tabletPortraitMeterGridY);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeMeterGridX[2]);
-    position.setLandscapeY(tabletLandscapeMeterGridY);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
+    if (deviceName=="Default") {
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(50.0);
+      position.setPortraitY(9.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(14.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitMeterGridX[2]);
+      position.setPortraitY(tabletPortraitMeterGridY);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeMeterGridX[2]);
+      position.setLandscapeY(tabletLandscapeMeterGridY);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+    }
+    if (deviceName!="Default") {
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(0.0);
+      position.setPortraitX(0.0);
+      position.setPortraitY(0.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(64.0);
+      position.setLandscapeY(80.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,255));
+    }
     config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","meterBackground");
-    config.addParameter("meterType","speed");
-    config.addParameter("updateInterval","1000000");
-    config.addParameter("labelY","78.0");
-    config.addParameter("valueY","40.0");
-    config.addParameter("unitY","10.0");
+    config.setParameter("iconFilename","meterBackground");
+    config.setParameter("meterType","speed");
+    config.setParameter("updateInterval","1000000");
+    config.setParameter("labelY","78.0");
+    config.setParameter("valueY","40.0");
+    config.setParameter("unitY","10.0");
     addWidgetToPage(config);
     // ---------------------------------------------------------
     config=WidgetConfig();
     config.setPageName("Default");
     config.setName("Track length");
     config.setType(WidgetTypeMeter);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(83.0);
-    position.setPortraitY(9.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(73.5);
-    position.setLandscapeY(14.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitMeterGridX[3]);
-    position.setPortraitY(tabletPortraitMeterGridY);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeMeterGridX[3]);
-    position.setLandscapeY(tabletLandscapeMeterGridY);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
+    if (deviceName=="Default") {
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(83.0);
+      position.setPortraitY(9.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(73.5);
+      position.setLandscapeY(14.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitMeterGridX[3]);
+      position.setPortraitY(tabletPortraitMeterGridY);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeMeterGridX[3]);
+      position.setLandscapeY(tabletLandscapeMeterGridY);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+    }
+    if (deviceName!="Default") {
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(0.0);
+      position.setPortraitX(0.0);
+      position.setPortraitY(0.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(87.5);
+      position.setLandscapeY(80.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,255));
+    }
     config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","meterBackground");
-    config.addParameter("meterType","trackLength");
-    config.addParameter("updateInterval","1000000");
-    config.addParameter("labelY","78.0");
-    config.addParameter("valueY","40.0");
-    config.addParameter("unitY","10.0");
+    config.setParameter("iconFilename","meterBackground");
+    config.setParameter("meterType","trackLength");
+    config.setParameter("updateInterval","1000000");
+    config.setParameter("labelY","78.0");
+    config.setParameter("valueY","40.0");
+    config.setParameter("unitY","10.0");
     addWidgetToPage(config);
     // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Map scale");
-    config.setType(WidgetTypeScale);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(70.0);
-    position.setPortraitY(92.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(50.0);
-    position.setLandscapeY(88.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[1]);
-    position.setPortraitY(tabletPortraitButtonGridY[2]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[2]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","scale");
-    config.addParameter("updateInterval","1000000");
-    config.addParameter("tickLabelOffsetX","0");
-    config.addParameter("mapLabelOffsetY","9.0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Default");
-    config.setName("Status");
-    config.setType(WidgetTypeStatus);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(70.0);
-    position.setPortraitY(92.0);
-    position.setPortraitZ(1);
-    position.setLandscapeX(50.0);
-    position.setLandscapeY(88.0);
-    position.setLandscapeZ(1);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[1]);
-    position.setPortraitY(tabletPortraitButtonGridY[3]);
-    position.setPortraitZ(1);
-    position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[2]);
-    position.setLandscapeZ(1);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","statusBackground");
-    config.addParameter("updateInterval","100000");
-    config.addParameter("labelWidth","95.0");
-    addWidgetToPage(config);
+    if (deviceName=="Default") {
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Map scale");
+      config.setType(WidgetTypeScale);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(70.0);
+      position.setPortraitY(92.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(88.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[1]);
+      position.setPortraitY(tabletPortraitButtonGridY[2]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[1]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[2]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","scale");
+      config.setParameter("updateInterval","1000000");
+      config.setParameter("tickLabelOffsetX","0");
+      config.setParameter("mapLabelOffsetY","9.0");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Status");
+      config.setType(WidgetTypeStatus);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(70.0);
+      position.setPortraitY(92.0);
+      position.setPortraitZ(1);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(88.0);
+      position.setLandscapeZ(1);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[1]);
+      position.setPortraitY(tabletPortraitButtonGridY[3]);
+      position.setPortraitZ(1);
+      position.setLandscapeX(tabletLandscapeButtonGridX[1]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[2]);
+      position.setLandscapeZ(1);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","statusBackground");
+      config.setParameter("updateInterval","100000");
+      config.setParameter("labelWidth","95.0");
+      addWidgetToPage(config);
+      config.setPageName("Path Tools");
+      config.clearPositions();
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(50.0);
+      position.setPortraitY(30.0);
+      position.setPortraitZ(1);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(88.0);
+      position.setLandscapeZ(1);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX((tabletPortraitButtonGridX[2]+tabletPortraitButtonGridX[1])/2);
+      position.setPortraitY(tabletPortraitButtonGridY[4]);
+      position.setPortraitZ(1);
+      position.setLandscapeX((tabletLandscapeButtonGridX[2]+tabletLandscapeButtonGridX[1])/2);
+      position.setLandscapeY(tabletLandscapeButtonGridY[2]);
+      position.setLandscapeZ(1);
+      config.addPosition(position);
+      addWidgetToPage(config);
+    }
     // ---------------------------------------------------------
     config=WidgetConfig();
     config.setPageName("Default");
     config.setName("Navigation");
     config.setType(WidgetTypeNavigation);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(22.0);
-    position.setPortraitY(87.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(14.5);
-    position.setLandscapeY(78.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitMeterGridX[0]);
-    position.setPortraitY(tabletPortraitMeterGridY);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeMeterGridX[0]);
-    position.setLandscapeY(tabletLandscapeMeterGridY);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
+    if (deviceName=="Default") {
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(22.0);
+      position.setPortraitY(87.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(14.5);
+      position.setLandscapeY(78.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitMeterGridX[0]);
+      position.setPortraitY(tabletPortraitMeterGridY);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeMeterGridX[0]);
+      position.setLandscapeY(tabletLandscapeMeterGridY);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+    }
+    if (deviceName!="Default") {
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(0.0);
+      position.setPortraitX(0.0);
+      position.setPortraitY(0.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(14.5);
+      position.setLandscapeY(80.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,255));
+    }
     config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","navigationBackground");
-    config.addParameter("updateInterval","1000000");
-    config.addParameter("durationLabelOffsetY","38");
-    config.addParameter("durationValueOffsetY","25");
-    config.addParameter("targetDistanceLabelOffsetY","68");
-    config.addParameter("targetDistanceValueOffsetY","55");
-    config.addParameter("turnDistanceValueOffsetY","25");
-    config.addParameter("directionIconFilename","navigationDirection");
-    config.addParameter("targetIconFilename","navigationTarget");
-    config.addParameter("separatorIconFilename","navigationSeparator");
-    config.addParameter("directionChangeDuration","500000");
-    config.addParameter("targetRadius","86.0");
-    config.addParameter("orientationLabelRadius","86.5");
-    config.addParameter("turnLineWidth","15.0");
-    config.addParameter("turnLineArrowOverhang","7.5");
-    config.addParameter("turnLineArrowHeight","13.0");
-    config.addParameter("turnLineStartHeight","20.0");
-    config.addParameter("turnLineMiddleHeight","8.5");
-    config.addParameter("turnLineStartX","50.0");
-    config.addParameter("turnLineStartY","37.0");
-    config.addParameter("TurnColor/red","0");
-    config.addParameter("TurnColor/green","0");
-    config.addParameter("TurnColor/blue","0");
-    config.addParameter("TurnColor/alpha","255");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Page Left");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(0);
-    position.setPortraitX(3.5);
-    position.setPortraitY(50.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(3.0);
-    position.setLandscapeY(50.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","pageLeft");
-    config.addParameter("command","setPage(Default,+1)");
-    config.addParameter("repeat","0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Page Right");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(0);
-    position.setPortraitX(96.5);
-    position.setPortraitY(50.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(97.0);
-    position.setLandscapeY(50.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","pageRight");
-    config.addParameter("command","setPage(Default,-1)");
-    config.addParameter("repeat","0");
+    config.setParameter("iconFilename","navigationBackground");
+    config.setParameter("updateInterval","1000000");
+    config.setParameter("durationLabelOffsetY","38");
+    config.setParameter("durationValueOffsetY","25");
+    config.setParameter("targetDistanceLabelOffsetY","68");
+    config.setParameter("targetDistanceValueOffsetY","55");
+    config.setParameter("turnDistanceValueOffsetY","25");
+    config.setParameter("directionIconFilename","navigationDirection");
+    config.setParameter("targetIconFilename","navigationTarget");
+    config.setParameter("separatorIconFilename","navigationSeparator");
+    config.setParameter("directionChangeDuration","500000");
+    config.setParameter("targetRadius","86.0");
+    config.setParameter("orientationLabelRadius","86.5");
+    config.setParameter("turnLineWidth","15.0");
+    config.setParameter("turnLineArrowOverhang","7.5");
+    config.setParameter("turnLineArrowHeight","13.0");
+    config.setParameter("turnLineStartHeight","20.0");
+    config.setParameter("turnLineMiddleHeight","8.5");
+    config.setParameter("turnLineStartX","50.0");
+    config.setParameter("turnLineStartY","37.0");
+    config.setParameter("TurnColor/red","0");
+    config.setParameter("TurnColor/green","0");
+    config.setParameter("TurnColor/blue","0");
+    config.setParameter("TurnColor/alpha","255");
     addWidgetToPage(config);
     // ---------------------------------------------------------
     config=WidgetConfig();
     config.setPageName("Path Tools");
     config.setName("Path Info");
     config.setType(WidgetTypePathInfo);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(50.0);
-    position.setPortraitY(12.5);
-    position.setPortraitZ(0);
-    position.setLandscapeX(50.0);
-    position.setLandscapeY(21.0);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX((tabletPortraitButtonGridX[2]+tabletPortraitButtonGridX[1])/2);
-    position.setPortraitY((tabletPortraitButtonGridY[2]+tabletPortraitButtonGridY[3])/2);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[6]);
-    position.setLandscapeY((tabletLandscapeButtonGridY[0]+tabletLandscapeButtonGridY[1])/2);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
+    if (deviceName=="Default") {
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(50.0);
+      position.setPortraitY(12.5);
+      position.setPortraitZ(0);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(21.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX((tabletPortraitButtonGridX[2]+tabletPortraitButtonGridX[1])/2);
+      position.setPortraitY((tabletPortraitButtonGridY[2]+tabletPortraitButtonGridY[3])/2);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[6]);
+      position.setLandscapeY((tabletLandscapeButtonGridY[0]+tabletLandscapeButtonGridY[1])/2);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","pathInfoBackground");
+      config.setParameter("pathNameOffsetX","3.0");
+      config.setParameter("pathNameOffsetY","82.0");
+      config.setParameter("pathNameWidth","60.0");
+      config.setParameter("pathValuesWidth","22.5");
+      config.setParameter("pathLengthOffsetX","74.5");
+      config.setParameter("pathLengthOffsetY","82.0");
+      config.setParameter("pathAltitudeUpOffsetX","74.5");
+      config.setParameter("pathAltitudeUpOffsetY","57.25");
+      config.setParameter("pathAltitudeDownOffsetX","74.5");
+      config.setParameter("pathAltitudeDownOffsetY","32.5");
+      config.setParameter("pathDurationOffsetX","74.5");
+      config.setParameter("pathDurationOffsetY","8.25");
+      config.setParameter("altitudeProfileWidth","50.5");
+      config.setParameter("altitudeProfileHeight","54.0");
+      config.setParameter("altitudeProfileOffsetX","9.5");
+      config.setParameter("altitudeProfileOffsetY","14.0");
+      config.setParameter("noAltitudeProfileOffsetX","32.0");
+      config.setParameter("noAltitudeProfileOffsetY","42.0");
+      config.setParameter("altitudeProfileXTickCount","5");
+      config.setParameter("altitudeProfileYTickCount","3");
+    }
+    if (deviceName!="Default") {
+      config.setPageName("Default");
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(0.0);
+      position.setPortraitX(0.0);
+      position.setPortraitY(0.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(31.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,255));
+      config.setParameter("iconFilename","pathInfoLargeBackground");
+      config.setParameter("pathNameOffsetX","2.0");
+      config.setParameter("pathNameOffsetY","90.0");
+      config.setParameter("pathNameWidth","96.0");
+      config.setParameter("pathValuesWidth","18.5");
+      config.setParameter("pathLengthOffsetX","5.5");
+      config.setParameter("pathLengthOffsetY","75.0");
+      config.setParameter("pathAltitudeUpOffsetX","30.0");
+      config.setParameter("pathAltitudeUpOffsetY","75.0");
+      config.setParameter("pathAltitudeDownOffsetX","55.0");
+      config.setParameter("pathAltitudeDownOffsetY","75.0");
+      config.setParameter("pathDurationOffsetX","80.5");
+      config.setParameter("pathDurationOffsetY","75.0");
+      config.setParameter("altitudeProfileWidth","87.0");
+      config.setParameter("altitudeProfileHeight","53.0");
+      config.setParameter("altitudeProfileOffsetX","8.0");
+      config.setParameter("altitudeProfileOffsetY","10.0");
+      config.setParameter("noAltitudeProfileOffsetX","50.0");
+      config.setParameter("noAltitudeProfileOffsetY","37.5");
+      config.setParameter("altitudeProfileXTickCount","7");
+      config.setParameter("altitudeProfileYTickCount","5");
+    }
     config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","pathInfoBackground");
-    config.addParameter("pathNameOffsetX","3.0");
-    config.addParameter("pathNameOffsetY","82.0");
-    config.addParameter("pathNameWidth","60.0");
-    config.addParameter("pathValuesOffsetX","74.5");
-    config.addParameter("pathValuesWidth","22.5");
-    config.addParameter("pathLengthOffsetY","82.0");
-    config.addParameter("pathAltitudeUpOffsetY","57.25");
-    config.addParameter("pathAltitudeDownOffsetY","32.5");
-    config.addParameter("pathDurationOffsetY","8.25");
-    config.addParameter("altitudeProfileWidth","50.5");
-    config.addParameter("altitudeProfileHeight","54.0");
-    config.addParameter("altitudeProfileOffsetX","9.5");
-    config.addParameter("altitudeProfileOffsetY","14.0");
-    config.addParameter("altitudeProfileLineWidth","2.0");
-    config.addParameter("altitudeProfileAxisLineWidth","2.0");
-    config.addParameter("altitudeProfileMinAltitudeDiff","20.0");
-    config.addParameter("altitudeProfileXTickCount","5");
-    config.addParameter("altitudeProfileYTickCount","3");
-    config.addParameter("altitudeProfileXTickLabelOffsetY","1.5");
-    config.addParameter("altitudeProfileYTickLabelOffsetX","1.0");
-    config.addParameter("altitudeProfileXTickLabelWidth","5");
-    config.addParameter("altitudeProfileYTickLabelWidth","4");
-    config.addParameter("AltitudeProfileFillColor/red","255");
-    config.addParameter("AltitudeProfileFillColor/green","190");
-    config.addParameter("AltitudeProfileFillColor/blue","127");
-    config.addParameter("AltitudeProfileFillColor/alpha","255");
-    config.addParameter("AltitudeProfileLineColor/red","255");
-    config.addParameter("AltitudeProfileLineColor/green","127");
-    config.addParameter("AltitudeProfileLineColor/blue","0");
-    config.addParameter("AltitudeProfileLineColor/alpha","255");
-    config.addParameter("AltitudeProfileAxisColor/red","0");
-    config.addParameter("AltitudeProfileAxisColor/green","0");
-    config.addParameter("AltitudeProfileAxisColor/blue","0");
-    config.addParameter("AltitudeProfileAxisColor/alpha","64");
-    config.addParameter("noAltitudeProfileOffsetX","32.0");
-    config.addParameter("noAltitudeProfileOffsetY","42.0");
-    config.addParameter("locationIconFilename","pathInfoLocation");
+    config.setParameter("altitudeProfileXTickLabelOffsetY","1.5");
+    config.setParameter("altitudeProfileYTickLabelOffsetX","1.0");
+    config.setParameter("altitudeProfileXTickLabelWidth","5");
+    config.setParameter("altitudeProfileYTickLabelWidth","4");
+    config.setParameter("altitudeProfileLineWidth","2.0");
+    config.setParameter("altitudeProfileAxisLineWidth","2.0");
+    config.setParameter("altitudeProfileMinAltitudeDiff","20.0");
+    config.setParameter("AltitudeProfileFillColor/red","255");
+    config.setParameter("AltitudeProfileFillColor/green","190");
+    config.setParameter("AltitudeProfileFillColor/blue","127");
+    config.setParameter("AltitudeProfileFillColor/alpha","255");
+    config.setParameter("AltitudeProfileLineColor/red","255");
+    config.setParameter("AltitudeProfileLineColor/green","127");
+    config.setParameter("AltitudeProfileLineColor/blue","0");
+    config.setParameter("AltitudeProfileLineColor/alpha","255");
+    config.setParameter("AltitudeProfileAxisColor/red","0");
+    config.setParameter("AltitudeProfileAxisColor/green","0");
+    config.setParameter("AltitudeProfileAxisColor/blue","0");
+    config.setParameter("AltitudeProfileAxisColor/alpha","64");
+    config.setParameter("locationIconFilename","pathInfoLocation");
     addWidgetToPage(config);
     // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Target Visibility");
-    config.setType(WidgetTypeCheckbox);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(87.5);
-    position.setPortraitY(93.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(10.5);
-    position.setLandscapeY(87.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[0]);
-    position.setPortraitY(tabletPortraitButtonGridY[1]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[0]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[1]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("uncheckedIconFilename","targetOff");
-    config.addParameter("uncheckedCommand","hideTarget()");
-    config.addParameter("checkedIconFilename","targetOn");
-    config.addParameter("checkedCommand","showTarget()");
-    config.addParameter("stateConfigPath","Navigation/Target");
-    config.addParameter("stateConfigName","visible");
-    config.addParameter("updateInterval","250000");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Target At Address");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(62.5);
-    position.setPortraitY(93.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(10.5);
-    position.setLandscapeY(62.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[1]);
-    position.setPortraitY(tabletPortraitButtonGridY[1]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[1]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","setTargetAtAddress");
-    config.addParameter("command","setTargetAtAddress()");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Target At Center");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(37.5);
-    position.setPortraitY(93.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(10.5);
-    position.setLandscapeY(37.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[2]);
-    position.setPortraitY(tabletPortraitButtonGridY[1]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[2]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[1]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","setTargetAtMapCenter");
-    config.addParameter("command","setTargetAtMapCenter()");
-    config.addParameter("repeat","0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Zoom Level Lock");
-    config.setType(WidgetTypeCheckbox);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(12.5);
-    position.setPortraitY(93.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(10.5);
-    position.setLandscapeY(12.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[3]);
-    position.setPortraitY(tabletPortraitButtonGridY[1]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[3]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[1]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("uncheckedIconFilename","zoomLevelLockOff");
-    config.addParameter("uncheckedCommand","setZoomLevelLock(0)");
-    config.addParameter("checkedIconFilename","zoomLevelLockOn");
-    config.addParameter("checkedCommand","setZoomLevelLock(1)");
-    config.addParameter("stateConfigPath","Map");
-    config.addParameter("stateConfigName","zoomLevelLock");
-    config.addParameter("updateInterval","250000");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Status");
-    config.setType(WidgetTypeStatus);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(50.0);
-    position.setPortraitY(30.0);
-    position.setPortraitZ(1);
-    position.setLandscapeX(50.0);
-    position.setLandscapeY(88.0);
-    position.setLandscapeZ(1);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX((tabletPortraitButtonGridX[2]+tabletPortraitButtonGridX[1])/2);
-    position.setPortraitY(tabletPortraitButtonGridY[4]);
-    position.setPortraitZ(1);
-    position.setLandscapeX((tabletLandscapeButtonGridX[2]+tabletLandscapeButtonGridX[1])/2);
-    position.setLandscapeY(tabletLandscapeButtonGridY[2]);
-    position.setLandscapeZ(1);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","statusBackground");
-    config.addParameter("updateInterval","100000");
-    config.addParameter("labelWidth","95.0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Set Path End Flag");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(87.5);
-    position.setPortraitY(80.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(89.5);
-    position.setLandscapeY(87.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[0]);
-    position.setPortraitY(tabletPortraitButtonGridY[0]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[0]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","setPathEndFlag");
-    config.addParameter("command","setPathEndFlag()");
-    config.addParameter("repeat","0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Set Path Start Flag");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(62.5);
-    position.setPortraitY(80.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(89.5);
-    position.setLandscapeY(62.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[1]);
-    position.setPortraitY(tabletPortraitButtonGridY[0]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","setPathStartFlag");
-    config.addParameter("command","setPathStartFlag()");
-    config.addParameter("repeat","0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Set Active Route");
-    config.setType(WidgetTypeButton);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(37.5);
-    position.setPortraitY(80.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(89.5);
-    position.setLandscapeY(37.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[2]);
-    position.setPortraitY(tabletPortraitButtonGridY[0]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[2]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("iconFilename","setActiveRoute");
-    config.addParameter("command","setActiveRoute()");
-    config.addParameter("repeat","0");
-    addWidgetToPage(config);
-    // ---------------------------------------------------------
-    config=WidgetConfig();
-    config.setPageName("Path Tools");
-    config.setName("Path Info Lock");
-    config.setType(WidgetTypeCheckbox);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(4.0);
-    position.setPortraitX(12.5);
-    position.setPortraitY(80.0);
-    position.setPortraitZ(0);
-    position.setLandscapeX(89.5);
-    position.setLandscapeY(12.5);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    position=WidgetPosition();
-    position.setRefScreenDiagonal(7.0);
-    position.setPortraitX(tabletPortraitButtonGridX[3]);
-    position.setPortraitY(tabletPortraitButtonGridY[0]);
-    position.setPortraitZ(0);
-    position.setLandscapeX(tabletLandscapeButtonGridX[3]);
-    position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-    position.setLandscapeZ(0);
-    config.addPosition(position);
-    config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setInactiveColor(GraphicColor(255,255,255,100));
-    config.addParameter("uncheckedIconFilename","pathInfoLockOff");
-    config.addParameter("uncheckedCommand","setPathInfoLock(0)");
-    config.addParameter("checkedIconFilename","pathInfoLockOn");
-    config.addParameter("checkedCommand","setPathInfoLock(1)");
-    config.addParameter("stateConfigPath","Navigation");
-    config.addParameter("stateConfigName","pathInfoLocked");
-    config.addParameter("updateInterval","250000");
-    addWidgetToPage(config);
-    pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
+    if (deviceName=="Default") {
+      config=WidgetConfig();
+      config.setPageName("Path Tools");
+      config.setName("Target Visibility");
+      config.setType(WidgetTypeCheckbox);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(87.5);
+      position.setPortraitY(93.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(10.5);
+      position.setLandscapeY(87.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[0]);
+      position.setPortraitY(tabletPortraitButtonGridY[1]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[0]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[1]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("uncheckedIconFilename","targetOff");
+      config.setParameter("uncheckedCommand","hideTarget()");
+      config.setParameter("checkedIconFilename","targetOn");
+      config.setParameter("checkedCommand","showTarget()");
+      config.setParameter("stateConfigPath","Navigation/Target");
+      config.setParameter("stateConfigName","visible");
+      config.setParameter("updateInterval","250000");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Path Tools");
+      config.setName("Target At Address");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(62.5);
+      position.setPortraitY(93.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(10.5);
+      position.setLandscapeY(62.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[1]);
+      position.setPortraitY(tabletPortraitButtonGridY[1]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[1]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[1]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","setTargetAtAddress");
+      config.setParameter("command","setTargetAtAddress()");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Path Tools");
+      config.setName("Target At Center");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(37.5);
+      position.setPortraitY(93.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(10.5);
+      position.setLandscapeY(37.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[2]);
+      position.setPortraitY(tabletPortraitButtonGridY[1]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[2]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[1]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","setTargetAtMapCenter");
+      config.setParameter("command","setTargetAtMapCenter()");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Path Tools");
+      config.setName("Set Path End Flag");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(87.5);
+      position.setPortraitY(80.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(89.5);
+      position.setLandscapeY(87.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[0]);
+      position.setPortraitY(tabletPortraitButtonGridY[0]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[0]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","setPathEndFlag");
+      config.setParameter("command","setPathEndFlag()");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Path Tools");
+      config.setName("Set Path Start Flag");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(62.5);
+      position.setPortraitY(80.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(89.5);
+      position.setLandscapeY(62.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[1]);
+      position.setPortraitY(tabletPortraitButtonGridY[0]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[1]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","setPathStartFlag");
+      config.setParameter("command","setPathStartFlag()");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Path Tools");
+      config.setName("Set Active Route");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(37.5);
+      position.setPortraitY(80.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(89.5);
+      position.setLandscapeY(37.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[2]);
+      position.setPortraitY(tabletPortraitButtonGridY[0]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[2]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","setActiveRoute");
+      config.setParameter("command","setActiveRoute()");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Path Tools");
+      config.setName("Path Info Lock");
+      config.setType(WidgetTypeCheckbox);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(12.5);
+      position.setPortraitY(80.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(89.5);
+      position.setLandscapeY(12.5);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[3]);
+      position.setPortraitY(tabletPortraitButtonGridY[0]);
+      position.setPortraitZ(0);
+      position.setLandscapeX(tabletLandscapeButtonGridX[3]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("uncheckedIconFilename","pathInfoLockOff");
+      config.setParameter("uncheckedCommand","setPathInfoLock(0)");
+      config.setParameter("checkedIconFilename","pathInfoLockOn");
+      config.setParameter("checkedCommand","setPathInfoLock(1)");
+      config.setParameter("stateConfigPath","Navigation");
+      config.setParameter("stateConfigName","pathInfoLocked");
+      config.setParameter("updateInterval","250000");
+      addWidgetToPage(config);
+    }
   }
 
   // Create the widgets from the config
-  pageNames=c->getAttributeValues("Graphic/Widget/Page","name",__FILE__, __LINE__);
+  pageNames=c->getAttributeValues("Graphic/Widget/Device[@name='" + deviceName + "']/Page","name",__FILE__, __LINE__);
   std::list<std::string>::iterator i;
   for(i=pageNames.begin();i!=pageNames.end();i++) {
     //DEBUG("found a widget page with name %s",(*i).c_str());
 
     // Create the page
-    WidgetPage *page=new WidgetPage(*i);
+    WidgetPage *page=new WidgetPage(this,*i);
     if (!page) {
       FATAL("can not create widget page object",NULL);
       core->getThread()->unlockMutex(accessMutex);
@@ -962,7 +1011,7 @@ void WidgetEngine::createGraphic() {
     pageMap.insert(pair);
 
     // Go through all widgets of this page
-    std::string path="Graphic/Widget/Page[@name='" + *i + "']/Primitive";
+    std::string path="Graphic/Widget/Device[@name='" + deviceName + "']/Page[@name='" + *i + "']/Primitive";
     std::list<std::string> widgetNames=c->getAttributeValues(path,"name",__FILE__, __LINE__);
     std::list<std::string>::iterator j;
     for(j=widgetNames.begin();j!=widgetNames.end();j++) {
@@ -979,31 +1028,31 @@ void WidgetEngine::createGraphic() {
       WidgetNavigation *navigation;
       WidgetPathInfo *pathInfo;
       if (widgetType=="button") {
-        button=new WidgetButton();
+        button=new WidgetButton(page);
         primitive=button;
       }
       if (widgetType=="checkbox") {
-        checkbox=new WidgetCheckbox();
+        checkbox=new WidgetCheckbox(page);
         primitive=checkbox;
       }
       if (widgetType=="meter") {
-        meter=new WidgetMeter();
+        meter=new WidgetMeter(page);
         primitive=meter;
       }
       if (widgetType=="scale") {
-        scale=new WidgetScale();
+        scale=new WidgetScale(page);
         primitive=scale;
       }
       if (widgetType=="status") {
-        status=new WidgetStatus();
+        status=new WidgetStatus(page);
         primitive=status;
       }
       if (widgetType=="navigation") {
-        navigation=new WidgetNavigation();
+        navigation=new WidgetNavigation(page);
         primitive=navigation;
       }
       if (widgetType=="pathInfo") {
-        pathInfo=new WidgetPathInfo();
+        pathInfo=new WidgetPathInfo(page);
         primitive=pathInfo;
       }
 
@@ -1017,23 +1066,23 @@ void WidgetEngine::createGraphic() {
 
       // Load the image of the widget
       if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")) {
-        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
+        primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {
-        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"checkedIconFilename",__FILE__, __LINE__));
+        primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"checkedIconFilename",__FILE__, __LINE__));
         checkbox->setCheckedTexture(primitive->getTexture());
-        primitive->setTextureFromIcon(c->getStringValue(widgetPath,"uncheckedIconFilename",__FILE__, __LINE__));
+        primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"uncheckedIconFilename",__FILE__, __LINE__));
         checkbox->setUncheckedTexture(primitive->getTexture());
         checkbox->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
       }
       if (widgetType=="navigation") {
-        navigation->getDirectionIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"directionIconFilename",__FILE__, __LINE__));
+        navigation->getDirectionIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"directionIconFilename",__FILE__, __LINE__));
         navigation->getDirectionIcon()->setX(-navigation->getDirectionIcon()->getIconWidth()/2);
         navigation->getDirectionIcon()->setY(-navigation->getDirectionIcon()->getIconHeight()/2);
-        navigation->getTargetIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"targetIconFilename",__FILE__, __LINE__));
+        navigation->getTargetIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"targetIconFilename",__FILE__, __LINE__));
         navigation->getTargetIcon()->setX(-navigation->getTargetIcon()->getIconWidth()/2);
         navigation->getTargetIcon()->setY(-navigation->getTargetIcon()->getIconHeight()/2);
-        navigation->getSeparatorIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
+        navigation->getSeparatorIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
         navigation->getSeparatorIcon()->setX(0);
         navigation->getSeparatorIcon()->setY(0);
       }
@@ -1103,19 +1152,23 @@ void WidgetEngine::createGraphic() {
         pathInfo->setPathNameOffsetX(c->getDoubleValue(widgetPath,"pathNameOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setPathNameOffsetY(c->getDoubleValue(widgetPath,"pathNameOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setPathNameWidth(c->getDoubleValue(widgetPath,"pathNameWidth",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
-        pathInfo->setPathValuesOffsetX(c->getDoubleValue(widgetPath,"pathValuesOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setPathValuesWidth(c->getDoubleValue(widgetPath,"pathValuesWidth",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
+        pathInfo->setPathNameOffsetX(c->getDoubleValue(widgetPath,"pathNameOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setPathNameOffsetY(c->getDoubleValue(widgetPath,"pathNameOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathLengthOffsetX(c->getDoubleValue(widgetPath,"pathLengthOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setPathLengthOffsetY(c->getDoubleValue(widgetPath,"pathLengthOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathAltitudeUpOffsetX(c->getDoubleValue(widgetPath,"pathAltitudeUpOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setPathAltitudeUpOffsetY(c->getDoubleValue(widgetPath,"pathAltitudeUpOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathAltitudeDownOffsetX(c->getDoubleValue(widgetPath,"pathAltitudeDownOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setPathAltitudeDownOffsetY(c->getDoubleValue(widgetPath,"pathAltitudeDownOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setPathDurationOffsetX(c->getDoubleValue(widgetPath,"pathDurationOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setPathDurationOffsetY(c->getDoubleValue(widgetPath,"pathDurationOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileWidth(c->getDoubleValue(widgetPath,"altitudeProfileWidth",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setAltitudeProfileHeight(c->getDoubleValue(widgetPath,"altitudeProfileHeight",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
-        pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth",__FILE__, __LINE__)*((double)core->getScreen()->getDPI())/160.0);
-        pathInfo->setAltitudeProfileAxisLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileAxisLineWidth",__FILE__, __LINE__)*((double)core->getScreen()->getDPI())/160.0);
+        pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth",__FILE__, __LINE__)*((double)device->getScreen()->getDPI())/160.0);
+        pathInfo->setAltitudeProfileAxisLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileAxisLineWidth",__FILE__, __LINE__)*((double)device->getScreen()->getDPI())/160.0);
         pathInfo->setNoAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setNoAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"noAltitudeProfileOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileFillColor(c->getGraphicColorValue(widgetPath+"/AltitudeProfileFillColor",__FILE__, __LINE__));
@@ -1128,7 +1181,7 @@ void WidgetEngine::createGraphic() {
         pathInfo->setAltitudeProfileYTickLabelOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileYTickLabelOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setAltitudeProfileXTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileXTickLabelWidth",__FILE__, __LINE__));
         pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth",__FILE__, __LINE__));
-        pathInfo->getLocationIcon()->setTextureFromIcon(c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
+        pathInfo->getLocationIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
       }
 
       // Add the widget to the page
@@ -1140,7 +1193,7 @@ void WidgetEngine::createGraphic() {
 
   // Set the default page on the graphic engine
   WidgetPageMap::iterator j;
-  j=pageMap.find(c->getStringValue("Graphic/Widget","selectedPage",__FILE__, __LINE__));
+  j=pageMap.find(c->getStringValue("Graphic/Widget/Device[@name='" + deviceName + "']","selectedPage",__FILE__, __LINE__));
   if (j==pageMap.end()) {
     FATAL("default page does not exist",NULL);
     core->getThread()->unlockMutex(accessMutex);
@@ -1148,9 +1201,9 @@ void WidgetEngine::createGraphic() {
   } else {
     currentPage=j->second;
     visiblePages.addPrimitive(currentPage->getGraphicObject());
-    core->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-    core->getGraphicEngine()->setWidgetGraphicObject(&visiblePages);
-    core->getGraphicEngine()->unlockDrawing();
+    getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+    device->setVisibleWidgetPages(&visiblePages);
+    getGraphicEngine()->unlockDrawing();
   }
 
   // Allow access by the next thread
@@ -1160,7 +1213,7 @@ void WidgetEngine::createGraphic() {
   updateWidgetPositions();
 }
 
-// Updates the positions of the widgets in dependence of the current screen dimension
+// Updates the positions of the widgets in dependence of the current device->getScreen() dimension
 void WidgetEngine::updateWidgetPositions() {
 
   // Only one thread please
@@ -1168,18 +1221,18 @@ void WidgetEngine::updateWidgetPositions() {
 
   // Find out the orientation for which we need to update the positioning
   std::string orientation="Unknown";
-  switch(core->getScreen()->getOrientation()) {
+  switch(device->getScreen()->getOrientation()) {
     case GraphicScreenOrientationLandscape: orientation="Landscape"; break;
     case GraphicScreenOrientationProtrait: orientation="Portrait"; break;
   }
   //DEBUG("orientation=%s",orientation.c_str());
-  Int width=core->getScreen()->getWidth();
-  Int height=core->getScreen()->getHeight();
-  double diagonal=core->getScreen()->getDiagonal();
-  DEBUG("width=%d height=%d diagonal=%f",width,height,diagonal);
+  Int width=device->getScreen()->getWidth();
+  Int height=device->getScreen()->getHeight();
+  double diagonal=device->getScreen()->getDiagonal();
+  //DEBUG("width=%d height=%d diagonal=%f",width,height,diagonal);
 
-  // Set global variables that depend on the screen configuration
-  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*core->getScreen()->getWidth()/100.0);
+  // Set global variables that depend on the device->getScreen() configuration
+  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*device->getScreen()->getWidth()/100.0);
 
   // Go through all pages
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
@@ -1190,14 +1243,14 @@ void WidgetEngine::updateWidgetPositions() {
 
     // Go through all widgets
     std::list<WidgetPrimitive*> primitives;
-    core->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+    getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
     GraphicPrimitiveMap *widgetMap=page->getGraphicObject()->getPrimitiveMap();
     GraphicPrimitiveMap::iterator j;
     for(j=widgetMap->begin();j!=widgetMap->end();j++) {
       WidgetPrimitive *primitive=(WidgetPrimitive*)j->second;
-      std::string path="Graphic/Widget/Page[@name='" + page->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/Position";
+      std::string path="Graphic/Widget/Device[@name='" + device->getName() + "']/Page[@name='" + page->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/Position";
 
-      // Find the position that is closest to the reference screen diagonal
+      // Find the position that is closest to the reference device->getScreen() diagonal
       std::list<std::string> refScreenDiagonals = c->getAttributeValues(path,"refScreenDiagonal",__FILE__,__LINE__);
       double nearestValue = std::numeric_limits<double>::max();
       std::string nearestString;
@@ -1221,7 +1274,7 @@ void WidgetEngine::updateWidgetPositions() {
     for(std::list<WidgetPrimitive*>::iterator i=primitives.begin();i!=primitives.end();i++) {
       page->addWidget(*i);
     }
-    core->getGraphicEngine()->unlockDrawing();
+    getGraphicEngine()->unlockDrawing();
 
   }
 
@@ -1233,9 +1286,9 @@ void WidgetEngine::updateWidgetPositions() {
 void WidgetEngine::deinit() {
 
   // Clear the widget page
-  core->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-  core->getGraphicEngine()->setWidgetGraphicObject(NULL);
-  core->getGraphicEngine()->unlockDrawing();
+  getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+  device->setVisibleWidgetPages(NULL);
+  getGraphicEngine()->unlockDrawing();
 
   // Only one thread
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
@@ -1374,7 +1427,7 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   }
 
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
-  Int width = core->getScreen()->getWidth();
+  Int width = device->getScreen()->getWidth();
 
   // Check if the requested page exists
   if (pageMap.find(name)==pageMap.end()) {
@@ -1405,10 +1458,10 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   translateParameter.setInfinite(false);
   translateParameter.setAnimationType(GraphicTranslateAnimationTypeAccelerated);
   translateAnimationSequence.push_back(translateParameter);
-  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+  getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   prevPageGraphicObject->setTranslateAnimationSequence(translateAnimationSequence);
   prevPageGraphicObject->setLifeEnd(t+changePageDurationStep1);
-  core->getGraphicEngine()->unlockDrawing();
+  getGraphicEngine()->unlockDrawing();
 
   // Let the new page move inside the window
   translateAnimationSequence.clear();
@@ -1433,9 +1486,9 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   translateAnimationSequence.push_back(translateParameter);
   nextPageGraphicObject->setTranslateAnimationSequence(translateAnimationSequence);
   nextPageGraphicObject->setLifeEnd(0);
-  core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+  getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   visiblePages.addPrimitive(nextPageGraphicObject);
-  core->getGraphicEngine()->unlockDrawing();
+  getGraphicEngine()->unlockDrawing();
 
   // Ignore any touches during transition
   ignoreTouchesEnd=t+changePageDurationStep1+changePageDurationStep2;
@@ -1443,7 +1496,7 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   // Set the new page
   currentPage=nextPage;
   nextPage->setWidgetsActive(t,true);
-  core->getConfigStore()->setStringValue("Graphic/Widget","selectedPage",name,__FILE__, __LINE__);
+  core->getConfigStore()->setStringValue("Graphic/Widget/Device[@name='" + device->getName() + "']","selectedPage",name,__FILE__, __LINE__);
   core->getThread()->unlockMutex(accessMutex);
 }
 
@@ -1526,6 +1579,26 @@ bool WidgetEngine::work(TimestampInMicroseconds t) {
   } else {
     return false;
   }
+}
+
+// Returns the font engine
+FontEngine *WidgetEngine::getFontEngine() {
+  return device->getFontEngine();
+}
+
+// Returns the graphic engine
+GraphicEngine *WidgetEngine::getGraphicEngine() {
+  return device->getGraphicEngine();
+}
+
+// Returns the screen
+Screen *WidgetEngine::getScreen() {
+  return device->getScreen();
+}
+
+// Returns the device
+Device *WidgetEngine::getDevice() {
+  return device;
 }
 
 }

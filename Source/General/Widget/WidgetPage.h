@@ -20,6 +20,7 @@ class WidgetPage {
 
 protected:
 
+  WidgetEngine *widgetEngine;                           // Widget engine this page belongs to
   std::string name;                                     // Name of the page
   GraphicObject graphicObject;                          // Contains the widgets of this page
   bool widgetsActive;                                   // Indicates if the widgets are active
@@ -32,7 +33,7 @@ protected:
 public:
 
   // Constructors and destructor
-  WidgetPage(std::string name);
+  WidgetPage(WidgetEngine *widgetEngine, std::string name);
   virtual ~WidgetPage();
 
   // Adds a widget to the page
@@ -82,7 +83,13 @@ public:
     return widgetsActive;
   }
 
+  FontEngine *getFontEngine();
 
+  WidgetEngine *getWidgetEngine();
+
+  GraphicEngine *getGraphicEngine();
+
+  Screen *getScreen();
 };
 
 }

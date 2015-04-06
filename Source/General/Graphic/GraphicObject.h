@@ -48,7 +48,7 @@ protected:
 public:
 
   // Constructor
-  GraphicObject(bool deletePrimitivesOnDestruct=false);
+  GraphicObject(Screen *screen, bool deletePrimitivesOnDestruct=false);
 
   // Destructor
   virtual ~GraphicObject();

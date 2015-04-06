@@ -15,7 +15,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetStatus::WidgetStatus() : WidgetPrimitive() {
+WidgetStatus::WidgetStatus(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
   widgetType=WidgetTypeStatus;
   updateInterval=100000;
   labelWidth=0;
@@ -27,16 +27,16 @@ WidgetStatus::WidgetStatus() : WidgetPrimitive() {
 
 // Destructor
 WidgetStatus::~WidgetStatus() {
-  core->getFontEngine()->lockFont("sansSmall",__FILE__, __LINE__);
-  if (firstStatusFontString) core->getFontEngine()->destroyString(firstStatusFontString);
-  if (secondStatusFontString) core->getFontEngine()->destroyString(secondStatusFontString);
-  core->getFontEngine()->unlockFont();
+  widgetPage->getFontEngine()->lockFont("sansSmall",__FILE__, __LINE__);
+  if (firstStatusFontString) widgetPage->getFontEngine()->destroyString(firstStatusFontString);
+  if (secondStatusFontString) widgetPage->getFontEngine()->destroyString(secondStatusFontString);
+  widgetPage->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetStatus::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   Int textX, textY;
   std::list<std::string> status;
 
@@ -68,14 +68,14 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
       textX=x+(iconWidth/2)-(secondStatusFontString->getIconWidth())/2;
       secondStatusFontString->setX(textX);
       secondStatusFontString->setY(textY);
-      core->getFontEngine()->unlockFont();
+      widgetPage->getFontEngine()->unlockFont();
 
       // Start fade animation if the status was not displayed before
       if ((color.getAlpha()==0)&&(fadeStartTime==fadeEndTime)) {
-        if (core->getWidgetEngine()->getWidgetsActive())
-          setFadeAnimation(t,color,this->activeColor,false,core->getGraphicEngine()->getFadeDuration());
+        if (widgetPage->getWidgetEngine()->getWidgetsActive())
+          setFadeAnimation(t,color,this->activeColor,false,widgetPage->getGraphicEngine()->getFadeDuration());
         else
-          setFadeAnimation(t,color,this->inactiveColor,false,core->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,color,this->inactiveColor,false,widgetPage->getGraphicEngine()->getFadeDuration());
       }
       isHidden=false;
 
@@ -83,7 +83,7 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
 
       // Start fade animation if the status was not displayed before
       if ((color.getAlpha()!=0)&&(fadeStartTime==fadeEndTime)) {
-        setFadeAnimation(t,color,GraphicColor(255,255,255,0),false,core->getGraphicEngine()->getFadeDuration());
+        setFadeAnimation(t,color,GraphicColor(255,255,255,0),false,widgetPage->getGraphicEngine()->getFadeDuration());
       }
       isHidden=true;
     }
@@ -98,20 +98,20 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
 }
 
 // Executed every time the graphic engine needs to draw
-void WidgetStatus::draw(Screen *screen, TimestampInMicroseconds t) {
+void WidgetStatus::draw(TimestampInMicroseconds t) {
 
   // Let the primitive draw the background
-  WidgetPrimitive::draw(screen,t);
+  WidgetPrimitive::draw(t);
 
   // Draw the status
   if (color.getAlpha()!=0) {
     if (firstStatusFontString) {
       firstStatusFontString->setColor(color);
-      firstStatusFontString->draw(screen,t);
+      firstStatusFontString->draw(t);
     }
     if (secondStatusFontString) {
       secondStatusFontString->setColor(color);
-      secondStatusFontString->draw(screen,t);
+      secondStatusFontString->draw(t);
     }
   }
 

@@ -19,14 +19,18 @@ namespace GEODISCOVERER {
 FontCharacter::FontCharacter(Int width, Int height) {
   this->width=width;
   this->height=height;
-  if (!(bitmap=(UShort*)malloc(sizeof(*bitmap)*width*height))) {
+  if (!(normalBitmap=(UShort*)malloc(sizeof(*normalBitmap)*width*height))) {
+    FATAL("no memory for the bitmap",NULL);
+  }
+  if (!(strokeBitmap=(UShort*)malloc(sizeof(*strokeBitmap)*width*height))) {
     FATAL("no memory for the bitmap",NULL);
   }
 }
 
 // Destructor
 FontCharacter::~FontCharacter() {
-  free(bitmap);
+  free(normalBitmap);
+  free(strokeBitmap);
 }
 
 }

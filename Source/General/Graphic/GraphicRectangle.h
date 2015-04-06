@@ -29,13 +29,13 @@ protected:
 public:
 
   // Constructor
-  GraphicRectangle();
+  GraphicRectangle(Screen *screen);
 
   // Loads an icon and sets it as the texture of the primitive
-  void setTextureFromIcon(std::string iconFilename);
+  void setTextureFromIcon(Screen *screen, std::string iconFilename);
 
   // Called when the widget must be drawn
-  virtual void draw(Screen *screen, TimestampInMicroseconds t);
+  virtual void draw(TimestampInMicroseconds t);
 
   // Destructor
   virtual ~GraphicRectangle();

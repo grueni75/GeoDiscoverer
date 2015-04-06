@@ -16,7 +16,15 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetNavigation::WidgetNavigation() : WidgetPrimitive(), turnArrowPointBuffer(24) {
+WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
+    WidgetPrimitive(widgetPage),
+    turnArrowPointBuffer(widgetPage->getScreen(),24),
+    directionIcon(widgetPage->getScreen()),
+    targetIcon(widgetPage->getScreen()),
+    separatorIcon(widgetPage->getScreen()),
+    targetObject(widgetPage->getScreen()),
+    compassObject(widgetPage->getScreen())
+{
   widgetType=WidgetTypeNavigation;
   updateInterval=1000000;
   nextUpdateTime=0;
@@ -27,7 +35,7 @@ WidgetNavigation::WidgetNavigation() : WidgetPrimitive(), turnArrowPointBuffer(2
   locationBearingActual=0;
   locationBearingActual=0;
   directionChangeDuration=0;
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   fontEngine->updateString(&distanceLabelFontString,"Distance");
   fontEngine->updateString(&durationLabelFontString,"Duration");
@@ -52,18 +60,18 @@ WidgetNavigation::WidgetNavigation() : WidgetPrimitive(), turnArrowPointBuffer(2
 
 // Destructor
 WidgetNavigation::~WidgetNavigation() {
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
-  if (distanceLabelFontString) core->getFontEngine()->destroyString(distanceLabelFontString);
-  if (durationLabelFontString) core->getFontEngine()->destroyString(durationLabelFontString);
+  if (distanceLabelFontString) fontEngine->destroyString(distanceLabelFontString);
+  if (durationLabelFontString) fontEngine->destroyString(durationLabelFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
-  if (distanceValueFontString) core->getFontEngine()->destroyString(distanceValueFontString);
-  if (durationValueFontString) core->getFontEngine()->destroyString(durationValueFontString);
+  if (distanceValueFontString) fontEngine->destroyString(distanceValueFontString);
+  if (durationValueFontString) fontEngine->destroyString(durationValueFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++) {
-    if (orientationLabelFontStrings[i]) core->getFontEngine()->destroyString(orientationLabelFontStrings[i]);
+    if (orientationLabelFontStrings[i]) fontEngine->destroyString(orientationLabelFontStrings[i]);
   }
   fontEngine->unlockFont();
 }
@@ -72,7 +80,7 @@ WidgetNavigation::~WidgetNavigation() {
 bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
   bool update;
-  FontEngine *fontEngine=core->getFontEngine();
+  FontEngine *fontEngine=widgetPage->getFontEngine();
   NavigationEngine *navigationEngine=core->getNavigationEngine();
   UnitConverter *unitConverter=core->getUnitConverter();
   std::string value, unit;
@@ -218,17 +226,20 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       if (navigationInfo->getLocationBearing()==NavigationInfo::getUnknownAngle()) {
         hideCompass=true;
       } else {
-        GraphicRotateAnimationParameter rotateParameter;
-        rotateParameter.setStartTime(t);
-        rotateParameter.setStartAngle(compassObject.getAngle());
-        rotateParameter.setEndAngle(navigationInfo->getLocationBearing());
-        rotateParameter.setDuration(directionChangeDuration);
-        rotateParameter.setInfinite(false);
-        rotateParameter.setAnimationType(GraphicRotateAnimationTypeAccelerated);
-        std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = compassObject.getRotateAnimationSequence();
-        rotateAnimationSequence.push_back(rotateParameter);
-        compassObject.setRotateAnimationSequence(rotateAnimationSequence);
-        //directionIcon.setAngle(navigationInfos->locationBearing);
+        if (widgetPage->getWidgetEngine()->getDevice()->isAnimationFriendly()) {
+          GraphicRotateAnimationParameter rotateParameter;
+          rotateParameter.setStartTime(t);
+          rotateParameter.setStartAngle(compassObject.getAngle());
+          rotateParameter.setEndAngle(navigationInfo->getLocationBearing());
+          rotateParameter.setDuration(directionChangeDuration);
+          rotateParameter.setInfinite(false);
+          rotateParameter.setAnimationType(GraphicRotateAnimationTypeAccelerated);
+          std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = compassObject.getRotateAnimationSequence();
+          rotateAnimationSequence.push_back(rotateParameter);
+          compassObject.setRotateAnimationSequence(rotateAnimationSequence);
+        } else {
+          compassObject.setAngle(navigationInfo->getLocationBearing());
+        }
         activateWidget=true;
         hideCompass=false;
       }
@@ -237,17 +248,20 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       if (navigationInfo->getTargetBearing()==NavigationInfo::getUnknownAngle()) {
         hideTarget=true;
       } else {
-        GraphicRotateAnimationParameter rotateParameter;
-        rotateParameter.setStartTime(t);
-        rotateParameter.setStartAngle(targetObject.getAngle());
-        rotateParameter.setEndAngle(navigationInfo->getTargetBearing());
-        rotateParameter.setDuration(directionChangeDuration);
-        rotateParameter.setInfinite(false);
-        rotateParameter.setAnimationType(GraphicRotateAnimationTypeAccelerated);
-        std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = targetObject.getRotateAnimationSequence();
-        rotateAnimationSequence.push_back(rotateParameter);
-        targetObject.setRotateAnimationSequence(rotateAnimationSequence);
-        //directionIcon.setAngle(navigationInfos->locationBearing);
+        if (widgetPage->getWidgetEngine()->getDevice()->isAnimationFriendly()) {
+          GraphicRotateAnimationParameter rotateParameter;
+          rotateParameter.setStartTime(t);
+          rotateParameter.setStartAngle(targetObject.getAngle());
+          rotateParameter.setEndAngle(navigationInfo->getTargetBearing());
+          rotateParameter.setDuration(directionChangeDuration);
+          rotateParameter.setInfinite(false);
+          rotateParameter.setAnimationType(GraphicRotateAnimationTypeAccelerated);
+          std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = targetObject.getRotateAnimationSequence();
+          rotateAnimationSequence.push_back(rotateParameter);
+          targetObject.setRotateAnimationSequence(rotateAnimationSequence);
+        } else {
+          targetObject.setAngle(navigationInfo->getTargetBearing());
+        }
         hideTarget=false;
         activateWidget=true;
       }
@@ -273,12 +287,12 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     }
 
     // Activate widget if not already
-    if (!core->getWidgetEngine()->getWidgetsActive()) {
+    if (!widgetPage->getWidgetEngine()->getWidgetsActive()) {
       if (activateWidget!=active) {
         if (activateWidget) {
-          setFadeAnimation(t,getColor(),getActiveColor(),false,core->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
         } else {
-          setFadeAnimation(t,getColor(),getInactiveColor(),false,core->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,getColor(),getInactiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
         }
         active=activateWidget;
       }
@@ -299,10 +313,10 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
 }
 
 // Executed every time the graphic engine needs to draw
-void WidgetNavigation::draw(Screen *screen, TimestampInMicroseconds t) {
+void WidgetNavigation::draw(TimestampInMicroseconds t) {
 
   // Let the primitive draw the background
-  WidgetPrimitive::draw(screen,t);
+  WidgetPrimitive::draw(t);
 
   // Draw the compass
   if (!hideCompass) {
@@ -310,7 +324,7 @@ void WidgetNavigation::draw(Screen *screen, TimestampInMicroseconds t) {
     screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
     screen->rotate(compassObject.getAngle(),0,0,1);
     directionIcon.setColor(color);
-    directionIcon.draw(screen,t);
+    directionIcon.draw(t);
     screen->endObject();
     screen->startObject();
     screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
@@ -323,7 +337,7 @@ void WidgetNavigation::draw(Screen *screen, TimestampInMicroseconds t) {
       orientationLabelFontStrings[i]->setX(round(x));
       orientationLabelFontStrings[i]->setY(round(y));
       orientationLabelFontStrings[i]->setColor(color);
-      orientationLabelFontStrings[i]->draw(screen,t);
+      orientationLabelFontStrings[i]->draw(t);
     }
     screen->endObject();
     if (!hideTarget) {
@@ -333,7 +347,7 @@ void WidgetNavigation::draw(Screen *screen, TimestampInMicroseconds t) {
       screen->translate(targetRadius*sin(FloatingPoint::degree2rad(targetObject.getAngle())),targetRadius*cos(FloatingPoint::degree2rad(targetObject.getAngle())),getZ());
       targetIcon.setColor(color);
       screen->rotate(targetIcon.getAngle(),0,0,1);
-      targetIcon.draw(screen,t);
+      targetIcon.draw(t);
       screen->endObject();
     }
   }
@@ -345,32 +359,32 @@ void WidgetNavigation::draw(Screen *screen, TimestampInMicroseconds t) {
     screen->startObject();
     screen->translate(getX(),getY(),getZ());
     screen->setColor(turnColor.getRed(),turnColor.getGreen(),turnColor.getBlue(),color.getAlpha());
-    turnArrowPointBuffer.drawAsTriangles(screen);
+    turnArrowPointBuffer.drawAsTriangles();
     screen->endObject();
 
   } else {
 
     // Draw the information about the target / route
     separatorIcon.setColor(color);
-    separatorIcon.draw(screen,t);
+    separatorIcon.draw(t);
     if (distanceLabelFontString) {
       distanceLabelFontString->setColor(color);
-      distanceLabelFontString->draw(screen,t);
+      distanceLabelFontString->draw(t);
     }
     if (durationLabelFontString) {
       durationLabelFontString->setColor(color);
-      durationLabelFontString->draw(screen,t);
+      durationLabelFontString->draw(t);
     }
     if (durationValueFontString) {
       durationValueFontString->setColor(color);
-      durationValueFontString->draw(screen,t);
+      durationValueFontString->draw(t);
     }
   }
 
   // Draw the distance text (independent if a turn is coming or not)
   if (distanceValueFontString) {
     distanceValueFontString->setColor(color);
-    distanceValueFontString->draw(screen,t);
+    distanceValueFontString->draw(t);
   }
 }
 
@@ -379,5 +393,6 @@ void WidgetNavigation::updatePosition(Int x, Int y, Int z) {
   WidgetPrimitive::updatePosition(x,y,z);
   nextUpdateTime=0;
 }
+
 
 }

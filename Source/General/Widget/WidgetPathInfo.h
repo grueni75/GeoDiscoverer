@@ -34,7 +34,7 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   // Holds the points of the altitude profile
   GraphicPointBuffer *altitudeProfileFillPointBuffer;
   GraphicPointBuffer *altitudeProfileLinePointBuffer;
-  GraphicPointBuffer altitudeProfileAxisPointBuffer;
+  GraphicPointBuffer *altitudeProfileAxisPointBuffer;
 
   // Color the altitude profile
   GraphicColor altitudeProfileFillColor;
@@ -48,11 +48,14 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   Int pathNameWidth;
   Int pathNameOffsetX;
   Int pathNameOffsetY;
-  Int pathValuesOffsetX;
   Int pathValuesWidth;
+  Int pathLengthOffsetX;
   Int pathLengthOffsetY;
+  Int pathAltitudeUpOffsetX;
   Int pathAltitudeUpOffsetY;
+  Int pathAltitudeDownOffsetX;
   Int pathAltitudeDownOffsetY;
+  Int pathDurationOffsetX;
   Int pathDurationOffsetY;
   Int altitudeProfileWidth;
   Int altitudeProfileHeight;
@@ -121,14 +124,14 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
 public:
 
   // Constructors and destructor
-  WidgetPathInfo();
+  WidgetPathInfo(WidgetPage *widgetPage);
   virtual ~WidgetPathInfo();
 
   // Let the widget work
   virtual bool work(TimestampInMicroseconds t);
 
   // Called when the widget must be drawn
-  virtual void draw(Screen *screen, TimestampInMicroseconds t);
+  virtual void draw(TimestampInMicroseconds t);
 
   // Called when the map has changed
   virtual void onMapChange(bool widgetVisible, MapPosition pos);
@@ -178,10 +181,6 @@ public:
 
   void setPathLengthOffsetY(Int pathLengthOffsetY) {
     this->pathLengthOffsetY = pathLengthOffsetY;
-  }
-
-  void setPathValuesOffsetX(Int pathValuesOffsetX) {
-    this->pathValuesOffsetX = pathValuesOffsetX;
   }
 
   void setPathValuesWidth(Int pathValuesWidth) {
@@ -235,13 +234,9 @@ public:
     this->altitudeProfileMinAltitudeDiff = altitudeProfileMinAltitudeDiff;
   }
 
-  void setAltitudeProfileXTickCount(Int altitudeProfileXTickCount) {
-    this->altitudeProfileXTickCount = altitudeProfileXTickCount;
-  }
+  void setAltitudeProfileXTickCount(Int altitudeProfileXTickCount);
 
-  void setAltitudeProfileYTickCount(Int altitudeProfileYTickCount) {
-    this->altitudeProfileYTickCount = altitudeProfileYTickCount;
-  }
+  void setAltitudeProfileYTickCount(Int altitudeProfileYTickCount);
 
   void setAltitudeProfileXTickLabelOffsetY(
       Int altitudeProfileXTickLabelOffsetY) {
@@ -272,6 +267,22 @@ public:
   static void setCurrentPathLocked(bool currentPathLocked, const char *file, int line) {
     WidgetPathInfo::currentPathLocked = currentPathLocked;
     core->getConfigStore()->setIntValue("Navigation","pathInfoLocked",currentPathLocked,file,line);
+  }
+
+  void setPathAltitudeDownOffsetX(Int pathAltitudeDownOffsetX) {
+    this->pathAltitudeDownOffsetX = pathAltitudeDownOffsetX;
+  }
+
+  void setPathAltitudeUpOffsetX(Int pathAltitudeUpOffsetX) {
+    this->pathAltitudeUpOffsetX = pathAltitudeUpOffsetX;
+  }
+
+  void setPathDurationOffsetX(Int pathDurationOffsetX) {
+    this->pathDurationOffsetX = pathDurationOffsetX;
+  }
+
+  void setPathLengthOffsetX(Int pathLengthOffsetX) {
+    this->pathLengthOffsetX = pathLengthOffsetX;
   }
 };
 

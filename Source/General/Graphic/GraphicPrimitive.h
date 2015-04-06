@@ -23,6 +23,7 @@ class GraphicPrimitive {
 protected:
 
   GraphicType type;                                     // Type of primitive
+  Screen *screen;                                       // Screen this primitive belongs to
   GraphicPrimitive *animator;                           // Object to use as the animator
   std::list<std::string> name;                          // Multiline name of primitive
   Int x;                                                // X coordinate
@@ -103,7 +104,7 @@ protected:
 public:
 
   // Constructor
-  GraphicPrimitive();
+  GraphicPrimitive(Screen *screen);
 
   // Destructor
   virtual ~GraphicPrimitive();

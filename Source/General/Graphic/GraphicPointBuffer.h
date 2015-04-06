@@ -20,17 +20,17 @@ class GraphicPointBuffer {
 
 protected:
 
+  Screen *screen;                                    // Screen this point buffer belongs to
   Short *points;                                     // Pointer to the points data
   Int numberOfPoints;                                // Number of points that can be stored in the buffer
   Int insertPos;                                     // The position where to insert a new point
   GraphicBufferInfo buffer;                          // ID of the vertex buffer to use
   bool bufferOutdated;                               // Indicates that the buffer must be recreated
-  static std::list<GraphicBufferInfo> unusedBuffers; // List of unused buffers
 
 public:
 
   // Constructor
-  GraphicPointBuffer(Int numberOfPoints);
+  GraphicPointBuffer(Screen *screen, Int numberOfPoints);
 
   // Destructor
   virtual ~GraphicPointBuffer();
@@ -48,16 +48,13 @@ public:
   void reset();
 
   // Uses the stored points to draw triangles
-  void drawAsTriangles(Screen *screen);
+  void drawAsTriangles();
 
   // Uses the stored points to draw textured triangles
-  void drawAsTexturedTriangles(Screen *screen, GraphicTextureInfo textureInfo, GraphicPointBuffer *textureCoordinates);
-
-  // Frees all used buffer objects
-  static void destroyBuffers();
+  void drawAsTexturedTriangles(GraphicTextureInfo textureInfo, GraphicPointBuffer *textureCoordinates);
 
   // Updates the buffer contents
-  void updateBuffer(Screen *screen);
+  void updateBuffer();
 
   // Invalidates any textures or buffers
   void invalidate();

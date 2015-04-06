@@ -15,6 +15,18 @@
 
 namespace GEODISCOVERER {
 
+// Writes PNG data to a device
+void pngWriteDataToDevice(png_structp png_ptr, png_bytep data, png_size_t length) {
+  Device *device = (Device*)png_get_io_ptr(png_ptr);
+  if (!device->send(data,length)) {
+    png_error(png_ptr, "pngWriteDataToDevice: could not write to device");
+  }
+}
+
+// Dummy flush function for png library
+void pngFlush(png_structp png_ptr) {
+}
+
 // Ints the png part
 void Image::initPNG() {
 }
@@ -30,7 +42,7 @@ bool Image::queryPNG(std::string filepath, Int &width, Int &height) {
   // Open file and test for it being a PNG
   FILE *fp = fopen(filepath.c_str(), "rb");
   if (!fp) {
-    ERROR("can not open <%s> for reading",filepath.c_str());
+    DEBUG("can not open <%s> for reading",filepath.c_str());
     goto cleanup;
   }
   fread(header, 1, 8, fp);
@@ -51,7 +63,7 @@ bool Image::queryPNG(std::string filepath, Int &width, Int &height) {
     goto cleanup;
   }
   if (setjmp(png_jmpbuf(png_ptr))) {
-    ERROR("can not set position in png image <%s>",filepath.c_str());
+    DEBUG("can not set position in png image <%s>",filepath.c_str());
     goto cleanup;
   }
   png_init_io(png_ptr, fp);
@@ -86,12 +98,12 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
   abortLoad=false;
   FILE *fp = fopen(filepath.c_str(), "rb");
   if (!fp) {
-    ERROR("can not open <%s> for reading",filepath.c_str());
+    DEBUG("can not open <%s> for reading",filepath.c_str());
     goto cleanup;
   }
   fread(header, 1, 8, fp);
   if (png_sig_cmp(header, 0, 8)) {
-    ERROR("file <%s> is not a PNG file",filepath.c_str());
+    DEBUG("file <%s> is not a PNG file",filepath.c_str());
     goto cleanup;
   }
 
@@ -107,7 +119,7 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
     goto cleanup;
   }
   if (setjmp(png_jmpbuf(png_ptr))) {
-    ERROR("error while reading png image <%s>",filepath.c_str());
+    DEBUG("error while reading png image <%s>",filepath.c_str());
     goto cleanup;
   }
   png_init_io(png_ptr, fp);
@@ -140,11 +152,11 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
   } else if (info_ptr->color_type==PNG_COLOR_TYPE_RGB) {
     pixelSize=getRGBPixelSize();
   } else {
-    ERROR("the image <%s> does not use the RGBA, RGB or palette color space",filepath.c_str());
+    DEBUG("the image <%s> does not use the RGBA, RGB or palette color space",filepath.c_str());
     goto cleanup;
   }
   if (info_ptr->bit_depth!=8) {
-    ERROR("the image <%s> does not use 8-bit depth per color channel",filepath.c_str());
+    DEBUG("the image <%s> does not use 8-bit depth per color channel",filepath.c_str());
     goto cleanup;
   }
   if (info_ptr->rowbytes!=width*pixelSize) {
@@ -187,7 +199,7 @@ cleanup:
 }
 
 // Loads a png-based icon by considering the DPI of the screen
-ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &imageHeight, double &dpiScale, UInt &pixelSize) {
+ImagePixel *Image::loadPNGIcon(Screen *screen, std::string filename, Int &imageWidth, Int &imageHeight, double &dpiScale, UInt &pixelSize) {
 
   FILE *in;
   std::string bestIconPath="";
@@ -195,7 +207,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
 
   // First check if the icon in the device's native screen dpi is available
   std::stringstream s;
-  bestDPI=core->getScreen()->getDPI();
+  bestDPI=screen->getDPI();
   s << iconFolder << "/" << bestDPI << "dpi/" << filename;
   //DEBUG("checking existance of icon <%s>",s.str().c_str());
   if (access(s.str().c_str(),F_OK)==0) {
@@ -231,7 +243,7 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
             std::string t=dirp->d_name;
             t=t.substr(0,dirpath.find_first_of("dpi"));
             Int dpi=atoi(t.c_str());
-            Int dpiDistance=abs(core->getScreen()->getDPI()-dpi);
+            Int dpiDistance=abs(screen->getDPI()-dpi);
             if (dpiDistance<bestDPIDistance) {
               bestIconPath=iconPath;
               bestDPIDistance=dpiDistance;
@@ -257,14 +269,41 @@ ImagePixel *Image::loadPNGIcon(std::string filename, Int &imageWidth, Int &image
     return NULL;
 
   // Compute the width and height of the scaled icon
-  dpiScale=(double)core->getScreen()->getDPI()/(double)bestDPI;
+  dpiScale=(double)screen->getDPI()/(double)bestDPI;
 
   // That's it
   return icon;
 }
 
-// Writes a png
-bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize) {
+// Writes a png to a file
+bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize, bool inverseRows) {
+
+  // Open the file
+  FILE *fp = fopen(filepath.c_str(), "wb");
+  if (!fp) {
+    DEBUG("can not open <%s> for writing",filepath.c_str());
+    return false;
+  }
+
+  // Call the internal function
+  bool result = writePNG(image,ImageOutputTargetTypeFile,(void*)fp,width,height,pixelSize,inverseRows);
+
+  // Clean up
+  fclose(fp);
+
+  // Return result
+  return result;
+}
+
+// Writes a png to a device
+bool Image::writePNG(ImagePixel *image, Device *device, Int width, Int height, UInt pixelSize, bool inverseRows) {
+  if (!device->announcePNGImage())
+    return false;
+  return writePNG(image,ImageOutputTargetTypeDevice,(void*)device,width,height,pixelSize,inverseRows);
+}
+
+// Writes a png to either a C file pointer or to Linux file descriptor
+bool Image::writePNG(ImagePixel *image, ImageOutputTargetType targetType, void *target, Int width, Int height, UInt pixelSize, bool inverseRows=false) {
 
   png_structp png_ptr=NULL;
   png_infop info_ptr=NULL;
@@ -272,13 +311,6 @@ bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int hei
   Int color_type = -1;
   Int y;
   png_bytepp rows;
-
-  // Open the file
-  FILE *fp = fopen(filepath.c_str(), "wb");
-  if (!fp) {
-    ERROR("can not open <%s> for writing",filepath.c_str());
-    goto cleanup;
-  }
 
   // Initialize the library for writing this image
   png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -292,10 +324,19 @@ bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int hei
     goto cleanup;
   }
   if (setjmp(png_jmpbuf(png_ptr))) {
-    ERROR("error while writing png image <%s>",filepath.c_str());
+    DEBUG("error while writing png image",NULL);
     goto cleanup;
   }
-  png_init_io(png_ptr, fp);
+  switch (targetType) {
+    case ImageOutputTargetTypeFile:
+      png_init_io(png_ptr, (FILE*)target);
+      break;
+    case ImageOutputTargetTypeDevice:
+      png_set_write_fn(png_ptr, target, pngWriteDataToDevice, pngFlush);
+      break;
+    default:
+      FATAL("unsupported target type",NULL);
+  }
 
   // Tell the library what to write
   if (pixelSize==getRGBPixelSize())
@@ -311,13 +352,15 @@ bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int hei
     goto cleanup;
   }
   for (y=0;y<height;y++) {
-    rows[y]=&image[y*width*pixelSize];
+    Int y2=inverseRows ? height-1-y : y;
+    rows[y]=&image[y2*width*pixelSize];
   }
   png_set_rows(png_ptr,info_ptr,rows);
 
   // Write the image
   png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
   free(rows);
+  result=true;
 
 cleanup:
 
@@ -325,8 +368,6 @@ cleanup:
   if ((png_ptr)||(info_ptr)) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
   }
-  if (fp)
-    fclose(fp);
   return result;
 }
 

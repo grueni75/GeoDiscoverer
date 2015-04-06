@@ -20,14 +20,14 @@ class GraphicEngine {
 
 protected:
 
+  // Device this engine renders for
+  Device *device;
+
   // Map object
   GraphicObject *map;
 
   // Path animators object
   GraphicObject pathAnimators;
-
-  // Widget graphic object
-  GraphicObject *widgetGraphicObject;
 
   // Center icon
   GraphicRectangle centerIcon;
@@ -87,9 +87,6 @@ protected:
   // Previous position
   GraphicPosition previousPosition;
 
-  // Number of frames without any change
-  Int noChangeFrameCount;
-
   // Last start time of the center icon fade
   TimestampInMicroseconds lastCenterIconFadeStartTime;
 
@@ -117,7 +114,7 @@ protected:
 public:
 
   // Constructors and destructor
-  GraphicEngine();
+  GraphicEngine(Device *device);
   virtual ~GraphicEngine();
 
   // Inits dynamic data
@@ -133,7 +130,7 @@ public:
   void deinit();
 
   // Does the drawing
-  void draw(bool forceRedraw);
+  bool draw(bool forceRedraw);
 
   // Outputs statistical infos
   void outputStats();
@@ -178,11 +175,6 @@ public:
   void unlockPathAnimators()
   {
       core->getThread()->unlockMutex(drawingMutex);
-  }
-
-  void setWidgetGraphicObject(GraphicObject *widgetGraphicObject)
-  {
-      this->widgetGraphicObject = widgetGraphicObject;
   }
 
   GraphicPosition *lockPos(const char *file, int line)

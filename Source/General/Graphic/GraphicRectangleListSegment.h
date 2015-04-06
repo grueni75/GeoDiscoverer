@@ -26,7 +26,7 @@ protected:
 public:
 
   // Constructor
-  GraphicRectangleListSegment(Int numberOfRectangles);
+  GraphicRectangleListSegment(Screen *screen, Int numberOfRectangles);
 
   // Destructor
   virtual ~GraphicRectangleListSegment();
@@ -35,7 +35,7 @@ public:
   bool addRectangle(Short x[4], Short y[4]);
 
   // Draws the rectangles
-  void draw(Screen *screen, GraphicTextureInfo textureInfo);
+  void draw(GraphicTextureInfo textureInfo);
 
   // Recreates any textures or buffers
   virtual void invalidate();

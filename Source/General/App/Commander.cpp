@@ -80,24 +80,24 @@ std::string Commander::execute(std::string cmd) {
   bool cmdExecuted=false;
   //DEBUG("before: x=%d y=%d",pos->getX(),pos->getY());
   if (cmdName=="zoom") {
-    GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+    GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
     pos->zoom(atof(args[0].c_str()));
     pos->updateLastUserModification();
-    core->getGraphicEngine()->unlockPos();
+    core->getDefaultGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
   if (cmdName=="pan") {
-    GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+    GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
     pos->pan(atoi(args[0].c_str()),atoi(args[1].c_str()));
     pos->updateLastUserModification();
-    core->getGraphicEngine()->unlockPos();
+    core->getDefaultGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
   if (cmdName=="rotate") {
-    GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+    GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
     pos->rotate(atof(args[0].c_str()));
     pos->updateLastUserModification();
-    core->getGraphicEngine()->unlockPos();
+    core->getDefaultGraphicEngine()->unlockPos();
     // Map is not update if rotation only, so we need to update screen graphic of navigation engine here
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->updateScreenGraphic(false);
@@ -105,7 +105,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setPage") {
-    core->getWidgetEngine()->setPage(args[0],atoi(args[1].c_str()));
+    core->getDefaultWidgetEngine()->setPage(args[0],atoi(args[1].c_str()));
     cmdExecuted=true;
   }
   if (cmdName=="twoFingerGesture") {
@@ -114,8 +114,8 @@ std::string Commander::execute(std::string cmd) {
     Int x,y;
     x=atoi(args[0].c_str());
     y=atoi(args[1].c_str());
-    x=x-core->getScreen()->getWidth()/2;
-    y=core->getScreen()->getHeight()/2-1-y;
+    x=x-core->getDefaultScreen()->getWidth()/2;
+    y=core->getDefaultScreen()->getHeight()/2-1-y;
     core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
     Int dX=lastTouchedX-x;
     Int dY=lastTouchedY-y;
@@ -123,18 +123,18 @@ std::string Commander::execute(std::string cmd) {
 
     // First check if a widget was two fingure gestured
     bool widgetTouched=false;
-    if (core->getWidgetEngine()->onTwoFingerGesture(t,dX,dY,atof(args[2].c_str()),atof(args[3].c_str()))) {
+    if (core->getDefaultWidgetEngine()->onTwoFingerGesture(t,dX,dY,atof(args[2].c_str()),atof(args[3].c_str()))) {
       widgetTouched=true;
     }
 
     // Then do the map scrolling
     if (!widgetTouched) {
-      GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+      GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
       pos->rotate(atof(args[2].c_str()));
       pos->zoom(atof(args[3].c_str()));
       pos->pan(dX,dY);
       pos->updateLastUserModification();
-      core->getGraphicEngine()->unlockPos();
+      core->getDefaultGraphicEngine()->unlockPos();
     }
 
     // Update some variables
@@ -150,19 +150,19 @@ std::string Commander::execute(std::string cmd) {
     y=atoi(args[1].c_str());
 
     // Convert the coordinates to screen coordinates
-    x=x-core->getScreen()->getWidth()/2;
-    y=core->getScreen()->getHeight()/2-1-y;
+    x=x-core->getDefaultScreen()->getWidth()/2;
+    y=core->getDefaultScreen()->getHeight()/2-1-y;
 
     // First check if a widget was touched
     bool widgetTouched=false;
     if ((cmdName=="touchDown")||(cmdName=="touchMove")) {
       //DEBUG("touchDown(%d,%d)",x,y);
-      if (core->getWidgetEngine()->onTouchDown(t,x,y))
+      if (core->getDefaultWidgetEngine()->onTouchDown(t,x,y))
         widgetTouched=true;
     }
     if (cmdName=="touchUp") {
       //DEBUG("touchUp(%d,%d)",x,y);
-      if (core->getWidgetEngine()->onTouchUp(t,x,y))
+      if (core->getDefaultWidgetEngine()->onTouchUp(t,x,y))
         widgetTouched=true;
     }
 
@@ -174,10 +174,10 @@ std::string Commander::execute(std::string cmd) {
         Int dY=lastTouchedY-y;
         core->getThread()->unlockMutex(accessMutex);
         //DEBUG("pan(%d,%d)",dX,dY);
-        GraphicPosition *pos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+        GraphicPosition *pos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
         pos->pan(dX,dY);
         pos->updateLastUserModification();
-        core->getGraphicEngine()->unlockPos();
+        core->getDefaultGraphicEngine()->unlockPos();
       }
     }
 
@@ -194,8 +194,10 @@ std::string Commander::execute(std::string cmd) {
     if (args[0] == "landscape") {
       orientation=GraphicScreenOrientationLandscape;
     }
-    core->getScreen()->init(orientation,atoi(args[1].c_str()),atoi(args[2].c_str()));
-    core->getWidgetEngine()->updateWidgetPositions();
+    core->getDefaultDevice()->setOrientation(orientation);
+    core->getDefaultDevice()->setWidth(atoi(args[1].c_str()));
+    core->getDefaultDevice()->setHeight(atoi(args[2].c_str()));
+    core->getDefaultDevice()->reconfigure();
     cmdExecuted=true;
   }
   if (cmdName=="graphicInvalidated") {
@@ -278,11 +280,11 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setWakeLock") {
-    core->getScreen()->setWakeLock(atoi(args[0].c_str()), __FILE__, __LINE__);
+    core->getDefaultScreen()->setWakeLock(atoi(args[0].c_str()), __FILE__, __LINE__);
     cmdExecuted=true;
   }
   if (cmdName=="getWakeLock") {
-    if (core->getScreen()->getWakeLock()) {
+    if (core->getDefaultScreen()->getWakeLock()) {
       result="true";
     } else {
       result="false";
@@ -336,9 +338,9 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="showTarget") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->showTarget(true);
-      GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+      GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
       visPos->updateLastUserModification();
-      core->getGraphicEngine()->unlockPos();
+      core->getDefaultGraphicEngine()->unlockPos();
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
@@ -347,9 +349,9 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setTargetAtMapCenter") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->setTargetAtMapCenter();
-      GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+      GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
       visPos->updateLastUserModification();
-      core->getGraphicEngine()->unlockPos();
+      core->getDefaultGraphicEngine()->unlockPos();
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
@@ -358,24 +360,24 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setTargetAtGeographicCoordinate") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->setTargetAtGeographicCoordinate(atof(args[0].c_str()),atof(args[1].c_str()),true);
-      GraphicPosition *visPos=core->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+      GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
       visPos->updateLastUserModification();
-      core->getGraphicEngine()->unlockPos();
+      core->getDefaultGraphicEngine()->unlockPos();
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
   if (cmdName=="showContextMenu") {
-    core->getWidgetEngine()->showContextMenu();
+    core->getDefaultWidgetEngine()->showContextMenu();
     cmdExecuted=true;
   }
   if (cmdName=="setTargetAtAddress") {
-    core->getWidgetEngine()->setTargetAtAddress();
+    core->getDefaultWidgetEngine()->setTargetAtAddress();
     cmdExecuted=true;
   }
   if ((cmdName=="newNavigationInfos")||(cmdName=="initComplete")) {
-    core->getWidgetEngine()->showContextMenu();
+    core->getDefaultWidgetEngine()->showContextMenu();
     cmdExecuted=true;
   }
   if (cmdName=="setPathInfoLock") {
@@ -391,8 +393,8 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setPathStartFlag") {
-    NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
-    Int nearestPathIndex = core->getWidgetEngine()->getNearestPathIndex();
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath();
+    Int nearestPathIndex = core->getDefaultWidgetEngine()->getNearestPathIndex();
     if (nearestPath==NULL) {
       WARNING("cannot set start flag: no path near to the current map center found",NULL);
     } else {
@@ -401,8 +403,8 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setPathEndFlag") {
-    NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
-    Int nearestPathIndex = core->getWidgetEngine()->getNearestPathIndex();
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath();
+    Int nearestPathIndex = core->getDefaultWidgetEngine()->getNearestPathIndex();
     if (nearestPath==NULL) {
       WARNING("cannot set end flag: no path near to the current map center found",NULL);
     } else {
@@ -411,7 +413,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setActiveRoute") {
-    NavigationPath *nearestPath = core->getWidgetEngine()->getNearestPath();
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath();
     if (nearestPath==NULL) {
       WARNING("no path near to the current map center found: disabling active route",NULL);
     }
@@ -436,6 +438,14 @@ std::string Commander::execute(std::string cmd) {
     if (core->getDebug()) {
       core->getDebug()->replayTrace(args[0]);
     }
+    cmdExecuted=true;
+  }
+  if (cmdName=="addDashboardDevice") {
+    //if (core->getIsInitialized()) {
+      core->addDashboardDevice(args[0],atoi(args[1].c_str()));
+    //} else {
+    //  DEBUG("addDashboardDevice command ignored because core is not yet initialized",NULL);
+    //}
     cmdExecuted=true;
   }
 

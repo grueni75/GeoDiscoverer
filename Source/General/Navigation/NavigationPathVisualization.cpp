@@ -44,7 +44,7 @@ void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
   if (i!=tileInfoMap.end()) {
     NavigationPathTileInfo *tileInfo=i->second;
     GraphicObject *tileVisualization=tile->getVisualization();
-    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (tileInfo->getPathLine())
       tileVisualization->removePrimitive(tileInfo->getPathLineKey(),true);
     if (tileInfo->getPathArrowList())
@@ -53,7 +53,7 @@ void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
       tileVisualization->removePrimitive(tileInfo->getPathStartFlagKey(),true);
     if (tileInfo->getPathEndFlag())
       tileVisualization->removePrimitive(tileInfo->getPathEndFlagKey(),true);
-    core->getGraphicEngine()->unlockDrawing();
+    core->getDefaultGraphicEngine()->unlockDrawing();
     tileInfoMap.erase(i);
   }
 }
@@ -108,15 +108,15 @@ void NavigationPathVisualization::createGraphic() {
     NavigationPathTileInfo *tileInfo=i->second;
     GraphicRectangleList *rectangleList=tileInfo->getPathArrowList();
     if (rectangleList) {
-      rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
+      rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
     }
     GraphicRectangle *rectangle=tileInfo->getPathStartFlag();
     if (rectangle) {
-      rectangle->setTexture(core->getGraphicEngine()->getPathStartFlagIcon()->getTexture());
+      rectangle->setTexture(core->getDefaultGraphicEngine()->getPathStartFlagIcon()->getTexture());
     }
     rectangle=tileInfo->getPathEndFlag();
     if (rectangle) {
-      rectangle->setTexture(core->getGraphicEngine()->getPathEndFlagIcon()->getTexture());
+      rectangle->setTexture(core->getDefaultGraphicEngine()->getPathEndFlagIcon()->getTexture());
     }
   }
 }
@@ -125,21 +125,21 @@ void NavigationPathVisualization::createGraphic() {
 void NavigationPathVisualization::optimizeGraphic() {
   for(NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
     GraphicLine *line=i->second->getPathLine();
-    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (line) line->optimize();
-    core->getGraphicEngine()->unlockDrawing();
+    core->getDefaultGraphicEngine()->unlockDrawing();
     GraphicRectangleList *rectangleList=i->second->getPathArrowList();
-    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (rectangleList) rectangleList->optimize();
-    core->getGraphicEngine()->unlockDrawing();
+    core->getDefaultGraphicEngine()->unlockDrawing();
     GraphicRectangle *rectangle=i->second->getPathStartFlag();
-    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (rectangle) rectangle->optimize();
-    core->getGraphicEngine()->unlockDrawing();
+    core->getDefaultGraphicEngine()->unlockDrawing();
     rectangle=i->second->getPathEndFlag();
-    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (rectangle) rectangle->optimize();
-    core->getGraphicEngine()->unlockDrawing();
+    core->getDefaultGraphicEngine()->unlockDrawing();
   }
 }
 

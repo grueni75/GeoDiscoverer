@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-GraphicLine::GraphicLine(Int numberOfStrokes, Short width) : GraphicPrimitive() {
+GraphicLine::GraphicLine(Screen *screen, Int numberOfStrokes, Short width) : GraphicPrimitive(screen) {
   type=GraphicTypeLine;
   this->valuesPerTriangle=3;
   this->numberOfTrianglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","lineNumberOfStrokesOtherSegemnts",__FILE__, __LINE__);
@@ -25,7 +25,7 @@ GraphicLine::GraphicLine(Int numberOfStrokes, Short width) : GraphicPrimitive() 
   if (numberOfStrokes==0) {
     numberOfStrokes=numberOfTrianglesOtherSegments;
   }
-  if (!(currentSegment=new GraphicPointBuffer(valuesPerTriangle*4*numberOfStrokes))) {
+  if (!(currentSegment=new GraphicPointBuffer(screen,valuesPerTriangle*4*numberOfStrokes))) {
     FATAL("can not create point buffer",NULL);
     return;
   }
@@ -62,7 +62,7 @@ bool GraphicLine::pointIsValid(double x, double y) {
 void GraphicLine::addPoint(Short x, Short y) {
   //DEBUG("x=%d y=%d insertPos=%d endPosCurrentSegment=%d",x,y,insertPos,endPosCurrentSegment);
   if (!currentSegment->addPoint(x,y)) {
-    if (!(currentSegment=new GraphicPointBuffer(valuesPerTriangle*numberOfTrianglesOtherSegments))) {
+    if (!(currentSegment=new GraphicPointBuffer(screen,valuesPerTriangle*numberOfTrianglesOtherSegments))) {
       FATAL("can not create point buffer",NULL);
       return;
     }
@@ -193,9 +193,9 @@ void GraphicLine::addStroke(Short x0, Short y0, Short x1, Short y1) {
 }
 
 // Draws the line
-void GraphicLine::draw(Screen *screen) {
+void GraphicLine::draw() {
   for(std::list<GraphicPointBuffer*>::iterator i=segments.begin();i!=segments.end();i++) {
-    (*i)->drawAsTriangles(screen);
+    (*i)->drawAsTriangles();
   }
 }
 
@@ -220,7 +220,7 @@ void GraphicLine::optimize() {
   }
 
   // Create a new segment that holds all points
-  if (!(currentSegment=new GraphicPointBuffer(totalPoints))) {
+  if (!(currentSegment=new GraphicPointBuffer(screen,totalPoints))) {
     FATAL("can not create point buffer",NULL);
     return;
   }

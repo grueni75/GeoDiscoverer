@@ -24,7 +24,7 @@ MapCache::MapCache() {
 
   // Reserve the memory for preparing a tile image
   //DEBUG("sizeof(*tileImageScratch)=%d",sizeof(*tileImageScratch));
-  tileImageScratch=(UShort *)malloc(sizeof(*tileImageScratch)*core->getMapSource()->getMapTileWidth()*core->getMapSource()->getMapTileHeight());
+  tileImageScratch=(UByte *)malloc(core->getImage()->getRGBAPixelSize()*core->getMapSource()->getMapTileWidth()*core->getMapSource()->getMapTileHeight());
   if (!tileImageScratch) {
     FATAL("could not reserve memory for the tile image",NULL);
     return;
@@ -69,7 +69,7 @@ void MapCache::createGraphic() {
 
   // Create texture infos
   for (int i=0;i<size;i++) {
-    GraphicTextureInfo t=core->getScreen()->createTextureInfo();
+    GraphicTextureInfo t=core->getDefaultScreen()->createTextureInfo();
     unusedTextures.push_back(t);
   }
 
@@ -83,7 +83,7 @@ void MapCache::createGraphic() {
     for (std::vector<MapTile*>::const_iterator j=(*tiles).begin();j!=(*tiles).end();j++) {
       MapTile *t=*j;
       //DEBUG("adding tile at position <%d,%d> to uncached tile list",t->getMapX(),t->getMapY());
-      t->setIsCached(false,core->getScreen()->getTextureNotDefined(),false);
+      t->setIsCached(false,Screen::getTextureNotDefined(),false);
       uncachedTiles.push_back(t);
     }
   }
@@ -106,15 +106,15 @@ void MapCache::deinit() {
   // Clear all list
   for(std::list<MapTile*>::iterator i=cachedTiles.begin();i!=cachedTiles.end();i++) {
     MapTile *t=*i;
-    t->getRectangle()->setTextureAnimation(0,core->getScreen()->getTextureNotDefined(),core->getScreen()->getTextureNotDefined(),false,0);
+    t->getRectangle()->setTextureAnimation(0,Screen::getTextureNotDefined(),Screen::getTextureNotDefined(),false,0);
   }
   cachedTiles.clear();
   for(std::list<GraphicTextureInfo>::iterator i=unusedTextures.begin();i!=unusedTextures.end();i++) {
-    core->getScreen()->destroyTextureInfo(*i,"MapCache (unused texture)");
+    core->getDefaultScreen()->destroyTextureInfo(*i,"MapCache (unused texture)");
   }
   unusedTextures.clear();
   for(std::list<GraphicTextureInfo>::iterator i=usedTextures.begin();i!=usedTextures.end();i++) {
-    core->getScreen()->destroyTextureInfo(*i,"MapCache (used texture)");
+    core->getDefaultScreen()->destroyTextureInfo(*i,"MapCache (used texture)");
   }
   usedTextures.clear();
   uncachedTiles.clear();
@@ -150,11 +150,11 @@ void MapCache::removeTile(MapTile *tile) {
       FATAL("tile found in cached list but not marked as cached",NULL);
     }
     core->getThread()->unlockMutex(accessMutex);
-    core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     GraphicRectangle *r=tile->getRectangle();
-    r->setTextureAnimation(0,core->getScreen()->getTextureNotDefined(),core->getScreen()->getTextureNotDefined(),false,0);
+    r->setTextureAnimation(0,Screen::getTextureNotDefined(),Screen::getTextureNotDefined(),false,0);
     r->setZ(0);
-    core->getGraphicEngine()->unlockDrawing();
+    core->getDefaultGraphicEngine()->unlockDrawing();
     core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
     usedTextures.remove(tile->getEndTexture());
     unusedTextures.push_back(tile->getEndTexture());
@@ -253,10 +253,10 @@ void MapCache::updateMapTileImages() {
       uncachedTiles.push_back(t);
       core->getThread()->unlockMutex(accessMutex);
       GraphicTextureInfo m=t->getEndTexture();
-      core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+      core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
       GraphicRectangle *r=t->getRectangle();
       r->setZ(0);
-      core->getGraphicEngine()->unlockDrawing();
+      core->getDefaultGraphicEngine()->unlockDrawing();
       t->setIsCached(false);
       core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
       usedTextures.remove(m);
@@ -270,14 +270,28 @@ void MapCache::updateMapTileImages() {
       break;
     }
 
-    // Copy the image of the map tile from the map image
-    // Do the conversion to RGB565
-    //DEBUG("copying tile image from map image",NULL);
-    for (Int y=0;y<t->getHeight();y++) {
-      for (Int x=0;x<t->getWidth();x++) {
-        Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
-        Int scratchPos=y*t->getWidth()+x;
-        tileImageScratch[scratchPos]=((currentImage[imagePos]>>3)<<11 | (currentImage[imagePos+1]>>2)<<5 | (currentImage[imagePos+2]>>3));
+    // Do the image conversion depending on the supported texture format
+    if (core->getDefaultScreen()->isTextureFormatRGB888Supported()) {
+      // Copy the image of the map tile from the map image
+      for (Int y=0;y<t->getHeight();y++) {
+        for (Int x=0;x<t->getWidth();x++) {
+          Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
+          Int scratchPos=(y*t->getWidth()+x)*3;
+          tileImageScratch[scratchPos+0]=currentImage[imagePos+0];
+          tileImageScratch[scratchPos+1]=currentImage[imagePos+1];
+          tileImageScratch[scratchPos+2]=currentImage[imagePos+2];
+        }
+      }
+    } else {
+      // Copy the image of the map tile from the map image
+      // Do the conversion to RGB565
+      UShort *scratch=(UShort*)tileImageScratch;
+      for (Int y=0;y<t->getHeight();y++) {
+        for (Int x=0;x<t->getWidth();x++) {
+          Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
+          Int scratchPos=(y*t->getWidth()+x);
+          scratch[scratchPos]=((currentImage[imagePos]>>3)<<11 | (currentImage[imagePos+1]>>2)<<5 | (currentImage[imagePos+2]>>3));
+        }
       }
     }
 
@@ -327,7 +341,15 @@ void MapCache::updateMapTileImages() {
 void MapCache::setNextTileTexture()
 {
   GraphicTextureInfo m=usedTextures.back();
-  core->getScreen()->setTextureImage(m,tileImageScratch,currentTile->getWidth(),currentTile->getHeight());
+  if (core->getDefaultScreen()->isTextureFormatRGB888Supported()) {
+    if (!(core->getDefaultScreen()->setTextureImage(m,(UByte*)tileImageScratch,currentTile->getWidth(),currentTile->getHeight(),GraphicTextureFormatRGB888))) {
+      FATAL("can not update texture image",NULL);
+    }
+  } else {
+    if (!(core->getDefaultScreen()->setTextureImage(m,(UByte*)tileImageScratch,currentTile->getWidth(),currentTile->getHeight(),GraphicTextureFormatRGB565))) {
+      FATAL("can not update texture image",NULL);
+    }
+  }
   tileTextureAvailable=false;
 }
 

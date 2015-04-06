@@ -18,6 +18,9 @@ namespace GEODISCOVERER {
 // Image type
 typedef UByte ImagePixel;
 
+// Transfer types
+enum ImageOutputTargetType { ImageOutputTargetTypeFile, ImageOutputTargetTypeDevice };
+
 class Image {
 
 protected:
@@ -40,6 +43,9 @@ protected:
   // Ints the png part
   void initPNG();
 
+  // Writes a png
+  bool writePNG(ImagePixel *image, ImageOutputTargetType targetType, void *target, Int width, Int height, UInt pixelSize, bool inverseRows);
+
 public:
 
   // Constructor and destructor
@@ -60,10 +66,13 @@ public:
 
   // Loads an PNG based icon
   // The correct file is determined from the screen dpi
-  ImagePixel *loadPNGIcon(std::string filename, Int &imageWidth, Int &imageHeight, double &dpiScale, UInt &pixelSize);
+  ImagePixel *loadPNGIcon(Screen *screen, std::string filename, Int &imageWidth, Int &imageHeight, double &dpiScale, UInt &pixelSize);
 
-  // Writes a png
-  bool writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize);
+  // Writes a png to a file
+  bool writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize, bool inverseRows=false);
+
+  // Writes a png to a device
+  bool writePNG(ImagePixel *image, Device *device, Int width, Int height, UInt pixelSize, bool inverseRows=false);
 
   // Aborts the current jpeg image loading
   void setAbortLoad()

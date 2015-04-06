@@ -28,12 +28,14 @@ class FontEngine {
 protected:
 
   FT_Library freeTypeLib;     // Pointer to the library
+  Int DPI;                    // DPI of the screen this font engine renders for
   FontTypeMap fontTypeMap;    // Holds all available fonts
   Font *currentFont;          // Font that is currently used for drawing
   Int backgroundStrokeWidth;  // Width of the stroke (for 12 pt font) behind the font letters for better contrast on black background
   Int stringCacheSize;        // Maximum size of the cache string map
   Int fadeOutOffset;          // Distance to the right border when to start fading out the character
   ThreadMutexInfo *accessMutex; // Mutex to access the font engine
+  Screen *screen;             // The screen this engine renders for
 
   // Loads a font
   bool loadFont(std::string fontType, std::string fontFilename, Int fontSize);
@@ -44,7 +46,7 @@ protected:
 public:
 
   // Constructor
-  FontEngine();
+  FontEngine(Screen *screen);
 
   // Destructor
   virtual ~FontEngine();
@@ -97,6 +99,14 @@ public:
 
   Int getFadeOutOffset() const {
     return fadeOutOffset;
+  }
+
+  Int getDPI() const {
+    return DPI;
+  }
+
+  Screen* getScreen() {
+    return screen;
   }
 };
 

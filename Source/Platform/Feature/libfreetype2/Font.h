@@ -81,6 +81,7 @@ class Font {
 
 protected:
 
+  FontEngine *fontEngine;                         // Font engine this font belongs to
   FT_Library freeTypeLib;                         // Pointer to the library
   FT_Face face;                                   // Holds the font data
   Int size;                                       // Size of the font
@@ -105,10 +106,13 @@ protected:
   ConversionResult convertUTF8toUTF32 (const UTF8** sourceStart, const UTF8* sourceEnd,
   UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
 
+  // Copies the characters to the bitmap
+  void copyCharacters(FontString *fontString, std::list<FontCharacterPosition> *drawingList, bool useStrokeBitmap, UShort *textureBitmap, Int textureWidth, Int textureHeight, Int top, Int left, Int width, Int height, Int fadeOutOffset);
+
 public:
 
   // Constructor
-  Font(FT_Library freeTypeLib, std::string filename, Int size);
+  Font(FontEngine *fontEngine, FT_Library freeTypeLib, std::string filename, Int size);
 
   // Destructor
   virtual ~Font();

@@ -15,10 +15,10 @@
 
 namespace GEODISCOVERER {
 
-WidgetCheckbox::WidgetCheckbox() : WidgetPrimitive() {
+WidgetCheckbox::WidgetCheckbox(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
   widgetType=WidgetTypeCheckbox;
-  checkedTexture=core->getScreen()->getTextureNotDefined();
-  uncheckedTexture=core->getScreen()->getTextureNotDefined();
+  checkedTexture=Screen::getTextureNotDefined();
+  uncheckedTexture=Screen::getTextureNotDefined();
   nextUpdateTime=0;
 }
 
@@ -28,14 +28,14 @@ WidgetCheckbox::~WidgetCheckbox() {
 
 // Deinits the checkbox
 void WidgetCheckbox::deinit() {
-  texture=core->getScreen()->getTextureNotDefined();
-  if ((checkedTexture!=core->getScreen()->getTextureNotDefined())&&(destroyTexture)) {
-    core->getScreen()->destroyTextureInfo(checkedTexture,"WidgetCheckbox (checked texture)");
-    checkedTexture=core->getScreen()->getTextureNotDefined();
+  texture=Screen::getTextureNotDefined();
+  if ((checkedTexture!=Screen::getTextureNotDefined())&&(destroyTexture)) {
+    screen->destroyTextureInfo(checkedTexture,"WidgetCheckbox (checked texture)");
+    checkedTexture=Screen::getTextureNotDefined();
   }
-  if ((uncheckedTexture!=core->getScreen()->getTextureNotDefined())&&(destroyTexture)) {
-    core->getScreen()->destroyTextureInfo(uncheckedTexture,"WidgetCheckbox (unchecked texture)");
-    uncheckedTexture=core->getScreen()->getTextureNotDefined();
+  if ((uncheckedTexture!=Screen::getTextureNotDefined())&&(destroyTexture)) {
+    screen->destroyTextureInfo(uncheckedTexture,"WidgetCheckbox (unchecked texture)");
+    uncheckedTexture=Screen::getTextureNotDefined();
   }
 }
 

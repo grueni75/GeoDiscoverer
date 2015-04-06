@@ -23,13 +23,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.jmdns.JmDNS;
+import javax.jmdns.impl.JmDNSImpl;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -37,6 +48,8 @@ import org.acra.ACRA;
 import org.acra.ACRAConstants;
 import org.acra.ReportField;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -49,7 +62,16 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.net.nsd.NsdManager.DiscoveryListener;
+import android.net.nsd.NsdManager.RegistrationListener;
+import android.net.nsd.NsdManager.ResolveListener;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.MulticastLock;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -58,6 +80,7 @@ import android.os.Process;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.widget.Toast;
 
 /** Interfaces with the C++ part */
 public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorEventListener, Runnable {
@@ -139,6 +162,52 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   
   // Indicates if a replay is active
   protected boolean replayTraceActive = false; 
+
+  // References for jmDNS
+  WifiManager wifiManager;
+  protected JmDNS jmDNS = null;
+  protected GDDashboardServiceListener dashboardServiceListener = null;
+  MulticastLock multicastLock;
+
+  /**
+   * Finds all IP addresses of the wlan adapter
+   */
+  private Enumeration<InetAddress> getWifiInetAddresses(final Context context) {
+    final WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+    final String macAddress = wifiInfo.getMacAddress();
+    final String[] macParts = macAddress.split(":");
+    final byte[] macBytes = new byte[macParts.length];
+    for (int i = 0; i< macParts.length; i++) {
+      macBytes[i] = (byte)Integer.parseInt(macParts[i], 16);
+    }
+    try {
+      final Enumeration<NetworkInterface> e =  NetworkInterface.getNetworkInterfaces();
+      while (e.hasMoreElements()) {
+        final NetworkInterface networkInterface = e.nextElement();
+        if (Arrays.equals(networkInterface.getHardwareAddress(), macBytes)) {
+          return networkInterface.getInetAddresses();
+        }
+      }
+    } catch (SocketException e) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+    }
+    return null;
+  }
+
+  /**
+   * Returns the requested IP address class 
+   */
+  @SuppressWarnings("unchecked")
+  private <T extends InetAddress> T getWifiInetAddress(final Context context, final Class<T> inetClass) {
+      final Enumeration<InetAddress> e = getWifiInetAddresses(context);
+      while (e.hasMoreElements()) {
+          final InetAddress inetAddress = e.nextElement();
+          if (inetAddress.getClass() == inetClass) {
+              return (T)inetAddress;
+          }
+      }
+      return null;
+  }
   
   //
   // Constructor and destructor
@@ -158,12 +227,16 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   
   /** Constructor 
    * @param screenDPI */
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   GDCore(Application application, String homePath) {
 
     // Copy variables
     this.application=application;
     this.homePath=homePath;
-    
+   
+    // Get services
+    wifiManager = (android.net.wifi.WifiManager) application.getSystemService(android.content.Context.WIFI_SERVICE);
+
     // Prepare the JNI part
     initJNI();
 
@@ -384,6 +457,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   }
   
   /** Starts the core */
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   protected synchronized void start()
   {
     lock.lock();
@@ -418,6 +492,25 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           changeScreen=true;
         }
         createGraphic=true;
+        if (Integer.valueOf(configStoreGetStringValue("Cockpit/App/Dashboard","active"))>0) {
+          multicastLock = wifiManager.createMulticastLock("Geo Discoverer lock for JmDNS");
+          multicastLock.setReferenceCounted(true);
+          multicastLock.acquire();
+          InetAddress deviceAddress = getWifiInetAddress(application, Inet4Address.class);
+          //Logger logger = Logger.getLogger(JmDNSImpl.class.getName());
+          //logger.setLevel(Level.FINER);
+          try {
+            jmDNS = JmDNS.create(deviceAddress);
+            dashboardServiceListener = new GDDashboardServiceListener(jmDNS);
+            jmDNS.addServiceListener(GDApplication.dashboardNetworkServiceType, dashboardServiceListener);
+            executeAppCommand("infoDialog(\"" + deviceAddress.toString() + "\")");
+          } 
+          catch (IOException e) {
+            GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", e.getMessage());
+          }
+          executeCoreCommand(String.format("addDashboardDevice(%s,%d)","192.168.43.89",Integer.getInteger(configStoreGetStringValue("Cockpit/App/Dashboard", "port"))));
+          executeAppCommand("infoDialog(\"Remove fixed addDashboardDevice\")");
+        }
       }
       lock.unlock();
 
@@ -425,6 +518,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   } 
 
   /** Deinits the core */
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   protected synchronized void stop()
   {
     lock.lock();
@@ -443,7 +537,22 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         cockpitEngine.stop();
         cockpitEngine=null;
       }
-          
+      
+      // Stop service discovery
+      if (dashboardServiceListener!=null) {
+        jmDNS.removeServiceListener(GDApplication.dashboardNetworkServiceType, dashboardServiceListener);
+        try {
+          jmDNS.close();
+        }
+        catch (IOException e) {
+          GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", e.getMessage());
+        }
+        jmDNS=null;
+        dashboardServiceListener=null;
+        if (multicastLock!=null)
+          multicastLock.release();
+      }
+
       // Deinit the core
       deinitCore();
     }
@@ -668,6 +777,11 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     if (gl==currentGL) {
       if ((!coreStopped)&&(homeDirAvailable)) {
         if (!suspendCore) {
+          if (changeScreen) {
+            executeCoreCommand(changeScreenCommand);
+            changeScreen=false;
+            forceRedraw=true;
+          }
           if (graphicInvalidated) {        
             executeCoreCommand("graphicInvalidated()");
             graphicInvalidated=false;
@@ -676,11 +790,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           if (createGraphic) {        
             executeCoreCommand("createGraphic()");
             createGraphic=false;
-          }
-          if (changeScreen) {
-            executeCoreCommand(changeScreenCommand);
-            changeScreen=false;
-            forceRedraw=true;
           }
           updateScreen(forceRedraw);
           forceRedraw=false;
@@ -816,6 +925,5 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   // Other calls back from the sensor manager
   public void onAccuracyChanged(Sensor sensor, int accuracy) {
   }
-  
   
 }

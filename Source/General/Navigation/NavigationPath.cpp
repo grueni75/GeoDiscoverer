@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-NavigationPath::NavigationPath() {
+NavigationPath::NavigationPath() : animator(core->getDefaultScreen()) {
 
   // Init variables
   accessMutex=core->getThread()->createMutex("navigation path access mutex");
@@ -41,9 +41,9 @@ NavigationPath::NavigationPath() {
   init();
 
   // Add the animator to the graphic engine
-  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   animatorKey=pathAnimators->addPrimitive(&animator);
-  core->getGraphicEngine()->unlockPathAnimators();
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
 }
 
 // Destructor
@@ -53,9 +53,9 @@ NavigationPath::~NavigationPath() {
   deinit();
 
   // Remove the animator
-  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   pathAnimators->removePrimitive(animatorKey,false);
-  core->getGraphicEngine()->unlockPathAnimators();
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
 
   // Free variables
   core->getThread()->destroyMutex(accessMutex);
@@ -153,7 +153,7 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
         if (!line) {
 
           // Create a new line and add it to the tile
-          line=new GraphicLine(0,pathWidth);
+          line=new GraphicLine(core->getDefaultScreen(),0,pathWidth);
           if (!line) {
             FATAL("can not create graphic line object",NULL);
             return;
@@ -164,9 +164,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           line->setCutWidth((*k)->getWidth());
           line->setCutHeight((*k)->getHeight());
           info->setPathLine(line);
-          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+          core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           info->setPathLineKey(tileVisualization->addPrimitive(line));
-          core->getGraphicEngine()->unlockDrawing();
+          core->getDefaultGraphicEngine()->unlockDrawing();
 
         }
 
@@ -175,9 +175,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
         Int y1=(*k)->getHeight()-(prevPos.getY()-(*k)->getMapY(0));
         Int x2=currentPos.getX()-(*k)->getMapX(0);
         Int y2=(*k)->getHeight()-(currentPos.getY()-(*k)->getMapY(0));
-        core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+        core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
         line->addStroke(x1,y1,x2,y2);
-        core->getGraphicEngine()->unlockDrawing();
+        core->getDefaultGraphicEngine()->unlockDrawing();
 
         // Add arrow if necessary
         if (currentPos.getHasBearing()) {
@@ -187,22 +187,22 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           if (!rectangleList) {
 
             // Create a new rectangle list and add it to the tile
-            rectangleList=new GraphicRectangleList(0);
+            rectangleList=new GraphicRectangleList(core->getDefaultScreen(),0);
             if (!rectangleList) {
               FATAL("can not create graphic rectangle list object",NULL);
               return;
             }
             rectangleList->setAnimator(&animator);
             rectangleList->setZ(2); // ensure that arrow is drawn after line texture
-            rectangleList->setTexture(core->getGraphicEngine()->getPathDirectionIcon()->getTexture());
+            rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
             rectangleList->setDestroyTexture(false);
             rectangleList->setCutEnabled(true);
             rectangleList->setCutWidth((*k)->getWidth());
             rectangleList->setCutHeight((*k)->getHeight());
-            Int arrowWidth=core->getGraphicEngine()->getPathDirectionIcon()->getWidth();
-            Int arrowHeight=core->getGraphicEngine()->getPathDirectionIcon()->getHeight();
-            Int arrowXToCenter=arrowWidth/2-core->getGraphicEngine()->getPathDirectionIcon()->getIconWidth()/2;
-            Int arrowYToCenter=arrowHeight/2-core->getGraphicEngine()->getPathDirectionIcon()->getIconHeight()/2;
+            Int arrowWidth=core->getDefaultGraphicEngine()->getPathDirectionIcon()->getWidth();
+            Int arrowHeight=core->getDefaultGraphicEngine()->getPathDirectionIcon()->getHeight();
+            Int arrowXToCenter=arrowWidth/2-core->getDefaultGraphicEngine()->getPathDirectionIcon()->getIconWidth()/2;
+            Int arrowYToCenter=arrowHeight/2-core->getDefaultGraphicEngine()->getPathDirectionIcon()->getIconHeight()/2;
             double totalRadius=sqrt((double)(arrowWidth*arrowWidth/4+arrowHeight*arrowHeight/4));
             double distanceToCenter=sqrt((double)(arrowXToCenter*arrowXToCenter+arrowYToCenter*arrowYToCenter));
             double angleToCenter;
@@ -213,9 +213,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
             }
             rectangleList->setParameter(totalRadius,distanceToCenter,angleToCenter);
             info->setPathArrowList(rectangleList);
-            core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
             info->setPathArrowListKey(tileVisualization->addPrimitive(rectangleList));
-            core->getGraphicEngine()->unlockDrawing();
+            core->getDefaultGraphicEngine()->unlockDrawing();
           }
 
           // Add the arrow
@@ -233,9 +233,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           double angle=FloatingPoint::computeAngle(distX,distY);
           double x=x1+dist/2*cos(angle);
           double y=y1+dist/2*sin(angle);
-          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+          core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           rectangleList->addRectangle(x,y,angle);
-          core->getGraphicEngine()->unlockDrawing();
+          core->getDefaultGraphicEngine()->unlockDrawing();
 
         }
       }
@@ -297,93 +297,95 @@ void NavigationPath::updateTileVisualization(NavigationPathVisualizationType typ
 
       // Find map tile that contains the position
       MapTile *k=mapContainer->findMapTileByPictureCoordinate(pos);
+      if (k) {
 
-      // Check if the map tile has already graphic objects for this path
-      NavigationPathTileInfo *info=visualization->findTileInfo(k);
-      GraphicRectangle *flag=NULL;
-      switch(type) {
-        case NavigationPathVisualizationTypeStartFlag:
-          flag=info->getPathStartFlag();
-          break;
-        case NavigationPathVisualizationTypeEndFlag:
-          flag=info->getPathEndFlag();
-          break;
-      }
-      GraphicObject *tileVisualization=k->getVisualization();
-      if (!remove) {
-        if (!flag) {
-
-          // Create a new flag and add it to the tile
-          flag=new GraphicRectangle();
-          if (!flag) {
-            FATAL("can not create graphic rectangle object",NULL);
-            return;
-          }
-          flag->setAnimator(&animator);
-          GraphicRectangle *ref = NULL;
-          switch(type) {
-            case NavigationPathVisualizationTypeStartFlag:
-              ref = core->getGraphicEngine()->getPathStartFlagIcon();
-              info->setPathStartFlag(flag);
-              flag->setZ(3); // ensure that start flag is drawn after tile and direction texture
-              break;
-            case NavigationPathVisualizationTypeEndFlag:
-              ref = core->getGraphicEngine()->getPathEndFlagIcon();
-              info->setPathEndFlag(flag);
-              flag->setZ(4); // ensure that end flag is drawn after start flag, tile and direction texture
-              break;
-          }
-          flag->setColor(GraphicColor(255,255,255,255));
-          flag->setTexture(ref->getTexture());
-          flag->setDestroyTexture(false);
-          flag->setIconWidth(ref->getIconWidth());
-          flag->setIconHeight(ref->getIconHeight());
-          flag->setWidth(ref->getWidth());
-          flag->setHeight(ref->getHeight());
-          Int endX=pos.getX()-k->getMapX(0)-flag->getIconWidth()/2;
-          Int endY=k->getHeight()-(pos.getY()-k->getMapY(0))-flag->getIconHeight()/2;
-          Int startX=endX;
-          Int startY=endY+core->getScreen()->getHeight();
-          if (animate) {
-            flag->setX(startX);
-            flag->setY(startY);
-            flag->setTranslateAnimation(t,startX,startY,endX,endY,false,flagAnimationDuration,GraphicTranslateAnimationTypeAccelerated);
-          } else {
-            flag->setX(endX);
-            flag->setY(endY);
-          }
-          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-          switch(type) {
-            case NavigationPathVisualizationTypeStartFlag:
-              info->setPathStartFlagKey(tileVisualization->addPrimitive(flag));
-              break;
-            case NavigationPathVisualizationTypeEndFlag:
-              info->setPathEndFlagKey(tileVisualization->addPrimitive(flag));
-              break;
-          }
-          core->getGraphicEngine()->unlockDrawing();
+        // Check if the map tile has already graphic objects for this path
+        NavigationPathTileInfo *info=visualization->findTileInfo(k);
+        GraphicRectangle *flag=NULL;
+        switch(type) {
+          case NavigationPathVisualizationTypeStartFlag:
+            flag=info->getPathStartFlag();
+            break;
+          case NavigationPathVisualizationTypeEndFlag:
+            flag=info->getPathEndFlag();
+            break;
         }
-      } else {
-        if (flag) {
-          GraphicPrimitiveKey key;
-          GraphicRectangle *flag;
-          switch(type) {
-            case NavigationPathVisualizationTypeStartFlag:
-              key=info->getPathStartFlagKey();
-              flag=info->getPathStartFlag();
-              info->setPathStartFlag(NULL);
-              info->setPathStartFlagKey(0);
-              break;
-            case NavigationPathVisualizationTypeEndFlag:
-              key=info->getPathEndFlagKey();
-              flag=info->getPathEndFlag();
-              info->setPathEndFlag(NULL);
-              info->setPathEndFlagKey(0);
-              break;
+        GraphicObject *tileVisualization=k->getVisualization();
+        if (!remove) {
+          if (!flag) {
+
+            // Create a new flag and add it to the tile
+            flag=new GraphicRectangle(core->getDefaultScreen());
+            if (!flag) {
+              FATAL("can not create graphic rectangle object",NULL);
+              return;
+            }
+            flag->setAnimator(&animator);
+            GraphicRectangle *ref = NULL;
+            switch(type) {
+              case NavigationPathVisualizationTypeStartFlag:
+                ref = core->getDefaultGraphicEngine()->getPathStartFlagIcon();
+                info->setPathStartFlag(flag);
+                flag->setZ(3); // ensure that start flag is drawn after tile and direction texture
+                break;
+              case NavigationPathVisualizationTypeEndFlag:
+                ref = core->getDefaultGraphicEngine()->getPathEndFlagIcon();
+                info->setPathEndFlag(flag);
+                flag->setZ(4); // ensure that end flag is drawn after start flag, tile and direction texture
+                break;
+            }
+            flag->setColor(GraphicColor(255,255,255,255));
+            flag->setTexture(ref->getTexture());
+            flag->setDestroyTexture(false);
+            flag->setIconWidth(ref->getIconWidth());
+            flag->setIconHeight(ref->getIconHeight());
+            flag->setWidth(ref->getWidth());
+            flag->setHeight(ref->getHeight());
+            Int endX=pos.getX()-k->getMapX(0)-flag->getIconWidth()/2;
+            Int endY=k->getHeight()-(pos.getY()-k->getMapY(0))-flag->getIconHeight()/2;
+            Int startX=endX;
+            Int startY=endY+core->getDefaultScreen()->getHeight();
+            if (animate) {
+              flag->setX(startX);
+              flag->setY(startY);
+              flag->setTranslateAnimation(t,startX,startY,endX,endY,false,flagAnimationDuration,GraphicTranslateAnimationTypeAccelerated);
+            } else {
+              flag->setX(endX);
+              flag->setY(endY);
+            }
+            core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            switch(type) {
+              case NavigationPathVisualizationTypeStartFlag:
+                info->setPathStartFlagKey(tileVisualization->addPrimitive(flag));
+                break;
+              case NavigationPathVisualizationTypeEndFlag:
+                info->setPathEndFlagKey(tileVisualization->addPrimitive(flag));
+                break;
+            }
+            core->getDefaultGraphicEngine()->unlockDrawing();
           }
-          core->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-          tileVisualization->removePrimitive(key,true);
-          core->getGraphicEngine()->unlockDrawing();
+        } else {
+          if (flag) {
+            GraphicPrimitiveKey key;
+            GraphicRectangle *flag;
+            switch(type) {
+              case NavigationPathVisualizationTypeStartFlag:
+                key=info->getPathStartFlagKey();
+                flag=info->getPathStartFlag();
+                info->setPathStartFlag(NULL);
+                info->setPathStartFlagKey(0);
+                break;
+              case NavigationPathVisualizationTypeEndFlag:
+                key=info->getPathEndFlagKey();
+                flag=info->getPathEndFlag();
+                info->setPathEndFlag(NULL);
+                info->setPathEndFlagKey(0);
+                break;
+            }
+            core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            tileVisualization->removePrimitive(key,true);
+            core->getDefaultGraphicEngine()->unlockDrawing();
+          }
         }
       }
     }
@@ -545,7 +547,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   unlockAccess();
 
   // Inform the widgets
-  core->getWidgetEngine()->onPathChange(this,NavigationPathChangeTypeEndPositionAdded);
+  core->onPathChange(this,NavigationPathChangeTypeEndPositionAdded);
 }
 
 // Clears the graphical representation
@@ -569,9 +571,9 @@ void NavigationPath::deinit() {
   core->getMapSource()->unlockAccess();
 
   // Force a redraw
-  GraphicObject *pathAnimators=core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   pathAnimators->setIsUpdated(true);
-  core->getGraphicEngine()->unlockPathAnimators();
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
 
   // Is not initialized
   setIsInit(false);
@@ -599,9 +601,9 @@ void NavigationPath::init() {
   updateMetrics();
 
   // Configure the animator
-  core->getGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
-  core->getGraphicEngine()->unlockPathAnimators();
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
 
   // Create a visualization object for each zoom level
   core->getMapSource()->lockAccess(__FILE__,__LINE__);
@@ -1131,7 +1133,7 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
   unlockAccess();
 
   // Inform the widget engine
-  core->getWidgetEngine()->onPathChange(this, NavigationPathChangeTypeFlagSet);
+  core->onPathChange(this, NavigationPathChangeTypeFlagSet);
 }
 
 // Sets the end flag at the given index
@@ -1190,7 +1192,7 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
   unlockAccess();
 
   // Inform the widget engine
-  core->getWidgetEngine()->onPathChange(this, NavigationPathChangeTypeFlagSet);
+  core->onPathChange(this, NavigationPathChangeTypeFlagSet);
 }
 
 // Returns the points selected by the flags

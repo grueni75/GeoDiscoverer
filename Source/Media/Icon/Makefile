@@ -51,6 +51,8 @@ $(LINUX): $(PNGS)
 	@echo Installing PNGs into linux target
 	@rm -rf $(LINUX)/240dpi
 	@cp -r 240dpi $(LINUX)/
+	@rm -rf $(LINUX)/320dpi
+	@cp -r 320dpi $(LINUX)/
 
 # Install icons into android target
 $(ANDROID): $(PNGS)

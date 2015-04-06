@@ -24,6 +24,7 @@ class WidgetEngine {
 protected:
 
   ThreadMutexInfo *accessMutex;                         // Mutex for accessing this object
+  Device *device;                                       // Device that shall be used for this widget engine
   WidgetPageMap pageMap;                                // Holds all available widget pages
   WidgetPage *currentPage;                              // The currently selected page
   GraphicColor selectedWidgetColor;                     // Color of selected widgets
@@ -52,7 +53,7 @@ protected:
 public:
 
   // Constructors and destructor
-  WidgetEngine();
+  WidgetEngine(Device *device);
   virtual ~WidgetEngine();
 
   // Inits the object
@@ -134,6 +135,14 @@ public:
   Int getNearestPathIndex() const {
     return nearestPathIndex;
   }
+
+  FontEngine *getFontEngine();
+
+  GraphicEngine *getGraphicEngine();
+
+  Screen *getScreen();
+
+  Device *getDevice();
 };
 
 }

@@ -187,7 +187,7 @@ bool MapSourceCalibratedPictures::init()
   if (!cacheRetrieved) {
 
     // Prevent that phone switches off
-    core->getScreen()->setWakeLock(true, __FILE__, __LINE__, false);
+    core->getDefaultScreen()->setWakeLock(true, __FILE__, __LINE__, false);
 
     // Create a new progress dialog if required
     std::string title="Collecting files of map " + std::string(folder);
@@ -353,7 +353,7 @@ bool MapSourceCalibratedPictures::init()
     }
 
     // Reset wakelock
-    core->getScreen()->setWakeLock(core->getConfigStore()->getIntValue("General","wakeLock",__FILE__, __LINE__),__FILE__, __LINE__,false);
+    core->getDefaultScreen()->setWakeLock(core->getConfigStore()->getIntValue("General","wakeLock",__FILE__, __LINE__),__FILE__, __LINE__,false);
   }
 
   //DEBUG("centerPosition.lng=%e centerPosition.lat=%e",centerPosition->getLng(),centerPosition->getLat());

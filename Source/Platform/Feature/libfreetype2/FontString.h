@@ -34,13 +34,13 @@ protected:
 public:
 
   // Constructor
-  FontString(Font *font, FontString *fontStringRef);
+  FontString(Screen *screen, Font *font, FontString *fontStringRef);
 
   // Destructor
   virtual ~FontString();
 
   // Called when the widget must be drawn
-  virtual void draw(Screen *screen, TimestampInMicroseconds t);
+  virtual void draw(TimestampInMicroseconds t);
 
   // Getters and setters
   TimestampInSeconds getLastAccess() const

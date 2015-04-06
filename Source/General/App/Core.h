@@ -60,6 +60,7 @@ class ConfigStore;
 class Thread;
 class Clock;
 class Screen;
+class Device;
 class FontEngine;
 class GraphicEngine;
 class WidgetEngine;
@@ -72,12 +73,15 @@ class Image;
 class Dialog;
 class NavigationEngine;
 class Commander;
+class MapPosition;
+class MapTile;
+class NavigationPath;
 
 // Error types for downloads
 typedef enum { DownloadResultSuccess, DownloadResultFileNotFound, DownloadResultOtherFail } DownloadResult;
 
 // Types of changes to a navigation path object
-typedef enum {NavigationPathChangeTypeEndPositionAdded, NavigationPathChangeTypeFlagSet, NavigationPathChangeTypeWillBeRemoved } NavigationPathChangeType;
+typedef enum { NavigationPathChangeTypeEndPositionAdded, NavigationPathChangeTypeFlagSet, NavigationPathChangeTypeWillBeRemoved, NavigationPathChangeTypeWidgetEngineInit } NavigationPathChangeType;
 
 class Core {
 
@@ -87,10 +91,10 @@ protected:
   std::string homePath;
 
   // Density of the screen
-  Int screenDPI;
+  Int defaultScreenDPI;
 
   // Diagonal of the screen
-  Int screenDiagonal;
+  Int defaultScreenDiagonal;
 
   // Current thread info about the maintenance thread
   ThreadInfo *maintenanceThreadInfo;
@@ -104,6 +108,12 @@ protected:
   // Current thread info about the late init thread
   ThreadInfo *lateInitThreadInfo;
 
+  // Current thread info about the dashboard rendering thread
+  ThreadInfo *updateDashboardScreensThreadInfo;
+
+  // Used to wakeup the dashboard rendering thread
+  ThreadSignalInfo *updateDashboardScreensWakeupSignal;
+
   // Used to interrupt the map update thread
   ThreadMutexInfo *mapUpdateInterruptMutex;
 
@@ -115,11 +125,23 @@ protected:
   ThreadMutexInfo *isInitializedMutex;
   ThreadSignalInfo *isInitializedSignal;
 
+  // Default device
+  Device *defaultDevice;
+
+  // The dashboard device list
+  std::list<Device*> dashboardDevices;
+
+  // Used to control access to the devices list
+  ThreadMutexInfo *dashboardDevicesMutex;
+
   // Indicates if the core is initialized
   bool isInitialized;
 
   // Used to force an exit of the map update thread
   bool quitMapUpdateThread;
+
+  // Used to force an exit of the update cockpit screens thread
+  bool quitUpdateDashboardScreensThread;
 
   // Used to force an exit of the core
   bool quitCore;
@@ -143,11 +165,7 @@ protected:
   ConfigStore *configStore;
   Thread *thread;
   Clock *clock;
-  Screen *screen;
   UnitConverter *unitConverter;
-  FontEngine *fontEngine;
-  GraphicEngine *graphicEngine;
-  WidgetEngine *widgetEngine;
   MapCache *mapCache;
   MapEngine *mapEngine;
   MapSource *mapSource;
@@ -171,7 +189,10 @@ public:
   // Updates the screen
   void updateScreen(bool forceRedraw);
 
-  // Allows an external interrupt
+  // Updates the screen of cockpits
+  void updateDashboardScreens();
+
+    // Allows an external interrupt
   void interruptAllowedHere(const char *file, int line);
 
   // Updates the map
@@ -189,7 +210,14 @@ public:
   // Does a late initialization of certain objects
   void lateInit();
 
-  // Called
+  // Informs the engines that the map has changed
+  void onMapChange(MapPosition pos, std::list<MapTile*> *centerMapTiles);
+
+  // Informs the engines that the location has changed
+  void onLocationChange(MapPosition mapPos);
+
+  // Informs the engines that a path has changed
+  void onPathChange(NavigationPath *path, NavigationPathChangeType changeType);
 
   // Stops the map update thread
   void interruptMapUpdate(const char *file, int line);
@@ -207,6 +235,9 @@ public:
   void waitForInitialization() {
     thread->waitForSignal(isInitializedSignal);
   }
+
+  // Adds a new dashboard device
+  void addDashboardDevice(std::string host, Int port);
 
   // Getters and setters
   std::string getHomePath() const
@@ -239,16 +270,6 @@ public:
       return unitConverter;
   }
 
-  GraphicEngine *getGraphicEngine() const
-  {
-      return graphicEngine;
-  }
-
-  WidgetEngine *getWidgetEngine() const
-  {
-      return widgetEngine;
-  }
-
   Image *getImage() const
   {
       return image;
@@ -267,16 +288,6 @@ public:
   MapSource *getMapSource() const
   {
       return mapSource;
-  }
-
-  FontEngine *getFontEngine() const
-  {
-      return fontEngine;
-  }
-
-  Screen *getScreen() const
-  {
-      return screen;
   }
 
   Thread *getThread() const
@@ -325,6 +336,14 @@ public:
   TimestampInMicroseconds getFileOpenForWritingWaitTime() const {
     return fileAccessWaitTime;
   }
+
+  Screen *getDefaultScreen();
+
+  Device *getDefaultDevice();
+
+  WidgetEngine *getDefaultWidgetEngine();
+
+  GraphicEngine *getDefaultGraphicEngine();
 };
 
 // Pointer to the core
@@ -404,5 +423,6 @@ extern Core *core;
 #include <NavigationTarget.h>
 #include <NavigationEngine.h>
 #include <Commander.h>
+#include <Device.h>
 
 #endif /* MAIN_H_ */

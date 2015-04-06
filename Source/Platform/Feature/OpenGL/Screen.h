@@ -22,22 +22,39 @@ namespace GEODISCOVERER {
 // Data types
 typedef GLuint GraphicBufferInfo;
 typedef GLuint GraphicTextureInfo;
-enum GraphicTextureFormat { GraphicTextureFormatRGB, GraphicTextureFormatRGBA1, GraphicTextureFormatRGBA4  };
-enum GraphicScreenOrientation { GraphicScreenOrientationProtrait, GraphicScreenOrientationLandscape  };
+enum GraphicTextureFormat { GraphicTextureFormatRGB565, GraphicTextureFormatRGBA5551, GraphicTextureFormatRGBA4444, GraphicTextureFormatRGB888, GraphicTextureFormatRGBA8888  };
+enum GraphicScreenOrientation { GraphicScreenOrientationProtrait = 0, GraphicScreenOrientationLandscape = 1  };
+typedef struct {
+  GraphicTextureInfo textureInfo;
+  std::string source;
+} TextureDebugInfo;
 
 // Manages access to the screen
 class Screen {
 
 protected:
 
-  // Density of the screen
-  Int DPI;
+  // Pointer to the device this screen belongs to
+  Device *device;
 
-  // Diagonal of the screen
-  double diagonal;
+  // Current width and height of the screen
+  Int width;
+  Int height;
+
+  // Orientation of the screen
+  GraphicScreenOrientation orientation;
 
   // Indicates if wake lock is on or off
   bool wakeLock;
+
+  // Indicates that this screen is drawing into a buffer
+  bool separateFramebuffer;
+
+  // Framebuffer ID
+  GLuint framebuffer;
+
+  // Color renderbuffer ID
+  GLuint colorRenderbuffer;
 
   // Number of steps to approximate an ellipse
   const static Int ellipseSegments = 32;
@@ -54,10 +71,50 @@ protected:
   // Decides if resource allocation is allowed
   bool allowAllocation;
 
+  // Index to the buffer for the next screen shot
+  Int nextScreenShotPixelsIndex;
+
+  // Screen shot pixel buffers
+  GLvoid *screenShotPixels[2];
+
+  // Semaphore for accessing the current screen shot pixels
+  ThreadMutexInfo *nextScreenShotPixelsMutex;
+
+  // Signal for triggering the screen shot thread
+  ThreadSignalInfo *writeScreenShotSignal;
+
+  // Thread that writes the screen shot
+  ThreadInfo *writeScreenShotThreadInfo;
+
+  // Indicates that the write screen shot thread shall quit
+  bool quitWriteScreenShotThread;
+
+  // Width of the line
+  Int lineWidth;
+
+  // Checks if an extension is available
+  bool queryExtension(const char *extName);
+
+  // Indicates if RGBA8888 image format can be used
+  bool textureFormatRGBA8888Supported;
+  bool textureFormatRGB888Supported;
+
+  // List of cached texture infos
+  std::list<TextureDebugInfo> unusedTextureInfos;
+
+  // List of cached buffer infos
+  std::list<GraphicBufferInfo> unusedBufferInfos;
+
 public:
 
   // Constructor: Init screen (show window)
-  Screen(Int DPI, double diagonal);
+  Screen(Device *device);
+
+  // Setups the EGL context
+  static bool setupContext();
+
+  // Destroys the EGL context
+  static void shutdownContext();
 
   // Inits the screen
   void init(GraphicScreenOrientation orientation, Int width, Int height);
@@ -72,10 +129,22 @@ public:
   GraphicScreenOrientation getOrientation();
 
   // Main loop that handles events
-  void mainLoop();
+  static void mainLoop();
 
   // Destructor: clean up everything (close window)
   virtual ~Screen();
+
+  // Activates the screen for drawing
+  void startScene();
+
+  // Creates a screen shot
+  bool createScreenShot();
+
+  // Writes a screen shot
+  void writeScreenShot();
+
+  // Writes the screen content as a png
+  void writePNG(std::string path);
 
   // Clears the screen
   void clear();
@@ -116,12 +185,6 @@ public:
   // Draws multiple triangles
   void drawTriangles(Int numberOfTriangles, GraphicBufferInfo pointCoordinatesBuffer, GraphicTextureInfo textureInfo=textureNotDefined, GraphicBufferInfo textureCoordinatesBuffer=bufferNotDefined);
 
-  // Draws a line
-  void drawLine(Int x1, Int y1, Int x2, Int y2);
-
-  // Draws a line consisting of multiple points
-  void drawLines(Int numberOfPoints, Short *pointArray);
-
   // Draws a ellipse
   void drawEllipse(bool filled);
 
@@ -132,7 +195,7 @@ public:
   GraphicTextureInfo createTextureInfo();
 
   // Sets the image of a texture
-  void setTextureImage(GraphicTextureInfo texture, UShort *image, Int width, Int height, GraphicTextureFormat format=GraphicTextureFormatRGB);
+  bool setTextureImage(GraphicTextureInfo texture, UByte *image, Int width, Int height, GraphicTextureFormat format=GraphicTextureFormatRGB565);
 
   // Frees a texture id
   void destroyTextureInfo(GraphicTextureInfo i, std::string source);
@@ -150,7 +213,7 @@ public:
   void setWakeLock(bool state, const char *file, int line, bool persistent=true);
 
   // Frees any internal textures or buffers
-  void graphicInvalidated();
+  void graphicInvalidated(bool contextLost);
 
   // Creates the graphic
   void createGraphic();
@@ -159,19 +222,14 @@ public:
   void destroyGraphic();
 
   // Getters and setters
-  const GraphicTextureInfo getTextureNotDefined()
+  static const GraphicTextureInfo getTextureNotDefined()
   {
       return textureNotDefined;
   }
 
-  const GraphicBufferInfo getBufferNotDefined()
+  static const GraphicBufferInfo getBufferNotDefined()
   {
       return bufferNotDefined;
-  }
-
-  Int getDPI() const
-  {
-      return DPI;
   }
 
   bool getWakeLock() const
@@ -189,9 +247,18 @@ public:
       this->allowAllocation=allowAllocation;
   }
 
-  double getDiagonal() const {
-    return diagonal;
+  bool isTextureFormatRGB888Supported() const {
+    return textureFormatRGB888Supported;
   }
+
+  bool isTextureFormatRGBA8888Supported() const {
+    return textureFormatRGBA8888Supported;
+  }
+
+  double getDiagonal() const;
+
+  Int getDPI() const;
+
 };
 
 }

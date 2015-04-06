@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Constructors
-GraphicRectangle::GraphicRectangle() : GraphicPrimitive()
+GraphicRectangle::GraphicRectangle(Screen *screen) : GraphicPrimitive(screen)
 {
   type=GraphicTypeRectangle;
   setFilled(true);
@@ -31,14 +31,14 @@ GraphicRectangle::~GraphicRectangle() {
 }
 
 // Loads an icon and sets it as the texture of the primitive
-void GraphicRectangle::setTextureFromIcon(std::string iconFilename) {
+void GraphicRectangle::setTextureFromIcon(Screen *screen, std::string iconFilename) {
 
   // Load the icon
   iconFilename+=".png";
   Int imageWidth, imageHeight;
   UInt pixelSize;
   double dpiScale;
-  ImagePixel *iconImage=core->getImage()->loadPNGIcon(iconFilename,imageWidth,imageHeight,dpiScale,pixelSize);
+  ImagePixel *iconImage=core->getImage()->loadPNGIcon(screen, iconFilename,imageWidth,imageHeight,dpiScale,pixelSize);
   if (!iconImage)
     return;
   if (pixelSize!=Image::getRGBAPixelSize()) {
@@ -63,36 +63,59 @@ void GraphicRectangle::setTextureFromIcon(std::string iconFilename) {
   iconWidth=dpiScale*(double)imageWidth;
   iconHeight=dpiScale*(double)imageHeight;
 
-  // Convert it to RGBA5551
-  UShort *textureImage;
-  textureImage=(UShort*)malloc(textureWidth*textureHeight*sizeof(UShort));
-  if (!textureImage) {
-    FATAL("can not reserve memory for texture image",NULL);
-    return;
-  }
-  memset(textureImage,0,textureWidth*textureHeight*sizeof(UShort));
-  for(Int y=0;y<imageHeight;y++) {
-    for(Int x=0;x<imageWidth;x++) {
-      UByte red=iconImage[(y*imageWidth+x)*Image::getRGBAPixelSize()+0]>>3;
-      UByte green=iconImage[(y*imageWidth+x)*Image::getRGBAPixelSize()+1]>>3;
-      UByte blue=iconImage[(y*imageWidth+x)*Image::getRGBAPixelSize()+2]>>3;
-      UByte alpha=iconImage[(y*imageWidth+x)*Image::getRGBAPixelSize()+3]>>7;
-      textureImage[(y+textureHeight-imageHeight)*textureWidth+x]=(red<<11)|(green<<6)|(blue<<1)|alpha;
+  // Convert the image depending on the supported format
+  setTexture(screen->createTextureInfo());
+  if (screen->isTextureFormatRGBA8888Supported()) {
+
+    // Convert it to RGBA8888
+    UInt *textureImage;
+    textureImage=(UInt*)malloc(textureWidth*textureHeight*sizeof(UInt));
+    if (!textureImage) {
+      FATAL("can not reserve memory for texture image",NULL);
+      return;
     }
+    memset(textureImage,0,textureWidth*textureHeight*sizeof(UInt));
+    for(Int y=0;y<imageHeight;y++) {
+      memcpy(&textureImage[(y+textureHeight-imageHeight)*textureWidth],&iconImage[y*imageWidth*Image::getRGBAPixelSize()],imageWidth*sizeof(UInt));
+    }
+
+    // Create the texture
+    if (!(screen->setTextureImage(getTexture(),(UByte*)textureImage,textureWidth,textureHeight,GraphicTextureFormatRGBA8888))) {
+      FATAL("can not update texture image",NULL);
+    }
+    free(textureImage);
+
+  } else {
+
+    // Convert it to RGBA5551
+    UShort *textureImage;
+    textureImage=(UShort*)malloc(textureWidth*textureHeight*sizeof(UShort));
+    if (!textureImage) {
+      FATAL("can not reserve memory for texture image",NULL);
+      return;
+    }
+    memset(textureImage,0,textureWidth*textureHeight*sizeof(UShort));
+    for(Int y=0;y<imageHeight;y++) {
+      for(Int x=0;x<imageWidth;x++) {
+        UByte red=iconImage[(y*imageWidth+x)*Image::getRGBAPixelSize()+0]>>3;
+        UByte green=iconImage[(y*imageWidth+x)*Image::getRGBAPixelSize()+1]>>3;
+        UByte blue=iconImage[(y*imageWidth+x)*Image::getRGBAPixelSize()+2]>>3;
+        UByte alpha=iconImage[(y*imageWidth+x)*Image::getRGBAPixelSize()+3]>>7;
+        textureImage[(y+textureHeight-imageHeight)*textureWidth+x]=(red<<11)|(green<<6)|(blue<<1)|alpha;
+      }
+    }
+
+    // Create the texture
+    if (!(screen->setTextureImage(getTexture(),(UByte*)textureImage,textureWidth,textureHeight,GraphicTextureFormatRGBA5551))) {
+      FATAL("can not update texture image",NULL);
+    }
+    free(textureImage);
   }
   free(iconImage);
-
-  // Create the texture
-  //if (getTexture()!=core->getScreen()->getTextureNotDefined()) {
-  //  core->getScreen()->destroyTextureInfo(getTexture());
-  //}
-  setTexture(core->getScreen()->createTextureInfo());
-  core->getScreen()->setTextureImage(getTexture(),textureImage,textureWidth,textureHeight,GraphicTextureFormatRGBA1);
-  free(textureImage);
 }
 
 // Called when the rectangle must be drawn
-void GraphicRectangle::draw(Screen *screen, TimestampInMicroseconds t) {
+void GraphicRectangle::draw(TimestampInMicroseconds t) {
 
   // Set color
   screen->setColor(getColor().getRed(),getColor().getGreen(),getColor().getBlue(),getColor().getAlpha());

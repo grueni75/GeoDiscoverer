@@ -15,14 +15,12 @@
 
 namespace GEODISCOVERER {
 
-// List of unused buffers
-std::list<GraphicBufferInfo> GraphicPointBuffer::unusedBuffers;
-
 // Constructor
-GraphicPointBuffer::GraphicPointBuffer(Int numberOfPoints) {
+GraphicPointBuffer::GraphicPointBuffer(Screen *screen, Int numberOfPoints) {
+  this->screen=screen;
   this->numberOfPoints=numberOfPoints;
   insertPos=0;
-  buffer=core->getScreen()->getBufferNotDefined();
+  buffer=Screen::getBufferNotDefined();
   bufferOutdated=true;
   if (!(points=(Short*)malloc(sizeof(*points)*2*numberOfPoints))) {
     FATAL("can not create point array",NULL);
@@ -55,32 +53,27 @@ bool GraphicPointBuffer::addPoint(GraphicPoint point) {
 }
 
 // Uses the stored points to draw triangles
-void GraphicPointBuffer::drawAsTriangles(Screen *screen) {
+void GraphicPointBuffer::drawAsTriangles() {
   if (insertPos==0)
     return;
-  updateBuffer(screen);
+  updateBuffer();
   screen->drawTriangles(insertPos/3,buffer);
 }
 
 // Uses the stored points to draw textured triangles
-void GraphicPointBuffer::drawAsTexturedTriangles(Screen *screen, GraphicTextureInfo textureInfo, GraphicPointBuffer *textureCoordinates) {
+void GraphicPointBuffer::drawAsTexturedTriangles(GraphicTextureInfo textureInfo, GraphicPointBuffer *textureCoordinates) {
   if (insertPos==0)
     return;
-  updateBuffer(screen);
-  textureCoordinates->updateBuffer(screen);
+  updateBuffer();
+  textureCoordinates->updateBuffer();
   screen->drawTriangles(insertPos/3,buffer,textureInfo,textureCoordinates->getBuffer());
 }
 
 // Updates the buffer contents
-void GraphicPointBuffer::updateBuffer(Screen *screen) {
+void GraphicPointBuffer::updateBuffer() {
   if (bufferOutdated) {
     if (buffer==screen->getBufferNotDefined()) {
-      if (GraphicPointBuffer::unusedBuffers.size()>0) {
-        buffer=GraphicPointBuffer::unusedBuffers.front();
-        GraphicPointBuffer::unusedBuffers.pop_front();
-      } else {
-        buffer=core->getScreen()->createBufferInfo();
-      }
+      buffer=screen->createBufferInfo();
     }
     //DEBUG("insertPos=%d buffer=0x%08x",insertPos,buffer);
     screen->setArrayBufferData(buffer,(Byte*)points,insertPos*2*sizeof(Short));
@@ -88,20 +81,12 @@ void GraphicPointBuffer::updateBuffer(Screen *screen) {
   }
 }
 
-// Frees all used buffer objects
-void GraphicPointBuffer::destroyBuffers() {
-  for(std::list<GraphicBufferInfo>::iterator i=unusedBuffers.begin();i!=unusedBuffers.end();i++) {
-    core->getScreen()->destroyBufferInfo(*i);
-  }
-  unusedBuffers.clear();
-}
-
 // Recreates any textures or buffers
 void GraphicPointBuffer::invalidate() {
   bufferOutdated=true;
-  if (buffer!=core->getScreen()->getBufferNotDefined()) {
-    unusedBuffers.push_back(buffer);
-    buffer=core->getScreen()->getBufferNotDefined();
+  if (buffer!=Screen::getBufferNotDefined()) {
+    screen->destroyBufferInfo(buffer);
+    buffer=Screen::getBufferNotDefined();
   }
 }
 

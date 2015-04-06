@@ -16,7 +16,11 @@
 namespace GEODISCOVERER {
 
 // Constructor
-FontEngine::FontEngine() {
+FontEngine::FontEngine(Screen *screen) {
+
+  // Set variables
+  this->screen=screen;
+  this->DPI=screen->getDPI();
 
   // Init the free type 2 library
   if (FT_Init_FreeType(&freeTypeLib)) {
@@ -63,7 +67,7 @@ bool FontEngine::loadFont(std::string fontType, std::string fontFilename, Int fo
 
   // Create the font
   Font *font;
-  if (!(font=new Font(freeTypeLib,fontFilename,fontSize)))
+  if (!(font=new Font(this, freeTypeLib,fontFilename,fontSize)))
     return false;
 
   // And add it to the available fonts

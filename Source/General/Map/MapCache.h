@@ -21,7 +21,7 @@ class MapCache {
 protected:
 
   Int size;                                       // Number of tiles to cache
-  UShort *tileImageScratch;                       // Holds the image of one tile for handover to the graphic system
+  UByte *tileImageScratch;                        // Holds the image of one tile for handover to the graphic system
   MapTile *currentTile;                           // Tile that is currently processed
   std::list<MapTile *> cachedTiles;               // List of tiles that are currently cached
   std::list<MapTile *> uncachedTiles;             // List of tiles that are currently not cached

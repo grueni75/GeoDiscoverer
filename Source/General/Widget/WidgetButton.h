@@ -27,7 +27,7 @@ protected:
 public:
 
   // Constructors and destructor
-  WidgetButton();
+  WidgetButton(WidgetPage *widgetPage);
   virtual ~WidgetButton();
 
   // Let the button work

@@ -35,24 +35,35 @@ void *lateInitThread(void *args) {
   return NULL;
 }
 
+// Dashboard thread
+void *updateDashboardScreensThread(void *args) {
+  core->updateDashboardScreens();
+  return NULL;
+}
+
 // Constructor of the main application
 Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
 
   // Set variables
   this->homePath=homePath;
-  this->screenDPI=screenDPI;
-  this->screenDiagonal=screenDiagonal;
+  this->defaultScreenDPI=screenDPI;
+  this->defaultScreenDiagonal=screenDiagonal;
 
   // Reset variables
   this->maintenanceThreadInfo=NULL;
   this->maintenanceMutex=NULL;
   this->lateInitThreadInfo=NULL;
   this->mapUpdateThreadInfo=NULL;
+  this->updateDashboardScreensThreadInfo=NULL;
   this->mapUpdateInterruptMutex=NULL;
   this->mapUpdateStartSignal=NULL;
   this->mapUpdateTileTextureProcessedSignal=NULL;
   this->isInitializedMutex=NULL;
   this->isInitializedSignal=NULL;
+  this->maintenancePeriod=0;
+  this->dashboardDevicesMutex=NULL;
+  this->updateDashboardScreensWakeupSignal=NULL;
+  this->defaultDevice=NULL;
   isInitialized=false;
   quitMapUpdateThread=false;
   mapUpdateStopped=true;
@@ -64,19 +75,16 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   thread = NULL;
   dialog = NULL;
   clock = NULL;
-  screen = NULL;
-  graphicEngine = NULL;
-  widgetEngine = NULL;
   mapCache = NULL;
   mapEngine = NULL;
   mapSource = NULL;
   unitConverter = NULL;
   image = NULL;
   commander = NULL;
-  fontEngine = NULL;
   navigationEngine = NULL;
   fileAccessRetries = 10;
   fileAccessWaitTime = 100;
+  quitUpdateDashboardScreensThread = false;
 
   // Create core objects that are required early
   if (!(thread=new Thread())) {
@@ -104,6 +112,15 @@ Core::~Core() {
   if (lateInitThreadInfo) {
     thread->waitForThread(lateInitThreadInfo);
     thread->destroyThread(lateInitThreadInfo);
+  }
+
+  // Wait until the update dashboard screens thread has finished
+  if (updateDashboardScreensThreadInfo) {
+    quitUpdateDashboardScreensThread=true;
+    thread->issueSignal(updateDashboardScreensWakeupSignal);
+    thread->waitForThread(updateDashboardScreensThreadInfo);
+    thread->destroyThread(updateDashboardScreensThreadInfo);
+    thread->destroySignal(updateDashboardScreensWakeupSignal);
   }
 
   // Wait until the maintenance thread has finished
@@ -153,7 +170,7 @@ Core::~Core() {
   }
 
   // Delete the components
-  screen->setAllowDestroying(true);
+  getDefaultDevice()->getScreen()->setAllowDestroying(true);
   DEBUG("deleting commander",NULL);
   if (commander) delete commander;
   DEBUG("deleting navigationEngine",NULL);
@@ -164,14 +181,8 @@ Core::~Core() {
   if (mapCache) delete mapCache;
   DEBUG("deleting mapSource",NULL);
   if (mapSource) delete mapSource;
-  DEBUG("deleting widgetEngine",NULL);
-  if (widgetEngine) delete widgetEngine;
-  DEBUG("deleting graphicEngine",NULL);
-  if (graphicEngine) delete graphicEngine;
-  DEBUG("deleting fontEngine",NULL);
-  if (fontEngine) delete fontEngine;
-  DEBUG("deleting screen",NULL);
-  if (screen) delete screen;
+  DEBUG("deleting default device",NULL);
+  delete defaultDevice;
   DEBUG("deleting unit converter",NULL);
   if (unitConverter) delete unitConverter;
   DEBUG("deleting image",NULL);
@@ -245,26 +256,14 @@ bool Core::init() {
     FATAL("can not create dialog object",NULL);
     return false;
   }
-  DEBUG("initializing screen",NULL);
-  if (!(screen=new Screen(screenDPI,screenDiagonal))) {
-    FATAL("can not create screen object",NULL);
+  DEBUG("initializing default device",NULL);
+  if (!(defaultDevice=new Device("Default",false,true))) {
+    FATAL("can not create default device object",NULL);
     return false;
   }
-  DEBUG("initializing fontEngine",NULL);
-  if (!(fontEngine=new FontEngine())) {
-    FATAL("can not create font engine object",NULL);
-    return false;
-  }
-  DEBUG("initializing graphicEngine",NULL);
-  if (!(graphicEngine=new GraphicEngine())) {
-    FATAL("can not create graphic engine object",NULL);
-    return false;
-  }
-  DEBUG("initializing widgetEngine",NULL);
-  if (!(widgetEngine=new WidgetEngine())) {
-    FATAL("can not create widget engine object",NULL);
-    return false;
-  }
+  defaultDevice->setDPI(defaultScreenDPI);
+  defaultDevice->setDiagonal(defaultScreenDiagonal);
+  defaultDevice->init();
   DEBUG("initializing mapSource",NULL);
   if (!(mapSource=MapSource::newMapSource())) {
     FATAL("can not create map source object",NULL);
@@ -300,6 +299,8 @@ bool Core::init() {
   mapUpdateStartSignal=thread->createSignal();
   mapUpdateTileTextureProcessedSignal=thread->createSignal();
   maintenanceMutex=thread->createMutex("core maintenance mutex");
+  dashboardDevicesMutex=thread->createMutex("devices mutex");
+  updateDashboardScreensWakeupSignal=thread->createSignal(false);
 
   // Create the map update thread
   mapUpdateThreadInfo=thread->createThread("map update thread",mapUpdateThread,NULL);
@@ -309,6 +310,11 @@ bool Core::init() {
 
   // Create the late init thread
   lateInitThreadInfo=thread->createThread("late init thread",lateInitThread,NULL);
+
+  // Create the update dashboard screens thread
+  if (configStore->getIntValue("Cockpit/App/Dashboard","active",__FILE__,__LINE__)) {
+    updateDashboardScreensThreadInfo=thread->createThread("update dashboard screens thread",updateDashboardScreensThread,NULL);
+  }
 
   // We are initialized
   continueMapUpdate();
@@ -326,7 +332,7 @@ void Core::updateScreen(bool forceRedraw) {
   PROFILE_START;
 
   // Allow texture allocation
-  screen->setAllowAllocation(true);
+  getDefaultDevice()->getScreen()->setAllowAllocation(true);
 
   // Check if all objects are initialized
   if ((mapSource->getIsInitialized())&&(navigationEngine->getIsInitialized())) {
@@ -360,8 +366,11 @@ void Core::updateScreen(bool forceRedraw) {
   }
   PROFILE_ADD("pre draw");
 
-  // Redraw the scene
-  graphicEngine->draw(forceRedraw);
+  /* Redraw the scene
+  for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
+    (*i)->getGraphicEngine()->draw(forceRedraw);
+  }*/
+  getDefaultDevice()->getGraphicEngine()->draw(forceRedraw);
   PROFILE_ADD("draw");
 
   // Only work if the required objects are initialized
@@ -373,8 +382,8 @@ void Core::updateScreen(bool forceRedraw) {
     } else {
 
       // Abort the update if the pos has changed
-      GraphicPosition visPos=*(graphicEngine->lockPos(__FILE__, __LINE__));
-      graphicEngine->unlockPos();
+      GraphicPosition visPos=*(getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+      getDefaultGraphicEngine()->unlockPos();
       if (mapEngine->mapUpdateIsRequired(visPos,NULL,NULL,NULL,false)) {
         mapEngine->setAbortUpdate();
       }
@@ -392,8 +401,8 @@ void Core::updateScreen(bool forceRedraw) {
 
     // Check if an update of the map is required
     bool updateRequired=false;
-    GraphicPosition visPos=*(graphicEngine->lockPos(__FILE__, __LINE__));
-    graphicEngine->unlockPos();
+    GraphicPosition visPos=*(getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+    getDefaultGraphicEngine()->unlockPos();
     if (mapEngine->mapUpdateIsRequired(visPos))
       updateRequired=true;
 
@@ -407,8 +416,126 @@ void Core::updateScreen(bool forceRedraw) {
   }
 
   // Disallow texture allocation
-  screen->setAllowAllocation(false);
+  getDefaultDevice()->getScreen()->setAllowAllocation(false);
   PROFILE_ADD("post draw");
+}
+
+// Adds a new dashboard device
+void Core::addDashboardDevice(std::string host, Int port) {
+
+  // First check if device already exists
+  std::stringstream name;
+  name << host << ":" << port;
+  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
+    Device *d = *i;
+    if (d->getName()==name.str()) {
+      DEBUG("device %s is not added because it already exists",name.str().c_str());
+      core->getThread()->unlockMutex(dashboardDevicesMutex);
+      return;
+    }
+  }
+  core->getThread()->unlockMutex(dashboardDevicesMutex);
+
+  // Create the device
+  Device *d;
+  if (!(d=new Device(name.str(),configStore->getIntValue("Cockpit/App/Dashboard","whiteBackground",__FILE__,__LINE__),false))) {
+    FATAL("can not create dashboard device object",NULL);
+    return;
+  }
+  d->setHost(host);
+  d->setPort(port);
+  d->setDPI(configStore->getIntValue("Cockpit/App/Dashboard","dotsPerInch",__FILE__,__LINE__));
+
+  // Add the device
+  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  dashboardDevices.push_back(d);
+  core->getThread()->unlockMutex(dashboardDevicesMutex);
+  DEBUG("dashboard device %s has been added",name.str().c_str());
+}
+
+// Updates the screen of cokcpits
+void Core::updateDashboardScreens() {
+
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundHigh);
+
+  DEBUG("updateDashboardScreens thread started",NULL);
+
+  // Get config values
+  TimestampInMilliseconds minUpdatePeriodNormal = configStore->getIntValue("Cockpit","minUpdatePeriodNormal",__FILE__,__LINE__);
+  TimestampInMilliseconds minUpdatePeriodTurn = configStore->getIntValue("Cockpit","minUpdatePeriodTurn",__FILE__,__LINE__);
+
+  // Create the EGL context for this thread
+  if (!Screen::setupContext())
+    return;
+
+  // Repeat until quit is requested
+  while (!quitUpdateDashboardScreensThread) {
+
+    DEBUG("ping",NULL);
+
+    // Update the update interval depending if a turn is near or not
+    bool turnActive;
+    TimestampInMicroseconds sleepTime;
+    NavigationInfo *info=navigationEngine->lockNavigationInfo(__FILE__,__LINE__);
+    navigationEngine->unlockNavigationInfo();
+    if (turnActive)
+      sleepTime=minUpdatePeriodTurn;
+    else
+      sleepTime=minUpdatePeriodNormal;
+
+    // Go through all devices
+    std::list<Device*> devicesToBeRemoved;
+    core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+    std::list<Device*> devices = dashboardDevices;
+    core->getThread()->unlockMutex(dashboardDevicesMutex);
+    for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
+      Device *d = *i;
+
+      // Discover the device infos
+      bool deviceAvailable=false;
+      if (d->discover()) {
+
+        // Do the drawing
+        if (d->draw()) {
+          deviceAvailable=true;
+        }
+      }
+
+      // Remove the device if it is not available anymore
+      if (!deviceAvailable) {
+        devicesToBeRemoved.push_back(d);
+      }
+    }
+
+    // Remove any marked device
+    core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+    for (std::list<Device*>::iterator i=devicesToBeRemoved.begin();i!=devicesToBeRemoved.end();i++) {
+      Device *d=*i;
+      dashboardDevices.remove(d);
+      d->destroy(false);
+      delete d;
+    }
+    devicesToBeRemoved.clear();
+    core->getThread()->unlockMutex(dashboardDevicesMutex);
+
+    // Sleep for the next round
+    core->getThread()->waitForSignal(updateDashboardScreensWakeupSignal,sleepTime);
+  }
+
+  // Destroy the screens of the devices
+  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
+    Device *d = *i;
+    d->destroy(false);
+    delete d;
+  }
+  core->getThread()->unlockMutex(dashboardDevicesMutex);
+  dashboardDevices.clear();
+
+  // Destroy the EGL context
+  Screen::shutdownContext();
 }
 
 // Main loop of the map update thread
@@ -603,27 +730,28 @@ void Core::updateGraphic(bool graphicInvalidated) {
   }
 
   // First deinit everything
-  screen->setAllowDestroying(true);
+  Device *d=getDefaultDevice();
+  d->getScreen()->setAllowDestroying(true);
   navigationEngine->destroyGraphic();
   if (isInitialized)
     mapCache->destroyGraphic();
-  widgetEngine->destroyGraphic();
-  graphicEngine->destroyGraphic();
-  fontEngine->destroyGraphic();
-  screen->destroyGraphic();
+  d->getGraphicEngine()->destroyGraphic();
+  d->getScreen()->destroyGraphic();
+  d->getWidgetEngine()->destroyGraphic();
+  d->getFontEngine()->destroyGraphic();
   if (graphicInvalidated) {
-    screen->graphicInvalidated();
+    d->getScreen()->graphicInvalidated(true);
   }
-  screen->setAllowDestroying(false);
-  screen->setAllowAllocation(true);
-  screen->createGraphic();
-  fontEngine->createGraphic();
-  graphicEngine->createGraphic();
-  widgetEngine->createGraphic();
+  d->getScreen()->setAllowDestroying(false);
+  d->getScreen()->setAllowAllocation(true);
+  d->getScreen()->createGraphic();
+  d->getFontEngine()->createGraphic();
+  d->getWidgetEngine()->createGraphic();
+  d->getGraphicEngine()->createGraphic();
   if (isInitialized)
     mapCache->createGraphic();
   navigationEngine->createGraphic();
-  screen->setAllowAllocation(false);
+  d->getScreen()->setAllowAllocation(false);
 
   // Trigger an update of the map
   mapEngine->setForceMapRecreation();
@@ -661,6 +789,62 @@ void Core::waitForFile(std::string path) {
     usleep(fileAccessWaitTime);
   }
   DEBUG("max retries reached but file still not available",NULL);
+}
+
+// Returns the default screen
+Screen *Core::getDefaultScreen() {
+  return defaultDevice->getScreen();
+}
+
+// Returns the default device
+Device *Core::getDefaultDevice() {
+  return defaultDevice;
+}
+
+// Returns the default widget engine
+WidgetEngine *Core::getDefaultWidgetEngine() {
+  return defaultDevice->getWidgetEngine();
+}
+
+// Returns the default graphic engine
+GraphicEngine *Core::getDefaultGraphicEngine() {
+  return defaultDevice->getGraphicEngine();
+}
+
+// Informs the engines that the map has changed
+void Core::onMapChange(MapPosition pos, std::list<MapTile*> *centerMapTiles) {
+  defaultDevice->getWidgetEngine()->onMapChange(pos,centerMapTiles);
+  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
+    if ((*i)->getWidgetEngine()) {
+      (*i)->getWidgetEngine()->onMapChange(pos,centerMapTiles);
+    }
+  }
+  core->getThread()->unlockMutex(dashboardDevicesMutex);
+}
+
+// Informs the engines that the location has changed
+void Core::onLocationChange(MapPosition mapPos) {
+  defaultDevice->getWidgetEngine()->onLocationChange(mapPos);
+  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
+    if ((*i)->getWidgetEngine()) {
+      (*i)->getWidgetEngine()->onLocationChange(mapPos);
+    }
+  }
+  core->getThread()->unlockMutex(dashboardDevicesMutex);
+}
+
+// Informs the engines that a path has changed
+void Core::onPathChange(NavigationPath *path, NavigationPathChangeType changeType) {
+  defaultDevice->getWidgetEngine()->onPathChange(path,changeType);
+  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
+    if ((*i)->getWidgetEngine()) {
+      (*i)->getWidgetEngine()->onPathChange(path,changeType);
+    }
+  }
+  core->getThread()->unlockMutex(dashboardDevicesMutex);
 }
 
 }
