@@ -3,6 +3,6 @@ ROOT="`pwd`/../../../.."
 sh -c "cd $ROOT/Source && make android"
 sed -i 's/<xsd:documentation>Geo Discoverer Config schema.*<\/xsd:documentation>/<xsd:documentation>Geo Discoverer Config schema '`date +"%Y%m%d-%H%M%S"`'<\/xsd:documentation>/' assets/GeoDiscoverer/config.shipped.xsd 
 sh -c "cd $ROOT/Source/Media/Icon && make android"
-sh -c "rsync -ahvz --progress --exclude .directory --exclude '*.xcf' --delete $ROOT/Source/Help assets/GeoDiscoverer/"
+sh -c "rsync -ahvz --progress --exclude .directory --exclude '*.xcf' --delete $ROOT/Source/Platform/Target/Help/public/ assets/GeoDiscoverer/Help"
 find assets/GeoDiscoverer -type f -exec cat {} \; | md5sum >assets/GeoDiscoverer.list
 sh -c "cd assets/GeoDiscoverer && find -type f" | sed 's/^.\///' >>assets/GeoDiscoverer.list 
