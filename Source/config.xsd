@@ -166,6 +166,21 @@
                               <xsd:documentation>Network port to use when communicating with the dashboard app.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
+                          <xsd:element name="useZeroConf" type="xsd:boolean" default="0" gd:upgrade="restore">
+                            <xsd:annotation>
+                              <xsd:documentation>Use zero configuration network to discover geo dashboard devices.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>                          
+                          <xsd:element name="useAddressCacheLookup" type="xsd:boolean" default="1" gd:upgrade="restore">
+                            <xsd:annotation>
+                              <xsd:documentation>Lookup geo dashboard devices from the ARP cache.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>                          
+                          <xsd:element name="addressCacheSleepTime" type="xsd:integer" default="10">
+                            <xsd:annotation>
+                              <xsd:documentation>Time in seconds to wait before rechecking the ARP cache for new devices.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>                          
                         </xsd:sequence>
                       </xsd:complexType>
                     </xsd:element>

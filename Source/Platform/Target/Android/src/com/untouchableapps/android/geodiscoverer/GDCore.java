@@ -18,6 +18,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +39,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.impl.JmDNSImpl;
@@ -167,8 +170,12 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   WifiManager wifiManager;
   protected JmDNS jmDNS = null;
   protected GDDashboardServiceListener dashboardServiceListener = null;
-  MulticastLock multicastLock;
+  MulticastLock multicastLock = null;
 
+  // References for the network discovery via ARP lookup
+  Thread lookupARPCacheThread = null;
+  boolean quitLookupARPCacheThread = false;
+  
   /**
    * Finds all IP addresses of the wlan adapter
    */
@@ -492,25 +499,86 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           changeScreen=true;
         }
         createGraphic=true;
+        
+        // Search for geo dashboard devices if configured
         if (Integer.valueOf(configStoreGetStringValue("Cockpit/App/Dashboard","active"))>0) {
-          multicastLock = wifiManager.createMulticastLock("Geo Discoverer lock for JmDNS");
-          multicastLock.setReferenceCounted(true);
-          multicastLock.acquire();
-          InetAddress deviceAddress = getWifiInetAddress(application, Inet4Address.class);
-          //Logger logger = Logger.getLogger(JmDNSImpl.class.getName());
-          //logger.setLevel(Level.FINER);
-          try {
-            jmDNS = JmDNS.create(deviceAddress);
-            dashboardServiceListener = new GDDashboardServiceListener(jmDNS);
-            jmDNS.addServiceListener(GDApplication.dashboardNetworkServiceType, dashboardServiceListener);
-            executeAppCommand("infoDialog(\"" + deviceAddress.toString() + "\")");
-          } 
-          catch (IOException e) {
-            GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", e.getMessage());
+          
+          // Use zero conf to discover devices if configured
+          if (Integer.valueOf(configStoreGetStringValue("Cockpit/App/Dashboard","useZeroConf"))!=0) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "acquiring multicast lock");
+            if (wifiManager!=null) {
+              multicastLock = wifiManager.createMulticastLock("Geo Discoverer lock for JmDNS");
+              if (multicastLock!=null) {
+                multicastLock.setReferenceCounted(true);
+                multicastLock.acquire();
+                GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "starting jmDNS");
+                InetAddress deviceAddress = getWifiInetAddress(application, Inet4Address.class);
+                //Logger logger = Logger.getLogger(JmDNSImpl.class.getName());
+                //logger.setLevel(Level.FINER);
+                try {
+                  jmDNS = JmDNS.create(deviceAddress);
+                  dashboardServiceListener = new GDDashboardServiceListener(jmDNS);
+                  jmDNS.addServiceListener(GDApplication.dashboardNetworkServiceType, dashboardServiceListener);
+                  executeAppCommand("infoDialog(\"" + deviceAddress.toString() + "\")");
+                } 
+                catch (IOException e) {
+                  GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                }
+              } else {
+                GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "could not get multicast lock");                              
+              }
+            } else {
+              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "no wifi manager available");              
+            }
           }
-          executeCoreCommand(String.format("addDashboardDevice(%s,%d)","192.168.43.89",Integer.getInteger(configStoreGetStringValue("Cockpit/App/Dashboard", "port"))));
-          executeAppCommand("infoDialog(\"Remove fixed addDashboardDevice\")");
-        }
+
+          // Use ARP cache lookups to discover devices if configured
+          if (Integer.valueOf(configStoreGetStringValue("Cockpit/App/Dashboard","useAddressCacheLookup"))!=0) {
+            quitLookupARPCacheThread = false;
+            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "starting ARP cache lookup thread");
+            lookupARPCacheThread = new Thread(new Runnable() {
+              
+              @Override
+              public void run() {
+                
+                int sleepTime = Integer.valueOf(configStoreGetStringValue("Cockpit/App/Dashboard","addressCacheSleepTime"))*1000;
+                int port = Integer.valueOf(configStoreGetStringValue("Cockpit/App/Dashboard", "port"));
+                while (!quitLookupARPCacheThread) {
+                  
+                  // Go through the ARP cache
+                  try {
+                    BufferedReader br = new BufferedReader(new FileReader("/proc/net/arp"));
+                    try {
+                      String line = br.readLine();
+                      Pattern p = Pattern.compile("^\\s*(\\d+\\.\\d+\\.\\d+\\.\\d+)\\s*");
+                      while (line != null) {
+                        Matcher m = p.matcher(line);
+                        if (m.find()) {
+                          String ip = m.group(1);
+                          executeCoreCommand(String.format("addDashboardDevice(%s,%d)",ip,port));
+                        }
+                        line = br.readLine();
+                      }
+                    } finally {
+                      br.close();
+                    }
+                  }
+                  catch (IOException e) {
+                    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.toString());
+                  }
+                  
+                  // Sleep for the defined time
+                  try {
+                    Thread.sleep(sleepTime);
+                  }
+                  catch (InterruptedException e) {
+                  }
+                }
+              }
+            });
+            lookupARPCacheThread.start();
+          }
+        }        
       }
       lock.unlock();
 
@@ -540,17 +608,36 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       
       // Stop service discovery
       if (dashboardServiceListener!=null) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "stopping jmDNS");
         jmDNS.removeServiceListener(GDApplication.dashboardNetworkServiceType, dashboardServiceListener);
         try {
           jmDNS.close();
         }
         catch (IOException e) {
-          GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", e.getMessage());
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
         }
         jmDNS=null;
         dashboardServiceListener=null;
-        if (multicastLock!=null)
-          multicastLock.release();
+      }
+      if (multicastLock!=null) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "releasing multicast lock");
+        multicastLock.release();
+      }
+      if (lookupARPCacheThread!=null) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "stopping ARP cache lookup thread");
+        quitLookupARPCacheThread = true;
+        boolean repeat = true;
+        while (repeat) {
+          repeat=false;
+          lookupARPCacheThread.interrupt();
+          try {
+            lookupARPCacheThread.join();
+          }
+          catch (InterruptedException e) {
+            repeat=true;
+          }
+        }
+        lookupARPCacheThread = null;
       }
 
       // Deinit the core
