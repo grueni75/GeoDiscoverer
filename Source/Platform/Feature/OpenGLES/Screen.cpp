@@ -535,8 +535,9 @@ void Screen::graphicInvalidated(bool contextLost) {
     //DEBUG("unusedTextureInfos.size()=%d",unusedTextureInfos.size());
     for(std::list<TextureDebugInfo>::iterator i=unusedTextureInfos.begin();i!=unusedTextureInfos.end();i++) {
       GraphicTextureInfo textureInfo=(*i).textureInfo;
-      if (!contextLost)
+      if (!contextLost) {
         glDeleteTextures(1,&textureInfo);
+      }
     }
     unusedTextureInfos.clear();
     //DEBUG("unusedBufferInfos.size()=%d",unusedBufferInfos.size());
@@ -813,10 +814,15 @@ bool Screen::setupContext() {
 // Destroys the EGL context
 void Screen::shutdownContext() {
   eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-  eglDestroyContext(eglDisplay, eglContext);
-  eglDestroySurface(eglDisplay, eglSurface);
-  eglTerminate(eglDisplay);
-
+  if (!(eglDestroySurface(eglDisplay, eglSurface))) {
+    FATAL("can not destroy EGL surface",NULL);
+  }
+  if (!(eglDestroyContext(eglDisplay, eglContext))) {
+    FATAL("can not destroy EGL context",NULL);
+  }
+  if (!(eglTerminate(eglDisplay))) {
+    FATAL("can not terminate EGL display",NULL);
+  }
   eglDisplay = EGL_NO_DISPLAY;
   eglSurface = EGL_NO_SURFACE;
   eglContext = EGL_NO_CONTEXT;
