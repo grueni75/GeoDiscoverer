@@ -65,7 +65,9 @@ ThreadInfo *Thread::createThread(std::string name, ThreadFunction threadFunction
     FATAL("can not set thread priority (error=%d)",result);
   }*/
   pthread_mutex_lock(&accessMutex);
-  std::string *t = new std::string(name);
+  std::stringstream s;
+  s << name << " (0x" << std::stringstream::hex << thread << ")";
+  std::string *t = new std::string(s.str());
   if (!t) {
     FATAL("can not create string",NULL);
   }
@@ -128,7 +130,7 @@ void Thread::destroyMutex(ThreadMutexInfo *mutex) {
   ThreadMutexWaitQueueMap::iterator j = mutexWaitQueueMap.find(mutex);
   if (j!=mutexWaitQueueMap.end()) {
     for(std::list<std::string*>::iterator k=j->second->begin();k!=j->second->end();k++) {
-      delete *k;
+      delete (*k);
     }
     delete j->second;
     mutexWaitQueueMap.erase(j);
@@ -353,7 +355,7 @@ Thread::~Thread() {
   pthread_mutex_destroy(&accessMutex);
   for(ThreadMutexWaitQueueMap::iterator i=mutexWaitQueueMap.begin();i!=mutexWaitQueueMap.end();i++) {
     for(std::list<std::string*>::iterator j=i->second->begin();j!=i->second->end();j++) {
-      delete *j;
+      delete (*j);
     }
     delete i->second;
   }
