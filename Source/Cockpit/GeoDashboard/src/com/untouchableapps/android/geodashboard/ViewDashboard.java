@@ -44,8 +44,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.text.format.Formatter;
-import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -190,7 +188,7 @@ public class ViewDashboard extends Activity {
    */
   private Bitmap createTextBitmap(String text) {
     Paint paint = new Paint();
-    paint.setTextSize(16 * getResources().getDisplayMetrics().density);
+    paint.setTextSize(22 * getResources().getDisplayMetrics().density);
     paint.setColor(Color.BLACK);
     paint.setTextAlign(Paint.Align.CENTER);
     Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -299,7 +297,7 @@ public class ViewDashboard extends Activity {
   /**
    * Stops the network service
    */
-  private void stopService() {
+  private void stopService(boolean wait) {
     quitServerThread=true;
     Bitmap b = createTextBitmap(getString(R.string.deinit_server));
     Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,b);
@@ -323,6 +321,18 @@ public class ViewDashboard extends Activity {
       }
     });
     stopThread.start();
+    if (wait) {
+      boolean repeat=true;
+      while (repeat) {
+        try {
+          repeat=false;
+          stopThread.join();
+        }
+        catch (InterruptedException e) {
+          repeat=true;
+        }
+      }
+    } 
   }
   
   /**
@@ -391,11 +401,6 @@ public class ViewDashboard extends Activity {
     width = size.x;
     height = size.y;
 
-    // Enable multicast on WLAN
-    wifiManager = (android.net.wifi.WifiManager) getSystemService(android.content.Context.WIFI_SERVICE);
-    multicastLock = wifiManager.createMulticastLock("Geo Dashboard lock for JmDNS");
-    multicastLock.setReferenceCounted(true);
-    multicastLock.acquire();
         
     // Handle messages from the server thread
     serverThreadHandler = new Handler(Looper.getMainLooper()) {
@@ -414,9 +419,6 @@ public class ViewDashboard extends Activity {
         }
       }
     };
-    
-    // Create the network service
-    startService();
   }
 
   @Override
@@ -447,16 +449,37 @@ public class ViewDashboard extends Activity {
   }
   
   /**
-   * Suspend the network service
+   * Called when activity is resumed
    */
   @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    stopService();
+  protected void onResume() {
+    super.onResume();
+
+    // Enable multicast on WLAN
+    wifiManager = (android.net.wifi.WifiManager) getSystemService(android.content.Context.WIFI_SERVICE);
+    multicastLock = wifiManager.createMulticastLock("Geo Dashboard lock for JmDNS");
+    multicastLock.setReferenceCounted(true);
+    multicastLock.acquire();
+    
+    // Create the network service
+    startService();
+  }
+  
+  /**
+   * Called when the activity is paused
+   */
+  @Override
+  protected void onPause() {
+    super.onPause();
+    
+    // Stop the network service
+    stopService(true);
+    
+    // Release the multicast lock
     if (multicastLock!=null)
       multicastLock.release();
   }
-  
+    
   /** Create the action buttons */
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -472,7 +495,7 @@ public class ViewDashboard extends Activity {
     switch (item.getItemId()) {
       case R.id.action_refresh:
         restartNetworkService=true;
-        stopService();
+        stopService(false);
         return true;
       default:
         return super.onOptionsItemSelected(item);
