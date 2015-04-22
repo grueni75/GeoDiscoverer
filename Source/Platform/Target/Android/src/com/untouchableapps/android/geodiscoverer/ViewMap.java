@@ -133,33 +133,11 @@ public class ViewMap extends GDActivity {
   // Flags
   boolean compassWatchStarted = false;
   boolean exitRequested = false;
+  boolean restartRequested = false;
   
   // Handles finished queued downloads
   LinkedList<Bundle> downloads = new LinkedList<Bundle>();
-  BroadcastReceiver downloadCompleteReceiver = new BroadcastReceiver() {
-    
-    @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-    @Override
-    public void onReceive(Context context, Intent intent) {
-      
-      // If one of the requested download finished, restart the core
-      for (Bundle download : downloads) {
-        DownloadManager.Query query = new DownloadManager.Query();
-        query.setFilterById(download.getLong("ID"));
-        Cursor cur = downloadManager.query(query);
-        int col = cur.getColumnIndex(DownloadManager.COLUMN_STATUS);
-        if (cur.moveToFirst()) {
-          if (cur.getInt(col)==DownloadManager.STATUS_SUCCESSFUL) {
-            restartCore(false);
-          } else {
-            errorDialog(getString(R.string.download_failed,download.getLong("Name")));
-          }
-        }
-        downloads.remove(download);
-        break;
-      }
-    }
-  };
+  BroadcastReceiver downloadCompleteReceiver = null;
   
   /** Updates the progress dialog */
   protected void updateProgressDialog(String message, int progress) {
@@ -237,6 +215,7 @@ public class ViewMap extends GDActivity {
     }
     
     /** Called when the core has a message */
+    @SuppressLint("NewApi")
     @Override
     public void handleMessage(Message msg) {  
       
@@ -370,6 +349,18 @@ public class ViewMap extends GDActivity {
             viewMap.finish();
             commandExecuted=true;
           } 
+          if (commandFunction.equals("restartActivity")) {            
+            viewMap.stopService(new Intent(viewMap, GDService.class));
+            SharedPreferences.Editor prefsEditor = viewMap.prefs.edit();
+            prefsEditor.putBoolean("processIntent", false);
+            prefsEditor.commit();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+              viewMap.recreate();
+            } else {
+              viewMap.finish();
+            }
+            commandExecuted=true;
+          } 
           if (commandFunction.equals("initComplete")) {
 
             // Inform the user about the app drawer
@@ -462,6 +453,7 @@ public class ViewMap extends GDActivity {
 
   /** Restarts the core */
   void restartCore(boolean resetConfig) {
+    restartRequested=true;
     busyTextView.setText(" " + getString(R.string.restarting_core_object) + " ");
     Message m=Message.obtain(coreObject.messageHandler);
     m.what = GDCore.RESTART_CORE;
@@ -1070,10 +1062,34 @@ public class ViewMap extends GDActivity {
       downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
       IntentFilter filter = new IntentFilter();
       filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+      downloadCompleteReceiver = new BroadcastReceiver() {
+        
+        @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          
+          // If one of the requested download finished, restart the core
+          for (Bundle download : downloads) {
+            DownloadManager.Query query = new DownloadManager.Query();
+            query.setFilterById(download.getLong("ID"));
+            Cursor cur = downloadManager.query(query);
+            int col = cur.getColumnIndex(DownloadManager.COLUMN_STATUS);
+            if (cur.moveToFirst()) {
+              if (cur.getInt(col)==DownloadManager.STATUS_SUCCESSFUL) {
+                restartCore(false);
+              } else {
+                errorDialog(getString(R.string.download_failed,download.getLong("Name")));
+              }
+            }
+            downloads.remove(download);
+            break;
+          }
+        }
+      };
       registerReceiver(downloadCompleteReceiver, filter);
     }
   }
-  
+
   /** Downloads files extracted from intents */
   @TargetApi(Build.VERSION_CODES.GINGERBREAD)
   void downloadRoute(final Uri srcURI) {
@@ -1155,11 +1171,13 @@ public class ViewMap extends GDActivity {
   public void onCreate(Bundle savedInstanceState) {
     
     super.onCreate(savedInstanceState);
+    restartRequested=false;
+    exitRequested=false;
     
     // Check for OpenGL ES 2.00
     final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
     final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
-    final boolean supportsEs2 = configurationInfo.reqGlEsVersion >= 0x20000;
+    final boolean supportsEs2 = (configurationInfo.reqGlEsVersion >= 0x20000) || (Build.FINGERPRINT.startsWith("generic"));
     if (!supportsEs2)
     {
       fatalDialog(getString(R.string.opengles20_required));
@@ -1173,6 +1191,15 @@ public class ViewMap extends GDActivity {
     }
     if (prefs.contains("lastAddressText")) {
       lastAddressText = prefs.getString("lastAddressText", "");
+    }
+    if (prefs.contains("processIntent")) {
+      boolean processIntent = prefs.getBoolean("processIntent", true);
+      if (!processIntent) {
+        getIntent().addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+      }
+      SharedPreferences.Editor prefsEditor = prefs.edit();
+      prefsEditor.putBoolean("processIntent", true);
+      prefsEditor.commit();
     }
     
     // Get the core object
@@ -1322,7 +1349,7 @@ public class ViewMap extends GDActivity {
     mapSurfaceView.onPause();
     stopWatchingCompass();
     coreObject.executeCoreCommand("maintenance()");
-    if (!exitRequested) {
+    if ((!exitRequested)&&(!restartRequested)) {
       Intent intent = new Intent(this, GDService.class);
       intent.setAction("activityPaused");
       startService(intent);
@@ -1334,10 +1361,22 @@ public class ViewMap extends GDActivity {
   @Override
   public void onResume() {
     super.onResume();
-    
-    // Resume all components
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onResume called by " + Thread.currentThread().getName());
+
+    // Bug fix: Somehow the emulator calls onResume before onCreate
+    // But the code relies on the fact that onCreate is called before
+    // Do nothing if onCreate has not yet initialized the objects
+    if (coreObject==null)
+      return;
+
+    // Resume the map surface view
     mapSurfaceView.onResume();
+
+    // If we shall restart or exit, don't init anything here
+    if ((exitRequested)||(restartRequested)) 
+      return;
+
+    // Resume all components only if a exit or restart is not requested
     startWatchingCompass();
     updateWakeLock();
     Intent intent = new Intent(this, GDService.class);
@@ -1348,7 +1387,6 @@ public class ViewMap extends GDActivity {
       m.what = GDCore.START_CORE;
       coreObject.messageHandler.sendMessage(m);      
     }
-    exitRequested=false;
     
     // Extract the file path from the intent
     intent = getIntent();
@@ -1392,6 +1430,7 @@ public class ViewMap extends GDActivity {
     // Check if the intent was seen
     if (intent!=null) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "intent=" + intent.toString());
+      intent.toUri(0);
       if ((intent.getFlags()&Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY)!=0) {
         isGDA=false;
         isGPXFromFile=false;
@@ -1483,8 +1522,16 @@ public class ViewMap extends GDActivity {
     coreObject.setActivity(null);
     if (wakeLock.isHeld())
       wakeLock.release();
+    if (downloadCompleteReceiver!=null)
+      unregisterReceiver(downloadCompleteReceiver);
     if (exitRequested) 
       System.exit(0);
+    if (restartRequested) {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+        Intent intent = new Intent(getApplicationContext(), ViewMap.class);
+        startActivity(intent);
+      }
+    }
   }
 
   /** Called when a configuration change (e.g., caused by a screen rotation) has occured */

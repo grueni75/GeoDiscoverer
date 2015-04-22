@@ -1,0 +1,3 @@
+#!/bin/bash
+adb logcat | grep `adb shell ps | grep com.untouchableapps.android.geodiscoverer | cut -c10-15`
+

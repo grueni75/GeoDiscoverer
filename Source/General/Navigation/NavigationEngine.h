@@ -254,9 +254,10 @@ public:
       core->getThread()->unlockMutex(targetPosMutex);
   }
 
-  void lockRoutes(const char *file, int line)
+  std::list<NavigationPath*> *lockRoutes(const char *file, int line)
   {
       core->getThread()->lockMutex(routesMutex, file, line);
+      return &routes;
   }
   void unlockRoutes()
   {

@@ -26,6 +26,7 @@ ZipArchive::ZipArchive(std::string archiveFolder, std::string archiveName) {
 ZipArchive::~ZipArchive() {
   if (archive)
     zip_close(archive);
+  archive=NULL;
 }
 
 // Initializes the object

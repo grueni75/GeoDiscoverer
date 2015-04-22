@@ -529,7 +529,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := gdcore
 MY_GD_ROOT := ../../../..
 MY_GD_PLATFORM_SRCS = $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/POSIX -name '*.cpp' -exec echo ../{} \;)
-MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/OpenGLES -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/OpenGL -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libjpeg -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libxml2 -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libfreetype2 -name '*.cpp' -exec echo ../{} \;)
@@ -540,7 +540,7 @@ MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libpro
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/Android -name '*.cpp' -exec echo ../{} \;)
 MY_GD_GENERAL_SRCS = $(shell find $(MY_GD_ROOT)/Source/General -name '*.cpp' -exec echo ../{} \;)
 MY_GD_INCLUDES = -I$(MY_GD_ROOT)/Source/Platform/Feature/POSIX
-MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/OpenGLES
+MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/OpenGL
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libjpeg
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libxml2
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libfreetype2

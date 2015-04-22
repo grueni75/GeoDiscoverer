@@ -121,6 +121,20 @@
 			                  </xsd:sequence>
 			                </xsd:complexType>
 			              </xsd:element>
+                    <xsd:element name="Vibration">
+                      <xsd:annotation>
+                        <xsd:documentation>Vibrates if important navigation events occur (turns, off route).</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="active" type="xsd:boolean" default="1" gd:upgrade="restore">
+                            <xsd:annotation>
+                              <xsd:documentation>Enables the vibration cockpit app.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
                     <xsd:element name="Voice">
                       <xsd:annotation>
                         <xsd:documentation>Speaks cockpit infos aloud.</xsd:documentation>
@@ -179,6 +193,11 @@
                           <xsd:element name="addressCacheSleepTime" type="xsd:integer" default="10">
                             <xsd:annotation>
                               <xsd:documentation>Time in seconds to wait before rechecking the ARP cache for new devices.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>                          
+                          <xsd:element name="socketTimeout" type="xsd:integer" default="3">
+                            <xsd:annotation>
+                              <xsd:documentation>Time in seconds to wait before aborting communication via a socket.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>                          
                         </xsd:sequence>

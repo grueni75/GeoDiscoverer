@@ -205,7 +205,7 @@ public:
   void tileTextureAvailable(const char *file, int line);
 
   // Called if the textures or buffers have been lost or must be recreated
-  void updateGraphic(bool graphicInvalidated);
+  void updateGraphic(bool graphicInvalidated, bool destroyOnly);
 
   // Does a late initialization of certain objects
   void lateInit();

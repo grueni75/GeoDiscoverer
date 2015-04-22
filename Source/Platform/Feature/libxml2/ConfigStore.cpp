@@ -339,6 +339,8 @@ void ConfigStore::read()
       }
       free(buf1);
       free(buf2);
+      fclose(in1);
+      fclose(in2);
     }
     if (schemaHasChanged) {
 

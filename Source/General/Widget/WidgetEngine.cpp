@@ -1209,6 +1209,21 @@ void WidgetEngine::createGraphic() {
   // Allow access by the next thread
   core->getThread()->unlockMutex(accessMutex);
 
+  // Inform the widgets about the current app status
+  std::list<NavigationPath*> *routes=core->getNavigationEngine()->lockRoutes(__FILE__,__LINE__);
+  for (std::list<NavigationPath*>::iterator i=routes->begin();i!=routes->end();i++) {
+    onPathChange(*i,NavigationPathChangeTypeWidgetEngineInit);
+  }
+  core->getNavigationEngine()->unlockRoutes();
+  MapPosition pos = *core->getNavigationEngine()->lockLocationPos(__FILE__,__LINE__);
+  core->getNavigationEngine()->unlockLocationPos();
+  onLocationChange(pos);
+  pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
+  core->getMapEngine()->unlockMapPos();
+  std::list<MapTile*> *centerMapTiles = core->getMapEngine()->lockCenterMapTiles(__FILE__,__LINE__);
+  onMapChange(pos,centerMapTiles);
+  core->getMapEngine()->unlockCenterMapTiles();
+
   // Set the positions of the widgets
   updateWidgetPositions();
 }

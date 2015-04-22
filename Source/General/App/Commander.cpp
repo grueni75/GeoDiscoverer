@@ -201,11 +201,11 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="graphicInvalidated") {
-    core->updateGraphic(true);
+    core->updateGraphic(true,false);
     cmdExecuted=true;
   }
   if (cmdName=="createGraphic") {
-    core->updateGraphic(false);
+    core->updateGraphic(false,false);
     cmdExecuted=true;
   }
   if (cmdName=="locationChanged") {
@@ -441,11 +441,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="addDashboardDevice") {
-    //if (core->getIsInitialized()) {
-      core->addDashboardDevice(args[0],atoi(args[1].c_str()));
-    //} else {
-    //  DEBUG("addDashboardDevice command ignored because core is not yet initialized",NULL);
-    //}
+    core->addDashboardDevice(args[0],atoi(args[1].c_str()));
     cmdExecuted=true;
   }
 

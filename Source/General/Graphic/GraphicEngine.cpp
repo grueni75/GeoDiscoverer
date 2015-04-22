@@ -306,7 +306,8 @@ bool GraphicEngine::draw(bool forceRedraw) {
     screen->setColor(255,0,255,255);
     screen->scale(100,100,1.0);
     screen->drawEllipse(false);
-    screen->endObject();*/
+    screen->endObject();
+*/
 
     PROFILE_ADD("drawing init");
 

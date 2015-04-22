@@ -28,12 +28,14 @@ Device::Device(std::string name, bool whiteBackround, bool animationFriendly) {
   this->fontEngine=NULL;
   this->widgetEngine=NULL;
   this->graphicEngine=NULL;
+  this->socketTimeout=core->getConfigStore()->getIntValue("Cockpit/App/Dashboard","socketTimeout",__FILE__,__LINE__);
   visibleWidgetPages=NULL;
   width=0;
   height=0;
   port=0;
   socketfd=-1;
   orientation=GraphicScreenOrientationProtrait;
+  initDone=false;
 }
 
 // Destructor
@@ -84,15 +86,31 @@ void Device::reconfigure() {
   widgetEngine->updateWidgetPositions();
 }
 
-// Destroys the device
-void Device::destroy(bool contextLost) {
+// Creates the graphic
+void Device::createGraphic() {
+
+  // If screen is not initialized, skip this
+  if (!screen)
+    return;
+
+  DEBUG("creating graphic",NULL);
+  screen->setAllowAllocation(true);
+  screen->createGraphic();
+  fontEngine->createGraphic();
+  widgetEngine->createGraphic();
+  graphicEngine->createGraphic();
+  screen->setAllowAllocation(false);
+}
+
+// Destroys the graphic
+void Device::destroyGraphic(bool contextLost) {
 
   // If screen is not initialized, skip this
   if (!screen)
     return;
 
   // Do the destroying
-  DEBUG("destroy",NULL);
+  DEBUG("destroying graphic",NULL);
   screen->setAllowDestroying(true);
   if (graphicEngine) graphicEngine->destroyGraphic();
   screen->destroyGraphic();
@@ -100,23 +118,23 @@ void Device::destroy(bool contextLost) {
   if (fontEngine) fontEngine->destroyGraphic();
   screen->graphicInvalidated(contextLost);
   screen->setAllowDestroying(false);
-
 }
 
 // Performs the drawing on this device
 bool Device::draw() {
 
   // Was the device info already discovered?
-  if (width==0)
+  if (!initDone)
     return false;
 
   // Do the drawing
-  getScreen()->setAllowAllocation(true);
-  bool result=getGraphicEngine()->draw(false);
-  getScreen()->setAllowAllocation(false);
+  screen->setAllowAllocation(true);
+  bool result=graphicEngine->draw(false);
+  screen->setAllowAllocation(false);
   if (socketfd>=0)
     closeSocket();
 
   return result;
 }
+
 } /* namespace GEODISCOVERER */

@@ -12,6 +12,8 @@
 
 #include <Core.h>
 
+#ifdef TARGET_LINUX
+
 int frameCountBeforeTextureInvalidation=30;
 bool graphicInitialized=false;
 
@@ -19,7 +21,7 @@ bool graphicInitialized=false;
 void displayFunc()
 {
   if (!graphicInitialized) {
-    GEODISCOVERER::core->updateGraphic(false);
+    GEODISCOVERER::core->updateGraphic(false,false);
     graphicInitialized=true;
   }
   GEODISCOVERER::core->updateScreen(false);
@@ -61,7 +63,7 @@ void keyboardFunc(GLubyte key, GLint x, GLint y)
 void idleFunc() {
   usleep(16666);
   if (frameCountBeforeTextureInvalidation==0) {
-    GEODISCOVERER::core->updateGraphic(false);
+    GEODISCOVERER::core->updateGraphic(false,false);
     frameCountBeforeTextureInvalidation--;
   } else {
     if (frameCountBeforeTextureInvalidation>0)
@@ -103,55 +105,118 @@ void motionFunc(int x, int y)
   }
 }
 
+#endif
+
 namespace GEODISCOVERER {
 
-// Background thread that stores images of the screen
-void *writeScreenShotThread(void *args) {
-  ((Screen*)args)->writeScreenShot();
-  return NULL;
-}
+// Program for the vertex shader
+const char *Screen::vertexShaderProgram =
+#ifdef TARGET_LINUX
+"   #version 130                                      \n"
+#endif
+    // Inputs
+"   uniform mat4 mvpMatrix;                           \n"
+"   uniform vec4 colorIn;                             \n"
+"   attribute vec4 positionIn;                        \n"
+"   attribute vec2 textureCoordinateIn;               \n"
+    // Variables shared with the fragment shader
+"   varying vec4 colorOut;                            \n"
+"   varying vec2 textureCoordinateOut;                \n"
+"                                                     \n"
+"   void main()                                       \n"
+"   {                                                 \n"
+"     colorOut = colorIn;                             \n"
+"     gl_Position = mvpMatrix * positionIn;           \n"
+"     textureCoordinateOut = textureCoordinateIn;     \n"
+"   }                                                 \n";
+
+// Program for the fragment shader
+const char *Screen::fragmentShaderProgram =
+#ifdef TARGET_LINUX
+"   #version 130                                                                  \n"
+#endif
+    // Inputs
+"   uniform bool textureEnabled;                                                  \n"
+"   uniform sampler2D textureImageIn;                                             \n"
+    // Variables shared with the vertex shader
+"   varying lowp vec4 colorOut;                                                   \n"
+"   varying lowp vec2 textureCoordinateOut;                                       \n"
+"                                                                                 \n"
+"   void main()                                                                   \n"
+"   {                                                                             \n"
+"     if (textureEnabled)                                                         \n"
+"       gl_FragColor = colorOut * texture2D(textureImageIn, textureCoordinateOut);\n"
+"     else                                                                        \n"
+"       gl_FragColor = colorOut;                                                  \n"
+"   }                                                                             \n";
 
 // Constructor: open window and init opengl
 Screen::Screen(Device *device) {
-
-  // Set variables
   this->device=device;
-  this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock", __FILE__, __LINE__);
-  this->separateFramebuffer=separateFramebuffer;
-  this->lineWidth=0;
+  this->allowDestroying=false;
+  this->allowAllocation=false;
+  this->orientation=GraphicScreenOrientationProtrait;
+  this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock",__FILE__, __LINE__);
+  this->ellipseCoordinatesBuffer=bufferNotDefined;
+  this->separateFramebuffer=(device!=core->getDefaultDevice());
+  this->testTextureInfo=getTextureNotDefined();
   framebuffer=0;
   colorRenderbuffer=0;
-  setWakeLock(wakeLock, __FILE__, __LINE__);
-  for (Int i=0;i<2;i++) {
-    screenShotPixels[i]=NULL;
-  }
-  quitWriteScreenShotThread=false;
-  nextScreenShotPixelsIndex=0;
-  if (separateFramebuffer) {
-    nextScreenShotPixelsMutex=core->getThread()->createMutex("current screen shot pixels mutex");
-    writeScreenShotSignal=core->getThread()->createSignal();
-    writeScreenShotThreadInfo=core->getThread()->createThread("screen shot write thread",writeScreenShotThread,this);
-  }
+  screenShotPixel=NULL;
+  vertexShaderHandle=0;
+  fragmentShaderHandle=0;
+  shaderProgramHandle=0;
+  width=0;
+  height=0;
+  mvpMatrixHandle=-1;
+  positionInHandle=-1;
+  colorInHandle=-1;
+  textureCoordinateInHandle=-1;
+  textureImageInHandle=-1;
+  textureEnabledHandle=-1;
+  lineWidth=0;
+  openglES30Supported=false;
+  pixelBuffer=0;
+  pixelBufferSize=0;
 }
 
 // Main loop
 void Screen::mainLoop() {
+#ifdef TARGET_LINUX
+  int argc = 0;
+  char **argv = NULL;
+  glutInit(&argc, argv);
+  glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+  glutInitWindowSize(getWidth(), getHeight());
+  glutInitWindowPosition(600, 50);
+  Int winid=glutCreateWindow("GeoDiscoverer");
+  glutDisplayFunc(displayFunc);
+  glutKeyboardFunc(keyboardFunc);
+  glutIdleFunc(idleFunc);
+  glutMouseFunc(mouseFunc);
+  glutMotionFunc(motionFunc);
   glutMainLoop();
+  WARNING("check if exit is working correctly",NULL);
+  core->updateGraphic(false,true);
+  core->getDefaultScreen()->setAllowDestroying(true);
+  graphicInvalidated(false);
+#endif
 }
 
-// Get the width of the screen
-Int Screen::getWidth() {
-  return width;
-}
-
-// Get the height of the screen
-Int Screen::getHeight() {
-  return height;
-}
-
-// Gets the orientation of the screen
-GraphicScreenOrientation Screen::getOrientation() {
-  return orientation;
+// Compiles a shader program
+void Screen::compileShaderProgram(GLuint handle, const char *program) {
+  GLint len = strlen(program);
+  glShaderSource(handle,1,&program,&len);
+  glCompileShader(handle);
+  GLint compileSuccess;
+  glGetShaderiv(handle, GL_COMPILE_STATUS, &compileSuccess);
+  if (compileSuccess == GL_FALSE) {
+      GLchar messages[256];
+      glGetShaderInfoLog(handle, sizeof(messages), 0, &messages[0]);
+      FATAL("can not compile shader program: %s",messages);
+      return;
+  }
 }
 
 // Checks if an extension is available
@@ -189,70 +254,21 @@ bool Screen::queryExtension(const char *extName) {
 // Inits the screen
 void Screen::init(GraphicScreenOrientation orientation, Int width, Int height) {
 
-  int argc = 0;
-  char **argv = NULL;
-
   // Update variables
   this->width=width;
   this->height=height;
   this->orientation=orientation;
-  this->textureFormatRGB888Supported=false;
-  this->textureFormatRGBA8888Supported=false;
   DEBUG("dpi=%d width=%d height=%d",getDPI(),width,height);
-
-  // Shall we do off-screen rendering?
-  if (!separateFramebuffer) {
-
-    // Open window
-    glutInit(&argc, argv);
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize(getWidth(), getHeight());
-    glutInitWindowPosition(600, 50);
-    glutCreateWindow("GeoDiscoverer");
-    glutDisplayFunc(displayFunc);
-    glutKeyboardFunc(keyboardFunc);
-    glutIdleFunc(idleFunc);
-    glutMouseFunc(mouseFunc);
-    glutMotionFunc(motionFunc);
-
-  } else {
-
-    // Create a suitable frame buffer
-    glGenFramebuffers(1,&framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER,framebuffer);
-    glGenRenderbuffers(1,&colorRenderbuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER,colorRenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, getWidth(), getHeight());
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE)
-      FATAL("can not create off-screen frame buffer",NULL);
-
-    // Reserve memory for the screen shot buffers
-    core->getThread()->lockMutex(nextScreenShotPixelsMutex,__FILE__,__LINE__);
-    for (Int i=0;i<2;i++) {
-      if (screenShotPixels[i])
-        free(screenShotPixels[i]);
-      if (!(screenShotPixels[i]=malloc(width*height*Image::getRGBPixelSize()))) {
-        FATAL("can not reserve memory for screen shot pixels",NULL);
-        return;
-      }
-    }
-    nextScreenShotPixelsIndex=0;
-    core->getThread()->unlockMutex(nextScreenShotPixelsMutex);
-
-  }
 
   // Compute the maximum tiles to show
   if (!separateFramebuffer)
     core->getMapEngine()->setMaxTiles();
 
-  // Check for error
-  GLenum error=glGetError();
-  if (error!=GL_NO_ERROR) {
-    FATAL("something went wrong during init (error=0x%08x)",error);
-  }
+  // Init the projection matrix
+  projectionMatrix = glm::frustum<float>(-((float)getWidth()) / 2.0, ((float)getWidth()) / 2.0, -((float)getHeight()) / 2.0, ((float)getHeight()) / 2.0, -1.0, 1.0);
+  vpMatrix=projectionMatrix*viewMatrix;
+  mvpMatrix=vpMatrix*modelMatrix;
+
 }
 
 // Activates the screen for drawing
@@ -270,17 +286,32 @@ void Screen::startScene() {
   else
     glClearColor(0.0f,0.0f,0.0f,0.0f);
   glViewport(0, 0, (GLsizei) getWidth(), (GLsizei) getHeight());
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(-((GLfloat)getWidth()) / 2.0, ((GLfloat)getWidth()) / 2.0, -((GLfloat)getHeight()) / 2.0, ((GLfloat)getHeight()) / 2.0, -1.0, 1.0);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );      // select modulate to mix texture with color for shading
+
+  // Set texture parameter
+  //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );      // select modulate to mix texture with color for shading
+  //glActiveTexture(GL_TEXTURE0);
+  //glUniform1i(textureImageInHandle, 0);
 
   // Enable transparency
-  glEnable(GL_BLEND);
-  //glEnable (GL_LINE_SMOOTH);
+  glEnable (GL_BLEND);
   setColorModeAlpha();
+
+  // Activate texture slot
+  glActiveTexture(GL_TEXTURE0);
+  glUniform1i(textureImageInHandle, 0);
+
+  // Hand over pointers to static variables to the shader
+  glEnableVertexAttribArray(positionInHandle);
+  glEnableVertexAttribArray(textureCoordinateInHandle);
+  glUniform1i(textureEnabledHandle,1);
+
+  // Clear the matrix stack
+  if (modelMatrixStack.size()!=0) {
+    FATAL("model matrix stack has entries left from previous drawing",NULL);
+  }
+  modelMatrix = glm::mat4x4(1.0);
+  mvpMatrix=vpMatrix*modelMatrix;
+  glUniformMatrix4fv(mvpMatrixHandle,1,false,glm::value_ptr(mvpMatrix));
 
   // Check for error
   GLenum error=glGetError();
@@ -292,15 +323,32 @@ void Screen::startScene() {
 // Creates a screen shot
 bool Screen::createScreenShot() {
 
+  bool result = true;
+
   // Get the screen pixels
+  GLvoid *pixels;
   glReadBuffer(GL_COLOR_ATTACHMENT0);
-  core->getThread()->lockMutex(nextScreenShotPixelsMutex,__FILE__,__LINE__);
-  GLvoid *nextScreenShotPixels=screenShotPixels[nextScreenShotPixelsIndex];
-  if (nextScreenShotPixels!=NULL)
-    glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,nextScreenShotPixels);
-  core->getThread()->unlockMutex(nextScreenShotPixelsMutex);
-  if (nextScreenShotPixels!=NULL)
-    core->getThread()->issueSignal(writeScreenShotSignal);
+  if (pixelBufferSize!=0) {
+
+    // Grab the image
+    if (openglES30Supported) {
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, pixelBuffer);
+      glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,0);
+      pixels = glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, pixelBufferSize, GL_MAP_READ_BIT);
+    } else {
+      glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,screenShotPixel);
+      pixels=screenShotPixel;
+    }
+
+    // Write the PNG
+    result = core->getImage()->writePNG((ImagePixel*)pixels,device,width,height,core->getImage()->getRGBPixelSize(),true);
+
+    // Clean up
+    if (openglES30Supported) {
+      glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    }
+  }
 
   // Check for error
   GLenum error=glGetError();
@@ -308,121 +356,91 @@ bool Screen::createScreenShot() {
     FATAL("something went wrong during createScreenShot (error=0x%08x)",error);
   }
 
-  return true;
+  return result;
 }
 
-// Writes the screen shot as a png
-void Screen::writeScreenShot() {
-
-  GLvoid *pixels;
-
-  // Set the priority
-  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
-
-  // This thread can be cancelled at any time
-  core->getThread()->setThreadCancable();
-
-  // Do an endless loop
-  while (true) {
-
-    // Wait for the trigger
-    core->getThread()->waitForSignal(writeScreenShotSignal);
-
-    // Shall we quit?
-    if (quitWriteScreenShotThread)
-      return;
-
-    // Copy the screen shot pixels
-    core->getThread()->lockMutex(nextScreenShotPixelsMutex,__FILE__,__LINE__);
-    pixels=screenShotPixels[nextScreenShotPixelsIndex];
-    nextScreenShotPixelsIndex=(nextScreenShotPixelsIndex+1)%2;
-    core->getThread()->unlockMutex(nextScreenShotPixelsMutex);
-
-    // Write the PNG
-    //core->getImage()->writePNG((ImagePixel*)pixels,screenShotPath,width,height,core->getImage()->getRGBPixelSize(),true);
-  }
-}
-
+// Clears the scene
 void Screen::clear() {
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
 // Starts a new object
 void Screen::startObject() {
-  glPushMatrix();
-}
-
-// Resets all scaling, translation and rotation parameters of the object
-void Screen::resetObject() {
-  glLoadIdentity();
+  modelMatrixStack.push_back(modelMatrix);
 }
 
 // Sets the line width for drawing operations
 void Screen::setLineWidth(Int width) {
-  this->lineWidth=width;
+  lineWidth=width;
   glLineWidth(width);
 }
 
 // Ends the current object
 void Screen::endObject() {
-  glPopMatrix();
+  modelMatrix=modelMatrixStack.back();
+  modelMatrixStack.pop_back();
+  mvpMatrix=vpMatrix*modelMatrix;
+  glUniformMatrix4fv(mvpMatrixHandle,1,false,glm::value_ptr(mvpMatrix));
 }
 
 // Rotates the scene
 void Screen::rotate(double angle, Int x, Int y, Int z) {
-  glRotatef(angle, x, y, z);
+  glm::vec3 axis = glm::vec3(x,y,z);
+  modelMatrix=glm::rotate(modelMatrix,(float)FloatingPoint::degree2rad(angle),axis);
+  mvpMatrix=vpMatrix*modelMatrix;
+  glUniformMatrix4fv(mvpMatrixHandle,1,false,glm::value_ptr(mvpMatrix));
 }
 
 // Scales the scene
 void Screen::scale(double x, double y, double z) {
-  glScalef(x, y, z);
+  glm::vec3 factors = glm::vec3(x,y,z);
+  modelMatrix=glm::scale(modelMatrix,factors);
+  mvpMatrix=vpMatrix*modelMatrix;
+  glUniformMatrix4fv(mvpMatrixHandle,1,false,glm::value_ptr(mvpMatrix));
 }
 
 // Translates the scene
 void Screen::translate(Int x, Int y, Int z) {
-  glTranslatef(x, y, z);
+  glm::vec3 translation = glm::vec3(x,y,z);
+  modelMatrix=glm::translate(modelMatrix,translation);
+  mvpMatrix=vpMatrix*modelMatrix;
+  glUniformMatrix4fv(mvpMatrixHandle,1,false,glm::value_ptr(mvpMatrix));
 }
 
 // Sets the drawing color
 void Screen::setColor(UByte r, UByte g, UByte b, UByte a) {
-  glColor4f((GLfloat) (r) / 255.0, (GLfloat) (g) / 255.0, (GLfloat) (b) / 255.0, (GLfloat) (a) / 255.0);
+  drawingColor = glm::vec4((float) (r) / 255.0, (float) (g) / 255.0, (float) (b) / 255.0, (float) (a) / 255.0);
+  glUniform4fv(colorInHandle,1,glm::value_ptr(drawingColor));
 }
 
 // Sets color mode such that alpha channel of primitive determines its transparency
 void Screen::setColorModeAlpha() {
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 // Sets color mode such that primitive color is multiplied with background color
 void Screen::setColorModeMultiply() {
-  glBlendFunc (GL_ZERO, GL_SRC_COLOR);
+  glBlendFunc(GL_ZERO, GL_SRC_COLOR);
 }
 
-// Draws a single rectangle
+// Draws a rectangle
 void Screen::drawRectangle(Int x1, Int y1, Int x2, Int y2, GraphicTextureInfo texture, bool filled) {
-  double textureX1=0.0;
-  double textureY1=1.0;
-  double textureX2=1.0;
-  double textureY2=0.0;
+  float box[] = {x1,y1, x2,y1, x1,y2, x1,y2, x2,y1, x2,y2};
+  //DEBUG("x1=%d y1=%d x2=%d y2=%d",x1,y1,x2,y2);
   if (texture!=Screen::getTextureNotDefined()) {
-    glEnable( GL_TEXTURE_2D );
+    float tex[] = {0.0,1.0, 1.0,1.0, 0.0,0.0, 0.0,0.0, 1.0,1.0, 1.0,0.0};
     glBindTexture( GL_TEXTURE_2D, texture );
-    glBegin( GL_QUADS );
-    glTexCoord2d(textureX1,textureY2); glVertex2d(x1,y2);
-    glTexCoord2d(textureX2,textureY2); glVertex2d(x2,y2);
-    glTexCoord2d(textureX2,textureY1); glVertex2d(x2,y1);
-    glTexCoord2d(textureX1,textureY1); glVertex2d(x1,y1);
-    glEnd();
-    glBindTexture( GL_TEXTURE_2D, 0 );
-    glDisable( GL_TEXTURE_2D );
+    glVertexAttribPointer(positionInHandle, 2, GL_FLOAT, false, 0, &box[0]);
+    glVertexAttribPointer(textureCoordinateInHandle, 2, GL_FLOAT, false, 0, &tex[0]);
+    glDrawArrays(GL_TRIANGLES,0,6);
   } else {
     if (filled) {
-      glBegin( GL_QUADS );
-      glVertex2d(x1,y2);
-      glVertex2d(x2,y2);
-      glVertex2d(x2,y1);
-      glVertex2d(x1,y1);
-      glEnd();
+      glDisableVertexAttribArray(textureCoordinateInHandle);
+      glUniform1i(textureEnabledHandle,0);
+      glVertexAttribPointer(positionInHandle, 2, GL_FLOAT, false, 0, &box[0]);
+      glDrawArrays(GL_TRIANGLES,0,6);
+      glUniform1i(textureEnabledHandle,1);
+      glEnableVertexAttribArray(textureCoordinateInHandle);
     } else {
       Int negHalveLineWidth=lineWidth/2;
       Int posHalveLineWidth=lineWidth/2+lineWidth%2;
@@ -436,49 +454,76 @@ void Screen::drawRectangle(Int x1, Int y1, Int x2, Int y2, GraphicTextureInfo te
 
 // Draws multiple triangles
 void Screen::drawTriangles(Int numberOfTriangles, GraphicBufferInfo pointCoordinatesBuffer, GraphicTextureInfo textureInfo, GraphicBufferInfo textureCoordinatesBuffer) {
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, pointCoordinatesBuffer);
-  glVertexPointer(2, GL_SHORT, 0, 0);
+
   if (textureInfo!=textureNotDefined) {
-    glEnable( GL_TEXTURE_2D );
-    glBindTexture( GL_TEXTURE_2D, textureInfo );
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, textureCoordinatesBuffer);
-    glTexCoordPointer(2, GL_SHORT, 0, 0);
+    glVertexAttribPointer(textureCoordinateInHandle, 2, GL_SHORT, false, 0, 0);
+    glBindTexture( GL_TEXTURE_2D, textureInfo );
+  } else {
+    glDisableVertexAttribArray(textureCoordinateInHandle);
+    glUniform1i(textureEnabledHandle,0);
   }
+  glBindBuffer(GL_ARRAY_BUFFER, pointCoordinatesBuffer);
+  glVertexAttribPointer(positionInHandle, 2, GL_SHORT, false, 0, 0);
   glDrawArrays(GL_TRIANGLES, 0, numberOfTriangles*3);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glDisableClientState(GL_VERTEX_ARRAY);
-  if (textureInfo!=textureNotDefined) {
-    glBindTexture( GL_TEXTURE_2D, 0 );
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisable( GL_TEXTURE_2D );
+  if (textureInfo==textureNotDefined) {
+    glEnableVertexAttribArray(textureCoordinateInHandle);
+    glUniform1i(textureEnabledHandle,1);
   }
 }
 
 // Draws a ellipse
 void Screen::drawEllipse(bool filled) {
-  if (filled) {
-    glBegin(GL_POLYGON);
-  } else {
-    glBegin(GL_LINE_LOOP);
-  }
-  for(double t = 0; t <= 2*M_PI; t += 2*M_PI/ellipseSegments)
-    glVertex2f(cos(t), sin(t));
-  glEnd();
 
+  // Points prepared?
+  if (ellipseCoordinatesBuffer==bufferNotDefined) {
+
+    // No, create them
+    ellipseCoordinatesBuffer=createBufferInfo();
+    float *ellipseSegmentPoints=NULL;
+    if (!(ellipseSegmentPoints=(float*)malloc(2*sizeof(*ellipseSegmentPoints)*ellipseSegments))) {
+      FATAL("can not create ellipse segment points array",NULL);
+      return;
+    }
+    Int index=0;
+    for(double t = 0; t <= 2*M_PI; t += 2*M_PI/ellipseSegments) {
+      ellipseSegmentPoints[index++]=cos(t);
+      ellipseSegmentPoints[index++]=sin(t);
+    }
+    setArrayBufferData(ellipseCoordinatesBuffer,(Byte*)ellipseSegmentPoints,2*sizeof(*ellipseSegmentPoints)*ellipseSegments);
+    free(ellipseSegmentPoints);
+  }
+
+  // Draw the ellipse
+  glDisableVertexAttribArray(textureCoordinateInHandle);
+  glUniform1i(textureEnabledHandle,0);
+  glBindBuffer(GL_ARRAY_BUFFER, ellipseCoordinatesBuffer);
+  glVertexAttribPointer(positionInHandle, 2, GL_FLOAT, false, 0, 0);
+  if (filled) {
+    glDrawArrays(GL_TRIANGLE_FAN,0,ellipseSegments);
+  } else {
+    glDrawArrays(GL_LINE_LOOP,0,ellipseSegments);
+  }
+  glUniform1i(textureEnabledHandle,1);
+  glEnableVertexAttribArray(textureCoordinateInHandle);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 // Finished the drawing of the scene
 void Screen::endScene() {
+
+#ifdef TARGET_LINUX
   glFlush();
   glutSwapBuffers();
+#endif
 
   // Check for error
   GLenum error=glGetError();
   if (error!=GL_NO_ERROR) {
     FATAL("something went wrong during drawing (error=0x%08x)",error);
   }
+
 }
 
 // Creates a new texture id
@@ -488,7 +533,7 @@ GraphicTextureInfo Screen::createTextureInfo() {
     if (unusedTextureInfos.size()>0) {
       i=unusedTextureInfos.front().textureInfo;
       unusedTextureInfos.pop_front();
-      //DEBUG("reusing existing texture info (i==%d)",i);
+      //DEBUG("reusing existing texture info",NULL);
     } else {
       glGenTextures( 1, &i );
       //DEBUG("creating new texture info (i==%d)",i);
@@ -508,11 +553,13 @@ GraphicTextureInfo Screen::createTextureInfo() {
 
 // Sets the image of a texture
 bool Screen::setTextureImage(GraphicTextureInfo texture, UByte *image, Int width, Int height, GraphicTextureFormat format) {
+
+  //glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,texture);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-  glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
   GLenum imageFormat;
   GLenum imageContents;
   GLenum imageDataType;
@@ -546,11 +593,10 @@ bool Screen::setTextureImage(GraphicTextureInfo texture, UByte *image, Int width
       FATAL("unknown format",NULL);
       return false;
   }
+  //DEBUG("imageFormat=%d width=%d height=%d imageContents=%d imageDataType=%d ",imageFormat,width,height,imageContents,imageDataType);
   glTexImage2D(GL_TEXTURE_2D, 0, imageFormat, width, height, 0, imageContents, imageDataType, image);
   GLenum error=glGetError();
-  glBindTexture(GL_TEXTURE_2D,0);
   if (error!=GL_NO_ERROR) {
-    DEBUG("glGetError()=0x%x",error);
     return false;
   } else {
     return true;
@@ -612,13 +658,6 @@ void Screen::destroyBufferInfo(GraphicBufferInfo buffer) {
   unusedBufferInfos.push_back(buffer);
 }
 
-// If set to one, the screen is not turned off
-void Screen::setWakeLock(bool state, const char *file, int line, bool persistent) {
-  if (persistent)
-    core->getConfigStore()->setIntValue("General","wakeLock",state,file,line);
-  wakeLock=state;
-}
-
 // Frees any internal textures or buffers
 void Screen::graphicInvalidated(bool contextLost) {
   if (allowDestroying) {
@@ -626,52 +665,320 @@ void Screen::graphicInvalidated(bool contextLost) {
     //DEBUG("unusedTextureInfos.size()=%d",unusedTextureInfos.size());
     for(std::list<TextureDebugInfo>::iterator i=unusedTextureInfos.begin();i!=unusedTextureInfos.end();i++) {
       GraphicTextureInfo textureInfo=(*i).textureInfo;
-      glDeleteTextures(1,&textureInfo);
+      if (!contextLost) {
+        glDeleteTextures(1,&textureInfo);
+      }
     }
     unusedTextureInfos.clear();
     //DEBUG("unusedBufferInfos.size()=%d",unusedBufferInfos.size());
     for(std::list<GraphicBufferInfo>::iterator i=unusedBufferInfos.begin();i!=unusedBufferInfos.end();i++) {
       GraphicBufferInfo bufferInfo=*i;
-      glDeleteBuffers(1,&bufferInfo);
+      if (!contextLost)
+        glDeleteBuffers(1,&bufferInfo);
     }
     unusedBufferInfos.clear();
+    if (shaderProgramHandle) {
+      if (!contextLost)
+        glDeleteProgram(shaderProgramHandle);
+      shaderProgramHandle=0;
+    }
+    if (fragmentShaderHandle) {
+      if (!contextLost)
+        glDeleteShader(fragmentShaderHandle);
+      fragmentShaderHandle=0;
+    }
+    if (vertexShaderHandle) {
+      if (!contextLost)
+        glDeleteShader(vertexShaderHandle);
+      vertexShaderHandle=0;
+    }
+    if (separateFramebuffer) {
+      if (colorRenderbuffer) {
+        if (!contextLost)
+          glDeleteRenderbuffers(1,&colorRenderbuffer);
+        colorRenderbuffer=0;
+      }
+      if (framebuffer) {
+        if (!contextLost)
+          glDeleteFramebuffers(1,&framebuffer);
+        framebuffer=0;
+      }
+    }
   } else {
     FATAL("texture and buffer destroying has been disallowed",NULL);
+  }
+
+  // Check for error
+  GLenum error=glGetError();
+  if (error!=GL_NO_ERROR) {
+    FATAL("something went wrong during graphicInvalidated (error=0x%08x)",error);
   }
 }
 
 // Creates the graphic
 void Screen::createGraphic() {
+
+#ifdef TARGET_ANDROID
+  // Check if OpenGLES 3.0 is available
+  const char* versionStr = (const char*)glGetString(GL_VERSION);
+  if (strstr(versionStr, "OpenGL ES 3.")) {
+    if (!openglES30Supported) {
+      if (gl3stubInit()) {
+        openglES30Supported=true;
+        DEBUG("OpenGL ES 3.0 supported",NULL);
+      }
+    }
+  }
+#endif
+
+  // Shall we do off-screen rendering?
+  if (separateFramebuffer) {
+
+    // Create a suitable frame buffer
+    glGenFramebuffers(1,&framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER,framebuffer);
+    glGenRenderbuffers(1,&colorRenderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER,colorRenderbuffer);
+#ifdef TARGET_LINUX
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, getWidth(), getHeight());
+#endif
+#ifdef TARGET_ANDROID
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8_OES, getWidth(), getHeight());
+#endif
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbuffer);
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+      glDeleteFramebuffers(1,&framebuffer);
+      framebuffer=0;
+      ERROR("can not create off-screen frame buffer (status=0x%04x)",status);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER,framebuffer);
+    pixelBufferSize=getWidth()*getHeight()*Image::getRGBPixelSize();
+
+    // Create a suitable pixel buffer object for fast reads
+    if (openglES30Supported) {
+      glGenBuffers(1, &pixelBuffer);
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, pixelBuffer);
+      glBufferData(GL_PIXEL_PACK_BUFFER, pixelBufferSize, 0, GL_DYNAMIC_READ);
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    }
+
+    // Reserve memory for the screen shot buffers
+    if (!openglES30Supported) {
+      if (screenShotPixel)
+        free(screenShotPixel);
+      if (!(screenShotPixel=malloc(pixelBufferSize))) {
+        FATAL("can not reserve memory for screen shot pixels",NULL);
+        return;
+      }
+    }
+  } else {
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+  }
+
+  // Check if the more accurate texture formats are supported
+  UByte texture[] = { 0,0,0,0 };
+  testTextureInfo=createTextureInfo();
+  if (setTextureImage(testTextureInfo,&texture[0],1,1,GraphicTextureFormatRGBA8888)) {
+    DEBUG("RGBA8888 supported!",NULL);
+    textureFormatRGBA8888Supported=true;
+  }
+  if (setTextureImage(testTextureInfo,&texture[0],1,1,GraphicTextureFormatRGB888)) {
+    DEBUG("RGB888 supported!",NULL);
+    textureFormatRGB888Supported=true;
+  }
+
+  // Compile and link the vertex shader program
+  vertexShaderHandle = glCreateShader(GL_VERTEX_SHADER);
+  if (!vertexShaderHandle) {
+    FATAL("can not create vertex shader handle",NULL);
+    return;
+  }
+  compileShaderProgram(vertexShaderHandle,vertexShaderProgram);
+  fragmentShaderHandle = glCreateShader(GL_FRAGMENT_SHADER);
+  if (!vertexShaderHandle) {
+    FATAL("can not create vertex shader handle",NULL);
+    return;
+  }
+  compileShaderProgram(fragmentShaderHandle,fragmentShaderProgram);
+  shaderProgramHandle=glCreateProgram();
+  glAttachShader(shaderProgramHandle, vertexShaderHandle);
+  glAttachShader(shaderProgramHandle, fragmentShaderHandle);
+  glLinkProgram(shaderProgramHandle);
+  GLint linkSuccess;
+  glGetProgramiv(shaderProgramHandle, GL_LINK_STATUS, &linkSuccess);
+  if (linkSuccess == GL_FALSE) {
+    GLchar messages[256];
+    glGetProgramInfoLog(shaderProgramHandle, sizeof(messages), 0, &messages[0]);
+    FATAL("can not link shader program: %s",messages);
+    return;
+  }
+
+  // Get pointer to the input variables of the shader
+  mvpMatrixHandle = glGetUniformLocation(shaderProgramHandle, "mvpMatrix");
+  positionInHandle = glGetAttribLocation(shaderProgramHandle, "positionIn");
+  colorInHandle = glGetUniformLocation(shaderProgramHandle, "colorIn");
+  textureCoordinateInHandle = glGetAttribLocation(shaderProgramHandle, "textureCoordinateIn");
+  textureImageInHandle = glGetUniformLocation(shaderProgramHandle, "textureImageIn");
+  textureEnabledHandle = glGetUniformLocation(shaderProgramHandle, "textureEnabled");
+  /*DEBUG("vertexShaderHandle=%d",vertexShaderHandle);
+  DEBUG("fragmentShaderHandle=%d",fragmentShaderHandle);
+  DEBUG("shaderProgramHandle=%d",shaderProgramHandle);
+  DEBUG("mvpMatrixHandle=%d",mvpMatrixHandle);
+  DEBUG("positionInHandle=%d",positionInHandle);
+  DEBUG("colorInHandle=%d",colorInHandle);
+  DEBUG("textureCoordinateInHandle=%d",textureCoordinateInHandle);
+  DEBUG("textureImageInHandle=%d",textureImageInHandle);
+  DEBUG("textureEnabledHandle=%d",textureEnabledHandle);*/
+
+  // Use this program
+  glUseProgram(shaderProgramHandle);
+
+  // Init the view matrix
+  glm::vec3 eye = glm::vec3(0.0f,0.0f,1.0f);
+  glm::vec3 center = glm::vec3(0.0f,0.0f,-1.0f);
+  glm::vec3 up = glm::vec3(0.0f,-1.0f,0.0f);
+  viewMatrix = glm::lookAt(eye,center,up);
+
+  // Init the model matrix
+  modelMatrix = glm::mat4x4(1.0);
+
+  // Update dependent matrixes
+  vpMatrix=projectionMatrix*viewMatrix;
+  mvpMatrix=vpMatrix*modelMatrix;
+
+  // Check for error
+  GLenum error=glGetError();
+  if (error!=GL_NO_ERROR) {
+    FATAL("something went wrong during createGraphic (error=0x%08x)",error);
+  }
 }
 
 // Destroys the graphic
 void Screen::destroyGraphic() {
+  if (ellipseCoordinatesBuffer!=bufferNotDefined) {
+    destroyBufferInfo(ellipseCoordinatesBuffer);
+    ellipseCoordinatesBuffer=bufferNotDefined;
+  }
+  if (testTextureInfo!=getTextureNotDefined())
+    destroyTextureInfo(testTextureInfo,"Screen::destroyGraphic");
 }
 
 // Destructor
 Screen::~Screen() {
-  if (separateFramebuffer) {
-    quitWriteScreenShotThread=true;
-    core->getThread()->issueSignal(writeScreenShotSignal);
-    core->getThread()->waitForThread(writeScreenShotThreadInfo);
-    core->getThread()->destroyThread(writeScreenShotThreadInfo);
-    core->getThread()->destroyMutex(nextScreenShotPixelsMutex);
-    core->getThread()->destroySignal(writeScreenShotSignal);
-  }
-  for (Int i=0;i<2;i++)
-    if (screenShotPixels[i])
-      free(screenShotPixels[i]);
+  if (screenShotPixel)
+    free(screenShotPixel);
 }
+
+#ifdef TARGET_ANDROID
+// Static variables for EGL context
+EGLConfig Screen::eglConfig;
+EGLSurface Screen::eglSurface;
+EGLContext Screen::eglContext;
+EGLDisplay Screen::eglDisplay;
+#endif
 
 // Setups the EGL context
 bool Screen::setupContext() {
+
+#ifdef TARGET_ANDROID
+
+  // EGL config attributes
+  const EGLint confAttr[] = {
+          EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+          EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+          EGL_RED_SIZE,   8,
+          EGL_GREEN_SIZE, 8,
+          EGL_BLUE_SIZE,  8,
+          EGL_ALPHA_SIZE, 0,
+          EGL_DEPTH_SIZE, 0,
+          EGL_NONE
+  };
+
+  // EGL context attributes
+  const EGLint ctxAttr[] = {
+          EGL_CONTEXT_CLIENT_VERSION, 2,
+          EGL_NONE
+  };
+
+  // surface attributes
+  // the surface size is set to the input frame size
+  const EGLint surfaceAttr[] = {
+           EGL_WIDTH, 1,
+           EGL_HEIGHT, 1,
+           EGL_NONE
+  };
+
+  EGLint eglMajVers, eglMinVers;
+  EGLint numConfigs;
+
+  // Create display
+  eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+  if (eglDisplay==EGL_NO_DISPLAY) {
+    ERROR("can not get default EGL display",NULL);
+    return false;
+  }
+  if (!eglInitialize(eglDisplay, &eglMajVers, &eglMinVers)) {
+    ERROR("can not get initialize EGL display",NULL);
+    return false;
+  }
+
+  // Choose the first config, i.e. best config
+  if (!eglChooseConfig(eglDisplay, confAttr, &eglConfig, 1, &numConfigs)) {
+    ERROR("can not choose EGL config",NULL);
+    return false;
+  }
+
+  // Create context
+  eglContext = eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT, ctxAttr);
+  if (eglContext==EGL_NO_CONTEXT) {
+    ERROR("can not create EGL context",NULL);
+    return false;
+  }
+
+  // create a pixelbuffer surface
+  eglSurface = eglCreatePbufferSurface(eglDisplay, eglConfig, surfaceAttr);
+  if (eglContext==EGL_NO_SURFACE) {
+    ERROR("can not create EGL surface",NULL);
+    return false;
+  }
+
+  // Activate the context
+  if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) {
+    ERROR("can not make EGL context current",NULL);
+    return false;
+  }
+
+  return true;
+#endif
+
+#ifdef TARGET_LINUX
   FATAL("not supported",NULL);
   return false;
+#endif
 }
 
 // Destroys the EGL context
 void Screen::shutdownContext() {
+#ifdef TARGET_ANDROID
+  eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+  if (!(eglDestroySurface(eglDisplay, eglSurface))) {
+    FATAL("can not destroy EGL surface",NULL);
+  }
+  if (!(eglDestroyContext(eglDisplay, eglContext))) {
+    FATAL("can not destroy EGL context",NULL);
+  }
+  if (!(eglTerminate(eglDisplay))) {
+    FATAL("can not terminate EGL display",NULL);
+  }
+  eglDisplay = EGL_NO_DISPLAY;
+  eglSurface = EGL_NO_SURFACE;
+  eglContext = EGL_NO_CONTEXT;
+#endif
+
+#ifdef TARGET_LINUX
   FATAL("not supported",NULL);
+#endif
 }
 
 // Returns the diagonal of the screen

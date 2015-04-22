@@ -13,15 +13,29 @@
 #ifndef SCREEN_H_
 #define SCREEN_H_
 
+#ifdef TARGET_ANDROID
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#endif
+#ifdef TARGET_LINUX
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/freeglut.h>
+#endif
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#ifdef TARGET_ANDROID
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include "OpenGLES3Stub.h"
+#endif
 
 namespace GEODISCOVERER {
 
 // Data types
-typedef GLuint GraphicBufferInfo;
 typedef GLuint GraphicTextureInfo;
+typedef GLuint GraphicBufferInfo;
 enum GraphicTextureFormat { GraphicTextureFormatRGB565, GraphicTextureFormatRGBA5551, GraphicTextureFormatRGBA4444, GraphicTextureFormatRGB888, GraphicTextureFormatRGBA8888  };
 enum GraphicScreenOrientation { GraphicScreenOrientationProtrait = 0, GraphicScreenOrientationLandscape = 1  };
 typedef struct {
@@ -37,15 +51,39 @@ protected:
   // Pointer to the device this screen belongs to
   Device *device;
 
+  // Value indicating that no texture is available
+  static const GraphicTextureInfo textureNotDefined = 0;
+
+  // Value indicating that no buffer is available
+  const static GraphicBufferInfo bufferNotDefined = 0;
+
+  // Number of segments to use for ellipse drawing
+  static const int ellipseSegments=32;
+
+  // Holds the coordinates for drawing the ellipse
+  GraphicBufferInfo ellipseCoordinatesBuffer;
+
+  // List of cached texture infos
+  std::list<TextureDebugInfo> unusedTextureInfos;
+
+  // List of cached buffer infos
+  std::list<GraphicBufferInfo> unusedBufferInfos;
+
   // Current width and height of the screen
   Int width;
   Int height;
 
+  // Indicates if wake lock is on or off
+  bool wakeLock;
+
   // Orientation of the screen
   GraphicScreenOrientation orientation;
 
-  // Indicates if wake lock is on or off
-  bool wakeLock;
+  // Decides if resource destroying is allowed
+  bool allowDestroying;
+
+  // Decides if resource allocation is allowed
+  bool allowAllocation;
 
   // Indicates that this screen is drawing into a buffer
   bool separateFramebuffer;
@@ -56,59 +94,75 @@ protected:
   // Color renderbuffer ID
   GLuint colorRenderbuffer;
 
-  // Number of steps to approximate an ellipse
-  const static Int ellipseSegments = 32;
+  // Pixel buffer ID
+  GLuint pixelBuffer;
 
-  // Value indicating that no texture is available
-  const static GraphicTextureInfo textureNotDefined = 0;
+  // Size of the pixel buffer
+  GLsizeiptr pixelBufferSize;
 
-  // Value indicating that no buffer is available
-  const static GraphicBufferInfo bufferNotDefined = 0;
+  // Screen shot pixel buffer
+  GLvoid *screenShotPixel;
 
-  // Decides if resource destroying is allowed
-  bool allowDestroying;
+  // Matrixes for OpenGL transformations
+  glm::mat4x4 viewMatrix;
+  glm::mat4x4 projectionMatrix;
+  glm::mat4x4 modelMatrix;
+  glm::mat4x4 vpMatrix;
+  glm::mat4x4 mvpMatrix;
 
-  // Decides if resource allocation is allowed
-  bool allowAllocation;
+  // Stack of matrixes that are used for drawing
+  std::list<glm::mat4x4 > modelMatrixStack;
 
-  // Index to the buffer for the next screen shot
-  Int nextScreenShotPixelsIndex;
+  // Programs for the vertex and fragment shaders
+  static const char *vertexShaderProgram;
+  static const char *fragmentShaderProgram;
 
-  // Screen shot pixel buffers
-  GLvoid *screenShotPixels[2];
+  // Handles for the shaders
+  GLuint vertexShaderHandle;
+  GLuint fragmentShaderHandle;
+  GLuint shaderProgramHandle;
+  GLint mvpMatrixHandle;
+  GLint colorInHandle;
+  GLint positionInHandle;
+  GLint textureCoordinateInHandle;
+  GLint textureImageInHandle;
+  GLint textureEnabledHandle;
 
-  // Semaphore for accessing the current screen shot pixels
-  ThreadMutexInfo *nextScreenShotPixelsMutex;
-
-  // Signal for triggering the screen shot thread
-  ThreadSignalInfo *writeScreenShotSignal;
-
-  // Thread that writes the screen shot
-  ThreadInfo *writeScreenShotThreadInfo;
-
-  // Indicates that the write screen shot thread shall quit
-  bool quitWriteScreenShotThread;
+  // Compiles a shader program
+  void compileShaderProgram(GLuint handle, const char *program);
 
   // Width of the line
   Int lineWidth;
+
+  // Drawing color
+  glm::vec4 drawingColor;
 
   // Checks if an extension is available
   bool queryExtension(const char *extName);
 
   // Indicates if RGBA8888 image format can be used
+  GraphicTextureInfo testTextureInfo;
   bool textureFormatRGBA8888Supported;
   bool textureFormatRGB888Supported;
 
-  // List of cached texture infos
-  std::list<TextureDebugInfo> unusedTextureInfos;
+  // Indicates if OpenGL ES 3.0 is available
+  bool openglES30Supported;
 
-  // List of cached buffer infos
-  std::list<GraphicBufferInfo> unusedBufferInfos;
+#ifdef TARGET_ANDROID
+  // EGL context
+  static EGLConfig eglConfig;
+  static EGLSurface eglSurface;
+  static EGLContext eglContext;
+  static EGLDisplay eglDisplay;
+#endif
 
 public:
 
-  // Constructor: Init screen (show window)
+  // Constructor
   Screen(Device *device);
+
+  // Destructor
+  virtual ~Screen();
 
   // Setups the EGL context
   static bool setupContext();
@@ -119,29 +173,11 @@ public:
   // Inits the screen
   void init(GraphicScreenOrientation orientation, Int width, Int height);
 
-  // Gets the width of the screen
-  Int getWidth();
-
-  // Gets the height of the screen
-  Int getHeight();
-
-  // Gets the orientation of the screen
-  GraphicScreenOrientation getOrientation();
-
-  // Main loop that handles events
-  static void mainLoop();
-
-  // Destructor: clean up everything (close window)
-  virtual ~Screen();
-
   // Activates the screen for drawing
   void startScene();
 
   // Creates a screen shot
   bool createScreenShot();
-
-  // Writes a screen shot
-  void writeScreenShot();
 
   // Writes the screen content as a png
   void writePNG(std::string path);
@@ -151,9 +187,6 @@ public:
 
   // Starts a new object
   void startObject();
-
-  // Resets all scaling, translation and rotation parameters of the object
-  void resetObject();
 
   // Sets the line width for drawing operations
   void setLineWidth(Int width);
@@ -170,14 +203,14 @@ public:
   // Translates the scene
   void translate(Int x, Int y, Int z);
 
+  // Sets the drawing color
+  void setColor(UByte r, UByte g, UByte b, UByte a);
+
   // Sets color mode such that alpha channel of primitive determines its transparency
   void setColorModeAlpha();
 
   // Sets color mode such that primitive color is multiplied with background color
   void setColorModeMultiply();
-
-  // Sets the drawing color
-  void setColor(UByte r, UByte g, UByte b, UByte a);
 
   // Draws a rectangle
   void drawRectangle(Int x1,Int y1, Int x2, Int y2, GraphicTextureInfo texture, bool filled);
@@ -221,15 +254,33 @@ public:
   // Destroys the graphic
   void destroyGraphic();
 
+  // Main loop that handles events
+  void mainLoop();
+
   // Getters and setters
+  static const GraphicBufferInfo getBufferNotDefined()
+  {
+      return bufferNotDefined;
+  }
+
   static const GraphicTextureInfo getTextureNotDefined()
   {
       return textureNotDefined;
   }
 
-  static const GraphicBufferInfo getBufferNotDefined()
+  Int getHeight() const
   {
-      return bufferNotDefined;
+      return height;
+  }
+
+  Int getWidth() const
+  {
+      return width;
+  }
+
+  GraphicScreenOrientation getOrientation() const
+  {
+      return orientation;
   }
 
   bool getWakeLock() const

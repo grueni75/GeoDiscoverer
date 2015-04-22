@@ -304,7 +304,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
       // If the found tile is a direct neighbor: set the visual position accordingly
       bool useCalibratorPosition=true;
-      if (preferredNeighbor) {
+      /*if (preferredNeighbor) {
         if ((useCalibratorPosition)&&(preferredNeighbor->isNorthWestNeighbor(tile))) {
           tile->setVisX(preferredNeighbor->getVisX(0)-tile->getWidth());
           tile->setVisY(preferredNeighbor->getVisY(0)+tile->getHeight());
@@ -345,7 +345,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
           tile->setVisY(preferredNeighbor->getVisY(0));
           useCalibratorPosition=false;
         }
-      }
+      }*/
 
       // Use the position computed by the calibrator if no direct neighbor
       if (useCalibratorPosition) {

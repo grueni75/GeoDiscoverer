@@ -40,6 +40,9 @@ protected:
   // Density of the screen
   Int DPI;
 
+  // Defines how long the socket shall wait for a progressing communication
+  TimestampInSeconds socketTimeout;
+
   // Diagonal of the screen
   double diagonal;
 
@@ -60,11 +63,8 @@ protected:
   Int width;
   Int height;
 
-  // Opens a connection to the device
-  bool openSocket();
-
-  // Closes the connection to the device
-  void closeSocket();
+  // Indicates that the device is initialized
+  bool initDone;
 
 public:
 
@@ -73,6 +73,12 @@ public:
 
   // Destructor
   virtual ~Device();
+
+  // Opens a connection to the device
+  bool openSocket();
+
+  // Closes the connection to the device
+  void closeSocket();
 
   // Creates the components
   void init();
@@ -92,8 +98,11 @@ public:
   // Sends data to a network device
   bool send(UByte *buffer, Int length);
 
-  // Destroys the device
-  void destroy(bool contextLost);
+  // Destroys the graphic of the device
+  void destroyGraphic(bool contextLost);
+
+  // Creates the graphic of the device
+  void createGraphic();
 
   // Getters and setters
   Screen* getScreen() {
@@ -174,6 +183,14 @@ public:
 
   bool isAnimationFriendly() const {
     return animationFriendly;
+  }
+
+  void setInitDone() {
+    this->initDone = true;
+  }
+
+  bool isInitDone() const {
+    return initDone;
   }
 };
 

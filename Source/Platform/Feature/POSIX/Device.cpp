@@ -66,7 +66,7 @@ bool Device::openSocket() {
   // Set socket timeout
   struct timeval tv;
   memset(&tv,0,sizeof(timeval));
-  tv.tv_sec=1;
+  tv.tv_sec=socketTimeout;
   if (setsockopt(socketfd,SOL_SOCKET,SO_RCVTIMEO,(const void *)&tv,sizeof(tv))!=0) {
     FATAL("can not set time out on socket",NULL);
     return false;
@@ -93,7 +93,7 @@ bool Device::discover() {
   UByte buffer[64];
 
   // Was the device info already discovered?
-  if (width>0)
+  if (initDone)
     return true;
 
   // Ask the server for the screen configuration
@@ -124,24 +124,11 @@ bool Device::discover() {
 
   // Init the device
   init();
-  getScreen()->init(orientation,width,height);
-  getScreen()->setAllowAllocation(true);
-  getScreen()->createGraphic();
-  getFontEngine()->createGraphic();
-  getWidgetEngine()->createGraphic();
-  getGraphicEngine()->createGraphic();
-  getScreen()->setAllowAllocation(false);
-  NavigationPath *path = core->getDefaultWidgetEngine()->getNearestPath();
-  if (path!=NULL)
-    getWidgetEngine()->onPathChange(path,NavigationPathChangeTypeWidgetEngineInit);
-  MapPosition pos = *core->getNavigationEngine()->lockLocationPos(__FILE__,__LINE__);
-  core->getNavigationEngine()->unlockLocationPos();
-  getWidgetEngine()->onLocationChange(pos);
-  pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
-  core->getMapEngine()->unlockMapPos();
-  std::list<MapTile*> *centerMapTiles = core->getMapEngine()->lockCenterMapTiles(__FILE__,__LINE__);
-  getWidgetEngine()->onMapChange(pos,centerMapTiles);
-  core->getMapEngine()->unlockCenterMapTiles();
+  screen->init(orientation,width,height);
+  createGraphic();
+
+  // That's it
+  initDone=true;
   return true;
 }
 

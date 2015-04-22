@@ -41,6 +41,7 @@ public class GDMapSurfaceView extends GLSurfaceView {
   float prevDistance=0;
 
   /** Constructor */
+  @SuppressLint("NewApi")
   public GDMapSurfaceView(Context context, AttributeSet attrs) {
     super(context, attrs);
     
