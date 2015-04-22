@@ -88,6 +88,9 @@ sub downloadtile;
 # };
 our $tilelist;
 
+# Turn on autoflush
+$|++;
+
 # In the current version we keep things simple, the tiles have to be
 # selected either by the command line options --link, --lat, --lon,
 # and --zoom or read from the file as given by --loadtilelist.  In a
@@ -203,17 +206,25 @@ sub selecttilescmdline {
 sub downloadtiles {
     my $tiles = shift;
 
-    my $lwpua = LWP::UserAgent->new;
+    my $lwpua = LWP::UserAgent->new();
     $lwpua->env_proxy;
+    $lwpua->agent('wget');
 
     for my $zoom ( sort { $a <=> $b } keys %$tiles ) {
 
-        printf "Download %d tiles for zoom level %d ",
+        my $prefix = sprintf "Download %d tiles for zoom level %d:",
           scalar( @{ $tiles->{$zoom} } ), $zoom
           unless $opt{quiet};
-
+        my $i = 0;
+        my $total = scalar @{ $tiles->{$zoom} };
+        my $progress = "$prefix $i/$total";
+        print $progress unless $opt{quiet};
         for my $t ( @{ $tiles->{$zoom} } ) {
             downloadtile( $lwpua, @{ $t->{xyz} } );
+            print "\r";
+            $i++;
+            $progress = "$prefix $i/$total";
+            print $progress unless $opt{quiet};
         }
         print "\n" unless $opt{quiet};
     }
@@ -313,13 +324,18 @@ sub downloadtile {
     }
 
     # Download the image
-    print "." unless $opt{quiet};
     mkpath( dirname($fname) );
     my $repeat = 1;
     while ($repeat) {
       for (my $i = 0; $i < scalar @baseurls; $i++) {
-        my $url = "$baseurls[$i]/$path";
-        #print $url . "\n";
+        my $url = "$baseurls[$i]";
+        if ($url =~ m/\${.+}/) {
+          $url =~ s/\${x}/$tilex/g;
+          $url =~ s/\${y}/$tiley/g;
+          $url =~ s/\${z}/$zoom/g;
+        } else {
+          $url .= "/$path";
+        }
         unlink $fname . "." . $i;
         my $res = $lwpua->get( $url, ':content_file' => $fname . "." . $i );
         $repeat = 0;
@@ -359,7 +375,6 @@ sub downloadtile {
     my $width=256;
     my $height=256;
     my $imagefname=$2 . "png";
-    #print $imagefname . "\n";
     my %gdm;
     $gdm{GDM}->{version}="1.0";
     $gdm{GDM}->{imageFileName}=[ $imagefname ];
@@ -512,10 +527,12 @@ L<http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames>
 =head1 AUTHOR
 
 Rolf Krahl E<lt>rotkraut@cpan.orgE<gt>
+Matthias Grünewald
 
 =head1 COPYRIGHT AND LICENCE
 
 Copyright (C) 2008-2010 by Rolf Krahl
+Extensions for Geo Discoverer added by Matthias Grünewald
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
@@ -527,13 +544,13 @@ __END__
 
 =head1 NAME
 
-downloadosmtiles.pl - Download map tiles from OpenStreetMap
+DownloadOSMTiles.pl - Download map tiles from OpenStreetMap
 
 =head1 SYNOPSIS
 
-  downloadosmtiles.pl --lat=49.5611:49.6282 --lon=10.951:11.0574 --zoom=13:14
-  downloadosmtiles.pl --link='http://www.openstreetmap.org/?lat=-23.5872&lon=-46.6508&zoom=12&layers=B000FTF'
-  downloadosmtiles.pl --loadtilelist=filename
+  DownloadOSMTiles.pl --lat=49.5611:49.6282 --lon=10.951:11.0574 --zoom=13:14
+  DownloadOSMTiles.pl --link='http://www.openstreetmap.org/?lat=-23.5872&lon=-46.6508&zoom=12&layers=B000FTF'
+  DownloadOSMTiles.pl --loadtilelist=filename
 
 =head1 DESCRIPTION
 
@@ -602,10 +619,17 @@ Default: none
 
 =head2 C<--baseurl=url>
 
-The base URL of the server to download the tiles from.
+The base URL of the server to download the tiles from. If multiple 
+URLs are given, the resulting tile is an overlay of all given tiles. 
 
 Default: L<http://tile.openstreetmap.org>
 (This is the base URL for the Mapnik tiles.)
+
+=head2 C<--baseopacity=float>
+
+The opacity to use for the last defined base URL.
+
+Default: 1.0 
 
 =head2 C<--destdir=dir>
 
@@ -629,6 +653,22 @@ See L</TILE LISTS> below.
 
 Read a list of tiles to download from the file C<filename>.  See
 L</TILE LISTS> below.
+
+=head2 C<--bounds="((south, west), (north, east))">
+
+Alternative to the C<--longitude> and C<--latitude> option. Uses the 
+bounds given in the argument for defining the bounding box of 
+coordinates to download.
+
+=head2 C<--refgdm=filename>
+
+Alternative to the C<--longitude> and C<--latitude> option. Uses the 
+bounds defined in the given GDM file for defining the bounding box of 
+coordinates to download.
+
+=head2 C<--wait=time>
+
+Pauses after each tile download for the given time in seconds.
 
 =head1 EXAMPLE
 

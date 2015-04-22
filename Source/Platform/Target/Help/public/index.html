@@ -2608,7 +2608,7 @@ Except as contained in this notice, the name of a copyright holder shall not be 
 |DebugAids@@margin-right:1em;@@|How to help the developer to improve the app|
 |ContactDeveloper@@margin-right:1em;@@|How to contact the developer|</pre>
 </div>
-<div title="MapCreation" creator="Matthias" modifier="Matthias" created="201412201118" modified="201412201639" changecount="58">
+<div title="MapCreation" creator="Matthias" modifier="Matthias" created="201412201118" modified="201504220423" changecount="59">
 <pre>Geo Discoverer can use different sources for maps. You can choose the map to use in the AppSettings. The maps are stored in dedicated folders within the [[Map folder|HomeDirectory]]. There are two types of map sources supported: offline maps and online maps.
 !Online maps
 An online map is defined by a XML file called &quot;info.gds&quot; (GDS=Geo Discoverer map Source). It describes from which (OSM) tile servers each map tile shall be created. Geo Discoverer supports overlaying of tiles from different server ~URLs. For example, hiking tracks can be added to a topographical map. 
@@ -2637,6 +2637,7 @@ Geo Discoverer is bundled with a set of small tools that can create the contents
 |!Tool |!Description |
 |[[CalcGDMCharacterstics.pl|MapCreation/CalcGDMCharacterstics.pl]]|Computes the horizontal and vertical density (pixel/degree) from a &quot;.gdm&quot; file. |
 |[[DownloadOSMTiles.pl|MapCreation/DownloadOSMTiles.pl]]|Downloads tiles from one or more tile servers and creates &quot;.gdm&quot; files for them. Please note that most OSM servers do not allow mass downloads. So please respect the terms of use! |
+|[[MergeOSMTiles.pl|MapCreation/MergeOSMTiles.pl]]|Merges the small OSM tiles into larger ones to speed up the map load time in Geo Discoverer|
 |[[GeoTIFF2GDM.pl|MapCreation/GeoTIFF2GDM.pl]]|Converts a ~GeoTIFF picture into map tiles. This includes the creation of &quot;.gdm&quot; files from the coordinates given in the ~GeoTIFF picture.|
 |[[GrabMaps.py|MapCreation/GrabMaps.py]]|Grabs map pictures from windows applications and creates &quot;.gdm&quot; files for them. The calibration data is also copied from the windows application. It contains support for Google Maps running in Firefox and Garmin's &quot;Deutschland Digital Topographische Karte&quot;. The script requires the software packages ~ActivePython-2.7.2.5, ~PIL-1.1.7 and ~MiniCap.|
 </pre>
@@ -4144,8 +4145,9 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201504020612" changecount="19">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201504220424" changecount="21">
 <pre>|!Date |!Changes |
+|2015-04-22|Added ~MergeOSMTiles.pl script to [[MapCreation]].|
 |2015-04-02|Added acknowledge for ~JmDNS library to [[About]].|
 |2015-03-13|Added Google Play Store link to GettingStarted.|
 |2015-03-13|Added acknowledge for GLM to [[About]].|
