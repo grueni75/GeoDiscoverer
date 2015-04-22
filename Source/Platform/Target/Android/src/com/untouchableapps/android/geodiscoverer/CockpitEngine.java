@@ -86,6 +86,9 @@ public class CockpitEngine {
     if (Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "active"))>0) {
       apps.add(new CockpitAppVoice(context));
     }
+    if (Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Vibration", "active"))>0) {
+      apps.add(new CockpitAppVibration(context));
+    }
     
     // Start the engine
     start();
