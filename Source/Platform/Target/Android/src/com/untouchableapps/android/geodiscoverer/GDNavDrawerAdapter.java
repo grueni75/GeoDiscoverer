@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -87,6 +88,7 @@ public class GDNavDrawerAdapter extends ArrayAdapter<GDNavDrawerItem> {
     if (item.id!=GDNavDrawerItem.ID_APP_INFO) {
       viewHolder.iconView.setImageResource(item.icon);
       viewHolder.titleView.setText(item.title);
+      viewHolder.iconView.setColorFilter(viewHolder.titleView.getCurrentTextColor());
     } else {
       viewHolder.appVersionView.setText(appVersion);
     }
