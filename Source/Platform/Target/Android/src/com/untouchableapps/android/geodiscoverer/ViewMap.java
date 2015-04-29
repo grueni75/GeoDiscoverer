@@ -394,8 +394,11 @@ public class ViewMap extends GDActivity {
                   }
                 }.start();
               }
-            }
-            
+            }            
+            commandExecuted=true;
+          } 
+          if (commandFunction.equals("decideContinueOrNewTrack")) {            
+            viewMap.decideContinueOrNewTrack();
             commandExecuted=true;
           } 
           
@@ -534,6 +537,48 @@ public class ViewMap extends GDActivity {
     textWatcher.onTextChanged(editText.getText(),0,0,0);
     editText.addTextChangedListener(textWatcher);
     alert.show();                
+  }
+
+  /** Asks the user if the core shall be resetted */
+  void askForConfigReset() {
+    AlertDialog.Builder builder = new AlertDialog.Builder(ViewMap.this);
+    builder.setTitle(getTitle());
+    builder.setMessage(R.string.reset_question);
+    builder.setCancelable(true);
+    builder.setPositiveButton(R.string.yes,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            restartCore(true);
+          }
+        });
+    builder.setNegativeButton(R.string.no, null);
+    builder.setIcon(android.R.drawable.ic_dialog_alert);
+    AlertDialog alert = builder.create();
+    alert.show();
+  }
+
+  /** Asks the user if the track shall be continued or a new track shall be started */
+  void decideContinueOrNewTrack() {
+    AlertDialog.Builder builder = new AlertDialog.Builder(ViewMap.this);
+    builder.setTitle(getTitle());
+    builder.setMessage(R.string.continue_or_new_track_question);
+    builder.setCancelable(true);
+    builder.setPositiveButton(R.string.new_track,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            coreObject.executeCoreCommand("setRecordTrack(1)");
+            coreObject.executeCoreCommand("createNewTrack()");
+          }
+        });
+    builder.setNegativeButton(R.string.contine_track, 
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            coreObject.executeCoreCommand("setRecordTrack(1)");            
+          }
+        });
+    builder.setIcon(android.R.drawable.ic_dialog_info);
+    AlertDialog alert = builder.create();
+    alert.show();
   }
 
   /** Copies tracks from the Track into the Route directory */
@@ -1041,17 +1086,17 @@ public class ViewMap extends GDActivity {
   ArrayList<GDNavDrawerItem> createNavDrawerEntries() {
     ArrayList<GDNavDrawerItem> entries = new ArrayList<GDNavDrawerItem>();
     entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_APP_INFO,R.drawable.icon,null)); // special entry for app info
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_LEGEND,android.R.drawable.ic_menu_view,getString(R.string.show_legend)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_ADD_TRACKS_AS_ROUTES,android.R.drawable.ic_menu_add,getString(R.string.add_tracks_as_routes)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_REMOVE_ROUTES,android.R.drawable.ic_menu_delete,getString(R.string.remove_routes)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_FORCE_MAP_REDOWNLOAD,android.R.drawable.ic_menu_mapmode,getString(R.string.force_map_redownload)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_TOGGLE_MESSAGES,android.R.drawable.ic_menu_info_details,getString(R.string.toggle_messages)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_PREFERENCES,android.R.drawable.ic_menu_preferences,getString(R.string.preferences)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_HELP,android.R.drawable.ic_menu_help,getString(R.string.button_label_help)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SEND_LOGS,android.R.drawable.ic_menu_upload,getString(R.string.send_logs)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_DONATE,android.R.drawable.ic_menu_send,getString(R.string.button_label_donate)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_RESET,android.R.drawable.ic_menu_revert,getString(R.string.reset)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_EXIT,android.R.drawable.ic_menu_close_clear_cancel,getString(R.string.exit)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_LEGEND,R.drawable.legend,getString(R.string.show_legend)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_ADD_TRACKS_AS_ROUTES,R.drawable.add,getString(R.string.add_tracks_as_routes)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_REMOVE_ROUTES,R.drawable.remove,getString(R.string.remove_routes)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_FORCE_MAP_REDOWNLOAD,R.drawable.refresh,getString(R.string.force_map_redownload)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_TOGGLE_MESSAGES,R.drawable.messages,getString(R.string.toggle_messages)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_PREFERENCES,R.drawable.prefs,getString(R.string.preferences)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_HELP,R.drawable.help,getString(R.string.button_label_help)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SEND_LOGS,R.drawable.upload,getString(R.string.send_logs)));
+    //entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_DONATE,android.R.drawable.ic_menu_send,getString(R.string.button_label_donate)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_RESET,R.drawable.reset,getString(R.string.reset)));
+    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_EXIT,R.drawable.exit,getString(R.string.exit)));
     return entries;
   }
   
@@ -1240,20 +1285,7 @@ public class ViewMap extends GDActivity {
             break;
           case GDNavDrawerItem.ID_RESET:
             if (mapSurfaceView!=null) {
-              AlertDialog.Builder builder = new AlertDialog.Builder(ViewMap.this);
-              builder.setTitle(getTitle());
-              builder.setMessage(R.string.reset_question);
-              builder.setCancelable(true);
-              builder.setPositiveButton(R.string.yes,
-                  new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                      restartCore(true);
-                    }
-                  });
-              builder.setNegativeButton(R.string.no, null);
-              builder.setIcon(android.R.drawable.ic_dialog_alert);
-              AlertDialog alert = builder.create();
-              alert.show();
+              askForConfigReset();
             }
             break;
           case GDNavDrawerItem.ID_EXIT:

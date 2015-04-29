@@ -273,7 +273,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("uncheckedIconFilename","trackRecordingOff");
       config.setParameter("uncheckedCommand","setRecordTrack(0)");
       config.setParameter("checkedIconFilename","trackRecordingOn");
-      config.setParameter("checkedCommand","setRecordTrack(1)");
+      config.setParameter("checkedCommand","decideContinueOrNewTrack()");
       config.setParameter("stateConfigPath","Navigation");
       config.setParameter("stateConfigName","recordTrack");
       config.setParameter("updateInterval","250000");

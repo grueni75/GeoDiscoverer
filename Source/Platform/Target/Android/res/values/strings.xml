@@ -119,4 +119,7 @@
   <string name="support_geodiscoverer">Support Geo Discoverer!</string>
   <string name="force_map_redownload">Refresh visible map</string>
   <string name="opengles20_required">The app is not compatible to this device because it does not support OpenGL ES 2.0.</string>
+  <string name="continue_or_new_track_question">Shall the current track be continued or shall a new track be started?</string>
+  <string name="new_track">New track</string>
+  <string name="contine_track">Continue track</string>
 </resources>

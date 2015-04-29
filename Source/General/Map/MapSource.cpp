@@ -460,6 +460,7 @@ MapContainer *MapSource::findMapContainerByGeographicCoordinate(MapPosition pos,
           bestMapContainer=currentMapContainer;
           bestPos=pos;
           betterMapContainerFound=true;
+          //DEBUG("new candidate found: zoomLevel=%d distToNearestLngScale=%f distToNearestLatScale=%f",currentMapContainer->getZoomLevel(),distToNearestLngScale,distToNearestLatScale);
 
           // Stop search if this map is the preferred one
           if (bestMapContainer==preferredMapContainer)

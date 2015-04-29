@@ -444,6 +444,11 @@ std::string Commander::execute(std::string cmd) {
     core->addDashboardDevice(args[0],atoi(args[1].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="decideContinueOrNewTrack") {
+    dispatch(cmd);
+    result="false";
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {
