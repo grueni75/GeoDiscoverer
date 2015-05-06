@@ -174,6 +174,8 @@ public class ViewDashboard extends Activity {
   @SuppressWarnings("unchecked")
   private <T extends InetAddress> T getWifiInetAddress(final Context context, final Class<T> inetClass) {
       final Enumeration<InetAddress> e = getWifiInetAddresses(context);
+      if (e==null)
+        return null;
       while (e.hasMoreElements()) {
           final InetAddress inetAddress = e.nextElement();
           if (inetAddress.getClass() == inetClass) {
@@ -222,6 +224,11 @@ public class ViewDashboard extends Activity {
 
         // Create the JmDNS object
         InetAddress address = getWifiInetAddress(ViewDashboard.this, Inet4Address.class);
+        if (address==null) {
+          Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,getString(R.string.no_wlan_address));
+          msg.sendToTarget();
+          return;
+        }
         try {
           jmDNS = JmDNS.create(address);
         }
