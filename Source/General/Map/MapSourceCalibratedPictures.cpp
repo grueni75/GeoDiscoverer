@@ -63,6 +63,22 @@ bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::li
         (*i)->exportEntry(filename,getFolderPath() + "/legend.png");
       }
 
+      // If the file is a info.gds file, merge it's info into the existing list
+      if (filename=="info.gds") {
+        DEBUG("info.gds found",NULL);
+        std::string gdsFilename = getFolderPath() + "/infoFromGDA.gds";
+        (*i)->exportEntry("info.gds",gdsFilename);
+        readGDSInfo(gdsFilename);
+        unlink(gdsFilename.c_str());
+        for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
+          std::vector<std::string> element = *i;
+          for (std::vector<std::string>::iterator j=element.begin();j!=element.end();j++) {
+            DEBUG("%s",(*j).c_str());
+          }
+        }
+
+      }
+
       // If this file is not a calibration file, skip it
       Int pos=filename.find_last_of(".");
       std::string extension=filename.substr(pos+1);
@@ -92,7 +108,7 @@ bool MapSourceCalibratedPictures::init()
   std::ofstream ofs;
   std::ifstream ifs;
   //FILE *in;
-  struct stat mapFolderStat,mapCacheStat;
+  struct stat mapFolderStat,mapCacheStat,mapArchiveStat;
   bool cacheRetrieved;
   std::string title;
   std::string mapPath=getFolderPath();
@@ -109,11 +125,18 @@ bool MapSourceCalibratedPictures::init()
   if (((stat(mapPath.c_str(),&mapFolderStat))==0)&&(stat(cacheFilepath.c_str(),&mapCacheStat)==0)) {
 
     // Is the cache newer than the folder?
-    bool isNewerOrSameAge=false;
-    if (mapCacheStat.st_mtime>=mapFolderStat.st_mtime) {
-      isNewerOrSameAge=true;
+    bool isOlder=false;
+    if (mapCacheStat.st_mtime<mapFolderStat.st_mtime) {
+      isOlder=true;
     }
-    if (isNewerOrSameAge) {
+    for(std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
+      if (stat((*i).c_str(),&mapArchiveStat)==0) {
+        if (mapCacheStat.st_mtime<mapArchiveStat.st_mtime) {
+          isOlder=true;
+        }
+      }
+    }
+    if (!isOlder) {
 
       // Load the cache
       ifs.open(cacheFilepath.c_str(),std::ios::binary);
@@ -300,6 +323,21 @@ bool MapSourceCalibratedPictures::init()
     centerPosition->setLng(lngWest+(lngEast-lngWest)/2);
     centerPosition->setLat(latSouth+(latNorth-latSouth)/2);
 
+    // Set the default map layer names
+    for (Int z=maxZoomLevel;z>=minZoomLevel;z--) {
+      std::stringstream s;
+      s << z;
+      mapLayerNameMap[s.str()]=z-minZoomLevel+1;
+    }
+
+    // Remember the original zoom levels
+    this->minZoomLevel=minZoomLevel;
+    this->maxZoomLevel=maxZoomLevel;
+    DEBUG("minZoomLevel=%d maxZoomLevel=%d",minZoomLevel,maxZoomLevel);
+
+    // Rename the layers
+    renameLayers();
+
     // Normalize the zoom levels
     maxZoomLevel-=minZoomLevel;
     for(std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
@@ -410,6 +448,9 @@ void MapSourceCalibratedPictures::store(std::ofstream *ofs) {
 
   // Store all relevant fields
   centerPosition->store(ofs);
+  DEBUG("minZoomLevel=%d maxZoomLevel=%d",minZoomLevel,maxZoomLevel);
+  Storage::storeInt(ofs,minZoomLevel);
+  Storage::storeInt(ofs,maxZoomLevel);
 
   // Store all container objects
   Storage::storeInt(ofs,mapContainers.size());
@@ -428,6 +469,13 @@ void MapSourceCalibratedPictures::store(std::ofstream *ofs) {
     } else {
       Storage::storeBool(ofs,false);
     }
+  }
+
+  // Store the map layer names
+  Storage::storeInt(ofs,mapLayerNameMap.size());
+  for (MapLayerNameMap::iterator i=mapLayerNameMap.begin();i!=mapLayerNameMap.end();i++) {
+    Storage::storeString(ofs,i->first);
+    Storage::storeInt(ofs,i->second);
   }
 
   // Store the size for the progress dialog
@@ -482,7 +530,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Check if the class has changed
   Int size=sizeof(MapSourceCalibratedPictures);
 #ifdef TARGET_LINUX
-  if (size!=304) {
+  if (size!=360) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return false;
   }
@@ -505,6 +553,9 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
     success=false;
     goto cleanup;
   }
+  Storage::retrieveInt(cacheData,cacheSize,mapSource->minZoomLevel);
+  Storage::retrieveInt(cacheData,cacheSize,mapSource->maxZoomLevel);
+  DEBUG("minZoomLevel=%d maxZoomLevel=%d",mapSource->minZoomLevel,mapSource->maxZoomLevel);
   //PROFILE_ADD("position retrieve");
 
   // Read the map containers
@@ -551,6 +602,16 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
 
   }
   //PROFILE_ADD("search tree retrieve");
+
+  // Read the map layer names
+  Storage::retrieveInt(cacheData,cacheSize,size);
+  for (Int i=0;i<size;i++) {
+    char *name;
+    Int zoomLevel;
+    Storage::retrieveString(cacheData,cacheSize,&name);
+    Storage::retrieveInt(cacheData,cacheSize,zoomLevel);
+    mapSource->mapLayerNameMap[name]=zoomLevel;
+  }
 
   // The progress value was already consumed
   cacheSize-=sizeof(Int);

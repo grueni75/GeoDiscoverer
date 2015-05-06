@@ -27,6 +27,8 @@ MapSource::MapSource() {
   centerPosition=NULL;
   mapArchivesMutex=core->getThread()->createMutex("map archives mutex");
   mapDownloader=NULL;
+  minZoomLevel=-1;
+  maxZoomLevel=-1;
 }
 
 MapSource::~MapSource() {
@@ -281,6 +283,58 @@ void MapSource::closeProgress() {
   core->getDialog()->closeProgress(progressDialog);
 }
 
+// Renames the layers with the infos in the gds file
+void MapSource::renameLayers() {
+
+  // Rename the map layers
+  Int zoomLevel;
+  bool zoomLevelFound=false;
+  std::string name;
+  bool nameFound=false;
+  std::stringstream in;
+  std::string infoFilePath = getFolderPath() + "/info.gds";
+  for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
+    std::vector<std::string> element = *i;
+    if (element[0]=="LayerName") {
+      if (element[1]=="zoomLevel") {
+        in.str(element[2]);
+        in.clear();
+        in >> zoomLevel;
+        zoomLevelFound=true;
+      }
+      if (element[1]=="name") {
+        name=element[2];
+        nameFound=true;
+      }
+    }
+    if (element[0]=="/LayerName") {
+      if (!zoomLevelFound) {
+        ERROR("one LayerName element has no zoomLevel element in <%s>",infoFilePath.c_str());
+        break;
+      }
+      if (!nameFound) {
+        ERROR("one LayerName element has no name element in <%s>",infoFilePath.c_str());
+        break;
+      }
+      bool found=false;
+      DEBUG("minZoomLevel=%d",minZoomLevel);
+      for (MapLayerNameMap::iterator i=mapLayerNameMap.begin();i!=mapLayerNameMap.end();i++) {
+        if (i->second==zoomLevel-minZoomLevel+1) {
+          mapLayerNameMap.erase(i);
+          mapLayerNameMap[name]=zoomLevel-minZoomLevel+1;
+          found=true;
+          break;
+        }
+      }
+      if (!found) {
+        ERROR("zoom level %d of map layer with name <%s> does not exist",zoomLevel,name.c_str());
+      }
+      zoomLevelFound=false;
+      nameFound=false;
+    }
+  }
+}
+
 // Creates a new map source object of the correct type
 MapSource *MapSource::newMapSource() {
 
@@ -297,7 +351,35 @@ MapSource *MapSource::newMapSource() {
   }
 
   // If the info.gds file does not exist, it is an offline source
+  std::string type = "tileServer";
+  std::list<std::string> mapArchivePaths;
+  bool mapArchivePathFound = false;
   if (access(infoPath.c_str(),F_OK)) {
+
+    type="internalMapArchive";
+
+  } else {
+
+    // Read in info.gds to find out type of source
+    gdsElements.clear();
+    readGDSInfo(infoPath);
+
+    // Find out the kind of source
+    for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
+      std::vector<std::string> element = *i;
+      if (element[0]=="type") {
+        type = element[1];
+      }
+      if (element[0]=="mapArchivePath") {
+        mapArchivePaths.push_back(element[1]);
+        mapArchivePathFound = true;
+      }
+    }
+  }
+
+  // Internal map archive?
+  MapSource *result = NULL;
+  if (type=="internalMapArchive") {
 
     // Get all the tiles of the map
     std::list<std::string> mapArchivePaths;
@@ -324,48 +406,39 @@ MapSource *MapSource::newMapSource() {
       ERROR("map folder <%s> does not contain a tiles.gda file",NULL);
       return new MapSourceEmpty();
     } else {
-      return new MapSourceCalibratedPictures(mapArchivePaths);
+      result = new MapSourceCalibratedPictures(mapArchivePaths);
     }
 
-  } else {
+  }
 
-    // Read in info.gds to find out type of source
-    readGDSInfo(infoPath);
+  // Online source?
+  if (type=="tileServer") {
+    result = new MapSourceMercatorTiles();
+  }
 
-    // Find out the kind of source
-    std::string type = "tileServer";
-    std::list<std::string> mapArchivePaths;
-    bool mapArchivePathFound = false;
-    for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
-      std::vector<std::string> element = *i;
-      if (element[0]=="type") {
-        type = element[1];
-      }
-      if (element[0]=="mapArchivePath") {
-        mapArchivePaths.push_back(element[1]);
-        mapArchivePathFound = true;
-      }
+  // External map archive?
+  if (type=="externalMapArchive") {
+    if (!mapArchivePathFound) {
+      ERROR("map source file <%s> does not contain a mapArchivePath element",infoPath.c_str());
+      return new MapSourceEmpty();
     }
-
-    // Create the correct source
-    if (type=="tileServer") {
-      return new MapSourceMercatorTiles();
-    }
-    if (type=="externalMapArchive") {
-      if (!mapArchivePathFound) {
-        ERROR("map source file <%s> does not contain a mapArchivePath element",infoPath.c_str());
+    for (std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
+      if (access((*i).c_str(),F_OK)) {
+        ERROR("external map archive <%s> referenced in <%s> does not exist",(*i).c_str(),infoPath.c_str());
         return new MapSourceEmpty();
       }
-      for (std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
-        if (access((*i).c_str(),F_OK)) {
-          ERROR("external map archive <%s> referenced in <%s> does not exist",(*i).c_str(),infoPath.c_str());
-          return new MapSourceEmpty();
-        }
-      }
-      return new MapSourceCalibratedPictures(mapArchivePaths);
     }
+    result = new MapSourceCalibratedPictures(mapArchivePaths);
   }
-  return NULL;
+
+  // Was a map source created?
+  if (result==NULL) {
+    ERROR("map source type <%s> is not supported",type.c_str());
+    return new MapSourceEmpty();
+  }
+
+  // Return the result
+  return result;
 }
 
 // Returns the map tile in which the position lies
@@ -855,6 +928,30 @@ void MapSource::markMapContainerObsolete(MapContainer *c) {
 
 // Removes all obsolete map containers
 void MapSource::removeObsoleteMapContainers(bool removeFromMapArchive) {
+}
+
+// Returns the names of each map layer
+std::list<std::string> MapSource::getMapLayerNames() {
+  std::list<std::string> result;
+  for (Int z=zoomLevelSearchTrees.size()-1;z>0;z--) {
+    for (MapLayerNameMap::iterator i=mapLayerNameMap.begin();i!=mapLayerNameMap.end();i++) {
+      if (i->second==z) result.push_back(i->first);
+    }
+  }
+  return result;
+}
+
+// Selects the given map layer
+void MapSource::selectMapLayer(std::string name) {
+  MapLayerNameMap::iterator i=mapLayerNameMap.find(name);
+  if (i!=mapLayerNameMap.end()) {
+    MapPosition pos=*(core->getMapEngine()->lockMapPos(__FILE__,__LINE__));
+    core->getMapEngine()->unlockMapPos();
+    if (core->getMapSource()->findMapTileByGeographicCoordinate(pos,i->second,true))
+      core->getMapEngine()->setZoomLevel(i->second);
+    else
+      WARNING("map layer <%s> is not selected because it has no tile for current position",name.c_str());
+  }
 }
 
 }

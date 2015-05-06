@@ -31,28 +31,39 @@ std::string MapSource::getNodeText(XMLNode node)
 // Reads elements from the GDS XML structure
 bool MapSource::readGDSInfo(XMLNode startNode, std::vector<std::string> path) {
   bool result=false;
+  //DEBUG("path.size()=%d",path.size());
   for (XMLNode n = startNode; n; n = n->next) {
     if (n->type == XML_ELEMENT_NODE) {
       std::string name=std::string((char*)n->name);
       if (n->children) {
         std::vector<std::string> newPath = path;
         newPath.push_back(name);
+        //DEBUG("name=%s",name.c_str());
         if (readGDSInfo(n->children,newPath)) {
           result=true;
           if (gdsElements.back().size()!=newPath.size()+1) {
             newPath[newPath.size()-1]="/"+name;
+            //DEBUG("end of name=%s",newPath[newPath.size()-1].c_str());
             gdsElements.push_back(newPath);
           }
         }
       }
     }
     if (n->type == XML_TEXT_NODE) {
-      std::vector<std::string> element;
-      for (Int i=0;i<path.size();i++)
-        element.push_back(path[i]);
       std::string value = getNodeText(n);
-      element.push_back(value);
-      gdsElements.push_back(element);
+      bool emptyString=true;
+      for (Int i=0;i<value.length();i++) {
+        if ((value[i]!='\r')&&(value[i]!='\n')&&(value[i]!=' ')&&(value[i]!='\t'))
+          emptyString=false;
+      }
+      if (!emptyString) {
+        std::vector<std::string> element;
+        for (Int i=0;i<path.size();i++)
+          element.push_back(path[i]);
+        element.push_back(value);
+        //DEBUG("value=%s",value.c_str());
+        gdsElements.push_back(element);
+      }
       result=true;
     }
   }
@@ -74,7 +85,6 @@ bool MapSource::readGDSInfo(std::string infoFilePath)
   std::vector<std::string> emptyPath;
 
   // Read the XML file
-  gdsElements.clear();
   doc = xmlReadFile(infoFilePath.c_str(), NULL, 0);
   if (!doc) {
     ERROR("can not open file <%s> for reading map source information",infoFilePath.c_str());

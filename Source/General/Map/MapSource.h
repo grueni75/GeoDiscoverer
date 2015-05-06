@@ -17,6 +17,8 @@
 namespace GEODISCOVERER {
 
 typedef enum { MapSourceTypeCalibratedPictures, MapSourceTypeMercatorTiles, MapSourceTypeEmpty } MapSourceType;
+typedef std::map<std::string, Int> MapLayerNameMap;
+typedef std::pair<std::string, Int> MapLayerNamePair;
 
 class MapSource {
 
@@ -41,6 +43,9 @@ protected:
   std::list<std::string> status;            // Status of the map source
   ThreadMutexInfo *statusMutex;             // Mutex for accessing the status
   MapDownloader *mapDownloader;             // Downlads missing tiles from the tileserver
+  MapLayerNameMap mapLayerNameMap;          // Defines for each zoom level a name
+  Int minZoomLevel;                         // Minimum zoom value
+  Int maxZoomLevel;                         // Maximum zoom value
 
   // Lists of map containers sorted by their boundaries
   std::vector<Int> mapsIndexByLatNorth;
@@ -85,6 +90,9 @@ protected:
 
   // Reads information about the map
   static bool readGDSInfo(std::string infoFilePath);
+
+  // Renames the layers with the infos in the gds file
+  void renameLayers();
 
 public:
 
@@ -138,6 +146,12 @@ public:
 
   // Removes all obsolete map containers
   virtual void removeObsoleteMapContainers(bool removeFromMapArchive);
+
+  // Returns the names of each map layer
+  std::list<std::string> getMapLayerNames();
+
+  // Selects the given map layer
+  void selectMapLayer(std::string name);
 
   // Getters and setters
   Int getMapTileLength() const {

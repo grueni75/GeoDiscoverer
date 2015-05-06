@@ -281,7 +281,7 @@ void WidgetEngine::createGraphic() {
       // ---------------------------------------------------------
       config=WidgetConfig();
       config.setPageName("Default");
-      config.setName("Create New Track");
+      config.setName("Change Map Layer");
       config.setType(WidgetTypeButton);
       position=WidgetPosition();
       position.setRefScreenDiagonal(4.0);
@@ -303,8 +303,8 @@ void WidgetEngine::createGraphic() {
       config.addPosition(position);
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setInactiveColor(GraphicColor(255,255,255,100));
-      config.setParameter("iconFilename","createNewTrack");
-      config.setParameter("command","createNewTrack()");
+      config.setParameter("iconFilename","changeMapLayer");
+      config.setParameter("command","changeMapLayer()");
       config.setParameter("repeat","0");
       addWidgetToPage(config);
       // ---------------------------------------------------------

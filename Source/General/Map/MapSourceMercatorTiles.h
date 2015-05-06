@@ -20,8 +20,6 @@ class MapSourceMercatorTiles : public MapSource {
 protected:
 
   ThreadMutexInfo *accessMutex;                     // Mutex for accessing the map source object
-  Int minZoomLevel;                                 // Minimum zoom value
-  Int maxZoomLevel;                                 // Maximum zoom value
   Int mapContainerCacheSize;                        // Number of map containers to hold in the cache
   bool errorOccured;                                // Indicates that an error has occured
   bool downloadWarningOccured;                      // Indicates that a warning has occured

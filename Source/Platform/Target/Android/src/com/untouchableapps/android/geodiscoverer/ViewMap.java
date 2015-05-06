@@ -401,6 +401,10 @@ public class ViewMap extends GDActivity {
             viewMap.decideContinueOrNewTrack();
             commandExecuted=true;
           } 
+          if (commandFunction.equals("changeMapLayer")) {            
+            viewMap.changeMapLayer(commandArgs);
+            commandExecuted=true;
+          } 
           
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
@@ -576,6 +580,23 @@ public class ViewMap extends GDActivity {
             coreObject.executeCoreCommand("setRecordTrack(1)");            
           }
         });
+    builder.setIcon(android.R.drawable.ic_dialog_info);
+    AlertDialog alert = builder.create();
+    alert.show();
+  }
+
+  /** Asks the user if which map layer shall be selected */
+  void changeMapLayer(final Vector<String> names) {
+    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    builder.setTitle(R.string.map_layer_selection_question);
+    builder.setItems(names.toArray(new CharSequence[names.size()]),
+        new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            coreObject.executeCoreCommand("selectMapLayer(" + names.elementAt(which)  + ")");
+          }
+        });
+    builder.setCancelable(true);
     builder.setIcon(android.R.drawable.ic_dialog_info);
     AlertDialog alert = builder.create();
     alert.show();

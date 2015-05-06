@@ -446,7 +446,32 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="decideContinueOrNewTrack") {
     dispatch(cmd);
-    result="false";
+    cmdExecuted=true;
+  }
+  if (cmdName=="changeMapLayer") {
+    if (core->getIsInitialized()) {
+      std::list<std::string> names=core->getMapSource()->getMapLayerNames();
+      std::string appCmd = "changeMapLayer(";
+      for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
+        if (i==names.begin())
+          appCmd += *i;
+        else
+          appCmd += "," + *i;
+      }
+      appCmd += ")";
+      dispatch(appCmd);
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="selectMapLayer") {
+    if (core->getIsInitialized()) {
+      DEBUG("cmd=%s",cmd.c_str());
+      core->getMapSource()->selectMapLayer(args[0]);
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
+    }
     cmdExecuted=true;
   }
 

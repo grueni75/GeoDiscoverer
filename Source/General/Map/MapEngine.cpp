@@ -811,7 +811,8 @@ void MapEngine::updateMap() {
     core->getThread()->lockMutex(forceMapUpdateMutex, __FILE__, __LINE__);
     forceMapUpdate=false;
     core->getThread()->unlockMutex(forceMapUpdateMutex);
-    forceMapRecreation=false;
+    if (forceMapRecreation)
+      forceMapRecreation=false;
 
     //PROFILE_ADD("update init");
 

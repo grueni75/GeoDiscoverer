@@ -194,6 +194,13 @@ public:
 
   void setZoomLevelLock(bool zoomLevelLock, bool showInfo=true);
 
+  void setZoomLevel(Int zoomLevel) {
+    setZoomLevelLock(true,false);
+    lockDisplayArea(__FILE__,__LINE__);
+    displayArea.setZoomLevel(zoomLevel);
+    unlockDisplayArea();
+    setForceMapRecreation();
+  }
 };
 
 }

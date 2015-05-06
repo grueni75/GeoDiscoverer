@@ -118,6 +118,16 @@ bool MapSourceMercatorTiles::init() {
   centerPosition->setLatScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::latBound);
   centerPosition->setLngScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::lngBound);
 
+  // Set the default map layer names
+  for (Int z=maxZoomLevel;z>=minZoomLevel;z--) {
+    std::stringstream s;
+    s << z;
+    mapLayerNameMap[s.str()]=z-minZoomLevel+1;
+  }
+
+  // Rename the layers
+  renameLayers();
+
   // Init the zoom levels
   for (int z=0;z<(maxZoomLevel-minZoomLevel)+2;z++) {
     zoomLevelSearchTrees.push_back(NULL);

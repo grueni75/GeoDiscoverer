@@ -13,17 +13,17 @@
     </xsd:annotation>
     <xsd:complexType>
       <xsd:sequence>
-		    <xsd:element name="mapProjection" minOccurs="0" default="linear">
-		      <xsd:annotation>
-		        <xsd:documentation>
-		          Type of map projection.
-		          Four types are currently supported: 
-		          - linear                  => the picture coordinates depend linearly on the geographic coordinates (x=a*longitude+b, y=c*latitude+d)
-		          - sphericalNormalMercator => the map uses a spherical normal mercator projection of geographic coordinates to picture coordinates (as used by OSM tile server)
-		          - mercator                => same as sphericalNormalMercator
-		          - proj4                   => use a proj.4 (http://trac.osgeo.org/proj/) string to define the map projection. Requires that the element "mapProjectionArgs" is present.
-		        </xsd:documentation>
-		      </xsd:annotation>
+        <xsd:element name="mapProjection" minOccurs="0" default="linear">
+          <xsd:annotation>
+            <xsd:documentation>
+              Type of map projection.
+              Four types are currently supported: 
+              - linear                  => the picture coordinates depend linearly on the geographic coordinates (x=a*longitude+b, y=c*latitude+d)
+              - sphericalNormalMercator => the map uses a spherical normal mercator projection of geographic coordinates to picture coordinates (as used by OSM tile server)
+              - mercator                => same as sphericalNormalMercator
+              - proj4                   => use a proj.4 (http://trac.osgeo.org/proj/) string to define the map projection. Requires that the element "mapProjectionArgs" is present.
+            </xsd:documentation>
+          </xsd:annotation>
           <xsd:simpleType>
             <xsd:restriction base="xsd:string">
               <xsd:enumeration value="linear"/>
@@ -32,7 +32,7 @@
               <xsd:enumeration value="proj4"/>
             </xsd:restriction>
           </xsd:simpleType>
-		    </xsd:element>  
+        </xsd:element>  
         <xsd:element name="mapProjectionArgs" minOccurs="0" type="xsd:string">
           <xsd:annotation>
             <xsd:documentation>
@@ -40,21 +40,21 @@
             </xsd:documentation>
           </xsd:annotation>
         </xsd:element>
-	      <xsd:element name="calibrationPoint" minOccurs="3" maxOccurs="unbounded">
-	        <xsd:annotation>
-	          <xsd:documentation>
+        <xsd:element name="calibrationPoint" minOccurs="3" maxOccurs="unbounded">
+          <xsd:annotation>
+            <xsd:documentation>
                Defines a calibration point.
-	          </xsd:documentation>
-	        </xsd:annotation>
-	        <xsd:complexType>
-	          <xsd:sequence>
-	            <xsd:element name="latitude" type="xsd:double">
-	              <xsd:annotation>
-	                <xsd:documentation>
-	                  Latitude of the calibration point.
-	                </xsd:documentation>
-	              </xsd:annotation>
-	            </xsd:element>
+            </xsd:documentation>
+          </xsd:annotation>
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="latitude" type="xsd:double">
+                <xsd:annotation>
+                  <xsd:documentation>
+                    Latitude of the calibration point.
+                  </xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
                <xsd:element name="longitude" type="xsd:double">
                  <xsd:annotation>
                    <xsd:documentation>
@@ -76,17 +76,17 @@
                    </xsd:documentation>
                  </xsd:annotation>
                </xsd:element>
-	          </xsd:sequence>
-	        </xsd:complexType>
-	      </xsd:element>
-	      <xsd:element name="imageFileName" type="xsd:string">
-	        <xsd:annotation>
-	          <xsd:documentation>
-	            Filename of the image representing this map.
-	            Images in PNG or JPG format are supported.
-	          </xsd:documentation>
-	        </xsd:annotation>
-	      </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="imageFileName" type="xsd:string">
+          <xsd:annotation>
+            <xsd:documentation>
+              Filename of the image representing this map.
+              Images in PNG or JPG format are supported.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:element>
         <xsd:element name="zoomLevel" type="xsd:integer">
           <xsd:annotation>
             <xsd:documentation>
