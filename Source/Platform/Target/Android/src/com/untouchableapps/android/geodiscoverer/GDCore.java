@@ -650,11 +650,15 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         repeat=false;
         lookupARPCacheThread.interrupt();
         try {
-          lookupARPCacheThread.join();
+          lookupARPCacheThread.join(100);
         }
         catch (InterruptedException e) {
           repeat=true;
         }
+        if (lookupARPCacheThread.isAlive())
+          repeat=true;
+        else
+          repeat=false;
       }
       lookupARPCacheThread = null;
     }

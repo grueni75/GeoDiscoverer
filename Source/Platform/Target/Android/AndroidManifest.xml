@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.untouchableapps.android.geodiscoverer"
       android:versionCode="17"
-      android:versionName="20150506">
+      android:versionName="20150507">
   <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
