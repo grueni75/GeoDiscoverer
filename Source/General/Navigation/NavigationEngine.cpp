@@ -1334,12 +1334,13 @@ void NavigationEngine::computeNavigationInfo() {
       infos << ";-;-";
     }
     if (navigationInfo.getType() == NavigationInfoTypeRoute) {
-      if (navigationInfo.getOffRoute())
-        infos << ";off route";
-      else
-        infos << ";on route";
+      if (navigationInfo.getOffRoute()) {
+        core->getUnitConverter()->formatMeters(navigationInfo.getRouteDistance(),value,unit);
+        infos << ";off route;" << value << " " << unit;
+      } else
+        infos << ";on route;-";
     } else {
-      infos << ";no route";
+      infos << ";no route;-";
     }
     core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
     //  sleep(1);

@@ -48,6 +48,9 @@ protected:
   // Remaining distance to next turn
   double turnDistance;
 
+  // Remaining distance to route
+  double routeDistance;
+
   // Angle by which the turn will change the direction
   double turnAngle;
 
@@ -137,6 +140,14 @@ public:
 
   void setType(NavigationInfoType type) {
     this->type = type;
+  }
+
+  double getRouteDistance() const {
+    return routeDistance;
+  }
+
+  void setRouteDistance(double routeDistance) {
+    this->routeDistance = routeDistance;
   }
 };
 

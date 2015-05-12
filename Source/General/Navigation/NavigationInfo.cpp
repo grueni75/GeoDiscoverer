@@ -22,6 +22,7 @@ NavigationInfo::NavigationInfo() {
   targetDuration=unknownDuration;
   turnDistance=unknownDistance;
   turnAngle=unknownAngle;
+  routeDistance=unknownDistance;
   offRoute=false;
 }
 

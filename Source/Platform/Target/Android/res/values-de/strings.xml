@@ -3,10 +3,10 @@
   <string name="tts_locale">de</string>
   <string name="tts_turn_left">Bitte in %1$s links abbiegen!</string>
   <string name="tts_turn_right">Bitte in %1$s rechts abbiegen!</string>
-  <string name="tts_off_route">Du bist nicht mehr auf dem richtigem Weg!</string>
-  <string name="tts_meters">Metern</string>
-  <string name="tts_kilometers">Kilometern</string>
-  <string name="tts_megameters">Megametern</string>
+  <string name="tts_off_route">Du bist %1$s von Deinem Weg entfernt!</string>
+  <string name="tts_meters">Meter</string>
+  <string name="tts_kilometers">Kilometer</string>
+  <string name="tts_megameters">Megameter</string>
   <string name="tts_miles">Meilen</string>
   <string name="tts_yards">Yards</string>
 </resources>

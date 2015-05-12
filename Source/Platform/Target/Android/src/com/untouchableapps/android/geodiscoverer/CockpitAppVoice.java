@@ -75,7 +75,7 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
       long diffToLastUpdate = t - lastAlert;
       if (diffToLastUpdate>minDurationBetweenOffRouteAlerts) {
         textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
-        textToSpeech.speak(context.getString(R.string.tts_off_route), TextToSpeech.QUEUE_ADD, null);
+        textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);
         lastAlert=t;
       }
     }
@@ -85,39 +85,53 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
       lastAlert=t;
     }
   }  
+
+  /** Converts a distance string into a speakable string */
+  protected String textDistanceToVoiceDistance(String distance) {
+    float distanceNumber = Float.valueOf(distance.substring(0,distance.indexOf(" ")));
+    distanceNumber=Math.round(distanceNumber);
+    String distanceUnit = distance.substring(distance.indexOf(" ")+1);
+    if (distanceUnit.equals("m")) {
+      distanceUnit=context.getString(R.string.tts_meters);
+    }
+    if (distanceUnit.equals("km")) {
+      distanceUnit=context.getString(R.string.tts_kilometers);
+    }
+    if (distanceUnit.equals("Mm")) {
+      distanceUnit=context.getString(R.string.tts_megameters);
+    }
+    if (distanceUnit.equals("mi")) {
+      distanceUnit=context.getString(R.string.tts_miles);
+    }
+    if (distanceUnit.equals("yd")) {
+      distanceUnit=context.getString(R.string.tts_yards);
+    }
+    return String.format(textToSpeechLocale, "%.0f %s", distanceNumber,distanceUnit);
+  }
   
   /** Prepare the text to say */
   public void update(CockpitInfos infos) {
     
     navigationInstructions="";
     
-    // Is a turn coming?
-    if (!infos.turnAngle.equals("-")) {
-      Float turnAngle = Float.valueOf(infos.turnAngle);
-      float distanceNumber = Float.valueOf(infos.turnDistance.substring(0,infos.turnDistance.indexOf(" ")));
-      distanceNumber=Math.round(distanceNumber);
-      String distanceUnit = infos.turnDistance.substring(infos.turnDistance.indexOf(" ")+1);
-      if (distanceUnit.equals("m")) {
-        distanceUnit=context.getString(R.string.tts_meters);
-      }
-      if (distanceUnit.equals("km")) {
-        distanceUnit=context.getString(R.string.tts_kilometers);
-      }
-      if (distanceUnit.equals("Mm")) {
-        distanceUnit=context.getString(R.string.tts_megameters);
-      }
-      if (distanceUnit.equals("mi")) {
-        distanceUnit=context.getString(R.string.tts_miles);
-      }
-      if (distanceUnit.equals("yd")) {
-        distanceUnit=context.getString(R.string.tts_yards);
-      }
-      String distance = String.format(textToSpeechLocale, "%.0f %s", distanceNumber,distanceUnit);
-      if (turnAngle>0)
-        navigationInstructions=context.getString(R.string.tts_turn_left, distance);
-      else
-        navigationInstructions=context.getString(R.string.tts_turn_right, distance);
+    // Are we off route?
+    if (infos.offRoute) {
       
+      String distance = textDistanceToVoiceDistance(infos.routeDistance);
+      navigationInstructions=context.getString(R.string.tts_off_route, distance);
+      
+    } else {
+
+      // Is a turn coming?
+      if (!infos.turnAngle.equals("-")) {
+        Float turnAngle = Float.valueOf(infos.turnAngle);
+        String distance = textDistanceToVoiceDistance(infos.turnDistance);
+        if (turnAngle>0)
+          navigationInstructions=context.getString(R.string.tts_turn_left, distance);
+        else
+          navigationInstructions=context.getString(R.string.tts_turn_right, distance);
+        
+      }
     }
   }
   

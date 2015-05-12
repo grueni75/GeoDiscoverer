@@ -222,6 +222,7 @@ public class CockpitEngine {
     cockpitInfos.turnAngle = infosAsArray[4];
     cockpitInfos.turnDistance = infosAsArray[5];
     cockpitInfos.offRoute = infosAsArray[6].equals("off route");
+    cockpitInfos.routeDistance = infosAsArray[7];
     currentTurnDistance = cockpitInfos.turnDistance;
     currentOffRoute = cockpitInfos.offRoute;
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "update: currentOffRoute=" + Boolean.toString(currentOffRoute));

@@ -37,4 +37,6 @@ public class CockpitInfos {
   /** Indicates if location is off route */
   boolean offRoute;
   
+  /** Remaining distance to route */
+  String routeDistance;
 }

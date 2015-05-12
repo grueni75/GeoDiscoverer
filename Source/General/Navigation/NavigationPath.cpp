@@ -745,7 +745,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
   // Init variables
   std::vector<MapPosition> mapPositions=getSelectedPoints();
-  double minDistance=std::numeric_limits<double>::max();
+  double distanceToRoute=std::numeric_limits<double>::max();
   std::vector<MapPosition>::iterator nearestIterator;
   Int startIndex, endIndex;
   startIndex=reverse ? mapPositions.size()-1 : 0;
@@ -759,8 +759,8 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
   for (Int i=startIndex; reverse?i>=endIndex:i<=endIndex;reverse?i--:i++) {
     MapPosition curPoint = mapPositions[i];
     double distance = curPoint.computeDistance(locationPos);
-    if (distance<minDistance)  {
-      minDistance=distance;
+    if (distance<distanceToRoute)  {
+      distanceToRoute=distance;
       nearestIterator=mapPositions.begin()+i;
     }
   }
@@ -768,7 +768,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
   // Check if we are already on route
   bool offRoute=true;
-  if (minDistance<minDistanceToBeOffRoute)
+  if (distanceToRoute<minDistanceToBeOffRoute)
     offRoute=false;
 
   // In case there are multiple points on the route,
@@ -825,7 +825,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
   // From the nearest point, find the point at the predefined distance
   bool wayPointSet = false;
-  double distanceToRouteEnd=minDistance;
+  double distanceToRouteEnd=distanceToRoute;
   double turnAngle=NavigationInfo::getUnknownAngle();
   MapPosition pos;
   MapPosition lastValidPos=NavigationPath::getPathInterruptedPos();
@@ -836,7 +836,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
   bool firstFrontPosFound = false;
   bool turnPointSet = false;
   bool prevPointWasTurnPoint = true;
-  if (minDistance!=std::numeric_limits<double>::max()) {
+  if (distanceToRoute!=std::numeric_limits<double>::max()) {
     while (true) {
       pos = *iterator;
       if (pos!=NavigationPath::getPathInterruptedPos()) {
@@ -1003,6 +1003,8 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
   // Set the navigation infos
   navigationInfo.setOffRoute(offRoute);
+  if (offRoute)
+    navigationInfo.setRouteDistance(distanceToRoute);
   navigationInfo.setTargetDistance(distanceToRouteEnd);
   navigationInfo.setTurnAngle(turnAngle);
   navigationInfo.setTurnDistance(turnDistance);

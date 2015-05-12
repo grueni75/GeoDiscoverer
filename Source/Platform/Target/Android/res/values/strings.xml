@@ -88,7 +88,7 @@
   <string name="tts_locale">en</string>
   <string name="tts_turn_left">Please turn left in %1$s!</string>
   <string name="tts_turn_right">Please turn right in %1$s!</string>
-  <string name="tts_off_route">You are off route!</string>
+  <string name="tts_off_route">You are %1$s away from your route!</string>
   <string name="tts_meters">meters</string>
   <string name="tts_kilometers">kilometers</string>
   <string name="tts_megameters">megameters</string>
