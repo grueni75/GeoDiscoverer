@@ -105,20 +105,20 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   ThreadInfo *widgetPathInfoThreadInfo;
   ThreadMutexInfo *visualizationMutex;
   ThreadMutexInfo *widgetPathInfoThreadWorkingMutex;
-  std::string visualizationPathName;
-  std::string visualizationPathLength;
-  std::string visualizationPathAltitudeUp;
-  std::string visualizationPathAltitudeDown;
-  std::string visualizationPathDuration;
-  std::list<GraphicPoint> visualizationAltitudeProfileFillPoints;
-  std::list<GraphicPoint> visualizationAltitudeProfileLinePoints;
-  GraphicPoint visualizationAltitudeProfileLocationIconPoint;
+  std::string *visualizationPathName;
+  std::string *visualizationPathLength;
+  std::string *visualizationPathAltitudeUp;
+  std::string *visualizationPathAltitudeDown;
+  std::string *visualizationPathDuration;
+  std::list<GraphicPoint> *visualizationAltitudeProfileFillPoints;
+  std::list<GraphicPoint> *visualizationAltitudeProfileLinePoints;
+  GraphicPoint *visualizationAltitudeProfileLocationIconPoint;
   bool visualizationAltitudeProfileHideLocationIcon;
-  std::list<GraphicPoint> visualizationAltitudeProfileAxisPoints;
-  std::vector<std::string> visualizationAltitudeProfileXTickLabels;
-  std::vector<GraphicPoint> visualizationAltitudeProfileXTickPoints;
-  std::vector<std::string> visualizationAltitudeProfileYTickLabels;
-  std::vector<GraphicPoint> visualizationAltitudeProfileYTickPoints;
+  std::list<GraphicPoint> *visualizationAltitudeProfileAxisPoints;
+  std::vector<std::string> *visualizationAltitudeProfileXTickLabels;
+  std::vector<GraphicPoint> *visualizationAltitudeProfileXTickPoints;
+  std::vector<std::string> *visualizationAltitudeProfileYTickLabels;
+  std::vector<GraphicPoint> *visualizationAltitudeProfileYTickPoints;
   bool visualizationNoAltitudeProfile;
 
 public:

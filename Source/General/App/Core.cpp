@@ -338,7 +338,7 @@ void Core::updateScreen(bool forceRedraw) {
 
   bool wakeupMapUpdateThread=false;
 
-  PROFILE_START;
+  //PROFILE_START;
 
   // Allow texture allocation
   getDefaultDevice()->getScreen()->setAllowAllocation(true);
@@ -362,25 +362,25 @@ void Core::updateScreen(bool forceRedraw) {
       thread->unlockMutex(isInitializedMutex);
       core->getThread()->issueSignal(isInitializedSignal);
       core->getCommander()->dispatch("initComplete()");
-      PROFILE_ADD("init");
+      //PROFILE_ADD("init");
     }
 
     // Check if a new texture is ready
     if (mapCache->getTileTextureAvailable()) {
       mapCache->setNextTileTexture();
       thread->issueSignal(mapUpdateTileTextureProcessedSignal);
-      PROFILE_ADD("tile texture transfer");
+      //PROFILE_ADD("tile texture transfer");
     }
 
   }
-  PROFILE_ADD("pre draw");
+  //PROFILE_ADD("pre draw");
 
   /* Redraw the scene
   for (std::list<Device*>::iterator i=devices.begin();i!=devices.end();i++) {
     (*i)->getGraphicEngine()->draw(forceRedraw);
   }*/
   getDefaultDevice()->getGraphicEngine()->draw(forceRedraw);
-  PROFILE_ADD("draw");
+  //PROFILE_ADD("draw");
 
   // Only work if the required objects are initialized
   if (!mapUpdateStopped) {
@@ -397,7 +397,7 @@ void Core::updateScreen(bool forceRedraw) {
         mapEngine->setAbortUpdate();
       }
     }
-    PROFILE_ADD("map update abort check");
+    //PROFILE_ADD("map update abort check");
   }
 
   // Let the map update thread continue
@@ -420,13 +420,13 @@ void Core::updateScreen(bool forceRedraw) {
     if (updateRequired) {
       thread->issueSignal(mapUpdateStartSignal);
     }
-    PROFILE_ADD("map update trigger check");
+    //PROFILE_ADD("map update trigger check");
 
   }
 
   // Disallow texture allocation
   getDefaultDevice()->getScreen()->setAllowAllocation(false);
-  PROFILE_ADD("post draw");
+  //PROFILE_ADD("post draw");
 }
 
 // Adds a new dashboard device
@@ -498,7 +498,7 @@ void Core::updateDashboardScreens() {
     else
       sleepTime=minUpdatePeriodNormal;
 
-    DEBUG("sleepTime=%d",sleepTime);
+    //DEBUG("sleepTime=%d",sleepTime);
 
     // Get all devices
     core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
@@ -689,7 +689,7 @@ void Core::maintenance(bool endlessLoop) {
     // Output the profiling result
 #ifdef PROFILING_ENABLED
     core->getProfileEngine()->outputResult("",false);
-    core->getGraphicEngine()->outputStats();
+    core->getDefaultGraphicEngine()->outputStats();
 #endif
 
     // Call the maintenance in the map source

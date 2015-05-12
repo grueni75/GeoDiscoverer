@@ -152,7 +152,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
   // Get the time
   currentTime=core->getClock()->getMicrosecondsSinceStart();
 
-  PROFILE_START;
+  //PROFILE_START;
 
   // Copy the current position
   lockPos(__FILE__,__LINE__);
@@ -176,7 +176,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
     DEBUG("forcing redraw due to external request",NULL);
     redrawScene=true;
   }
-  PROFILE_ADD("int");
+  //PROFILE_ADD("init");
 
   // Do stuff for the default screen
   if (isDefaultScreen) {
@@ -283,7 +283,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
     device->setNoChangeFrameCount(0);
   }
 
-  PROFILE_ADD("drawing work and update check");
+  //PROFILE_ADD("drawing work and update check");
 
   // Redraw required?
   if (redrawScene) {
@@ -309,7 +309,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
     screen->endObject();
 */
 
-    PROFILE_ADD("drawing init");
+    //PROFILE_ADD("drawing init");
 
     // Do the stuff for the default screen
     if (isDefaultScreen) {
@@ -494,7 +494,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
         }
       }
 
-      PROFILE_ADD("map drawing");
+      //PROFILE_ADD("map drawing");
 
       // Draw the location icon and the compass cone
       //DEBUG("locationIcon.getColor().getAlpha()=%d locationIcon.getX()=%d locationIcon.getY()=%d",locationIcon.getColor().getAlpha(),locationIcon.getX(),locationIcon.getY());
@@ -539,7 +539,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
       }
       //WARNING("enable location icon",NULL);
       //DEBUG("locationAccuradyRadiusX=%d locationAccuracyRadiusY=%d",locationAccuracyRadiusX,locationAccuracyRadiusY);
-      PROFILE_ADD("location drawing");
+      //PROFILE_ADD("location drawing");
 
       // Draw the target icon
       if (targetIcon.getColor().getAlpha()>0) {
@@ -562,7 +562,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
         screen->endObject();
         screen->endObject();
       }
-      PROFILE_ADD("target icon drawing");
+      //PROFILE_ADD("target icon drawing");
 
       // Draw the arrow icon
       if (arrowIcon.getColor().getAlpha()>0) {
@@ -585,7 +585,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
         screen->endObject();
         screen->endObject();
       }
-      PROFILE_ADD("arrow drawing");
+      //PROFILE_ADD("arrow drawing");
 
       // End the map object
       screen->endObject();
@@ -602,7 +602,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
       //DEBUG("x1=%d y1=%d x2=%d y2=%d",x1,y1,x2,y2);
       screen->drawRectangle(x1,y1,x2,y2,centerIcon.getTexture(),true);
       screen->endObject();
-      PROFILE_ADD("cursor drawing");
+      //PROFILE_ADD("cursor drawing");
     }
 
     // Draw all widgets
@@ -623,7 +623,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
         screen->endObject();
       }
     }
-    PROFILE_ADD("widget drawing");
+    //PROFILE_ADD("widget drawing");
 
     // Finish the drawing
     screen->endScene();
@@ -665,8 +665,8 @@ bool GraphicEngine::draw(bool forceRedraw) {
   // Drawing ends
   unlockDrawing();
 
+  //PROFILE_ADD("cleanup");
   //PROFILE_END;
-  PROFILE_ADD("cleanup");
 
   return result;
 }
