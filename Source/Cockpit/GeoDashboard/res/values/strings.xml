@@ -13,6 +13,7 @@
     <string name="waiting_for_connection">Waiting at %1$s:%2$d&#8230;</string>
     <string name="init_server">Initializing network service&#8230;</string>
     <string name="deinit_server">Shutting down network service&#8230;</string>
+    <string name="server_down">Network service is down!</string>
     <string name="no_wlan_address">No WLAN IP address found! Is WLAN on and associated?</string>
  
 </resources>

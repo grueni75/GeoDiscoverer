@@ -21,7 +21,8 @@
             android:name=".ViewDashboard"
             android:label="@string/app_name"
             android:theme="@style/FullscreenTheme"
-            android:screenOrientation="landscape" > 
+            android:screenOrientation="landscape"
+            android:launchMode="singleInstance" > 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -17,6 +17,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -29,7 +30,10 @@ import javax.jmdns.ServiceInfo;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -97,6 +101,21 @@ public class ViewDashboard extends Activity {
   boolean restartNetworkService = false;
   
   /**
+   * Indicates that WLAN is active
+   */
+  boolean wlanActive = false;
+
+  /**
+   * Indicates that the app is active
+   */
+  boolean appActive = false;
+  
+  /**
+   * Indicates that the service is active
+   */
+  boolean serviceActive = false;
+
+  /**
    * References to the full screen image view
    */
   ImageView dashboardView;
@@ -128,7 +147,7 @@ public class ViewDashboard extends Activity {
   /**
    * Registers the network service of this app
    */
-  private void registerService(int port) {
+  private boolean registerService(int port) {
         
     ServiceInfo serviceInfo = ServiceInfo.create(
         "_geodashboard._tcp.",
@@ -139,8 +158,11 @@ public class ViewDashboard extends Activity {
       jmDNS.registerService(serviceInfo);
     }
     catch (IOException e) {
-      Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-    }
+      Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
+      msg.sendToTarget();
+      return false;
+    } 
+    return true;
   }
 
   /**
@@ -200,9 +222,18 @@ public class ViewDashboard extends Activity {
   }
   
   /**
+   * Displays a bitmap with a text
+   */
+  protected void displayTextBitmap(String text) {
+    Bitmap b = createTextBitmap(text);
+    Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,b);
+    msg.sendToTarget();
+  }
+  
+  /**
    * Starts the network service
    */
-  private void startService() {
+  private void startService(boolean wait) {
         
     quitServerThread=false;
     serverThread = new Thread(new Runnable() {
@@ -211,22 +242,27 @@ public class ViewDashboard extends Activity {
       public void run() {
 
         // Open server socket
-        try {
-          serverSocket = new ServerSocket(11111);
+        if (serverSocket==null) {
+          try {
+            serverSocket = new ServerSocket();
+            serverSocket.setReuseAddress(true);
+            serverSocket.bind(new InetSocketAddress(11111));
+          }
+          catch (IOException e) {
+            Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
+            msg.sendToTarget();
+            displayTextBitmap(getString(R.string.server_down));
+            serverSocket = null;
+            return;
+          }
         }
-        catch (IOException e) {
-          Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
-          msg.sendToTarget();
-          return;
-        }
-        if (serverSocket==null) 
-          return;
 
         // Create the JmDNS object
         InetAddress address = getWifiInetAddress(ViewDashboard.this, Inet4Address.class);
         if (address==null) {
           Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,getString(R.string.no_wlan_address));
           msg.sendToTarget();
+          displayTextBitmap(getString(R.string.server_down));
           return;
         }
         try {
@@ -235,17 +271,22 @@ public class ViewDashboard extends Activity {
         catch (IOException e) {
           Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
           msg.sendToTarget();
+          displayTextBitmap(getString(R.string.server_down));
           return;
         }
 
         // Register the service
-        registerService(serverSocket.getLocalPort());
+        if (!registerService(serverSocket.getLocalPort())) {
+          displayTextBitmap(getString(R.string.server_down));
+          return;
+        }
 
         // Set bitmap to indicate "wait for first connection"
         Bitmap b = createTextBitmap(getString(R.string.waiting_for_connection,address.toString(),serverSocket.getLocalPort()));
         Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,b);
         msg.sendToTarget();
         b=null;
+        serviceActive = true;
 
         // Handle network communication
         while (!quitServerThread) {
@@ -273,7 +314,8 @@ public class ViewDashboard extends Activity {
             client.close();
           }
           catch (IOException e) {
-            Toast.makeText(ViewDashboard.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
+            msg.sendToTarget();
           }
         }
         
@@ -281,12 +323,11 @@ public class ViewDashboard extends Activity {
         jmDNS.unregisterAllServices();
         try {
           jmDNS.close();
-          serverSocket.close();
         }
         catch (IOException e) {
           Toast.makeText(ViewDashboard.this, e.getMessage(), Toast.LENGTH_LONG).show();
-          return;
         }
+        displayTextBitmap(getString(R.string.server_down));
         
       }
       
@@ -294,11 +335,18 @@ public class ViewDashboard extends Activity {
     serverThread.start();
     
     // Display text to indicate initialization
-    Bitmap b = createTextBitmap(getString(R.string.init_server));
-    Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,b);
-    msg.sendToTarget();
-    b=null;
-
+    displayTextBitmap(getString(R.string.init_server));
+    
+    // Shall we wait
+    if (wait) {
+      while (!serviceActive) {
+        try {
+          Thread.sleep(1000);
+        }
+        catch (InterruptedException e) {
+        }
+      }
+    }
   }
   
   /**
@@ -306,10 +354,7 @@ public class ViewDashboard extends Activity {
    */
   private void stopService(boolean wait) {
     quitServerThread=true;
-    Bitmap b = createTextBitmap(getString(R.string.deinit_server));
-    Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,b);
-    msg.sendToTarget();
-    b=null;    
+    displayTextBitmap(getString(R.string.deinit_server));
     Thread stopThread = new Thread(new Runnable() {
       @Override
       public void run() {
@@ -321,9 +366,11 @@ public class ViewDashboard extends Activity {
         }
         catch (Exception e) {
         }
+        displayTextBitmap(getString(R.string.server_down));
+        serviceActive=false;
         if (restartNetworkService) {
           restartNetworkService=false;
-          startService();
+          startService(false);
         }
       }
     });
@@ -341,6 +388,15 @@ public class ViewDashboard extends Activity {
       }
     } 
   }
+  
+  /** 
+   * Restarts the network service 
+   */
+  protected void restartService() {
+    //restartNetworkService=true;
+    stopService(false);
+  }
+
   
   /**
    * Socket that receives the communication with geo discoverer
@@ -407,8 +463,7 @@ public class ViewDashboard extends Activity {
     display.getRealSize(size);
     width = size.x;
     height = size.y;
-
-        
+    
     // Handle messages from the server thread
     serverThreadHandler = new Handler(Looper.getMainLooper()) {
       @Override
@@ -426,6 +481,64 @@ public class ViewDashboard extends Activity {
         }
       }
     };
+    
+    // Get notifications if WLAN changes
+    IntentFilter intentFilter = new IntentFilter();
+    intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+    registerReceiver(new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        boolean connectionEstablished = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
+        if (connectionEstablished) {
+          wlanActive=true;
+        } else {
+          wlanActive=false;
+        }
+      }
+      
+    }, intentFilter);
+       
+    // Start thread that handles wlan changes
+    wifiManager = (android.net.wifi.WifiManager) getSystemService(android.content.Context.WIFI_SERVICE);
+    new Thread(new Runnable() {
+      
+      @Override
+      public void run() {
+
+        // Set the correct WLAN state
+        InetAddress address = getWifiInetAddress(ViewDashboard.this, Inet4Address.class);
+        if (address!=null) {
+          wlanActive=true;
+        } else {
+          wlanActive=false;
+        }
+        
+        // Endless loop
+        while (true) {
+          if ((appActive)&&(wlanActive)) {
+            if (!serviceActive) {
+              address = getWifiInetAddress(ViewDashboard.this, Inet4Address.class);
+              if (address!=null) {
+                startService(true);
+              }
+            }
+          }
+          if ((!wlanActive)||(!appActive)) {
+            if (serviceActive) {
+              stopService(true);
+            }
+          }
+          try {
+            Thread.sleep(1000);
+          }
+          catch (InterruptedException e) {
+          }
+        }
+      }
+    }).start();
+
+    // Service is down
+    displayTextBitmap(getString(R.string.server_down));
   }
 
   @Override
@@ -463,13 +576,12 @@ public class ViewDashboard extends Activity {
     super.onResume();
 
     // Enable multicast on WLAN
-    wifiManager = (android.net.wifi.WifiManager) getSystemService(android.content.Context.WIFI_SERVICE);
     multicastLock = wifiManager.createMulticastLock("Geo Dashboard lock for JmDNS");
     multicastLock.setReferenceCounted(true);
     multicastLock.acquire();
     
-    // Create the network service
-    startService();
+    // App is available
+    appActive=true;
   }
   
   /**
@@ -479,8 +591,8 @@ public class ViewDashboard extends Activity {
   protected void onPause() {
     super.onPause();
     
-    // Stop the network service
-    stopService(true);
+    // App is not available
+    appActive=false;
     
     // Release the multicast lock
     if (multicastLock!=null)
@@ -495,18 +607,38 @@ public class ViewDashboard extends Activity {
     inflater.inflate(R.menu.view_dashboard_actions, menu);
     return super.onCreateOptionsMenu(menu);
   }
-  
+    
   /** Respond to action buttons */
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.action_refresh:
-        restartNetworkService=true;
-        stopService(false);
+        restartService();
         return true;
       default:
         return super.onOptionsItemSelected(item);
     }
+  }
+  
+  /** Close the socket on destroy */
+  @Override
+  protected void onDestroy() {
+    while (serviceActive) {
+      try {
+        Thread.sleep(1000);
+      }
+      catch (InterruptedException e) {
+      }
+    }
+    if (serverSocket!=null) {
+      try {
+        serverSocket.close();
+      }
+      catch (IOException e) {
+      }
+      serverSocket=null;
+    }
+    super.onDestroy();
   }
   
 }
