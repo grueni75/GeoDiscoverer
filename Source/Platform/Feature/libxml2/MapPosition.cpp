@@ -186,7 +186,7 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
 
   // Go through children and extract standard information
   XMLNode extensionsNode=NULL;
-  for (XMLNode node=wptNode->children;node=node->next;node!=NULL) {
+  for (XMLNode node=wptNode->children;node!=NULL;node=node->next) {
     if ((isGPXNameSpace(node))&&(node->type==XML_ELEMENT_NODE)) {
       std::string name=(char*)node->name;
       std::string text;
