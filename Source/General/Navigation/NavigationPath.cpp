@@ -852,9 +852,6 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
         double bearing = locationPos.computeBearing(pos);
         if ((fabs(bearing-locationPos.getBearing())<90.0)||(firstFrontPosFound)) {
 
-          // Do check all positions from the first front pos onwards
-          firstFrontPosFound=true;
-
           // Determine the way point for target computation
           double distanceFromLocation = pos.computeDistance(locationPos);
           if ((!wayPointSet)&&(distanceFromLocation>minDistanceToRouteWayPoint)) {
@@ -911,6 +908,17 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
               turnIterator++;
             }
           }
+
+          // If we are off route and this is the first route point:
+          // Mark it as a turn
+          if ((offRoute)&&(!firstFrontPosFound)) {
+            //DEBUG("marking first route point as turn",NULL);
+            turnPointSet=true;
+            turnPoint=pos;
+            bestTurnLookForwardPos=turnLookForwardPos;
+            prevPointWasTurnPoint=false;
+          }
+          firstFrontPosFound=true;
 
           // Turn detection
           double turnLookBackAngle=pos.computeBearing(turnLookBackPos);
