@@ -46,6 +46,21 @@ bool Device::openSocket() {
       DEBUG("can not create socket",NULL);
       continue;
     }
+
+    // Set socket timeout
+    struct timeval tv;
+    memset(&tv,0,sizeof(timeval));
+    tv.tv_sec=1;
+    if (setsockopt(socketfd,SOL_SOCKET,SO_RCVTIMEO,(const void *)&tv,sizeof(tv))!=0) {
+      FATAL("can not set time out on socket",NULL);
+      return false;
+    }
+    if (setsockopt(socketfd,SOL_SOCKET,SO_SNDTIMEO,(const void *)&tv,sizeof(tv))!=0) {
+      FATAL("can not set time out on socket",NULL);
+      return false;
+    }
+
+    // Connect to socket
     if (connect(socketfd,r->ai_addr,r->ai_addrlen) < 0) {
       DEBUG("can not connect socket",NULL);
       close(socketfd);

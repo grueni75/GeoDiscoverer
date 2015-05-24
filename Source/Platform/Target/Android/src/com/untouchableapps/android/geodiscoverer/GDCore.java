@@ -565,7 +565,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
                   try {
                     String line = br.readLine();
                     Pattern p = Pattern.compile("^\\s*(\\d+\\.\\d+\\.\\d+\\.\\d+)\\s*");
-                    while (line != null) {
+                    while ((line != null)&&(!quitLookupARPCacheThread)) {
                       Matcher m = p.matcher(line);
                       if (m.find()) {
                         String ip = m.group(1);
