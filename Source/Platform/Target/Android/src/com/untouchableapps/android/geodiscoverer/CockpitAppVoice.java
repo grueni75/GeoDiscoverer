@@ -82,7 +82,6 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
     if (type==AlertType.newTurn) {
       textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
       textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);      
-      lastAlert=t;
     }
   }  
 
