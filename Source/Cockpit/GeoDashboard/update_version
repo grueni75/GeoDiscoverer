@@ -1,0 +1,4 @@
+#!/bin/bash
+sed -i 's/android:versionName=\".*\"/android:versionName="'`date +"%Y%m%d"`'"/' AndroidManifest.xml
+
+
