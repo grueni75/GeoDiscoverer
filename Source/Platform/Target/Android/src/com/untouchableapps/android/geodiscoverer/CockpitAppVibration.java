@@ -46,7 +46,7 @@ public class CockpitAppVibration implements CockpitAppInterface {
   }  
 
   /** Inform the user via vibration */
-  public void alert(AlertType type) {
+  public void alert(AlertType type, boolean repeated) {
     long[] pattern = { 0, 500, 500, 500 };
     vibrator.vibrate(pattern, -1);
   }  

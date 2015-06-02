@@ -124,25 +124,26 @@ public class CockpitEngine {
               Thread.sleep(waitTimeBeforeAlert);
               if (quitVibrateThread)
                 return;
-
-              // Skip vibrate if we are not off route anymore and this is 
-              // is not the first vibrate
-              if ((!currentOffRoute)&&(fastVibrateCount>1))
+              
+              // Skip vibrate if we are not off route anymore 
+              // and this is is not the first vibrate
+              if (((!currentOffRoute)||(!currentTurnDistance.equals("-")))&&(fastVibrateCount>1))
                 break;
               
               // Alert the user of all registered cockpit apps
-              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "vibrateThread: currentOffRoute=" + Boolean.toString(currentOffRoute));
+              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "vibrateThread: currentOffRoute=" + Boolean.toString(currentOffRoute));
               for (CockpitAppInterface app : apps) {
-                if (currentOffRoute)
-                  app.alert(AlertType.offRoute);
+                if (!currentTurnDistance.equals("-"))
+                  app.alert(AlertType.newTurn,fastVibrateCount>1);
                 else
-                  app.alert(AlertType.newTurn);
+                  app.alert(AlertType.offRoute,fastVibrateCount>1);
               }
               
               // Repeat if off route 
               // Vibrate fast at the beginning, slow afterwards
               // Quit if a new vibrate is requested or we are on route again
-              if (currentOffRoute) {
+              if ((currentOffRoute)&&(currentTurnDistance.equals("-"))) {
+                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "repeating alert");
                 int offRouteVibratePeriod;
                 if (fastVibrateCount>offRouteAlertFastCount) {
                   offRouteVibratePeriod=offRouteAlertSlowPeriod;
@@ -152,17 +153,17 @@ public class CockpitEngine {
                 }
                 for (int i=0;i<offRouteVibratePeriod/1000;i++) {
                   Thread.sleep(1000);
-                  if ((!currentOffRoute)||(currentVibrateCount<expectedAlertCount-1))
+                  if ((!currentOffRoute)||(!currentTurnDistance.equals("-"))||(currentVibrateCount<expectedAlertCount-1))
                     break;
                 }
               }
               if (quitVibrateThread)
                 return;
             }
-            while ((currentOffRoute)&&(currentVibrateCount==expectedAlertCount-1));
+            while ((currentOffRoute)&&(currentTurnDistance.equals("-"))&&(currentVibrateCount==expectedAlertCount-1));
             currentVibrateCount++;
-            if (!currentOffRoute) 
-              fastVibrateCount=1;
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("currentVibrateCount=%d expectedVibrateCount=%d",currentVibrateCount,expectedAlertCount));
+            fastVibrateCount=1;
           }
           catch(InterruptedException e) {
             ; // repeat
@@ -225,7 +226,7 @@ public class CockpitEngine {
     cockpitInfos.routeDistance = infosAsArray[7];
     currentTurnDistance = cockpitInfos.turnDistance;
     currentOffRoute = cockpitInfos.offRoute;
-    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "update: currentOffRoute=" + Boolean.toString(currentOffRoute));
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "update: currentOffRoute=" + Boolean.toString(currentOffRoute));
     
     // If the turn has appeared or disappears, force an update
     if ((currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals("-")))
@@ -263,7 +264,7 @@ public class CockpitEngine {
     }
     if (alert) {
             
-      // Inform the vibrate thread to do the work
+      // Inform the alert thread to do the work
       lock.lock();
       expectedAlertCount++;
       triggerAlert.signal();

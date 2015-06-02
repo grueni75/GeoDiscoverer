@@ -64,16 +64,16 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
   }  
 
   /** Not necessary */
-  public void alert(AlertType type) {
+  public void alert(AlertType type, boolean repeated) {
     if (!textToSpeechReady)
       return;
     long t = Calendar.getInstance().getTimeInMillis();
     if (type==AlertType.offRoute) {
       
       // Only speak off route alert with defined distance
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "voiceApp: got off route indication");
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "voiceApp: got off route indication (repeated=" + String.valueOf(repeated) + ")");
       long diffToLastUpdate = t - lastAlert;
-      if (diffToLastUpdate>minDurationBetweenOffRouteAlerts) {
+      if ((!repeated)||(diffToLastUpdate>minDurationBetweenOffRouteAlerts)) {
         textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
         textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);
         lastAlert=t;
@@ -113,22 +113,21 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
     
     navigationInstructions="";
     
-    // Are we off route?
-    if (infos.offRoute) {
-      
-      String distance = textDistanceToVoiceDistance(infos.routeDistance);
-      navigationInstructions=context.getString(R.string.tts_off_route, distance);
-      
+    // Is a turn coming?
+    if (!infos.turnAngle.equals("-")) {
+      Float turnAngle = Float.valueOf(infos.turnAngle);
+      String distance = textDistanceToVoiceDistance(infos.turnDistance);
+      if (turnAngle>0)
+        navigationInstructions=context.getString(R.string.tts_turn_left, distance);
+      else
+        navigationInstructions=context.getString(R.string.tts_turn_right, distance);
     } else {
 
-      // Is a turn coming?
-      if (!infos.turnAngle.equals("-")) {
-        Float turnAngle = Float.valueOf(infos.turnAngle);
-        String distance = textDistanceToVoiceDistance(infos.turnDistance);
-        if (turnAngle>0)
-          navigationInstructions=context.getString(R.string.tts_turn_left, distance);
-        else
-          navigationInstructions=context.getString(R.string.tts_turn_right, distance);
+      // Are we off route?
+      if (infos.offRoute) {
+        
+        String distance = textDistanceToVoiceDistance(infos.routeDistance);
+        navigationInstructions=context.getString(R.string.tts_off_route, distance);
         
       }
     }

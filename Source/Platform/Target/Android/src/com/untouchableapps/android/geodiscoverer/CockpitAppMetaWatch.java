@@ -194,7 +194,7 @@ public class CockpitAppMetaWatch implements CockpitAppInterface {
   }  
 
   /** Inform the user via vibration */
-  public void alert(AlertType type) {
+  public void alert(AlertType type, boolean repeated) {
     Intent intent = new Intent("org.metawatch.manager.VIBRATE");
     Bundle b = new Bundle();
     b.putInt("vibrate_on", 500);
@@ -335,11 +335,19 @@ public class CockpitAppMetaWatch implements CockpitAppInterface {
       // Draw the two lines of information
       x = 48;
       y = 35;
-      if ((infos!=null)&&(!infos.targetDistance.equals("-"))) {
-        c.drawText(context.getString(R.string.distance),x,y,smallFontPaint);
-        y += bigFontRealSize+2;
-        c.drawText(infos.targetDistance,x,y,bigFontPaint);
-        y += smallFontRealSize+7;
+      if (infos!=null) {
+        String targetDistance;
+        if (infos.offRoute) {
+          targetDistance=infos.routeDistance;
+        } else {
+          targetDistance=infos.targetDistance;
+        }
+        if (!infos.targetDistance.equals("-")) {
+          c.drawText(context.getString(R.string.distance),x,y,smallFontPaint);
+          y += bigFontRealSize+2;
+          c.drawText(targetDistance,x,y,bigFontPaint);
+          y += smallFontRealSize+7;
+        }
       }
       c.drawLine(20, 51, 76, 51, smallFontPaint);
       if ((infos!=null)&&(!infos.targetDuration.equals("-"))) {

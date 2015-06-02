@@ -120,7 +120,6 @@ void Debug::print(Verbosity verbosity, const char *file, int line, bool messageL
           GDApp_executeAppCommand("fatalDialog(\"" + message + "\")");
           break;
         case verbosityInfo:
-          DEBUG("infoDialog called",NULL);
           GDApp_executeAppCommand("infoDialog(\"" + message + "\")");
           break;
       }

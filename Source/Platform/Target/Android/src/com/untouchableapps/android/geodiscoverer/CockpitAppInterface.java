@@ -27,7 +27,7 @@ public interface CockpitAppInterface {
   public void focus();
   
   /** Alerts the user (e.g., vibrates the cockpit) */
-  public void alert(AlertType type);
+  public void alert(AlertType type, boolean repeated);
 
   /** Starts the cockpit app */
   public void start();

@@ -33,7 +33,7 @@ bool Device::openSocket() {
   std::stringstream portStringStream;
   portStringStream << port;
   if (getaddrinfo(host.c_str(), portStringStream.str().c_str(), &hints, &result)) {
-    DEBUG("can not resolve host %s",host.c_str());
+    //DEBUG("can not resolve host %s",host.c_str());
     return false;
   }
 
@@ -43,7 +43,7 @@ bool Device::openSocket() {
     // Open the connection to the host
     socketfd = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
     if (socketfd < 0) {
-      DEBUG("can not create socket",NULL);
+      //DEBUG("can not create socket",NULL);
       continue;
     }
 
@@ -62,7 +62,7 @@ bool Device::openSocket() {
 
     // Connect to socket
     if (connect(socketfd,r->ai_addr,r->ai_addrlen) < 0) {
-      DEBUG("can not connect socket",NULL);
+      //DEBUG("can not connect socket",NULL);
       close(socketfd);
       socketfd=-1;
       continue;
@@ -74,7 +74,7 @@ bool Device::openSocket() {
 
   // No connection found
   if (socketfd<0) {
-    DEBUG("can not connect to host %s:%d",host.c_str(),port);
+    //DEBUG("can not connect to host %s:%d",host.c_str(),port);
     return false;
   }
 
