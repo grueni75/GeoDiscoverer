@@ -339,7 +339,7 @@ sub downloadtile {
         unlink $fname . "." . $i;
         my $res = $lwpua->get( $url, ':content_file' => $fname . "." . $i );
         $repeat = 0;
-        if (($res->status_line =~ m/^500 /)||($res->status_line =~ m/^504 /)||($res->status_line =~ m/^524 /)) {
+        if (($res->status_line =~ m/^500 /)||($res->status_line =~ m/^504 /)||($res->status_line =~ m/^524 /)||($res->status_line =~ m/^522 /)||($res->status_line =~ m/^503 /)) {
           $repeat = 1;
         } else {
           die $res->status_line unless $res->is_success;
