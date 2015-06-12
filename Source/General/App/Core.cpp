@@ -654,7 +654,6 @@ void Core::lateInit() {
   // If you add other objects, please update also
   // the mapUpdateStopped and mapEngine init code in
   // the updateScreen method
-
 }
 
 // Main loop of the maintenance thread

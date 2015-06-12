@@ -154,6 +154,9 @@ public:
   // Recomputes the visualization of the path info
   void updateVisualization();
 
+  // Called when the widget has changed his position
+  virtual void updatePosition(Int x, Int y, Int z);
+
   // Getters and setters
   void setPathNameOffsetX(Int pathNameOffsetX) {
     this->pathNameOffsetX = pathNameOffsetX;
@@ -284,6 +287,7 @@ public:
   void setPathLengthOffsetX(Int pathLengthOffsetX) {
     this->pathLengthOffsetX = pathLengthOffsetX;
   }
+
 };
 
 } /* namespace GEODISCOVERER */
