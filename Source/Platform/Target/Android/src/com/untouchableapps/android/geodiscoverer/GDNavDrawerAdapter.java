@@ -32,7 +32,7 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-/** Generates entries for the navigation drawer */
+/** Generates entries for the navigation drawer 
 public class GDNavDrawerAdapter extends ArrayAdapter<GDNavDrawerItem> {
 
   public final ArrayList<GDNavDrawerItem> entries;
@@ -78,7 +78,7 @@ public class GDNavDrawerAdapter extends ArrayAdapter<GDNavDrawerItem> {
         viewHolder.iconView = (ImageView) convertView.findViewById(R.id.nav_drawer_item_icon);
         viewHolder.titleView = (TextView) convertView.findViewById(R.id.nav_drawer_item_title);
       } else {
-        convertView = inflater.inflate(R.layout.nav_drawer_app_info, parent, false);
+        convertView = inflater.inflate(R.layout.view_map_menu_header, parent, false);
         viewHolder.appVersionView = (TextView) convertView.findViewById(R.id.nav_drawer_app_version);
       }
       convertView.setTag(viewHolder);
@@ -97,3 +97,4 @@ public class GDNavDrawerAdapter extends ArrayAdapter<GDNavDrawerItem> {
   
 }
 
+*/

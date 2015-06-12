@@ -14,9 +14,7 @@ package com.untouchableapps.android.geodiscoverer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -24,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,9 +38,8 @@ import org.acra.ReportingInteractionMode;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DownloadManager;
-import android.app.ProgressDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -52,6 +48,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.hardware.Sensor;
@@ -65,29 +63,28 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Base64;
-import android.util.LogPrinter;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import com.cocosw.undobar.UndoBarController;
-import com.cocosw.undobar.UndoBarController.UndoListener;
-import com.cocosw.undobar.UndoBarStyle;
-import com.untouchableapps.android.geodiscoverer.R.drawable;
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 public class ViewMap extends GDActivity {
     
@@ -95,7 +92,7 @@ public class ViewMap extends GDActivity {
   static final int SHOW_PREFERENCE_REQUEST = 0;
 
   // GUI components
-  ProgressDialog progressDialog;
+  MaterialDialog progressDialog;
   int progressMax;
   int progressCurrent;
   String progressMessage;
@@ -105,7 +102,8 @@ public class ViewMap extends GDActivity {
   DrawerLayout viewMapRootLayout = null;
   LinearLayout messageLayout = null;
   LinearLayout splashLayout = null;
-  ListView navDrawerList = null;
+  NavigationView navDrawerList= null;
+  CoordinatorLayout snackbarPosition=null;
   
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -144,18 +142,19 @@ public class ViewMap extends GDActivity {
     progressCurrent=progress;
     progressMessage=message;
     if (progressDialog==null) {
-      progressDialog = new ProgressDialog(this);
+      MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
       if (progressMax==0)
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        builder.progress(true, 0);
       else
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-      progressDialog.setMessage(progressMessage);    
-      progressDialog.setMax(progressMax);
-      progressDialog.setCancelable(false);
+        builder.progress(false, progressMax, true);
+      builder.content(progressMessage);
+      builder.cancelable(false);
+      progressDialog=builder.build();
       progressDialog.show();
     }
-    progressDialog.setMessage(progressMessage);    
-    progressDialog.setProgress(progressCurrent);
+    progressDialog.setContent(progressMessage);
+    if (!progressDialog.isIndeterminateProgress())
+      progressDialog.setProgress(progressCurrent);
   }
 
   // Shows the splash screen
@@ -175,35 +174,7 @@ public class ViewMap extends GDActivity {
       busyTextView.setText(" " + getString(R.string.starting_core_object) + " ");
     }
   }
-  
-  // Shows the context menu
-  void showContextMenu() {
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setTitle(R.string.context_menu_title);
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    String[] items = { 
-      getString(R.string.set_target_at_map_center), 
-      getString(R.string.set_target_at_location), 
-      getString(R.string.show_target), 
-      getString(R.string.hide_target), 
-    };
-    builder.setItems(items, 
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            switch(which) {
-              case 0: coreObject.executeCoreCommand("setTargetAtMapCenter()"); break;
-              case 1: askForAddress(getString(R.string.manually_entered_address),lastAddressText); break;
-              case 2: coreObject.executeCoreCommand("showTarget()"); break;
-              case 3: coreObject.executeCoreCommand("hideTarget()"); break;
-            }
-          }
-        }
-    );
-    builder.setCancelable(true);
-    AlertDialog alert = builder.create();
-    alert.show();    
-  }
-  
+    
   // Communication with the native core
   public static final int EXECUTE_COMMAND = 0;
   static protected class CoreMessageHandler extends Handler {
@@ -335,10 +306,6 @@ public class ViewMap extends GDActivity {
             }
             commandExecuted=true;
           }
-          if (commandFunction.equals("showContextMenu")) {
-            viewMap.showContextMenu();
-            commandExecuted=true;
-          }
           if (commandFunction.equals("askForAddress")) {
             viewMap.askForAddress(viewMap.getString(R.string.manually_entered_address),viewMap.lastAddressText);
             commandExecuted=true;
@@ -365,11 +332,12 @@ public class ViewMap extends GDActivity {
 
             // Inform the user about the app drawer
             if (!viewMap.prefs.getBoolean("navDrawerHintShown", false)) {
-              UndoBarController.UndoBar undoBar = new UndoBarController.UndoBar(viewMap);
-              undoBar.message(viewMap.getString(R.string.nav_drawer_hint));
-              undoBar.style(new UndoBarStyle(drawable.check_mark, R.string.got_it, GDApplication.MESSAGE_BAR_DURATION_LONG));
-              undoBar.listener(new UndoListener() {
-                public void onUndo(Parcelable token) {
+              Snackbar
+              .make(viewMap.snackbarPosition, 
+                  viewMap.getString(R.string.nav_drawer_hint), Snackbar.LENGTH_LONG)
+              .setAction(R.string.got_it, new OnClickListener() {
+                @Override
+                public void onClick(View v) {
                   ViewMap viewMap = weakViewMap.get();
                   if (viewMap!=null) {
                     SharedPreferences.Editor prefsEditor = viewMap.prefs.edit();
@@ -377,8 +345,8 @@ public class ViewMap extends GDActivity {
                     prefsEditor.commit();
                   }
                 }
-              });
-              undoBar.show();
+              })
+              .show();
             }
             
             // Replay the trace if it exists
@@ -472,45 +440,46 @@ public class ViewMap extends GDActivity {
 
   /** Asks the user for confirmation of the address */
   void askForAddress(final String subject, final String text) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    final EditText editText = new EditText(this);
-    editText.setText(text);
-    builder.setTitle(R.string.address_dialog_title);
-    builder.setMessage(R.string.address_dialog_message);
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    builder.setView(editText);
-    builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {  
-      public void onClick(DialogInterface dialog, int whichButton) {  
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+    builder.title(R.string.address_dialog_title);
+    builder.content(R.string.address_dialog_message);
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    builder.inputType(InputType.TYPE_CLASS_TEXT);
+    builder.input(getString(R.string.address_dialog_hint), text, new MaterialDialog.InputCallback() {
+      @Override
+      public void onInput(MaterialDialog dialog, CharSequence input) {
         LocationFromAddressTask task = new LocationFromAddressTask();
         task.subject = subject;
-        task.text = editText.getText().toString();
+        task.text = input.toString();
         task.execute();
-      }  
+      }
     });
-    builder.setNegativeButton(R.string.cancel, null);
-    builder.setCancelable(true);
-    AlertDialog alert = builder.create();
-    alert.show();                
+    builder.positiveText(R.string.finished);
+    builder.negativeText(R.string.cancel);
+    builder.cancelable(true);
+    builder.show();    
   }
 
   /** Asks the user for confirmation of the route name */
   void askForRouteName(Uri srcURI, final String routeName) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
     final ImportRouteTask task = new ImportRouteTask();
     task.srcURI = srcURI;
     final FrameLayout dialogRootLayout = new FrameLayout(this);
-    builder.setTitle(R.string.route_name_dialog_title);
-    builder.setMessage(R.string.route_name_dialog_message);
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    builder.setView(dialogRootLayout);
-    builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {  
-      public void onClick(DialogInterface dialog, int whichButton) {  
+    builder.title(R.string.route_name_dialog_title);
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    builder.customView(dialogRootLayout, false);
+    builder.positiveText(R.string.finished);
+    builder.negativeText(R.string.cancel);
+    builder.cancelable(true);
+    builder.callback(new MaterialDialog.ButtonCallback() {
+      @Override
+      public void onPositive(MaterialDialog dialog) {
+        super.onPositive(dialog);
         task.execute();
-      }  
+      }
     });
-    builder.setNegativeButton(R.string.cancel, null);
-    builder.setCancelable(true);
-    AlertDialog alert = builder.create();
+    MaterialDialog alert = builder.build();
     LayoutInflater inflater = alert.getLayoutInflater();
     final View contentView = inflater.inflate(R.layout.route_name, dialogRootLayout);
     final EditText editText = (EditText) contentView.findViewById(R.id.route_name_edit_text);
@@ -545,7 +514,7 @@ public class ViewMap extends GDActivity {
 
   /** Asks the user if the core shall be resetted */
   void askForConfigReset() {
-    AlertDialog.Builder builder = new AlertDialog.Builder(ViewMap.this);
+    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
     builder.setTitle(getTitle());
     builder.setMessage(R.string.reset_question);
     builder.setCancelable(true);
@@ -557,13 +526,13 @@ public class ViewMap extends GDActivity {
         });
     builder.setNegativeButton(R.string.no, null);
     builder.setIcon(android.R.drawable.ic_dialog_alert);
-    AlertDialog alert = builder.create();
+    Dialog alert = builder.create();
     alert.show();
   }
 
   /** Asks the user if the track shall be continued or a new track shall be started */
   void decideContinueOrNewTrack() {
-    AlertDialog.Builder builder = new AlertDialog.Builder(ViewMap.this);
+    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
     builder.setTitle(getTitle());
     builder.setMessage(R.string.continue_or_new_track_question);
     builder.setCancelable(true);
@@ -581,13 +550,13 @@ public class ViewMap extends GDActivity {
           }
         });
     builder.setIcon(android.R.drawable.ic_dialog_info);
-    AlertDialog alert = builder.create();
+    Dialog alert = builder.create();
     alert.show();
   }
 
   /** Asks the user if which map layer shall be selected */
   void changeMapLayer(final Vector<String> names) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
     builder.setTitle(R.string.map_layer_selection_question);
     builder.setItems(names.toArray(new CharSequence[names.size()]),
         new DialogInterface.OnClickListener() {
@@ -598,25 +567,25 @@ public class ViewMap extends GDActivity {
         });
     builder.setCancelable(true);
     builder.setIcon(android.R.drawable.ic_dialog_info);
-    AlertDialog alert = builder.create();
+    builder.setNegativeButton(R.string.cancel, null);
+    Dialog alert = builder.create();
     alert.show();
   }
 
   /** Copies tracks from the Track into the Route directory */
   private class CopyTracksTask extends AsyncTask<Void, Integer, Void> {
 
-    ProgressDialog progressDialog;
+    MaterialDialog progressDialog;
     public String[] trackNames;
 
     protected void onPreExecute() {
 
       // Prepare the progress dialog
-      progressDialog = new ProgressDialog(ViewMap.this);
-      progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-      progressDialog.setMessage(getString(R.string.copying_tracks));
-      progressDialog.setMax(trackNames.length);
-      progressDialog.setCancelable(false);
-      progressDialog.show();
+      progressDialog = new MaterialDialog.Builder(ViewMap.this)
+        .content(getString(R.string.copying_tracks))
+        .progress(false,trackNames.length,true)
+        .cancelable(false)
+        .show();
     }
 
     protected Void doInBackground(Void... params) {
@@ -718,7 +687,7 @@ public class ViewMap extends GDActivity {
   /** Copies tracks from the Track into the Route directory */
   private class ImportRouteTask extends AsyncTask<Void, Integer, Void> {
 
-    ProgressDialog progressDialog;
+    MaterialDialog progressDialog;
     public String name;
     public Uri srcURI;
     public String dstFilename;
@@ -726,11 +695,11 @@ public class ViewMap extends GDActivity {
     protected void onPreExecute() {
 
       // Prepare the progress dialog
-      progressDialog = new ProgressDialog(ViewMap.this);
-      progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-      progressDialog.setMessage(getString(R.string.importing_route,name));
-      progressDialog.setCancelable(false);
-      progressDialog.show();
+      progressDialog = new MaterialDialog.Builder(ViewMap.this)
+      .content(getString(R.string.importing_route,name))
+      .progress(true,0)
+      .cancelable(false)
+      .show();
     }
 
     protected Void doInBackground(Void... params) {
@@ -775,7 +744,7 @@ public class ViewMap extends GDActivity {
   /** Imports *.gda files from external source */
   private class ImportMapArchivesTask extends AsyncTask<Void, Integer, Void> {
 
-    ProgressDialog progressDialog;
+    MaterialDialog progressDialog;
     public File srcFile;
     public File mapFolder;
     public String mapInfoFilename;
@@ -783,11 +752,11 @@ public class ViewMap extends GDActivity {
     protected void onPreExecute() {
 
       // Prepare the progress dialog
-      progressDialog = new ProgressDialog(ViewMap.this);
-      progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-      progressDialog.setMessage(getString(R.string.importing_external_map_archives,srcFile.getName()));
-      progressDialog.setCancelable(false);
-      progressDialog.show();
+      progressDialog = new MaterialDialog.Builder(ViewMap.this)
+      .content(getString(R.string.importing_external_map_archives,srcFile.getName()))
+      .progress(true,0)
+      .cancelable(false)
+      .show();
     }
 
     protected Void doInBackground(Void... params) {
@@ -880,40 +849,32 @@ public class ViewMap extends GDActivity {
       
     });
 
-    // Create the state array
-    final boolean[] checkedItems = new boolean[logs.size()];
-
     // Create the dialog
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setTitle(R.string.log_selection_question);
-    builder.setMultiChoiceItems(items, checkedItems,
-        new DialogInterface.OnMultiChoiceClickListener() {
-          public void onClick(DialogInterface dialog, int which,
-              boolean isChecked) {
-          }
-        });
-    builder.setCancelable(true);
-    builder.setPositiveButton(R.string.finished,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            SendLogsTask sendLogsTask = new SendLogsTask();
-            LinkedList<String> logNames = new LinkedList<String>();
-            for (int i = 0; i < items.length; i++) {
-              if (checkedItems[i]) {
-                logNames.add(items[i]);
-              }
-            }
-            if (logNames.size() == 0)
-              return;
-            sendLogsTask.logNames = new String[logNames.size()];
-            logNames.toArray(sendLogsTask.logNames);
-            sendLogsTask.execute();
-          }
-        });
-    builder.setNegativeButton(R.string.cancel, null);
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    AlertDialog alert = builder.create();
-    alert.show();
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+    builder.title(R.string.log_selection_question);
+    builder.items(items);
+    builder.cancelable(true);
+    builder.positiveText(R.string.finished);
+    builder.negativeText(R.string.cancel);
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    builder.itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
+      @Override
+      public boolean onSelection(MaterialDialog dialog, Integer[] which,
+          CharSequence[] text) {
+        SendLogsTask sendLogsTask = new SendLogsTask();
+        LinkedList<String> logNames = new LinkedList<String>();
+        for (int i = 0; i < which.length; i++) {
+          logNames.add(items[which[i]]);
+        }
+        if (logNames.size() == 0)
+          return true;
+        sendLogsTask.logNames = new String[logNames.size()];
+        logNames.toArray(sendLogsTask.logNames);
+        sendLogsTask.execute();
+        return true;
+      }
+    });
+    builder.show();
   }
 
   /** Opens the donate activity */
@@ -927,7 +888,7 @@ public class ViewMap extends GDActivity {
   void openWelcomeDialog() {
 
     // Create the dialog
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
     builder.setTitle(R.string.welcome_dialog_title);
     builder.setMessage(R.string.welcome_dialog_message);
     builder.setCancelable(true);
@@ -946,7 +907,7 @@ public class ViewMap extends GDActivity {
           }
         });
     builder.setIcon(android.R.drawable.ic_dialog_info);
-    AlertDialog alert = builder.create();
+    Dialog alert = builder.create();
     alert.show();
   }
   
@@ -967,57 +928,48 @@ public class ViewMap extends GDActivity {
     routes.toArray(items);
     Arrays.sort(items, Collections.reverseOrder());
 
-    // Create the state array
-    final boolean[] checkedItems = new boolean[routes.size()];
-
     // Create the dialog
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setTitle(R.string.track_as_route_selection_question);
-    builder.setMultiChoiceItems(items, checkedItems,
-        new DialogInterface.OnMultiChoiceClickListener() {
-          public void onClick(DialogInterface dialog, int which,
-              boolean isChecked) {
-          }
-        });
-    builder.setCancelable(true);
-    builder.setPositiveButton(R.string.finished,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            CopyTracksTask copyTracksTask = new CopyTracksTask();
-            LinkedList<String> trackNames = new LinkedList<String>();
-            for (int i = 0; i < items.length; i++) {
-              if (checkedItems[i]) {
-                trackNames.add(items[i]);
-              }
-            }
-            if (trackNames.size() == 0)
-              return;
-            copyTracksTask.trackNames = new String[trackNames.size()];
-            trackNames.toArray(copyTracksTask.trackNames);
-            copyTracksTask.execute();
-          }
-        });
-    builder.setNegativeButton(R.string.cancel, null);
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    AlertDialog alert = builder.create();
-    alert.show();
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+    builder.title(R.string.track_as_route_selection_question);
+    builder.cancelable(true);
+    builder.positiveText(R.string.finished);
+    builder.items(items);
+    builder.itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
+      @Override
+      public boolean onSelection(MaterialDialog dialog, Integer[] which,
+          CharSequence[] text) {
+        CopyTracksTask copyTracksTask = new CopyTracksTask();
+        LinkedList<String> trackNames = new LinkedList<String>();
+        for (int i = 0; i < which.length; i++) {
+          trackNames.add(items[which[i]]);
+        }
+        if (trackNames.size() == 0)
+          return true;
+        copyTracksTask.trackNames = new String[trackNames.size()];
+        trackNames.toArray(copyTracksTask.trackNames);
+        copyTracksTask.execute();
+        return true;
+      }
+    });
+    builder.negativeText(R.string.cancel);
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    builder.show();
   }
 
   /** Removes routes from the Route directory */
   private class RemoveRoutesTask extends AsyncTask<Void, Integer, Void> {
 
-    ProgressDialog progressDialog;
+    MaterialDialog progressDialog;
     public String[] routeNames;
 
     protected void onPreExecute() {
 
       // Prepare the progress dialog
-      progressDialog = new ProgressDialog(ViewMap.this);
-      progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-      progressDialog.setMessage(getString(R.string.removing_routes));
-      progressDialog.setMax(routeNames.length);
-      progressDialog.setCancelable(false);
-      progressDialog.show();
+      progressDialog = new MaterialDialog.Builder(ViewMap.this)
+      .content(getString(R.string.removing_routes))
+      .progress(false,routeNames.length,true)
+      .cancelable(false)
+      .show();
     }
 
     protected Void doInBackground(Void... params) {
@@ -1067,58 +1019,32 @@ public class ViewMap extends GDActivity {
     routes.toArray(items);
     Arrays.sort(items);
 
-    // Create the state array
-    final boolean[] checkedItems = new boolean[routes.size()];
-
     // Create the dialog
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setTitle(R.string.route_remove_selection_question);
-    builder.setMultiChoiceItems(items, checkedItems,
-        new DialogInterface.OnMultiChoiceClickListener() {
-          public void onClick(DialogInterface dialog, int which,
-              boolean isChecked) {
-          }
-        });
-    builder.setCancelable(true);
-    builder.setPositiveButton(R.string.finished,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            RemoveRoutesTask removeRoutesTask = new RemoveRoutesTask();
-            LinkedList<String> routeNames = new LinkedList<String>();
-            for (int i = 0; i < items.length; i++) {
-              if (checkedItems[i]) {
-                routeNames.add(items[i]);
-              }
-            }
-            if (routeNames.size() == 0)
-              return;
-            removeRoutesTask.routeNames = new String[routeNames.size()];
-            routeNames.toArray(removeRoutesTask.routeNames);
-            removeRoutesTask.execute();
-          }
-        });
-    builder.setNegativeButton(R.string.cancel, null);
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    AlertDialog alert = builder.create();
-    alert.show();
-  }
-  
-  /** Defines all entries in the navigation drawer */
-  ArrayList<GDNavDrawerItem> createNavDrawerEntries() {
-    ArrayList<GDNavDrawerItem> entries = new ArrayList<GDNavDrawerItem>();
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_APP_INFO,R.drawable.icon,null)); // special entry for app info
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_LEGEND,R.drawable.legend,getString(R.string.show_legend)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_ADD_TRACKS_AS_ROUTES,R.drawable.add,getString(R.string.add_tracks_as_routes)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_REMOVE_ROUTES,R.drawable.remove,getString(R.string.remove_routes)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_FORCE_MAP_REDOWNLOAD,R.drawable.refresh,getString(R.string.force_map_redownload)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_TOGGLE_MESSAGES,R.drawable.messages,getString(R.string.toggle_messages)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_PREFERENCES,R.drawable.prefs,getString(R.string.preferences)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SHOW_HELP,R.drawable.help,getString(R.string.button_label_help)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_SEND_LOGS,R.drawable.upload,getString(R.string.send_logs)));
-    //entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_DONATE,android.R.drawable.ic_menu_send,getString(R.string.button_label_donate)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_RESET,R.drawable.reset,getString(R.string.reset)));
-    entries.add(new GDNavDrawerItem(GDNavDrawerItem.ID_EXIT,R.drawable.exit,getString(R.string.exit)));
-    return entries;
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+    builder.title(R.string.route_remove_selection_question);
+    builder.cancelable(true);
+    builder.items(items);
+    builder.positiveText(R.string.finished);
+    builder.negativeText(R.string.cancel);
+    builder.itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
+      @Override
+      public boolean onSelection(MaterialDialog dialog, Integer[] which,
+          CharSequence[] text) {
+        RemoveRoutesTask removeRoutesTask = new RemoveRoutesTask();
+        LinkedList<String> routeNames = new LinkedList<String>();
+        for (int i = 0; i < which.length; i++) {
+          routeNames.add(items[which[i]]);
+        }
+        if (routeNames.size() == 0)
+          return true;
+        removeRoutesTask.routeNames = new String[routeNames.size()];
+        routeNames.toArray(removeRoutesTask.routeNames);
+        removeRoutesTask.execute();
+        return true;
+      }
+    });
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    builder.show();
   }
   
   /** Prepares activity for functions only available on gingerbread */
@@ -1185,7 +1111,7 @@ public class ViewMap extends GDActivity {
 
         // Ask the user if GPX file shall be downloaded and overwritten if file exists
         final File dstFile = new File(dstFilename);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
         builder.setTitle(getTitle());
         String message; 
         if (dstFile.exists())
@@ -1219,16 +1145,13 @@ public class ViewMap extends GDActivity {
           });
         builder.setNegativeButton(R.string.no, null);
         builder.setIcon(android.R.drawable.ic_dialog_info);
-        AlertDialog alert = builder.create();
+        Dialog alert = builder.create();
         alert.show();
       }
 
     } else {
       errorDialog(getString(R.string.download_manager_not_available));
     }
-    
-    
-    
     
   }
   
@@ -1288,34 +1211,41 @@ public class ViewMap extends GDActivity {
     viewMapRootLayout = (DrawerLayout) findViewById(R.id.view_map_root_layout);
     messageLayout = (LinearLayout) findViewById(R.id.view_map_message_layout);
     splashLayout = (LinearLayout) findViewById(R.id.view_map_splash_layout);
-    navDrawerList = (ListView) findViewById(R.id.view_map_nav_drawer);
-    ArrayList<GDNavDrawerItem> entries = createNavDrawerEntries();
-    navDrawerList.setAdapter(new GDNavDrawerAdapter((GDActivity)this,entries));
-    navDrawerList.setOnItemClickListener(new OnItemClickListener() {
-
-      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        GDNavDrawerAdapter adapter = (GDNavDrawerAdapter)parent.getAdapter();
-        GDNavDrawerItem item = adapter.entries.get(position);
+    navDrawerList = (NavigationView) findViewById(R.id.view_map_nav_drawer);
+    snackbarPosition = (CoordinatorLayout) findViewById(R.id.view_map_snackbar_position);
+    PackageManager packageManager = getPackageManager();
+    String appVersion;
+    try {
+      appVersion = "Version " + packageManager.getPackageInfo(getPackageName(), 0).versionName;
+    }
+    catch(NameNotFoundException e) {
+      appVersion = "Version ?";
+    }
+    TextView navDrawerAppVersion = (TextView) findViewById(R.id.nav_drawer_app_version);
+    navDrawerAppVersion.setText(appVersion);
+    navDrawerList.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+      @Override
+      public boolean onNavigationItemSelected(MenuItem menuItem) {
         Intent intent;
-        switch (item.id) {
-          case GDNavDrawerItem.ID_PREFERENCES:
+        switch (menuItem.getItemId()) {
+          case R.id.nav_preferences:
             if (mapSurfaceView!=null) {
               Intent myIntent = new Intent(getApplicationContext(), Preferences.class);
               startActivityForResult(myIntent, SHOW_PREFERENCE_REQUEST);
             }
             break;
-          case GDNavDrawerItem.ID_RESET:
+          case R.id.nav_reset:
             if (mapSurfaceView!=null) {
               askForConfigReset();
             }
             break;
-          case GDNavDrawerItem.ID_EXIT:
+          case R.id.nav_exit:
             busyTextView.setText(" " + getString(R.string.stopping_core_object) + " ");
             Message m=Message.obtain(coreObject.messageHandler);
             m.what = GDCore.STOP_CORE;
             coreObject.messageHandler.sendMessage(m);
             break;
-          case GDNavDrawerItem.ID_TOGGLE_MESSAGES:
+          case R.id.nav_toggle_messages:
             if (messageLayout.getVisibility()==LinearLayout.VISIBLE) {
               messageLayout.setVisibility(LinearLayout.INVISIBLE);
             } else {
@@ -1324,13 +1254,13 @@ public class ViewMap extends GDActivity {
             }
             viewMapRootLayout.requestLayout();
             break;
-          case GDNavDrawerItem.ID_ADD_TRACKS_AS_ROUTES:
+          case R.id.nav_add_tracks_as_routes:
             addTracksAsRoutes();
             break;
-          case GDNavDrawerItem.ID_REMOVE_ROUTES:
+          case R.id.nav_remove_routes:
             removeRoutes();
             break;
-          case GDNavDrawerItem.ID_SHOW_LEGEND:
+          case R.id.nav_show_legend:
             String legendPath = coreObject.executeCoreCommand("getMapLegendPath()");
             File legendPathFile = new File(legendPath);
             if (!legendPathFile.exists()) {
@@ -1342,24 +1272,25 @@ public class ViewMap extends GDActivity {
               startActivity(intent);
             }
             break;
-          case GDNavDrawerItem.ID_SHOW_HELP:
+          case R.id.nav_show_help:
             intent = new Intent(getApplicationContext(), ShowHelp.class);
             startActivity(intent);
             break;
-          case GDNavDrawerItem.ID_SEND_LOGS:
+          case R.id.nav_send_logs:
             sendLogs();
             break;
-          case GDNavDrawerItem.ID_DONATE:
+          /*case R.id.nav_donate:
             donate();
-            break;
-          case GDNavDrawerItem.ID_FORCE_MAP_REDOWNLOAD:
+            break;*/
+          case R.id.nav_force_map_redownload:
             coreObject.executeCoreCommand("forceMapRedownload()");
             break;
         }
-        navDrawerList.setItemChecked(position, false);
-        viewMapRootLayout.closeDrawer(navDrawerList);
+        viewMapRootLayout.closeDrawers();
+        return true;
       }
     });
+    viewMapRootLayout.setDrawerShadow(R.drawable.navigationview_shadow, GravityCompat.START);
     setSplashVisibility(true); // to get the correct busy text
     setSplashVisibility(false);
     updateViewConfiguration(getResources().getConfiguration());
@@ -1510,7 +1441,7 @@ public class ViewMap extends GDActivity {
           mapFolderFilename = mapFolderFilename.substring(0, mapFolderFilename.lastIndexOf('.'));
           final String mapInfoFilename = mapFolderFilename + "/info.gds";
           final File mapFolder = new File(mapFolderFilename);
-          AlertDialog.Builder builder = new AlertDialog.Builder(this);
+          AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
           builder.setTitle(R.string.import_map);
           String message; 
           if (mapFolder.exists())
@@ -1531,7 +1462,7 @@ public class ViewMap extends GDActivity {
             });
           builder.setNegativeButton(R.string.no, null);
           builder.setIcon(android.R.drawable.ic_dialog_info);
-          AlertDialog alert = builder.create();
+          Dialog alert = builder.create();
           alert.show();
         }
 
@@ -1678,14 +1609,5 @@ public class ViewMap extends GDActivity {
     }
     return super.onKeyDown(keyCode,event);
   }
-  
-  /** Called when a key is released */ 
-  public boolean onKeyUp (int keyCode, KeyEvent event) {
-    if (keyCode==KeyEvent.KEYCODE_DPAD_CENTER) {
-      coreObject.executeCoreCommand("showContextMenu()");
-      return true;
-    }
-    return super.onKeyUp(keyCode, event);
-  }
-   
+     
 }

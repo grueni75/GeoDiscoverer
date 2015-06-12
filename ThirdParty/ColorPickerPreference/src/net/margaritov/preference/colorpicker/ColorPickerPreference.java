@@ -16,6 +16,7 @@
 
 package net.margaritov.preference.colorpicker;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -43,6 +44,7 @@ public class ColorPickerPreference
 	private int mValue = Color.BLACK;
 	private float mDensity = 0;
 	private boolean mAlphaSliderEnabled = false;
+	private String mDialogTitle;
 
 	private static final String androidns = "http://schemas.android.com/apk/res/android";
 
@@ -59,6 +61,10 @@ public class ColorPickerPreference
 	public ColorPickerPreference(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		init(context, attrs);
+	}
+	
+	public void setDialogTitle(String title) {
+	  mDialogTitle=title;
 	}
 	
 	@Override
@@ -102,19 +108,19 @@ public class ColorPickerPreference
 		LinearLayout widgetFrameView = ((LinearLayout)mView.findViewById(android.R.id.widget_frame));
 		if (widgetFrameView == null) return;
 		widgetFrameView.setVisibility(View.VISIBLE);
-		widgetFrameView.setPadding(
+		/*widgetFrameView.setPadding(
 			widgetFrameView.getPaddingLeft(),
 			widgetFrameView.getPaddingTop(),
 			(int)(mDensity * 8),
 			widgetFrameView.getPaddingBottom()
-		);
+		);*/
 		// remove already create preview image
 		int count = widgetFrameView.getChildCount();
 		if (count > 0) {
 			widgetFrameView.removeViews(0, count);
 		}
 		widgetFrameView.addView(iView);
-		iView.setBackgroundDrawable(new AlphaPatternDrawable((int)(5 * mDensity)));
+		//iView.setBackgroundDrawable(new AlphaPatternDrawable((int)(5 * mDensity)));
 		iView.setImageBitmap(getPreviewBitmap());
 	}
 
@@ -165,7 +171,8 @@ public class ColorPickerPreference
 	}
 
 	public boolean onPreferenceClick(Preference preference) {
-		ColorPickerDialog picker = new ColorPickerDialog(getContext(), getValue());
+	  ColorPickerDialog picker = new ColorPickerDialog((Activity)getContext(),getValue());
+	  picker.setDialogTitle(mDialogTitle);
 		picker.setOnColorChangedListener(this);
 		if (mAlphaSliderEnabled) {
 			picker.setAlphaSliderVisible(true);

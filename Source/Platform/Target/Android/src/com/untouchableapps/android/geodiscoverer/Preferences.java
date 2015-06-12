@@ -13,7 +13,6 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,13 +20,13 @@ import java.util.LinkedList;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -35,8 +34,26 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
+import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.AppCompatCheckBox;
+import android.support.v7.widget.AppCompatCheckedTextView;
+import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.AppCompatRadioButton;
+import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.Toolbar;
 import android.text.method.DigitsKeyListener;
-import android.util.TimingLogger;
+import android.util.AttributeSet;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
+import com.afollestad.materialdialogs.prefs.MaterialListPreference;
 
 public class Preferences extends PreferenceActivity implements
     OnPreferenceClickListener,OnPreferenceChangeListener {
@@ -53,13 +70,19 @@ public class Preferences extends PreferenceActivity implements
   /** Preference that was requested to the next preference screen */
   Preference clickedPreference = null;
 
+  /** Toolbar of the avtivity */
+  Toolbar bar = null;
+  
+  /** Adds app compatibility to this activity */
+  AppCompatDelegate appCompatDelegate;
+  
   // Request codes for calling other activities
   static final int SHOW_PREFERENCE_SCREEN_REQUEST = 0;
 
   /** Collects entries for a list preference item */
   private class FillListPreferenceItemTask extends AsyncTask<Void, Integer, Void> {
 
-    public ListPreference entry;
+    public MaterialListPreference entry;
     public String key;
     public String path;
     public String name;
@@ -160,7 +183,15 @@ public class Preferences extends PreferenceActivity implements
       coreObject.configStoreSetStringValue(path + "/" + name, "blue", String.valueOf((value>>0)&0xFF));
     } else {
       String value = (String) newValue;
-      coreObject.configStoreSetStringValue(path, name, value);      
+      coreObject.configStoreSetStringValue(path, name, value);
+      if (preference instanceof MaterialListPreference) {
+        MaterialListPreference listPref = (MaterialListPreference) preference;
+        listPref.setValue(value);
+      }
+      if (preference instanceof MaterialEditTextPreference) {
+        MaterialEditTextPreference editTextPref = (MaterialEditTextPreference) preference;
+        editTextPref.setText(value);
+      }
     }
     setResult(1);
     if ((path.equals(""))&&(name.equals("expertMode"))) {
@@ -298,6 +329,7 @@ public class Preferences extends PreferenceActivity implements
       // Color node?
     } else if (type.equals("color")) {
       ColorPickerPreference colorPicker = new ColorPickerPreference(this);
+      colorPicker.setDialogTitle("Value of \"" + prettyName + "\"");
       entry = colorPicker;
       colorPicker.setAlphaSliderEnabled(true);
       int red = Integer.valueOf(coreObject.configStoreGetStringValue(key, "red"));
@@ -312,7 +344,7 @@ public class Preferences extends PreferenceActivity implements
       // Text-based entry nodes?
     } else if ((type.equals("string"))
         || (type.equals("integer") || (type.equals("double")))) {
-      EditTextPreference editText = new EditTextPreference(this);
+      MaterialEditTextPreference editText = new MaterialEditTextPreference(this);
       entry = editText;
       entry.setDefaultValue(coreObject.configStoreGetStringValue(path, name));
       editText.setDialogTitle("Value of \"" + prettyName + "\"");
@@ -342,7 +374,7 @@ public class Preferences extends PreferenceActivity implements
 
       // Enumeration node?
     } else if (type.equals("enumeration")) {
-      ListPreference list = new ListPreference(this);
+      MaterialListPreference list = new MaterialListPreference(this);
       entry = list;
       list.setDefaultValue(coreObject.configStoreGetStringValue(path, name));
       list.setDialogTitle("Value of \"" + prettyName + "\"");
@@ -370,7 +402,7 @@ public class Preferences extends PreferenceActivity implements
       attributeParent.addPreference(entry);
       if (backgroundFill) {
         FillListPreferenceItemTask task = new FillListPreferenceItemTask();
-        task.entry = (ListPreference)entry;
+        task.entry = (MaterialListPreference)entry;
         task.key = key;
         task.path = path;
         task.name = name;
@@ -463,10 +495,14 @@ public class Preferences extends PreferenceActivity implements
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
+    // Install delegate for app compatibility
+    appCompatDelegate=AppCompatDelegate.create(this, null);    
+    appCompatDelegate.installViewFactory();
+    appCompatDelegate.onCreate(savedInstanceState);
     super.onCreate(savedInstanceState);
 
     //TimingLogger timings = new TimingLogger("GDApp", "onCreate");
-
+    
     // Get the core object
     coreObject = GDApplication.coreObject;
 
@@ -505,7 +541,33 @@ public class Preferences extends PreferenceActivity implements
 
     //timings.addSplit("rest");
     //timings.dumpToLog();
-       
+  }
+  
+  /** Called when a view is created */
+  @Override
+  public View onCreateView(String name, Context context, AttributeSet attrs) {
+    // Allow super to try and create a view first
+    final View result = super.onCreateView(name, context, attrs);
+    if (result != null) {
+      return result;
+    }
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      // If we're running pre-L, we need to 'inject' our tint aware Views in place of the
+      // standard framework versions
+      switch (name) {
+        case "EditText":
+          return new AppCompatEditText(this, attrs);
+        case "Spinner":
+          return new AppCompatSpinner(this, attrs);
+        case "CheckBox":
+          return new AppCompatCheckBox(this, attrs);
+        case "RadioButton":
+          return new AppCompatRadioButton(this, attrs);
+        case "CheckedTextView":
+          return new AppCompatCheckedTextView(this, attrs);
+      }
+    }
+    return null;
   }
 
   /** Called when a called activity finishes */
@@ -523,5 +585,100 @@ public class Preferences extends PreferenceActivity implements
 
       }
     }
+  }
+
+  /** Make the home button visible */
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    getSupportActionBar().setHomeButtonEnabled(true);
+    return true;
+  }
+  
+  /** Go back if home button is pressed */
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case android.R.id.home:
+        super.onBackPressed();
+        return true;
+      }
+    return super.onOptionsItemSelected(item);
+  }
+  
+  //////////////////////////////////////////////////////////////////
+  // Use app compatibility delegate in necessary places
+  
+  public ActionBar getSupportActionBar() {
+    return appCompatDelegate.getSupportActionBar();
+  }
+
+  public void setSupportActionBar(@Nullable Toolbar toolbar) {
+    appCompatDelegate.setSupportActionBar(toolbar);
+  }
+
+  @Override
+  public MenuInflater getMenuInflater() {
+    return appCompatDelegate.getMenuInflater();
+  }
+
+  @Override
+  public void setContentView(@LayoutRes int layoutResID) {
+    appCompatDelegate.setContentView(layoutResID);
+  }
+
+  @Override
+  public void setContentView(View view) {
+    appCompatDelegate.setContentView(view);
+  }
+
+  @Override
+  public void setContentView(View view, ViewGroup.LayoutParams params) {
+    appCompatDelegate.setContentView(view, params);
+  }
+
+  @Override
+  public void addContentView(View view, ViewGroup.LayoutParams params) {
+    appCompatDelegate.addContentView(view, params);
+  }
+
+  @Override
+  protected void onPostResume() {
+    super.onPostResume();
+    appCompatDelegate.onPostResume();
+  }
+
+  @Override
+  protected void onTitleChanged(CharSequence title, int color) {
+    super.onTitleChanged(title, color);
+    appCompatDelegate.setTitle(title);
+  }
+
+  @Override
+  public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    appCompatDelegate.onConfigurationChanged(newConfig);
+  }
+
+  @Override
+  protected void onStop() {
+    super.onStop();
+    appCompatDelegate.onStop();
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    appCompatDelegate.onDestroy();
+  }
+
+  public void invalidateOptionsMenu() {
+    appCompatDelegate.invalidateOptionsMenu();
+  }  
+
+  @Override
+  protected void onPostCreate(Bundle savedInstanceState) {
+    super.onPostCreate(savedInstanceState);
+    appCompatDelegate.onPostCreate(savedInstanceState);    
   }
 }

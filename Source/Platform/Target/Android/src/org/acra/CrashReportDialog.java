@@ -9,20 +9,25 @@ import java.io.IOException;
 import org.acra.collector.CrashReportData;
 import org.acra.util.ToastSender;
 
+import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.untouchableapps.android.geodiscoverer.R;
+
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -33,14 +38,14 @@ import android.widget.Toast;
  * to send reports. Requires android:launchMode="singleInstance" in your
  * AndroidManifest to work properly.
  **/
-public class CrashReportDialog extends Activity implements DialogInterface.OnClickListener, OnDismissListener {
+public class CrashReportDialog extends AppCompatActivity implements DialogInterface.OnClickListener, OnDismissListener {
     private static final String STATE_EMAIL = "email";
     private static final String STATE_COMMENT = "comment";
     private SharedPreferences prefs;
-    private EditText userComment;
-    private EditText userEmail;
+    private AppCompatEditText userComment;
+    private AppCompatEditText userEmail;
     String mReportFileName;
-    AlertDialog mDialog;
+    Dialog mDialog;
     static boolean dialogDone = false;
 
     @Override
@@ -59,7 +64,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
         if (mReportFileName == null) {
             finish();
         }
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        AlertDialogWrapper.Builder dialogBuilder = new AlertDialogWrapper.Builder(this);
         int resourceId = ACRA.getConfig().resDialogTitle();
         if(resourceId != 0) {
             dialogBuilder.setTitle(resourceId);
@@ -82,7 +87,11 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
         final float textSize = 16;
         final LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(10, 10, 10, 10);
+        root.setPadding(
+            getResources().getDimensionPixelSize(com.afollestad.materialdialogs.R.dimen.md_dialog_frame_margin),
+            getResources().getDimensionPixelSize(com.afollestad.materialdialogs.R.dimen.md_content_padding_top),
+            getResources().getDimensionPixelSize(com.afollestad.materialdialogs.R.dimen.md_dialog_frame_margin),
+            getResources().getDimensionPixelSize(com.afollestad.materialdialogs.R.dimen.md_content_padding_bottom));
         root.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         root.setFocusable(true);
         root.setFocusableInTouchMode(true);
@@ -112,7 +121,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
             scrollable.addView(label, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT));
 
-            userComment = new EditText(this);
+            userComment = new AppCompatEditText(this);
             userComment.setTextSize(textSize);
             userComment.setLines(3);
             userComment.setGravity(Gravity.TOP);
@@ -135,7 +144,7 @@ public class CrashReportDialog extends Activity implements DialogInterface.OnCli
             label.setPadding(label.getPaddingLeft(), 10, label.getPaddingRight(), label.getPaddingBottom());
             scrollable.addView(label);
 
-            userEmail = new EditText(this);
+            userEmail = new AppCompatEditText(this);
             userEmail.setSingleLine();
             userEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
             userEmail.setTextSize(textSize);

@@ -13,7 +13,7 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
-import org.sufficientlysecure.donations.DonationsFragment;
+//import org.sufficientlysecure.donations.DonationsFragment;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -45,14 +45,14 @@ public class Donate extends FragmentActivity {
       setTitle(R.string.support_geodiscoverer);
       setContentView(R.layout.donate);
 
+      /*
       FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
       DonationsFragment donationsFragment;
       donationsFragment = DonationsFragment.newInstance(false, true, GOOGLE_PUBKEY, GOOGLE_CATALOG,
               getResources().getStringArray(R.array.donation_google_catalog_values), false, null, null,
               null, false, null, null, false, null);
-
       ft.replace(R.id.donations_activity_container, donationsFragment, "donationsFragment");
-      ft.commit();
+      ft.commit();*/
   }
 
   /**

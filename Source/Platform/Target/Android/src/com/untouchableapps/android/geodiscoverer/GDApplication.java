@@ -27,10 +27,10 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Environment;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
-
-import com.cocosw.undobar.UndoBarController;
 
 /* Configuration of ACRA for reporting crashes */
 @ReportsCrashes(
@@ -189,10 +189,12 @@ public class GDApplication extends Application {
   
   /** Shows a toast */
   public static void showMessageBar(Activity activity, String message, long duration) {
-    UndoBarController.UndoBar undoBar = new UndoBarController.UndoBar(activity);
-    undoBar.message(message);
-    undoBar.style(UndoBarController.MESSAGESTYLE);
-    undoBar.duration(duration);
-    undoBar.show();
+    View v = activity.getWindow().getDecorView().findViewById(R.id.view_map_snackbar_position);
+    if (v==null) {
+      v = activity.getWindow().getDecorView().findViewById(android.R.id.content);
+    }
+    Snackbar
+    .make(v, message, Snackbar.LENGTH_LONG)
+    .show(); // Don’t forget to show!
   }
 }

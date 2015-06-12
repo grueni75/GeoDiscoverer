@@ -54,13 +54,15 @@
 	<string name="manually_entered_address">Manually entered address</string>
 	<string name="address_dialog_title">Set target at address</string>
 	<string name="address_dialog_message">Enter the address to find in a single line:</string>
-	<string name="device_admin_description">Allows Geo Discoverer to turn off the screen by locking it.</string>
+  <string name="address_dialog_hint">Alexanderplatz 1, Berlin</string>
+  <string name="device_admin_description">Allows Geo Discoverer to turn off the screen by locking it.</string>
 	<string name="device_admin_not_enabled">Screen can not be locked: Please allow GeoDiscoverer to act as a device admin in the system settings.</string>
 	<string name="replace_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;? There exists already a map folder that will be replaced.</string>
 	<string name="create_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;?</string>
 	<string name="cannot_create_map_folder">Map folder &lt;%1$s&gt; could not be created!</string>
 	<string name="navigation_drawer_menu_entry_icon_description">Icon of the menu entry</string>
   <string name="navigation_drawer_app_info_icon_description">Image showing the icon of the app</string>
+  <string name="navigation_drawer_header_background_description">Header background image showing mountains</string>
   <string name="view_map_splash_image_description">Image showing the icon of the app</string>
   <string name="show_legend">Show legend</string>
   <string name="map_has_no_legend">Map &lt;%1$s&gt; has no legend! You can add one by creating the picture &lt;%2$s&gt;.</string>
@@ -123,4 +125,8 @@
   <string name="new_track">New track</string>
   <string name="contine_track">Continue track</string>
   <string name="map_layer_selection_question">Select the layer to display:</string>
+  <string name="map">Map</string>
+  <string name="routes">Routes</string>
+  <string name="general">General</string>
+  <string name="debug">Debug</string>
 </resources>
