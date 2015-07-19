@@ -29,7 +29,7 @@ std::string MapSource::getNodeText(XMLNode node)
 }
 
 // Reads elements from the GDS XML structure
-bool MapSource::readGDSInfo(XMLNode startNode, std::vector<std::string> path) {
+bool MapSource::resolveGDSInfo(XMLNode startNode, std::vector<std::string> path) {
   bool result=false;
   //DEBUG("path.size()=%d",path.size());
   for (XMLNode n = startNode; n; n = n->next) {
@@ -71,30 +71,16 @@ bool MapSource::readGDSInfo(XMLNode startNode, std::vector<std::string> path) {
 }
 
 // Reads information about the map
-bool MapSource::readGDSInfo(std::string infoFilePath)
+bool MapSource::resolveGDSInfo(std::string infoFilePath)
 {
-  xmlDocPtr doc = NULL;
-  xmlNodePtr rootNode,gdsNode,n;
-  bool result=false;
-  std::string version;
-  bool tileServerFound=false;
-  std::string name;
-  bool minZoomLevelFound,maxZoomLevelFound;
-  std::stringstream in;
-  xmlChar *text;
-  std::vector<std::string> emptyPath;
+  std::string mapSourceSchemaFilePath = core->getHomePath() +"/source.xsd";
 
-  // Read the XML file
-  doc = xmlReadFile(infoFilePath.c_str(), NULL, 0);
-  if (!doc) {
-    ERROR("can not open file <%s> for reading map source information",infoFilePath.c_str());
-    goto cleanup;
-  }
-  rootNode = xmlDocGetRootElement(doc);
-  if (!rootNode) {
-    FATAL("could not extract root node",NULL);
-    goto cleanup;
-  }
+  // Read the info file
+  if (!resolvedGDSInfo.readSchema(mapSourceSchemaFilePath))
+    return false;
+  if (!resolvedGDSInfo.readConfig(infoFilePath))
+    return false;
+  resolvedGDSInfo.prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
 
   // Check the version
   text = xmlGetProp(rootNode,BAD_CAST "version");
@@ -104,32 +90,54 @@ bool MapSource::readGDSInfo(std::string infoFilePath)
   }
   xmlFree(text);
 
-  // Find the GDS node
-  gdsNode=NULL;
-  for (n = rootNode; n; n = n->next) {
-    if (n->type == XML_ELEMENT_NODE) {
-      name=std::string((char*)n->name);
-      if (name=="GDS") {
-        gdsNode=n->children;
-        break;
+  replace all refs
+  decide on zoom level and remove any zoom level element in doc
+  fill the layer name map and remove any laver name map in doc
+
+}
+
+// Reads information about the map
+void MapSource::readAvailableGDSInfos() {
+
+  std::string mapSourceFolderPath = core->getHomePath() + "/Source";
+  std::string mapSourceSchemaFilePath = core->getHomePath() +"/source.xsd";
+
+  // First get a list of all available route filenames
+  DIR *dp = opendir( mapSourceFolderPath.c_str() );
+  struct dirent *dirp;
+  struct stat filestat;
+  std::list<std::string> routes;
+  if (dp == NULL){
+    FATAL("can not open directory <%s> for reading available map sources",mapSourceFolderPath.c_str());
+    return;
+  }
+  while ((dirp = readdir( dp )))
+  {
+    std::string filepath = mapSourceFolderPath + "/" + dirp->d_name + "/info.gds";
+
+    // Only look for directories
+    if (stat( filepath.c_str(), &filestat ))        continue;
+    if (S_ISDIR( filestat.st_mode )) {
+
+      // Read the info file
+      ConfigSection c;
+      if (!c.readSchema(mapSourceSchemaFilePath))
+        return;
+      if (c.readConfig(filepath)) {
+        c.prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
+
+        // Check the version
+        char *text = xmlGetProp(xmlDocGetRootElement(c.getConfig()),BAD_CAST "version");
+        if (strcmp(text,"1.0")==0) {
+          availableGDSInfos.push_back(c);
+        } else {
+          ERROR("the version (%s) of the GDS file <%s> is not supported",text,filepath.c_str());
+        }
+        xmlFree(text);
       }
     }
   }
-  if (!gdsNode) {
-    ERROR("can not find GDS node in <%s>",infoFilePath.c_str());
-    goto cleanup;
-  }
-
-  // Loop over the root node to extract the information
-  readGDSInfo(gdsNode,emptyPath);
-  result=true;
-
-  // Clean up
-cleanup:
-  if (doc)
-    xmlFreeDoc(doc);
-
-  return result;
+  closedir(dp);
 }
 
 }

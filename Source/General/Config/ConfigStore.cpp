@@ -30,10 +30,6 @@ ConfigStore::ConfigStore() {
   schemaShippedFilepath=core->getHomePath() + "/config.shipped.xsd";
   schemaCurrentFilepath=core->getHomePath() + "/config.current.xsd";
   configValueWidth=40;
-  config=NULL;
-  schema=NULL;
-  xpathConfigCtx=NULL;
-  xpathSchemaCtx=NULL;
   accessMutex=core->getThread()->createMutex("config store access mutex");
   quitWriteConfigThread=false;
   writeConfigSignal=core->getThread()->createSignal();

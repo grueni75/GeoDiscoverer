@@ -13,8 +13,6 @@
 #ifndef CONFIGSTORE_H_
 #define CONFIGSTORE_H_
 
-#include <ConfigStorePlatform.h>
-
 namespace GEODISCOVERER {
 
 typedef std::map<std::string, std::string> StringMap;
@@ -39,18 +37,11 @@ protected:
   // Width of the value field in config file
   Int configValueWidth;
 
-  // Pointer to the schema
-  XMLDocument schema;
-
-  // Pointer to the data
-  XMLDocument config;
-
-  // Context for using xpath
-  XMLXPathContext xpathConfigCtx;
-  XMLXPathContext xpathSchemaCtx;
-
   // Mutex to sequentialize changes in the config
   ThreadMutexInfo *accessMutex;
+
+  // Main config
+  ConfigSection configSection;
 
   // Minimum distance in seconds between writes of the config store
   Int writeConfigMinWaitTime;

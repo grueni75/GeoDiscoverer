@@ -358,6 +358,7 @@ extern Core *core;
 #include <ProfileBlockResult.h>
 #include <ProfileMethodResult.h>
 #include <ProfileEngine.h>
+#include <ConfigSection.h>
 #include <ConfigStore.h>
 #include <UnitConverter.h>
 #include <ZipArchive.h>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GDS version="1.0">
+  <name>Waymarked Trails for Cycling</name>
+  <isMarkup>true</isMarkup>
+  <TileServer>
+    <serverURL>http://tile.waymarkedtrails.org/hiking/${z}/${x}/${y}.png</serverURL>
+    <overlayAlpha>0.5</overlayAlpha>
+  </TileServer>
+  <minZoomLevel>0</minZoomLevel>
+  <maxZoomLevel>18</maxZoomLevel>
+</GDS>

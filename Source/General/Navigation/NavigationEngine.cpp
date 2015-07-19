@@ -222,7 +222,7 @@ void NavigationEngine::updateRoutes() {
   struct stat filestat;
   std::list<std::string> routes;
   if (dp == NULL){
-    ERROR("can not open directory <%s> for reading available routes",getRoutePath().c_str());
+    FATAL("can not open directory <%s> for reading available routes",getRoutePath().c_str());
     return;
   }
   while ((dirp = readdir( dp )))

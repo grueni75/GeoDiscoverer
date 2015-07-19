@@ -51,18 +51,7 @@ void ConfigStore::init()
 // Deinits the data
 void ConfigStore::deinit()
 {
-  if (xpathSchemaCtx)
-    xmlXPathFreeContext(xpathSchemaCtx);
-  if (xpathConfigCtx)
-    xmlXPathFreeContext(xpathConfigCtx);
-  if (schema)
-    xmlFreeDoc((xmlDocPtr)schema);
-  if (config)
-    xmlFreeDoc((xmlDocPtr)config);
-  xpathConfigCtx=NULL;
-  xpathSchemaCtx=NULL;
-  config=NULL;
-  schema=NULL;
+  configSection.deinit();
 }
 
 // Called when the core is unloaded (process is killed)
@@ -82,9 +71,7 @@ void ConfigStore::read(std::string schemaFilepath, bool recreateConfig)
   int i, j;
 
   // Read the schema
-  schema = xmlReadFile(schemaFilepath.c_str(), NULL, 0);
-  if (!schema) {
-    FATAL("read of schema file <%s> failed",schemaFilepath.c_str());
+  if (!configSection.readSchema(schemaFilepath.c_str())) {
     return;
   }
 
@@ -95,18 +82,15 @@ void ConfigStore::read(std::string schemaFilepath, bool recreateConfig)
     doc = xmlNewDoc(BAD_CAST "1.0");
     if (!doc) {
       FATAL("can not create xml document",NULL);
-      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     rootNode = xmlNewNode(NULL, BAD_CAST "GDC");
     if (!rootNode) {
       FATAL("can not create xml root node",NULL);
-      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     if (!xmlNewProp(rootNode, BAD_CAST "version", BAD_CAST "1.0")) {
       FATAL("can not create xml property",NULL);
-      core->getThread()->unlockMutex(accessMutex);
       return;
     }
     xmlDocSetRootElement(doc, rootNode);
@@ -115,42 +99,37 @@ void ConfigStore::read(std::string schemaFilepath, bool recreateConfig)
     xmlNsPtr configNamespace=xmlNewNs(rootNode,BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/config/1/0", BAD_CAST NULL);
     if (!configNamespace) {
      FATAL("can not create config namespace",NULL);
-     core->getThread()->unlockMutex(accessMutex);
      return;
     }
     xmlNsPtr xmlNamespace=xmlNewNs(rootNode,BAD_CAST "http://www.w3.org/2001/XMLSchema-instance", BAD_CAST "xsi");
     if (!xmlNamespace) {
      FATAL("can not create xml namespace",NULL);
-     core->getThread()->unlockMutex(accessMutex);
      return;
     }
     if (!xmlNewNsProp(rootNode, xmlNamespace, BAD_CAST "schemaLocation", BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/config/1/0 http://www.untouchableapps.de/GeoDiscoverer/config/1/0/config.xsd")) {
       FATAL("can not create xml property",NULL);
-      core->getThread()->unlockMutex(accessMutex);
       return;
     }
 
     // Save the XML config
-    config=doc;
+    configSection.setConfig(doc);
     hasChanged=true;
     write();
 
     // Cleanup
     xmlFreeDoc(doc);
-    config=NULL;
+    configSection.setConfig(NULL);
   }
 
   // Read the config
-  doc = xmlReadFile(configFilepath.c_str(), NULL, 0);
-  if (!doc) {
-    FATAL("read of config file <%s> failed",configFilepath.c_str());
-    core->getThread()->unlockMutex(accessMutex);
+  if (!configSection.readConfig(configFilepath)) {
+    FATAL("can not read configuration",NULL);
     return;
   }
+  doc = configSection.getConfig();
   rootNode = xmlDocGetRootElement(doc);
   if (!rootNode) {
     FATAL("could not extract root node",NULL);
-    core->getThread()->unlockMutex(accessMutex);
     return;
   }
 
@@ -158,29 +137,15 @@ void ConfigStore::read(std::string schemaFilepath, bool recreateConfig)
   xmlChar *text = xmlGetProp(rootNode,BAD_CAST "version");
   if (strcmp((char*)text,"1.0")!=0) {
     FATAL("config file <%s> has unknown version",configFilepath.c_str());
-    core->getThread()->unlockMutex(accessMutex);
     return;
   }
   xmlFree(text);
 
   // Remember the config
-  config=doc;
+  configSection.setConfig(doc);
 
   // Prepare xpath evaluation
-  xpathConfigCtx = xmlXPathNewContext(doc);
-  if (xpathConfigCtx == NULL) {
-    FATAL("can not create config xpath context",NULL);
-    core->getThread()->unlockMutex(accessMutex);
-    return;
-  }
-  xmlXPathRegisterNs(xpathConfigCtx, BAD_CAST "gdc", BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/config/1/0");
-  xpathSchemaCtx = xmlXPathNewContext(schema);
-  if (xpathSchemaCtx == NULL) {
-    FATAL("can not create schema xpath context",NULL);
-    core->getThread()->unlockMutex(accessMutex);
-    return;
-  }
-  xmlXPathRegisterNs(xpathSchemaCtx, BAD_CAST "xsd", BAD_CAST "http://www.w3.org/2001/XMLSchema");
+  configSection.prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/config/1/0");
 }
 
 // Extracts all schema nodes that hold user-definable values
@@ -347,7 +312,7 @@ void ConfigStore::read()
       // Copy all user config values from the old config
       INFO("upgrading schema while keeping all user configuration",NULL);
       read(schemaShippedFilepath,false);
-      rememberUserConfig("",schema->children->children);
+      rememberUserConfig("",configSection.getSchema()->children->children);
 
       // Free resources
       deinit();
@@ -383,7 +348,7 @@ void ConfigStore::read()
 void ConfigStore::write()
 {
   if (hasChanged) {
-    xmlDocPtr doc = (xmlDocPtr) config;
+    xmlDocPtr doc = (xmlDocPtr) configSection.getConfig();
     if (!doc) {
       FATAL("config object has no xml document",NULL);
       return;
@@ -513,102 +478,17 @@ XMLNode ConfigStore::createNodeWithPath(XMLNode parentNode, std::string path, st
 
 // Finds config nodes
 std::list<XMLNode> ConfigStore::findConfigNodes(std::string path) {
-  std::list<XMLNode> result;
-  xmlXPathObjectPtr xpathObj=NULL;
-  xmlNodePtr node=NULL;
-  xmlNodeSetPtr nodes;
-  Int size;
-  bool found;
-  size_t i,j;
-
-  // Add the correct namespace to the path
-  i=0;
-  while((j=path.find("/",i))!=std::string::npos) {
-    path=path.replace(j,1,"/gdc:");
-    i=j+1;
-  }
-
-  // Execute the xpath expression
-  xpathObj = xmlXPathEvalExpression(BAD_CAST path.c_str(), xpathConfigCtx);
-  if (xpathObj == NULL) {
-    FATAL("can not evaluate xpath expression <%s>",path.c_str());
-    return result;
-  }
-  nodes=xpathObj->nodesetval;
-  size = (nodes) ? nodes->nodeNr : 0;
-  found = false;
-  for(Int i = 0; i < size; ++i) {
-    if(nodes->nodeTab[i]->type == XML_ELEMENT_NODE) {
-      result.push_back(nodes->nodeTab[i]);
-    }
-  }
-  xmlXPathFreeObject(xpathObj);
-  return result;
+  return configSection.findConfigNodes(path);
 }
 
 // Finds schema nodes
 std::list<XMLNode> ConfigStore::findSchemaNodes(std::string path, std::string extension) {
-  std::list<XMLNode> result;
-  xmlXPathObjectPtr xpathObj=NULL;
-  xmlNodePtr node=NULL;
-  xmlNodeSetPtr nodes;
-  Int size;
-  bool found;
-  size_t i,j;
-
-  // Remove any attribute constraints from the path
-  i=0;
-  while((j=path.find("[",i))!=std::string::npos) {
-    Int k=path.find("]",j+1);
-    if (k==std::string::npos) {
-      k=path.size();
-    }
-    std::string constraint=path.substr(j,k-j+1);
-    path=path.replace(j,constraint.size(),"");
-    i=j+1;
-  }
-
-  // Modify the config path to match the schema pathes
-  i=0;
-  while((j=path.find("/",i))!=std::string::npos) {
-    Int k=path.find("/",j+1);
-    if (k==std::string::npos) {
-      k=path.size();
-    }
-    std::string elementName=path.substr(j+1,k-j-1);
-    std::string replaceString;
-    if (i==0) {
-      replaceString="/xsd:schema/xsd:element[@name='" + elementName + "']";
-    } else {
-      replaceString="/xsd:complexType/xsd:sequence/xsd:element[@name='" + elementName + "']";
-    }
-    path=path.replace(j,elementName.size()+1,replaceString);
-    i=j+replaceString.size();
-  }
-  path=path+extension;
-
-  // Execute the xpath expression
-  xpathObj = xmlXPathEvalExpression(BAD_CAST path.c_str(), xpathSchemaCtx);
-  if (xpathObj == NULL) {
-    FATAL("can not evaluate xpath expression <%s>",path.c_str());
-    return result;
-  }
-  nodes=xpathObj->nodesetval;
-  size = (nodes) ? nodes->nodeNr : 0;
-  found = false;
-  for(Int i = 0; i < size; ++i) {
-    if (nodes->nodeTab[i]->type == XML_ELEMENT_NODE) {
-      result.push_back(nodes->nodeTab[i]);
-    }
-  }
-  xmlXPathFreeObject(xpathObj);
-  return result;
+  return configSection.findSchemaNodes(path,extension);
 }
 
 // Gets a string value from the config
 std::string ConfigStore::getStringValue(std::string path, std::string name, const char *file, int line)
 {
-  xmlDocPtr doc = config;
   std::string value;
   xmlNodePtr node,rootNode,childNode;
   std::string xpath;
@@ -682,7 +562,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, cons
 // Sets a string value in the config
 void ConfigStore::setStringValue(std::string path, std::string name, std::string value, const char *file, int line)
 {
-  xmlDocPtr doc = config;
+  xmlDocPtr doc = configSection.getConfig();
   xmlNodePtr node,rootNode;
   std::string xpath;
   if (path=="")

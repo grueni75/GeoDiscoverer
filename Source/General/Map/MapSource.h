@@ -57,7 +57,8 @@ protected:
   std::vector<MapContainerTreeNode*> zoomLevelSearchTrees;
 
   // Holds all attributes extracted from the gds file
-  static std::list<std::vector<std::string> > gdsElements;
+  static std::list<ConfigSection> availableGDSInfos;
+  static ConfigSection resolvedGDSInfo;
 
   // Inserts a new tile into the sorted list associated with the given border
   void insertMapContainerToSortedList(std::vector<Int> *list, MapContainer *newMapContainer, Int newMapContainerIndex, GeographicBorder border);
@@ -85,11 +86,11 @@ protected:
   // Returns the text contained in a xml node
   static std::string getNodeText(XMLNode node);
 
-  // Reads elements from the GDS XML structure
-  static bool readGDSInfo(XMLNode startNode, std::vector<std::string> path);
+  // Reads all available map sources
+  static void readAvailableGDSInfos();
 
   // Reads information about the map
-  static bool readGDSInfo(std::string infoFilePath);
+  static bool resolveGDSInfo(std::string infoFilePath);
 
   // Renames the layers with the infos in the gds file
   void renameLayers();

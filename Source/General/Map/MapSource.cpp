@@ -15,7 +15,8 @@
 namespace GEODISCOVERER {
 
 // Holds all attributes extracted from the gds file
-std::list<std::vector<std::string> > MapSource::gdsElements;
+std::list<ConfigSection> MapSource::availableGDSInfos;
+ConfigSection MapSource::resolvedGDSInfo;
 
 MapSource::MapSource() {
   folder=core->getConfigStore()->getStringValue("Map","folder", __FILE__, __LINE__);
@@ -36,7 +37,6 @@ MapSource::~MapSource() {
   core->getThread()->destroyMutex(statusMutex);
   core->getThread()->destroyMutex(mapArchivesMutex);
 }
-
 
 // Clear the source
 void MapSource::deinit()
