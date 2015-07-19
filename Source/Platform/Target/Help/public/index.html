@@ -1146,7 +1146,7 @@ config.macros.foldFirst = {
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="ConfigTweaks" creator="Matthias" modifier="Matthias" created="201210230617" modified="201412261916" tags="systemConfig excludeSearch" changecount="45">
+<div title="ConfigTweaks" creator="Matthias" modifier="Matthias" created="201210230617" modified="201507111347" tags="systemConfig excludeSearch" changecount="47">
 <pre>//{{{
 var ua = navigator.userAgent.toLowerCase();
 //alert(ua);
@@ -1167,6 +1167,8 @@ config.options.chkShowRightSidebar=true;
 if(isAndroid) {
 	config.options.chkShowQuickEdit=false;
 	config.options.chkShowRightSidebar=false;
+        config.options.chkAutosizeOn=false;
+	config.options.chkAnimate=false;
 }
 //}}}
 
@@ -5633,7 +5635,7 @@ These 'style tweaks' can be easily included in other stylesheet tiddler so they 
 .BGError	  { background-color:[[ColorPalette::Error]];	 	}
 /*}}}*/</pre>
 </div>
-<div title="TextAreaPlugin" creator="Matthias" modifier="Matthias" created="201210250618" modified="201301202109" tags="extension systemConfig excludeSearch" changecount="5">
+<div title="TextAreaPlugin" creator="Matthias" modifier="Matthias" created="201210250618" modified="201507111346" tags="extension systemConfig excludeSearch" changecount="6">
 <pre>/***
 |Name|TextAreaPlugin|
 |Source|http://www.TiddlyTools.com/#TextAreaPlugin|
@@ -5666,6 +5668,7 @@ version.extensions.TextAreaPlugin= {major: 2, minor: 3, revision: 0, date: new D
 if (config.options.chkTextAreaExtensions===undefined) config.options.chkTextAreaExtensions=true;
 if (config.options.chkDisableAutoSelect===undefined) config.options.chkDisableAutoSelect=true;
 if (config.options.chkResizeEditor===undefined) config.options.chkResizeEditor=true;
+if (config.options.chkAutosizeOn===undefined) config.options.chkAutosizeOn=true;
 
 // automatically tweak shadow EditTemplate to add &quot;autosizeEditor&quot; toolbar command
 if (config.options.chkResizeEditor)
@@ -5808,6 +5811,7 @@ config.commands.autosizeEditor = {
 
 config.macros.autosizeEditor={
 	handler: function(place,macroName,params,wikifier,paramString,tiddler) {
+		if (config.options.chkAutosizeOn==false) return;
 		var here=story.findContainingTiddler(place); if (!here) return;
 		var ta=here.getElementsByTagName('textarea'); if (!ta) return;
 		for (i=0;i&lt;ta.length;i++) {
