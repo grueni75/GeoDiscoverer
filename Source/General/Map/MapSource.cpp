@@ -286,7 +286,9 @@ void MapSource::closeProgress() {
 // Renames the layers with the infos in the gds file
 void MapSource::renameLayers() {
 
-  // Rename the map layers
+  FATAL("code must be adapted",NULL);
+
+  /* Rename the map layers
   Int zoomLevel;
   bool zoomLevelFound=false;
   std::string name;
@@ -332,7 +334,7 @@ void MapSource::renameLayers() {
       zoomLevelFound=false;
       nameFound=false;
     }
-  }
+  }*/
 }
 
 // Creates a new map source object of the correct type
@@ -361,10 +363,11 @@ MapSource *MapSource::newMapSource() {
   } else {
 
     // Read in info.gds to find out type of source
-    gdsElements.clear();
-    readGDSInfo(infoPath);
+    readAvailableGDSInfos();
+    resolveGDSInfo(infoPath);
 
-    // Find out the kind of source
+    FATAL("continue here",NULL);
+    /* Find out the kind of source
     for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
       std::vector<std::string> element = *i;
       if (element[0]=="type") {
@@ -374,7 +377,7 @@ MapSource *MapSource::newMapSource() {
         mapArchivePaths.push_back(element[1]);
         mapArchivePathFound = true;
       }
-    }
+    }*/
   }
 
   // Internal map archive?

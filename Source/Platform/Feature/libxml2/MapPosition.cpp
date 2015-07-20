@@ -114,23 +114,6 @@ void MapPosition::writeGPX(XMLNode parentNode) {
   }
 }
 
-// Returns the text contents of a element node
-bool MapPosition::getText(XMLNode node, std::string &contents) {
-  if (!node->children)
-    return false;
-  if (!node->children->name)
-    return false;
-  if ((std::string((char*)node->children->name)!="text"))
-    return false;
-  if (!node->children->content)
-    return false;
-  contents=std::string((char*)node->children->content);
-  if (contents=="")
-    return false;
-  else
-    return true;
-}
-
 // Checks if the namespace of the given xml node is a valid geo discoverer namespace
 bool MapPosition::isGDNameSpace(XMLNode node) {
   if (node->ns!=NULL) {
@@ -190,7 +173,7 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
     if ((isGPXNameSpace(node))&&(node->type==XML_ELEMENT_NODE)) {
       std::string name=(char*)node->name;
       std::string text;
-      if (getText(node,text)) {
+      if (ConfigSection::getNodeText(node,text)) {
         iss.str(text);
         iss.clear();
         if (name == "ele") {
@@ -233,7 +216,7 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
       if ((isGDNameSpace(node))&&(node->type==XML_ELEMENT_NODE)) {
         std::string name=(char*)node->name;
         std::string text;
-        if (getText(node,text)) {
+        if (ConfigSection::getNodeText(node,text)) {
           iss.str(text);
           iss.clear();
           if (name == "source") {

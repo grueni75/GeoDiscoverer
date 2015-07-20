@@ -129,19 +129,6 @@ void MapContainer::writeCalibrationFile()
 
 }
 
-// Returns the text contained in a xml node
-std::string MapContainer::getNodeText(XMLNode node)
-{
-  xmlNodePtr n;
-  for (n = node->children; n; n = n->next) {
-    std::string name=std::string((char*)n->name);
-    if (name=="text") {
-      return std::string((char*)n->content);
-    }
-  }
-  return "";
-}
-
 // Reads a gdm file
 bool MapContainer::readGDMCalibrationFile()
 {
@@ -169,6 +156,7 @@ bool MapContainer::readGDMCalibrationFile()
   void *buffer;
   Int size;
   std::list<ZipArchive*> *mapArchives;
+  std::string t;
 
   // Init
   //xmlInitParser(); // already done by config store
@@ -238,31 +226,39 @@ bool MapContainer::readGDMCalibrationFile()
     if (n->type == XML_ELEMENT_NODE) {
       name=std::string((char*)n->name);
       if (name=="imageFileName") {
-        imageFileNameFound=true;
-        setImageFileName(getNodeText(n));
+        if (ConfigSection::getNodeText(n,t)) {
+          imageFileNameFound=true;
+          setImageFileName(t);
+        }
       }
       if (name=="mapProjection") {
-        std::string mapProjection=getNodeText(n);
-        if (mapProjection=="linear") {
-          calibratorType=MapCalibratorTypeLinear;
-        } else if ((mapProjection=="mercator")||(mapProjection=="sphericalNormalMercator")) {
-          calibratorType=MapCalibratorTypeSphericalNormalMercator;
-        } else if (mapProjection=="proj4") {
-          calibratorType=MapCalibratorTypeProj4;
-        } else {
-          ERROR("map projection <%s> defined in <%s> not supported",mapProjection.c_str(),calibrationFilePath);
-          goto cleanup;
+        if (ConfigSection::getNodeText(n,t)) {
+          std::string mapProjection=t;
+          if (mapProjection=="linear") {
+            calibratorType=MapCalibratorTypeLinear;
+          } else if ((mapProjection=="mercator")||(mapProjection=="sphericalNormalMercator")) {
+            calibratorType=MapCalibratorTypeSphericalNormalMercator;
+          } else if (mapProjection=="proj4") {
+            calibratorType=MapCalibratorTypeProj4;
+          } else {
+            ERROR("map projection <%s> defined in <%s> not supported",mapProjection.c_str(),calibrationFilePath);
+            goto cleanup;
+          }
         }
       }
       if (name=="mapProjectionArgs") {
-        mapProjectionArgs=getNodeText(n);
-        mapProjectionArgsFound=true;
+        if (ConfigSection::getNodeText(n,t)) {
+          mapProjectionArgs=t;
+          mapProjectionArgsFound=true;
+        }
       }
       if (name=="zoomLevel") {
-        zoomLevelFound=true;
-        in.str(getNodeText(n));
-        in.clear();
-        in >> zoomLevel;
+        if (ConfigSection::getNodeText(n,t)) {
+          zoomLevelFound=true;
+          in.str(t);
+          in.clear();
+          in >> zoomLevel;
+        }
       }
       if (name=="calibrationPoint") {
         xFound=false;
@@ -271,23 +267,25 @@ bool MapContainer::readGDMCalibrationFile()
         latitudeFound=false;
         for (xmlNodePtr n2 = n->children; n2; n2 = n2->next) {
           name2=std::string((char*)n2->name);
-          in.str(getNodeText(n2));
-          in.clear();
-          if (name2=="x") {
-            xFound=true;
-            in >> x;
-          }
-          if (name2=="y") {
-            yFound=true;
-            in >> y;
-          }
-          if (name2=="longitude") {
-            longitudeFound=true;
-            in >> longitude;
-          }
-          if (name2=="latitude") {
-            latitudeFound=true;
-            in >> latitude;
+          if (ConfigSection::getNodeText(n2,t)) {
+            in.str(t);
+            in.clear();
+            if (name2=="x") {
+              xFound=true;
+              in >> x;
+            }
+            if (name2=="y") {
+              yFound=true;
+              in >> y;
+            }
+            if (name2=="longitude") {
+              longitudeFound=true;
+              in >> longitude;
+            }
+            if (name2=="latitude") {
+              latitudeFound=true;
+              in >> latitude;
+            }
           }
         }
         if ((!xFound)||(!yFound)||(!longitudeFound)||(!latitudeFound)) {

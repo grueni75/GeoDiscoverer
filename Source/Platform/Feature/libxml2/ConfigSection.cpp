@@ -174,4 +174,37 @@ std::list<XMLNode> ConfigSection::findSchemaNodes(std::string path, std::string 
   return result;
 }
 
+// Returns the text contents as string of the given node
+bool ConfigSection::getNodeText(XMLNode node, std::string &nodeText) {
+  xmlNodePtr n;
+  for (n = node->children; n; n = n->next) {
+    if ((n->name)&&(strcmp((char*)n->name,"text")==0)
+    &&(n->content)&&(strcmp((char*)n->content,"")!=0)) {
+      nodeText=std::string((char*)node->children->content);
+      return true;
+    }
+  }
+  return false;
+}
+
+// Returns the text contents as string of a given element in the tree
+bool ConfigSection::getNodeText(XMLNode parent, std::string nodeName, std::string &nodeText) {
+  for (XMLNode n=parent->children;n!=NULL;n=n->next) {
+    DEBUG("n->name=%s",n->name);
+  }
+  return false;
+}
+
+// Returns the text contents as double of a given element in the tree
+bool ConfigSection::getNodeText(XMLNode parent, std::string nodeName, double &nodeText) {
+  std::string t;
+  if (getNodeText(parent,nodeName,t)) {
+    std::stringstream s(t);
+    s >> nodeText;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 } /* namespace GEODISCOVERER */

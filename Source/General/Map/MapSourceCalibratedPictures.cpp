@@ -68,15 +68,9 @@ bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::li
         DEBUG("info.gds found",NULL);
         std::string gdsFilename = getFolderPath() + "/infoFromGDA.gds";
         (*i)->exportEntry("info.gds",gdsFilename);
-        readGDSInfo(gdsFilename);
+        resolveGDSInfo(gdsFilename);
         unlink(gdsFilename.c_str());
-        for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
-          std::vector<std::string> element = *i;
-          for (std::vector<std::string>::iterator j=element.begin();j!=element.end();j++) {
-            DEBUG("%s",(*j).c_str());
-          }
-        }
-
+        FATAL("code must be tested",NULL);
       }
 
       // If this file is not a calibration file, skip it

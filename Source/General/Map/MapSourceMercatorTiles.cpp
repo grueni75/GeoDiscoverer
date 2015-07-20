@@ -512,7 +512,9 @@ bool MapSourceMercatorTiles::parseGDSInfo()
   std::stringstream in;
   std::string infoFilePath = getFolderPath() + "/info.gds";
 
-  // Loop over the elements and extract the information
+  FATAL("code must be adapted",NULL);
+
+  /* Loop over the elements and extract the information
   tileServerFound=false;
   minZoomLevelFound=false;
   maxZoomLevelFound=false;
@@ -590,6 +592,7 @@ bool MapSourceMercatorTiles::parseGDSInfo()
     goto cleanup;
   }
   result=true;
+*/
 
 cleanup:
 

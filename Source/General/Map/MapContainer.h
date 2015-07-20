@@ -67,9 +67,6 @@ protected:
   // Reads a gdm file
   bool readGDMCalibrationFile();
 
-  // Returns the text contained in a xml node
-  std::string getNodeText(XMLNode node);
-
   // Inserts a new tile into the sorted list associated with the given border
   void insertTileToSortedList(std::vector<Int> *list, MapTile *newTile, Int newTileIndex, PictureBorder border);
 

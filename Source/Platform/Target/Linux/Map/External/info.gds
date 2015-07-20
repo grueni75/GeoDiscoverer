@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GDS version="1.0">
+<GDS 
+  xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
+  version="1.0">
   <type>externalMapArchive</type>
   <mapArchivePath>/home/grueni/Apps/DownloadOSMTiles/Arnheim.gda</mapArchivePath>
 </GDS>

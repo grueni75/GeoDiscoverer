@@ -72,9 +72,6 @@ protected:
   // Finds nodes in a xml tree
   std::list<XMLNode> findNodes(XMLDocument document, XMLXPathContext xpathCtx, std::string path);
 
-  // Returns the text contents of a element node
-  bool getText(XMLNode node, std::string &contents);
-
   // Extracts information about the path from the given node set
   void extractInformation(std::list<XMLNode> nodes);
 

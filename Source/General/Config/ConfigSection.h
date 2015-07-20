@@ -57,6 +57,15 @@ public:
   // Finds a set of schema nodes at the given path
   std::list<XMLNode> findSchemaNodes(std::string path, std::string extension="");
 
+  // Returns the text contents as string of the given node
+  static bool getNodeText(XMLNode node, std::string &nodeText);
+
+  // Returns the text contents as string of a named node in the tree
+  static bool getNodeText(XMLNode parent, std::string nodeName, std::string &nodeText);
+
+  // Returns the text contents as double of a given element in the tree
+  static bool getNodeText(XMLNode parent, std::string nodeName, double &nodeText);
+
   // Getters and setters
   XMLDocument getConfig() const {
     return config;

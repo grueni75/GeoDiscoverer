@@ -220,23 +220,6 @@ std::list<XMLNode> NavigationPath::findNodes(XMLDocument document, XMLXPathConte
   return result;
 }
 
-// Returns the text contents of a element node
-bool NavigationPath::getText(XMLNode node, std::string &contents) {
-  if (!node->children)
-    return false;
-  if (!node->children->name)
-    return false;
-  if (std::string((char*)node->children->name)!="text")
-    return false;
-  if (!node->children->content)
-    return false;
-  contents=std::string((char*)node->children->content);
-  if (contents=="")
-    return false;
-  else
-    return true;
-}
-
 // Extracts information about the path from the given node set
 void NavigationPath::extractInformation(std::list<XMLNode> nodes) {
   std::string t;
@@ -244,10 +227,10 @@ void NavigationPath::extractInformation(std::list<XMLNode> nodes) {
     XMLNode node=*i;
     std::string nodeName=(char*)node->name;
     if (nodeName=="name") {
-      if (getText(node,t)) name=t;
+      if (ConfigSection::getNodeText(node,t)) name=t;
     }
     if (nodeName=="desc") {
-      if (getText(node,t)) description=t;
+      if (ConfigSection::getNodeText(node,t)) description=t;
     }
   }
 }

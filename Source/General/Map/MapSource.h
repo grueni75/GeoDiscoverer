@@ -83,9 +83,6 @@ protected:
   // Recreates the search data structures
   void createSearchDataStructures(bool showProgressDialog=false);
 
-  // Returns the text contained in a xml node
-  static std::string getNodeText(XMLNode node);
-
   // Reads all available map sources
   static void readAvailableGDSInfos();
 

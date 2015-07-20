@@ -15,20 +15,7 @@
 
 namespace GEODISCOVERER {
 
-// Returns the text contained in a xml node
-std::string MapSource::getNodeText(XMLNode node)
-{
-  xmlNodePtr n;
-  for (n = node; n; n = n->next) {
-    std::string name=std::string((char*)n->name);
-    if (name=="text") {
-      return std::string((char*)n->content);
-    }
-  }
-  return "";
-}
-
-// Reads elements from the GDS XML structure
+/* Reads elements from the GDS XML structure
 bool MapSource::resolveGDSInfo(XMLNode startNode, std::vector<std::string> path) {
   bool result=false;
   //DEBUG("path.size()=%d",path.size());
@@ -68,7 +55,7 @@ bool MapSource::resolveGDSInfo(XMLNode startNode, std::vector<std::string> path)
     }
   }
   return result;
-}
+}*/
 
 // Reads information about the map
 bool MapSource::resolveGDSInfo(std::string infoFilePath)
@@ -83,17 +70,29 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
   resolvedGDSInfo.prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
 
   // Check the version
-  text = xmlGetProp(rootNode,BAD_CAST "version");
-  if (strcmp((char*)text,"1.0")!=0) {
+  char *text = (char *)xmlGetProp(xmlDocGetRootElement(resolvedGDSInfo.getConfig()),BAD_CAST "version");
+  if (strcmp(text,"1.0")!=0) {
     ERROR("the version (%s) of the GDS file <%s> is not supported",text,infoFilePath.c_str());
-    goto cleanup;
+    xmlFree(text);
+    return false;
   }
   xmlFree(text);
 
-  replace all refs
-  decide on zoom level and remove any zoom level element in doc
-  fill the layer name map and remove any laver name map in doc
+  // Find all MapSourceRef and replace them with the referenced one
+  std::list<XMLNode> mapSourceRefNodes=resolvedGDSInfo.findConfigNodes("/GDS/MapSourceRef");
+  for (std::list<XMLNode>::iterator i=mapSourceRefNodes.begin();i!=mapSourceRefNodes.end();i++) {
+    std::string name;
+    bool nameFound=resolvedGDSInfo.getNodeText(*i,"name",name);
+    double overlayAlpha;
+    bool overlayAlphaFound=resolvedGDSInfo.getNodeText(*i,"overlayAlpha",overlayAlpha);
+  }
 
+
+  // replace all refs
+  // decide on zoom level and remove any zoom level element in doc
+  // fill the layer name map and remove any laver name map in doc
+  // add support for second info.gds from map archive (map source calibrated pictures calls this function several times)
+  FATAL("continue here",NULL);
 }
 
 // Reads information about the map
@@ -127,7 +126,7 @@ void MapSource::readAvailableGDSInfos() {
         c.prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
 
         // Check the version
-        char *text = xmlGetProp(xmlDocGetRootElement(c.getConfig()),BAD_CAST "version");
+        char *text = (char *)xmlGetProp(xmlDocGetRootElement(c.getConfig()),BAD_CAST "version");
         if (strcmp(text,"1.0")==0) {
           availableGDSInfos.push_back(c);
         } else {

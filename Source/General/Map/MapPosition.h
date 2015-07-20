@@ -53,9 +53,6 @@ protected:
   bool isUpdated;                                   // Indicates that the position has been changed
   Int index;                                        // Index of this point within the vector it is part of
 
-  // Returns the text contents of a element node
-  bool getText(XMLNode node, std::string &contents);
-
   // Checks if the namespace of the given xml node is a valid gpx namespace
   bool isGPXNameSpace(XMLNode node);
 
