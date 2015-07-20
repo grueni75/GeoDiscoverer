@@ -466,6 +466,7 @@ void Core::addDashboardDevice(std::string host, Int port) {
 
   // Add the device
   core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  DEBUG("adding device %04x",d);
   dashboardDevices.push_back(d);
   core->getThread()->unlockMutex(dashboardDevicesMutex);
   DEBUG("dashboard device %s has been added",name.str().c_str());
@@ -546,6 +547,7 @@ void Core::updateDashboardScreens() {
     if (devicesToBeRemoved.size()>0) {
       for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
         Device *d=*i;
+        DEBUG("destroying device 0x%04x",d);
         d->destroyGraphic(false);
       }
       DEBUG("shutting down EGL context",NULL);

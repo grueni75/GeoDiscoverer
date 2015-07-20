@@ -61,12 +61,12 @@
 		
 		        <TextView
 		            android:id="@+id/view_map_message_text_view"
+                style="@style/GDStyle.TextViewMonospace"
 		            android:layout_width="match_parent"
 		            android:layout_height="match_parent"
 		            android:gravity="bottom"
 		            android:textColor="#ffffffff"
 		            android:textSize="10sp"
-		            android:typeface="monospace"
 		            tools:ignore="SmallSp" />
 		    </LinearLayout>
 		    

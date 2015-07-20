@@ -21,16 +21,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.location.LocationManager;
-import android.net.nsd.NsdManager;
-import android.net.nsd.NsdServiceInfo;
-import android.net.wifi.WifiManager;
-import android.net.wifi.WifiManager.MulticastLock;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.DisplayMetrics;
+import android.support.v7.app.NotificationCompat;
 import android.widget.Toast;
 
 public class GDService extends Service {
@@ -169,14 +166,19 @@ public class GDService extends Service {
             
       // Set the service to foreground
       if (!serviceInForeground) {
-        notification = new Notification(R.drawable.status, getText(R.string.notification_service_in_foreground_message), System.currentTimeMillis());
-        notification.setLatestEventInfo(this, getText(R.string.notification_title), getText(R.string.notification_service_in_foreground_message), pendingIntent);
+        notification = new NotificationCompat.Builder(this)
+          .setContentTitle(getText(R.string.notification_title))
+          .setContentText(getText(R.string.notification_service_in_foreground_message))
+          .setSmallIcon(R.drawable.status)
+          .setContentIntent(pendingIntent)
+          .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
+          .build();
         startForeground(R.string.notification_title, notification);
         serviceInForeground=true;
       }
     }
     if (intent.getAction().equals("activityPaused")) {
-      
+
       // Stop watching location if track recording is disabled
       boolean recordingPosition = true;
       String state=coreObject.executeCoreCommand("getRecordTrack()");

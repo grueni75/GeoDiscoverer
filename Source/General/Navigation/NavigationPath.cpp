@@ -1207,11 +1207,19 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
 
 // Returns the points selected by the flags
 std::vector<MapPosition> NavigationPath::getSelectedPoints() {
+  //DEBUG("startIndex=%d endIndex=%d size=%d reverse=%d",startIndex,endIndex,mapPositions.size(),reverse);
   if ((startIndex==-1)&&(endIndex==-1))
     return mapPositions;
   else {
-    Int startIndex=0;
-    Int endIndex=mapPositions.size()-1;
+    Int startIndex;
+    Int endIndex;
+    if (reverse) {
+      endIndex=0;
+      startIndex=mapPositions.size()-1;
+    } else {
+      startIndex=0;
+      endIndex=mapPositions.size()-1;
+    }
     if (this->startIndex!=-1)
       startIndex=this->startIndex;
     if (this->endIndex!=-1)

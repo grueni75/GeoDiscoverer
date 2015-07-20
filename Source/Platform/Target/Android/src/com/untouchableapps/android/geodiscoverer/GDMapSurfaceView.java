@@ -195,9 +195,11 @@ public class GDMapSurfaceView extends GLSurfaceView {
       if (action==MotionEvent.ACTION_DOWN) {
         firstPointerID=event.getPointerId(0);
         pointerIndex=event.findPointerIndex(firstPointerID);
-        x = Math.round(event.getX(pointerIndex));
-        y = Math.round(event.getY(pointerIndex));
-        coreObject.executeCoreCommand("touchDown(" + x + "," + y + ")");
+        if (pointerIndex!=-1) {
+          x = Math.round(event.getX(pointerIndex));
+          y = Math.round(event.getY(pointerIndex));
+          coreObject.executeCoreCommand("touchDown(" + x + "," + y + ")");
+        }
       }
 
       // One or more pointers have moved?
@@ -208,11 +210,13 @@ public class GDMapSurfaceView extends GLSurfaceView {
       // All pointers have left?
       if ((action==MotionEvent.ACTION_UP)||(action==MotionEvent.ACTION_CANCEL)) {
         pointerIndex=event.findPointerIndex(firstPointerID);
-        x = Math.round(event.getX(pointerIndex));
-        y = Math.round(event.getY(pointerIndex));
-        coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");
-        firstPointerID=-1;
-        secondPointerID=-1;
+        if (pointerIndex!=-1) {
+          x = Math.round(event.getX(pointerIndex));
+          y = Math.round(event.getY(pointerIndex));
+          coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");
+          firstPointerID=-1;
+          secondPointerID=-1;
+        }
       }
 
       // New pointer touched screen? 
