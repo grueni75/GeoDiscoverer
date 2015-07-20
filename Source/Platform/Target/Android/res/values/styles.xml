@@ -15,4 +15,7 @@
   <style name="GDStyle.Dialog" parent="Theme.AppCompat.Dialog">
     <item name="colorAccent">@color/gd_orange</item>
   </style> 
+  <style name="GDStyle.TextViewMonospace">
+    <item name="android:typeface">monospace</item>
+  </style> 
 </resources>
