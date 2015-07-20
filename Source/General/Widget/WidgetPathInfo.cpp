@@ -132,14 +132,23 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
     visualizationPathDuration="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";*/
     DEBUG("before: widgetPage=0x%04x, fontEngine=0x%04x",widgetPage,widgetPage->getFontEngine());
     fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
+    DEBUG("ping",NULL);
     fontEngine->updateString(&pathNameFontString,*visualizationPathName,pathNameWidth);
+    DEBUG("ping",NULL);
     Int maxWidth=pathNameFontString->getIconWidth();
+    DEBUG("ping",NULL);
     pathNameFontString->setX(x+pathNameOffsetX+(pathNameWidth-maxWidth)/2);
+    DEBUG("ping",NULL);
     pathNameFontString->setY(y+pathNameOffsetY);
+    DEBUG("ping",NULL);
     fontEngine->updateString(&pathLengthFontString,*visualizationPathLength,pathValuesWidth);
+    DEBUG("ping",NULL);
     fontEngine->updateString(&pathAltitudeUpFontString,*visualizationPathAltitudeUp,pathValuesWidth);
+    DEBUG("ping",NULL);
     fontEngine->updateString(&pathAltitudeDownFontString,*visualizationPathAltitudeDown,pathValuesWidth);
+    DEBUG("ping",NULL);
     fontEngine->updateString(&pathDurationFontString,*visualizationPathDuration,pathValuesWidth);
+    DEBUG("ping",NULL);
     fontEngine->unlockFont();
     DEBUG("after: widgetPage=0x%04x, fontEngine=0x%04x",widgetPage,widgetPage->getFontEngine());
     maxWidth=pathLengthFontString->getIconWidth();
