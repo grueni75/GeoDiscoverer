@@ -130,7 +130,7 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
     visualizationPathAltitudeUp="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
     visualizationPathAltitudeDown="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
     visualizationPathDuration="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";*/
-    FontEngine *fontEngine=widgetPage->getFontEngine();
+    DEBUG("before: widgetPage=0x%04x, fontEngine=0x%04x",widgetPage,widgetPage->getFontEngine());
     fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
     fontEngine->updateString(&pathNameFontString,*visualizationPathName,pathNameWidth);
     Int maxWidth=pathNameFontString->getIconWidth();
@@ -140,7 +140,8 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
     fontEngine->updateString(&pathAltitudeUpFontString,*visualizationPathAltitudeUp,pathValuesWidth);
     fontEngine->updateString(&pathAltitudeDownFontString,*visualizationPathAltitudeDown,pathValuesWidth);
     fontEngine->updateString(&pathDurationFontString,*visualizationPathDuration,pathValuesWidth);
-    widgetPage->getFontEngine()->unlockFont();
+    fontEngine->unlockFont();
+    DEBUG("after: widgetPage=0x%04x, fontEngine=0x%04x",widgetPage,widgetPage->getFontEngine());
     maxWidth=pathLengthFontString->getIconWidth();
     if (pathAltitudeUpFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeUpFontString->getIconWidth();
     if (pathAltitudeDownFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeDownFontString->getIconWidth();
@@ -518,6 +519,7 @@ void WidgetPathInfo::updateVisualization() {
       double pathDuration=currentPath->getDuration();
       double pathAltitudeUp=currentPath->getAltitudeUp();
       double pathAltitudeDown=currentPath->getAltitudeDown();
+      // it seems that the start end indexes changed by the background loader causes some memory problem here
       std::vector<MapPosition> pathPoints=currentPath->getSelectedPoints();
       //DEBUG("pathPoints.size()=%d",pathPoints.size());
       bool pathReversed=currentPath->getReverse();
