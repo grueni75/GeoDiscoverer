@@ -190,7 +190,10 @@ bool ConfigSection::getNodeText(XMLNode node, std::string &nodeText) {
 // Returns the text contents as string of a given element in the tree
 bool ConfigSection::getNodeText(XMLNode parent, std::string nodeName, std::string &nodeText) {
   for (XMLNode n=parent->children;n!=NULL;n=n->next) {
-    DEBUG("n->name=%s",n->name);
+    if ((n->type==XML_ELEMENT_NODE)&&(strcmp((char*)n->name,nodeName.c_str())==0)) {
+      getNodeText(n,nodeText);
+      return true;
+    }
   }
   return false;
 }

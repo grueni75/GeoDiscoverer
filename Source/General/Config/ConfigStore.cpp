@@ -35,7 +35,9 @@ ConfigStore::ConfigStore() {
   writeConfigSignal=core->getThread()->createSignal();
   skipWaitSignal=core->getThread()->createSignal();
   writeConfigThreadInfo=core->getThread()->createThread("config store write config thread",configStoreWriteThread,this);
-
+  if (!(configSection=new ConfigSection())) {
+    FATAL("can not create config section object",NULL);
+  }
   init();
   read();
 
@@ -54,6 +56,7 @@ ConfigStore::~ConfigStore() {
   core->getThread()->destroySignal(writeConfigSignal);
   core->getThread()->destroySignal(skipWaitSignal);
   deinit();
+  delete configSection;
   core->getThread()->destroyMutex(accessMutex);
 }
 

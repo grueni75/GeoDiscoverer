@@ -57,8 +57,8 @@ protected:
   std::vector<MapContainerTreeNode*> zoomLevelSearchTrees;
 
   // Holds all attributes extracted from the gds file
-  static std::list<ConfigSection> availableGDSInfos;
-  static ConfigSection resolvedGDSInfo;
+  static std::list<ConfigSection*> availableGDSInfos;
+  static ConfigSection *resolvedGDSInfo;
 
   // Inserts a new tile into the sorted list associated with the given border
   void insertMapContainerToSortedList(std::vector<Int> *list, MapContainer *newMapContainer, Int newMapContainerIndex, GeographicBorder border);

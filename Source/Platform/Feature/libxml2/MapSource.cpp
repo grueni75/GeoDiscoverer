@@ -62,29 +62,79 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
 {
   std::string mapSourceSchemaFilePath = core->getHomePath() +"/source.xsd";
 
+  // Create a new resolvedGDSInfo object
+  if (resolvedGDSInfo)
+    delete resolvedGDSInfo;
+  if (!(resolvedGDSInfo=new ConfigSection())) {
+    FATAL("can not create config section object",NULL);
+  }
+
   // Read the info file
-  if (!resolvedGDSInfo.readSchema(mapSourceSchemaFilePath))
+  if (!resolvedGDSInfo->readSchema(mapSourceSchemaFilePath))
     return false;
-  if (!resolvedGDSInfo.readConfig(infoFilePath))
+  if (!resolvedGDSInfo->readConfig(infoFilePath))
     return false;
-  resolvedGDSInfo.prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
+  resolvedGDSInfo->prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
 
   // Check the version
-  char *text = (char *)xmlGetProp(xmlDocGetRootElement(resolvedGDSInfo.getConfig()),BAD_CAST "version");
+  char *text = (char *)xmlGetProp(xmlDocGetRootElement(resolvedGDSInfo->getConfig()),BAD_CAST "version");
   if (strcmp(text,"1.0")!=0) {
-    ERROR("the version (%s) of the GDS file <%s> is not supported",text,infoFilePath.c_str());
+    ERROR("the version <%s> of the GDS file <%s> is not supported",text,infoFilePath.c_str());
     xmlFree(text);
     return false;
   }
   xmlFree(text);
 
   // Find all MapSourceRef and replace them with the referenced one
-  std::list<XMLNode> mapSourceRefNodes=resolvedGDSInfo.findConfigNodes("/GDS/MapSourceRef");
+  std::list<XMLNode> mapSourceRefNodes=resolvedGDSInfo->findConfigNodes("/GDS/MapSourceRef");
   for (std::list<XMLNode>::iterator i=mapSourceRefNodes.begin();i!=mapSourceRefNodes.end();i++) {
     std::string name;
-    bool nameFound=resolvedGDSInfo.getNodeText(*i,"name",name);
+    bool nameFound=resolvedGDSInfo->getNodeText(*i,"name",name);
     double overlayAlpha;
-    bool overlayAlphaFound=resolvedGDSInfo.getNodeText(*i,"overlayAlpha",overlayAlpha);
+    bool overlayAlphaFound=resolvedGDSInfo->getNodeText(*i,"overlayAlpha",overlayAlpha);
+    if (nameFound) {
+
+      // Find the referenced map source
+      bool found=false;
+      for (std::list<ConfigSection*>::iterator j=availableGDSInfos.begin();j!=availableGDSInfos.end();j++) {
+        std::string refName;
+        std::list<XMLNode> n=(*j)->findConfigNodes("/GDS/name");
+        if ((n.size()==1)&&((*j)->getNodeText(n.front(),refName)&&(name==refName))) {
+
+          // Only the map sources of type tileServer are supported
+          std::string refType;
+          n=(*j)->findConfigNodes("/GDS/type");
+          if ((n.size()==1)&&((*j)->getNodeText(n.front(),refType)&&(refType=="tileServer"))) {
+            found=true;
+
+            // Copy the tile server entries from the referenced map source
+            n=(*j)->findConfigNodes("/GDS/TileServer");
+            XMLNode currentSibling=*i;
+            for (std::list<XMLNode>::iterator k=n.begin();k!=n.end();k++) {
+              XMLNode n2=xmlCopyNode(*k,true);
+              xmlAddNextSibling(currentSibling,n2);
+              currentSibling=n2;
+            }
+
+            // Unlink the map source ref
+            xmlUnlinkNode(*i);
+            xmlFreeNode(*i);
+
+            ERROR("update the min and max zoom levels",NULL);
+
+            break;
+
+          }
+        }
+      }
+
+      // Referenced source not found?
+      if (!found) {
+        ERROR("the referenced map source <%s> in the GDS file <%s> can not be found",name.c_str(),infoFilePath.c_str());
+      }
+    } else {
+      ERROR("the GDS file <%s> contains a MapSourceRef that has no name element",infoFilePath.c_str());
+    }
   }
 
 
@@ -101,11 +151,16 @@ void MapSource::readAvailableGDSInfos() {
   std::string mapSourceFolderPath = core->getHomePath() + "/Source";
   std::string mapSourceSchemaFilePath = core->getHomePath() +"/source.xsd";
 
+  // Free the available list
+  for (std::list<ConfigSection*>::iterator i=availableGDSInfos.begin();i!=availableGDSInfos.end();i++) {
+    delete *i;
+  }
+  availableGDSInfos.clear();
+
   // First get a list of all available route filenames
   DIR *dp = opendir( mapSourceFolderPath.c_str() );
   struct dirent *dirp;
   struct stat filestat;
-  std::list<std::string> routes;
   if (dp == NULL){
     FATAL("can not open directory <%s> for reading available map sources",mapSourceFolderPath.c_str());
     return;
@@ -116,21 +171,25 @@ void MapSource::readAvailableGDSInfos() {
 
     // Only look for directories
     if (stat( filepath.c_str(), &filestat ))        continue;
-    if (S_ISDIR( filestat.st_mode )) {
+    if (S_ISREG( filestat.st_mode )) {
 
       // Read the info file
-      ConfigSection c;
-      if (!c.readSchema(mapSourceSchemaFilePath))
+      ConfigSection *c;
+      if (!(c=new ConfigSection())) {
+        FATAL("can not create config section object",NULL);
+      }
+      if (!c->readSchema(mapSourceSchemaFilePath))
         return;
-      if (c.readConfig(filepath)) {
-        c.prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
+      if (c->readConfig(filepath)) {
+        c->prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
 
         // Check the version
-        char *text = (char *)xmlGetProp(xmlDocGetRootElement(c.getConfig()),BAD_CAST "version");
+        char *text = (char *)xmlGetProp(xmlDocGetRootElement(c->getConfig()),BAD_CAST "version");
         if (strcmp(text,"1.0")==0) {
           availableGDSInfos.push_back(c);
         } else {
           ERROR("the version (%s) of the GDS file <%s> is not supported",text,filepath.c_str());
+          delete c;
         }
         xmlFree(text);
       }

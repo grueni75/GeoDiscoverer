@@ -41,7 +41,7 @@ protected:
   ThreadMutexInfo *accessMutex;
 
   // Main config
-  ConfigSection configSection;
+  ConfigSection *configSection;
 
   // Minimum distance in seconds between writes of the config store
   Int writeConfigMinWaitTime;

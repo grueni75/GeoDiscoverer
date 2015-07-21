@@ -51,7 +51,7 @@ void ConfigStore::init()
 // Deinits the data
 void ConfigStore::deinit()
 {
-  configSection.deinit();
+  configSection->deinit();
 }
 
 // Called when the core is unloaded (process is killed)
@@ -71,7 +71,7 @@ void ConfigStore::read(std::string schemaFilepath, bool recreateConfig)
   int i, j;
 
   // Read the schema
-  if (!configSection.readSchema(schemaFilepath.c_str())) {
+  if (!configSection->readSchema(schemaFilepath.c_str())) {
     return;
   }
 
@@ -112,21 +112,21 @@ void ConfigStore::read(std::string schemaFilepath, bool recreateConfig)
     }
 
     // Save the XML config
-    configSection.setConfig(doc);
+    configSection->setConfig(doc);
     hasChanged=true;
     write();
 
     // Cleanup
     xmlFreeDoc(doc);
-    configSection.setConfig(NULL);
+    configSection->setConfig(NULL);
   }
 
   // Read the config
-  if (!configSection.readConfig(configFilepath)) {
+  if (!configSection->readConfig(configFilepath)) {
     FATAL("can not read configuration",NULL);
     return;
   }
-  doc = configSection.getConfig();
+  doc = configSection->getConfig();
   rootNode = xmlDocGetRootElement(doc);
   if (!rootNode) {
     FATAL("could not extract root node",NULL);
@@ -142,10 +142,10 @@ void ConfigStore::read(std::string schemaFilepath, bool recreateConfig)
   xmlFree(text);
 
   // Remember the config
-  configSection.setConfig(doc);
+  configSection->setConfig(doc);
 
   // Prepare xpath evaluation
-  configSection.prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/config/1/0");
+  configSection->prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/config/1/0");
 }
 
 // Extracts all schema nodes that hold user-definable values
@@ -312,7 +312,7 @@ void ConfigStore::read()
       // Copy all user config values from the old config
       INFO("upgrading schema while keeping all user configuration",NULL);
       read(schemaShippedFilepath,false);
-      rememberUserConfig("",configSection.getSchema()->children->children);
+      rememberUserConfig("",configSection->getSchema()->children->children);
 
       // Free resources
       deinit();
@@ -348,7 +348,7 @@ void ConfigStore::read()
 void ConfigStore::write()
 {
   if (hasChanged) {
-    xmlDocPtr doc = (xmlDocPtr) configSection.getConfig();
+    xmlDocPtr doc = (xmlDocPtr) configSection->getConfig();
     if (!doc) {
       FATAL("config object has no xml document",NULL);
       return;
@@ -478,12 +478,12 @@ XMLNode ConfigStore::createNodeWithPath(XMLNode parentNode, std::string path, st
 
 // Finds config nodes
 std::list<XMLNode> ConfigStore::findConfigNodes(std::string path) {
-  return configSection.findConfigNodes(path);
+  return configSection->findConfigNodes(path);
 }
 
 // Finds schema nodes
 std::list<XMLNode> ConfigStore::findSchemaNodes(std::string path, std::string extension) {
-  return configSection.findSchemaNodes(path,extension);
+  return configSection->findSchemaNodes(path,extension);
 }
 
 // Gets a string value from the config
@@ -562,7 +562,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, cons
 // Sets a string value in the config
 void ConfigStore::setStringValue(std::string path, std::string name, std::string value, const char *file, int line)
 {
-  xmlDocPtr doc = configSection.getConfig();
+  xmlDocPtr doc = configSection->getConfig();
   xmlNodePtr node,rootNode;
   std::string xpath;
   if (path=="")

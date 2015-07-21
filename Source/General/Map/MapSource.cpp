@@ -15,8 +15,8 @@
 namespace GEODISCOVERER {
 
 // Holds all attributes extracted from the gds file
-std::list<ConfigSection> MapSource::availableGDSInfos;
-ConfigSection MapSource::resolvedGDSInfo;
+std::list<ConfigSection*> MapSource::availableGDSInfos;
+ConfigSection *MapSource::resolvedGDSInfo = NULL;
 
 MapSource::MapSource() {
   folder=core->getConfigStore()->getStringValue("Map","folder", __FILE__, __LINE__);
