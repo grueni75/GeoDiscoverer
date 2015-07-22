@@ -104,7 +104,8 @@
   <string name="crash_dialog_comment_text">You can add an optional comment that explains the bug.</string>
   <string name="crash_dialog_email_text">If you add your email address, the author can contact you with further questions.</string>
   <string name="crash_dialog_ok_toast_text">Thank you!</string>
-  <string name="crash_toast_text">Creating crash report!</string>
+  <string name="crash_toast_text_new_report">Geo Discoverer has crashed&#8230;</string>
+  <string name="crash_toast_text_left_over_report">Processing crash report(s) from previous session&#8230;</string>
   <string name="crash_notification_ticker_text">Crash reports available for Geo Discoverer!</string>
   <string name="crash_notification_title">Geo Discoverer crashed</string>
   <string name="crash_notification_text">Please touch to send a report</string>

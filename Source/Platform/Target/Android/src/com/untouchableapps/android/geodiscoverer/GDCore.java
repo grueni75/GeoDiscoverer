@@ -771,6 +771,42 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   // Functions that are called by the native core
   //
   
+  /** Sends a native crash report */
+  public void sendNativeCrashReport(String dumpBinPath, boolean quitApp) {
+
+    // Get the content of the minidump file and format it in base64
+    ACRA.getErrorReporter().putCustomData("nativeMinidumpPath", dumpBinPath);
+    String dumpTxtPath = dumpBinPath.concat(".base64");
+    try {
+        DataInputStream dumpBinReader = new DataInputStream(new FileInputStream(dumpBinPath));
+        long len = new File(dumpBinPath).length();
+        if (len > Integer.MAX_VALUE) {
+          dumpBinReader.close();
+          throw new IOException("File "+dumpBinPath+" too large, was "+len+" bytes.");
+        }
+        byte[] bytes = new byte[(int) len];
+        dumpBinReader.readFully(bytes);
+        String dumpContents = Base64.encodeToString(bytes,Base64.DEFAULT);
+        BufferedWriter dumpTextWriter = new BufferedWriter(new FileWriter(dumpTxtPath));
+        dumpTextWriter.write(dumpContents);
+        dumpTextWriter.close();
+        String[] dumpContentsInLines = dumpContents.split("\n");
+        ReportField[] customReportFields = new ReportField[ACRAConstants.DEFAULT_REPORT_FIELDS.length+1];
+        System.arraycopy(ACRAConstants.DEFAULT_REPORT_FIELDS, 0, customReportFields, 0, ACRAConstants.DEFAULT_REPORT_FIELDS.length);
+        customReportFields[ACRAConstants.DEFAULT_REPORT_FIELDS.length]=ReportField.APPLICATION_LOG;
+        ACRA.getConfig().setCustomReportContent(customReportFields);
+        ACRA.getConfig().setApplicationLogFileLines(dumpContentsInLines.length+1);
+        ACRA.getConfig().setApplicationLogFile(dumpTxtPath);
+        dumpBinReader.close();
+    } 
+    catch (Exception e) {
+    }
+    
+    // Send report via ACRA
+    Exception e = new Exception("GDCore has crashed");
+    ACRA.getErrorReporter().handleException(e,true);          
+  }
+  
   /** Execute an command */
   @SuppressWarnings("resource")
   public void executeAppCommand(final String cmd)
@@ -788,35 +824,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
           GDApplication.appContext.startActivity(startMain);
           
-          // Get the content of the minidump file and format it in base64
+          // Send the native report
           String dumpBinPath = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
-          ACRA.getErrorReporter().putCustomData("nativeMinidumpPath", dumpBinPath);
-          String dumpTxtPath = dumpBinPath.concat(".base64");
-          try {
-              DataInputStream dumpBinReader = new DataInputStream(new FileInputStream(dumpBinPath));
-              long len = new File(dumpBinPath).length();
-              if (len > Integer.MAX_VALUE) throw new IOException("File "+dumpBinPath+" too large, was "+len+" bytes.");
-              byte[] bytes = new byte[(int) len];
-              dumpBinReader.readFully(bytes);
-              String dumpContents = Base64.encodeToString(bytes,Base64.DEFAULT);
-              BufferedWriter dumpTextWriter = new BufferedWriter(new FileWriter(dumpTxtPath));
-              dumpTextWriter.write(dumpContents);
-              dumpTextWriter.close();
-              String[] dumpContentsInLines = dumpContents.split("\n");
-              ReportField[] customReportFields = new ReportField[ACRAConstants.DEFAULT_REPORT_FIELDS.length+1];
-              System.arraycopy(ACRAConstants.DEFAULT_REPORT_FIELDS, 0, customReportFields, 0, ACRAConstants.DEFAULT_REPORT_FIELDS.length);
-              customReportFields[ACRAConstants.DEFAULT_REPORT_FIELDS.length]=ReportField.APPLICATION_LOG;
-              ACRA.getConfig().setCustomReportContent(customReportFields);
-              ACRA.getConfig().setApplicationLogFileLines(dumpContentsInLines.length+1);
-              ACRA.getConfig().setApplicationLogFile(dumpTxtPath);
-              dumpBinReader.close();
-          } 
-          catch (Exception e) {
-          }
-          
-          // Send report via ACRA
-          Exception e = new Exception("GDCore has crashed");
-          ACRA.getErrorReporter().handleException(e,true);          
+          sendNativeCrashReport(dumpBinPath,true);
         }
       };
       reportThread.start();
