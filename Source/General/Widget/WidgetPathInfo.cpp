@@ -75,6 +75,7 @@ WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) :
   visualizationAltitudeProfileYTickLabels=NULL;
   visualizationAltitudeProfileYTickPoints=NULL;
   visualizationNoAltitudeProfile=NULL;
+  visualizationValid=false;
 }
 
 // Destructor
@@ -122,7 +123,7 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
 
   // Redraw the widget if required
   core->getThread()->lockMutex(visualizationMutex,__FILE__, __LINE__);
-  if (redrawRequired) {
+  if (redrawRequired&&visualizationValid) {
 
     // Update the labels
     /*visualizationPathName="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
@@ -130,27 +131,16 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
     visualizationPathAltitudeUp="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
     visualizationPathAltitudeDown="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
     visualizationPathDuration="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";*/
-    DEBUG("before: widgetPage=0x%04x, fontEngine=0x%04x",widgetPage,widgetPage->getFontEngine());
     fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
-    DEBUG("ping",NULL);
     fontEngine->updateString(&pathNameFontString,*visualizationPathName,pathNameWidth);
-    DEBUG("ping",NULL);
     Int maxWidth=pathNameFontString->getIconWidth();
-    DEBUG("ping",NULL);
     pathNameFontString->setX(x+pathNameOffsetX+(pathNameWidth-maxWidth)/2);
-    DEBUG("ping",NULL);
     pathNameFontString->setY(y+pathNameOffsetY);
-    DEBUG("ping",NULL);
     fontEngine->updateString(&pathLengthFontString,*visualizationPathLength,pathValuesWidth);
-    DEBUG("ping",NULL);
     fontEngine->updateString(&pathAltitudeUpFontString,*visualizationPathAltitudeUp,pathValuesWidth);
-    DEBUG("ping",NULL);
     fontEngine->updateString(&pathAltitudeDownFontString,*visualizationPathAltitudeDown,pathValuesWidth);
-    DEBUG("ping",NULL);
     fontEngine->updateString(&pathDurationFontString,*visualizationPathDuration,pathValuesWidth);
-    DEBUG("ping",NULL);
     fontEngine->unlockFont();
-    DEBUG("after: widgetPage=0x%04x, fontEngine=0x%04x",widgetPage,widgetPage->getFontEngine());
     maxWidth=pathLengthFontString->getIconWidth();
     if (pathAltitudeUpFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeUpFontString->getIconWidth();
     if (pathAltitudeDownFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeDownFontString->getIconWidth();
@@ -843,6 +833,7 @@ void WidgetPathInfo::updateVisualization() {
     this->visualizationAltitudeProfileYTickPoints=altitudeProfileYTickPoints;
     this->visualizationNoAltitudeProfile=noAltitudeProfile;
     redrawRequired=true;
+    visualizationValid=true;
     core->getThread()->unlockMutex(visualizationMutex);
     //PROFILE_ADD("put path info");
 

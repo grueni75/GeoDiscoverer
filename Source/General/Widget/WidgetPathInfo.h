@@ -120,6 +120,7 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   std::vector<std::string> *visualizationAltitudeProfileYTickLabels;
   std::vector<GraphicPoint> *visualizationAltitudeProfileYTickPoints;
   bool visualizationNoAltitudeProfile;
+  bool visualizationValid;
 
 public:
 
