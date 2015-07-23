@@ -8,12 +8,12 @@ my $report = shift;
 my $lib = shift;
 
 # Extract the breakpad dump
+my $dump = "";
+my $arch;
 if ($report !~ m/.dmp$/) {
   print "Extracting native dump from crash report... ";
   open(my $in, $report) or die "Can not open <$report> for reading!";
   my $state = 0;
-  my $dump = "";
-  my $arch;
   while (my $line = <$in>) {
     chomp $line;
     #print $line . "\n";
@@ -39,7 +39,7 @@ if ($report !~ m/.dmp$/) {
     #print $state . "\n";
   }
   close($in);
-  #print Dumper(@dump);
+  #print $dump;
   print "Done!\n";
 }
 
