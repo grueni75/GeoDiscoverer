@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.channels.FileChannel;
 
 import org.acra.ACRA;
+import org.acra.ACRAConfigurationException;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 
@@ -47,7 +48,7 @@ import android.widget.Toast;
     resDialogCommentPrompt = R.string.crash_dialog_comment_text, 
     resDialogOkToast = R.string.crash_dialog_ok_toast_text, 
     resDialogEmailPrompt = R.string.crash_dialog_email_text,
-    resToastText = R.string.crash_toast_text, 
+    resToastText = R.string.crash_toast_text_new_report, 
     formUriBasicAuthLogin = "tlyiessideratterandiffor", 
     formUriBasicAuthPassword = "rhMR0V0AmdHU7If4jk2N1OIq"
 )
@@ -87,7 +88,7 @@ public class GDApplication extends Application {
     
     // Init crash reporting
     ACRA.init(this);
-    
+        
     // Initialize the core object
     String homeDirPath = GDApplication.getHomeDirPath();
     if (homeDirPath.equals("")) {
@@ -95,6 +96,20 @@ public class GDApplication extends Application {
       System.exit(1);
     } else {
       coreObject=new GDCore(this, homeDirPath);
+    }
+    
+    // Send any left over native crash reports
+    File logDir = new File(homeDirPath + "/Log");
+    File[] files = logDir.listFiles();
+    for (File file : files) {
+      if ((file.isFile())&&(file.getAbsolutePath().endsWith(".dmp"))) {
+        File file2 = new File(file.getAbsoluteFile() + ".base64");
+        if (!file2.exists()) {
+          ACRA.getConfig().setResToastText(R.string.crash_toast_text_left_over_report);
+          coreObject.sendNativeCrashReport(file.getAbsolutePath(),true);
+          break; // only one report at a time
+        }
+      }
     }
   }
 

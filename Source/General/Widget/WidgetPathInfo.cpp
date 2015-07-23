@@ -75,6 +75,7 @@ WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) :
   visualizationAltitudeProfileYTickLabels=NULL;
   visualizationAltitudeProfileYTickPoints=NULL;
   visualizationNoAltitudeProfile=NULL;
+  visualizationValid=false;
 }
 
 // Destructor
@@ -122,7 +123,7 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
 
   // Redraw the widget if required
   core->getThread()->lockMutex(visualizationMutex,__FILE__, __LINE__);
-  if (redrawRequired) {
+  if (redrawRequired&&visualizationValid) {
 
     // Update the labels
     /*visualizationPathName="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
@@ -130,7 +131,6 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
     visualizationPathAltitudeUp="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
     visualizationPathAltitudeDown="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
     visualizationPathDuration="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";*/
-    DEBUG("before: widgetPage=0x%04x, fontEngine=0x%04x",widgetPage,widgetPage->getFontEngine());
     fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
     fontEngine->updateString(&pathNameFontString,*visualizationPathName,pathNameWidth);
     Int maxWidth=pathNameFontString->getIconWidth();
@@ -141,7 +141,6 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
     fontEngine->updateString(&pathAltitudeDownFontString,*visualizationPathAltitudeDown,pathValuesWidth);
     fontEngine->updateString(&pathDurationFontString,*visualizationPathDuration,pathValuesWidth);
     fontEngine->unlockFont();
-    DEBUG("after: widgetPage=0x%04x, fontEngine=0x%04x",widgetPage,widgetPage->getFontEngine());
     maxWidth=pathLengthFontString->getIconWidth();
     if (pathAltitudeUpFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeUpFontString->getIconWidth();
     if (pathAltitudeDownFontString->getIconWidth()>maxWidth) maxWidth=pathAltitudeDownFontString->getIconWidth();
@@ -834,6 +833,7 @@ void WidgetPathInfo::updateVisualization() {
     this->visualizationAltitudeProfileYTickPoints=altitudeProfileYTickPoints;
     this->visualizationNoAltitudeProfile=noAltitudeProfile;
     redrawRequired=true;
+    visualizationValid=true;
     core->getThread()->unlockMutex(visualizationMutex);
     //PROFILE_ADD("put path info");
 
