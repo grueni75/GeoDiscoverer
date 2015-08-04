@@ -101,13 +101,15 @@ public class GDApplication extends Application {
     // Send any left over native crash reports
     File logDir = new File(homeDirPath + "/Log");
     File[] files = logDir.listFiles();
-    for (File file : files) {
-      if ((file.isFile())&&(file.getAbsolutePath().endsWith(".dmp"))) {
-        File file2 = new File(file.getAbsoluteFile() + ".base64");
-        if (!file2.exists()) {
-          ACRA.getConfig().setResToastText(R.string.crash_toast_text_left_over_report);
-          coreObject.sendNativeCrashReport(file.getAbsolutePath(),true);
-          break; // only one report at a time
+    if (files!=null) {
+      for (File file : files) {
+        if ((file.isFile())&&(file.getAbsolutePath().endsWith(".dmp"))) {
+          File file2 = new File(file.getAbsoluteFile() + ".base64");
+          if (!file2.exists()) {
+            ACRA.getConfig().setResToastText(R.string.crash_toast_text_left_over_report);
+            coreObject.sendNativeCrashReport(file.getAbsolutePath(),true);
+            break; // only one report at a time
+          }
         }
       }
     }
