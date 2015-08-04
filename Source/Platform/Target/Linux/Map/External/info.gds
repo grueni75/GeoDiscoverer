@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GDS 
-  xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
-  version="1.0">
+<GDS version="1.0">
   <type>externalMapArchive</type>
   <mapArchivePath>/home/grueni/Backups/mg-handy/ExtSDCard/GeoDiscoverer/Duesseldorf.gda</mapArchivePath>
+  <mapArchivePath>/home/grueni/Backups/mg-handy/ExtSDCard/GeoDiscoverer/Duesseldorf2.gda</mapArchivePath>
+  <mapArchivePath>/home/grueni/Backups/mg-handy/ExtSDCard/GeoDiscoverer/Duesseldorf3.gda</mapArchivePath>
+  <mapArchivePath>/home/grueni/Backups/mg-handy/ExtSDCard/GeoDiscoverer/Duesseldorf4.gda</mapArchivePath>
 </GDS>

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GDS 
-  xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
-  version="1.0">
+<GDS version="1.0">
   <TileServer>
     <serverURL>http://a.tile.opentopomap.org/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>1.0</overlayAlpha>
@@ -17,6 +15,6 @@
   <MapSourceRef>
     <name>Waymarked Trails for Cycling</name>
   </MapSourceRef>
-  <minZoomLevel>7</minZoomLevel>
-  <maxZoomLevel>15</maxZoomLevel>
+  <minZoomLevel>0</minZoomLevel>
+  <maxZoomLevel>20</maxZoomLevel>
 </GDS>

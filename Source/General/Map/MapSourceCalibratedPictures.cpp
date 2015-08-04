@@ -70,7 +70,6 @@ bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::li
         (*i)->exportEntry("info.gds",gdsFilename);
         resolveGDSInfo(gdsFilename);
         unlink(gdsFilename.c_str());
-        FATAL("code must be tested",NULL);
       }
 
       // If this file is not a calibration file, skip it

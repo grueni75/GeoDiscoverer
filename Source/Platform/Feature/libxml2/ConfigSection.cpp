@@ -49,9 +49,46 @@ bool ConfigSection::readSchema(std::string schemaFilepath) {
   return true;
 }
 
+// Sets a default namespace for all the nodes
+void ConfigSection::setDefaultNamespace(XMLNamespace ns, XMLNode node) {
+  if (node->ns==NULL) {
+    xmlSetNs(node,ns);
+  }
+  for (XMLNode n=node->children;n!=NULL;n=n->next) {
+    setDefaultNamespace(ns,n);
+  }
+}
+
 // Reads the config
 bool ConfigSection::readConfig(std::string configFilepath) {
-  config = xmlReadFile(configFilepath.c_str(), NULL, 0);
+
+  // Merge the info if config is already set
+  if (config) {
+
+    // Read the doc
+    XMLDocument doc =  xmlReadFile(configFilepath.c_str(), NULL, 0);
+    if (!doc) {
+      ERROR("read of config file <%s> failed",configFilepath.c_str());
+      return false;
+    }
+
+    // Set the default namespace (if doc has none)
+    XMLNode currentSibling=xmlGetLastChild(findConfigNodes("/GDS").front());
+
+    // Copy all nodes below the root
+    for (XMLNode n=xmlDocGetRootElement(doc)->children;n!=NULL;n=n->next) {
+      XMLNode n2=xmlCopyNode(n,true);
+      setDefaultNamespace(currentSibling->ns,n2);
+      xmlAddNextSibling(currentSibling,n2);
+      currentSibling=n2;
+    }
+
+    // Free memory
+    xmlFreeDoc(doc);
+
+  } else {
+    config = xmlReadFile(configFilepath.c_str(), NULL, 0);
+  }
   if (!config) {
     ERROR("read of config file <%s> failed",configFilepath.c_str());
     return false;
@@ -66,18 +103,28 @@ ConfigSection::~ConfigSection() {
 
 // Prepare xpath evaluation
 void ConfigSection::prepareXPath(std::string schemaNamespace) {
-  xpathConfigCtx = xmlXPathNewContext(config);
-  if (xpathConfigCtx == NULL) {
-    FATAL("can not create config xpath context",NULL);
-    return;
+  this->schemaNamespace=schemaNamespace;
+  if (!xpathConfigCtx) {
+    XMLNode root=xmlDocGetRootElement(config);
+    if (!root->ns) {
+      XMLNamespace ns=xmlNewNs(root,BAD_CAST schemaNamespace.c_str(),NULL);
+      setDefaultNamespace(ns,root);
+    }
+    xpathConfigCtx = xmlXPathNewContext(config);
+    if (xpathConfigCtx == NULL) {
+      FATAL("can not create config xpath context",NULL);
+      return;
+    }
+    xmlXPathRegisterNs(xpathConfigCtx, BAD_CAST "gd", BAD_CAST schemaNamespace.c_str());
   }
-  xmlXPathRegisterNs(xpathConfigCtx, BAD_CAST "gd", BAD_CAST schemaNamespace.c_str());
-  xpathSchemaCtx = xmlXPathNewContext(schema);
-  if (xpathSchemaCtx == NULL) {
-    FATAL("can not create schema xpath context",NULL);
-    return;
+  if (!xpathSchemaCtx) {
+    xpathSchemaCtx = xmlXPathNewContext(schema);
+    if (xpathSchemaCtx == NULL) {
+      FATAL("can not create schema xpath context",NULL);
+      return;
+    }
+    xmlXPathRegisterNs(xpathSchemaCtx, BAD_CAST "xsd", BAD_CAST "http://www.w3.org/2001/XMLSchema");
   }
-  xmlXPathRegisterNs(xpathSchemaCtx, BAD_CAST "xsd", BAD_CAST "http://www.w3.org/2001/XMLSchema");
 }
 
 // Finds config nodes
@@ -174,6 +221,20 @@ std::list<XMLNode> ConfigSection::findSchemaNodes(std::string path, std::string 
   return result;
 }
 
+// Sets the text contents of the given node
+bool ConfigSection::setNodeText(XMLNode node, std::string nodeText) {
+  xmlNodePtr n;
+  for (n = node->children; n; n = n->next) {
+    if ((n->name)&&(strcmp((char*)n->name,"text")==0)) {
+      xmlChar *valueEncoded = xmlEncodeSpecialChars(config,(const xmlChar *)nodeText.c_str());
+      xmlNodeSetContent(n,valueEncoded);
+      xmlFree(valueEncoded);
+      return true;
+    }
+  }
+  return false;
+}
+
 // Returns the text contents as string of the given node
 bool ConfigSection::getNodeText(XMLNode node, std::string &nodeText) {
   xmlNodePtr n;
@@ -187,27 +248,14 @@ bool ConfigSection::getNodeText(XMLNode node, std::string &nodeText) {
   return false;
 }
 
-// Returns the text contents as string of a given element in the tree
-bool ConfigSection::getNodeText(XMLNode parent, std::string nodeName, std::string &nodeText) {
+// Finds a child node of the given parent node
+XMLNode ConfigSection::findNode(XMLNode parent, std::string nodeName) {
   for (XMLNode n=parent->children;n!=NULL;n=n->next) {
     if ((n->type==XML_ELEMENT_NODE)&&(strcmp((char*)n->name,nodeName.c_str())==0)) {
-      getNodeText(n,nodeText);
-      return true;
+      return n;
     }
   }
-  return false;
-}
-
-// Returns the text contents as double of a given element in the tree
-bool ConfigSection::getNodeText(XMLNode parent, std::string nodeName, double &nodeText) {
-  std::string t;
-  if (getNodeText(parent,nodeName,t)) {
-    std::stringstream s(t);
-    s >> nodeText;
-    return true;
-  } else {
-    return false;
-  }
+  return NULL;
 }
 
 } /* namespace GEODISCOVERER */

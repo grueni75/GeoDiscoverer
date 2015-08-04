@@ -3,6 +3,7 @@
   xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
   version="1.0">
   <name>Open Topo Map</name>
+  <type></type>
   <isMarkup>false</isMarkup>
     <TileServer>
     <serverURL>http://a.tile.opentopomap.org/${z}/${x}/${y}.png</serverURL>

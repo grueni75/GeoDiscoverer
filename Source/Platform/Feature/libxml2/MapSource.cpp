@@ -62,16 +62,20 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
 {
   std::string mapSourceSchemaFilePath = core->getHomePath() +"/source.xsd";
 
-  // Create a new resolvedGDSInfo object
-  if (resolvedGDSInfo)
-    delete resolvedGDSInfo;
-  if (!(resolvedGDSInfo=new ConfigSection())) {
-    FATAL("can not create config section object",NULL);
+  // Create a new resolvedGDSInfo object or merge the new info file if object already exists
+  if (!resolvedGDSInfo) {
+
+    // Create the object
+    if (!(resolvedGDSInfo=new ConfigSection())) {
+      FATAL("can not create config section object",NULL);
+    }
+
+    // Read the schema file
+    if (!resolvedGDSInfo->readSchema(mapSourceSchemaFilePath))
+      return false;
   }
 
   // Read the info file
-  if (!resolvedGDSInfo->readSchema(mapSourceSchemaFilePath))
-    return false;
   if (!resolvedGDSInfo->readConfig(infoFilePath))
     return false;
   resolvedGDSInfo->prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
@@ -88,61 +92,145 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
   // Find all MapSourceRef and replace them with the referenced one
   std::list<XMLNode> mapSourceRefNodes=resolvedGDSInfo->findConfigNodes("/GDS/MapSourceRef");
   for (std::list<XMLNode>::iterator i=mapSourceRefNodes.begin();i!=mapSourceRefNodes.end();i++) {
+
+    // Get the fields from the MapSourceRef
     std::string name;
     bool nameFound=resolvedGDSInfo->getNodeText(*i,"name",name);
     double overlayAlpha;
     bool overlayAlphaFound=resolvedGDSInfo->getNodeText(*i,"overlayAlpha",overlayAlpha);
+    Int refMinZoomLevel=minZoomLevelDefault;
+    bool refMinZoomLevelSet=resolvedGDSInfo->getNodeText(*i,"minZoomLevel",refMinZoomLevel);
+    Int refMaxZoomLevel=maxZoomLevelDefault;
+    bool refMaxZoomLevelSet=resolvedGDSInfo->getNodeText(*i,"maxZoomLevel",refMaxZoomLevel);
+    std::string refLayerGroupName="";
+    bool refLayerGroupNameSet=resolvedGDSInfo->getNodeText(*i,"layerGroupName",refLayerGroupName);
+
+    // Does thie entry have a name?
     if (nameFound) {
 
       // Find the referenced map source
       bool found=false;
       for (std::list<ConfigSection*>::iterator j=availableGDSInfos.begin();j!=availableGDSInfos.end();j++) {
-        std::string refName;
-        std::list<XMLNode> n=(*j)->findConfigNodes("/GDS/name");
-        if ((n.size()==1)&&((*j)->getNodeText(n.front(),refName)&&(name==refName))) {
+        std::string refName="";
+        (*j)->getNodeText("/GDS/name",refName);
+        std::string refType="";
+        if (!(*j)->getNodeText("/GDS/type",refType))
+          refType="tileServer";
+        if ((refType=="tileServer")&&(name==refName)) {
+          found=true;
 
-          // Only the map sources of type tileServer are supported
-          std::string refType;
-          n=(*j)->findConfigNodes("/GDS/type");
-          if ((n.size()==1)&&((*j)->getNodeText(n.front(),refType)&&(refType=="tileServer"))) {
-            found=true;
+          // Update the min and max zoom level
+          Int localMinZoomLevel=refMinZoomLevel;
+          bool localMinZoomLevelSet=(*j)->getNodeText("/GDS/minZoomLevel",localMinZoomLevel);
+          if (refMinZoomLevelSet) {
+            localMinZoomLevel=refMinZoomLevel;
+            localMinZoomLevelSet=true;
+          }
+          Int localMaxZoomLevel=refMaxZoomLevel;
+          bool localMaxZoomLevelSet=(*j)->getNodeText("/GDS/maxZoomLevel",localMaxZoomLevel);
+          if (refMaxZoomLevelSet) {
+            localMaxZoomLevel=refMaxZoomLevel;
+            localMaxZoomLevelSet=true;
+          }
 
-            // Copy the tile server entries from the referenced map source
-            n=(*j)->findConfigNodes("/GDS/TileServer");
-            XMLNode currentSibling=*i;
-            for (std::list<XMLNode>::iterator k=n.begin();k!=n.end();k++) {
-              XMLNode n2=xmlCopyNode(*k,true);
-              xmlAddNextSibling(currentSibling,n2);
-              currentSibling=n2;
+          // Copy the tile server entries from the referenced map source
+          std::list<XMLNode> n=(*j)->findConfigNodes("/GDS/TileServer");
+          XMLNode currentSibling=*i;
+          for (std::list<XMLNode>::iterator k=n.begin();k!=n.end();k++) {
+
+            // Copy the TileServer entry
+            XMLNode n2=xmlCopyNode(*k,true);
+            if (n2==NULL)
+              FATAL("can not copy node",NULL);
+
+            // Update all fields
+            Int minZoomLevel=localMinZoomLevel;
+            (*j)->getNodeText(n2,"minZoomLevel",minZoomLevel);
+            if (localMinZoomLevelSet)
+              minZoomLevel=localMinZoomLevel;
+            Int maxZoomLevel=localMaxZoomLevel;
+            (*j)->getNodeText(n2,"maxZoomLevel",maxZoomLevel);
+            if (localMaxZoomLevelSet)
+              maxZoomLevel=localMaxZoomLevel;
+            std::string layerGroupName=refLayerGroupName;
+            (*j)->getNodeText(n2,"layerGroupName",layerGroupName);
+            if (refLayerGroupNameSet)
+              layerGroupName=refLayerGroupName;
+
+            // Add the min and max zoom level
+            if (!(resolvedGDSInfo->setNodeText(n2,"minZoomLevel",localMinZoomLevel)))
+              FATAL("can not set minZoomLevel",NULL);
+            if (!(resolvedGDSInfo->setNodeText(n2,"maxZoomLevel",localMaxZoomLevel)))
+              FATAL("can not set maxZoomLevel",NULL);
+            if (layerGroupName!="") {
+              if (!(resolvedGDSInfo->setNodeText(n2,"layerGroupName",layerGroupName))) {
+                FATAL("can not set layerGroupName",NULL);
+              }
             }
 
-            // Unlink the map source ref
-            xmlUnlinkNode(*i);
-            xmlFreeNode(*i);
-
-            ERROR("update the min and max zoom levels",NULL);
-
-            break;
-
+            // Update overlay alpha if necessary
+            if (overlayAlphaFound) {
+              XMLNode n3;
+              n3=resolvedGDSInfo->findNode(n2,"overlayAlpha");
+              if (n3==NULL) {
+                ERROR("one of the tile server entries in the map source <%s> has no overlayAlpha element",name.c_str());
+                return false;
+              } else {
+                double t;
+                resolvedGDSInfo->getNodeText(n3,t);
+                t*=overlayAlpha;
+                std::stringstream t2;
+                t2<<t;
+                resolvedGDSInfo->setNodeText(n3,t2.str());
+              }
+            }
+            xmlAddNextSibling(currentSibling,n2);
+            currentSibling=n2;
           }
+
+          // Unlink the map source ref
+          xmlUnlinkNode(*i);
+          xmlFreeNode(*i);
+
+          break;
         }
       }
 
       // Referenced source not found?
       if (!found) {
         ERROR("the referenced map source <%s> in the GDS file <%s> can not be found",name.c_str(),infoFilePath.c_str());
+        return false;
       }
     } else {
       ERROR("the GDS file <%s> contains a MapSourceRef that has no name element",infoFilePath.c_str());
+      return false;
     }
   }
 
+  // Get the global min and max zoom level
+  Int globalMinZoomLevel=minZoomLevelDefault;
+  bool globalMinZoomLevelSet=resolvedGDSInfo->getNodeText("/GDS/minZoomLevel",globalMinZoomLevel);
+  Int globalMaxZoomLevel=maxZoomLevelDefault;
+  bool globalMaxZoomLevelSet=resolvedGDSInfo->getNodeText("/GDS/maxZoomLevel",globalMaxZoomLevel);
 
-  // replace all refs
-  // decide on zoom level and remove any zoom level element in doc
-  // fill the layer name map and remove any laver name map in doc
-  // add support for second info.gds from map archive (map source calibrated pictures calls this function several times)
-  FATAL("continue here",NULL);
+  // Go through all tile servers and update the min and max zoom level
+  // Find all MapSourceRef and replace them with the referenced one
+  std::list<XMLNode> tileServerNodes=resolvedGDSInfo->findConfigNodes("/GDS/TileServer");
+  for (std::list<XMLNode>::iterator i=tileServerNodes.begin();i!=tileServerNodes.end();i++) {
+    if (globalMaxZoomLevelSet) {
+      resolvedGDSInfo->setNodeText(*i,"maxZoomLevel",globalMaxZoomLevel);
+    }
+    if (globalMinZoomLevelSet) {
+      resolvedGDSInfo->setNodeText(*i,"minZoomLevel",globalMinZoomLevel);
+    }
+    /*std::string t;
+    resolvedGDSInfo->getNodeText(*i,"serverURL",t);
+    DEBUG("%s",t.c_str());*/
+  }
+
+  WARNING("fill the layer name map and remove any laver name map in doc",NULL);
+  WARNING("add support for second info.gds from map archive (map source calibrated pictures calls this function several times",NULL);
+  WARNING("update config store to use the new functions from config section",NULL);
 }
 
 // Reads information about the map

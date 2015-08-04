@@ -159,7 +159,7 @@ void MapDownloader::queueMapContainerDownload(MapContainer *mapContainer)
 }
 
 // Adds a server url to the list of URLs a tile consists of
-bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, ImageType imageType) {
+bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, ImageType imageType, std::string layerGroupName, Int minZoomLevel, Int maxZoomLevel) {
   MapTileServer *mapTileServer;
 
   // Check if the image is supported

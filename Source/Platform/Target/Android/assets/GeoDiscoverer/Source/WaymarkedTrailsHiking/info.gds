@@ -2,7 +2,7 @@
 <GDS 
   xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
   version="1.0">
-  <name>Waymarked Trails for Cycling</name>
+  <name>Waymarked Trails for Hiking</name>
   <isMarkup>true</isMarkup>
   <TileServer>
     <serverURL>http://tile.waymarkedtrails.org/hiking/${z}/${x}/${y}.png</serverURL>

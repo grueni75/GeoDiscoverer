@@ -109,19 +109,23 @@ int main(int argc, char **argv)
   GEODISCOVERER::ThreadInfo *main=GEODISCOVERER::core->getThread()->createThread("main thread",mainThread,NULL);
 
   // Wait some time
-  while (!GEODISCOVERER::core->getIsInitialized()) {
+  while ((!mainThreadHasExited)&&(!GEODISCOVERER::core->getIsInitialized())) {
     sleep(1);
   }
 
   // Start the debugging thread
-  GEODISCOVERER::ThreadInfo *debug=GEODISCOVERER::core->getThread()->createThread("debug thread",debugThread,NULL);
+  GEODISCOVERER::ThreadInfo *debug=NULL;
+  if (!mainThreadHasExited)
+    debug=GEODISCOVERER::core->getThread()->createThread("debug thread",debugThread,NULL);
 
   // Wait until the threads exit
-  GEODISCOVERER::core->getThread()->waitForThread(debug);
+  if (debug)
+    GEODISCOVERER::core->getThread()->waitForThread(debug);
   GEODISCOVERER::core->getThread()->waitForThread(main);
 
   // And destruct core object
-  GEODISCOVERER::core->getThread()->destroyThread(debug);
+  if (debug)
+    GEODISCOVERER::core->getThread()->destroyThread(debug);
   GEODISCOVERER::core->getThread()->destroyThread(main);
   delete GEODISCOVERER::core;
   GEODISCOVERER::Core::unload();

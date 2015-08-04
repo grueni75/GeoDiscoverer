@@ -636,8 +636,7 @@ void Core::lateInit() {
   if (!mapSource->getIsInitialized()) {
     DEBUG("late initializing mapSource",NULL);
     if (!mapSource->init()) {
-      delete mapSource;
-      mapSource=NULL;
+      return;
     }
   }
 

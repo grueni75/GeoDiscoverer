@@ -42,7 +42,7 @@ protected:
   bool contentsChanged;                     // Indicates if the users of the map source need to update their data structures
   std::list<std::string> status;            // Status of the map source
   ThreadMutexInfo *statusMutex;             // Mutex for accessing the status
-  MapDownloader *mapDownloader;             // Downlads missing tiles from the tileserver
+  MapDownloader *mapDownloader;             // Downloads missing tiles from the tileserver
   MapLayerNameMap mapLayerNameMap;          // Defines for each zoom level a name
   Int minZoomLevel;                         // Minimum zoom value
   Int maxZoomLevel;                         // Maximum zoom value
@@ -59,6 +59,10 @@ protected:
   // Holds all attributes extracted from the gds file
   static std::list<ConfigSection*> availableGDSInfos;
   static ConfigSection *resolvedGDSInfo;
+
+  // Min and max zoom levels
+  static const Int minZoomLevelDefault=0;
+  static const Int maxZoomLevelDefault=19;
 
   // Inserts a new tile into the sorted list associated with the given border
   void insertMapContainerToSortedList(std::vector<Int> *list, MapContainer *newMapContainer, Int newMapContainerIndex, GeographicBorder border);

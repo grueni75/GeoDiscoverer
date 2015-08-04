@@ -286,55 +286,37 @@ void MapSource::closeProgress() {
 // Renames the layers with the infos in the gds file
 void MapSource::renameLayers() {
 
-  FATAL("code must be adapted",NULL);
-
-  /* Rename the map layers
-  Int zoomLevel;
-  bool zoomLevelFound=false;
-  std::string name;
-  bool nameFound=false;
-  std::stringstream in;
+  // Rename the map layers
   std::string infoFilePath = getFolderPath() + "/info.gds";
-  for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
-    std::vector<std::string> element = *i;
-    if (element[0]=="LayerName") {
-      if (element[1]=="zoomLevel") {
-        in.str(element[2]);
-        in.clear();
-        in >> zoomLevel;
-        zoomLevelFound=true;
-      }
-      if (element[1]=="name") {
-        name=element[2];
-        nameFound=true;
-      }
+  std::list<XMLNode> layerNames = resolvedGDSInfo->findConfigNodes("/GDS/LayerName");
+  for(std::list<XMLNode>::iterator i=layerNames.begin();i!=layerNames.end();i++) {
+    bool zoomLevelFound;
+    Int zoomLevel;
+    zoomLevelFound=resolvedGDSInfo->getNodeText(*i,"zoomLevel",zoomLevel);
+    bool nameFound;
+    std::string name;
+    nameFound=resolvedGDSInfo->getNodeText(*i,"name",name);
+    if (!zoomLevelFound) {
+      ERROR("one LayerName element has no zoomLevel element in <%s>",infoFilePath.c_str());
+      break;
     }
-    if (element[0]=="/LayerName") {
-      if (!zoomLevelFound) {
-        ERROR("one LayerName element has no zoomLevel element in <%s>",infoFilePath.c_str());
+    if (!nameFound) {
+      ERROR("one LayerName element has no name element in <%s>",infoFilePath.c_str());
+      break;
+    }
+    bool found=false;
+    for (MapLayerNameMap::iterator i=mapLayerNameMap.begin();i!=mapLayerNameMap.end();i++) {
+      if (i->second==zoomLevel-minZoomLevel+1) {
+        mapLayerNameMap.erase(i);
+        mapLayerNameMap[name]=zoomLevel-minZoomLevel+1;
+        found=true;
         break;
       }
-      if (!nameFound) {
-        ERROR("one LayerName element has no name element in <%s>",infoFilePath.c_str());
-        break;
-      }
-      bool found=false;
-      DEBUG("minZoomLevel=%d",minZoomLevel);
-      for (MapLayerNameMap::iterator i=mapLayerNameMap.begin();i!=mapLayerNameMap.end();i++) {
-        if (i->second==zoomLevel-minZoomLevel+1) {
-          mapLayerNameMap.erase(i);
-          mapLayerNameMap[name]=zoomLevel-minZoomLevel+1;
-          found=true;
-          break;
-        }
-      }
-      if (!found) {
-        ERROR("zoom level %d of map layer with name <%s> does not exist",zoomLevel,name.c_str());
-      }
-      zoomLevelFound=false;
-      nameFound=false;
     }
-  }*/
+    if (!found) {
+      ERROR("zoom level %d of map layer with name <%s> does not exist",zoomLevel,name.c_str());
+    }
+  }
 }
 
 // Creates a new map source object of the correct type
@@ -366,18 +348,18 @@ MapSource *MapSource::newMapSource() {
     readAvailableGDSInfos();
     resolveGDSInfo(infoPath);
 
-    FATAL("continue here",NULL);
-    /* Find out the kind of source
-    for(std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
-      std::vector<std::string> element = *i;
-      if (element[0]=="type") {
-        type = element[1];
-      }
-      if (element[0]=="mapArchivePath") {
-        mapArchivePaths.push_back(element[1]);
+    // Find out the kind of source
+    resolvedGDSInfo->getNodeText("/GDS/type",type);
+
+    // Add all map archives
+    std::list<XMLNode> mapArchivePathNodes=resolvedGDSInfo->findConfigNodes("/GDS/mapArchivePath");
+    for(std::list<XMLNode>::iterator i=mapArchivePathNodes.begin();i!=mapArchivePathNodes.end();i++) {
+      std::string t;
+      if (resolvedGDSInfo->getNodeText(*i,t)) {
+        mapArchivePaths.push_back(t);
         mapArchivePathFound = true;
       }
-    }*/
+    }
   }
 
   // Internal map archive?

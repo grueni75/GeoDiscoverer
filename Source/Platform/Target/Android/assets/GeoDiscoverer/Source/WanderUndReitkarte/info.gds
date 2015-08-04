@@ -2,6 +2,7 @@
 <GDS 
   xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
   version="1.0">
+  <name>Wander und Reitkarte</name>
   <TileServer>
     <serverURL>http://topo.wanderreitkarte.de/topo/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>1.0</overlayAlpha>

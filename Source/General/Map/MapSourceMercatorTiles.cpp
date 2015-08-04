@@ -507,92 +507,51 @@ void MapSourceMercatorTiles::getScales(Int zoomLevel, double &latScale, double &
 bool MapSourceMercatorTiles::parseGDSInfo()
 {
   bool result=false;
-  bool tileServerFound=false;
-  bool minZoomLevelFound,maxZoomLevelFound;
-  std::stringstream in;
   std::string infoFilePath = getFolderPath() + "/info.gds";
 
-  FATAL("code must be adapted",NULL);
-
-  /* Loop over the elements and extract the information
-  tileServerFound=false;
-  minZoomLevelFound=false;
-  maxZoomLevelFound=false;
-  std::string serverURL;
-  bool serverURLFound=false;
-  double overlayAlpha;
-  bool overlayAlphaFound=false;
-  std::string imageFormat;
-  bool imageFormatFound=false;
-  for (std::list<std::vector<std::string> >::iterator i=gdsElements.begin();i!=gdsElements.end();i++) {
-    std::vector<std::string> element = *i;
-    if (element[0]=="TileServer") {
-      if (element[1]=="serverURL") {
-        serverURL=element[2];
-        serverURLFound=true;
-      }
-      if (element[1]=="overlayAlpha") {
-        in.str(element[2]);
-        in.clear();
-        in >> overlayAlpha;
-        overlayAlphaFound=true;
-      }
-      if (element[1]=="imageFormat") {
-        in.str(element[2]);
-        in.clear();
-        in >> imageFormat;
-        imageFormatFound=true;
-      }
+  // Loop over the elements and extract the information
+  this->minZoomLevel=std::numeric_limits<Int>::max();
+  this->maxZoomLevel=std::numeric_limits<Int>::min();
+  std::list<XMLNode> tileServers=resolvedGDSInfo->findConfigNodes("/GDC/TileServer");
+  for (std::list<XMLNode>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
+    std::string serverURL;
+    bool serverURLFound=false;
+    serverURLFound=resolvedGDSInfo->getNodeText(*i,"serverURL",serverURL);
+    double overlayAlpha;
+    bool overlayAlphaFound=false;
+    overlayAlphaFound=resolvedGDSInfo->getNodeText(*i,"overlayAlpha",overlayAlpha);
+    Int minZoomLevel;
+    resolvedGDSInfo->getNodeText(*i,"minZoomLevel",minZoomLevel);
+    Int maxZoomLevel;
+    resolvedGDSInfo->getNodeText(*i,"maxZoomLevel",maxZoomLevel);
+    std::string imageFormat="";
+    resolvedGDSInfo->getNodeText(*i,"imageFormat",imageFormat);
+    std::string layerGroupName="";
+    resolvedGDSInfo->getNodeText(*i,"layerGroupName",layerGroupName);
+    if (!serverURLFound) {
+      ERROR("one TileServer element has no serverURL element in <%s>",infoFilePath.c_str());
+      goto cleanup;
     }
-    if (element[0]=="/TileServer") {
-      if (!serverURLFound) {
-        ERROR("one TileServer element has no serverURL element in <%s>",infoFilePath.c_str());
-        goto cleanup;
-      }
-      if (!overlayAlphaFound) {
-        ERROR("one TileServer element has no overlayAlpha element in <%s>",infoFilePath.c_str());
-        goto cleanup;
-      }
-      ImageType imageType = ImageTypeUnknown;
-      if (imageFormatFound) {
-        if (imageFormat=="jpeg")
-          imageType = ImageTypeJPEG;
-        if (imageFormat=="png")
-          imageType = ImageTypePNG;
-      }
-      mapDownloader->addTileServer(serverURL,overlayAlpha,imageType);
-      tileServerFound=true;
-      serverURLFound=false;
-      overlayAlphaFound=false;
-      imageFormatFound=false;
+    if (!overlayAlphaFound) {
+      ERROR("one TileServer element has no overlayAlpha element in <%s>",infoFilePath.c_str());
+      goto cleanup;
     }
-    if (element[0]=="minZoomLevel") {
-      minZoomLevelFound=true;
-      in.str(element[1]);
-      in.clear();
-      in >> minZoomLevel;
-    }
-    if (element[0]=="maxZoomLevel") {
-      maxZoomLevelFound=true;
-      in.str(element[1]);
-      in.clear();
-      in >> maxZoomLevel;
-    }
+    ImageType imageType = ImageTypeUnknown;
+    if (imageFormat=="jpeg")
+      imageType = ImageTypeJPEG;
+    if (imageFormat=="png")
+      imageType = ImageTypePNG;
+    if (minZoomLevel<this->minZoomLevel)
+      this->minZoomLevel=minZoomLevel;
+    if (maxZoomLevel>this->maxZoomLevel)
+      this->maxZoomLevel=maxZoomLevel;
+    mapDownloader->addTileServer(serverURL,overlayAlpha,imageType,layerGroupName,minZoomLevel,maxZoomLevel);
   }
-  if (!tileServerFound) {
+  if (tileServers.size()==0) {
     ERROR("no tileServer element found in <%s>",infoFilePath.c_str());
     goto cleanup;
   }
-  if (!minZoomLevelFound) {
-    ERROR("minZoomLevel not found in <%s>",infoFilePath.c_str());
-    goto cleanup;
-  }
-  if (!maxZoomLevelFound) {
-    ERROR("maxZoomLevel not found in <%s>",infoFilePath.c_str());
-    goto cleanup;
-  }
   result=true;
-*/
 
 cleanup:
 
