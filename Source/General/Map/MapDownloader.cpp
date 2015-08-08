@@ -181,12 +181,82 @@ bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, Im
   }
 
   // Remember the map tile server
-  if (!(mapTileServer=new MapTileServer(mapSource,tileServers.size(),serverURL,overlayAlpha,imageType))) {
+  if (!(mapTileServer=new MapTileServer(mapSource,layerGroupName,tileServers.size(),serverURL,overlayAlpha,imageType,minZoomLevel,maxZoomLevel))) {
     FATAL("can not create map tile server object",NULL);
     return false;
   }
   tileServers.push_back(mapTileServer);
+
+  // Remember the layer group name
+  if (std::find(layerGroupNames.begin(), layerGroupNames.end(), layerGroupName)==layerGroupNames.end()) {
+    layerGroupNames.push_back(layerGroupName);
+  }
+
   return true;
+}
+
+// Defines the supported zoom levels
+void MapDownloader::updateZoomLevels(Int &minZoomLevel,Int &maxZoomLevel, MapLayerNameMap &mapLayerNameMap) {
+
+  // Set max and min zoom level
+  // Harmonize zoom levels for tile servers
+  minZoomLevel=0;
+  Int minZoomLevelMap;
+  Int maxZoomLevelMap=0;
+  for (std::list<std::string>::iterator i=layerGroupNames.begin();i!=layerGroupNames.end();i++) {
+    minZoomLevelMap=maxZoomLevelMap+1;
+    maxZoomLevelMap=minZoomLevelMap;
+    std::string layerGroupName=*i;
+    Int minZoomLevelServer=std::numeric_limits<Int>::min();
+    Int maxZoomLevelServer=std::numeric_limits<Int>::max();
+    for (std::list<MapTileServer*>::iterator j=tileServers.begin();j!=tileServers.end();j++) {
+      MapTileServer *server=*j;
+      if (server->getLayerGroupName()==layerGroupName) {
+        if (server->getMaxZoomLevelServer()<maxZoomLevelServer)
+          maxZoomLevelServer=server->getMaxZoomLevelServer();
+        if (server->getMinZoomLevelServer()>minZoomLevelServer)
+          minZoomLevelServer=server->getMinZoomLevelServer();
+      }
+    }
+    maxZoomLevelMap+=maxZoomLevelServer-minZoomLevelServer;
+    for (std::list<MapTileServer*>::iterator j=tileServers.begin();j!=tileServers.end();j++) {
+      MapTileServer *server=*j;
+      if (server->getLayerGroupName()==layerGroupName) {
+        server->setMaxZoomLevelServer(maxZoomLevelServer);
+        server->setMinZoomLevelServer(minZoomLevelServer);
+        server->setMaxZoomLevelMap(maxZoomLevelMap);
+        server->setMinZoomLevelMap(minZoomLevelMap);
+      }
+    }
+    Int k=minZoomLevelMap;
+    for (Int j=minZoomLevelServer;j<=maxZoomLevelServer;j++) {
+      std::stringstream name;
+      if (name=="")
+        name << j;
+      else
+        name << layerGroupName << " " << j;
+      mapLayerNameMap[name.str()]=k;
+      k++;
+    }
+  }
+  minZoomLevel=1;
+  maxZoomLevel=maxZoomLevelMap;
+}
+
+// Returns the zoom level bounds of the map layer group that contains the refZoomLevel
+void MapDownloader::getLayerGroupZoomLevelBounds(Int refZoomLevel, Int &minZoomLevelMap, Int &minZoomLevelServer, Int &maxZoomLevelServer) {
+  minZoomLevelMap=-1;
+  minZoomLevelServer=-1;
+  maxZoomLevelServer=-1;
+  for (std::list<MapTileServer*>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
+    MapTileServer *tileServer=*i;
+    if ((refZoomLevel>=tileServer->getMinZoomLevelMap())&&(refZoomLevel<=tileServer->getMaxZoomLevelMap())) {
+      minZoomLevelMap=tileServer->getMinZoomLevelMap();
+      minZoomLevelServer=tileServer->getMinZoomLevelServer();
+      maxZoomLevelServer=tileServer->getMaxZoomLevelServer();
+      return;
+    }
+  }
 }
 
 // Downloads map tiles from the tile server

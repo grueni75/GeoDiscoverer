@@ -860,7 +860,7 @@ void MapEngine::updateMap() {
         bool scaleHasChanged=false;
         double distToLngScale=fabs(bestMapTile->getLngScale()-displayArea.getRefPos().getLngScale());
         double distToLatScale=fabs(bestMapTile->getLatScale()-displayArea.getRefPos().getLatScale());
-        if ((visPosResetted)||(bestMapTile->getParentMapContainer()->getZoomLevel()!=displayArea.getZoomLevel())) {
+        if ((visPosResetted)||(bestMapTile->getParentMapContainer()->getZoomLevelMap()!=displayArea.getZoomLevel())) {
 
           // Ensure that all tiles are removed
           scaleHasChanged=true;
@@ -876,7 +876,7 @@ void MapEngine::updateMap() {
 
         // Compute the new zoom value for the found scale
         double newZoom;
-        if (bestMapTile->getParentMapContainer()->getZoomLevel()!=displayArea.getZoomLevel()) {
+        if (bestMapTile->getParentMapContainer()->getZoomLevelMap()!=displayArea.getZoomLevel()) {
           double newLngZoom=newMapPos.getLngScale()/bestMapTile->getLngScale();
           double newLatZoom=newMapPos.getLatScale()/bestMapTile->getLatScale();
           newZoom=(newLngZoom+newLatZoom)/2;
@@ -908,7 +908,7 @@ void MapEngine::updateMap() {
         refPos.setLngScale(bestMapTile->getLngScale());
         refPos.setLatScale(bestMapTile->getLatScale());
         newDisplayArea.setRefPos(refPos);
-        newDisplayArea.setZoomLevel(bestMapTile->getParentMapContainer()->getZoomLevel());
+        newDisplayArea.setZoomLevel(bestMapTile->getParentMapContainer()->getZoomLevelMap());
         newDisplayArea.setYNorth(refPos.getY()+zoomedScreenHeight/2);
         newDisplayArea.setYSouth(refPos.getY()-zoomedScreenHeight/2);
         newDisplayArea.setXWest(refPos.getX()-zoomedScreenWidth/2);

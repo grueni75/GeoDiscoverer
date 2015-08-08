@@ -19,13 +19,18 @@ class MapTileServer {
 
 protected:
 
-  MapSourceMercatorTiles *mapSource;    // The map source this image belongs to
+  MapSourceMercatorTiles *mapSource;    // The map source this server belongs to
+  std::string layerGroupName;           // The name of the layer group this server belongs to
   UInt orderNr;                         // Order number of the tile server
   std::string serverURL;                // URL of the tile server to use
   std::string lastDownloadURL;          // URL of the last downloaded tile
   double overlayAlpha;                  // Alpha to use when creating the complete image
   ImageType imageType;                  // Type of the image
   std::string imagePath;                // Path to the downloaded image
+  Int minZoomLevelServer;               // Minimum usable zoom level of this server
+  Int maxZoomLevelServer;               // Maximum usable zoom level of this server
+  Int minZoomLevelMap;                  // Minimum zoom level in map
+  Int maxZoomLevelMap;                  // Maximum zoom level in map
 
   // Replaces a variable in a string
   bool replaceVariableInServerURL(std::string &url, std::string variableName, std::string variableValue);
@@ -33,7 +38,7 @@ protected:
 public:
 
   // Constructor
-  MapTileServer(MapSourceMercatorTiles *mapSource, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType);
+  MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel);
 
   // Destructor
   virtual ~MapTileServer();
@@ -44,6 +49,42 @@ public:
   // Loads a map image and overlays it atop of imagePixel
   bool composeTileImage(ImagePixel* &composedTileImage, Int &composedImageWidth, Int &composedImageHeight, Int threadNr);
 
+  // Getters and setters
+  Int getMaxZoomLevelMap() const {
+    return maxZoomLevelMap;
+  }
+
+  void setMaxZoomLevelMap(Int maxZoomLevelMap) {
+    this->maxZoomLevelMap = maxZoomLevelMap;
+  }
+
+  Int getMaxZoomLevelServer() const {
+    return maxZoomLevelServer;
+  }
+
+  void setMaxZoomLevelServer(Int maxZoomLevelServer) {
+    this->maxZoomLevelServer = maxZoomLevelServer;
+  }
+
+  Int getMinZoomLevelMap() const {
+    return minZoomLevelMap;
+  }
+
+  void setMinZoomLevelMap(Int minZoomLevelMap) {
+    this->minZoomLevelMap = minZoomLevelMap;
+  }
+
+  Int getMinZoomLevelServer() const {
+    return minZoomLevelServer;
+  }
+
+  void setMinZoomLevelServer(Int minZoomLevelServer) {
+    this->minZoomLevelServer = minZoomLevelServer;
+  }
+
+  const std::string& getLayerGroupName() const {
+    return layerGroupName;
+  }
 };
 
 } /* namespace GEODISCOVERER */

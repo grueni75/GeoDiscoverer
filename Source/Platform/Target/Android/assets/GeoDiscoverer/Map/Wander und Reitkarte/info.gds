@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GDS xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" version="1.0">
-  <TileServer>
-    <serverURL>http://topo.wanderreitkarte.de/topo/${z}/${x}/${y}.png</serverURL>
-    <overlayAlpha>1.0</overlayAlpha>
-  </TileServer>
-  <minZoomLevel>2</minZoomLevel>
-  <maxZoomLevel>18</maxZoomLevel>
+  <MapSourceRef>
+    <name>Wander und Reitkarte</name>
+    <layerGroupName>Wander und Reitkarte</layerGroupName>
+  </MapSourceRef>
 </GDS>

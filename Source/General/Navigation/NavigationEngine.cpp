@@ -993,7 +993,7 @@ void NavigationEngine::addGraphics(MapContainer *container) {
   std::list<MapContainer*>::iterator i;
   bool inserted=false;
   for (i=unvisualizedMapContainers.begin();i!=unvisualizedMapContainers.end();i++) {
-    if ((*i)->getZoomLevel() > container->getZoomLevel()) {
+    if ((*i)->getZoomLevelMap() > container->getZoomLevelMap()) {
       unvisualizedMapContainers.insert(i,container);
       inserted=true;
       break;

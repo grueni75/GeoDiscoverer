@@ -31,7 +31,7 @@ protected:
   MapTile *fetchMapTile(MapPosition pos, Int zoomLevel);
 
   // Finds the best matching zoom level
-  Int findBestMatchingZoomLevel(MapPosition pos);
+  Int findBestMatchingZoomLevel(MapPosition pos, Int refZoomLevelMap, Int &minZoomLevelMap, Int &minZoomLevelServer);
 
   // Creates the calibrator for the given bounds
   MapCalibrator *createMapCalibrator(double latNorth, double latSouth, double lngWest, double lngEast);

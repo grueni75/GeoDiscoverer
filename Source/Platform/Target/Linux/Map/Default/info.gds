@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GDS version="1.0">
-  <TileServer>
-    <serverURL>http://a.tile.opentopomap.org/${z}/${x}/${y}.png</serverURL>
-    <overlayAlpha>1.0</overlayAlpha>
-  </TileServer>
-  <TileServer>
-    <serverURL>http://tile.waymarkedtrails.org/hiking/${z}/${x}/${y}.png</serverURL>
-    <overlayAlpha>0.5</overlayAlpha>
-  </TileServer>
   <MapSourceRef>
     <name>Hike Bike Map</name>
-    <overlayAlpha>0.5</overlayAlpha>
+    <overlayAlpha>0.1</overlayAlpha>
+    <layerGroupName>Hike Bike Map Cycling</layerGroupName>
   </MapSourceRef>
   <MapSourceRef>
     <name>Waymarked Trails for Cycling</name>
+    <layerGroupName>Hike Bike Map Cycling</layerGroupName>
   </MapSourceRef>
-  <minZoomLevel>0</minZoomLevel>
-  <maxZoomLevel>20</maxZoomLevel>
+  <MapSourceRef>
+    <name>Hike Bike Map</name>
+    <overlayAlpha>0.5</overlayAlpha>
+    <layerGroupName>Hike Bike Map Hiking</layerGroupName>
+  </MapSourceRef>
+  <MapSourceRef>
+    <name>Waymarked Trails for Hiking</name>
+    <layerGroupName>Hike Bike Map Hiking</layerGroupName>
+  </MapSourceRef>
 </GDS>

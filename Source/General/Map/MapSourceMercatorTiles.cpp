@@ -118,13 +118,6 @@ bool MapSourceMercatorTiles::init() {
   centerPosition->setLatScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::latBound);
   centerPosition->setLngScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::lngBound);
 
-  // Set the default map layer names
-  for (Int z=maxZoomLevel;z>=minZoomLevel;z--) {
-    std::stringstream s;
-    s << z;
-    mapLayerNameMap[s.str()]=z-minZoomLevel+1;
-  }
-
   // Rename the layers
   renameLayers();
 
@@ -139,14 +132,16 @@ bool MapSourceMercatorTiles::init() {
 }
 
 // Finds the best matching zoom level
-Int MapSourceMercatorTiles::findBestMatchingZoomLevel(MapPosition pos) {
-  Int z=minZoomLevel;
+Int MapSourceMercatorTiles::findBestMatchingZoomLevel(MapPosition pos, Int refZoomLevelMap, Int &minZoomLevelMap, Int &minZoomLevelServer) {
+  Int maxZoomLevelServer;
+  mapDownloader->getLayerGroupZoomLevelBounds(refZoomLevelMap,minZoomLevelMap,minZoomLevelServer,maxZoomLevelServer);
+  Int z=minZoomLevelServer;
   double latSouth, latNorth, lngEast, lngWest;
   double distToLngScale,distToLatScale;
   double distToNearestLngScale=-1,distToNearestLatScale;
   double lngScale,latScale;
   bool newCandidateFound;
-  for (int i=minZoomLevel;i<=maxZoomLevel;i++) {
+  for (int i=minZoomLevelServer;i<=maxZoomLevelServer;i++) {
     pos.computeMercatorTileBounds(i,latNorth,latSouth,lngWest,lngEast);
     lngScale=mapTileLength/fabs(lngEast-lngWest);
     latScale=mapTileLength/fabs(latNorth-latSouth);
@@ -166,7 +161,7 @@ Int MapSourceMercatorTiles::findBestMatchingZoomLevel(MapPosition pos) {
       z=i;
     }
   }
-  return z;
+  return z-minZoomLevelServer+minZoomLevelMap;
 }
 
 // Creates the calibrator for the given bounds
@@ -209,21 +204,22 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
     return NULL;
 
   // Decide on the zoom level
-  Int z;
+  Int zMap,zMapBest,minZoomLevelMap,minZoomLevelServer;
+  zMapBest=findBestMatchingZoomLevel(pos,minZoomLevel,minZoomLevelMap,minZoomLevelServer);
   if (zoomLevel!=0) {
-    z=minZoomLevel+zoomLevel-1;
+    zMap=minZoomLevel+zoomLevel-1;
   } else {
-    z=findBestMatchingZoomLevel(pos);
+    zMap=zMapBest;
   }
-  if (z>maxZoomLevel) {
-    z=maxZoomLevel;
+  if (zMap>maxZoomLevel) {
+    zMap=maxZoomLevel;
   }
-  Int translatedZ=z-minZoomLevel+1;
+  Int zServer=zMap-minZoomLevelMap+minZoomLevelServer;
 
   // Compute the tile numbers
   Int x,y,max;
-  pos.computeMercatorTileXY(z,x,y);
-  max=(1<<z)-1;
+  pos.computeMercatorTileXY(zServer,x,y);
+  max=(1<<zServer)-1;
   if ((x<0)||(x>max))
     return NULL;
   if ((y<0)||(y>max))
@@ -231,13 +227,13 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
 
   // Compute the bounds of this tile
   double latSouth, latNorth, lngEast, lngWest;
-  pos.computeMercatorTileBounds(z,latNorth,latSouth,lngWest,lngEast);
+  pos.computeMercatorTileBounds(zServer,latNorth,latSouth,lngWest,lngEast);
 
   // Check if the container is not already available
   MapPosition t;
   t.setLat(latSouth+(latNorth-latSouth)/2);
   t.setLng(lngWest+(lngEast-lngWest)/2);
-  MapTile *mapTile = MapSource::findMapTileByGeographicCoordinate(t,translatedZ,true,NULL);
+  MapTile *mapTile = MapSource::findMapTileByGeographicCoordinate(t,zMap,true,NULL);
   if (mapTile)
     return mapTile;
 
@@ -245,7 +241,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   // Backup check to find problems
   for(std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
     MapContainer *c=*i;
-    if ((c->getX()==x)&&(c->getY()==y)&&(c->getZoomLevel()==translatedZ)) {
+    if ((c->getX()==x)&&(c->getY()==y)&&(c->getZoomLevelMap()==zMap)) {
       FATAL("tile alreay available",NULL);
       return c->getMapTiles()->front();
     }
@@ -253,8 +249,8 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
 #endif
 
   // Prepare the filenames
-  std::stringstream imageFileFolder; imageFileFolder << z << "/" << x;
-  std::stringstream imageFileBase; imageFileBase << z << "_" << x << "_" << y;
+  std::stringstream imageFileFolder; imageFileFolder << zMap << "/" << x;
+  std::stringstream imageFileBase; imageFileBase << zMap << "_" << x << "_" << y;
   std::string imageFileExtension = "png";
   ImageType imageType = ImageTypePNG;
   std::string imageFileName = imageFileBase.str() + "." + imageFileExtension;
@@ -271,7 +267,8 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   mapContainer->setMapFileFolder(imageFileFolder.str());
   mapContainer->setImageFileName(imageFileName);
   mapContainer->setCalibrationFileName(calibrationFileName);
-  mapContainer->setZoomLevel(translatedZ);
+  mapContainer->setZoomLevelMap(zMap);
+  mapContainer->setZoomLevelServer(zServer);
   mapContainer->setWidth(mapTileLength);
   mapContainer->setHeight(mapTileLength);
   mapContainer->setImageType(imageType);
@@ -317,7 +314,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
 
   // Store the new map container and indicate that a search data structure is required
   mapContainers.push_back(mapContainer);
-  insertNodeIntoSearchTree(mapContainer,mapContainer->getZoomLevel(),NULL,false,GeographicBorderLatNorth);
+  insertNodeIntoSearchTree(mapContainer,mapContainer->getZoomLevelMap(),NULL,false,GeographicBorderLatNorth);
   insertNodeIntoSearchTree(mapContainer,0,NULL,false,GeographicBorderLatNorth);
   contentsChanged=true;
 
@@ -347,9 +344,10 @@ MapTile *MapSourceMercatorTiles::findMapTileByGeographicCoordinate(MapPosition p
 
     // Check that there is not one on the disk/server that better matches the scale
     if (!lockZoomLevel) {
-      Int newZoomLevel = findBestMatchingZoomLevel(pos)-minZoomLevel+1;
-      if (newZoomLevel!=result->getParentMapContainer()->getZoomLevel()) {
-        return fetchMapTile(pos,newZoomLevel);
+      Int minZoomLevelMap, minZoomLevelServer;
+      Int newZoomLevelMap = findBestMatchingZoomLevel(pos,result->getParentMapContainer()->getZoomLevelMap(),minZoomLevelMap,minZoomLevelServer);
+      if (newZoomLevelMap!=result->getParentMapContainer()->getZoomLevelMap()) {
+        return fetchMapTile(pos,newZoomLevelMap);
       }
     }
     return result;
@@ -510,9 +508,7 @@ bool MapSourceMercatorTiles::parseGDSInfo()
   std::string infoFilePath = getFolderPath() + "/info.gds";
 
   // Loop over the elements and extract the information
-  this->minZoomLevel=std::numeric_limits<Int>::max();
-  this->maxZoomLevel=std::numeric_limits<Int>::min();
-  std::list<XMLNode> tileServers=resolvedGDSInfo->findConfigNodes("/GDC/TileServer");
+  std::list<XMLNode> tileServers=resolvedGDSInfo->findConfigNodes("/GDS/TileServer");
   for (std::list<XMLNode>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
     std::string serverURL;
     bool serverURLFound=false;
@@ -541,16 +537,14 @@ bool MapSourceMercatorTiles::parseGDSInfo()
       imageType = ImageTypeJPEG;
     if (imageFormat=="png")
       imageType = ImageTypePNG;
-    if (minZoomLevel<this->minZoomLevel)
-      this->minZoomLevel=minZoomLevel;
-    if (maxZoomLevel>this->maxZoomLevel)
-      this->maxZoomLevel=maxZoomLevel;
     mapDownloader->addTileServer(serverURL,overlayAlpha,imageType,layerGroupName,minZoomLevel,maxZoomLevel);
   }
   if (tileServers.size()==0) {
     ERROR("no tileServer element found in <%s>",infoFilePath.c_str());
     goto cleanup;
   }
+
+  mapDownloader->updateZoomLevels(minZoomLevel,maxZoomLevel,mapLayerNameMap);
   result=true;
 
 cleanup:

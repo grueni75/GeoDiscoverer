@@ -17,8 +17,6 @@
 namespace GEODISCOVERER {
 
 typedef enum { MapSourceTypeCalibratedPictures, MapSourceTypeMercatorTiles, MapSourceTypeEmpty } MapSourceType;
-typedef std::map<std::string, Int> MapLayerNameMap;
-typedef std::pair<std::string, Int> MapLayerNamePair;
 
 class MapSource {
 

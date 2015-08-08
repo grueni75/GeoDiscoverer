@@ -14,8 +14,9 @@
 
 namespace GEODISCOVERER {
 
-MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType) {
+MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel) {
   this->mapSource = mapSource;
+  this->layerGroupName = layerGroupName;
   this->serverURL = serverURL;
   this->overlayAlpha = overlayAlpha;
   this->imageType = imageType;
@@ -23,6 +24,10 @@ MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, UInt orderNr, st
   std::stringstream imagePathStream;
   imagePathStream << mapSource->getFolderPath() << "/download." << orderNr;
   this->imagePath = imagePathStream.str();
+  this->minZoomLevelServer=minZoomLevel;
+  this->maxZoomLevelServer=maxZoomLevel;
+  this->minZoomLevelMap=-1;
+  this->maxZoomLevelMap=-1;
 }
 
 MapTileServer::~MapTileServer() {
@@ -48,7 +53,7 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int 
 
   // Prepare the directory
   std::stringstream t;
-  std::stringstream z; z << mapContainer->getZoomLevel()+mapSource->getMinZoomLevel()-1;
+  std::stringstream z; z << mapContainer->getZoomLevelServer();
   std::stringstream x; x << mapContainer->getX();
   std::stringstream y; y << mapContainer->getY();
 

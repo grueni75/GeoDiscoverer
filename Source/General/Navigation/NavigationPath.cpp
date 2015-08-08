@@ -666,7 +666,7 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
   while(more_entries) {
 
     // New zoom level?
-    if ((j==mapContainers->end())||(zoomLevel!=(*j)->getZoomLevel())) {
+    if ((j==mapContainers->end())||(zoomLevel!=(*j)->getZoomLevelMap())) {
       if (zoomLevel!=-1) {
 
         // Process the so far collected containers
@@ -710,7 +710,7 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
       more_entries=false;
     } else {
       mapContainersOfSameZoomLevel.push_back(*j);
-      zoomLevel=(*j)->getZoomLevel();
+      zoomLevel=(*j)->getZoomLevelMap();
       j++;
     }
   }
@@ -723,7 +723,7 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
   Int zoomLevel=-1;
 
   // Remove the tile from the visualization
-  NavigationPathVisualization *visualization=zoomLevelVisualizations[mapContainer->getZoomLevel()-1];
+  NavigationPathVisualization *visualization=zoomLevelVisualizations[mapContainer->getZoomLevelMap()-1];
   std::vector<MapTile*> *mapTiles=mapContainer->getMapTiles();
   for(std::vector<MapTile*>::iterator i=mapTiles->begin();i!=mapTiles->end();i++) {
     visualization->removeTileInfo(*i);

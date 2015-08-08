@@ -227,16 +227,12 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
     resolvedGDSInfo->getNodeText(*i,"serverURL",t);
     DEBUG("%s",t.c_str());*/
   }
-
-  WARNING("fill the layer name map and remove any laver name map in doc",NULL);
-  WARNING("add support for second info.gds from map archive (map source calibrated pictures calls this function several times",NULL);
-  WARNING("update config store to use the new functions from config section",NULL);
 }
 
 // Reads information about the map
 void MapSource::readAvailableGDSInfos() {
 
-  std::string mapSourceFolderPath = core->getHomePath() + "/Source";
+  std::string mapSourceFolderPath = core->getHomePath() + "/Server";
   std::string mapSourceSchemaFilePath = core->getHomePath() +"/source.xsd";
 
   // Free the available list

@@ -45,6 +45,13 @@ MapContainer::MapContainer(bool doNotDelete) {
     this->imageFilePath=NULL;
     this->calibrationFileName=NULL;
     this->calibrationFilePath=NULL;
+    this->zoomLevelServer=0;
+    this->zoomLevelMap=0;
+    this->lngScale=0;
+    this->latScale=0;
+    this->imageType=ImageTypeUnknown;
+    this->width=0;
+    this->height=0;
   }
 }
 
@@ -780,7 +787,7 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize) {
   // Check if the class has changed
   Int size=sizeof(MapContainer);
 #ifdef TARGET_LINUX
-  if (size!=296) {
+  if (size!=304) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return NULL;
   }

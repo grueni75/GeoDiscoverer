@@ -346,6 +346,10 @@ MapSource *MapSource::newMapSource() {
 
     // Read in info.gds to find out type of source
     readAvailableGDSInfos();
+    if (resolvedGDSInfo) {
+      delete resolvedGDSInfo;
+      resolvedGDSInfo=NULL;
+    }
     resolveGDSInfo(infoPath);
 
     // Find out the kind of source
@@ -639,7 +643,7 @@ MapContainer *MapSource::findMapContainerByGeographicArea(MapArea area, MapTile 
 
     // Check that the scale fits
     bool candidateMatchesScale=false;
-    if (area.getZoomLevel()==currentMapContainer->getZoomLevel()) {
+    if (area.getZoomLevel()==currentMapContainer->getZoomLevelMap()) {
       candidateMatchesScale=true;
     }
     if (candidateMatchesScale) {
@@ -878,7 +882,7 @@ void MapSource::createSearchDataStructures(bool showProgressDialog) {
   for(std::vector<Int>::iterator i=mapsIndexByLatNorth.begin();i!=mapsIndexByLatNorth.end();i++) {
     Int index=*i;
     mapContainer=mapContainers[index];
-    Int zoomLevel=mapContainer->getZoomLevel();
+    Int zoomLevel=mapContainer->getZoomLevelMap();
     mapsIndexByZoomLevel[zoomLevel].push_back(index);
     mapsIndexByZoomLevel[0].push_back(index);  // zoom level 0 contains all containers and tiles
   }

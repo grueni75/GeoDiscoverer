@@ -32,7 +32,8 @@ protected:
   char                *calibrationFilePath; // Complete path to the calibration data of the map
   Int                 x;                    // X coordinate
   Int                 y;                    // Y coordinate
-  Int                 zoomLevel;            // Zoom level of the map
+  Int                 zoomLevelMap;         // Zoom level in the map
+  Int                 zoomLevelServer;      // Zoom level on the server
   Int                 downloadRetries;      // Number of retries done so far for downloading the image
   MapCalibrator       *mapCalibrator;       // Calibration model of the map
   Int                 width;                // Width of the map
@@ -210,12 +211,12 @@ public:
 
   double getBorder(GeographicBorder border);
 
-  Int getZoomLevel() const {
-    return zoomLevel;
+  Int getZoomLevelMap() const {
+    return zoomLevelMap;
   }
 
-  void setZoomLevel(Int zoomLevel) {
-    this->zoomLevel = zoomLevel;
+  void setZoomLevelMap(Int zoomLevelMap) {
+    this->zoomLevelMap = zoomLevelMap;
   }
 
   ImageType getImageType() const {
@@ -360,6 +361,14 @@ public:
 
   char* getCalibrationFilePath() const {
     return calibrationFilePath;
+  }
+
+  Int getZoomLevelServer() const {
+    return zoomLevelServer;
+  }
+
+  void setZoomLevelServer(Int zoomLevelServer) {
+    this->zoomLevelServer = zoomLevelServer;
   }
 };
 

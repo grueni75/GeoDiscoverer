@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GDS 
+  xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
+  version="1.0">
+  <name>Hike Bike Map</name>
+  <isMarkup>false</isMarkup>
+  <TileServer>
+    <serverURL>http://a.tiles.wmflabs.org/hikebike/${z}/${x}/${y}.png</serverURL>
+    <overlayAlpha>1.0</overlayAlpha>
+  </TileServer>
+  <TileServer>
+    <serverURL>http://b.tiles.wmflabs.org/hillshading/${z}/${x}/${y}.png</serverURL>
+    <overlayAlpha>1.0</overlayAlpha>
+  </TileServer>
+  <minZoomLevel>1</minZoomLevel>
+  <maxZoomLevel>18</maxZoomLevel>
+</GDS>

@@ -42,6 +42,7 @@ DownloadResult Core::downloadURL(std::string url, std::string filePath, bool gen
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "Geo Discoverer (build on "  __DATE__  ")");
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, out);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,curlErrorBuffer);
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
   //DEBUG("downloading url %s",url.c_str());
   CURLcode curlResult = curl_easy_perform(curl);
   curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE, &curlResponseCode);

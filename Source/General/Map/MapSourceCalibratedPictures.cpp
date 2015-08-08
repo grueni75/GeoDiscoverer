@@ -296,10 +296,10 @@ bool MapSourceCalibratedPictures::init()
       }
 
       // Remember the minimum and maximum zoom levels
-      if (mapContainer->getZoomLevel()<minZoomLevel)
-        minZoomLevel=mapContainer->getZoomLevel();
-      if (mapContainer->getZoomLevel()>maxZoomLevel)
-        maxZoomLevel=mapContainer->getZoomLevel();
+      if (mapContainer->getZoomLevelMap()<minZoomLevel)
+        minZoomLevel=mapContainer->getZoomLevelMap();
+      if (mapContainer->getZoomLevelMap()>maxZoomLevel)
+        maxZoomLevel=mapContainer->getZoomLevelMap();
 
       // Remember the largest border
       if (mapContainer->getLatNorth()>latNorth)
@@ -335,7 +335,7 @@ bool MapSourceCalibratedPictures::init()
     maxZoomLevel-=minZoomLevel;
     for(std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
       MapContainer *c=*i;
-      c->setZoomLevel(c->getZoomLevel()-minZoomLevel+1);
+      c->setZoomLevelMap(c->getZoomLevelMap()-minZoomLevel+1);
     }
     minZoomLevel=0;
 

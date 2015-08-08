@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GDS xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" version="1.0">
-  <TileServer>
-    <serverURL>http://a.tile.opentopomap.org/${z}/${x}/${y}.png</serverURL>
-    <overlayAlpha>1.0</overlayAlpha>
-  </TileServer>
-  <TileServer>
-    <serverURL>http://tile.waymarkedtrails.org/hiking/${z}/${x}/${y}.png</serverURL>
-    <overlayAlpha>0.5</overlayAlpha>
-  </TileServer>
-  <minZoomLevel>0</minZoomLevel>
-  <maxZoomLevel>16</maxZoomLevel>
+  <MapSourceRef>
+    <name>Open Topo Map</name>
+    <layerGroupName>Open Topo Hike Map</layerGroupName>
+  </MapSourceRef>
+  <MapSourceRef>
+    <name>Waymarked Trails for Hiking</name>
+    <layerGroupName>Open Topo Hike Map</layerGroupName>
+  </MapSourceRef>
 </GDS>

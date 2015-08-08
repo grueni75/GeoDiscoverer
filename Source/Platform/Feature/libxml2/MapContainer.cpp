@@ -73,7 +73,7 @@ void MapContainer::writeCalibrationFile()
   }
 
   // Add the zoom level
-  out << zoomLevel;
+  out << zoomLevelMap;
   if (!xmlNewChild(rootNode,NULL,BAD_CAST "zoomLevel",BAD_CAST out.str().c_str())) {
     FATAL("can not create xml child node",NULL);
     return;
@@ -257,7 +257,7 @@ bool MapContainer::readGDMCalibrationFile()
           zoomLevelFound=true;
           in.str(t);
           in.clear();
-          in >> zoomLevel;
+          in >> zoomLevelMap;
         }
       }
       if (name=="calibrationPoint") {

@@ -15,6 +15,9 @@
 
 namespace GEODISCOVERER {
 
+typedef std::map<std::string, Int> MapLayerNameMap;
+typedef std::pair<std::string, Int> MapLayerNamePair;
+
 class MapDownloader {
 
 protected:
@@ -31,6 +34,7 @@ protected:
   std::list<MapTileServer*> tileServers;                  // List of tile servers to download images from
   Int numberOfDownloadThreads;                            // Number of threads to spawn that download images
   std::vector<bool> downloadOngoing;                      // Indicates if the download thread is working
+  std::list<std::string> layerGroupNames;                 // List of used layer group names
 
 public:
 
@@ -57,6 +61,13 @@ public:
 
   // Merges all so far downloaded zip archives into the first one
   void maintenance();
+
+  // Defines the supported zoom levels
+  void updateZoomLevels(Int &minZoomLevel,Int &maxZoomLevel, MapLayerNameMap &mapLayerNameMap);
+
+  // Returns the zoom level bounds of the map layer group that contains the refZoomLevel
+  void getLayerGroupZoomLevelBounds(Int refZoomLevel, Int &minZoomLevelMap, Int &minZoomLevelServer, Int &maxZoomLevelServer);
+
 };
 
 } /* namespace GEODISCOVERER */
