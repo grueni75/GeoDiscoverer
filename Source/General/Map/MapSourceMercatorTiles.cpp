@@ -204,12 +204,12 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
     return NULL;
 
   // Decide on the zoom level
-  Int zMap,zMapBest,minZoomLevelMap,minZoomLevelServer;
-  zMapBest=findBestMatchingZoomLevel(pos,minZoomLevel,minZoomLevelMap,minZoomLevelServer);
+  Int zMap,minZoomLevelMap,minZoomLevelServer;
   if (zoomLevel!=0) {
     zMap=minZoomLevel+zoomLevel-1;
+    findBestMatchingZoomLevel(pos,zMap,minZoomLevelMap,minZoomLevelServer);
   } else {
-    zMap=zMapBest;
+    zMap=findBestMatchingZoomLevel(pos,minZoomLevel,minZoomLevelMap,minZoomLevelServer);
   }
   if (zMap>maxZoomLevel) {
     zMap=maxZoomLevel;

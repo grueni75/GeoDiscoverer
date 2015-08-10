@@ -340,13 +340,15 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       bool oneTileFound=false;
       for (std::list<MapTileServer*>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
         MapTileServer *tileServer=*i;
-        DownloadResult result = tileServer->downloadTileImage(mapContainer,threadNr);
-        if (result==DownloadResultOtherFail) {
-          downloadSuccess=false;
-          break;
+        if ((mapContainer->getZoomLevelMap()>=tileServer->getMinZoomLevelMap())&&(mapContainer->getZoomLevelMap()<=tileServer->getMaxZoomLevelMap())) {
+          DownloadResult result = tileServer->downloadTileImage(mapContainer,threadNr);
+          if (result==DownloadResultOtherFail) {
+            downloadSuccess=false;
+            break;
+          }
+          if (result==DownloadResultSuccess)
+            oneTileFound=true;
         }
-        if (result==DownloadResultSuccess)
-          oneTileFound=true;
       }
       if (!oneTileFound)
         downloadSuccess=false;
@@ -363,13 +365,15 @@ void MapDownloader::downloadMapImages(Int threadNr) {
         remove(tempFilePath.str().c_str());
         for (std::list<MapTileServer*>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
           MapTileServer *tileServer=*i;
+          if ((mapContainer->getZoomLevelMap()>=tileServer->getMinZoomLevelMap())&&(mapContainer->getZoomLevelMap()<=tileServer->getMaxZoomLevelMap())) {
 
-          // Load the image and compose it with the existing image
-          if (!tileServer->composeTileImage(composedImagePixel,composedImageWidth,composedImageHeight,threadNr)) {
-            if (composedImagePixel)
-              free(composedImagePixel);
-            composedImagePixel=NULL;
-            break;
+            // Load the image and compose it with the existing image
+            if (!tileServer->composeTileImage(composedImagePixel,composedImageWidth,composedImageHeight,threadNr)) {
+              if (composedImagePixel)
+                free(composedImagePixel);
+              composedImagePixel=NULL;
+              break;
+            }
           }
         }
         if (composedImagePixel) {
