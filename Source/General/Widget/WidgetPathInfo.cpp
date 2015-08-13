@@ -68,13 +68,13 @@ WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) :
   visualizationAltitudeProfileFillPoints=NULL;
   visualizationAltitudeProfileLinePoints=NULL;
   visualizationAltitudeProfileLocationIconPoint=NULL;
-  visualizationAltitudeProfileHideLocationIcon=NULL;
+  visualizationAltitudeProfileHideLocationIcon=false;
   visualizationAltitudeProfileAxisPoints=NULL;
   visualizationAltitudeProfileXTickLabels=NULL;
   visualizationAltitudeProfileXTickPoints=NULL;
   visualizationAltitudeProfileYTickLabels=NULL;
   visualizationAltitudeProfileYTickPoints=NULL;
-  visualizationNoAltitudeProfile=NULL;
+  visualizationNoAltitudeProfile=false;
   visualizationValid=false;
 }
 

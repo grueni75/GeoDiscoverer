@@ -30,6 +30,8 @@ protected:
   ImageType           imageType;            // File format of the image
   char                *calibrationFileName; // Filename of the calibration data of the map
   char                *calibrationFilePath; // Complete path to the calibration data of the map
+  char                *archiveFileName;     // Filename of the archive file that contains both the image and the calibration file
+  char                *archiveFilePath;     // Complete path to the archive file
   Int                 x;                    // X coordinate
   Int                 y;                    // Y coordinate
   Int                 zoomLevelMap;         // Zoom level in the map
@@ -125,7 +127,7 @@ public:
   bool readCalibrationFile(std::string fileFolder, std::string fileBasename, std::string fileExtension);
 
   // Writes a calibration file
-  void writeCalibrationFile();
+  void writeCalibrationFile(ZipArchive *mapArchive);
 
   // Store the contents of the object in a binary file
   void store(std::ofstream *ofs);
@@ -147,7 +149,7 @@ public:
     return overlayGraphicInvalid;
   }
 
-  void setOverlayGraphicInvalid(bool overlayGraphisInvalid) {
+  void setOverlayGraphicInvalid(bool overlayGraphicInvalid) {
     this->overlayGraphicInvalid = overlayGraphicInvalid;
   }
 
@@ -159,6 +161,11 @@ public:
   double getLngScale() const
   {
       return lngScale;
+  }
+
+  std::string getMapFileFolder() const
+  {
+      return std::string(mapFileFolder);
   }
 
   std::string getImageFilePath() const
@@ -179,6 +186,16 @@ public:
   std::string getImageFileName() const
   {
       return std::string(imageFileName);
+  }
+
+  std::string getArchiveFilePath() const
+  {
+      return std::string(archiveFilePath);
+  }
+
+  std::string getArchiveFileName() const
+  {
+      return std::string(archiveFileName);
   }
 
   std::vector<MapTile*> *getMapTiles() {
@@ -339,6 +356,26 @@ public:
         path = std::string(mapFileFolder) + "/" + imageFileName;
       if (this->imageFilePath) free(this->imageFilePath);
       if (!(this->imageFilePath=strdup(path.c_str()))) {
+        FATAL("can not create string",NULL);
+      }
+    }
+  }
+
+  void setArchiveFileName(std::string archiveFileName) {
+    if (doNotDelete) {
+      FATAL("can not set new archive file name because memory is statically allocated",NULL);
+    } else {
+      if (this->archiveFileName) free(this->archiveFileName);
+      if (!(this->archiveFileName=strdup(archiveFileName.c_str()))) {
+        FATAL("can not create string",NULL);
+      }
+      std::string path;
+      if (strcmp(mapFileFolder,".")==0)
+        path = archiveFileName;
+      else
+        path = std::string(mapFileFolder) + "/" + archiveFileName;
+      if (this->archiveFilePath) free(this->archiveFilePath);
+      if (!(this->archiveFilePath=strdup(path.c_str()))) {
         FATAL("can not create string",NULL);
       }
     }

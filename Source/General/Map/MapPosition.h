@@ -27,7 +27,7 @@ protected:
 
   bool doNotDelete;                                 // Indicates if the object has been alloacted by an own memory handler
   static const char *unknownSource;                 // String indicating that the source is unknown
-  static const double earthRadius = 6.371 * 1e6;    // Radius of earh in meter
+  static const double earthRadius;                  // Radius of earh in meter
   MapTile *mapTile;                                 // Tile this position belongs to
   Int x;                                            // X position in picture coordinate system
   Int y;                                            // Y position in picture coordinate system
@@ -117,7 +117,7 @@ public:
   bool isValid();
 
   // Invalidates the position
-  bool invalidate();
+  void invalidate();
 
   // Getters and setters
   bool getIsUpdated() const {

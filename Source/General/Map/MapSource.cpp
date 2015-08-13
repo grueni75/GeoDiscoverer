@@ -470,7 +470,7 @@ MapTile *MapSource::findMapTileByGeographicCoordinate(MapPosition pos, Int zoomL
 MapContainer *MapSource::findMapContainerByGeographicCoordinate(MapPosition pos, MapContainer *preferredMapContainer, MapContainerTreeNode* currentMapContainerTreeNode, GeographicBorder currentDimension, MapPosition &bestPos, double &distToNearestLngScale, double &distToNearestLatScale, bool &betterMapContainerFound, std::list<MapContainer*> *foundMapContainers) {
 
   MapContainer *bestMapContainer=NULL,*bestMapContainerLeft=NULL,*bestMapContainerRight=NULL;
-  bool betterMapContainerFoundRight=NULL,betterMapContainerFoundLeft=NULL;
+  bool betterMapContainerFoundRight=false,betterMapContainerFoundLeft=false;
   MapPosition bestPosRight, bestPosLeft;
   double distToNearestLngScaleRight, distToNearestLatScaleRight;
   double distToNearestLngScaleLeft, distToNearestLatScaleLeft;

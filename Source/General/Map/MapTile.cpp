@@ -386,9 +386,10 @@ void MapTile::setIsHidden(bool isHidden, const char *file, int line, bool fadeOu
     visualization.setColor(endColor);
     if ((isDrawn())&&(fadeOutAnimation)) {
       if (rectangle.getTexture()==endTexture) {
-        rectangle.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),startColor,endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
         rectangle.setFadeAnimationSequence(std::list<GraphicFadeAnimationParameter>());
+        rectangle.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),startColor,endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
         rectangle.setTextureAnimationSequence(std::list<GraphicTextureAnimationParameter>());
+        rectangle.setTextureAnimation(core->getClock()->getMicrosecondsSinceStart(),endTexture,endTexture,false,0);
       } else {
         std::list<GraphicFadeAnimationParameter> fadeAnimationSequence;
         GraphicFadeAnimationParameter fadeAnimationParameter;
@@ -415,9 +416,10 @@ void MapTile::setIsHidden(bool isHidden, const char *file, int line, bool fadeOu
       }
     } else {
       rectangle.setTexture(endTexture);
-      rectangle.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),endColor,endColor,false,0);
       rectangle.setFadeAnimationSequence(std::list<GraphicFadeAnimationParameter>());
+      rectangle.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),endColor,endColor,false,0);
       rectangle.setTextureAnimationSequence(std::list<GraphicTextureAnimationParameter>());
+      rectangle.setTextureAnimation(core->getClock()->getMicrosecondsSinceStart(),endTexture,endTexture,false,0);
     }
   }
   core->getDefaultGraphicEngine()->unlockDrawing();
@@ -428,10 +430,11 @@ void MapTile::setIsCached(bool isCached, GraphicTextureInfo texture, bool fadeOu
 {
   this->isCached = isCached;
   if (!isCached) {
-    if (this->getParentMapContainer()->getDownloadComplete())
+    if (this->getParentMapContainer()->getDownloadComplete()) {
       endTexture=core->getDefaultGraphicEngine()->getNotCachedTileImage()->getTexture();
-    else
+    } else {
       endTexture=core->getDefaultGraphicEngine()->getNotDownloadedTileImage()->getTexture();
+    }
   } else {
     endTexture=texture;
   }

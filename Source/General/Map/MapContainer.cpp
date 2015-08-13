@@ -45,6 +45,8 @@ MapContainer::MapContainer(bool doNotDelete) {
     this->imageFilePath=NULL;
     this->calibrationFileName=NULL;
     this->calibrationFilePath=NULL;
+    this->archiveFileName=NULL;
+    this->archiveFilePath=NULL;
     this->zoomLevelServer=0;
     this->zoomLevelMap=0;
     this->lngScale=0;
@@ -71,6 +73,8 @@ MapContainer::~MapContainer() {
     if (imageFilePath) free(imageFilePath);
     if (calibrationFileName) free(calibrationFileName);
     if (calibrationFilePath) free(calibrationFilePath);
+    if (archiveFileName) free(archiveFileName);
+    if (archiveFilePath) free(archiveFilePath);
   }
 }
 
@@ -78,6 +82,7 @@ MapContainer::~MapContainer() {
 MapContainer &MapContainer::operator=(const MapContainer &rhs)
 {
   FATAL("this object can not be copied",NULL);
+  return *this;
 }
 
 // Adds a tile to the map
@@ -517,7 +522,7 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
     std::string t=fileBasename + "." + "gdm";
     t=std::string(mapFileFolder) + "/" + t;
     setCalibrationFileName(t);
-    writeCalibrationFile();
+    writeCalibrationFile(NULL);
   }
 
   // Success!
@@ -726,6 +731,8 @@ void MapContainer::store(std::ofstream *ofs) {
   Storage::storeString(ofs,imageFilePath);
   Storage::storeString(ofs,calibrationFileName);
   Storage::storeString(ofs,calibrationFilePath);
+  Storage::storeString(ofs,archiveFileName);
+  Storage::storeString(ofs,archiveFilePath);
   mapCalibrator->store(ofs);
 
   // Store the search tree
@@ -821,6 +828,9 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize) {
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->imageFilePath);
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->calibrationFileName);
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->calibrationFilePath);
+  Storage::retrieveString(cacheData,cacheSize,&mapContainer->archiveFileName);
+  Storage::retrieveString(cacheData,cacheSize,&mapContainer->archiveFilePath);
+
   //PROFILE_ADD("field read"");
   mapContainer->mapCalibrator=MapCalibrator::retrieve(cacheData,cacheSize);
   if (mapContainer->mapCalibrator==NULL) {

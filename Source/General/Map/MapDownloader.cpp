@@ -28,7 +28,6 @@ MapDownloader::MapDownloader(MapSourceMercatorTiles *mapSource) {
   downloadErrorWaitTime=core->getConfigStore()->getIntValue("Map","downloadErrorWaitTime",__FILE__, __LINE__);
   numberOfDownloadThreads=core->getConfigStore()->getIntValue("Map","numerOfDownloadThreads",__FILE__, __LINE__);
   maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries",__FILE__, __LINE__);
-  maxMapArchiveSize=core->getConfigStore()->getIntValue("Map","maxMapArchiveSize",__FILE__, __LINE__);
   accessMutex=core->getThread()->createMutex("map downloader access mutex");
   quitMapImageDownloadThread=false;
   this->mapSource=mapSource;
@@ -231,7 +230,7 @@ void MapDownloader::updateZoomLevels(Int &minZoomLevel,Int &maxZoomLevel, MapLay
     Int k=minZoomLevelMap;
     for (Int j=minZoomLevelServer;j<=maxZoomLevelServer;j++) {
       std::stringstream name;
-      if (name=="")
+      if (name.str()==std::string(""))
         name << j;
       else
         name << layerGroupName << " " << j;
@@ -338,10 +337,13 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       // Download all images
       bool downloadSuccess=true;
       bool oneTileFound=false;
+      std::vector<std::string> urls;
       for (std::list<MapTileServer*>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
         MapTileServer *tileServer=*i;
         if ((mapContainer->getZoomLevelMap()>=tileServer->getMinZoomLevelMap())&&(mapContainer->getZoomLevelMap()<=tileServer->getMaxZoomLevelMap())) {
-          DownloadResult result = tileServer->downloadTileImage(mapContainer,threadNr);
+          std::string url;
+          DownloadResult result = tileServer->downloadTileImage(mapContainer,threadNr,url);
+          urls.push_back(url);
           if (result==DownloadResultOtherFail) {
             downloadSuccess=false;
             break;
@@ -363,17 +365,19 @@ void MapDownloader::downloadMapImages(Int threadNr) {
         std::stringstream tempFilePath;
         tempFilePath << mapSource->getFolderPath() << "/download." << threadNr << ".bin";
         remove(tempFilePath.str().c_str());
+        Int j=0;
         for (std::list<MapTileServer*>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
           MapTileServer *tileServer=*i;
           if ((mapContainer->getZoomLevelMap()>=tileServer->getMinZoomLevelMap())&&(mapContainer->getZoomLevelMap()<=tileServer->getMaxZoomLevelMap())) {
 
             // Load the image and compose it with the existing image
-            if (!tileServer->composeTileImage(composedImagePixel,composedImageWidth,composedImageHeight,threadNr)) {
+            if (!tileServer->composeTileImage(urls[j],composedImagePixel,composedImageWidth,composedImageHeight,threadNr)) {
               if (composedImagePixel)
                 free(composedImagePixel);
               composedImagePixel=NULL;
               break;
             }
+            j++;
           }
         }
         if (composedImagePixel) {
@@ -383,8 +387,8 @@ void MapDownloader::downloadMapImages(Int threadNr) {
 
         // Add the image to the archive
         struct stat stat_buffer;
-        bool tileAddedToArchive=false;
         Int result=stat(tempFilePath.str().c_str(),&stat_buffer);
+        ZipArchive *mapArchive=NULL;
         if (result==0) {
           UByte *file_buffer = (UByte *)malloc(stat_buffer.st_size);
           if (file_buffer) {
@@ -392,36 +396,21 @@ void MapDownloader::downloadMapImages(Int threadNr) {
             if ((in=fopen(tempFilePath.str().c_str(),"r"))) {
               fread(file_buffer,stat_buffer.st_size,1,in);
               fclose(in);
-              std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives(__FILE__, __LINE__);
-              ZipArchive *mapArchive=mapArchives->back();
-              if (mapArchive->getUnchangedSize()>maxMapArchiveSize) {
-                std::stringstream newFilename;
-                if (mapArchive->getArchiveName()=="tiles.gda")
-                  newFilename << "tiles2.gda";
-                else {
-                  Int nr;
-                  sscanf(mapArchive->getArchiveName().c_str(),"tiles%d.gda",&nr);
-                  newFilename << "tiles" << nr+1 << ".gda";
-                }
-                mapArchive=new ZipArchive(mapArchive->getArchiveFolder(),newFilename.str());
-                if ((mapArchive==NULL)||(!mapArchive->init()))
-                  FATAL("can not create zip archive object",NULL);
-                mapArchives->push_back(mapArchive);
-              }
+              mapArchive=new ZipArchive(mapSource->getFolderPath() + "/" + mapContainer->getMapFileFolder(),mapContainer->getArchiveFileName());
+              if ((mapArchive==NULL)||(!mapArchive->init()))
+                FATAL("can not create zip archive object",NULL);
               mapArchive->addEntry(mapContainer->getImageFilePath(),file_buffer,stat_buffer.st_size);
-              mapSource->unlockMapArchives();
-              tileAddedToArchive=true;
             }
           }
         }
 
         // Write the gdm file
-        if (tileAddedToArchive) {
+        if (mapArchive) {
           //DEBUG("writing calibration file of map container 0x%08x",mapContainer);
-          mapContainer->writeCalibrationFile();
-          std::list<ZipArchive*> *mapArchives=mapSource->lockMapArchives(__FILE__, __LINE__);
-          mapArchives->back()->writeChanges();
-          mapSource->unlockMapArchives();
+          mapContainer->writeCalibrationFile(mapArchive);
+          mapArchive->writeChanges();
+          delete mapArchive;
+          mapArchive=NULL;
         } else {
           WARNING("can not store <%s>",mapContainer->getImageFileName().c_str());
         }
@@ -435,10 +424,10 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       } else {
 
         // Put the container back in the queue if the retry count is not reached
+        mapContainer->setDownloadRetries(mapContainer->getDownloadRetries()+1);
         core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
         downloadQueue.push_back(mapContainer);
         core->getThread()->unlockMutex(accessMutex);
-        mapContainer->setDownloadRetries(mapContainer->getDownloadRetries()+1);
 
         // Wait some time before downloading again
         sleep(downloadErrorWaitTime);

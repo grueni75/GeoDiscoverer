@@ -209,8 +209,11 @@ Core::~Core() {
   if (thread) delete thread;
 }
 
-// Starts the application
+// Starts the applicationcreateTh
 bool Core::init() {
+
+  // Init cURL
+  initCURL();
 
   // Create components
   if (!(clock=new Clock())) {

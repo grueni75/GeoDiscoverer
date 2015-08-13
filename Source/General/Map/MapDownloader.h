@@ -23,7 +23,6 @@ class MapDownloader {
 protected:
 
   MapSourceMercatorTiles *mapSource;                      // Map source this object downloads for
-  Int maxMapArchiveSize;                                  // Maximum size a map archive shall have
   Int downloadErrorWaitTime;                              // Time in seconds to wait after a download error before starting a new download
   Int maxDownloadRetries;                                 // Maximum number of retries before a download is aborted
   std::list<MapContainer*> downloadQueue;                 // Queue of map containers that must be downloaded from the server

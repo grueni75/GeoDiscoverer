@@ -25,13 +25,13 @@ protected:
   NavigationInfoType type;
 
   // Undefined distance
-  const static double unknownDistance = -1;
+  const static double unknownDistance;
 
   // Undefined duration
-  const static double unknownDuration = -1;
+  const static double unknownDuration;
 
   // Undefined angle
-  const static double unknownAngle = 999.0;
+  const static double unknownAngle;
 
   // Direction of current movement
   double locationBearing;

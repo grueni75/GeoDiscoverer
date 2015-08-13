@@ -424,7 +424,7 @@ void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapCon
               addNewSegment=false;
               break; // already present
             }
-            if ((pos==(*j)->getEndIndex()+1)) {
+            if (pos==(*j)->getEndIndex()+1) {
               (*j)->setEndIndex(pos);
               addNewSegment=false;
               break; // existing segment extended

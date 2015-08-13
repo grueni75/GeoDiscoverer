@@ -174,6 +174,9 @@ protected:
   NavigationEngine *navigationEngine;
   Commander *commander;
 
+  // Inits cURL
+  void initCURL();
+
 public:
 
   // Constructor and destructor

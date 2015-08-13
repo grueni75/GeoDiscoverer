@@ -2,7 +2,6 @@
 <GDS version="1.0">
   <MapSourceRef>
     <name>Hike Bike Map</name>
-    <overlayAlpha>0.1</overlayAlpha>
     <layerGroupName>Hike Bike Map Cycling</layerGroupName>
   </MapSourceRef>
   <MapSourceRef>
@@ -11,7 +10,6 @@
   </MapSourceRef>
   <MapSourceRef>
     <name>Hike Bike Map</name>
-    <overlayAlpha>0.5</overlayAlpha>
     <layerGroupName>Hike Bike Map Hiking</layerGroupName>
   </MapSourceRef>
   <MapSourceRef>

@@ -14,6 +14,10 @@
 
 namespace GEODISCOVERER {
 
+const double NavigationInfo::unknownDistance = -1;
+const double NavigationInfo::unknownDuration = -1;
+const double NavigationInfo::unknownAngle = 999.0;
+
 NavigationInfo::NavigationInfo() {
   type=NavigationInfoTypeUnknown;
   locationBearing=unknownAngle;

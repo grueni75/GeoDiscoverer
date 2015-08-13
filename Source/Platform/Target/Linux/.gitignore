@@ -18,6 +18,7 @@ Map/DDorfExt/*.bin
 Map/External/*.bin
 Map/Kompass/*.bin
 Map/Kompass/*.gda
+Map/*/Tiles
 Icon/240dpi/*
 Icon/320dpi/*
 Log/*

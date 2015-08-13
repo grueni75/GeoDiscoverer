@@ -95,7 +95,7 @@ public:
     if (n) {
       return getNodeText(n,nodeText);
     } else {
-      return NULL;
+      return false;
     }
   }
 

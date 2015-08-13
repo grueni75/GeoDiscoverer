@@ -55,6 +55,9 @@ bool MapSourceMercatorTiles::init() {
   std::string mapPath=getFolderPath();
   ZipArchive *mapArchive;
 
+  WARNING("unused texture list in map cache gets corrupted",NULL);
+  WARNING("double free in map tile server download tile image",NULL);
+
   // Read the information from the config file
   if (!parseGDSInfo())
     return false;
@@ -193,6 +196,10 @@ MapCalibrator *MapSourceMercatorTiles::createMapCalibrator(double latNorth, doub
 // Fetches the map tile in which the given position lies from disk or server
 MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
 
+  if (accessMutex->lockedCount==0) {
+    FATAL("accessMutex of MapSourceMercatorTiles must be locked",NULL);
+  }
+
   // Do not continue if an error has occured
   if (errorOccured)
     return NULL;
@@ -249,14 +256,36 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
 #endif
 
   // Prepare the filenames
-  std::stringstream imageFileFolder; imageFileFolder << zMap << "/" << x;
-  std::stringstream imageFileBase; imageFileBase << zMap << "_" << x << "_" << y;
+  std::stringstream archiveFileFolder;
+  archiveFileFolder << "Tiles";
+  std::string path;
+  path = getFolderPath() + "/" + archiveFileFolder.str();
+  struct stat s;
+  if ((stat(path.c_str(), &s)!=0)||(!(s.st_mode&S_IFDIR))) {
+    if (mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
+      FATAL("can not create directory <%s>",path.c_str());
+    }
+  }
+  archiveFileFolder << "/" << zMap;
+  path = getFolderPath() + "/" + archiveFileFolder.str();
+  if ((stat(path.c_str(), &s)!=0)||(!(s.st_mode&S_IFDIR))) {
+    if (mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
+      FATAL("can not create directory <%s>",path.c_str());
+    }
+  }
+  archiveFileFolder << "/" << x;
+  path = getFolderPath() + "/" + archiveFileFolder.str();
+  if ((stat(path.c_str(), &s)!=0)||(!(s.st_mode&S_IFDIR))) {
+    if (mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
+      FATAL("can not create directory <%s>",path.c_str());
+    }
+  }
+  std::stringstream archiveFileBase; archiveFileBase << zMap << "_" << x << "_" << y;
   std::string imageFileExtension = "png";
   ImageType imageType = ImageTypePNG;
-  std::string imageFileName = imageFileBase.str() + "." + imageFileExtension;
-  std::string imageFilePath = imageFileFolder.str() + "/" + imageFileName;
-  std::string calibrationFileName = imageFileBase.str() + ".gdm";
-  std::string calibrationFilePath = imageFileFolder.str() + "/" + calibrationFileName;
+  std::string archiveFileName = archiveFileBase.str() + ".gda";
+  std::string imageFileName = archiveFileBase.str() + "." + imageFileExtension;
+  std::string calibrationFileName = archiveFileBase.str() + ".gdm";
 
   // Create a new map container
   MapContainer *mapContainer=new MapContainer();
@@ -264,7 +293,9 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
     FATAL("can not create map container",NULL);
     return NULL;
   }
-  mapContainer->setMapFileFolder(imageFileFolder.str());
+  mapContainer->setMapFileFolder(archiveFileFolder.str());
+  mapContainer->setArchiveFileName(archiveFileName);
+  mapContainer->setImageFileName(imageFileName);
   mapContainer->setImageFileName(imageFileName);
   mapContainer->setCalibrationFileName(calibrationFileName);
   mapContainer->setZoomLevelMap(zMap);
@@ -298,17 +329,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   mapContainer->createSearchTree();
 
   // Check if the tile has already been saved to disk
-  lockMapArchives(__FILE__, __LINE__);
-  bool found=false;
-  for(std::list<ZipArchive*>::iterator i=mapArchives.begin();i!=mapArchives.end();i++) {
-    ZipArchive *mapArchive = *i;
-    if (mapArchive->getEntrySize(imageFilePath)>0) {
-      found=true;
-      break;
-    }
-  }
-  unlockMapArchives();
-  if (!found) {
+  if (access((getFolderPath() + "/" + mapContainer->getArchiveFilePath()).c_str(),F_OK)==-1) {
     mapDownloader->queueMapContainerDownload(mapContainer);
   }
 

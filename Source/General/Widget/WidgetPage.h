@@ -49,7 +49,7 @@ public:
   bool onTouchDown(TimestampInMicroseconds t, Int x, Int y);
 
   // Called when the widget is not touched anymore
-  bool onTouchUp(TimestampInMicroseconds t, Int x, Int y);
+  void onTouchUp(TimestampInMicroseconds t, Int x, Int y);
 
   // Called when the map has changed
   void onMapChange(bool pageVisible, MapPosition pos);

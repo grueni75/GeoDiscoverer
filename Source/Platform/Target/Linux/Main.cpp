@@ -36,6 +36,8 @@ void *mainThread(void *args) {
   // Exit the thread
   mainThreadHasExited=true;
   GEODISCOVERER::core->getThread()->exitThread();
+
+  return NULL;
 }
 
 // Debugging thread
@@ -94,6 +96,8 @@ void *debugThread(void *args) {
 
   // Exit the thread
   GEODISCOVERER::core->getThread()->exitThread();
+
+  return NULL;
 }
 
 // Main routine

@@ -15,6 +15,11 @@
 
 namespace GEODISCOVERER {
 
+// Inits curl
+void Core::initCURL() {
+  curl_global_init(CURL_GLOBAL_ALL);
+}
+
 // Downloads a URL
 DownloadResult Core::downloadURL(std::string url, std::string filePath, bool generateMessages, bool ignoreFileNotFoundErrors) {
 

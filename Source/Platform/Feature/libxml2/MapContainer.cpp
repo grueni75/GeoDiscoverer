@@ -16,7 +16,7 @@
 namespace GEODISCOVERER {
 
 // Writes a calibration file
-void MapContainer::writeCalibrationFile()
+void MapContainer::writeCalibrationFile(ZipArchive *mapArchive)
 {
   xmlDocPtr doc = NULL;
   xmlNodePtr rootNode = NULL, node;
@@ -117,11 +117,17 @@ void MapContainer::writeCalibrationFile()
 
   // Write the file
   xmlDocDumpFormatMemoryEnc(doc, &buffer, &size, "UTF-8", 1);
-  std::list<ZipArchive*> *mapArchives=core->getMapSource()->lockMapArchives(__FILE__, __LINE__);
-  if (!mapArchives->back()->addEntry(calibrationFilePath,(void *)buffer,size)) {
+  bool mapArchivesLocked=false;
+  if (mapArchive==NULL) {
+    std::list<ZipArchive*> *mapArchives=core->getMapSource()->lockMapArchives(__FILE__, __LINE__);
+    mapArchive=mapArchives->back();
+    mapArchivesLocked=true;
+  }
+  if (!mapArchive->addEntry(calibrationFilePath,(void *)buffer,size)) {
     ERROR("can not add calibration file <%s> to map archive",calibrationFilePath);
   }
-  core->getMapSource()->unlockMapArchives();
+  if (mapArchivesLocked)
+    core->getMapSource()->unlockMapArchives();
 
   // Clean up
   xmlFreeDoc(doc);

@@ -200,7 +200,7 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
 
   // Find the geo discoverer extension
   XMLNode gdPoint=NULL;
-  for (XMLNode node=extensionsNode->children;node=node->next;node!=NULL) {
+  for (XMLNode node=extensionsNode->children;node!=NULL;node=node->next) {
     if ((isGDNameSpace(node))&&(node->type==XML_ELEMENT_NODE)) {
       std::string name=(char*)node->name;
       if (name=="pt") {
@@ -212,7 +212,7 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
 
   // Geo Discoverer extension available?
   if (gdPoint) {
-    for (XMLNode node=gdPoint->children;node=node->next;node!=NULL) {
+    for (XMLNode node=gdPoint->children;node!=NULL;node=node->next) {
       if ((isGDNameSpace(node))&&(node->type==XML_ELEMENT_NODE)) {
         std::string name=(char*)node->name;
         std::string text;

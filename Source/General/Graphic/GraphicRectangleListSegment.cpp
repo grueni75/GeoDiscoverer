@@ -53,6 +53,7 @@ bool GraphicRectangleListSegment::addRectangle(Short x[4], Short y[4]) {
   textureCoordinates->addPoint(1,0);
   triangleCoordinates->addPoint(x[1],y[1]);
   textureCoordinates->addPoint(1,1);
+  return true;
 }
 
 // Draws the rectangle list

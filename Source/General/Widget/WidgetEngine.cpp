@@ -1389,9 +1389,9 @@ bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
     return false;
   }
   deselectPage();
-  bool result = currentPage->onTouchUp(t,x,y);
+  currentPage->onTouchUp(t,x,y);
   core->getThread()->unlockMutex(accessMutex);
-  return result;
+  return true;
 }
 
 // Called when the screen is touched

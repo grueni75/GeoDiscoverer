@@ -133,7 +133,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
   screen->setColor(255,0,255,255);
   screen->setLineWidth(10);
   screen->drawRectangle(-100,-100,+100,+100,Screen::getTextureNotDefined(),false);
-  /*screen->startObject();
+  screen->startObject();
   screen->setLineWidth(10);
   screen->setColor(255,0,255,255);
   screen->scale(100,100,1.0);

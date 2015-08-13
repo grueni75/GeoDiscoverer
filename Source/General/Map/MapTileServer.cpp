@@ -47,7 +47,7 @@ bool MapTileServer::replaceVariableInServerURL(std::string &url, std::string var
 }
 
 // Downloads a map image from the server
-DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int threadNr) {
+DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int threadNr, std::string &url) {
 
   Int imageWidth, imageHeight;
 
@@ -58,11 +58,10 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int 
   std::stringstream y; y << mapContainer->getY();
 
   // Prepare the url
-  std::string url=serverURL;
+  url=serverURL;
   replaceVariableInServerURL(url,"${z}",z.str());
   replaceVariableInServerURL(url,"${x}",x.str());
   replaceVariableInServerURL(url,"${y}",y.str());
-  lastDownloadURL=url;
 
   // Download the file
   std::stringstream threadImagePath;
@@ -94,7 +93,7 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int 
 }
 
 // Loads a map image in RGBA format
-bool MapTileServer::composeTileImage(ImagePixel* &composedTileImage, Int &composedImageWidth, Int &composedImageHeight, Int threadNr) {
+bool MapTileServer::composeTileImage(std::string url, ImagePixel* &composedTileImage, Int &composedImageWidth, Int &composedImageHeight, Int threadNr) {
 
   ImagePixel *tileImage;
   UInt pixelSize;
@@ -115,11 +114,13 @@ bool MapTileServer::composeTileImage(ImagePixel* &composedTileImage, Int &compos
     case ImageTypePNG:
       tileImage=core->getImage()->loadPNG(threadImagePath.str(),width,height,pixelSize,false);
       break;
+    case ImageTypeUnknown:
+      FATAL("image type not known",NULL);
   }
   if (!tileImage)
     return false;
   if ((pixelSize!=Image::getRGBPixelSize())&&(pixelSize!=Image::getRGBAPixelSize())) {
-    WARNING("pixel size %d in downloaded map from <%s> is not supported",pixelSize,lastDownloadURL.c_str());
+    WARNING("pixel size %d in downloaded map from <%s> is not supported",pixelSize,url.c_str());
     free(tileImage);
     return false;
   }

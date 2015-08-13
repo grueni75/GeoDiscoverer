@@ -1343,11 +1343,6 @@
                   <xsd:documentation>Maximum number of retries before a download is aborted.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="maxMapArchiveSize" type="xsd:integer" default="4194304">
-                <xsd:annotation>
-                  <xsd:documentation>Maximum size in bytes a zip file with tile images shall have before switching to a new one.</xsd:documentation>
-                </xsd:annotation>
-              </xsd:element>
               <xsd:element name="numerOfDownloadThreads" type="xsd:integer" default="8">
                 <xsd:annotation>
                   <xsd:documentation>Number of threads to spawn that download images.</xsd:documentation>

@@ -16,6 +16,7 @@
 namespace GEODISCOVERER {
 
 const char * MapPosition::unknownSource = "unknown";
+const double MapPosition::earthRadius = 6.371 * 1e6;
 
 MapPosition::MapPosition(bool doNotDelete) {
   this->doNotDelete=doNotDelete;
@@ -86,13 +87,14 @@ MapPosition &MapPosition::operator=(const MapPosition &rhs)
       free(source);
     }
   }
-  memcpy(this,&rhs,sizeof(MapPosition));
+  memcpy((void*)this,(void*)&rhs,sizeof(MapPosition));
   if (!this->doNotDelete) {
     this->source=(char*)unknownSource;
     if ((rhs.source!=unknownSource)&&(rhs.source!=NULL)) {
       this->setSource(rhs.source);
     }
   }
+  return *this;
 }
 
 // Computes the destination point from the given bearing and distance
@@ -308,7 +310,7 @@ bool MapPosition::isValid() {
 }
 
 // Invalidates the position
-bool MapPosition::invalidate() {
+void MapPosition::invalidate() {
   lng=-std::numeric_limits<double>::max();
   lat=-std::numeric_limits<double>::max();
 }

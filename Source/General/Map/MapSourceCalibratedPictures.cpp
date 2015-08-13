@@ -31,6 +31,7 @@ MapSourceCalibratedPictures::~MapSourceCalibratedPictures() {
 MapSourceCalibratedPictures &MapSourceCalibratedPictures::operator=(const MapSourceCalibratedPictures &rhs)
 {
   FATAL("this object can not be copied",NULL);
+  return *this;
 }
 
 // Clear the source

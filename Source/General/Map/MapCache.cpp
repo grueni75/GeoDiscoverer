@@ -158,6 +158,7 @@ void MapCache::removeTile(MapTile *tile) {
     core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
     usedTextures.remove(tile->getEndTexture());
     unusedTextures.push_back(tile->getEndTexture());
+    DEBUG("removing tile 0x%08x",*i);
     cachedTiles.erase(i);
     tile->setIsCached(false);
     core->getThread()->unlockMutex(accessMutex);
@@ -211,11 +212,21 @@ void MapCache::updateMapTileImages() {
 
       // Check if the image exists in the map archive
       ZipArchive *mapArchive=NULL;
+      bool newMapArchive=false;
       std::list<ZipArchive*> *mapArchives = core->getMapSource()->lockMapArchives(__FILE__, __LINE__);
       for (std::list<ZipArchive*>::iterator i=mapArchives->begin();i!=mapArchives->end();i++) {
         if ((*i)->getEntrySize(currentContainer->getImageFilePath())>0) {
           mapArchive=*i;
           break;
+        }
+      }
+      if (!mapArchive) {
+        std::string path = core->getMapSource()->getFolderPath() + "/" + currentContainer->getArchiveFilePath();
+        if (access(path.c_str(),F_OK)!=-1) {
+          mapArchive=new ZipArchive(core->getMapSource()->getFolderPath() + "/" + currentContainer->getMapFileFolder(),currentContainer->getArchiveFileName());
+          if ((mapArchive==NULL)||(!mapArchive->init()))
+            FATAL("can not create zip archive object",NULL);
+          newMapArchive=true;
         }
       }
       if (mapArchive) {
@@ -239,6 +250,10 @@ void MapCache::updateMapTileImages() {
         }
       }
       core->getMapSource()->unlockMapArchives();
+      if (newMapArchive) {
+        delete mapArchive;
+        mapArchive=NULL;
+      }
       if (!currentImage)
         continue; // Do not continue in case of error
 
@@ -310,8 +325,9 @@ void MapCache::updateMapTileImages() {
     usedTextures.push_back(m);
     for(std::list<MapTile*>::iterator i=cachedTiles.begin();i!=cachedTiles.end();i++) {
       MapTile *t=*i;
-      if (t->getRectangle()->getTexture()==m)
+      if (t->getRectangle()->getTexture()==m) {
         FATAL("cached tile uses textures that is marked as unused",NULL);
+      }
     }
     core->getThread()->unlockMutex(accessMutex);
     currentTile=t;

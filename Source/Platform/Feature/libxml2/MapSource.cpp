@@ -227,6 +227,7 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
     resolvedGDSInfo->getNodeText(*i,"serverURL",t);
     DEBUG("%s",t.c_str());*/
   }
+  return true;
 }
 
 // Reads information about the map

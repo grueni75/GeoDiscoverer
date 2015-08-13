@@ -143,7 +143,7 @@ bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 }
 
 // Called when the page is not touched anymore
-bool WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
+void WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
 
   // Check all widgets
   std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
@@ -155,7 +155,6 @@ bool WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
   }
   deselectWidget(t);
   touchEndTime=t;
-
 }
 
 // Called when the map has changed

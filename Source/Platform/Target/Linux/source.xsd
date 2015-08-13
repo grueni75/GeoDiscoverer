@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xsd:schema
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0"
   elementFormDefault="qualified">
   
   <xsd:annotation>
@@ -94,22 +95,47 @@
                       </xsd:documentation>
                     </xsd:annotation>
                   </xsd:element>
-                  <xsd:element name="overlayAlpha" type="xsd:double">
+                  <xsd:element name="overlayAlpha" type="xsd:double" minOccurs="0">
                     <xsd:annotation>
                       <xsd:documentation>
                         Alpha value to use when overlaying this map source.
                         A value of 0.0 makes the tile invisible.
                         A value of 1.0 makes the tile fully visible.
+                        This value is multiplied with the alpha value of the 
+                        referenced map source.
                       </xsd:documentation>
                     </xsd:annotation>
                   </xsd:element>
+                  <xsd:element name="layerGroupName" type="xsd:string" minOccurs="0">
+                    <xsd:annotation>
+                      <xsd:documentation>
+                        Name of the layer group that this tile server 
+                        belongs to. Overwrites the layerGroupName of the 
+                        TileServer entries.
+                      </xsd:documentation>
+                    </xsd:annotation>
+                  </xsd:element>
+                  <xsd:element name="minZoomLevel" type="xsd:integer" minOccurs="0">
+                    <xsd:annotation>
+                      <xsd:documentation>
+                        Minimum zoom level supported by the tile servers.
+                      </xsd:documentation>
+                    </xsd:annotation>
+                  </xsd:element>
+                  <xsd:element name="maxZoomLevel" type="xsd:integer" minOccurs="0">
+                    <xsd:annotation>
+                      <xsd:documentation>
+                        Maximum zoom level supported by the tile servers.
+                      </xsd:documentation>
+                    </xsd:annotation>
+                  </xsd:element>                  
                 </xsd:sequence>
               </xsd:complexType>
             </xsd:element>
             <xsd:element name="TileServer" minOccurs="0" maxOccurs="unbounded">
               <xsd:annotation>
                 <xsd:documentation>
-                  Defines a (Open Stree Map compatible) server from which to download map tiles.
+                  Defines a (Open Street Map compatible) server from which to download map tiles.
                   The tiles are overlayed in the order given in this file.
                 </xsd:documentation>
               </xsd:annotation>
@@ -151,20 +177,44 @@
                       </xsd:documentation>
                     </xsd:annotation>
                   </xsd:element>
+                  <xsd:element name="layerGroupName" type="xsd:string" minOccurs="0">
+                    <xsd:annotation>
+                      <xsd:documentation>
+                        Name of the layer group that this tile server 
+                        belongs to.
+                      </xsd:documentation>
+                    </xsd:annotation>
+                  </xsd:element>
+                  <xsd:element name="minZoomLevel" type="xsd:integer" minOccurs="0">
+                    <xsd:annotation>
+                      <xsd:documentation>
+                        Minimum zoom level supported by this tile server.
+                      </xsd:documentation>
+                    </xsd:annotation>
+                  </xsd:element>
+                  <xsd:element name="maxZoomLevel" type="xsd:integer" minOccurs="0">
+                    <xsd:annotation>
+                      <xsd:documentation>
+                        Maximum zoom level supported by this tile server.
+                      </xsd:documentation>
+                    </xsd:annotation>
+                  </xsd:element>
                 </xsd:sequence>
               </xsd:complexType>
             </xsd:element>
-            <xsd:element name="minZoomLevel" type="xsd:integer">
+            <xsd:element name="minZoomLevel" type="xsd:integer" minOccurs="0">
               <xsd:annotation>
                 <xsd:documentation>
-                  Minimum zoom level supported by the tile servers.
+                  Minimum zoom level supported by the tile servers. Overwrites
+                  the minZoomLevel of all TileServer entries in this scope.
                 </xsd:documentation>
               </xsd:annotation>
             </xsd:element>
-            <xsd:element name="maxZoomLevel" type="xsd:integer">
+            <xsd:element name="maxZoomLevel" type="xsd:integer" minOccurs="0">
               <xsd:annotation>
                 <xsd:documentation>
-                  Maximum zoom level supported by the tile servers.
+                  Maximum zoom level supported by the tile servers. Overwrites
+                  the maxZoomLevel of all TileServer entries in this scope.
                 </xsd:documentation>
               </xsd:annotation>
             </xsd:element>

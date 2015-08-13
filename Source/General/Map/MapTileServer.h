@@ -23,7 +23,6 @@ protected:
   std::string layerGroupName;           // The name of the layer group this server belongs to
   UInt orderNr;                         // Order number of the tile server
   std::string serverURL;                // URL of the tile server to use
-  std::string lastDownloadURL;          // URL of the last downloaded tile
   double overlayAlpha;                  // Alpha to use when creating the complete image
   ImageType imageType;                  // Type of the image
   std::string imagePath;                // Path to the downloaded image
@@ -44,10 +43,10 @@ public:
   virtual ~MapTileServer();
 
   // Downloads a map image from the server
-  DownloadResult downloadTileImage(MapContainer *mapContainer, Int threadNr);
+  DownloadResult downloadTileImage(MapContainer *mapContainer, Int threadNr, std::string &url);
 
   // Loads a map image and overlays it atop of imagePixel
-  bool composeTileImage(ImagePixel* &composedTileImage, Int &composedImageWidth, Int &composedImageHeight, Int threadNr);
+  bool composeTileImage(std::string url, ImagePixel* &composedTileImage, Int &composedImageWidth, Int &composedImageHeight, Int threadNr);
 
   // Getters and setters
   Int getMaxZoomLevelMap() const {
