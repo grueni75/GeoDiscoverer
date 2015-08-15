@@ -44,6 +44,7 @@ protected:
   bool forceMapUpdate;                            // Force an update of the map on the next call
   bool forceMapRecreation;                        // Force a complete recreation of the map on the next call
   bool forceCacheUpdate;                          // Force an update of the map cache on the next call
+  bool redownloadAllZoomLevels;                   // Indicates if all zoom levels shall be re-downloaded
   bool forceMapRedownload;                        // Forces a redownload of all visble tiles
   ThreadMutexInfo *forceMapUpdateMutex;           // Mutex for accessing the force map update flag
   ThreadMutexInfo *forceCacheUpdateMutex;         // Mutex for accessing the force cache update flag
@@ -123,9 +124,10 @@ public:
   {
     forceMapRecreation=true;
   }
-  void setForceMapRedownload(const char *file, int line)
+  void setForceMapRedownload(bool redownloadAllZoomLevels, const char *file, int line)
   {
     core->getThread()->lockMutex(forceMapRedownloadMutex, file, line);
+    this->redownloadAllZoomLevels=redownloadAllZoomLevels;
     forceMapRedownload=true;
     core->getThread()->unlockMutex(forceMapRedownloadMutex);
   }

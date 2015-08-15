@@ -6,7 +6,6 @@
 
 PRGNAME = GeoDiscoverer
 ROOT = $(shell cd ../../../.. && pwd)
-CXX = clang
 
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/POSIX -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/OpenGL -name '*.cpp')
@@ -62,10 +61,12 @@ LIBS += -lstdc++ -lglut -lpthread -lGLU -ljpeg -lxml2 -lfreetype -lpng -lcurl -l
 
 CXXFLAGS += -DSRC_ROOT='"$(ROOT)/Source"' -DTARGET_LINUX -Wnon-virtual-dtor
 # normal debug
-#debug: CXXFLAGS += -g -O0 
-# for detecting various heap & stack problems 
-debug: CXXFLAGS += -g -O0 -fsanitize=address
-# for detecting uninitialized memory use 
+debug: CXXFLAGS += -g -O0 
+# Use this to get more warnings on the source code
+#CXX = clang
+# for detecting various heap & stack problems (requires CXX=clang)
+#debug: CXXFLAGS += -g -O0 -fsanitize=address
+# for detecting uninitialized memory use (requires CXX=clang)
 #debug: CXXFLAGS += -g -O0 -fsanitize=memory -fPIE -pie
 
 # General dependencies:

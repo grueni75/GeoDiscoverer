@@ -39,6 +39,9 @@ protected:
   // Reads information about the map
   bool parseGDSInfo();
 
+  // Clears the given map directory
+  void cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels);
+
 public:
 
   // Constructurs and destructor
@@ -72,7 +75,7 @@ public:
   virtual void markMapContainerObsolete(MapContainer *c);
 
   // Removes all obsolete map containers
-  virtual void removeObsoleteMapContainers(bool removeFromMapArchive);
+  virtual void removeObsoleteMapContainers(MapArea *displayArea=NULL, bool allZoomLevels=false);
 
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {

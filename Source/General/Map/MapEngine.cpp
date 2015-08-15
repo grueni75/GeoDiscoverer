@@ -41,6 +41,7 @@ MapEngine::MapEngine() {
   compassBearing=prevCompassBearing;
   isInitialized=false;
   forceMapRedownload=false;
+  redownloadAllZoomLevels=false;
 }
 
 // Destructor
@@ -657,21 +658,10 @@ void MapEngine::updateMap() {
       // Open a busy dialog
       DialogKey busyDialog = core->getDialog()->createProgress("Cleaning map archives",0);
 
-      // Remove the visible tiles and remember the map container
-      std::list<MapContainer*> visibleMapContainers;
+      // Remove the visible tiles from the map engine
       while (tiles.size()>0) {
         MapTile *t=tiles.back();
-        bool found=false;
-        for (std::list<MapContainer*>::iterator j=visibleMapContainers.begin();j!=visibleMapContainers.end();j++) {
-          if (*j==t->getParentMapContainer()) {
-            found=true;
-            break;
-          }
-        }
         if (t->getParentMapContainer()->getDownloadComplete()) {
-          if (!found) {
-            visibleMapContainers.push_back(t->getParentMapContainer());
-          }
           lockMapPos(__FILE__, __LINE__);
           if (mapPos.getMapTile()==t) {
             mapPos.setMapTile(NULL);
@@ -682,16 +672,27 @@ void MapEngine::updateMap() {
         }
       }
 
-      // Tell the map source that the map containers are obsolete and shall also be deleted from the gda archive
+      // Mark map containers obsolete depending on the requested zoom level to clear
+      lockDisplayArea(__FILE__, __LINE__);
+      MapArea displayArea=this->displayArea;
+      unlockDisplayArea();
       MapSource *mapSource = core->getMapSource();
       mapSource->lockAccess(__FILE__, __LINE__);
-      for (std::list<MapContainer*>::iterator j=visibleMapContainers.begin();j!=visibleMapContainers.end();j++) {
-        mapSource->markMapContainerObsolete(*j);
+      std::vector<MapContainer*> mapContainers=*(mapSource->getMapContainers());
+      for (std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
+        MapContainer *c=*i;
+        if ((!redownloadAllZoomLevels)&&(c->getZoomLevelMap()!=displayArea.getZoomLevel()))
+          c=NULL;
+        if ((c)&&(c->getDownloadComplete())&&
+        (c->getLatSouth()<=displayArea.getLatNorth())&&(c->getLatNorth()>=displayArea.getLatSouth())&&
+        (c->getLngWest()<=displayArea.getLngEast())&&(c->getLngEast()>=displayArea.getLngWest())) {
+          mapSource->markMapContainerObsolete(c);
+        }
       }
       mapSource->unlockAccess();
 
       // Finally remove the map containers
-      mapSource->removeObsoleteMapContainers(true);
+      mapSource->removeObsoleteMapContainers(&displayArea,redownloadAllZoomLevels);
 
       // Close busy dialog
       core->getDialog()->closeProgress(busyDialog);

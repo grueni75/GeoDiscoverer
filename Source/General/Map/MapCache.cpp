@@ -158,7 +158,7 @@ void MapCache::removeTile(MapTile *tile) {
     core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
     usedTextures.remove(tile->getEndTexture());
     unusedTextures.push_back(tile->getEndTexture());
-    DEBUG("removing tile 0x%08x",*i);
+    //DEBUG("removing tile 0x%08x",*i);
     cachedTiles.erase(i);
     tile->setIsCached(false);
     core->getThread()->unlockMutex(accessMutex);

@@ -308,7 +308,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="forceMapRedownload") {
-    core->getMapEngine()->setForceMapRedownload(__FILE__,__LINE__);
+    core->getMapEngine()->setForceMapRedownload(atoi(args[0].c_str()),__FILE__,__LINE__);
     core->getMapEngine()->setForceMapUpdate(__FILE__,__LINE__);
     cmdExecuted=true;
   }

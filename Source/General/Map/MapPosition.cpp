@@ -285,7 +285,15 @@ void MapPosition::toMSLHeight() {
 void MapPosition::computeMercatorTileXY(Int zoomLevel, Int &x, Int &y) {
   Int t=pow(2.0, zoomLevel);
   x=(Int)(floor((lng + 180.0) / 360.0 * t));
-  y=(Int)(floor((1.0 - log( tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0)) / M_PI) / 2.0 * t));
+  y=(Int)(floor((1.0 - log( tan(lat * M_PI/180.0) + 1.0 / cos(lat * M_PI/180.0) ) / M_PI) / 2.0 * t));
+  if (x<0)
+    x=0;
+  if (x>t-1)
+    x=t-1;
+  if (y<0)
+    y=0;
+  if (y>t-1)
+    y=t-1;
 }
 
 // Get the bounds of the tile this position lies in if a mercator project is used

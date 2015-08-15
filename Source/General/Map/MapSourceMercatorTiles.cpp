@@ -417,8 +417,90 @@ void MapSourceMercatorTiles::markMapContainerObsolete(MapContainer *c) {
   }
 }
 
+// Clears the given map directory
+void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels) {
+
+  // Go through the directory list
+  DIR *dfd;
+  struct dirent *dp;
+  dfd=opendir(dirPath.c_str());
+  if (dfd==NULL) {
+    FATAL("can not read directory <%s>",dirPath.c_str());
+  }
+  while ((dp = readdir(dfd)) != NULL) {
+
+    // Process any new directory recursively
+    std::string entry=dp->d_name;
+    std::string entryPath = dirPath + "/" + entry;
+    if (dp->d_type == DT_DIR) {
+      if ((entry!=".")&&(entry!=".."))
+        cleanMapFolder(entryPath,displayArea,allZoomLevels);
+    } else {
+
+      // Is this left over from a write trial
+      if (entry.find(".gda.")!=std::string::npos) {
+        remove(entryPath.c_str());
+      }
+
+      // Is this a gda file?
+      std::string postfix=entry.substr(entry.size()-4,4);
+      if (postfix==".gda") {
+        Int z,x,y;
+        std::istringstream s(entry),s2;
+        std::string t;
+        std::getline(s,t,'_');
+        s2.clear(); s2.str(t);
+        s2 >> z;
+        std::getline(s,t,'_');
+        s2.clear(); s2.str(t);
+        s2 >> x;
+        std::getline(s,t,'.');
+        s2.clear(); s2.str(t);
+        s2 >> y;
+
+        // Shall we remove it?
+        if (displayArea) {
+          MapPosition pos;
+          Int startZoomLevel;
+          Int endZoomLevel;
+          if (allZoomLevels) {
+            startZoomLevel=minZoomLevel;
+            endZoomLevel=maxZoomLevel;
+          } else {
+            startZoomLevel=displayArea->getZoomLevel();
+            endZoomLevel=displayArea->getZoomLevel();
+          }
+          for (Int zMap=startZoomLevel;zMap<=endZoomLevel;zMap++) {
+            Int startX,startY,endX,endY;
+            Int minZoomLevelMap;
+            Int minZoomLevelServer;
+            Int maxZoomLevelServer;
+            mapDownloader->getLayerGroupZoomLevelBounds(zMap,minZoomLevelMap,minZoomLevelServer,maxZoomLevelServer);
+            Int zServer=zMap-minZoomLevelMap+minZoomLevelServer;
+            if (zServer==z) {
+              pos.setLng(displayArea->getLngWest());
+              pos.setLat(displayArea->getLatNorth());
+              pos.computeMercatorTileXY(zServer,startX,startY);
+              pos.setLng(displayArea->getLngEast());
+              pos.setLat(displayArea->getLatSouth());
+              pos.computeMercatorTileXY(zServer,endX,endY);
+              if ((x>=startX)&&(x<=endX)&&(y>=startY)&&(y<=endY)) {
+                DEBUG("deleting %s",entryPath.c_str());
+                remove(entryPath.c_str());
+              }
+            }
+          }
+        }
+      } else {
+        DEBUG("entry=%s",entry.c_str());
+      }
+    }
+  }
+  closedir(dfd);
+}
+
 // Removes all obsolete map containers
-void MapSourceMercatorTiles::removeObsoleteMapContainers(bool removeFromMapArchive) {
+void MapSourceMercatorTiles::removeObsoleteMapContainers(MapArea *displayArea, bool allZoomLevels) {
 
   // Get a copy of the currently selected obsolete map containers
   lockAccess(__FILE__, __LINE__);
@@ -431,25 +513,6 @@ void MapSourceMercatorTiles::removeObsoleteMapContainers(bool removeFromMapArchi
   createSearchDataStructures();
   unlockAccess();
 
-  // Shall we remove the container also from the map archive?
-  if (removeFromMapArchive) {
-    lockMapArchives(__FILE__, __LINE__);
-    for(std::list<MapContainer*>::iterator j=obsoleteMapContainers.begin();j!=obsoleteMapContainers.end();j++) {
-      MapContainer *c=*j;
-      for(std::list<ZipArchive*>::iterator i=mapArchives.begin();i!=mapArchives.end();i++) {
-        ZipArchive *mapArchive = *i;
-        if (mapArchive->getEntrySize(c->getImageFilePath())>0) {
-          mapArchive->removeEntry(c->getImageFilePath());
-          mapArchive->removeEntry(c->getCalibrationFilePath());
-          mapArchive->writeChanges();
-          break;
-        }
-      }
-    }
-    unlockMapArchives();
-
-  }
-
   // Delete the obsolete map containers
   for(std::list<MapContainer*>::iterator i=obsoleteMapContainers.begin();i!=obsoleteMapContainers.end();i++) {
     MapContainer *c=*i;
@@ -458,6 +521,9 @@ void MapSourceMercatorTiles::removeObsoleteMapContainers(bool removeFromMapArchi
     core->getNavigationEngine()->removeGraphics(c);
     delete c;
   }
+
+  // Go through map directories recursively
+  cleanMapFolder(getFolderPath() + "/Tiles",displayArea,allZoomLevels);
 }
 
 // Performs maintenance (e.g., recreate degraded search tree)
@@ -486,7 +552,7 @@ void MapSourceMercatorTiles::maintenance() {
     unlockAccess();
 
     // Remove the obsolete map containers
-    removeObsoleteMapContainers(false);
+    removeObsoleteMapContainers();
 
   }
 

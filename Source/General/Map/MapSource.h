@@ -145,7 +145,7 @@ public:
   virtual void markMapContainerObsolete(MapContainer *c);
 
   // Removes all obsolete map containers
-  virtual void removeObsoleteMapContainers(bool removeFromMapArchive);
+  virtual void removeObsoleteMapContainers(MapArea *displayArea, bool allZoomLevels=false);
 
   // Returns the names of each map layer
   std::list<std::string> getMapLayerNames();

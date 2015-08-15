@@ -916,7 +916,7 @@ void MapSource::markMapContainerObsolete(MapContainer *c) {
 }
 
 // Removes all obsolete map containers
-void MapSource::removeObsoleteMapContainers(bool removeFromMapArchive) {
+void MapSource::removeObsoleteMapContainers(MapArea *displayArea, bool allZoomLevels) {
 }
 
 // Returns the names of each map layer
