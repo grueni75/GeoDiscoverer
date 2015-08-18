@@ -55,9 +55,6 @@ bool MapSourceMercatorTiles::init() {
   std::string mapPath=getFolderPath();
   ZipArchive *mapArchive;
 
-  WARNING("unused texture list in map cache gets corrupted",NULL);
-  WARNING("double free in map tile server download tile image",NULL);
-
   // Read the information from the config file
   if (!parseGDSInfo())
     return false;
@@ -471,13 +468,13 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
             endZoomLevel=displayArea->getZoomLevel();
           }
           for (Int zMap=startZoomLevel;zMap<=endZoomLevel;zMap++) {
-            Int startX,startY,endX,endY;
-            Int minZoomLevelMap;
-            Int minZoomLevelServer;
-            Int maxZoomLevelServer;
-            mapDownloader->getLayerGroupZoomLevelBounds(zMap,minZoomLevelMap,minZoomLevelServer,maxZoomLevelServer);
-            Int zServer=zMap-minZoomLevelMap+minZoomLevelServer;
-            if (zServer==z) {
+            if (zMap==z) {
+              Int startX,startY,endX,endY;
+              Int minZoomLevelMap;
+              Int minZoomLevelServer;
+              Int maxZoomLevelServer;
+              mapDownloader->getLayerGroupZoomLevelBounds(zMap,minZoomLevelMap,minZoomLevelServer,maxZoomLevelServer);
+              Int zServer=zMap-minZoomLevelMap+minZoomLevelServer;
               pos.setLng(displayArea->getLngWest());
               pos.setLat(displayArea->getLatNorth());
               pos.computeMercatorTileXY(zServer,startX,startY);
@@ -485,14 +482,12 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
               pos.setLat(displayArea->getLatSouth());
               pos.computeMercatorTileXY(zServer,endX,endY);
               if ((x>=startX)&&(x<=endX)&&(y>=startY)&&(y<=endY)) {
-                DEBUG("deleting %s",entryPath.c_str());
+                //DEBUG("deleting %s",entryPath.c_str());
                 remove(entryPath.c_str());
               }
             }
           }
         }
-      } else {
-        DEBUG("entry=%s",entry.c_str());
       }
     }
   }
@@ -589,8 +584,7 @@ void MapSourceMercatorTiles::getScales(Int zoomLevel, double &latScale, double &
 }
 
 // Reads information about the map
-bool MapSourceMercatorTiles::parseGDSInfo()
-{
+bool MapSourceMercatorTiles::parseGDSInfo() {
   bool result=false;
   std::string infoFilePath = getFolderPath() + "/info.gds";
 
