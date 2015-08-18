@@ -2672,7 +2672,7 @@ Geo Discoverer is bundled with a set of small tools that can create the contents
 |[[GrabMaps.py|MapCreation/GrabMaps.py]]|Grabs map pictures from windows applications and creates &quot;.gdm&quot; files for them. The calibration data is also copied from the windows application. It contains support for Google Maps running in Firefox and Garmin's &quot;Deutschland Digital Topographische Karte&quot;. The script requires the software packages ~ActivePython-2.7.2.5, ~PIL-1.1.7 and ~MiniCap.|
 </pre>
 </div>
-<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201505040544" changecount="197">
+<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201508180525" changecount="198">
 <pre>The map view is the main activity of the app. It shows the map selected in the AppPreferences on the screen. The map can be moved by using one finger and zoomed by using two fingers. Each map can consist of multiple layers at different zoom levels. The app automatically selects the best layer depending on the zoom ratio. You can also create your own map. See MapCreation.
 ! Elements on the map&lt;html&gt;&lt;a name=&quot;ElementsOnTheMap&quot;/&gt;&lt;/html&gt;
 Besides the map itself, different graphical elements are placed on top of it. Here is an explanation:
@@ -2753,16 +2753,15 @@ These buttons change to the widget page on the left or right side.
 There is also a menu available if you press the hardware menu button or if you swipe from the left edge of the screen to the right. The menu has the following entries:
 |!Menu entry|!Purpose |
 |Show legend|If the map has a legend, it is displayed in an external image viewer. See MapCreation if you want to add your own legend.|
+|Clean map|Deletes the tiles for the the current visible area. This can be used in case the map image is outdated, wrongly downloaded, or the storage space is needed.|
 |Add tracks as routes|Shows a dialog that allows you to convert previously recorded tracks into routes.|
 |Remove routes|Shows a dialog that allows you to delete routes. Attention: The routes are deleted permanently!|
-|Refresh visible map|Reloads the images for the visible tiles from the tile server(s). This can be used in case the map image is outdated or wrongly downloaded.|
-|Toggle messages|Overlays the map with debug messages|
-|Preferences|Opens the preferences of the app. See AppPreferences for more info.|
 |Help|Shows this help.|
-|Send logs|Opens a dialog that shows all recorded log files and crash reports. Select the ones you want to send to the developer. Afterwards, follow the instructions given on screen.|
-|Donate|Opens a dialog for donating money to the app development.|
-|Reset|Resets the app preferences to their defaults.|
+|Preferences|Opens the preferences of the app. See AppPreferences for more info.|
 |Exit|Exits the app.|
+|Toggle messages|Overlays the map with debug messages|
+|Send logs|Opens a dialog that shows all recorded log files and crash reports. Select the ones you want to send to the developer. Afterwards, follow the instructions given on screen.|
+|Reset|Resets the app preferences to their defaults.|
 </pre>
 </div>
 <div title="MarkupPreHead" creator="Matthias" modifier="Matthias" created="201501030959" modified="201501031004" changecount="2">
@@ -4186,8 +4185,9 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201506110542" changecount="25">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201508180527" changecount="27">
 <pre>|!Date |!Changes |
+|2015-08-18|Renamed &quot;Refresh visible map&quot; menu entry in MapView to &quot;Clean visible map&quot; and explained new features.|
 |2015-06-11|Added acknowledge for ~MaterialDialog library to [[About]].|
 |2015-05-13|Explained new dashboard feature in [[NavigationTasks]].|
 |2015-05-04|Explained new &quot;change map layer&quot; widget in [[MapView]].|
