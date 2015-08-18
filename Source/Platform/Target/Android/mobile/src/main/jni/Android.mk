@@ -527,7 +527,7 @@ include $(BUILD_STATIC_LIBRARY)
 # Build the application core
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdcore
-MY_GD_ROOT := ../../../../../../../
+MY_GD_ROOT := ../../../../../../..
 MY_GD_PLATFORM_SRCS = $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/POSIX -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/OpenGL -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libjpeg -name '*.cpp' -exec echo ../{} \;)
@@ -558,7 +558,7 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Widget
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Math
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Config
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Profile
-LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -DSRC_ROOT='"jni/../../../../../Source"'
+LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -DSRC_ROOT='"jni/../../../../../../../../Source"'
 LOCAL_CFLAGS += -Ijni/$(MY_BREAKPAD_PATH)/src/common/android/include 
 LOCAL_CFLAGS += -Ijni/libxml2-2.7.7/include 
 LOCAL_CFLAGS += -Ijni/freetype-2.4.2/include 
