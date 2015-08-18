@@ -936,10 +936,14 @@ void MapSource::selectMapLayer(std::string name) {
   if (i!=mapLayerNameMap.end()) {
     MapPosition pos=*(core->getMapEngine()->lockMapPos(__FILE__,__LINE__));
     core->getMapEngine()->unlockMapPos();
-    if (core->getMapSource()->findMapTileByGeographicCoordinate(pos,i->second,true))
+    core->getMapSource()->lockAccess(__FILE__,__LINE__);
+    bool found=core->getMapSource()->findMapTileByGeographicCoordinate(pos,i->second,true);
+    core->getMapSource()->unlockAccess();
+    if (found) {
       core->getMapEngine()->setZoomLevel(i->second);
-    else
+    } else {
       WARNING("map layer <%s> is not selected because it has no tile for current position",name.c_str());
+    }
   }
 }
 

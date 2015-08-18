@@ -230,11 +230,12 @@ void MapDownloader::updateZoomLevels(Int &minZoomLevel,Int &maxZoomLevel, MapLay
     Int k=minZoomLevelMap;
     for (Int j=minZoomLevelServer;j<=maxZoomLevelServer;j++) {
       std::stringstream name;
-      if (name.str()==std::string(""))
-        name << j;
+      if (layerGroupName=="")
+        name << k;
       else
         name << layerGroupName << " " << j;
       mapLayerNameMap[name.str()]=k;
+      //DEBUG("name=%s zoomLevel=%d",name.str().c_str(),k);
       k++;
     }
   }
