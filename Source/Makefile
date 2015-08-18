@@ -6,7 +6,7 @@
 
 ROOT = $(shell cd .. && pwd)
 LINUX = $(ROOT)/Source/Platform/Target/Linux
-ANDROID = $(ROOT)/Source/Platform/Target/Android/assets/GeoDiscoverer
+ANDROID = $(ROOT)/Source/Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer
 HELP = $(ROOT)/Source/Platform/Target/Help/public
 
 # General dependencies:

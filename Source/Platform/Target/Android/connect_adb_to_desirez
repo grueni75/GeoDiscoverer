@@ -1,4 +1,0 @@
-#!/bin/bash
-adb disconnect desirez
-adb connect desirez
-

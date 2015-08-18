@@ -1,0 +1,2 @@
+find sym -mtime +90 | sed 's/\(.*\)/rm -rf "\1"/' | sh
+

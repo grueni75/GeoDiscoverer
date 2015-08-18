@@ -1,7 +1,0 @@
-#!/bin/bash
-rm -rf /home/grueni/cvs/repository/GeoDiscoverer/Source/Platform/Target/Android/gen/*
-rm -rf /home/grueni/cvs/repository/GeoDiscoverer/Source/Platform/Target/Android/bin/*
-rm -rf bin
-rm -rf gen
-cvs -d /home/grueni/cvs/repository up -d gen bin
-

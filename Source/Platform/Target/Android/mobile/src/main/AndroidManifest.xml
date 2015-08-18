@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.untouchableapps.android.geodiscoverer"
+    android:versionCode="19"
+    android:versionName="20150818">
+
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!--  <uses-permission android:name="com.android.vending.BILLING"></uses-permission> -->
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="19" />
+    <application
+        android:name=".GDApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/GDStyle">
+        <activity
+            android:name=".Donate"
+            android:theme="@style/GDStyle.Dialog" />
+        <activity
+            android:name="org.acra.CrashReportDialog"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/GDStyle.Dialog" />
+        <activity
+            android:name=".ViewMap"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/GDStyle.NoTitleBar">
+            >
+            <!--  Launcher icon -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!--  GPX files via file scheme -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:mimeType="*/*" />
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.gpx" />
+            </intent-filter>
+            <!--  GPX files via http scheme -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:mimeType="*/*" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.gpx" />
+            </intent-filter>
+            <!--  GPX files via mime types -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:mimeType="application/gpx" />
+                <data android:mimeType="application/gpx+xml" />
+                <data android:mimeType="application/x-gpx" />
+                <data android:mimeType="application/x-gpx+xml" />
+                <data android:mimeType="x-cache/gpx" />
+                <data android:mimeType="x-cache/gpx+xml" />
+                <data android:mimeType="x-cache/x-gpx" />
+                <data android:mimeType="x-cache/x-gpx+xml" />
+            </intent-filter>
+            <!--  Map archive files -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:mimeType="*/*" />
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.gda" />
+            </intent-filter>
+            <!-- Text sent by other apps (e.g., addresses) -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Preferences"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/preferences"
+            android:theme="@style/GDStyle"></activity>
+        <activity
+            android:name=".ShowHelp"
+            android:label="@string/button_label_help"
+            android:theme="@style/GDStyle.NoTitleBar.Fullscreen"></activity>
+
+        <service android:name=".GDService" />
+        <receiver
+            android:name=".GDDeviceAdminReceiver"
+            android:description="@string/device_admin_description"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest> 

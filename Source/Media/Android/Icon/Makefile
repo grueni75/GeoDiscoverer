@@ -5,7 +5,7 @@
 # Variables:
 
 ROOT = $(shell cd ../../../.. && pwd)
-ANDROID = $(ROOT)/Source/Platform/Target/Android/res/
+ANDROID = $(ROOT)/Source/Platform/Target/Android/mobile/src/main/res/
 ANDROID_QUOTED = $(subst /,\/,$(ANDROID))
 
 SVGS = exit.svg
@@ -40,6 +40,7 @@ $(foreach dpi,$(DPIS),$(eval $(call SVG2PNG,$(dpi),%.png,%.svg)))
 $(ANDROID): $(PNGS)
 	@echo Installing PNGs into android target
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_\(.*\)\)/cp \1\/* $(ANDROID_QUOTED)\2\//' | sh
+	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/cp $(ANDROID_QUOTED)\/drawable-\2\/ic_launcher.png $(ANDROID_QUOTED)\/mipmap-\2\/ic_launcher.png/' | sh
 	@touch $(ANDROID)
 
 # Cleaning the project

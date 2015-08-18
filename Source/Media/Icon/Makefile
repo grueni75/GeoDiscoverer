@@ -6,7 +6,7 @@
 
 ROOT = $(shell cd ../../.. && pwd)
 LINUX = $(ROOT)/Source/Platform/Target/Linux/Icon/
-ANDROID = $(ROOT)/Source/Platform/Target/Android/assets/GeoDiscoverer/Icon/
+ANDROID = $(ROOT)/Source/Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Icon/
 
 SVGS = $(shell find -name '*.svg' -printf '%P\n')
 DPIS = 120 160 240 320 480 640

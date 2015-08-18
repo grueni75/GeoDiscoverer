@@ -1,0 +1,3 @@
+include ':mobile', ':wear', ':materialDialogs', ':colorPickerPreference'
+project(':materialDialogs').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/material-dialogs/library')
+project(':colorPickerPreference').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/ColorPickerPreference')
