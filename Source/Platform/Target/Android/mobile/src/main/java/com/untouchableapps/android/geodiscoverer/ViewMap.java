@@ -530,6 +530,29 @@ public class ViewMap extends GDActivity {
     alert.show();
   }
 
+  /** Asks the user if the only the current zoom level or all zoom levels shall be removed */
+  void askForMapCleanup() {
+    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
+    builder.setTitle(getTitle());
+    builder.setMessage(R.string.map_cleanup_question);
+    builder.setCancelable(true);
+    builder.setPositiveButton(R.string.map_cleanup_all_zoom_levels,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            coreObject.executeCoreCommand("forceMapRedownload(1)");
+          }
+        });
+    builder.setNegativeButton(R.string.map_cleanup_current_zoom_level,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            coreObject.executeCoreCommand("forceMapRedownload(0)");
+          }
+        });
+    builder.setIcon(android.R.drawable.ic_dialog_alert);
+    Dialog alert = builder.create();
+    alert.show();
+  }
+
   /** Asks the user if the track shall be continued or a new track shall be started */
   void decideContinueOrNewTrack() {
     AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
@@ -1282,8 +1305,10 @@ public class ViewMap extends GDActivity {
           /*case R.id.nav_donate:
             donate();
             break;*/
-          case R.id.nav_force_map_redownload:
-            coreObject.executeCoreCommand("forceMapRedownload()");
+          case R.id.nav_map_cleanup:
+            if (mapSurfaceView!=null) {
+              askForMapCleanup();
+            }
             break;
         }
         viewMapRootLayout.closeDrawers();

@@ -120,7 +120,6 @@
 	  <item>20 €</item>
   </string-array>
   <string name="support_geodiscoverer">Support Geo Discoverer!</string>
-  <string name="force_map_redownload">Refresh visible map</string>
   <string name="opengles20_required">The app is not compatible to this device because it does not support OpenGL ES 2.0.</string>
   <string name="continue_or_new_track_question">Shall the current track be continued or shall a new track be started?</string>
   <string name="new_track">New track</string>
@@ -130,4 +129,8 @@
   <string name="routes">Routes</string>
   <string name="general">General</string>
   <string name="debug">Debug</string>
+  <string name="map_cleanup_question">The visible tiles will be removed from the storage! Please select which zoom levels shall be cleaned.</string>
+  <string name="map_cleanup_all_zoom_levels">All zoom levels</string>
+  <string name="map_cleanup_current_zoom_level">Current zoom level</string>
+  <string name="cleanup_map">Cleanup map</string>
 </resources>
