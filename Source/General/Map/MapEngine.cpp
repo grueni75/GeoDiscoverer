@@ -668,8 +668,8 @@ void MapEngine::updateMap() {
           }
           unlockMapPos();
           deinitTile(t, __FILE__, __LINE__);
-          tiles.pop_back();
         }
+        tiles.pop_back();
       }
 
       // Mark map containers obsolete depending on the requested zoom level to clear
@@ -1115,6 +1115,5 @@ void MapEngine::setMapPos(MapPosition mapPos)
     DEBUG("requested map pos has been ignored because map contains no tile",NULL);
   }
 }
-
 
 }

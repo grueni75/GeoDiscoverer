@@ -26,6 +26,10 @@ protected:
   static const double latBound;                     // Maximum allowed latitude value
   static const double lngBound;                     // Maximum allowed longitude value
   std::list<MapContainer*> obsoleteMapContainers;   // List of obsolete map containers
+  ThreadMutexInfo *downloadJobsMutex;               // Mutex for accessing infos related to download jobs
+  std::list<std::string> processedDownloadJobs;     // List of job names that have been processed already
+  ThreadInfo *processDonwloadJobsThreadInfo;        // Thread that processes all download jobs
+  bool quitProcessDownloadJobsThread;               // Indicates if the process download jobs thread shall quit
 
   // Fetches the map tile in which the given position lies from disk or server
   MapTile *fetchMapTile(MapPosition pos, Int zoomLevel);
@@ -41,6 +45,9 @@ protected:
 
   // Clears the given map directory
   void cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels);
+
+  // Computes the mercator x and y ranges for the given area and zoom level
+  void computeMercatorBounds(MapArea *displayArea,Int zMap,Int &zServer,Int &startX,Int &endX,Int &startY,Int &endY);
 
 public:
 
@@ -76,6 +83,12 @@ public:
 
   // Removes all obsolete map containers
   virtual void removeObsoleteMapContainers(MapArea *displayArea=NULL, bool allZoomLevels=false);
+
+  // Adds a download job from the current visible map
+  virtual void addDownloadJob(bool estimateOnly, std::string zoomLevels);
+
+  // Processes all pending download jobs
+  virtual void processDownloadJobs();
 
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {

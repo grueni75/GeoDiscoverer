@@ -141,7 +141,7 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
   
   /** Called by the text to speech engine if init is complete */
   public void onInit(int status) {
-    if (status == TextToSpeech.SUCCESS) {
+    if ((status == TextToSpeech.SUCCESS)&&(textToSpeech!=null)) {
       textToSpeechLocale = new Locale(context.getString(R.string.tts_locale));
       int result = textToSpeech.setLanguage(textToSpeechLocale);
       if ((result == TextToSpeech.LANG_MISSING_DATA) || (result == TextToSpeech.LANG_NOT_SUPPORTED)) {

@@ -450,15 +450,7 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="changeMapLayer") {
     if (core->getIsInitialized()) {
-      std::list<std::string> names=core->getMapSource()->getMapLayerNames();
-      std::string appCmd = "changeMapLayer(";
-      for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
-        if (i==names.begin())
-          appCmd += *i;
-        else
-          appCmd += "," + *i;
-      }
-      appCmd += ")";
+      std::string appCmd = "changeMapLayer()";
       dispatch(appCmd);
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
@@ -467,8 +459,37 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="selectMapLayer") {
     if (core->getIsInitialized()) {
-      DEBUG("cmd=%s",cmd.c_str());
       core->getMapSource()->selectMapLayer(args[0]);
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="addDownloadJob") {
+    if (core->getIsInitialized()) {
+      core->getMapSource()->addDownloadJob(false,unparsedCmdArgs);
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="estimateDownloadJob") {
+    if (core->getIsInitialized()) {
+      core->getMapSource()->addDownloadJob(true,unparsedCmdArgs);
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="getMapLayers") {
+    if (core->getIsInitialized()) {
+      std::list<std::string> names=core->getMapSource()->getMapLayerNames();
+      for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
+        if (i==names.begin())
+          result += *i;
+        else
+          result += "," + *i;
+      }
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
     }

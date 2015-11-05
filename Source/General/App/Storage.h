@@ -30,6 +30,9 @@ public:
   // Write string into file
   static void storeString(std::ofstream *ofs, std::string string);
 
+  // Write string into file
+  static void storeString(std::ofstream *ofs, char *string);
+
   // Read string from file
   static void retrieveString(char *&cacheData, Int &cacheSize, char **string);
 

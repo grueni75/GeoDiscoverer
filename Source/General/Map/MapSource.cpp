@@ -947,4 +947,12 @@ void MapSource::selectMapLayer(std::string name) {
   }
 }
 
+// Adds a download job from the current visible map
+void MapSource::addDownloadJob(bool estimateOnly, std::string zoomLevels) {
+}
+
+// Processes all pending download jobs
+void MapSource::processDownloadJobs() {
+}
+
 }

@@ -26,6 +26,13 @@ void Storage::storeString(std::ofstream *ofs, std::string string) {
   ofs->write((char*)string.c_str(),string.size()+1);
 }
 
+// Write string into file
+void Storage::storeString(std::ofstream *ofs, char *string) {
+  if (string==NULL)
+    string=(char *)"";
+  ofs->write(string,strlen(string)+1);
+}
+
 // Read string from file
 void Storage::retrieveString(char *&cacheData, Int &cacheSize, char **string) {
   *string=cacheData;

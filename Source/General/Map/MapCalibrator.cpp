@@ -107,7 +107,7 @@ void MapCalibrator::store(std::ofstream *ofs) {
   // Store all relevant fields
   Storage::storeMem(ofs,(char*)this,size,true);
   if (args==NULL)
-    Storage::storeString(ofs,"");
+    Storage::storeString(ofs,(char*)"");
   else
     Storage::storeString(ofs,args);
   Storage::storeInt(ofs,calibrationPoints.size());

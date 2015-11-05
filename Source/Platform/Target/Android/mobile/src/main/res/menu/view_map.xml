@@ -11,9 +11,13 @@
 						android:icon="@drawable/legend"
 						android:title="@string/show_legend"/>
 					<item
-						android:id="@+id/nav_map_cleanup"
-						android:icon="@drawable/refresh"
-						android:title="@string/cleanup_map"/>
+						android:id="@+id/nav_map_download"
+						android:icon="@drawable/download"
+						android:title="@string/download_map"/>
+          <item
+            android:id="@+id/nav_map_cleanup"
+            android:icon="@drawable/refresh"
+            android:title="@string/cleanup_map"/>
 		    </menu>
 		  </item>
 

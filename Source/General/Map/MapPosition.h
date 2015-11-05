@@ -119,6 +119,9 @@ public:
   // Invalidates the position
   void invalidate();
 
+  // Sets the longitude and latitude based on the given mercator x and y coordinates
+  void setFromMercatorTileXY(Int zoomLevel, Int x, Int y);
+
   // Getters and setters
   bool getIsUpdated() const {
     return isUpdated;

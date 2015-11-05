@@ -38,6 +38,7 @@ import org.acra.ReportingInteractionMode;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
@@ -72,6 +73,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.Editable;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -370,7 +372,7 @@ public class ViewMap extends GDActivity {
             commandExecuted=true;
           } 
           if (commandFunction.equals("changeMapLayer")) {            
-            viewMap.changeMapLayer(commandArgs);
+            viewMap.changeMapLayer();
             commandExecuted=true;
           } 
           
@@ -404,7 +406,7 @@ public class ViewMap extends GDActivity {
   synchronized void startWatchingCompass() {
     if ((mapSurfaceView!=null)&&(!compassWatchStarted)) {
       sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
-      sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),SensorManager.SENSOR_DELAY_NORMAL);
+      sensorManager.registerListener(coreObject, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
       compassWatchStarted=true;
     }
   }
@@ -553,6 +555,46 @@ public class ViewMap extends GDActivity {
     alert.show();
   }
 
+  /** Asks the user which map layers of the visible map to download */
+  void askForMapDownload() {
+    String result=coreObject.executeCoreCommand("getMapLayers()");
+    final String[] mapLayers=result.split(",");
+    final String commandArgs=new String();
+    final LinkedList<String> selectedMapLayers = new LinkedList<String>();
+    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
+    builder.setTitle(R.string.download_job_level_selection_question);
+    builder.setMultiChoiceItems(mapLayers, null,
+        new DialogInterface.OnMultiChoiceClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+            if (isChecked)
+              selectedMapLayers.add(mapLayers[which]);
+            else
+              selectedMapLayers.remove(mapLayers[which]);
+            if (selectedMapLayers.size() > 0) {
+              String args = TextUtils.join(",", selectedMapLayers);
+              coreObject.executeCoreCommand("estimateDownloadJob(" + args + ")");
+            }
+          }
+        });
+    builder.setCancelable(true);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
+    builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        if (selectedMapLayers.size() > 0) {
+          String args = TextUtils.join(",", selectedMapLayers);
+          coreObject.executeCoreCommand("addDownloadJob(" + args + ")");
+        }
+      }
+    });
+    builder.setNegativeButton(R.string.cancel, null);
+    builder.setMessage(getString(R.string.download_job_level_selection_question,getString(R.string.download_job_unknown_size)));
+    Dialog alert = builder.create();
+    ((AlertDialog)alert).getButton(Dialog.BUTTON_POSITIVE).setEnabled(false);
+    alert.show();
+  }
+
   /** Asks the user if the track shall be continued or a new track shall be started */
   void decideContinueOrNewTrack() {
     AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
@@ -578,14 +620,16 @@ public class ViewMap extends GDActivity {
   }
 
   /** Asks the user if which map layer shall be selected */
-  void changeMapLayer(final Vector<String> names) {
+  void changeMapLayer() {
+    String result=coreObject.executeCoreCommand("getMapLayers()");
+    final String[] mapLayers=result.split(",");
     AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
     builder.setTitle(R.string.map_layer_selection_question);
-    builder.setItems(names.toArray(new CharSequence[names.size()]),
+    builder.setItems(mapLayers,
         new DialogInterface.OnClickListener() {
           @Override
           public void onClick(DialogInterface dialog, int which) {
-            coreObject.executeCoreCommand("selectMapLayer(" + names.elementAt(which)  + ")");
+            coreObject.executeCoreCommand("selectMapLayer(" + mapLayers[which]  + ")");
           }
         });
     builder.setCancelable(true);
@@ -1308,6 +1352,11 @@ public class ViewMap extends GDActivity {
           case R.id.nav_map_cleanup:
             if (mapSurfaceView!=null) {
               askForMapCleanup();
+            }
+            break;
+          case R.id.nav_map_download:
+            if (mapSurfaceView!=null) {
+              askForMapDownload();
             }
             break;
         }

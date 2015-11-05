@@ -40,6 +40,12 @@
 #include <unistd.h>
 #include <algorithm>
 #include <signal.h>
+#ifdef TARGET_ANDROID
+#include <sys/vfs.h>
+#define statvfs statfs  // Android uses a statvfs-like statfs struct and call.
+#else
+#include <sys/statvfs.h>
+#endif
 #ifdef TARGET_LINUX
 #include <execinfo.h>
 #endif

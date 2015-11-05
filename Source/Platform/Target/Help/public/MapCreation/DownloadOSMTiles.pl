@@ -326,6 +326,7 @@ sub downloadtile {
     # Download the image
     mkpath( dirname($fname) );
     my $repeat = 1;
+    my $at_least_one_downloaded=0;
     while ($repeat) {
       for (my $i = 0; $i < scalar @baseurls; $i++) {
         my $url = "$baseurls[$i]";
@@ -342,9 +343,17 @@ sub downloadtile {
         if (($res->status_line =~ m/^500 /)||($res->status_line =~ m/^504 /)||($res->status_line =~ m/^524 /)||($res->status_line =~ m/^522 /)||($res->status_line =~ m/^503 /)) {
           $repeat = 1;
         } else {
-          die $res->status_line unless $res->is_success;
+          if ($res->status_line !~ m/^404 /) {
+            die $res->status_line unless $res->is_success;
+          }
+        }
+        if ($res->is_success) {
+          $at_least_one_downloaded=1;
         }
       }
+    }
+    if (! $at_least_one_downloaded) {
+      die 'Could not download at least one tile!';
     }
 
     # Overlay the image to get the final one

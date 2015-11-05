@@ -309,6 +309,15 @@ void MapPosition::computeMercatorTileBounds(Int zoomLevel, double &latNorth, dou
   latSouth = 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
 }
 
+// Sets the longitude and latitude based on the given mercator x and y coordinates
+void MapPosition::setFromMercatorTileXY(Int zoomLevel, Int x, Int y) {
+  double unit = 1.0 / pow(2.0, zoomLevel);
+  setLng((x+0.5) * unit * 360.0 - 180.0);
+  double n = M_PI - 2.0 * M_PI * (y+0.5) * unit;
+  setLat(180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n))));
+
+}
+
 // Checks if the location is valid
 bool MapPosition::isValid() {
   if ((lng==-std::numeric_limits<double>::max())&&(lat==-std::numeric_limits<double>::max()))

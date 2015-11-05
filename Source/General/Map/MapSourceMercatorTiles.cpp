@@ -8,7 +8,7 @@
 // Unauthorized copying of this file, via any medium, is strictly prohibited.
 // Proprietary and confidential.
 //
-//============================================================================
+//============================getLayerGroupZoomLevelBounds================================================
 
 #include <Core.h>
 
@@ -17,6 +17,13 @@ namespace GEODISCOVERER {
 // Constant values
 const double MapSourceMercatorTiles::latBound = 85.0511287798;
 const double MapSourceMercatorTiles::lngBound = 180.0;
+
+// Process downloads thread
+void *mapSourceMercatorTilesProcessDownloadJobsThread(void *args) {
+  MapSourceMercatorTiles *mapSource = (MapSourceMercatorTiles*) args;
+  mapSource->processDownloadJobs();
+  return NULL;
+}
 
 // Constructor
 MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
@@ -29,6 +36,9 @@ MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   mapDownloader=new MapDownloader(this);
   if (mapDownloader==NULL)
     FATAL("can not create map downloader object",NULL);
+  downloadJobsMutex=core->getThread()->createMutex("download jobs mutex");
+  quitProcessDownloadJobsThread=false;
+  processDonwloadJobsThreadInfo=NULL;
 }
 
 // Destructor
@@ -41,10 +51,17 @@ MapSourceMercatorTiles::~MapSourceMercatorTiles() {
   // Free everything else
   deinit();
   core->getThread()->destroyMutex(accessMutex);
+  core->getThread()->destroyMutex(downloadJobsMutex);
 }
 
 // Deinitializes the map source
 void MapSourceMercatorTiles::deinit() {
+  if (processDonwloadJobsThreadInfo) {
+    quitProcessDownloadJobsThread=true;
+    core->getThread()->waitForThread(processDonwloadJobsThreadInfo);
+    core->getThread()->destroyThread(processDonwloadJobsThreadInfo);
+    processDonwloadJobsThreadInfo=NULL;
+  }
   if (mapDownloader) mapDownloader->deinit();
   MapSource::deinit();
 }
@@ -115,8 +132,8 @@ bool MapSourceMercatorTiles::init() {
   }
   centerPosition->setLat(0);
   centerPosition->setLng(0);
-  centerPosition->setLatScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::latBound);
-  centerPosition->setLngScale(((double)mapTileLength*pow(2.0,(double)minZoomLevel))/2.0/MapSourceMercatorTiles::lngBound);
+  centerPosition->setLatScale(((double)mapTileLength*pow(2.0,(double)0))/2.0/MapSourceMercatorTiles::latBound);
+  centerPosition->setLngScale(((double)mapTileLength*pow(2.0,(double)0))/2.0/MapSourceMercatorTiles::lngBound);
 
   // Rename the layers
   renameLayers();
@@ -125,6 +142,9 @@ bool MapSourceMercatorTiles::init() {
   for (int z=0;z<(maxZoomLevel-minZoomLevel)+2;z++) {
     zoomLevelSearchTrees.push_back(NULL);
   }
+
+  // Process the download jobs
+  processDownloadJobs();
 
   // Finished
   isInitialized=true;
@@ -342,7 +362,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   // Request the navigation engine to add overlays to the new tile
   core->getNavigationEngine()->addGraphics(mapContainer);
 
-  //DEBUG("tile %s created",mapTile->getVisName().front().c_str());
+  DEBUG("tile %s created",mapTile->getVisName().front().c_str());
 
   // Return the tile
   return mapTile;
@@ -414,6 +434,22 @@ void MapSourceMercatorTiles::markMapContainerObsolete(MapContainer *c) {
   }
 }
 
+// Computes the mercator x and y ranges for the given area and zoom level
+void MapSourceMercatorTiles::computeMercatorBounds(MapArea *displayArea,Int zMap,Int &zServer,Int &startX,Int &endX,Int &startY,Int &endY) {
+  Int minZoomLevelMap;
+  Int minZoomLevelServer;
+  Int maxZoomLevelServer;
+  mapDownloader->getLayerGroupZoomLevelBounds(zMap,minZoomLevelMap,minZoomLevelServer,maxZoomLevelServer);
+  zServer=zMap-minZoomLevelMap+minZoomLevelServer;
+  MapPosition pos;
+  pos.setLng(displayArea->getLngWest());
+  pos.setLat(displayArea->getLatNorth());
+  pos.computeMercatorTileXY(zServer,startX,startY);
+  pos.setLng(displayArea->getLngEast());
+  pos.setLat(displayArea->getLatSouth());
+  pos.computeMercatorTileXY(zServer,endX,endY);
+}
+
 // Clears the given map directory
 void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels) {
 
@@ -469,18 +505,8 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
           }
           for (Int zMap=startZoomLevel;zMap<=endZoomLevel;zMap++) {
             if (zMap==z) {
-              Int startX,startY,endX,endY;
-              Int minZoomLevelMap;
-              Int minZoomLevelServer;
-              Int maxZoomLevelServer;
-              mapDownloader->getLayerGroupZoomLevelBounds(zMap,minZoomLevelMap,minZoomLevelServer,maxZoomLevelServer);
-              Int zServer=zMap-minZoomLevelMap+minZoomLevelServer;
-              pos.setLng(displayArea->getLngWest());
-              pos.setLat(displayArea->getLatNorth());
-              pos.computeMercatorTileXY(zServer,startX,startY);
-              pos.setLng(displayArea->getLngEast());
-              pos.setLat(displayArea->getLatSouth());
-              pos.computeMercatorTileXY(zServer,endX,endY);
+              Int zServer,startX,endX,startY,endY;
+              computeMercatorBounds(displayArea,zMap,zServer,startX,endX,startY,endY);
               if ((x>=startX)&&(x<=endX)&&(y>=startY)&&(y<=endY)) {
                 //DEBUG("deleting %s",entryPath.c_str());
                 remove(entryPath.c_str());
@@ -565,9 +591,13 @@ MapCalibrator *MapSourceMercatorTiles::findMapCalibrator(Int zoomLevel, MapPosit
     return tile->getParentMapContainer()->getMapCalibrator();
   } else {
     deleteCalibrator=true;
-    Int z=zoomLevel-1+minZoomLevel;
+    Int minZoomLevelMap;
+    Int minZoomLevelServer;
+    Int maxZoomLevelServer;
+    mapDownloader->getLayerGroupZoomLevelBounds(zoomLevel,minZoomLevelMap,minZoomLevelServer,maxZoomLevelServer);
+    Int zServer=zoomLevel-minZoomLevelMap+minZoomLevelServer;
     double latNorth, latSouth, lngWest, lngEast;
-    pos.computeMercatorTileBounds(z,latNorth,latSouth,lngWest,lngEast);
+    pos.computeMercatorTileBounds(zServer,latNorth,latSouth,lngWest,lngEast);
     return createMapCalibrator(latNorth,latSouth,lngWest,lngEast);
   }
 }
@@ -577,8 +607,13 @@ void MapSourceMercatorTiles::getScales(Int zoomLevel, double &latScale, double &
   MapPosition pos;
   pos.setLat(latBound);
   pos.setLng(0);
+  Int minZoomLevelMap;
+  Int minZoomLevelServer;
+  Int maxZoomLevelServer;
+  mapDownloader->getLayerGroupZoomLevelBounds(zoomLevel,minZoomLevelMap,minZoomLevelServer,maxZoomLevelServer);
+  Int zServer=zoomLevel-minZoomLevelMap+minZoomLevelServer;
   double latNorth,latSouth,lngWest,lngEast;
-  pos.computeMercatorTileBounds(zoomLevel-1+minZoomLevel,latNorth,latSouth,lngWest,lngEast);
+  pos.computeMercatorTileBounds(zServer,latNorth,latSouth,lngWest,lngEast);
   lngScale=mapTileLength/(lngEast-lngWest);
   latScale=mapTileLength/(latNorth-latSouth);
 }
@@ -631,6 +666,186 @@ bool MapSourceMercatorTiles::parseGDSInfo() {
 cleanup:
 
   return result;
+}
+
+// Adds a download job from the current visible map
+void MapSourceMercatorTiles::addDownloadJob(bool estimateOnly, std::string zoomLevels) {
+
+  // Get the display area to download
+  MapArea area = *(core->getMapEngine()->lockDisplayArea(__FILE__,__LINE__));
+  core->getMapEngine()->unlockDisplayArea();
+
+  // Stop any ongoing download jobs
+  quitProcessDownloadJobsThread=true;
+  core->getThread()->lockMutex(downloadJobsMutex,__FILE__,__LINE__);
+
+  // Remove any estimation jobs
+  ConfigStore *c=core->getConfigStore();
+  std::list<std::string> names=c->getAttributeValues("Map/DownloadJob","name",__FILE__,__LINE__);
+  for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
+    if (std::find(processedDownloadJobs.begin(), processedDownloadJobs.end(), *i)==processedDownloadJobs.end()) {
+      std::string configPath="Map/DownloadJob[@name='" + *i + "']";
+      if (c->getIntValue(configPath,"estimateOnly",__FILE__,__LINE__)) {
+        c->removePath(configPath);
+      }
+    }
+  }
+
+  // Add new job
+  std::string jobName=core->getClock()->getXMLDate(core->getClock()->getSecondsSinceEpoch(),true);
+  std::string path="Map/DownloadJob[@name='" + jobName + "']";
+  c->setDoubleValue(path,"latNorth",area.getLatNorth(),__FILE__,__LINE__);
+  c->setDoubleValue(path,"latSouth",area.getLatSouth(),__FILE__,__LINE__);
+  c->setDoubleValue(path,"lngEast",area.getLngEast(),__FILE__,__LINE__);
+  c->setDoubleValue(path,"lngWest",area.getLngWest(),__FILE__,__LINE__);
+  c->setStringValue(path,"zoomLevels",zoomLevels,__FILE__,__LINE__);
+  c->setIntValue(path,"estimateOnly",estimateOnly,__FILE__,__LINE__);
+
+  // Stop the previous thread
+  if (processDonwloadJobsThreadInfo) {
+    core->getThread()->waitForThread(processDonwloadJobsThreadInfo);
+    core->getThread()->destroyThread(processDonwloadJobsThreadInfo);
+    processDonwloadJobsThreadInfo=NULL;
+  }
+
+  // Start the new job
+  quitProcessDownloadJobsThread=false;
+  processDonwloadJobsThreadInfo=core->getThread()->createThread("map source mercator tiles process download jobs thread",mapSourceMercatorTilesProcessDownloadJobsThread,(void*)this);
+  core->getThread()->unlockMutex(downloadJobsMutex);
+}
+
+// Processes all pending download jobs
+void MapSourceMercatorTiles::processDownloadJobs() {
+
+  core->getThread()->lockMutex(downloadJobsMutex,__FILE__,__LINE__);
+
+  // Get free storage space
+  double freeStorageSpace=0;
+  struct statvfs stat;
+  if (statvfs(getFolderPath().c_str(),&stat)!=0) {
+    FATAL("can not obtain free storage space",NULL);
+    return;
+  }
+  freeStorageSpace=((double)stat.f_bsize)*((double)stat.f_bfree)/1024.0/1024.0;
+  DEBUG("free space: %lf MB",freeStorageSpace);
+
+  // Go through all download jobs
+  std::list<std::string> finishedDownloadJobs;
+  ConfigStore *c=core->getConfigStore();
+  double estimatedTotalStorageSpace=0;
+  double averageMercatorTileSize=((double)c->getIntValue("Map","averageMercatorTileSize",__FILE__,__LINE__))/1024.0/1024.0;
+  std::list<std::string> names=c->getAttributeValues("Map/DownloadJob","name",__FILE__,__LINE__);
+  for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
+    if (std::find(processedDownloadJobs.begin(), processedDownloadJobs.end(), *i)==processedDownloadJobs.end()) {
+      DEBUG("processing download job %s",(*i).c_str());
+      processedDownloadJobs.push_back(*i);
+
+      // Process the download job
+      double estimatedJobStorageSpace=0;
+      bool allTilesDownloaded=true;
+      std::string configPath="Map/DownloadJob[@name='" + *i + "']";
+      bool estimateOnly=c->getIntValue(configPath,"estimateOnly",__FILE__,__LINE__);
+      MapArea area;
+      double n;
+      n=c->getDoubleValue(configPath,"latNorth",__FILE__,__LINE__);
+      area.setLatNorth(n);
+      n=c->getDoubleValue(configPath,"latSouth",__FILE__,__LINE__);
+      area.setLatSouth(n);
+      n=c->getDoubleValue(configPath,"lngEast",__FILE__,__LINE__);
+      area.setLngEast(n);
+      n=c->getDoubleValue(configPath,"lngWest",__FILE__,__LINE__);
+      area.setLngWest(n);
+      std::istringstream s(c->getStringValue(configPath,"zoomLevels",__FILE__,__LINE__));
+      std::string t;
+      Int zMap;
+      while (std::getline(s,t,',')) {
+        std::stringstream s2(t);
+        s2 >> zMap;
+
+        // Compute the tile ranges
+        Int zServer,startX,endX,startY,endY;
+        computeMercatorBounds(&area,zMap,zServer,startX,endX,startY,endY);
+
+        // Go through the tile ranges
+        for (Int x=startX;x<=endX;x++) {
+          for (Int y=startY;y<=endY;y++) {
+
+            // Tile not yet downloaded?
+            std::stringstream filePath;
+            filePath << getFolderPath() << "/Tiles/" << zMap << "/" << x << "/" << zMap << "_" << x << "_" << y << ".gda";
+            //DEBUG("%s",filePath.str().c_str());
+            if (access(filePath.str().c_str(),F_OK)==-1) {
+              allTilesDownloaded=false;
+
+              // Check if disk space is exceeded
+              estimatedJobStorageSpace+=averageMercatorTileSize;
+              if (!estimateOnly) {
+                if (estimatedTotalStorageSpace+estimatedJobStorageSpace>freeStorageSpace) {
+                  ERROR("suspending map download job because device has not enough free space (%d MB available)",freeStorageSpace);
+                  goto nextJob;
+                }
+              }
+
+              // Check if we shall quit
+              if (core->getQuitCore())
+                goto cleanup;
+
+              // Queue it
+              if (!estimateOnly) {
+                MapPosition pos;
+                pos.setFromMercatorTileXY(zServer,x,y);
+                lockAccess(__FILE__,__LINE__);
+                fetchMapTile(pos,zMap);
+                unlockAccess();
+              }
+
+            }
+
+            // Shall we stop?
+            if (quitProcessDownloadJobsThread)
+              goto cleanup;
+          }
+        }
+      }
+
+nextJob:
+
+      // Remember size of this job
+      estimatedTotalStorageSpace+=estimatedJobStorageSpace;
+
+      // Update app if this is an estimate job
+      if (estimateOnly) {
+        std::stringstream cmd;
+        std::string value,unit;
+        cmd << "updateDownloadJobSize(";
+        core->getUnitConverter()->formatBytes(estimatedJobStorageSpace*1024.0*1024.0,value,unit);
+        cmd << value << " " << unit << " / ";
+        core->getUnitConverter()->formatBytes(freeStorageSpace*1024.0*1024.0,value,unit);
+        cmd << value << " " << unit;
+        if (estimatedJobStorageSpace>freeStorageSpace)
+          cmd << "1";
+        else
+          cmd << "0";
+        cmd << ")";
+        core->getCommander()->dispatch(cmd.str());
+      }
+
+      // Remember this jobs if it's finished
+      if ((allTilesDownloaded)||(estimateOnly))
+        finishedDownloadJobs.push_back(*i);
+    }
+  }
+  DEBUG("estimatedStorageSpace: %lf MB",estimatedTotalStorageSpace);
+
+cleanup:
+
+  // Remove download job if all tiles have been downloaded
+  for (std::list<std::string>::iterator i=finishedDownloadJobs.begin();i!=finishedDownloadJobs.end();i++) {
+    std::string configPath="Map/DownloadJob[@name='" + *i + "']";
+    c->removePath(configPath);
+  }
+
+  core->getThread()->unlockMutex(downloadJobsMutex);
 }
 
 } /* namespace GEODISCOVERER */

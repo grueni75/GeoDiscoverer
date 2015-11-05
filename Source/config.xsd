@@ -1279,6 +1279,11 @@
                   <xsd:documentation>Indicates if the zoom level of the map shall not be changed when zooming.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="averageMercatorTileSize" type="xsd:integer" default="128000">
+                <xsd:annotation>
+                  <xsd:documentation>Average size of a mercator tile gda file.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="LastPosition" minOccurs="0">
                 <xsd:annotation>
                   <xsd:documentation>Information about the last shown position.</xsd:documentation>
@@ -1347,6 +1352,50 @@
                 <xsd:annotation>
                   <xsd:documentation>Number of threads to spawn that download images.</xsd:documentation>
                 </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="DownloadJob">
+                <xsd:annotation>
+                  <xsd:documentation>Defines a  map area that shall be downloaded to the device storage.</xsd:documentation>
+                </xsd:annotation>
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="latNorth" type="xsd:double">
+                      <xsd:annotation>
+                        <xsd:documentation>Latitude of the north border in degrees.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="latSouth" type="xsd:double">
+                      <xsd:annotation>
+                        <xsd:documentation>Latitude of the south border in degrees.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="lngWest" type="xsd:double">
+                      <xsd:annotation>
+                        <xsd:documentation>Longitude of the west border in degrees.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="lngEast" type="xsd:double">
+                      <xsd:annotation>
+                        <xsd:documentation>Longitude of the east border in degrees.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="zoomLevels" type="xsd:string">
+                      <xsd:annotation>
+                        <xsd:documentation>Zoom level to download.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="estimateOnly" type="xsd:boolean">
+                      <xsd:annotation>
+                        <xsd:documentation>Estimate required disk usage only.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                  </xsd:sequence>
+                  <xsd:attribute name="name">
+                    <xsd:annotation>
+                      <xsd:documentation>Name of the download job.</xsd:documentation>
+                    </xsd:annotation>
+                  </xsd:attribute>
+                </xsd:complexType>
               </xsd:element>
             </xsd:sequence>
           </xsd:complexType>

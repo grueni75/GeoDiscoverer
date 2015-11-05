@@ -35,6 +35,9 @@ public:
   // Converts a length in meters to the selected unit system and formats it for displaying purposes
   void formatMeters(double lengthInMeters, std::string &value, std::string &unit, Int precision=2, std::string lockedUnit="");
 
+  // Converts a size in bytes to the selected unit system and formats it for displaying purposes
+  void formatBytes(double bytes, std::string &value, std::string &unit, Int precision=2, std::string lockedUnit="");
+
   // Converts a speed in meters per second to the selected unit system and formats it for displaying purposes
   void formatMetersPerSecond(double speedInMetersPerSecond, std::string &value, std::string &unit, Int precision=2);
 

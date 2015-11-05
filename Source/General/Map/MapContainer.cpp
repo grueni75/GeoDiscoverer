@@ -794,7 +794,7 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize) {
   // Check if the class has changed
   Int size=sizeof(MapContainer);
 #ifdef TARGET_LINUX
-  if (size!=304) {
+  if (size!=320) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return NULL;
   }

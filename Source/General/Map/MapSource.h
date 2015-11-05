@@ -22,28 +22,28 @@ class MapSource {
 
 protected:
 
-  MapSourceType type;                       // Type of source
-  std::string folder;                       // Folder that contains the map data
-  std::list<ZipArchive*> mapArchives;       // Zip archives that contain the calibrated maps
-  ThreadMutexInfo *mapArchivesMutex;        // Mutex to access the map archives
-  double neighborPixelTolerance ;           // Maximum allowed difference in pixels to classify a tile as a neighbor
-  std::vector<MapContainer*> mapContainers; // Vector of all maps
-  MapPosition *centerPosition;              // Center position of the map
-  bool isInitialized;                       // Indicates if the object is initialized
-  Int mapTileLength;                        // Default length of a tile
-  Int progressValue;                        // Current progress value of the retrieve
-  DialogKey progressDialog;                 // Handle to progress dialog
-  std::string progressDialogTitle;          // Title of the progress dialog
-  Int progressUpdateValue;                  // Value when to update the progress dialog
-  Int progressValueMax;                     // Maximum progress value
-  Int progressIndex;                        // State of progress dialog
-  bool contentsChanged;                     // Indicates if the users of the map source need to update their data structures
-  std::list<std::string> status;            // Status of the map source
-  ThreadMutexInfo *statusMutex;             // Mutex for accessing the status
-  MapDownloader *mapDownloader;             // Downloads missing tiles from the tileserver
-  MapLayerNameMap mapLayerNameMap;          // Defines for each zoom level a name
-  Int minZoomLevel;                         // Minimum zoom value
-  Int maxZoomLevel;                         // Maximum zoom value
+  MapSourceType type;                             // Type of source
+  std::string folder;                             // Folder that contains the map data
+  std::list<ZipArchive*> mapArchives;             // Zip archives that contain the calibrated maps
+  ThreadMutexInfo *mapArchivesMutex;              // Mutex to access the map archives
+  double neighborPixelTolerance ;                 // Maximum allowed difference in pixels to classify a tile as a neighbor
+  std::vector<MapContainer*> mapContainers;       // Vector of all maps
+  MapPosition *centerPosition;                    // Center position of the map
+  bool isInitialized;                             // Indicates if the object is initialized
+  Int mapTileLength;                              // Default length of a tile
+  Int progressValue;                              // Current progress value of the retrieve
+  DialogKey progressDialog;                       // Handle to progress dialog
+  std::string progressDialogTitle;                // Title of the progress dialog
+  Int progressUpdateValue;                        // Value when to update the progress dialog
+  Int progressValueMax;                           // Maximum progress value
+  Int progressIndex;                              // State of progress dialog
+  bool contentsChanged;                           // Indicates if the users of the map source need to update their data structures
+  std::list<std::string> status;                  // Status of the map source
+  ThreadMutexInfo *statusMutex;                   // Mutex for accessing the status
+  MapDownloader *mapDownloader;                   // Downloads missing tiles from the tileserver
+  MapLayerNameMap mapLayerNameMap;                // Defines for each zoom level a name
+  Int minZoomLevel;                               // Minimum zoom value
+  Int maxZoomLevel;                               // Maximum zoom value
 
   // Lists of map containers sorted by their boundaries
   std::vector<Int> mapsIndexByLatNorth;
@@ -152,6 +152,12 @@ public:
 
   // Selects the given map layer
   void selectMapLayer(std::string name);
+
+  // Adds a download job from the current visible map
+  virtual void addDownloadJob(bool estimateOnly, std::string zoomLevels);
+
+  // Processes all pending download jobs
+  virtual void processDownloadJobs();
 
   // Getters and setters
   Int getMapTileLength() const {

@@ -73,6 +73,34 @@ void UnitConverter::formatMeters(double lengthInMeters, std::string &value, std:
   value=s.str();
 }
 
+// Converts a length in meters to the selected unit system and formats it for displaying purposes
+void UnitConverter::formatBytes(double bytes, std::string &value, std::string &unit, Int precision, std::string lockedUnit) {
+
+  // Convert the value and set the unit
+  if ((((bytes/1024.0/1024.0/1024.0/1024.0)>=1.0)&&(lockedUnit==""))||(lockedUnit=="TB")) {
+    bytes=bytes/1024.0/1024.0/1024.0/1024.0;
+    unit="TB";
+  } else if ((((bytes/1024.0/1024.0/1024.0)>=1.0)&&(lockedUnit==""))||(lockedUnit=="GB")) {
+    bytes=bytes/1024.0/1024.0/1024.0;
+    unit="GB";
+  } else if ((((bytes/1024.0/1024.0)>=1.0)&&(lockedUnit==""))||(lockedUnit=="MB")) {
+    bytes=bytes/1024.0/1024.0;
+    unit="MB";
+  } else if ((((bytes/1024.0)>=1.0)&&(lockedUnit==""))||(lockedUnit=="KB")) {
+    bytes=bytes/1024.0;
+    unit="KB";
+  } else {
+    unit="B";
+  }
+
+  // Format the value
+  std::stringstream s;
+  s.precision(precision);
+  s.setf(std::ios_base::fixed);
+  s<<bytes;
+  value=s.str();
+}
+
 // Converts a speed in meters per second to the selected unit system and formats it for displaying purposes
 void UnitConverter::formatMetersPerSecond(double speedInMetersPerSecond, std::string &value, std::string &unit, Int precision) {
 
