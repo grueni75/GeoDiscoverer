@@ -265,13 +265,27 @@ LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/curl_ntlm_core.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBCURL_PATH)/,lib/curl_ntlm_msgs.c)
 include $(BUILD_SHARED_LIBRARY)
 
+# Build the libiconv library
+include $(CLEAR_VARS)
+LOCAL_MODULE := gdiconv
+MY_LIBICONV_PATH := libiconv-1.14
+LOCAL_CFLAGS := -Wno-multichar -DLIBDIR="\"c\"" -DBUILDING_LIBICONV -DIN_LIBRARY
+LOCAL_CFLAGS += -Ijni/$(MY_LIBICONV_PATH) -Ijni/$(MY_LIBICONV_PATH)/include
+LOCAL_CFLAGS += -Ijni/$(MY_LIBICONV_PATH)/lib -Ijni/$(MY_LIBICONV_PATH)/libcharset/include
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBICONV_PATH)/,lib/iconv.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBICONV_PATH)/,lib/relocatable.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBICONV_PATH)/,libcharset/lib/localcharset.c)
+include $(BUILD_SHARED_LIBRARY)
+
 # Build the libxml2 library
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdxml
 MY_LIBXML2_PATH := libxml2-2.9.2
 LOCAL_CFLAGS := -DHAVE_CONFIG_H -D_REENTRANT
 LOCAL_CFLAGS += -Ijni/$(MY_LIBXML2_PATH) -Ijni/$(MY_LIBXML2_PATH)/include
+LOCAL_CFLAGS += -Ijni/$(MY_LIBICONV_PATH)/include
 LOCAL_LDLIBS := -lz -ldl -lm
+LOCAL_SHARED_LIBRARIES := gdiconv
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,SAX.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,entities.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,encoding.c)

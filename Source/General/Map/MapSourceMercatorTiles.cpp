@@ -362,7 +362,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   // Request the navigation engine to add overlays to the new tile
   core->getNavigationEngine()->addGraphics(mapContainer);
 
-  DEBUG("tile %s created",mapTile->getVisName().front().c_str());
+  //DEBUG("tile %s created",mapTile->getVisName().front().c_str());
 
   // Return the tile
   return mapTile;

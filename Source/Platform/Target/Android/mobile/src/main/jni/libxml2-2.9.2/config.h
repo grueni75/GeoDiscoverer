@@ -272,6 +272,9 @@
 /* Whether __va_copy() is available */
 /* #undef HAVE___VA_COPY */
 
+/* Enable libiconv support */
+#define LIBXML_ICONV_ENABLED
+
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST 
 
