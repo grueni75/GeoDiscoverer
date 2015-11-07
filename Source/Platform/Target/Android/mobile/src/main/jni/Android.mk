@@ -268,9 +268,10 @@ include $(BUILD_SHARED_LIBRARY)
 # Build the libxml2 library
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdxml
-MY_LIBXML2_PATH := libxml2-2.7.7
-LOCAL_CFLAGS := -D_REENTRANT -Ijni/$(MY_LIBXML2_PATH) -Ijni/$(MY_LIBXML2_PATH)/include 
-LOCAL_LDLIBS := -lz -ldl 
+MY_LIBXML2_PATH := libxml2-2.9.2
+LOCAL_CFLAGS := -DHAVE_CONFIG_H -D_REENTRANT
+LOCAL_CFLAGS += -Ijni/$(MY_LIBXML2_PATH) -Ijni/$(MY_LIBXML2_PATH)/include
+LOCAL_LDLIBS := -lz -ldl -lm
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,SAX.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,entities.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,encoding.c)
@@ -293,12 +294,12 @@ LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xpointer.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xinclude.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,nanohttp.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,nanoftp.c)
-LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,DOCBparser.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,catalog.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,globals.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,threads.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,c14n.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xmlstring.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,buf.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xmlregexp.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xmlschemas.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xmlschemastypes.c)
@@ -314,6 +315,7 @@ LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,pattern.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xmlsave.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xmlmodule.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,schematron.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_LIBXML2_PATH)/,xzlib.c)
 include $(BUILD_SHARED_LIBRARY)
 
 # Build the jpeg library
@@ -560,7 +562,7 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Config
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Profile
 LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -DSRC_ROOT='"jni/../../../../../../../../Source"'
 LOCAL_CFLAGS += -Ijni/$(MY_BREAKPAD_PATH)/src/common/android/include 
-LOCAL_CFLAGS += -Ijni/libxml2-2.7.7/include 
+LOCAL_CFLAGS += -Ijni/libxml2-2.9.2/include
 LOCAL_CFLAGS += -Ijni/freetype-2.4.2/include 
 LOCAL_CFLAGS += -Ijni/jpeg-8b 
 LOCAL_CFLAGS += -Ijni/libpng-1.4.4 
