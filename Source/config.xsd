@@ -615,6 +615,11 @@
 			                                    <xsd:documentation>Vertical offset for the map label in percent of the widget height.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+                                      <xsd:element name="layerLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the layer label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
 			                                <xsd:element name="labelWidth" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Width of the text in percent of the widget width.</xsd:documentation>

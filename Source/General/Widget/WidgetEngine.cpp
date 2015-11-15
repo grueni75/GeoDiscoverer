@@ -253,7 +253,7 @@ void WidgetEngine::createGraphic() {
       position=WidgetPosition();
       position.setRefScreenDiagonal(4.0);
       position.setPortraitX(84.0);
-      position.setPortraitY(80.5);
+      position.setPortraitY(79.0);
       position.setPortraitZ(0);
       position.setLandscapeX(10.5);
       position.setLandscapeY(37.5);
@@ -286,7 +286,7 @@ void WidgetEngine::createGraphic() {
       position=WidgetPosition();
       position.setRefScreenDiagonal(4.0);
       position.setPortraitX(57.0);
-      position.setPortraitY(80.5);
+      position.setPortraitY(79.0);
       position.setPortraitZ(0);
       position.setLandscapeX(10.5);
       position.setLandscapeY(12.5);
@@ -542,19 +542,19 @@ void WidgetEngine::createGraphic() {
       position=WidgetPosition();
       position.setRefScreenDiagonal(4.0);
       position.setPortraitX(70.0);
-      position.setPortraitY(92.0);
+      position.setPortraitY(90.0);
       position.setPortraitZ(0);
       position.setLandscapeX(50.0);
-      position.setLandscapeY(88.0);
+      position.setLandscapeY(84.0);
       position.setLandscapeZ(0);
       config.addPosition(position);
       position=WidgetPosition();
       position.setRefScreenDiagonal(7.0);
       position.setPortraitX(tabletPortraitButtonGridX[1]);
-      position.setPortraitY(tabletPortraitButtonGridY[2]);
+      position.setPortraitY(tabletPortraitButtonGridY[2]-1.0);
       position.setPortraitZ(0);
       position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-      position.setLandscapeY(tabletLandscapeButtonGridY[2]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[2]-1.0);
       position.setLandscapeZ(0);
       config.addPosition(position);
       config.setActiveColor(GraphicColor(255,255,255,255));
@@ -562,7 +562,8 @@ void WidgetEngine::createGraphic() {
       config.setParameter("iconFilename","scale");
       config.setParameter("updateInterval","1000000");
       config.setParameter("tickLabelOffsetX","0");
-      config.setParameter("mapLabelOffsetY","9.0");
+      config.setParameter("mapLabelOffsetY","27.0");
+      config.setParameter("layerLabelOffsetY","8.0");
       addWidgetToPage(config);
       // ---------------------------------------------------------
       config=WidgetConfig();
@@ -1121,6 +1122,7 @@ void WidgetEngine::createGraphic() {
         scale->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
         scale->setTickLabelOffsetX(c->getDoubleValue(widgetPath,"tickLabelOffsetX",__FILE__, __LINE__)*meter->getIconWidth()/100.0);
         scale->setMapLabelOffsetY(c->getDoubleValue(widgetPath,"mapLabelOffsetY",__FILE__, __LINE__)*meter->getIconHeight()/100.0);
+        scale->setLayerLabelOffsetY(c->getDoubleValue(widgetPath,"layerLabelOffsetY",__FILE__, __LINE__)*meter->getIconHeight()/100.0);
       }
       if (widgetType=="status") {
         status->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));

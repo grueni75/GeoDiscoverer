@@ -32,15 +32,22 @@ protected:
   // Current map name
   std::string mapName;
 
+  // Current layer name
+  std::string layerName;
+
   // Horizontal offset to use for the scale values
   Int tickLabelOffsetX;
 
   // Vertical offset to use for the map label
   Int mapLabelOffsetY;
 
+  // Vertical offset to use for the layer label
+  Int layerLabelOffsetY;
+
   // Font string objects for drawing
   std::vector<FontString*> scaledNumberFontString;
   FontString *mapNameFontString;
+  FontString *layerNameFontString;
 
 public:
 
@@ -72,6 +79,10 @@ public:
   void setMapLabelOffsetY(Int mapLabelOffsetY)
   {
       this->mapLabelOffsetY = mapLabelOffsetY;
+  }
+
+  void setLayerLabelOffsetY(Int layerLabelOffsetY) {
+    this->layerLabelOffsetY = layerLabelOffsetY;
   }
 };
 

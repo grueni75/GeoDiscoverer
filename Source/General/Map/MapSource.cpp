@@ -947,6 +947,14 @@ void MapSource::selectMapLayer(std::string name) {
   }
 }
 
+// Returns the name of the given zoom level
+std::string MapSource::getMapLayerName(int zoomLevel) {
+  for (MapLayerNameMap::iterator i=mapLayerNameMap.begin();i!=mapLayerNameMap.end();i++) {
+    if (i->second==zoomLevel) return i->first;
+  }
+  return "";
+}
+
 // Adds a download job from the current visible map
 void MapSource::addDownloadJob(bool estimateOnly, std::string zoomLevels) {
 }

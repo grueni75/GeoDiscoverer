@@ -87,7 +87,7 @@ public class GDApplication extends Application {
     appContext = getApplicationContext();
     
     // Init crash reporting
-    ACRA.init(this);
+    //ACRA.init(this);
         
     // Initialize the core object
     String homeDirPath = GDApplication.getHomeDirPath();

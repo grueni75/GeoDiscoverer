@@ -80,12 +80,15 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.AlertDialogWrapper;
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 public class ViewMap extends GDActivity {
@@ -106,6 +109,7 @@ public class ViewMap extends GDActivity {
   LinearLayout splashLayout = null;
   NavigationView navDrawerList= null;
   CoordinatorLayout snackbarPosition=null;
+  MaterialDialog mapDownloadDialog=null;
   
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -257,7 +261,7 @@ public class ViewMap extends GDActivity {
           }
           if (commandFunction.equals("createProgressDialog")) {
             viewMap.progressMax=Integer.parseInt(commandArgs.get(1));
-            viewMap.updateProgressDialog(commandArgs.get(0),0);
+            viewMap.updateProgressDialog(commandArgs.get(0), 0);
             commandExecuted=true;
           }
           if (commandFunction.equals("updateProgressDialog")) {
@@ -374,8 +378,19 @@ public class ViewMap extends GDActivity {
           if (commandFunction.equals("changeMapLayer")) {            
             viewMap.changeMapLayer();
             commandExecuted=true;
-          } 
-          
+          }
+          if (commandFunction.equals("updateDownloadJobSize")) {
+            MaterialDialog alert = viewMap.mapDownloadDialog;
+            if (alert!=null) {
+              alert.setContent(R.string.download_job_estimated_size_message,commandArgs.get(0),commandArgs.get(1));
+              if (Integer.parseInt(commandArgs.get(2))==1) {
+                alert.getActionButton(DialogAction.POSITIVE).setEnabled(false);
+              } else {
+                alert.getActionButton(DialogAction.POSITIVE).setEnabled(true);
+              }
+            }
+            commandExecuted=true;
+          }
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
           }
@@ -563,36 +578,50 @@ public class ViewMap extends GDActivity {
     final LinkedList<String> selectedMapLayers = new LinkedList<String>();
     AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
     builder.setTitle(R.string.download_job_level_selection_question);
-    builder.setMultiChoiceItems(mapLayers, null,
-        new DialogInterface.OnMultiChoiceClickListener() {
-          @Override
-          public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-            if (isChecked)
-              selectedMapLayers.add(mapLayers[which]);
-            else
-              selectedMapLayers.remove(mapLayers[which]);
-            if (selectedMapLayers.size() > 0) {
-              String args = TextUtils.join(",", selectedMapLayers);
-              coreObject.executeCoreCommand("estimateDownloadJob(" + args + ")");
-            }
-          }
-        });
+    builder.setMultiChoiceItems(mapLayers, null, null);
     builder.setCancelable(true);
     builder.setIcon(android.R.drawable.ic_dialog_info);
     builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialog, int which) {
+        mapDownloadDialog=null;
         if (selectedMapLayers.size() > 0) {
           String args = TextUtils.join(",", selectedMapLayers);
           coreObject.executeCoreCommand("addDownloadJob(" + args + ")");
         }
       }
     });
-    builder.setNegativeButton(R.string.cancel, null);
-    builder.setMessage(getString(R.string.download_job_level_selection_question,getString(R.string.download_job_unknown_size)));
-    Dialog alert = builder.create();
-    ((AlertDialog)alert).getButton(Dialog.BUTTON_POSITIVE).setEnabled(false);
-    alert.show();
+    builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        mapDownloadDialog=null;
+      }
+    });
+    builder.setMessage(R.string.download_job_no_level_selected_message);
+    mapDownloadDialog = (MaterialDialog)builder.create();
+    mapDownloadDialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
+    ListView multiChoiceItemsListView = mapDownloadDialog.getListView();
+    final AdapterView.OnItemClickListener originalListener=multiChoiceItemsListView.getOnItemClickListener();
+    multiChoiceItemsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        originalListener.onItemClick(parent,view,position,id);
+        Integer indexes[] = mapDownloadDialog.getSelectedIndices();
+        selectedMapLayers.clear();
+        for (Integer i : indexes) {
+          selectedMapLayers.add(mapLayers[i]);
+        }
+        if (selectedMapLayers.size() > 0) {
+          String args = TextUtils.join(",", selectedMapLayers);
+          coreObject.executeCoreCommand("estimateDownloadJob(" + args + ")");
+          mapDownloadDialog.setContent(R.string.download_job_estimating_size_message);
+        } else {
+          mapDownloadDialog.setContent(R.string.download_job_no_level_selected_message);
+        }
+        mapDownloadDialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
+      }
+    });
+    mapDownloadDialog.show();
   }
 
   /** Asks the user if the track shall be continued or a new track shall be started */

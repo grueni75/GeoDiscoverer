@@ -34,6 +34,8 @@ protected:
   Int numberOfDownloadThreads;                            // Number of threads to spawn that download images
   std::vector<bool> downloadOngoing;                      // Indicates if the download thread is working
   std::list<std::string> layerGroupNames;                 // List of used layer group names
+  TimestampInSeconds downloadStartTime;                   // Last time the first download was started
+  Int downloadedImages;                                   // Number of downloaded images so far
 
 public:
 
@@ -66,6 +68,9 @@ public:
 
   // Returns the zoom level bounds of the map layer group that contains the refZoomLevel
   void getLayerGroupZoomLevelBounds(Int refZoomLevel, Int &minZoomLevelMap, Int &minZoomLevelServer, Int &maxZoomLevelServer);
+
+  // Returns the number of active downloads
+  bool countActiveDownloads();
 
 };
 

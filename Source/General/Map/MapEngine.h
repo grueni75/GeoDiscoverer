@@ -203,6 +203,14 @@ public:
     unlockDisplayArea();
     setForceMapRecreation();
   }
+
+  Int getZoomLevel() {
+    Int zoomLevel;
+    lockDisplayArea(__FILE__,__LINE__);
+    zoomLevel=displayArea.getZoomLevel();
+    unlockDisplayArea();
+    return zoomLevel;
+  }
 };
 
 }

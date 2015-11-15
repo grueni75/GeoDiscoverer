@@ -495,6 +495,17 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="getMapDownloadActive") {
+    result="false";
+    if (core->getIsInitialized()) {
+      MapDownloader *mapDownloader=core->getMapSource()->getMapDownloader();
+      if (mapDownloader&&mapDownloader->countActiveDownloads()>0)
+        result="true";
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
+    }
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

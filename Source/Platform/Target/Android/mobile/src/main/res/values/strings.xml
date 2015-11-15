@@ -41,6 +41,7 @@
 	<string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
 	<string name="notification_service_in_foreground_message">Taking care of your position.</string>
 	<string name="notification_title">Geo Discoverer</string>
+  <string name="notification_map_download_ongoing_message">Downloading tiles (approx. %1$s left)...</string>
 	<string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
 	<string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
 	<string name="show_messages">Show messages</string>
@@ -134,7 +135,8 @@
   <string name="map_cleanup_current_zoom_level">Current zoom level</string>
   <string name="cleanup_map">Cleanup map</string>
   <string name="download_job_level_selection_question">Select the map layers to download</string>
-  <string name="download_job_estimated_size_message">Estimated disk usage: %s</string>
-  <string name="download_job_unknown_size">not yet known</string>
+  <string name="download_job_estimated_size_message">Estimated disk usage: %1$s required (%2$s available)</string>
   <string name="download_map">Download map</string>
+  <string name="download_job_no_level_selected_message">You have to choose at least one layer.</string>
+  <string name="download_job_estimating_size_message">Estimating storage usage of download job...</string>
 </resources>

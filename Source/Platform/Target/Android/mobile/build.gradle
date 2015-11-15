@@ -17,7 +17,8 @@ android {
             project.ext.set('appABI', 'all32')
         }
         debug {
-            project.ext.set('appABI', 'armeabi-v7a')
+            //project.ext.set('appABI', 'armeabi-v7a')
+            project.ext.set('appABI', 'x86')
         }
     }
 

@@ -72,7 +72,7 @@
 		    
 		    <android.support.design.widget.CoordinatorLayout
 		            android:id="@+id/view_map_snackbar_position"
-		            android:layout_width="288dp"
+		            android:layout_width="568dp"
 		            android:layout_height="wrap_content"
 		            android:layout_gravity="center_vertical|center_horizontal">
 		    </android.support.design.widget.CoordinatorLayout>

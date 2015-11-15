@@ -159,6 +159,9 @@ public:
   // Processes all pending download jobs
   virtual void processDownloadJobs();
 
+  // Returns the name of the given zoom level
+  std::string getMapLayerName(int zoomLevel);
+
   // Getters and setters
   Int getMapTileLength() const {
     return mapTileLength;

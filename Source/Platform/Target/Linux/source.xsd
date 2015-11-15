@@ -115,20 +115,20 @@
                       </xsd:documentation>
                     </xsd:annotation>
                   </xsd:element>
-                  <xsd:element name="minZoomLevel" type="xsd:integer" minOccurs="0">
-                    <xsd:annotation>
-                      <xsd:documentation>
-                        Minimum zoom level supported by the tile servers.
-                      </xsd:documentation>
-                    </xsd:annotation>
-                  </xsd:element>
-                  <xsd:element name="maxZoomLevel" type="xsd:integer" minOccurs="0">
-                    <xsd:annotation>
-                      <xsd:documentation>
-                        Maximum zoom level supported by the tile servers.
-                      </xsd:documentation>
-                    </xsd:annotation>
-                  </xsd:element>                  
+			            <xsd:element name="minZoomLevel" type="xsd:integer" minOccurs="0">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Minimum zoom level supported by the tile servers.
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>
+			            <xsd:element name="maxZoomLevel" type="xsd:integer" minOccurs="0">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Maximum zoom level supported by the tile servers.
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>                  
                 </xsd:sequence>
               </xsd:complexType>
             </xsd:element>
@@ -185,20 +185,20 @@
                       </xsd:documentation>
                     </xsd:annotation>
                   </xsd:element>
-                  <xsd:element name="minZoomLevel" type="xsd:integer" minOccurs="0">
-                    <xsd:annotation>
-                      <xsd:documentation>
-                        Minimum zoom level supported by this tile server.
-                      </xsd:documentation>
-                    </xsd:annotation>
-                  </xsd:element>
-                  <xsd:element name="maxZoomLevel" type="xsd:integer" minOccurs="0">
-                    <xsd:annotation>
-                      <xsd:documentation>
-                        Maximum zoom level supported by this tile server.
-                      </xsd:documentation>
-                    </xsd:annotation>
-                  </xsd:element>
+			            <xsd:element name="minZoomLevel" type="xsd:integer" minOccurs="0">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Minimum zoom level supported by this tile server.
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>
+			            <xsd:element name="maxZoomLevel" type="xsd:integer" minOccurs="0">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Maximum zoom level supported by this tile server.
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>
                 </xsd:sequence>
               </xsd:complexType>
             </xsd:element>

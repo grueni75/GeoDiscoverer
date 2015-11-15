@@ -22,7 +22,9 @@ WidgetScale::WidgetScale(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
   nextUpdateTime=0;
   tickLabelOffsetX=0;
   mapLabelOffsetY=0;
+  layerLabelOffsetY=0;
   mapNameFontString=NULL;
+  layerNameFontString=NULL;
   scaledNumberFontString=std::vector<FontString*>(4);
   for(Int i=0;i<4;i++) {
     scaledNumberFontString[i]=NULL;
@@ -33,9 +35,12 @@ WidgetScale::WidgetScale(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
 WidgetScale::~WidgetScale() {
   widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
   if (mapNameFontString) widgetPage->getFontEngine()->destroyString(mapNameFontString);
+  widgetPage->getFontEngine()->unlockFont();
   for(Int i=0;i<4;i++) {
     if (scaledNumberFontString[i]) widgetPage->getFontEngine()->destroyString(scaledNumberFontString[i]);
   }
+  widgetPage->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
+  if (layerNameFontString) widgetPage->getFontEngine()->destroyString(layerNameFontString);
   widgetPage->getFontEngine()->unlockFont();
 }
 
@@ -54,8 +59,9 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
   // Only update the info at given update interval
   if (t>=nextUpdateTime) {
 
-    // Get the map name
+    // Get the map and layer name
     mapName=core->getMapSource()->getFolder();
+    layerName=core->getMapSource()->getMapLayerName(core->getMapEngine()->getZoomLevel());
 
     // Compute the scale in meters
     MapPosition *pos=core->getMapEngine()->lockMapPos(__FILE__, __LINE__);
@@ -97,6 +103,14 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     mapNameFontString->setX(textX);
     mapNameFontString->setY(textY);
 
+    // Compute the layer name
+    fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
+    fontEngine->updateString(&layerNameFontString,layerName,getIconWidth());
+    textY=y+iconHeight+layerLabelOffsetY;
+    textX=x+(iconWidth-layerNameFontString->getIconWidth())/2;
+    layerNameFontString->setX(textX);
+    layerNameFontString->setY(textY);
+
     // Unlock the used font
     widgetPage->getFontEngine()->unlockFont();
 
@@ -127,6 +141,12 @@ void WidgetScale::draw(TimestampInMicroseconds t) {
   if (mapNameFontString) {
     mapNameFontString->setColor(color);
     mapNameFontString->draw(t);
+  }
+
+  // Draw the layer name
+  if (layerNameFontString) {
+    layerNameFontString->setColor(color);
+    layerNameFontString->draw(t);
   }
 
 }

@@ -677,22 +677,26 @@ void MapSourceMercatorTiles::addDownloadJob(bool estimateOnly, std::string zoomL
 
   // Stop any ongoing download jobs
   quitProcessDownloadJobsThread=true;
-  core->getThread()->lockMutex(downloadJobsMutex,__FILE__,__LINE__);
+  if (processDonwloadJobsThreadInfo) {
+    core->getThread()->waitForThread(processDonwloadJobsThreadInfo);
+    core->getThread()->destroyThread(processDonwloadJobsThreadInfo);
+    processDonwloadJobsThreadInfo=NULL;
+  }
 
   // Remove any estimation jobs
+  core->getThread()->lockMutex(downloadJobsMutex,__FILE__,__LINE__);
   ConfigStore *c=core->getConfigStore();
   std::list<std::string> names=c->getAttributeValues("Map/DownloadJob","name",__FILE__,__LINE__);
   for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
-    if (std::find(processedDownloadJobs.begin(), processedDownloadJobs.end(), *i)==processedDownloadJobs.end()) {
-      std::string configPath="Map/DownloadJob[@name='" + *i + "']";
-      if (c->getIntValue(configPath,"estimateOnly",__FILE__,__LINE__)) {
-        c->removePath(configPath);
-      }
+    std::string configPath="Map/DownloadJob[@name='" + *i + "']";
+    if (c->getIntValue(configPath,"estimateOnly",__FILE__,__LINE__)) {
+      c->removePath(configPath);
     }
   }
 
   // Add new job
   std::string jobName=core->getClock()->getXMLDate(core->getClock()->getSecondsSinceEpoch(),true);
+  processedDownloadJobs.remove(jobName);
   std::string path="Map/DownloadJob[@name='" + jobName + "']";
   c->setDoubleValue(path,"latNorth",area.getLatNorth(),__FILE__,__LINE__);
   c->setDoubleValue(path,"latSouth",area.getLatSouth(),__FILE__,__LINE__);
@@ -700,13 +704,7 @@ void MapSourceMercatorTiles::addDownloadJob(bool estimateOnly, std::string zoomL
   c->setDoubleValue(path,"lngWest",area.getLngWest(),__FILE__,__LINE__);
   c->setStringValue(path,"zoomLevels",zoomLevels,__FILE__,__LINE__);
   c->setIntValue(path,"estimateOnly",estimateOnly,__FILE__,__LINE__);
-
-  // Stop the previous thread
-  if (processDonwloadJobsThreadInfo) {
-    core->getThread()->waitForThread(processDonwloadJobsThreadInfo);
-    core->getThread()->destroyThread(processDonwloadJobsThreadInfo);
-    processDonwloadJobsThreadInfo=NULL;
-  }
+  //DEBUG("jobName=%s",jobName.c_str());
 
   // Start the new job
   quitProcessDownloadJobsThread=false;
@@ -727,7 +725,7 @@ void MapSourceMercatorTiles::processDownloadJobs() {
     return;
   }
   freeStorageSpace=((double)stat.f_bsize)*((double)stat.f_bfree)/1024.0/1024.0;
-  DEBUG("free space: %lf MB",freeStorageSpace);
+  //DEBUG("free space: %lf MB",freeStorageSpace);
 
   // Go through all download jobs
   std::list<std::string> finishedDownloadJobs;
@@ -737,7 +735,7 @@ void MapSourceMercatorTiles::processDownloadJobs() {
   std::list<std::string> names=c->getAttributeValues("Map/DownloadJob","name",__FILE__,__LINE__);
   for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
     if (std::find(processedDownloadJobs.begin(), processedDownloadJobs.end(), *i)==processedDownloadJobs.end()) {
-      DEBUG("processing download job %s",(*i).c_str());
+      //DEBUG("processing download job %s",(*i).c_str());
       processedDownloadJobs.push_back(*i);
 
       // Process the download job
@@ -759,8 +757,13 @@ void MapSourceMercatorTiles::processDownloadJobs() {
       std::string t;
       Int zMap;
       while (std::getline(s,t,',')) {
-        std::stringstream s2(t);
-        s2 >> zMap;
+        //DEBUG("t=%s",t.c_str());
+        MapLayerNameMap::iterator i=mapLayerNameMap.find(t);
+        if (i==mapLayerNameMap.end()) {
+          FATAL("can not find map layer <%s>", t.c_str());
+        }
+        zMap=i->second;
+        //DEBUG("zMap=%d",zMap);
 
         // Compute the tile ranges
         Int zServer,startX,endX,startY,endY;
@@ -819,14 +822,15 @@ nextJob:
         std::string value,unit;
         cmd << "updateDownloadJobSize(";
         core->getUnitConverter()->formatBytes(estimatedJobStorageSpace*1024.0*1024.0,value,unit);
-        cmd << value << " " << unit << " / ";
+        cmd << "\"" << value << " " << unit << "\",\"";
         core->getUnitConverter()->formatBytes(freeStorageSpace*1024.0*1024.0,value,unit);
-        cmd << value << " " << unit;
+        cmd << value << " " << unit << "\",";
         if (estimatedJobStorageSpace>freeStorageSpace)
           cmd << "1";
         else
           cmd << "0";
         cmd << ")";
+        //DEBUG("%s",cmd.str().c_str());
         core->getCommander()->dispatch(cmd.str());
       }
 
@@ -835,7 +839,7 @@ nextJob:
         finishedDownloadJobs.push_back(*i);
     }
   }
-  DEBUG("estimatedStorageSpace: %lf MB",estimatedTotalStorageSpace);
+  //DEBUG("estimatedStorageSpace: %lf MB",estimatedTotalStorageSpace);
 
 cleanup:
 
@@ -843,6 +847,7 @@ cleanup:
   for (std::list<std::string>::iterator i=finishedDownloadJobs.begin();i!=finishedDownloadJobs.end();i++) {
     std::string configPath="Map/DownloadJob[@name='" + *i + "']";
     c->removePath(configPath);
+    processedDownloadJobs.remove(*i);
   }
 
   core->getThread()->unlockMutex(downloadJobsMutex);

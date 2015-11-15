@@ -29,6 +29,7 @@ void *mainThread(void *args) {
 
   // Ensure that the widgets are positioned
   GEODISCOVERER::core->getCommander()->execute("screenChanged(landscape,768,480)");
+  //GEODISCOVERER::core->getCommander()->execute("screenChanged(portrait,480,768)");
 
   // Start the main loop
   GEODISCOVERER::core->getDefaultScreen()->mainLoop();

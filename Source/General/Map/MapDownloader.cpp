@@ -34,6 +34,8 @@ MapDownloader::MapDownloader(MapSourceMercatorTiles *mapSource) {
   downloadStartSignals.resize(numberOfDownloadThreads);
   mapImageDownloadThreadInfos.resize(numberOfDownloadThreads);
   downloadOngoing.resize(numberOfDownloadThreads);
+  downloadStartTime=0;
+  downloadedImages=0;
   for (Int i=0;i<numberOfDownloadThreads;i++) {
     downloadStartSignals[i]=core->getThread()->createSignal();
     UByte *args = (UByte *)malloc(sizeof(this)+sizeof(Int));
@@ -149,8 +151,14 @@ void MapDownloader::queueMapContainerDownload(MapContainer *mapContainer)
   // Flag that the image of the map container is not yet there
   mapContainer->setDownloadComplete(false);
 
-  // Request the download thread to fetch this image
+  // Remember the start time
   core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+  if (downloadQueue.size()==0) {
+    downloadStartTime=core->getClock()->getSecondsSinceEpoch();
+    downloadedImages=0;
+  }
+
+  // Request the download thread to fetch this image
   downloadQueue.push_back(mapContainer);
   core->getThread()->unlockMutex(accessMutex);
   for (Int i=0;i<numberOfDownloadThreads;i++)
@@ -262,8 +270,6 @@ void MapDownloader::getLayerGroupZoomLevelBounds(Int refZoomLevel, Int &minZoomL
 // Downloads map tiles from the tile server
 void MapDownloader::downloadMapImages(Int threadNr) {
 
-  std::list<std::string> status;
-
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
 
@@ -312,27 +318,16 @@ void MapDownloader::downloadMapImages(Int threadNr) {
 
       // Change the status
       downloadOngoing[threadNr]=true;
-      Int numerOfParallelDownloads=0;
-      for (Int i=0;i<numberOfDownloadThreads;i++) {
-        if (downloadOngoing[i])
-          numerOfParallelDownloads++;
-      }
-      totalLeft+=numerOfParallelDownloads;
-      std::stringstream s;
-      s << "Downloading " << totalLeft;
-      if (totalLeft==1)
-        s << " tile:";
-      else
-        s << " tiles:";
-      status.clear();
-      status.push_back(s.str());
-      s.str("");
-      s << mapContainer->getImageFileName();
-      if (numerOfParallelDownloads>1) {
-        s << " (+" << numerOfParallelDownloads-1 << ")";
-      }
-      status.push_back(s.str());
-      mapSource->setStatus(status,__FILE__, __LINE__);
+      Int numberOfParallelDownloads=0;
+      totalLeft+=countActiveDownloads();
+      TimestampInSeconds diff=core->getClock()->getSecondsSinceEpoch()-downloadStartTime;
+      double t=totalLeft*((double)diff)/((double)downloadedImages);
+      std::string value,unit;
+      core->getUnitConverter()->formatTime(t,value,unit);
+      std::stringstream cmd;
+      cmd << "mapDownloadStatusUpdated(";
+      cmd << downloadedImages << "," << totalLeft << "," << value << " " << unit << ")";
+      core->getCommander()->dispatch(cmd.str());
       core->getThread()->unlockMutex(accessMutex);
 
       // Download all images
@@ -421,6 +416,9 @@ void MapDownloader::downloadMapImages(Int threadNr) {
         mapContainer->setDownloadComplete(true);
         mapSource->unlockAccess();
         core->getMapEngine()->setForceCacheUpdate(__FILE__, __LINE__);
+        core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+        downloadedImages++;
+        core->getThread()->unlockMutex(accessMutex);
 
       } else {
 
@@ -438,14 +436,8 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       // Change the status
       core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
       downloadOngoing[threadNr]=false;
-      numerOfParallelDownloads=0;
-      for (Int i=0;i<numberOfDownloadThreads;i++) {
-        if (downloadOngoing[i])
-          numerOfParallelDownloads++;
-      }
-      if (numerOfParallelDownloads==0) {
-        status.clear();
-        mapSource->setStatus(status,__FILE__, __LINE__);
+      if (countActiveDownloads()==0) {
+        core->getCommander()->dispatch("mapDownloadStatusUpdated(0,0,0)");
       }
       core->getThread()->unlockMutex(accessMutex);
 
@@ -455,6 +447,18 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       }
     }
   }
+}
+
+// Returns the number of active downloads
+bool MapDownloader::countActiveDownloads() {
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  Int numberOfParallelDownloads=0;
+  for (Int i=0;i<numberOfDownloadThreads;i++) {
+    if (downloadOngoing[i])
+      numberOfParallelDownloads++;
+  }
+  core->getThread()->unlockMutex(accessMutex);
+  return numberOfParallelDownloads;
 }
 
 } /* namespace GEODISCOVERER */

@@ -132,7 +132,18 @@ public class GDService extends Service {
       // We don't provide binding, so return null
       return null;
   }
-  
+
+  /** Create the default notification */
+  private Notification createDefaultNotification() {
+    return new NotificationCompat.Builder(this)
+        .setContentTitle(getText(R.string.notification_title))
+        .setContentText(getText(R.string.notification_service_in_foreground_message))
+        .setSmallIcon(R.drawable.status)
+        .setContentIntent(pendingIntent)
+        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
+        .build();
+  }
+
   /** Called when the service is started */
   @Override
   public void onStart(Intent intent, int startId) {    
@@ -166,13 +177,7 @@ public class GDService extends Service {
             
       // Set the service to foreground
       if (!serviceInForeground) {
-        notification = new NotificationCompat.Builder(this)
-          .setContentTitle(getText(R.string.notification_title))
-          .setContentText(getText(R.string.notification_service_in_foreground_message))
-          .setSmallIcon(R.drawable.status)
-          .setContentIntent(pendingIntent)
-          .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
-          .build();
+        notification=createDefaultNotification();
         startForeground(R.string.notification_title, notification);
         serviceInForeground=true;
       }
@@ -184,7 +189,11 @@ public class GDService extends Service {
       String state=coreObject.executeCoreCommand("getRecordTrack()");
       if (state.equals("false")||state.equals(""))
           recordingPosition = false;
-      if ((!coreObject.cockpitEngineIsActive())&&(!recordingPosition)) {
+      boolean downloadingMaps = true;
+      state=coreObject.executeCoreCommand("getMapDownloadActive()");
+      if (state.equals("false")||state.equals(""))
+        downloadingMaps = false;
+      if ((!coreObject.cockpitEngineIsActive())&&(!recordingPosition)&&(!downloadingMaps)) {
         locationManager.removeUpdates(coreObject);
         locationWatchStarted = false;
         if (serviceInForeground) {
@@ -195,7 +204,24 @@ public class GDService extends Service {
       }
 
     }
-    
+    if (intent.getAction().equals("mapDownloadStatusUpdated")) {
+      if (intent.getIntExtra("tilesLeft",0)==0) {
+        notification = createDefaultNotification();
+      } else {
+        notification = new NotificationCompat.Builder(this)
+            .setContentTitle(getText(R.string.notification_title))
+            .setContentText(getString(R.string.notification_map_download_ongoing_message,
+                            intent.getStringExtra("timeLeft")))
+            .setSmallIcon(R.drawable.status)
+            .setContentIntent(pendingIntent)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
+            .setProgress(intent.getIntExtra("tilesLeft",0)+intent.getIntExtra("tilesDone",0),
+                         intent.getIntExtra("tilesLeft",0), true)
+            .build();
+      }
+      notificationManager.notify(R.string.notification_title, notification);
+    }
+
   }
   
   /** Called when the service is stopped */
