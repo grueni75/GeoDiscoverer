@@ -35,10 +35,10 @@ WidgetScale::WidgetScale(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
 WidgetScale::~WidgetScale() {
   widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
   if (mapNameFontString) widgetPage->getFontEngine()->destroyString(mapNameFontString);
-  widgetPage->getFontEngine()->unlockFont();
   for(Int i=0;i<4;i++) {
     if (scaledNumberFontString[i]) widgetPage->getFontEngine()->destroyString(scaledNumberFontString[i]);
   }
+  widgetPage->getFontEngine()->unlockFont();
   widgetPage->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
   if (layerNameFontString) widgetPage->getFontEngine()->destroyString(layerNameFontString);
   widgetPage->getFontEngine()->unlockFont();
@@ -102,6 +102,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     textX=x+(iconWidth-mapNameFontString->getIconWidth())/2;
     mapNameFontString->setX(textX);
     mapNameFontString->setY(textY);
+    fontEngine->unlockFont();
 
     // Compute the layer name
     fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
@@ -112,7 +113,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     layerNameFontString->setY(textY);
 
     // Unlock the used font
-    widgetPage->getFontEngine()->unlockFont();
+    fontEngine->unlockFont();
 
     // Set the next update time
     nextUpdateTime=t+updateInterval;

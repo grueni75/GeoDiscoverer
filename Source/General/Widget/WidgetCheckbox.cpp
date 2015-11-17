@@ -23,11 +23,6 @@ WidgetCheckbox::WidgetCheckbox(WidgetPage *widgetPage) : WidgetPrimitive(widgetP
 }
 
 WidgetCheckbox::~WidgetCheckbox() {
-  deinit();
-}
-
-// Deinits the checkbox
-void WidgetCheckbox::deinit() {
   texture=Screen::getTextureNotDefined();
   if ((checkedTexture!=Screen::getTextureNotDefined())&&(destroyTexture)) {
     screen->destroyTextureInfo(checkedTexture,"WidgetCheckbox (checked texture)");
