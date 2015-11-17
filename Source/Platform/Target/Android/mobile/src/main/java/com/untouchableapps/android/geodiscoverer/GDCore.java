@@ -858,7 +858,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         cockpitEngine.update(infos, false);
       cmdExecuted=true;
     }
-    if (cmd.startsWith("setMapDownloadStatus(")) {
+    if (cmd.startsWith("updateMapDownloadStatus(")) {
       String infos = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
       String[] args=infos.split(",");
       Intent intent = new Intent(application.getApplicationContext(), GDService.class);

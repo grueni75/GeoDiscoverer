@@ -11,26 +11,596 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b578a301-10f4-4fb1-9459-91cdc01d1a52" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/.directory" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0001-home.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0002-home2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0003-home3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0004-office.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0005-newspaper.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0006-pencil.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0007-pencil2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0008-quill.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0009-pen.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0010-blog.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0011-eyedropper.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0012-droplet.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0013-paint-format.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0014-image.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0015-images.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0016-camera.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0017-headphones.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0018-music.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0019-play.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0020-film.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0021-video-camera.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0022-dice.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0023-pacman.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0024-spades.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0025-clubs.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0026-diamonds.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0027-bullhorn.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0028-connection.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0029-podcast.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0030-feed.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0031-mic.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0032-book.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0033-books.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0034-library.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0035-file-text.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0036-profile.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0037-file-empty.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0038-files-empty.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0039-file-text2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0040-file-picture.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0041-file-music.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0042-file-play.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0043-file-video.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0044-file-zip.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0045-copy.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0046-paste.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0047-stack.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0048-folder.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0049-folder-open.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0050-folder-plus.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0051-folder-minus.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0052-folder-download.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0053-folder-upload.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0054-price-tag.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0055-price-tags.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0056-barcode.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0057-qrcode.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0058-ticket.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0059-cart.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0060-coin-dollar.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0061-coin-euro.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0062-coin-pound.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0063-coin-yen.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0064-credit-card.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0065-calculator.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0066-lifebuoy.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0067-phone.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0068-phone-hang-up.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0069-address-book.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0070-envelop.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0071-pushpin.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0072-location.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0073-location2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0074-compass.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0075-compass2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0076-map.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0077-map2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0078-history.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0079-clock.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0080-clock2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0081-alarm.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0082-bell.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0083-stopwatch.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0084-calendar.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0085-printer.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0086-keyboard.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0087-display.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0088-laptop.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0089-mobile.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0090-mobile2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0091-tablet.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0092-tv.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0093-drawer.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0094-drawer2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0095-box-add.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0096-box-remove.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0097-download.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0098-upload.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0099-floppy-disk.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0100-drive.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0101-database.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0102-undo.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0103-redo.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0104-undo2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0105-redo2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0106-forward.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0107-reply.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0108-bubble.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0109-bubbles.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0110-bubbles2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0111-bubble2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0112-bubbles3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0113-bubbles4.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0114-user.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0115-users.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0116-user-plus.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0117-user-minus.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0118-user-check.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0119-user-tie.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0120-quotes-left.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0121-quotes-right.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0122-hour-glass.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0123-spinner.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0124-spinner2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0125-spinner3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0126-spinner4.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0127-spinner5.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0128-spinner6.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0129-spinner7.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0130-spinner8.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0131-spinner9.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0132-spinner10.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0133-spinner11.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0134-binoculars.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0135-search.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0136-zoom-in.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0137-zoom-out.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0138-enlarge.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0139-shrink.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0140-enlarge2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0141-shrink2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0142-key.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0143-key2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0144-lock.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0145-unlocked.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0146-wrench.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0147-equalizer.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0148-equalizer2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0149-cog.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0150-cogs.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0151-hammer.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0152-magic-wand.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0153-aid-kit.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0154-bug.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0155-pie-chart.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0156-stats-dots.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0157-stats-bars.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0158-stats-bars2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0159-trophy.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0160-gift.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0161-glass.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0162-glass2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0163-mug.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0164-spoon-knife.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0165-leaf.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0166-rocket.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0167-meter.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0168-meter2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0169-hammer2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0170-fire.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0171-lab.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0172-magnet.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0173-bin.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0174-bin2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0175-briefcase.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0176-airplane.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0177-truck.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0178-road.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0179-accessibility.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0180-target.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0181-shield.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0182-power.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0183-switch.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0184-power-cord.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0185-clipboard.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0186-list-numbered.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0187-list.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0188-list2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0189-tree.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0190-menu.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0191-menu2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0192-menu3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0193-menu4.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0194-cloud.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0195-cloud-download.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0196-cloud-upload.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0197-cloud-check.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0198-download2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0199-upload2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0200-download3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0201-upload3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0202-sphere.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0203-earth.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0204-link.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0205-flag.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0206-attachment.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0207-eye.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0208-eye-plus.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0209-eye-minus.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0210-eye-blocked.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0211-bookmark.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0212-bookmarks.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0213-sun.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0214-contrast.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0215-brightness-contrast.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0216-star-empty.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0217-star-half.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0218-star-full.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0219-heart.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0220-heart-broken.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0221-man.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0222-woman.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0223-man-woman.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0224-happy.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0225-happy2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0226-smile.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0227-smile2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0228-tongue.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0229-tongue2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0230-sad.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0231-sad2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0232-wink.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0233-wink2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0234-grin.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0235-grin2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0236-cool.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0237-cool2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0238-angry.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0239-angry2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0240-evil.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0241-evil2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0242-shocked.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0243-shocked2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0244-baffled.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0245-baffled2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0246-confused.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0247-confused2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0248-neutral.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0249-neutral2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0250-hipster.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0251-hipster2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0252-wondering.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0253-wondering2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0254-sleepy.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0255-sleepy2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0256-frustrated.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0257-frustrated2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0258-crying.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0259-crying2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0260-point-up.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0261-point-right.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0262-point-down.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0263-point-left.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0264-warning.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0265-notification.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0266-question.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0267-plus.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0268-minus.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0269-info.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0270-cancel-circle.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0271-blocked.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0272-cross.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0273-checkmark.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0274-checkmark2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0275-spell-check.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0276-enter.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0278-play2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0279-pause.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0280-stop.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0281-previous.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0282-next.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0283-backward.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0284-forward2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0285-play3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0286-pause2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0287-stop2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0288-backward2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0289-forward3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0290-first.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0291-last.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0292-previous2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0293-next2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0294-eject.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0295-volume-high.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0296-volume-medium.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0297-volume-low.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0298-volume-mute.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0299-volume-mute2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0300-volume-increase.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0301-volume-decrease.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0302-loop.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0303-loop2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0304-infinite.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0305-shuffle.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0306-arrow-up-left.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0307-arrow-up.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0308-arrow-up-right.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0309-arrow-right.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0310-arrow-down-right.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0311-arrow-down.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0312-arrow-down-left.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0313-arrow-left.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0314-arrow-up-left2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0315-arrow-up2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0316-arrow-up-right2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0317-arrow-right2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0318-arrow-down-right2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0319-arrow-down2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0320-arrow-down-left2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0321-arrow-left2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0322-circle-up.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0323-circle-right.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0324-circle-down.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0325-circle-left.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0326-tab.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0327-move-up.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0328-move-down.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0329-sort-alpha-asc.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0330-sort-alpha-desc.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0331-sort-numeric-asc.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0332-sort-numberic-desc.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0333-sort-amount-asc.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0334-sort-amount-desc.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0335-command.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0336-shift.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0337-ctrl.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0338-opt.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0339-checkbox-checked.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0340-checkbox-unchecked.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0341-radio-checked.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0342-radio-checked2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0343-radio-unchecked.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0344-crop.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0345-make-group.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0346-ungroup.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0347-scissors.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0348-filter.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0349-font.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0350-ligature.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0351-ligature2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0352-text-height.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0353-text-width.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0354-font-size.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0355-bold.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0356-underline.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0357-italic.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0358-strikethrough.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0359-omega.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0360-sigma.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0361-page-break.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0362-superscript.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0363-subscript.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0364-superscript2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0365-subscript2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0366-text-color.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0367-pagebreak.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0368-clear-formatting.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0369-table.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0370-table2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0371-insert-template.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0372-pilcrow.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0373-ltr.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0374-rtl.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0375-section.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0376-paragraph-left.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0377-paragraph-center.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0378-paragraph-right.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0379-paragraph-justify.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0380-indent-increase.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0381-indent-decrease.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0382-share.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0383-new-tab.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0384-embed.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0385-embed2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0386-terminal.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0387-share2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0388-mail.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0389-mail2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0390-mail3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0391-mail4.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0392-google.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0393-google-plus.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0394-google-plus2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0395-google-plus3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0396-google-drive.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0397-facebook.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0398-facebook2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0399-facebook3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0400-ello.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0401-instagram.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0402-twitter.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0403-twitter2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0404-twitter3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0405-feed2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0406-feed3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0407-feed4.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0408-youtube.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0409-youtube2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0410-youtube3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0411-youtube4.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0412-twitch.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0413-vimeo.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0414-vimeo2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0415-vimeo3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0416-lanyrd.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0417-flickr.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0418-flickr2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0419-flickr3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0420-flickr4.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0421-picassa.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0422-picassa2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0423-dribbble.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0424-dribbble2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0425-dribbble3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0426-forrst.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0427-forrst2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0428-deviantart.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0429-deviantart2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0430-steam.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0431-steam2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0432-dropbox.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0433-onedrive.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0434-github.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0435-github2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0436-github3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0437-github4.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0438-github5.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0439-wordpress.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0440-wordpress2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0441-joomla.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0442-blogger.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0443-blogger2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0444-tumblr.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0445-tumblr2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0446-yahoo.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0447-tux.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0448-apple.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0449-finder.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0450-android.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0451-windows.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0452-windows8.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0453-soundcloud.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0454-soundcloud2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0455-skype.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0456-reddit.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0457-linkedin.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0458-linkedin2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0459-lastfm.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0460-lastfm2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0461-delicious.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0462-stumbleupon.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0463-stumbleupon2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0464-stackoverflow.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0465-pinterest.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0466-pinterest2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0467-xing.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0468-xing2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0469-flattr.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0470-foursquare.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0471-paypal.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0472-paypal2.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0473-paypal3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0474-yelp.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0475-file-pdf.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0476-file-openoffice.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0477-file-word.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0478-file-excel.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0479-libreoffice.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0480-html5.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0481-html52.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0482-css3.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0483-git.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0484-svg.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0485-codepen.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0486-chrome.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0487-firefox.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0488-IE.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0489-opera.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0490-safari.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/IcoMoonFree/0491-IcoMoon.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/status.svg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/icon.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/status.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/icon.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/status.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/icon.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/status.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/icon.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/status.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/icon.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/status.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/icon.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/status.png" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/add.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/add.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/add.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/add.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/add.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/add.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/add.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/add.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/add.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/add.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/add.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/add.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/download.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/download.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/download.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/download.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/download.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/download.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/download.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/download.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/download.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/download.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/download.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/download.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/exit.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/exit.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/exit.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/exit.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/exit.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/exit.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/exit.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/exit.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/exit.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/exit.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/exit.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/exit.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/help.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/help.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/help.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/help.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/help.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/help.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/help.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/help.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/help.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/help.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/help.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/help.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/legend.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/legend.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/legend.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/legend.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/legend.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/legend.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/legend.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/legend.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/legend.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/legend.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/legend.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/legend.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/messages.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/messages.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/messages.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/messages.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/messages.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/messages.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/messages.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/messages.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/messages.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/messages.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/messages.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/messages.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/prefs.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/prefs.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/prefs.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/prefs.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/prefs.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/prefs.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/prefs.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/prefs.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/prefs.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/prefs.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/prefs.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/prefs.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/refresh.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/refresh.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/refresh.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/refresh.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/refresh.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/refresh.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/refresh.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/refresh.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/refresh.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/refresh.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/refresh.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/refresh.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/remove.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/remove.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/remove.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/remove.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/remove.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/remove.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/remove.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/remove.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/remove.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/remove.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/remove.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/remove.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/reset.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/reset.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/reset.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/reset.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/reset.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/reset.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/reset.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/reset.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/reset.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/reset.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/reset.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/reset.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/upload.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/upload.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/upload.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/upload.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/upload.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/upload.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/upload.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/upload.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/upload.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/upload.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/upload.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/upload.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/App/Commander.cpp" afterPath="$PROJECT_DIR$/../../../General/App/Commander.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDMapSurfaceView.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDMapSurfaceView.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Linux/Main.cpp" afterPath="$PROJECT_DIR$/../Linux/Main.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapDownloader.cpp" afterPath="$PROJECT_DIR$/../../../General/Map/MapDownloader.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapDownloader.h" afterPath="$PROJECT_DIR$/../../../General/Map/MapDownloader.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapEngine.h" afterPath="$PROJECT_DIR$/../../../General/Map/MapEngine.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapSource.cpp" afterPath="$PROJECT_DIR$/../../../General/Map/MapSource.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapSource.h" afterPath="$PROJECT_DIR$/../../../General/Map/MapSource.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapSourceMercatorTiles.cpp" afterPath="$PROJECT_DIR$/../../../General/Map/MapSourceMercatorTiles.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetEngine.cpp" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetEngine.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetScale.cpp" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetScale.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetScale.h" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetScale.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/build.gradle" afterPath="$PROJECT_DIR$/mobile/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../config.xsd" afterPath="$PROJECT_DIR$/../../../config.xsd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Linux/source.xsd" afterPath="$PROJECT_DIR$/../Linux/source.xsd" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/add.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/add.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/download.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/download.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/exit.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/exit.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/help.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/help.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Help/public/index.html" afterPath="$PROJECT_DIR$/../Help/public/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/legend.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/legend.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/messages.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/messages.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/layout/nav_drawer_header.xml" afterPath="$PROJECT_DIR$/mobile/src/main/res/layout/nav_drawer_header.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/prefs.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/prefs.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/refresh.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/refresh.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/remove.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/remove.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/reset.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/reset.svg" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/mobile/src/main/res/values/strings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/upload.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/upload.svg" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/layout/view_map.xml" afterPath="$PROJECT_DIR$/mobile/src/main/res/layout/view_map.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -238,82 +808,7 @@
     <favorites_list name="GeoDiscoverer" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="GDCore.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="867" column="39" selection-start-line="867" selection-start-column="39" selection-end-line="867" selection-end-column="39" />
-              <folding>
-                <element signature="method#getWifiInetAddress#0;class#GDCore#0" expanded="true" />
-                <element signature="initializer##0;class#GDCore#0" expanded="true" />
-                <element signature="method#GDCore#0;class#GDCore#0" expanded="true" />
-                <element signature="method#updateHome#0;class#GDCore#0" expanded="true" />
-                <element signature="method#onSurfaceCreated#0;class#GDCore#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="strings.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/src/main/res/values/strings.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-6.571429">
-              <caret line="43" column="86" selection-start-line="43" selection-start-column="86" selection-end-line="43" selection-end-column="86" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MapDownloader.cpp" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Map/MapDownloader.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.32142857">
-              <caret line="320" column="0" selection-start-line="320" selection-start-column="0" selection-end-line="320" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GDService.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="213" column="49" selection-start-line="213" selection-start-column="49" selection-end-line="213" selection-end-column="49" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="method#handleExternalStorageState#0;class#GDService#0" expanded="true" />
-                <element signature="method#onBind#0;class#GDService#0" expanded="true" />
-                <element signature="method#createDefaultNotification#0;class#GDService#0" expanded="true" />
-                <element signature="method#onDestroy#0;class#GDService#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/build.gradle">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="16" column="33" selection-start-line="16" selection-start-column="33" selection-end-line="16" selection-end-column="33" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GDApplication.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.485623">
-              <caret line="106" column="30" selection-start-line="106" selection-start-column="30" selection-end-line="106" selection-end-column="30" />
-              <folding>
-                <element signature="method#showMessageBar#0;class#GDApplication#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -3317,7 +3812,7 @@
     </option>
     <option name="modificationStamps">
       <map>
-        <entry key="$PROJECT_DIR$" value="8674911269862" />
+        <entry key="$PROJECT_DIR$" value="8675060722818" />
       </map>
     </option>
     <option name="projectBuildClasspath">
@@ -4346,17 +4841,19 @@
         <option value="$PROJECT_DIR$/mobile/src/main/jni/libxml2-2.9.2/config.h" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/Android.mk" />
         <option value="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" />
-        <option value="$PROJECT_DIR$/mobile/src/main/res/layout/view_map.xml" />
-        <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Map/MapSourceMercatorTiles.cpp" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Widget/WidgetScale.cpp" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Map/MapDownloader.cpp" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/App/Commander.cpp" />
-        <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java" />
-        <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java" />
-        <option value="$PROJECT_DIR$/mobile/src/main/res/values/strings.xml" />
-        <option value="$PROJECT_DIR$/mobile/build.gradle" />
         <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" />
+        <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDMapSurfaceView.java" />
+        <option value="$PROJECT_DIR$/mobile/src/main/res/layout/view_map.xml" />
+        <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java" />
+        <option value="$PROJECT_DIR$/mobile/src/main/res/values/strings.xml" />
+        <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java" />
+        <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" />
+        <option value="$PROJECT_DIR$/mobile/build.gradle" />
+        <option value="$PROJECT_DIR$/mobile/src/main/res/layout/nav_drawer_header.xml" />
       </list>
     </option>
   </component>
@@ -4481,6 +4978,10 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="AndroidView" />
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -4532,6 +5033,122 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="values" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="menu" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="layout" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -4623,10 +5240,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="AndroidView" />
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -4977,34 +5590,34 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-4" width="1296" height="732" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3275488" sideWeight="0.46791443" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32747254" sideWeight="0.4638619" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
-      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3291815" sideWeight="0.43821138" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32740214" sideWeight="0.41788617" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3950178" sideWeight="0.4601626" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39479393" sideWeight="0.6449198" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32837406" sideWeight="0.5149095" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24973376" sideWeight="0.50554675" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286334" sideWeight="0.49572194" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3950178" sideWeight="0.5398374" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3292683" sideWeight="0.5352941" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3264642" sideWeight="0.27272728" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32740214" sideWeight="0.5821138" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2171123" sideWeight="0.54121864" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3264642" sideWeight="0.27165776" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328877" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286334" sideWeight="0.49358287" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24973376" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3292683" sideWeight="0.46470588" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32740214" sideWeight="0.46829268" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21626016" sideWeight="0.45878136" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32562277" sideWeight="0.45609757" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3253796" sideWeight="0.47219253" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32321042" sideWeight="0.46684492" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32831" sideWeight="0.53061223" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -5013,15 +5626,15 @@
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874355" sideWeight="0.63489497" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.4978701" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32943678" sideWeight="0.5063898" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37859425" sideWeight="0.48811412" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32943678" sideWeight="0.5063898" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.4978701" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.49574015" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37859425" sideWeight="0.511076" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.4978701" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.49574015" order="11" side_tool="false" content_ui="tabs" />
@@ -5034,8 +5647,8 @@
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32837406" sideWeight="0.32428116" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32943678" sideWeight="0.49361023" order="13" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout-to-restore>
   </component>
@@ -5054,48 +5667,26 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java</url>
-          <line>587</line>
+          <url>file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java</url>
+          <line>113</line>
           <properties />
-          <option name="timeStamp" value="34" />
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java</url>
+          <line>212</line>
+          <properties />
+          <option name="timeStamp" value="42" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="35" />
+      <option name="time" value="43" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitAppInterface.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.71163577">
-          <caret line="35" column="14" selection-start-line="35" selection-start-column="14" selection-end-line="35" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDDashboardServiceListener.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6795953">
-          <caret line="54" column="15" selection-start-line="54" selection-start-column="15" selection-end-line="54" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/menu/view_map.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.25092936">
-          <caret line="15" column="39" selection-start-line="15" selection-start-column="39" selection-end-line="15" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/Platform/Target/Linux/Main.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="93" column="4" selection-start-line="93" selection-start-column="4" selection-end-line="93" selection-end-column="74" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Map/MapSourceCalibratedPictures.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.6315789">
@@ -5107,13 +5698,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.27065527">
           <caret line="86" column="0" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDMapSurfaceView.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="142" column="21" selection-start-line="142" selection-start-column="21" selection-end-line="142" selection-end-column="21" />
         </state>
       </provider>
     </entry>
@@ -5258,17 +5842,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/nav_drawer_header.xml">
-      <provider selected="true" editor-type-id="android-designer">
-        <state />
-      </provider>
-      <provider editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDActivity.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -5315,17 +5888,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/view_map.xml">
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-7.25">
-          <caret line="78" column="4" selection-start-line="78" selection-start-column="4" selection-end-line="78" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Map/MapSource.h">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33270678">
@@ -5368,57 +5930,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.23035714">
-          <caret line="1436" column="26" selection-start-line="1436" selection-start-column="4" selection-end-line="1436" selection-end-column="26" />
-          <folding>
-            <element signature="docComment;field#coreObject#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#updateProgressDialog#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#6428#6451#0" expanded="false" />
-            <element signature="method#handleMessage#0;class#CoreMessageHandler#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#updateWakeLock#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#startWatchingCompass#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#stopWatchingCompass#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#updateViewConfiguration#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#restartCore#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#askForRouteName#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#19158:19928" expanded="false" />
-            <element signature="method#askForMapCleanup#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#askForMapDownload#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#22419#22774#0" expanded="false" />
-            <element signature="e#22773#22774#0" expanded="false" />
-            <element signature="e#22807#22822#0" expanded="false" />
-            <element signature="e#22824#22988#0" expanded="false" />
-            <element signature="e#22987#22988#0" expanded="false" />
-            <element signature="docComment;class#CopyTracksTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#CopyTracksTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;class#SendLogsTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#SendLogsTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;class#ImportRouteTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#ImportRouteTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#doInBackground#0;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#34654:35184" expanded="false" />
-            <element signature="method#donate#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#openWelcomeDialog#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#RemoveRoutesTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#onCreateGingerbread#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#42666#43598#0" expanded="false" />
-            <element signature="e#43597#43598#0" expanded="false" />
-            <element signature="method#onCreate#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#53730#53752#0" expanded="false" />
-            <element signature="e#54535#54598#0" expanded="false" />
-            <element signature="e#59940#59965#0" expanded="false" />
-            <element signature="docComment;class#LocationFromAddressTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#LocationFromAddressTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#61185#61242#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../../../../android/android-sdk/sources/android-22/android/app/Service.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.6216216">
@@ -5443,9 +5954,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Map/MapDownloader.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.32142857">
-          <caret line="320" column="0" selection-start-line="320" selection-start-column="0" selection-end-line="320" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="312" column="0" selection-start-line="312" selection-start-column="0" selection-end-line="312" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -5453,62 +5963,187 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.36291912">
           <caret line="503" column="16" selection-start-line="503" selection-start-column="8" selection-end-line="503" selection-end-column="23" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java">
+    <entry file="file://$PROJECT_DIR$/../../../../../android/android-sdk/sources/android-22/android/content/BroadcastReceiver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33226836">
+          <caret line="487" column="25" selection-start-line="487" selection-start-column="25" selection-end-line="487" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDMapSurfaceView.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="867" column="39" selection-start-line="867" selection-start-column="39" selection-end-line="867" selection-end-column="39" />
+          <caret line="53" column="39" selection-start-line="53" selection-start-column="39" selection-end-line="53" selection-end-column="39" />
           <folding>
-            <element signature="method#getWifiInetAddress#0;class#GDCore#0" expanded="true" />
-            <element signature="initializer##0;class#GDCore#0" expanded="true" />
-            <element signature="method#GDCore#0;class#GDCore#0" expanded="true" />
-            <element signature="method#updateHome#0;class#GDCore#0" expanded="true" />
-            <element signature="method#onSurfaceCreated#0;class#GDCore#0" expanded="true" />
+            <element signature="method#updateTwoFingerGesture#0;class#GDMapSurfaceView#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="181" column="34" selection-start-line="181" selection-start-column="34" selection-end-line="181" selection-end-column="34" />
+          <folding>
+            <element signature="method#onCreate#0;class#GDApplication#0" expanded="true" />
+            <element signature="method#getHomeDirPath#0;class#GDApplication#0" expanded="true" />
+            <element signature="method#addMessage#0;class#GDApplication#0" expanded="true" />
+            <element signature="method#showMessageBar#0;class#GDApplication#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/res/values/strings.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.571429">
-          <caret line="43" column="86" selection-start-line="43" selection-start-column="86" selection-end-line="43" selection-end-column="86" />
+        <state vertical-scroll-proportion="0.5886525">
+          <caret line="43" column="85" selection-start-line="43" selection-start-column="85" selection-end-line="43" selection-end-column="85" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.2989865">
+          <caret line="862" column="0" selection-start-line="862" selection-start-column="0" selection-end-line="862" selection-end-column="0" />
+          <folding>
+            <element signature="method#getWifiInetAddress#0;class#GDCore#0" expanded="true" />
+            <element signature="initializer##0;class#GDCore#0" expanded="true" />
+            <element signature="method#GDCore#0;class#GDCore#0" expanded="true" />
+            <element signature="method#updateHome#0;class#GDCore#0" expanded="true" />
+            <element signature="method#setThreadPriority#0;class#GDCore#0" expanded="true" />
+            <element signature="method#onDrawFrame#0;class#GDCore#0" expanded="true" />
+            <element signature="method#onSurfaceChanged#0;class#GDCore#0" expanded="true" />
+            <element signature="method#onSurfaceCreated#0;class#GDCore#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/ic_launcher.png">
+      <provider selected="true" editor-type-id="images">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDNavDrawerAdapter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="2.1367521">
+          <caret line="90" column="6" selection-start-line="90" selection-start-column="6" selection-end-line="90" selection-end-column="85" />
+          <folding>
+            <element signature="e#0#3491#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="213" column="49" selection-start-line="213" selection-start-column="49" selection-end-line="213" selection-end-column="49" />
+          <caret line="212" column="25" selection-start-line="212" selection-start-column="25" selection-end-line="212" selection-end-column="25" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="method#handleExternalStorageState#0;class#GDService#0" expanded="true" />
+            <element signature="method#updateExternalStorageState#0;class#GDService#0" expanded="true" />
+            <element signature="method#onCreate#0;class#GDService#0" expanded="true" />
             <element signature="method#onBind#0;class#GDService#0" expanded="true" />
             <element signature="method#createDefaultNotification#0;class#GDService#0" expanded="true" />
+            <element signature="e#7714#7750#0" expanded="true" />
             <element signature="method#onDestroy#0;class#GDService#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-8.78125">
+          <caret line="1382" column="24" selection-start-line="1382" selection-start-column="24" selection-end-line="1382" selection-end-column="24" />
+          <folding>
+            <element signature="docComment;field#coreObject#0;class#ViewMap#0" expanded="false" />
+            <element signature="docComment;method#updateProgressDialog#0;class#ViewMap#0" expanded="false" />
+            <element signature="e#6428#6451#0" expanded="false" />
+            <element signature="docComment;method#updateWakeLock#0;class#ViewMap#0" expanded="false" />
+            <element signature="docComment;method#startWatchingCompass#0;class#ViewMap#0" expanded="false" />
+            <element signature="docComment;method#stopWatchingCompass#0;class#ViewMap#0" expanded="false" />
+            <element signature="docComment;method#updateViewConfiguration#0;class#ViewMap#0" expanded="false" />
+            <element signature="docComment;method#restartCore#0;class#ViewMap#0" expanded="false" />
+            <element signature="docComment;method#askForRouteName#0;class#ViewMap#0" expanded="false" />
+            <element signature="class#19158:19928" expanded="false" />
+            <element signature="method#askForMapDownload#0;class#ViewMap#0" expanded="true" />
+            <element signature="e#22176#22222#0" expanded="true" />
+            <element signature="docComment;class#CopyTracksTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="class#CopyTracksTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="docComment;class#SendLogsTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="class#SendLogsTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="docComment;class#ImportRouteTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="class#ImportRouteTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="docComment;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="method#onPreExecute#0;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="true" />
+            <element signature="e#32028#32097#0" expanded="true" />
+            <element signature="method#doInBackground#0;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="true" />
+            <element signature="method#onProgressUpdate#0;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="true" />
+            <element signature="method#onPostExecute#0;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="true" />
+            <element signature="method#sendLogs#0;class#ViewMap#0" expanded="true" />
+            <element signature="class#34654:35184" expanded="false" />
+            <element signature="method#donate#0;class#ViewMap#0" expanded="true" />
+            <element signature="method#openWelcomeDialog#0;class#ViewMap#0" expanded="true" />
+            <element signature="method#addTracksAsRoutes#0;class#ViewMap#0" expanded="true" />
+            <element signature="docComment;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="method#onPreExecute#0;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="true" />
+            <element signature="e#39522#39557#0" expanded="true" />
+            <element signature="method#doInBackground#0;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="true" />
+            <element signature="method#onProgressUpdate#0;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="true" />
+            <element signature="method#onPostExecute#0;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="true" />
+            <element signature="method#removeRoutes#0;class#ViewMap#0" expanded="true" />
+            <element signature="e#49918#52717#0" expanded="true" />
+            <element signature="e#52716#52717#0" expanded="true" />
+            <element signature="e#53730#53752#0" expanded="false" />
+            <element signature="method#onPause#0;class#ViewMap#0" expanded="true" />
+            <element signature="e#54535#54598#0" expanded="false" />
+            <element signature="method#onDestroy#0;class#ViewMap#0" expanded="true" />
+            <element signature="docComment;class#LocationFromAddressTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="class#LocationFromAddressTask#0;class#ViewMap#0" expanded="false" />
+            <element signature="e#61185#61242#0" expanded="false" />
+            <element signature="method#onKeyDown#0;class#ViewMap#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/view_map.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-3.392857">
+          <caret line="79" column="18" selection-start-line="79" selection-start-column="18" selection-end-line="79" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="16" column="33" selection-start-line="16" selection-start-column="33" selection-end-line="16" selection-end-column="33" />
+        <state vertical-scroll-proportion="-4.071429">
+          <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java">
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/menu/view_map.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.485623">
-          <caret line="106" column="30" selection-start-line="106" selection-start-column="30" selection-end-line="106" selection-end-column="30" />
-          <folding>
-            <element signature="method#showMessageBar#0;class#GDApplication#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/nav_drawer_header.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.47058824">
+          <caret line="20" column="42" selection-start-line="20" selection-start-column="42" selection-end-line="20" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer">
+        <state />
       </provider>
     </entry>
   </component>

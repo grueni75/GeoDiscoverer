@@ -46,7 +46,7 @@ public class GDMapSurfaceView extends GLSurfaceView {
     super(context, attrs);
     
     // Set the framebuffer
-    setEGLConfigChooser(8,8,8,0,0,0);
+    setEGLConfigChooser(8,8,8,8,16,0);
     
     // Use OpenGL ES 2.0
     setEGLContextClientVersion(2);

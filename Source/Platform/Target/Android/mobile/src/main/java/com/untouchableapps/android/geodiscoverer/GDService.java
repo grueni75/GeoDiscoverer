@@ -138,9 +138,9 @@ public class GDService extends Service {
     return new NotificationCompat.Builder(this)
         .setContentTitle(getText(R.string.notification_title))
         .setContentText(getText(R.string.notification_service_in_foreground_message))
-        .setSmallIcon(R.drawable.status)
+        .setSmallIcon(R.drawable.notification_running)
         .setContentIntent(pendingIntent)
-        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
+        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
         .build();
   }
 
@@ -208,15 +208,16 @@ public class GDService extends Service {
       if (intent.getIntExtra("tilesLeft",0)==0) {
         notification = createDefaultNotification();
       } else {
+        int tilesDone=intent.getIntExtra("tilesDone",0);
+        int tilesTotal=intent.getIntExtra("tilesLeft",0)+tilesDone;
         notification = new NotificationCompat.Builder(this)
             .setContentTitle(getText(R.string.notification_title))
             .setContentText(getString(R.string.notification_map_download_ongoing_message,
-                            intent.getStringExtra("timeLeft")))
-            .setSmallIcon(R.drawable.status)
+                            intent.getIntExtra("tilesLeft",0),intent.getStringExtra("timeLeft")))
+            .setSmallIcon(R.drawable.notification_downloading)
             .setContentIntent(pendingIntent)
-            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icon))
-            .setProgress(intent.getIntExtra("tilesLeft",0)+intent.getIntExtra("tilesDone",0),
-                         intent.getIntExtra("tilesLeft",0), true)
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setProgress(tilesTotal,tilesDone,false)
             .build();
       }
       notificationManager.notify(R.string.notification_title, notification);

@@ -292,7 +292,7 @@ void MapDownloader::downloadMapImages(Int threadNr) {
 
       // Get the next container from the queue
       MapContainer *mapContainer=NULL;
-      Int totalLeft=0;
+      Int imagesLeft=0;
       core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
       if (!downloadQueue.empty()) {
 
@@ -309,7 +309,7 @@ void MapDownloader::downloadMapImages(Int threadNr) {
           mapContainer=downloadQueue.front();
           downloadQueue.pop_front();
         }
-        totalLeft=downloadQueue.size();
+        imagesLeft=downloadQueue.size();
       }
       if (!mapContainer) {
         core->getThread()->unlockMutex(accessMutex);
@@ -319,14 +319,19 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       // Change the status
       downloadOngoing[threadNr]=true;
       Int numberOfParallelDownloads=0;
-      totalLeft+=countActiveDownloads();
+      imagesLeft+=countActiveDownloads();
       TimestampInSeconds diff=core->getClock()->getSecondsSinceEpoch()-downloadStartTime;
-      double t=totalLeft*((double)diff)/((double)downloadedImages);
-      std::string value,unit;
-      core->getUnitConverter()->formatTime(t,value,unit);
+      std::string timeLeft="unknown time";
+      if (downloadedImages!=0) {
+        double t=imagesLeft*((double)diff)/((double)downloadedImages);
+        std::string value,unit;
+        core->getUnitConverter()->formatTime(t,value,unit);
+        timeLeft=value+" "+unit;
+      }
       std::stringstream cmd;
-      cmd << "mapDownloadStatusUpdated(";
-      cmd << downloadedImages << "," << totalLeft << "," << value << " " << unit << ")";
+      cmd << "updateMapDownloadStatus(";
+      cmd << downloadedImages << "," << imagesLeft << "," << timeLeft << ")";
+      //DEBUG("cmd=%s",cmd.str().c_str());
       core->getCommander()->dispatch(cmd.str());
       core->getThread()->unlockMutex(accessMutex);
 
@@ -437,7 +442,7 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
       downloadOngoing[threadNr]=false;
       if (countActiveDownloads()==0) {
-        core->getCommander()->dispatch("mapDownloadStatusUpdated(0,0,0)");
+        core->getCommander()->dispatch("updateMapDownloadStatus(0,0,0)");
       }
       core->getThread()->unlockMutex(accessMutex);
 
