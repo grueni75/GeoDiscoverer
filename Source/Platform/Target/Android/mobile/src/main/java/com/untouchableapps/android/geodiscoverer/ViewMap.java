@@ -1433,9 +1433,11 @@ public class ViewMap extends GDActivity {
   public void onPause() {
     super.onPause();
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onPause called by " + Thread.currentThread().getName());
-    mapSurfaceView.onPause();
+    if (mapSurfaceView!=null)
+      mapSurfaceView.onPause();
     stopWatchingCompass();
-    coreObject.executeCoreCommand("maintenance()");
+    if (coreObject!=null)
+      coreObject.executeCoreCommand("maintenance()");
     if ((!exitRequested)&&(!restartRequested)) {
       Intent intent = new Intent(this, GDService.class);
       intent.setAction("activityPaused");
@@ -1606,8 +1608,9 @@ public class ViewMap extends GDActivity {
   public void onDestroy() {    
     super.onDestroy();
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onDestroy called by " + Thread.currentThread().getName());
-    coreObject.setActivity(null);
-    if (wakeLock.isHeld())
+    if (coreObject!=null)
+      coreObject.setActivity(null);
+    if ((wakeLock!=null)&&(wakeLock.isHeld()))
       wakeLock.release();
     if (downloadCompleteReceiver!=null)
       unregisterReceiver(downloadCompleteReceiver);
