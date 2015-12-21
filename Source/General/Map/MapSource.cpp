@@ -289,6 +289,7 @@ void MapSource::renameLayers() {
   // Rename the map layers
   std::string infoFilePath = getFolderPath() + "/info.gds";
   std::list<XMLNode> layerNames = resolvedGDSInfo->findConfigNodes("/GDS/LayerName");
+  //DEBUG("size=%d",layerNames.size());
   for(std::list<XMLNode>::iterator i=layerNames.begin();i!=layerNames.end();i++) {
     bool zoomLevelFound;
     Int zoomLevel;
@@ -304,6 +305,7 @@ void MapSource::renameLayers() {
       ERROR("one LayerName element has no name element in <%s>",infoFilePath.c_str());
       break;
     }
+    //DEBUG("name=%s zoomLevel=%d",name.c_str(),zoomLevel);
     bool found=false;
     for (MapLayerNameMap::iterator i=mapLayerNameMap.begin();i!=mapLayerNameMap.end();i++) {
       if (i->second==zoomLevel-minZoomLevel+1) {

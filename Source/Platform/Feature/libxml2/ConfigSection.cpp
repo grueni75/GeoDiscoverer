@@ -76,9 +76,10 @@ bool ConfigSection::readConfig(std::string configFilepath) {
     XMLNode currentSibling=xmlGetLastChild(findConfigNodes("/GDS").front());
 
     // Copy all nodes below the root
+    XMLNamespace ns=currentSibling->ns;
     for (XMLNode n=xmlDocGetRootElement(doc)->children;n!=NULL;n=n->next) {
       XMLNode n2=xmlCopyNode(n,true);
-      setDefaultNamespace(currentSibling->ns,n2);
+      setDefaultNamespace(ns,n2);
       xmlAddNextSibling(currentSibling,n2);
       currentSibling=n2;
     }
