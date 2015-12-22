@@ -50,11 +50,15 @@ sub collect_symbols {
         while (my $line = <$cmd>) {
           #print $line;
           if ($line =~ m/MODULE Linux (\S*) (\S*) (\S*)/) {
+            #print $line;
             $hash = $2;
             $arch = $1;
             $name = $3;
           }
           push(@contents,$line);
+        }
+        if ($arch eq 'arm') {
+          $arch='arm-v7a' if ($path =~ m/armeabi-v7a/);
         }
         #print $hash . "\n" . $arch . "\n" . $name . "\n";
       

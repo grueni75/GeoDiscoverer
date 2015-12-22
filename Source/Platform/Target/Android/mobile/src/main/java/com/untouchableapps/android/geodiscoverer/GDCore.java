@@ -805,7 +805,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     
     // Send report via ACRA
     Exception e = new Exception("GDCore has crashed");
-    ACRA.getErrorReporter().handleException(e,true);          
+    ACRA.getErrorReporter().handleException(e,quitApp);
   }
   
   /** Execute an command */

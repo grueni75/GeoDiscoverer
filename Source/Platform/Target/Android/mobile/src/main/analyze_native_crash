@@ -44,13 +44,15 @@ if ($report !~ m/.dmp$/) {
 }
 
 # Translate the cpu architecture
-$arch = 'armeabi-v7a' if (! $arch); 
-print $arch . "\n";
+#print $arch . "\n";
 if ($arch eq 'armeabi-v7a') {
-  $arch = 'arm';
+  $arch='arm-v7a';
+} elsif ($arch eq 'armeabi') {
+  $arch='arm';
 } else {
   die "CPU architecture $arch not supported!";
 }
+print $arch . "\n";
 
 # Decode the dump and write it to disk
 if ($report !~ m/.dmp$/) {

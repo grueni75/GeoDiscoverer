@@ -48,7 +48,8 @@ static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
                          void* context,
                          bool succeeded)
 {
-  char *cmd = (char*)malloc(strlen("sendNativeCrashReport()")+strlen(descriptor.path())+1);
+  /*char *cmd = (char*)malloc(strlen("sendNativeCrashReport()")+strlen(descriptor.path())+1);
+  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","dumpCallback");
   if (!cmd) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create sendNativeCrashReport cmd!");
   } else {
@@ -57,7 +58,8 @@ static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
     strcat(cmd,")");
     GDApp_executeAppCommand(cmd);
     free(cmd);
-  }
+  }*/
+  succeeded=false;
   return succeeded;
 }
 
@@ -273,7 +275,8 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_GDCore_ini
   strcat(dumpDir,(const char*)"/Log");
   google_breakpad::MinidumpDescriptor descriptor(dumpDir);
   if (!(google_breakpad_exception_handler = new google_breakpad::ExceptionHandler(descriptor,NULL,dumpCallback,NULL,true,-1))) {
-    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create google breakpad exception handler!");
+  //if (!(google_breakpad_exception_handler = new google_breakpad::ExceptionHandler(descriptor,NULL,NULL,NULL,true,-1))) {
+        __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create google breakpad exception handler!");
     Java_com_untouchableapps_android_geodiscoverer_GDCore_deinitCore(env,thiz);
     exit(1);
   }
