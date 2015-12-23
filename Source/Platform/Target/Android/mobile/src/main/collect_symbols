@@ -16,7 +16,7 @@ collect_symbols($dir);
 sub collect_symbols { 
   my $dir = shift;
 
-  print "Processing <$dir>\n";
+  #print "Processing <$dir>\n";
   opendir my $in, $dir or die "Could not open dir <$dir>: $!";
   my @files = readdir($in); 
   closedir $in;

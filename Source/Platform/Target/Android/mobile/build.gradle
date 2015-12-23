@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+def computeVersionName() {
+    def date = new Date()
+    return date.format('yyyyMMdd')
+}
 
 android {
     compileSdkVersion 22
@@ -9,24 +13,35 @@ android {
         applicationId "com.untouchableapps.android.geodiscoverer"
         minSdkVersion 9
         targetSdkVersion 22
+        versionCode 19
+        versionName computeVersionName()
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            project.ext.set('appABI', 'all32')
+            project.ext.set('releaseAppABI', 'all32')
         }
         debug {
-            //project.ext.set('appABI', 'all32')
-            project.ext.set('appABI', 'armeabi-v7a')
-            //project.ext.set('appABI', 'armeabi')
-            //project.ext.set('appABI', 'x86')
+            project.ext.set('debugAppABI', 'armeabi-v7a')
         }
     }
 
     sourceSets.main {
         jniLibs.srcDir 'src/main/libs' // use the jni .so compiled from the manual ndk-build command
         jni.srcDirs = [] //disable automatic ndk-build call
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            if (variant.name == "release") {
+                println(variant.name)
+                output.outputFile = new File(
+                        output.outputFile.parent,
+                        "GeoDiscoverer${variant.versionName}.apk")
+                println(output.outputFile.name)
+            }
+        }
     }
 }
 
@@ -48,19 +63,20 @@ task collectAssets(type: Exec) {
 }
 preBuild.dependsOn collectAssets
 
-task updateVersion(type: Exec) {
-    workingDir 'src/main'
-    commandLine './update_version'
+android.buildTypes.all{ buildType ->
+    def collectSymbolsTask = task("collect${buildType.name.capitalize()}Symbols", type: Exec) {
+        workingDir 'src/main'
+        commandLine './collect_symbols', 'obj'
+    }
+    def buildNativeCodeTask = task("build${buildType.name.capitalize()}NativeCode", type: Exec) {
+        workingDir 'src/main'
+        commandLine 'ndk-build', 'APP_ABI=' + project.ext.get("${buildType.name}AppABI")
+    }
+    collectSymbolsTask.dependsOn buildNativeCodeTask
+    tasks.whenTaskAdded { task ->
+        if (task.name == "pre${buildType.name.capitalize()}Build") {
+            task.dependsOn collectSymbolsTask
+        }
+    }
 }
-preBuild.dependsOn updateVersion
 
-task ndkBuild(type: Exec) {
-    workingDir 'src/main'
-    commandLine 'ndk-build', 'APP_ABI=' + project.appABI
-}
-task collectSymbols(type: Exec) {
-    workingDir 'src/main'
-    commandLine './collect_symbols', 'obj'
-}
-preBuild.dependsOn collectSymbols
-collectSymbols.dependsOn ndkBuild
