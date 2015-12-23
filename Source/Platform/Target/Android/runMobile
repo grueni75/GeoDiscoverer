@@ -1,0 +1,2 @@
+./gradlew mobile:installDebug
+adb shell am start -n com.untouchableapps.android.geodiscoverer/com.untouchableapps.android.geodiscoverer.ViewMap
