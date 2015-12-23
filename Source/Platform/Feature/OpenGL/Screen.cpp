@@ -197,7 +197,6 @@ void Screen::mainLoop() {
   glutMouseFunc(mouseFunc);
   glutMotionFunc(motionFunc);
   glutMainLoop();
-  WARNING("check if exit is working correctly",NULL);
   core->updateGraphic(false,true);
   core->getDefaultScreen()->setAllowDestroying(true);
   graphicInvalidated(false);
