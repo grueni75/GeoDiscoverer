@@ -517,7 +517,7 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 </div></div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201511170939" changecount="123">
+<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201512230852" changecount="128">
 <pre>! Copyright (C) Matthias Grünewald - All Rights Reserved
 Geo Discoverer has been developed by Matthias Grünewald. He owns the copyright for the application, this help and all the media used. The app uses also many libraries and media from others. See [[Acknowledgements|About##Acknowledgements]]. 
 ! License
@@ -538,6 +538,10 @@ The biking and hiking trails visible on top of the Hike Bike Map and the Open To
 The bundled map source &quot;~OpenCycleMap&quot; use tile servers from http://www.opencyclemap.org/. The copyright is owned by Thunderforest. See http://www.thunderforest.com for more information.
 !! Nop's Reit- und Wanderkarte
 The bundled map source &quot;Wander und Reitkarten&quot; uses tile servers from http://www.wanderreitkarte.de/. It is licensed under the [[Creative Commons Attribution-NonCommercial-ShareAlike 3.0 DE License|http://creativecommons.org/licenses/by-nc-sa/3.0/de/]] license.
+!! 4UMaps
+The bundled map source &quot;4UMaps&quot; uses tile servers from http://www.4umaps.eu. It is allowed to use 4UMaps for private, non commercial use only. See the [[Terms of use|http://www.4umaps.eu/terms-of-use-copyright.aspx]] for more information.
+!! ~MapQuest
+The bundled map sources &quot;Default&quot; and &quot;~MapQuest&quot; use tile servers from http://open.mapquest.com. Data, imagery and map information is provided by ~MapQuest, [[OpenStreetMap|http://www.openstreetmap.org/copyright]] and contributors.
 !! Help
 !!! Tiddly Wiki Classic
 This help has been created within the wonderful ~TiddlyWikiClassic (TWC). TWC has been created by Jeremy Ruston and the ~UnaMesa Association. See License-TiddlyWikiClassic for more information.
@@ -1406,7 +1410,7 @@ Please check [[the Geo Discoverer Google+ page|https://plus.google.com/u/1/11697
 ! Other information in this Wiki
 &lt;&lt;tiddler MainMenu&gt;&gt;</pre>
 </div>
-<div title="HomeDirectory" creator="Matthias" modifier="Matthias" created="201412131328" modified="201412131331" changecount="7">
+<div title="HomeDirectory" creator="Matthias" modifier="Matthias" created="201412131328" modified="201512211534" changecount="10">
 <pre>Geo Discoverer stores all its file in the internal storage of your device. The directory is called &quot;[[GeoDiscoverer|About]]&quot;. It has the following content.
 |!Directory/File |!Purpose |
 |Font/|Contains all the fonts used for drawing text on the screen.|
@@ -1415,6 +1419,7 @@ Please check [[the Geo Discoverer Google+ page|https://plus.google.com/u/1/11697
 |Log/|Contains all kinds of log files that can be used for debugging.|
 |Map/|Contains all maps. Each map is stored in an own directory. See MapCreation for more info how to create own maps.|
 |Route/|Contains all routes that are loaded during startup. Tip: You can create sub folders for storing routes that you currently don't need. Geo Discoverer does not load GPX files from sub directories.|
+|Server/|Contains all known servers that provide map tiles for download. See MapCreation for more info how to create own maps.|
 |Track/|Contains all recorded tracks in GPX format.|
 |config.current.xsd|Current configuration schema.|
 |config.shipped.xsd|Configuration schema shipped with the app. This is used for upgrading the preferences if a new app version is installed.|
@@ -3314,14 +3319,15 @@ Except as contained in this notice, the name of a copyright holder shall not be 
 |DebugAids@@margin-right:1em;@@|How to help the developer to improve the app|
 |ContactDeveloper@@margin-right:1em;@@|How to contact the developer|</pre>
 </div>
-<div title="MapCreation" creator="Matthias" modifier="Matthias" created="201412201118" modified="201505040544" changecount="61">
-<pre>Geo Discoverer can use different sources for maps. You can choose the map to use in the AppSettings. The maps are stored in dedicated folders within the [[Map folder|HomeDirectory]]. There are two types of map sources supported: offline maps and online maps.
+<div title="MapCreation" creator="Matthias" modifier="Matthias" created="201412201118" modified="201512211612" changecount="66">
+<pre>Geo Discoverer can use different sources for maps. You can choose the map to use in the AppPreferences. The maps are stored in dedicated folders within the [[Map folder|HomeDirectory]]. There are two types of map sources supported: offline maps and online maps.
 !Online maps
 An online map is defined by a XML file called &quot;info.gds&quot; (GDS=Geo Discoverer map Source). It describes from which (OSM) tile servers each map tile shall be created. Geo Discoverer supports overlaying of tiles from different server ~URLs. For example, hiking tracks can be added to a topographical map. 
 You need to do the following steps for creating a new online map:
 # Create a new folder in the [[Map directory|HomeDirectory]]. It's name is also the map name used by Geo Discoverer.
 # Create the &quot;info.gds&quot; file within your new map folder. Geo Discoverer includes already online map sources. So you can simply copy a &quot;info.gds&quot; file from an existing map folder and modify it accordingly. The full file format is described in the [[MapSource.xsd|MapCreation/MapSource.xsd]] XML schema.
-# Optional: Create a legend for the map by adding an image called &quot;legend.png&quot; to the map folder.  
+# Optional: Create a legend for the map by adding an image called &quot;legend.png&quot; to the map folder. 
+# Optional: Re-use tile server definitions in the [[Server directory|HomeDirectory]] with the ~MapSourceRef tag in the &quot;info.gds&quot; file. Each tile server can also have it's own &quot;legend.png&quot;.
 # Start Geo Disoverer. If it is already running, use the [[&quot;Exit&quot; menu entry|MapView##Menu]] to close it beforehand.
 !Offline maps
 An offline map consists of many map pictures. Each picture is calibrated by defining the used map projection and at least three calibration points. Two files are required per picture: the map picture itself in a supported format (JPG or PNG), and a XML file with the ending &quot;.gdm&quot; (GDM=Geo Discoverer Map) that contains the calibration data. The format of the GDM file is defined in the [[MapContainer.xsd|MapCreation/MapContainer.xsd]] XML schema. All the map pictures are stored in a zip file with the file ending &quot;.gda&quot; (GDA=Geo Discoverer map Archive). The online maps also store the downloaded map pictures in &quot;.gda&quot; files. So you can use any &quot;.gda&quot; file from an online map source as an example. Map archives can also contain an image called &quot;legend.png&quot;. Geo Discoverer displays this image if the [[&quot;Show legend&quot; menu entry|MapView##Menu]] is selected. Offline maps may also contain a &quot;info.gds&quot; file. It's content is used in addition to the one from the &quot;info.gds&quot; file in the map folder. One example usage is the definition of map layer names when creating GDA files.  
@@ -3349,7 +3355,7 @@ Geo Discoverer is bundled with a set of small tools that can create the contents
 |[[GrabMaps.py|MapCreation/GrabMaps.py]]|Grabs map pictures from windows applications and creates &quot;.gdm&quot; files for them. The calibration data is also copied from the windows application. It contains support for Google Maps running in Firefox and Garmin's &quot;Deutschland Digital Topographische Karte&quot;. The script requires the software packages ~ActivePython-2.7.2.5, ~PIL-1.1.7 and ~MiniCap.|
 </pre>
 </div>
-<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201508180525" changecount="198">
+<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201512211528" changecount="199">
 <pre>The map view is the main activity of the app. It shows the map selected in the AppPreferences on the screen. The map can be moved by using one finger and zoomed by using two fingers. Each map can consist of multiple layers at different zoom levels. The app automatically selects the best layer depending on the zoom ratio. You can also create your own map. See MapCreation.
 ! Elements on the map&lt;html&gt;&lt;a name=&quot;ElementsOnTheMap&quot;/&gt;&lt;/html&gt;
 Besides the map itself, different graphical elements are placed on top of it. Here is an explanation:
@@ -3430,7 +3436,8 @@ These buttons change to the widget page on the left or right side.
 There is also a menu available if you press the hardware menu button or if you swipe from the left edge of the screen to the right. The menu has the following entries:
 |!Menu entry|!Purpose |
 |Show legend|If the map has a legend, it is displayed in an external image viewer. See MapCreation if you want to add your own legend.|
-|Clean map|Deletes the tiles for the the current visible area. This can be used in case the map image is outdated, wrongly downloaded, or the storage space is needed.|
+|Download map|Downloads the current visible area. A dialog guides through the download process.|
+|Cleanup map|Deletes the tiles for the the current visible area. This can be used in case the map image is outdated, wrongly downloaded, or the storage space is needed.|
 |Add tracks as routes|Shows a dialog that allows you to convert previously recorded tracks into routes.|
 |Remove routes|Shows a dialog that allows you to delete routes. Attention: The routes are deleted permanently!|
 |Help|Shows this help.|
@@ -4862,8 +4869,9 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201511170940" changecount="32">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201512211521" changecount="33">
 <pre>|!Date |!Changes |
+|2015-12-21|Updated tiddlers regarding the new map download feature.|
 |2015-11-17|Replaced ~IcoMoon by material design icons in [[About]].|
 |2015-11-07|Updated XML toolkit license due to version update. Added iconv acknowledge.|
 |2015-08-18|Renamed &quot;Refresh visible map&quot; menu entry in MapView to &quot;Clean visible map&quot; and explained new features.|
