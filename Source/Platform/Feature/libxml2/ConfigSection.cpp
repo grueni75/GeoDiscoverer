@@ -63,7 +63,9 @@ void ConfigSection::setDefaultNamespace(XMLNamespace ns, XMLNode node) {
 bool ConfigSection::readConfig(std::string configFilepath) {
 
   // Remember the folder of this config
-  folder=std::string(dirname((char*)configFilepath.c_str()));
+  char *t = strdup(configFilepath.c_str());
+  folder=std::string(dirname(t));
+  free(t);
 
   // Merge the info if config is already set
   if (config) {
