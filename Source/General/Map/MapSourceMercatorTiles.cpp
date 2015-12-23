@@ -108,12 +108,19 @@ bool MapSourceMercatorTiles::init() {
       remove((mapPath + "/" + filename).c_str());
     } else {
 
-      // Add this archive if it is valid
+      /* Add this archive if it is valid
       if (sscanf(dp->d_name,"tiles%d.gda",&nr)==1) {
         ZipArchive *archive = new ZipArchive(mapPath,dp->d_name);
         if ((archive)&&(archive->init())) {
           mapArchives.push_back(archive);
         }
+      }*/
+
+      // Delete any archive (not used anymore)
+      if ((sscanf(dp->d_name,"tiles%d.gda",&nr)==1)||(strcmp(dp->d_name,"tiles.gda")==0)) {
+        std::string p = mapPath+"/"+dp->d_name;
+        DEBUG("removing <%s> (not used anymore)",p.c_str());
+        unlink(p.c_str());
       }
     }
   }
