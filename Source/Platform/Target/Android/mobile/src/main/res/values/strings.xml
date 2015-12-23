@@ -16,6 +16,7 @@
 	<string name="track_as_route_selection_question">Select the tracks to copy to the route directory:</string>
 	<string name="route_remove_selection_question">Select the routes to delete from the route directory:</string>
   <string name="log_selection_question">Select the logs to send to the developer:</string>
+  <string name="map_legend_selection_question">Select the legend to show:</string>
 	<string name="finished">Finished</string>
 	<string name="cancel">Cancel</string>
 	<string name="copying_tracks">Copying tracks from track to route directory</string><string name="removing_routes">Removing routes from route directory</string>

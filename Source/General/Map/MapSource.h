@@ -44,6 +44,7 @@ protected:
   MapLayerNameMap mapLayerNameMap;                // Defines for each zoom level a name
   Int minZoomLevel;                               // Minimum zoom value
   Int maxZoomLevel;                               // Maximum zoom value
+  static StringMap legendPaths;                   // List of available legends with their names
 
   // Lists of map containers sorted by their boundaries
   std::vector<Int> mapsIndexByLatNorth;
@@ -162,6 +163,12 @@ public:
   // Returns the name of the given zoom level
   std::string getMapLayerName(int zoomLevel);
 
+  // Returns a list of names of the maps that have a legend
+  static std::list<std::string> getLegendNames();
+
+  // Returns the file path to the legend with the given name
+  static std::string getLegendPath(std::string name);
+
   // Getters and setters
   Int getMapTileLength() const {
     return mapTileLength;
@@ -199,10 +206,6 @@ public:
 
   std::string getFolderPath() const {
     return core->getHomePath() + "/Map/" + folder;
-  }
-
-  std::string getLegendPath() const {
-    return core->getHomePath() + "/Map/" + folder + "/legend.png";
   }
 
   virtual void lockAccess(const char *file, int line) {

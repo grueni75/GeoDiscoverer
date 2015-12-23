@@ -30,6 +30,9 @@ MapSource::MapSource() {
   mapDownloader=NULL;
   minZoomLevel=-1;
   maxZoomLevel=-1;
+  std::string defaultLegendPath=core->getHomePath() + "/Map/" + folder + "/legend.png";
+  if (access(defaultLegendPath.c_str(),F_OK)==0)
+    legendPaths[getFolder()]=defaultLegendPath;
 }
 
 MapSource::~MapSource() {
@@ -963,6 +966,19 @@ void MapSource::addDownloadJob(bool estimateOnly, std::string zoomLevels) {
 
 // Processes all pending download jobs
 void MapSource::processDownloadJobs() {
+}
+
+// Returns a list of names of the maps that have a legend
+std::list<std::string> MapSource::getLegendNames() {
+  std::list<std::string> l;
+  for (StringMap::iterator i=legendPaths.begin();i!=legendPaths.end();i++)
+    l.push_back(i->first);
+  return l;
+}
+
+// Returns the file path to the legend with the given name
+std::string MapSource::getLegendPath(std::string name) {
+  return legendPaths[name];
 }
 
 }

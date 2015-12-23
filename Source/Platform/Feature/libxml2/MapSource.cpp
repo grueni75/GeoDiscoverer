@@ -15,6 +15,9 @@
 
 namespace GEODISCOVERER {
 
+// Map that holds all available legends
+StringMap MapSource::legendPaths;
+
 /* Reads elements from the GDS XML structure
 bool MapSource::resolveGDSInfo(XMLNode startNode, std::vector<std::string> path) {
   bool result=false;
@@ -105,7 +108,7 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
     std::string refLayerGroupName="";
     bool refLayerGroupNameSet=resolvedGDSInfo->getNodeText(*i,"layerGroupName",refLayerGroupName);
 
-    // Does thie entry have a name?
+    // Does the entry have a name?
     if (nameFound) {
 
       // Find the referenced map source
@@ -188,6 +191,12 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
             currentSibling=n2;
           }
 
+          // Add this map legend if it exists
+          std::string legendPath=(*j)->getFolder()+"/legend.png";
+          if (access(legendPath.c_str(),F_OK)==0) {
+            legendPaths[name]=legendPath;
+          }
+
           // Unlink the map source ref
           xmlUnlinkNode(*i);
           xmlFreeNode(*i);
@@ -241,6 +250,7 @@ void MapSource::readAvailableGDSInfos() {
     delete *i;
   }
   availableGDSInfos.clear();
+  legendPaths.clear();
 
   // First get a list of all available route filenames
   DIR *dp = opendir( mapSourceFolderPath.c_str() );
@@ -271,7 +281,10 @@ void MapSource::readAvailableGDSInfos() {
         // Check the version
         char *text = (char *)xmlGetProp(xmlDocGetRootElement(c->getConfig()),BAD_CAST "version");
         if (strcmp(text,"1.0")==0) {
+
+          // Remember the config
           availableGDSInfos.push_back(c);
+
         } else {
           ERROR("the version (%s) of the GDS file <%s> is not supported",text,filepath.c_str());
           delete c;

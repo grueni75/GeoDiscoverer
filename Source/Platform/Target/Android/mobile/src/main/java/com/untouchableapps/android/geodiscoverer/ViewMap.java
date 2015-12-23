@@ -584,7 +584,7 @@ public class ViewMap extends GDActivity {
     builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialog, int which) {
-        mapDownloadDialog=null;
+        mapDownloadDialog = null;
         if (selectedMapLayers.size() > 0) {
           String args = TextUtils.join(",", selectedMapLayers);
           coreObject.executeCoreCommand("addDownloadJob(" + args + ")");
@@ -594,7 +594,7 @@ public class ViewMap extends GDActivity {
     builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialog, int which) {
-        mapDownloadDialog=null;
+        mapDownloadDialog = null;
       }
     });
     builder.setMessage(R.string.download_job_no_level_selected_message);
@@ -622,6 +622,38 @@ public class ViewMap extends GDActivity {
       }
     });
     mapDownloadDialog.show();
+  }
+
+  /** Asks the user which map legend to show */
+  void askForMapLegend(final String[] names) {
+    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
+    builder.setTitle(R.string.map_legend_selection_question);
+    builder.setItems(names,
+        new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            showMapLegend(names[which]);
+          }
+        });
+    builder.setCancelable(true);
+    builder.setIcon(android.R.drawable.ic_dialog_info);
+    builder.setNegativeButton(R.string.cancel, null);
+    Dialog alert = builder.create();
+    alert.show();
+  }
+
+  /** Shows the legend with the given name */
+  void showMapLegend(String name) {
+    String legendPath = coreObject.executeCoreCommand("getMapLegendPath(" + name + ")");
+    File legendPathFile = new File(legendPath);
+    if (!legendPathFile.exists()) {
+      errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder()"),legendPath));
+    } else {
+      Intent intent = new Intent();
+      intent.setAction(Intent.ACTION_VIEW);
+      intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
+      startActivity(intent);
+    }
   }
 
   /** Asks the user if the track shall be continued or a new track shall be started */
@@ -1142,7 +1174,7 @@ public class ViewMap extends GDActivity {
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
     builder.show();
   }
-  
+
   /** Prepares activity for functions only available on gingerbread */
   @TargetApi(Build.VERSION_CODES.GINGERBREAD)
   void onCreateGingerbread() {
@@ -1357,15 +1389,12 @@ public class ViewMap extends GDActivity {
             removeRoutes();
             break;
           case R.id.nav_show_legend:
-            String legendPath = coreObject.executeCoreCommand("getMapLegendPath()");
-            File legendPathFile = new File(legendPath);
-            if (!legendPathFile.exists()) {
-              errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder()"),legendPath));
+            String namesString = coreObject.executeCoreCommand("getMapLegendNames()");
+            String names[] = namesString.split(",");
+            if (names.length!=1) {
+              askForMapLegend(names);
             } else {
-              intent = new Intent();
-              intent.setAction(Intent.ACTION_VIEW);
-              intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
-              startActivity(intent);
+              showMapLegend(names[0]);
             }
             break;
           case R.id.nav_show_help:

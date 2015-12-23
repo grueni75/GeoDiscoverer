@@ -61,7 +61,9 @@ bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::li
 
       // If the file is a legend, extract it
       if (filename=="legend.png") {
-        (*i)->exportEntry(filename,getFolderPath() + "/legend.png");
+        std::string legendPath=getFolderPath() + "/legend.png";
+        (*i)->exportEntry(filename,legendPath);
+        legendPaths[getFolder()]=legendPath;
       }
 
       // If the file is a info.gds file, merge it's info into the existing list
@@ -380,7 +382,7 @@ bool MapSourceCalibratedPictures::init()
     if (mapArchive->getEntrySize("legend.png")!=0) {
       title="Extracting legend of map " + std::string(folder);
       dialog=core->getDialog()->createProgress(title,0);
-      mapArchive->exportEntry("legend.png",getLegendPath());
+      mapArchive->exportEntry("legend.png",getFolderPath()+"/legend.png");
       core->getDialog()->closeProgress(dialog);
     }
 

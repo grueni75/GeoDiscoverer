@@ -32,6 +32,9 @@ protected:
   XMLXPathContext xpathConfigCtx;
   XMLXPathContext xpathSchemaCtx;
 
+  // Folder this config is loaded from
+  std::string folder;
+
   // Sets a default namespace for all the nodes
   void setDefaultNamespace(XMLNamespace ns, XMLNode node);
 
@@ -137,6 +140,10 @@ public:
 
   XMLDocument getSchema() const {
     return schema;
+  }
+
+  const std::string& getFolder() const {
+    return folder;
   }
 };
 

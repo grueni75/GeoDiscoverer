@@ -291,8 +291,21 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="getMapLegendNames") {
+    std::list<std::string> names=core->getMapSource()->getLegendNames();
+    result="";
+    for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
+      if (i!=names.begin())
+        result=result+",";
+      result=result+*i;
+    }
+    cmdExecuted=true;
+  }
   if (cmdName=="getMapLegendPath") {
-    result=core->getMapSource()->getLegendPath();
+    if (args.size()==1)
+      result=core->getMapSource()->getLegendPath(args[0].c_str());
+    else
+      result="";
     cmdExecuted=true;
   }
   if (cmdName=="getMapFolder") {
