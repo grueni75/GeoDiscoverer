@@ -178,6 +178,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   // References for the network discovery via ARP lookup
   Thread lookupARPCacheThread = null;
   boolean quitLookupARPCacheThread = false;
+
+  // Last time the download status was updated
+  long lastDownloadStatusUpdate = 0;
   
   /**
    * Finds all IP addresses of the wlan adapter
@@ -859,14 +862,20 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       cmdExecuted=true;
     }
     if (cmd.startsWith("updateMapDownloadStatus(")) {
-      String infos = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
+      String infos = cmd.substring(cmd.indexOf("(") + 1, cmd.indexOf(")"));
       String[] args=infos.split(",");
-      Intent intent = new Intent(application.getApplicationContext(), GDService.class);
-      intent.setAction("mapDownloadStatusUpdated");
-      intent.putExtra("tilesDone", Integer.parseInt(args[0]));
-      intent.putExtra("tilesLeft",Integer.parseInt(args[1]));
-      intent.putExtra("timeLeft",args[2]);
-      application.startService(intent);
+      int tilesLeft = Integer.parseInt(args[1]);
+      long t = System.currentTimeMillis()/1000;
+      if ((System.currentTimeMillis()/1000>lastDownloadStatusUpdate)||
+          (tilesLeft==0)) {
+        Intent intent = new Intent(application.getApplicationContext(), GDService.class);
+        intent.setAction("mapDownloadStatusUpdated");
+        intent.putExtra("tilesDone", Integer.parseInt(args[0]));
+        intent.putExtra("tilesLeft",tilesLeft);
+        intent.putExtra("timeLeft",args[2]);
+        lastDownloadStatusUpdate=System.currentTimeMillis()/1000;
+        application.startService(intent);
+      }
       cmdExecuted=true;
     }
     if (!cmdExecuted) {
