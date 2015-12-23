@@ -13,7 +13,7 @@ android {
         applicationId "com.untouchableapps.android.geodiscoverer"
         minSdkVersion 9
         targetSdkVersion 22
-        versionCode 19
+        versionCode 20
         versionName computeVersionName()
     }
     buildTypes {
@@ -35,11 +35,9 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             if (variant.name == "release") {
-                println(variant.name)
                 output.outputFile = new File(
                         output.outputFile.parent,
                         "GeoDiscoverer${variant.versionName}.apk")
-                println(output.outputFile.name)
             }
         }
     }
@@ -74,7 +72,7 @@ android.buildTypes.all{ buildType ->
     }
     collectSymbolsTask.dependsOn buildNativeCodeTask
     tasks.whenTaskAdded { task ->
-        if (task.name == "pre${buildType.name.capitalize()}Build") {
+        if (task.name == "preDex${buildType.name.capitalize()}") {
             task.dependsOn collectSymbolsTask
         }
     }
