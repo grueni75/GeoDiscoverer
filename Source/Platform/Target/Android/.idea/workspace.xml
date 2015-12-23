@@ -11,19 +11,40 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b578a301-10f4-4fb1-9459-91cdc01d1a52" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/appcompat_v7_22_2_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/design_22_2_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/gridlayout_v7_22_2_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/jmdns_r353.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/play_services_base_7_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/play_services_wearable_7_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/recyclerview_v7_22_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/recyclerview_v7_22_2_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_annotations_22_2_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_v4_22_2_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/wearable_1_2_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/update_version" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/notification_downloading.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/notification_downloading.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/notification_downloading.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/notification_downloading.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/notification_downloading.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/notification_downloading.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/notification_downloading.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/notification_downloading.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/notification_downloading.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/notification_downloading.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/notification_downloading.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/notification_downloading.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/notification_running.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-hdpi/notification_running.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/notification_running.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-ldpi/notification_running.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/notification_running.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-mdpi/notification_running.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/notification_running.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xhdpi/notification_running.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/notification_running.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxhdpi/notification_running.png" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/notification_running.png" afterPath="$PROJECT_DIR$/mobile/src/main/res/drawable-xxxhdpi/notification_running.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/App/Commander.cpp" afterPath="$PROJECT_DIR$/../../../General/App/Commander.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Feature/libxml2/ConfigSection.cpp" afterPath="$PROJECT_DIR$/../../Feature/libxml2/ConfigSection.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Config/ConfigSection.h" afterPath="$PROJECT_DIR$/../../../General/Config/ConfigSection.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Help/public/MapCreation/MapContainer.xsd" afterPath="$PROJECT_DIR$/../Help/public/MapCreation/MapContainer.xsd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapSource.cpp" afterPath="$PROJECT_DIR$/../../../General/Map/MapSource.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Feature/libxml2/MapSource.cpp" afterPath="$PROJECT_DIR$/../../Feature/libxml2/MapSource.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapSource.h" afterPath="$PROJECT_DIR$/../../../General/Map/MapSource.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Help/public/MapCreation/MapSource.xsd" afterPath="$PROJECT_DIR$/../Help/public/MapCreation/MapSource.xsd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapSourceCalibratedPictures.cpp" afterPath="$PROJECT_DIR$/../../../General/Map/MapSourceCalibratedPictures.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/build.gradle" afterPath="$PROJECT_DIR$/mobile/build.gradle" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/collect_symbols" afterPath="$PROJECT_DIR$/mobile/src/main/collect_symbols" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/colorPickerPreference/colorPickerPreference.iml" afterPath="$PROJECT_DIR$/colorPickerPreference/colorPickerPreference.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Help/public/index.html" afterPath="$PROJECT_DIR$/../Help/public/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/mobile/src/main/res/values/strings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/materialDialogs/materialDialogs.iml" afterPath="$PROJECT_DIR$/materialDialogs/materialDialogs.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/mobile.iml" afterPath="$PROJECT_DIR$/mobile/mobile.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/notification_downloading.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/notification_downloading.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/notification_running.svg" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/SVG/notification_running.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wear/wear.iml" afterPath="$PROJECT_DIR$/wear/wear.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="GeoDiscoverer.iws" />
@@ -74,9 +95,45 @@
                 <option name="myItemId" value=":mobile" />
                 <option name="myItemType" value="com.intellij.openapi.externalSystem.view.ModuleNode" />
               </PATH_ELEMENT>
+            </PATH>
+            <PATH>
+              <PATH_ELEMENT>
+                <option name="myItemId" value="" />
+                <option name="myItemType" value="com.intellij.openapi.externalSystem.view.ExternalProjectsStructure$RootNode" />
+              </PATH_ELEMENT>
+              <PATH_ELEMENT>
+                <option name="myItemId" value="Android" />
+                <option name="myItemType" value="com.intellij.openapi.externalSystem.view.ProjectNode" />
+              </PATH_ELEMENT>
+              <PATH_ELEMENT>
+                <option name="myItemId" value=":mobile" />
+                <option name="myItemType" value="com.intellij.openapi.externalSystem.view.ModuleNode" />
+              </PATH_ELEMENT>
               <PATH_ELEMENT>
                 <option name="myItemId" value="Tasks" />
                 <option name="myItemType" value="com.intellij.openapi.externalSystem.view.TasksNode" />
+              </PATH_ELEMENT>
+            </PATH>
+            <PATH>
+              <PATH_ELEMENT>
+                <option name="myItemId" value="" />
+                <option name="myItemType" value="com.intellij.openapi.externalSystem.view.ExternalProjectsStructure$RootNode" />
+              </PATH_ELEMENT>
+              <PATH_ELEMENT>
+                <option name="myItemId" value="Android" />
+                <option name="myItemType" value="com.intellij.openapi.externalSystem.view.ProjectNode" />
+              </PATH_ELEMENT>
+              <PATH_ELEMENT>
+                <option name="myItemId" value=":mobile" />
+                <option name="myItemType" value="com.intellij.openapi.externalSystem.view.ModuleNode" />
+              </PATH_ELEMENT>
+              <PATH_ELEMENT>
+                <option name="myItemId" value="Tasks" />
+                <option name="myItemType" value="com.intellij.openapi.externalSystem.view.TasksNode" />
+              </PATH_ELEMENT>
+              <PATH_ELEMENT>
+                <option name="myItemId" value="other" />
+                <option name="myItemType" value="com.intellij.openapi.externalSystem.view.TasksNode$1" />
               </PATH_ELEMENT>
             </PATH>
             <PATH>
@@ -230,7 +287,62 @@
     <favorites_list name="GeoDiscoverer" />
   </component>
   <component name="FileEditorManager">
-    <leaf />
+    <leaf>
+      <file leaf-file-name="GDService.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="202" column="19" selection-start-line="202" selection-start-column="19" selection-end-line="202" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/mobile/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.54946727">
+              <caret line="41" column="47" selection-start-line="41" selection-start-column="47" selection-end-line="41" selection-end-column="47" />
+              <folding>
+                <element signature="e#66#130#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AndroidManifest.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="2" column="55" selection-start-line="2" selection-start-column="55" selection-end-line="2" selection-end-column="55" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="collect_symbols" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/mobile/src/main/collect_symbols">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="18" column="3" selection-start-line="18" selection-start-column="3" selection-end-line="18" selection-end-column="3" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GDCore.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="868" column="47" selection-start-line="868" selection-start-column="47" selection-end-line="868" selection-end-column="47" />
+              <folding>
+                <element signature="method#sendNativeCrashReport#0;class#GDCore#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -242,6 +354,7 @@
   <component name="GenerateSignedApkSettings">
     <option name="KEY_STORE_PATH" value="$PROJECT_DIR$/keystore" />
     <option name="KEY_ALIAS" value="matthias gruenewald" />
+    <option name="REMEMBER_PASSWORDS" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../.." />
@@ -863,11 +976,23 @@
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
+                <option name="name" value="buildDebugNativeCode" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
+                <option name="name" value="buildReleaseNativeCode" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
                 <option name="name" value="collectAssets" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
-                <option name="name" value="collectSymbols" />
+                <option name="name" value="collectDebugSymbols" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
+                <option name="name" value="collectReleaseSymbols" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
@@ -894,10 +1019,6 @@
                 <option name="description" value="Runs lint on just the fatal issues in the Release build." />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
                 <option name="name" value="lintVitalRelease" />
-              </ExternalTaskPojo>
-              <ExternalTaskPojo>
-                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
-                <option name="name" value="ndkBuild" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
@@ -939,10 +1060,6 @@
                 <option name="description" value="Uninstalls the Release build." />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
                 <option name="name" value="uninstallRelease" />
-              </ExternalTaskPojo>
-              <ExternalTaskPojo>
-                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
-                <option name="name" value="updateVersion" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
@@ -1017,6 +1134,10 @@
                 <option name="name" value="build" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
+                <option name="name" value="buildDebugNativeCode" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
                 <option name="description" value="Assembles and tests this project and all projects that depend on it." />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
                 <option name="name" value="buildDependents" />
@@ -1025,6 +1146,10 @@
                 <option name="description" value="Assembles and tests this project and all projects it depends on." />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
                 <option name="name" value="buildNeeded" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
+                <option name="name" value="buildReleaseNativeCode" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="description" value="Runs all checks." />
@@ -1050,7 +1175,11 @@
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
-                <option name="name" value="collectSymbols" />
+                <option name="name" value="collectDebugSymbols" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
+                <option name="name" value="collectReleaseSymbols" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
@@ -1323,10 +1452,6 @@
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
-                <option name="name" value="ndkBuild" />
-              </ExternalTaskPojo>
-              <ExternalTaskPojo>
-                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
                 <option name="name" value="packageDebug" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
@@ -1531,10 +1656,6 @@
                 <option name="description" value="Uninstalls the Release build." />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
                 <option name="name" value="uninstallRelease" />
-              </ExternalTaskPojo>
-              <ExternalTaskPojo>
-                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
-                <option name="name" value="updateVersion" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/mobile" />
@@ -3234,7 +3355,7 @@
     </option>
     <option name="modificationStamps">
       <map>
-        <entry key="$PROJECT_DIR$" value="8678114270654" />
+        <entry key="$PROJECT_DIR$" value="8678184850510" />
       </map>
     </option>
     <option name="projectBuildClasspath">
@@ -4261,7 +4382,6 @@
         <option value="$PROJECT_DIR$/mobile/src/main/jni/libiconv-1.14/libcharset/config.h" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/libiconv-1.14/config.h" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/libxml2-2.9.2/config.h" />
-        <option value="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Map/MapSourceMercatorTiles.cpp" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Widget/WidgetScale.cpp" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/GeoDiscoverer/General/Map/MapDownloader.cpp" />
@@ -4273,11 +4393,12 @@
         <option value="$PROJECT_DIR$/mobile/build/generated/source/r/debug/com/untouchableapps/android/geodiscoverer/R.java" />
         <option value="$PROJECT_DIR$/mobile/src/main/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" />
-        <option value="$PROJECT_DIR$/mobile/src/main/collect_symbols" />
         <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/Android.mk" />
-        <option value="$PROJECT_DIR$/mobile/build.gradle" />
         <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java" />
+        <option value="$PROJECT_DIR$/mobile/src/main/collect_symbols" />
+        <option value="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" />
+        <option value="$PROJECT_DIR$/mobile/build.gradle" />
       </list>
     </option>
   </component>
@@ -4287,6 +4408,9 @@
         <option name="mavenHome" value="Bundled (Maven 3)" />
       </MavenGeneralSettings>
     </option>
+  </component>
+  <component name="MavenProjectNavigator">
+    <treeState />
   </component>
   <component name="NamedScopeManager">
     <order />
@@ -4403,9 +4527,7 @@
     </navigator>
     <panes>
       <pane id="PackagesPane" />
-      <pane id="AndroidView" />
       <pane id="Scope" />
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -4548,6 +4670,8 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scratches" />
+      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -4560,10 +4684,11 @@
     <property name="android.sdk.path" value="$PROJECT_DIR$/../../../../../android/android-sdk" />
     <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="TA045089FR" />
     <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_AVD" value="Nexus_5_API_22_x86" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/keystore" />
-    <property name="ExportApk.ApkPath" value="$PROJECT_DIR$/mobile" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/export" />
+    <property name="ExportApk.ApkPath" value="$PROJECT_DIR$/export" />
     <property name="ExportApk.Flavors" value="" />
     <property name="ExportApk.BuildType" value="release" />
+    <property name="restartRequiresConfirmation" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="android.template.packageName">
@@ -4576,7 +4701,7 @@
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
+        <option name="scriptParameters" value="" />
         <option name="taskDescriptions">
           <list />
         </option>
@@ -4585,7 +4710,7 @@
             <option value="build" />
           </list>
         </option>
-        <option name="vmOptions" />
+        <option name="vmOptions" value="" />
       </ExternalSystemSettings>
       <method />
     </configuration>
@@ -4855,31 +4980,31 @@
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32747254" sideWeight="0.4638619" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.31995663" sideWeight="0.45614973" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Android Monitor" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.4262473" sideWeight="0.3620321" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32994652" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25813448" sideWeight="0.5358289" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32941177" sideWeight="0.4732143" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39262474" sideWeight="0.6016043" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24973376" sideWeight="0.50554675" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32837406" sideWeight="0.5149095" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39262474" sideWeight="0.59358287" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39251336" sideWeight="0.55576557" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3253796" sideWeight="0.56417114" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286334" sideWeight="0.49572194" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.4262473" sideWeight="0.63796794" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39251336" sideWeight="0.5482042" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3264642" sideWeight="0.24598931" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328877" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle Console" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25813448" sideWeight="0.4641711" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39251336" sideWeight="0.36495176" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3264642" sideWeight="0.43368983" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.1459893" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286334" sideWeight="0.49358287" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24973261" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32994652" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39251336" sideWeight="0.45179585" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32562277" sideWeight="0.4398374" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39251336" sideWeight="0.6350482" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3253796" sideWeight="0.42941177" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.31995663" sideWeight="0.45614973" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32831" sideWeight="0.53061223" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -5180,13 +5305,13 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/view_map.xml">
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-3.392857">
           <caret line="79" column="18" selection-start-line="79" selection-start-column="18" selection-end-line="79" selection-end-column="18" />
         </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/res/menu/view_map.xml">
@@ -5197,20 +5322,12 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/nav_drawer_header.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.47058824">
-          <caret line="20" column="42" selection-start-line="20" selection-start-column="42" selection-end-line="20" selection-end-column="42" />
-        </state>
-      </provider>
       <provider editor-type-id="android-designer">
         <state />
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.25762713">
-          <caret line="19" column="33" selection-start-line="19" selection-start-column="33" selection-end-line="19" selection-end-column="33" />
-          <folding />
+        <state vertical-scroll-proportion="0.47058824">
+          <caret line="20" column="42" selection-start-line="20" selection-start-column="42" selection-end-line="20" selection-end-column="42" />
         </state>
       </provider>
     </entry>
@@ -5225,9 +5342,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.12948208">
           <caret line="146" column="33" selection-start-line="146" selection-start-column="31" selection-end-line="146" selection-end-column="33" />
-          <folding>
-            <element signature="method#onTouchEvent#0;class#GDMapSurfaceView#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -5255,167 +5369,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33208254">
-          <caret line="212" column="0" selection-start-line="212" selection-start-column="0" selection-end-line="212" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.2251407">
           <caret line="1391" column="13" selection-start-line="1391" selection-start-column="13" selection-end-line="1391" selection-end-column="13" />
-          <folding>
-            <element signature="e#0#64784#0" expanded="true" />
-            <element signature="imports" expanded="true" />
-            <element signature="docComment;field#coreObject#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#updateProgressDialog#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#updateProgressDialog#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#5983#6023#0" expanded="true" />
-            <element signature="e#6428#6451#0" expanded="false" />
-            <element signature="method#handleMessage#0;class#CoreMessageHandler#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#11241#11293#0" expanded="true" />
-            <element signature="e#12414#12457#0" expanded="true" />
-            <element signature="e#12506#12521#0" expanded="true" />
-            <element signature="e#14213#14257#0" expanded="true" />
-            <element signature="docComment;method#updateWakeLock#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#updateWakeLock#0;class#ViewMap#0" expanded="true" />
-            <element signature="docComment;method#startWatchingCompass#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#startWatchingCompass#0;class#ViewMap#0" expanded="true" />
-            <element signature="docComment;method#stopWatchingCompass#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#updateViewConfiguration#0;class#ViewMap#0" expanded="false" />
-            <element signature="docComment;method#restartCore#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#16625#16667#0" expanded="true" />
-            <element signature="e#17123#17152#0" expanded="true" />
-            <element signature="e#17175#17206#0" expanded="true" />
-            <element signature="e#17358#17397#0" expanded="true" />
-            <element signature="e#17734#17751#0" expanded="true" />
-            <element signature="e#17779#17794#0" expanded="true" />
-            <element signature="docComment;method#askForRouteName#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#askForRouteName#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#18210#18242#0" expanded="true" />
-            <element signature="e#18400#18417#0" expanded="true" />
-            <element signature="e#18445#18460#0" expanded="true" />
-            <element signature="class#19158:19928" expanded="false" />
-            <element signature="method#askForConfigReset#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#20302#20325#0" expanded="true" />
-            <element signature="e#20391#20403#0" expanded="true" />
-            <element signature="e#20413#20572#0" expanded="true" />
-            <element signature="e#20571#20572#0" expanded="true" />
-            <element signature="e#20605#20616#0" expanded="true" />
-            <element signature="method#askForMapCleanup#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#21008#21037#0" expanded="true" />
-            <element signature="e#21103#21139#0" expanded="true" />
-            <element signature="e#21149#21345#0" expanded="true" />
-            <element signature="e#21344#21345#0" expanded="true" />
-            <element signature="e#21378#21417#0" expanded="true" />
-            <element signature="method#askForMapDownload#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#22176#22222#0" expanded="true" />
-            <element signature="e#22400#22417#0" expanded="true" />
-            <element signature="e#22809#22824#0" expanded="true" />
-            <element signature="e#23018#23065#0" expanded="true" />
-            <element signature="e#24070#24115#0" expanded="true" />
-            <element signature="e#24174#24221#0" expanded="true" />
-            <element signature="method#askForMapLegend#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#24564#24602#0" expanded="true" />
-            <element signature="e#24641#24830#0" expanded="true" />
-            <element signature="e#24829#24830#0" expanded="true" />
-            <element signature="e#24952#24967#0" expanded="true" />
-            <element signature="method#showMapLegend#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#25309#25405#0" expanded="true" />
-            <element signature="method#decideContinueOrNewTrack#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#25883#25922#0" expanded="true" />
-            <element signature="e#25988#26006#0" expanded="true" />
-            <element signature="e#26304#26326#0" expanded="true" />
-            <element signature="e#26961#26998#0" expanded="true" />
-            <element signature="e#27399#27414#0" expanded="true" />
-            <element signature="docComment;class#CopyTracksTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#CopyTracksTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#27842#27876#0" expanded="true" />
-            <element signature="e#28490#28526#0" expanded="true" />
-            <element signature="docComment;class#SendLogsTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#SendLogsTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#30143#30195#0" expanded="true" />
-            <element signature="docComment;class#ImportRouteTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#ImportRouteTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#31706#31746#0" expanded="true" />
-            <element signature="e#32102#32155#0" expanded="true" />
-            <element signature="e#32460#32499#0" expanded="true" />
-            <element signature="docComment;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#onPreExecute#0;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#33279#33348#0" expanded="true" />
-            <element signature="method#doInBackground#0;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#34894#34938#0" expanded="true" />
-            <element signature="method#onProgressUpdate#0;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="true" />
-            <element signature="method#onPostExecute#0;class#ImportMapArchivesTask#0;class#ViewMap#0" expanded="true" />
-            <element signature="method#sendLogs#0;class#ViewMap#0" expanded="true" />
-            <element signature="class#35905:36435" expanded="false" />
-            <element signature="e#36553#36584#0" expanded="true" />
-            <element signature="e#36668#36685#0" expanded="true" />
-            <element signature="e#36713#36728#0" expanded="true" />
-            <element signature="method#donate#0;class#ViewMap#0" expanded="true" />
-            <element signature="method#openWelcomeDialog#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#37884#37913#0" expanded="true" />
-            <element signature="e#37939#37970#0" expanded="true" />
-            <element signature="e#38036#38060#0" expanded="true" />
-            <element signature="e#38097#38125#0" expanded="true" />
-            <element signature="e#38318#38344#0" expanded="true" />
-            <element signature="method#addTracksAsRoutes#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#39439#39481#0" expanded="true" />
-            <element signature="e#39539#39556#0" expanded="true" />
-            <element signature="e#40304#40319#0" expanded="true" />
-            <element signature="docComment;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="method#onPreExecute#0;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#40773#40808#0" expanded="true" />
-            <element signature="method#doInBackground#0;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#41259#41297#0" expanded="true" />
-            <element signature="method#onProgressUpdate#0;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="true" />
-            <element signature="method#onPostExecute#0;class#RemoveRoutesTask#0;class#ViewMap#0" expanded="true" />
-            <element signature="method#removeRoutes#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#42467#42507#0" expanded="true" />
-            <element signature="e#42591#42608#0" expanded="true" />
-            <element signature="e#42636#42651#0" expanded="true" />
-            <element signature="method#onCreateGingerbread#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#44666#44726#0" expanded="true" />
-            <element signature="method#downloadRoute#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#45984#46021#0" expanded="true" />
-            <element signature="e#46373#46417#0" expanded="true" />
-            <element signature="e#46464#46503#0" expanded="true" />
-            <element signature="e#46675#46687#0" expanded="true" />
-            <element signature="e#47115#47169#0" expanded="true" />
-            <element signature="e#47695#47706#0" expanded="true" />
-            <element signature="e#47878#47928#0" expanded="true" />
-            <element signature="e#48570#48609#0" expanded="true" />
-            <element signature="e#51167#53699#0" expanded="true" />
-            <element signature="e#51848#51888#0" expanded="true" />
-            <element signature="e#53698#53699#0" expanded="true" />
-            <element signature="method#onPause#0;class#ViewMap#0" expanded="true" />
-            <element signature="method#onResume#0;class#ViewMap#0" expanded="true" />
-            <element signature="e#55577#55640#0" expanded="false" />
-            <element signature="e#57369#57407#0" expanded="true" />
-            <element signature="e#59090#59109#0" expanded="true" />
-            <element signature="e#59193#59268#0" expanded="true" />
-            <element signature="e#59319#59393#0" expanded="true" />
-            <element signature="e#59523#59535#0" expanded="true" />
-            <element signature="e#59974#59985#0" expanded="true" />
-            <element signature="e#60169#60208#0" expanded="true" />
-            <element signature="method#onDestroy#0;class#ViewMap#0" expanded="true" />
-            <element signature="docComment;class#LocationFromAddressTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="class#LocationFromAddressTask#0;class#ViewMap#0" expanded="false" />
-            <element signature="e#62275#62332#0" expanded="false" />
-            <element signature="e#63241#63279#0" expanded="true" />
-            <element signature="e#64392#64436#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/collect_symbols">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.1919192">
-          <caret line="15" column="13" selection-start-line="15" selection-start-column="4" selection-end-line="15" selection-end-column="19" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -5423,17 +5380,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.14141414">
           <caret line="88" column="0" selection-start-line="88" selection-start-column="0" selection-end-line="88" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.55531913">
-          <caret line="820" column="10" selection-start-line="820" selection-start-column="10" selection-end-line="820" selection-end-column="10" />
-          <folding>
-            <element signature="method#sendNativeCrashReport#0;class#GDCore#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -5442,7 +5388,7 @@
         <state vertical-scroll-proportion="0.20916335">
           <caret line="107" column="32" selection-start-line="107" selection-start-column="32" selection-end-line="107" selection-end-column="32" />
           <folding>
-            <element signature="e#3835#3877#0" expanded="true" />
+            <element signature="e#3835#3877#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -5451,15 +5397,50 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.39310345">
           <caret line="514" column="44" selection-start-line="514" selection-start-column="44" selection-end-line="514" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/collect_symbols">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="18" column="3" selection-start-line="18" selection-start-column="3" selection-end-line="18" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="868" column="47" selection-start-line="868" selection-start-column="47" selection-end-line="868" selection-end-column="47" />
+          <folding>
+            <element signature="method#sendNativeCrashReport#0;class#GDCore#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="202" column="19" selection-start-line="202" selection-start-column="19" selection-end-line="202" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="2" column="55" selection-start-line="2" selection-start-column="55" selection-end-line="2" selection-end-column="55" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.75697213">
-          <caret line="20" column="12" selection-start-line="20" selection-start-column="12" selection-end-line="20" selection-end-column="12" />
-          <folding />
+        <state vertical-scroll-proportion="0.54946727">
+          <caret line="41" column="47" selection-start-line="41" selection-start-column="47" selection-end-line="41" selection-end-column="47" />
+          <folding>
+            <element signature="e#66#130#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

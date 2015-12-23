@@ -69,15 +69,19 @@
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/assets" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/bundles" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/debugAndroidTest" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/dependency-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/dex" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.2.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/22.2.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/exploded-aar/com.android.support/support-v4/22.2.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/lint" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/pre-dexed" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/res" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/rs" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/symbols" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/intermediates/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/outputs" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/material-dialogs/library/build/tmp" />
     </content>
