@@ -9,7 +9,7 @@ configure
 configure.ac
 freetype2.pc
 freetype-config
-ftconfig.h
+#ftconfig.h
 libtool
 ltmain.sh
 unix-cc.mk
