@@ -69,16 +69,12 @@
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/assets" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/bundles" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/classes" />
-      <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/debugAndroidTest" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/dependency-cache" />
-      <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/dex" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/lint" />
-      <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/pre-dexed" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/res" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/rs" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/symbols" />
-      <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/intermediates/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/outputs" />
       <excludeFolder url="file://$MODULE_DIR$/../../../../../ThirdParty/ColorPickerPreference/build/tmp" />
     </content>
