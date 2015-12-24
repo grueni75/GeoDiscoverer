@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Geo Dashboard</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="service_registration_failed">Dashboard service registration failed with error code %1$d!</string>
+    <string name="service_unregistration_failed">Dashboard service unregistration failed with error code %1$d!</string>
+    <string name="service_registered">Dashboard service registered!</string>
+    <string name="service_unregistered">Dashboard service unregistered!</string>
+    <string name="fullscreen_content_description">Shows the dashboard</string>
+    <string name="refresh_title">Restart the network service</string>
+    <string name="waiting_for_connection">Waiting at %1$s:%2$d&#8230;</string>
+    <string name="init_server">Initializing network service&#8230;</string>
+    <string name="deinit_server">Shutting down network service&#8230;</string>
+    <string name="server_down">Network service is down!</string>
+    <string name="no_wlan_address">No WLAN IP address found! Is WLAN on and associated?</string>
+ 
+</resources>
