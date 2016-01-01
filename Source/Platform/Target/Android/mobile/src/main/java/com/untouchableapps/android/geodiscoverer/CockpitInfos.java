@@ -19,6 +19,9 @@ public class CockpitInfos {
   /** Direction of current movement */
   String locationBearing;
 
+  /** Current speed in m/s */
+  String locationSpeed;
+
   /** Bearing towards the given target */
   String targetBearing;
 
@@ -39,4 +42,5 @@ public class CockpitInfos {
   
   /** Remaining distance to route */
   String routeDistance;
+
 }

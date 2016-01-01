@@ -17,10 +17,12 @@ namespace GEODISCOVERER {
 const double NavigationInfo::unknownDistance = -1;
 const double NavigationInfo::unknownDuration = -1;
 const double NavigationInfo::unknownAngle = 999.0;
+const double NavigationInfo::unknownSpeed = -1;
 
 NavigationInfo::NavigationInfo() {
   type=NavigationInfoTypeUnknown;
   locationBearing=unknownAngle;
+  locationSpeed=unknownSpeed;
   targetBearing=unknownAngle;
   targetDistance=unknownDistance;
   targetDuration=unknownDuration;

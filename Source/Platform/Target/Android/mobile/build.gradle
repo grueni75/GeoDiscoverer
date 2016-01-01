@@ -53,6 +53,7 @@ dependencies {
     compile 'com.android.support:gridlayout-v7:22.2.0'
     compile project(':materialDialogs')
     compile project(':colorPickerPreference')
+    compile project(':jmDNS')
 }
 
 task collectAssets(type: Exec) {

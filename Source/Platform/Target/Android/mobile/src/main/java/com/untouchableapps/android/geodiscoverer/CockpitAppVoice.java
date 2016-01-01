@@ -23,7 +23,13 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
   
   // Context
   Context context;
-  
+
+  // Cockpit engine
+  CockpitEngine cockpitEngine;
+
+  // Average delay the tts system requires to speak
+  long speakDelay = 0;
+
   // Last time a navigation alert was spoken
   long lastAlert;
   long minDurationBetweenOffRouteAlerts;
@@ -37,14 +43,16 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
   String navigationInstructions = null; 
     
   /** Constructor */
-  public CockpitAppVoice(Context context) {
+  public CockpitAppVoice(Context context, CockpitEngine cockpitEngine) {
     super();
         
     // Init parameters
     minDurationBetweenOffRouteAlerts = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "minDurationBetweenOffRouteAlerts")) *  1000;
+    speakDelay = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "speakDelay")) *  1000;
 
-    // Remember context
+    // Remember variables
     this.context = context;
+    this.cockpitEngine = cockpitEngine;
 
     // Prepare the text to speech engine
     textToSpeech = new TextToSpeech(context, this);
@@ -68,25 +76,72 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
     if (!textToSpeechReady)
       return;
     long t = Calendar.getInstance().getTimeInMillis();
+    String navigationInstructions=this.navigationInstructions;
     if (type==AlertType.offRoute) {
       
       // Only speak off route alert with defined distance
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "voiceApp: got off route indication (repeated=" + String.valueOf(repeated) + ")");
       long diffToLastUpdate = t - lastAlert;
       if ((!repeated)||(diffToLastUpdate>minDurationBetweenOffRouteAlerts)) {
+        cockpitEngine.audioWakeup();
         textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
         textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);
         lastAlert=t;
       }
     }
     if (type==AlertType.newTurn) {
+      cockpitEngine.audioWakeup();
       textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
       textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);      
     }
-  }  
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("t(alert)=%d", System.currentTimeMillis() / 1000));
+  }
+
+  /** Converts a distance string into meters */
+  protected float textDistanceToMeters(String text) {
+    if (text.equals(""))
+      return 0;
+    float number = Float.valueOf(text.substring(0, text.indexOf(" ")));
+    String unit = text.substring(text.indexOf(" ") + 1);
+    if (unit.equals("m")) {
+      return (float) number;
+    }
+    if (unit.equals("km")) {
+      return (float) number*(float)1e3;
+    }
+    if (unit.equals("Mm")) {
+      return (float) number*(float)1e6;
+    }
+    if (unit.equals("mi")) {
+      return (float) number*(float)1609.34;
+    }
+    if (unit.equals("yd")) {
+      return (float) number*(float)0.9144;
+    }
+    GDApplication.coreObject.executeAppCommand("fatalDialog(\"Distance unit not supported\")");
+    return 0;
+  }
+
+  /** Converts a speed string into meters per second */
+  protected float textSpeedToMetersPerSecond(String text) {
+    if (text.equals(""))
+      return 0;
+    float number = Float.valueOf(text.substring(0, text.indexOf(" ")));
+    String unit = text.substring(text.indexOf(" ")+1);
+    if (unit.equals("km/h")) {
+      return (float) (number/3.6);
+    }
+    if (unit.equals("mph")) {
+      return (float) (number*0.44704);
+    }
+    GDApplication.coreObject.executeAppCommand("fatalDialog(\"Speed unit not supported\")");
+    return 0;
+  }
 
   /** Converts a distance string into a speakable string */
   protected String textDistanceToVoiceDistance(String distance) {
+    if (distance.equals(""))
+      return "";
     float distanceNumber = Float.valueOf(distance.substring(0,distance.indexOf(" ")));
     distanceNumber=Math.round(distanceNumber);
     String distanceUnit = distance.substring(distance.indexOf(" ")+1);
@@ -112,11 +167,51 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
   public void update(CockpitInfos infos) {
     
     navigationInstructions="";
-    
+
+    // Is a turn coming?
+    String distance="";
+    if (!infos.turnAngle.equals("-")) {
+      distance = infos.turnDistance;
+    } else {
+      if (infos.offRoute) {
+        distance = infos.routeDistance;
+      }
+    }
+    if (distance.equals(""))
+      return;
+
+    // Delay the audio requires for speaking
+    long audioDelay=speakDelay;
+    if (cockpitEngine.audioIsAsleep())
+      audioDelay+=cockpitEngine.audioWakeupDelay;
+
+    // Adapt the distance to the audio delay
+    if (!distance.equals("")) {
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("distance=%s",distance));
+      if ((!infos.targetBearing.equals("-")) && (!infos.locationSpeed.equals("-"))) {
+        float distanceOriginal = textDistanceToMeters(distance);
+        float distanceNew;
+        float speed = textSpeedToMetersPerSecond(infos.locationSpeed);
+        float distanceTravelled = speed * audioDelay / 1000;
+        float angleDegree = Float.parseFloat(infos.targetBearing) - Float.parseFloat(infos.locationBearing);
+        float angle = angleDegree * (float) Math.PI / (float) 180.0;
+        distanceNew = (float) Math.sqrt(distanceTravelled * distanceTravelled +
+            distanceOriginal * distanceOriginal - 2 * distanceTravelled * distanceOriginal *
+            Math.cos(angle));
+        /*GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("distanceOriginal=%f "+
+            "speed=%f distanceTravelled=%f angle(degree)=%f angle(rad)=%f distanceNew=%f",
+            distanceOriginal,speed,distanceTravelled,angleDegree,angle,distanceNew));*/
+        distance = cockpitEngine.core.executeCoreCommand(String.format("formatMeters(%f)", distanceNew));
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",distance);
+      }
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("distance=%s",distance));
+      distance = textDistanceToVoiceDistance(distance);
+    }
+
     // Is a turn coming?
     if (!infos.turnAngle.equals("-")) {
       Float turnAngle = Float.valueOf(infos.turnAngle);
-      String distance = textDistanceToVoiceDistance(infos.turnDistance);
+      distance = textDistanceToVoiceDistance(distance);
       if (turnAngle>0)
         navigationInstructions=context.getString(R.string.tts_turn_left, distance);
       else
@@ -126,11 +221,12 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
       // Are we off route?
       if (infos.offRoute) {
         
-        String distance = textDistanceToVoiceDistance(infos.routeDistance);
+        distance = textDistanceToVoiceDistance(distance);
         navigationInstructions=context.getString(R.string.tts_off_route, distance);
         
       }
     }
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("t(update)=%d",System.currentTimeMillis()/1000));
   }
   
   /** Clean up everything */

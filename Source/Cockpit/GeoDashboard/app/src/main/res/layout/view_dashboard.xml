@@ -5,12 +5,6 @@
     android:background="#0099cc"
     tools:context="com.untouchableapps.android.geodashboard.ViewDashboard" >
 
-    <!--
-         The primary full-screen view. This can be replaced with whatever view
-         is needed to present your content, e.g. VideoView, SurfaceView,
-         TextureView, etc.
-    -->
-
     <ImageView
         android:id="@+id/fullscreen_content"
         android:layout_width="match_parent"
@@ -19,5 +13,66 @@
         android:keepScreenOn="true"
         android:background="@android:color/white"
         android:contentDescription="@string/fullscreen_content_description" />
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical">
+
+      <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"/>
+
+      <LinearLayout
+        android:id="@+id/sound_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_horizontal|bottom">
+
+        <FrameLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1">
+          <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:id="@+id/sound_button_ship"
+            android:src="@drawable/ship"
+            android:background="?android:selectableItemBackground"/>
+        </FrameLayout>
+
+        <FrameLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1">
+          <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:id="@+id/sound_button_dog"
+            android:src="@drawable/dog"
+            android:background="?android:selectableItemBackground"/>
+        </FrameLayout>
+
+        <FrameLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1">
+          <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:id="@+id/sound_button_car"
+            android:src="@drawable/car"
+            android:background="?android:selectableItemBackground"/>
+        </FrameLayout>
+
+      </LinearLayout>
+
+    </LinearLayout>
+
 
 </FrameLayout>

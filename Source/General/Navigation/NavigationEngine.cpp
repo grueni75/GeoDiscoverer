@@ -1231,13 +1231,12 @@ void NavigationEngine::computeNavigationInfo() {
 
     // If a route is active, compute the details for the given route
     NavigationInfo navigationInfo=NavigationInfo();
-    double speed=0;
     if (locationPos.isValid()) {
       if (locationPos.getHasBearing()) {
         navigationInfo.setLocationBearing(locationPos.getBearing());
       }
       if (locationPos.getHasSpeed()) {
-        speed=locationPos.getSpeed();
+        navigationInfo.setLocationSpeed(locationPos.getSpeed());
       }
 
       // If a target is active, compute the details for the given target
@@ -1280,9 +1279,9 @@ void NavigationEngine::computeNavigationInfo() {
         }
       }
     }
-    if (speed>0) {
+    if (navigationInfo.getLocationSpeed()!=NavigationInfo::getUnknownSpeed()) {
       if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance())
-        navigationInfo.setTargetDuration(navigationInfo.getTargetDistance() / speed);
+        navigationInfo.setTargetDuration(navigationInfo.getTargetDistance() / navigationInfo.getLocationSpeed());
     }
 
     // Set the new navigation info
@@ -1300,6 +1299,11 @@ void NavigationEngine::computeNavigationInfo() {
       infos << navigationInfo.getLocationBearing();
     else
       infos << "-";
+    if (navigationInfo.getLocationSpeed()!=NavigationInfo::getUnknownSpeed()) {
+      core->getUnitConverter()->formatMetersPerSecond(navigationInfo.getLocationSpeed(),value,unit);
+      infos << ";" << value << " " << unit;
+    } else
+      infos << ";-";
     //navigationInfo.setTargetBearing(((float)rand())*359.0/(float)RAND_MAX);
     if (navigationInfo.getTargetBearing()!=NavigationInfo::getUnknownAngle())
       infos << ";" << navigationInfo.getTargetBearing();

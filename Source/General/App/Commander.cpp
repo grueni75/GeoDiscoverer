@@ -520,6 +520,13 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
 
+  if (cmdName=="formatMeters") {
+    std::string value,unit;
+    core->getUnitConverter()->formatMeters(atof(args[0].c_str()),value,unit);
+    result=value+" "+unit;
+    cmdExecuted=true;
+  }
+
   // Check if command has been executed
   if (!cmdExecuted) {
     ERROR("unknown command <%s>",cmd.c_str());

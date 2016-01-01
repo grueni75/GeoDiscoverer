@@ -12,6 +12,10 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Condition;
@@ -21,7 +25,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.untouchableapps.android.geodiscoverer.CockpitAppInterface.AlertType;
 
 import android.content.Context;
-import android.hardware.Camera.PreviewCallback;
+import android.content.res.AssetFileDescriptor;
+import android.media.MediaPlayer;
 
 public class CockpitEngine {
   
@@ -47,8 +52,16 @@ public class CockpitEngine {
   
   // Off route indication
   boolean currentOffRoute=false;
-  boolean lastOffRoute=false;  
-  
+  boolean lastOffRoute=false;
+
+  // Time info for deciding if silence needs to be played to wake up bluetooth device
+  long audioWakeupLastTrigger = 0;
+  long audioWakeupDelay = 0;
+  long audioWakeupDuration = 0;
+
+  // GDCore
+  GDCore core;
+
   // Context
   Context context;
   
@@ -60,15 +73,127 @@ public class CockpitEngine {
   int fastVibrateCount = 1;
   boolean quitVibrateThread = false;
   Thread vibrateThread = null;
-  
+
+  // Thread that handles network requests
+  static final int NET_CMD_PLAY_SOUND_DOG = 3;
+  static final int NET_CMD_PLAY_SOUND_SHIP = 4;
+  static final int NET_CMD_PLAY_SOUND_CAR = 5;
+  boolean quitNetworkServerThread=false;
+  Thread networkServerThread=null;
+  ServerSocket networkServerSocket=null;
+  int networkServerPort = 11111;
+  boolean networkServiceActive=false;
+  void startNetworkService() {
+
+    quitNetworkServerThread=false;
+    networkServerThread = new Thread(new Runnable() {
+
+      @Override
+      public void run() {
+
+        // Open server socket
+        if (networkServerSocket==null) {
+          try {
+            networkServerSocket = new ServerSocket();
+            networkServerSocket.setReuseAddress(true);
+            networkServerSocket.bind(new InetSocketAddress(networkServerPort+1));
+          }
+          catch (IOException e) {
+            GDApplication.addMessage(
+                GDApplication.DEBUG_MSG,
+                "GDApp",
+                e.getMessage()
+            );
+            networkServerSocket = null;
+            return;
+          }
+        }
+
+        // Set bitmap to indicate "wait for first connection"
+        networkServiceActive = true;
+
+        // Handle network communication
+        while (!quitNetworkServerThread) {
+          try {
+            Socket client = networkServerSocket.accept();
+            int cmd = client.getInputStream().read();
+            String soundFile = "";
+            switch(cmd) {
+              case NET_CMD_PLAY_SOUND_SHIP:
+                soundFile = "Sound/ship.mp3";
+                break;
+              case NET_CMD_PLAY_SOUND_CAR:
+                soundFile = "Sound/car.mp3";
+                break;
+              case NET_CMD_PLAY_SOUND_DOG:
+                soundFile = "Sound/dog.mp3";
+                break;
+            }
+            client.close();
+            audioWakeup();
+            final AssetFileDescriptor afd = context.getAssets().openFd(soundFile);
+            final MediaPlayer player = new MediaPlayer();
+            player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            player.prepare();
+            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+              public void onCompletion(MediaPlayer mp) {
+                try {
+                  afd.close();
+                  player.release();
+                } catch (IOException e) {
+                  GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                }
+              }
+            });
+            player.start();
+          }
+          catch (IOException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+          }
+        }
+      }
+
+    });
+    networkServerThread.start();
+  }
+  void stopNetworkService() {
+    quitNetworkServerThread=true;
+    Thread stopThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          Socket clientSocket = new Socket("localhost",networkServerSocket.getLocalPort());
+          clientSocket.getOutputStream().write(255);
+          clientSocket.close();
+          networkServerThread.join();
+        }
+        catch (Exception e) {
+        }
+        networkServiceActive=false;
+      }
+    });
+    stopThread.start();
+    boolean repeat=true;
+    while (repeat) {
+      try {
+        repeat=false;
+        stopThread.join();
+      }
+      catch (InterruptedException e) {
+        repeat=true;
+      }
+    }
+  }
+
   // List of registered apps
   LinkedList<CockpitAppInterface> apps = new LinkedList<CockpitAppInterface>();
 
   /** Constructor */
-  public CockpitEngine(Context context) {
+  public CockpitEngine(GDCore core, Context context) {
     super();
     
     // Remember context
+    this.core = core;
     this.context = context;
     
     // Init parameters
@@ -78,13 +203,15 @@ public class CockpitEngine {
     offRouteAlertFastPeriod = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertFastPeriod"));
     offRouteAlertFastCount = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertFastCount"));
     offRouteAlertSlowPeriod = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertSlowPeriod"));
+    audioWakeupDuration = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit", "audioWakeupDuration"))*1000;
+    audioWakeupDelay = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit", "audioWakeupDelay"))*1000;
 
     // Add all activated apps
     if (Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/MetaWatch", "active"))>0) {
       apps.add(new CockpitAppMetaWatch(context));
     }
     if (Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "active"))>0) {
-      apps.add(new CockpitAppVoice(context));
+      apps.add(new CockpitAppVoice(context,this));
     }
     if (Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Vibration", "active"))>0) {
       apps.add(new CockpitAppVibration(context));
@@ -96,6 +223,9 @@ public class CockpitEngine {
   
   /** Starts the cockpit apps */
   public void start() {
+
+    // Start the network thread
+    startNetworkService();
 
     // Start the vibrate thread
     if ((vibrateThread!=null)&&(vibrateThread.isAlive())) {
@@ -217,13 +347,14 @@ public class CockpitEngine {
       return;
     String[] infosAsArray = infosAsSSV.split(";");
     cockpitInfos.locationBearing = infosAsArray[0];
-    cockpitInfos.targetBearing = infosAsArray[1];
-    cockpitInfos.targetDistance = infosAsArray[2];
-    cockpitInfos.targetDuration = infosAsArray[3];
-    cockpitInfos.turnAngle = infosAsArray[4];
-    cockpitInfos.turnDistance = infosAsArray[5];
-    cockpitInfos.offRoute = infosAsArray[6].equals("off route");
-    cockpitInfos.routeDistance = infosAsArray[7];
+    cockpitInfos.locationSpeed = infosAsArray[1];
+    cockpitInfos.targetBearing = infosAsArray[2];
+    cockpitInfos.targetDistance = infosAsArray[3];
+    cockpitInfos.targetDuration = infosAsArray[4];
+    cockpitInfos.turnAngle = infosAsArray[5];
+    cockpitInfos.turnDistance = infosAsArray[6];
+    cockpitInfos.offRoute = infosAsArray[7].equals("off route");
+    cockpitInfos.routeDistance = infosAsArray[8];
     currentTurnDistance = cockpitInfos.turnDistance;
     currentOffRoute = cockpitInfos.offRoute;
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "update: currentOffRoute=" + Boolean.toString(currentOffRoute));
@@ -291,14 +422,61 @@ public class CockpitEngine {
     for (CockpitAppInterface app : apps) {
       app.stop();
     }
+    stopNetworkService();
   }
   
   /** Checks if at least one cockpit app is active */
   public boolean isActive() {
-    if (apps.size()>0)
+    if ((apps.size()>0)||(Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Dashboard", "active"))>0))
       return true;
     else
       return false;
   }
 
+  /** Wakeups the audio device if required */
+  public synchronized void audioWakeup() {
+    long t = System.currentTimeMillis();
+    if (audioIsAsleep()) {
+      audioWakeupLastTrigger = t + audioWakeupDelay;
+      try {
+        final AssetFileDescriptor afd = context.getAssets().openFd("Sound/silence.mp3");
+        final MediaPlayer player = new MediaPlayer();
+        player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+        player.prepare();
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+          public void onCompletion(MediaPlayer mp) {
+            try {
+              afd.close();
+              player.release();
+            } catch (IOException e) {
+              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+            }
+          }
+        });
+        player.start();
+      }
+      catch (IOException e) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+      }
+      boolean repeat=true;
+      while (repeat) {
+        try {
+          Thread.sleep(audioWakeupLastTrigger-t);
+          repeat=false;
+        } catch (InterruptedException e) {
+          t = System.currentTimeMillis();
+          if (t>=audioWakeupLastTrigger)
+            repeat=false;
+        }
+      }
+    }
+    audioWakeupLastTrigger = System.currentTimeMillis();
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("lastTrigger=%d",audioWakeupLastTrigger));
+  }
+
+  /** Indicates if audio device is asleep */
+  public boolean audioIsAsleep() {
+    long t = System.currentTimeMillis();
+    return (t>audioWakeupLastTrigger+audioWakeupDuration);
+  }
 }

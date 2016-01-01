@@ -24,10 +24,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -43,6 +46,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceListener;
 import javax.jmdns.impl.JmDNSImpl;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -181,47 +185,26 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   // Last time the download status was updated
   long lastDownloadStatusUpdate = 0;
-  
-  /**
-   * Finds all IP addresses of the wlan adapter
-   */
-  private Enumeration<InetAddress> getWifiInetAddresses(final Context context) {
-    final WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-    final String macAddress = wifiInfo.getMacAddress();
-    final String[] macParts = macAddress.split(":");
-    final byte[] macBytes = new byte[macParts.length];
-    for (int i = 0; i< macParts.length; i++) {
-      macBytes[i] = (byte)Integer.parseInt(macParts[i], 16);
-    }
-    try {
-      final Enumeration<NetworkInterface> e =  NetworkInterface.getNetworkInterfaces();
-      while (e.hasMoreElements()) {
-        final NetworkInterface networkInterface = e.nextElement();
-        if (Arrays.equals(networkInterface.getHardwareAddress(), macBytes)) {
-          return networkInterface.getInetAddresses();
-        }
-      }
-    } catch (SocketException e) {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-    }
-    return null;
-  }
 
   /**
-   * Returns the requested IP address class 
+   * Returns the IP4 address of the wlan interface
    */
   @SuppressWarnings("unchecked")
-  private <T extends InetAddress> T getWifiInetAddress(final Context context, final Class<T> inetClass) {
-      final Enumeration<InetAddress> e = getWifiInetAddresses(context);
-      while (e.hasMoreElements()) {
-          final InetAddress inetAddress = e.nextElement();
-          if (inetAddress.getClass() == inetClass) {
-              return (T)inetAddress;
-          }
-      }
-      return null;
+  private InetAddress getWifiInetAddress() {
+    int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
+    if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
+      ipAddress = Integer.reverseBytes(ipAddress);
+    }
+    byte[] ipByteArray = BigInteger.valueOf(ipAddress).toByteArray();
+    InetAddress inetAddress=null;
+    try {
+      inetAddress = InetAddress.getByAddress(ipByteArray);
+    } catch (UnknownHostException e) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+    }
+    return inetAddress;
   }
-  
+
   //
   // Constructor and destructor
   //
@@ -530,23 +513,27 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
               multicastLock.setReferenceCounted(true);
               multicastLock.acquire();
               GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "starting jmDNS");
-              InetAddress deviceAddress = getWifiInetAddress(application, Inet4Address.class);
-              //Logger logger = Logger.getLogger(JmDNSImpl.class.getName());
-              //logger.setLevel(Level.FINER);
-              try {
-                jmDNS = JmDNS.create(deviceAddress);
-                dashboardServiceListener = new GDDashboardServiceListener(jmDNS);
-                jmDNS.addServiceListener(GDApplication.dashboardNetworkServiceType, dashboardServiceListener);
-                executeAppCommand("infoDialog(\"" + deviceAddress.toString() + "\")");
-              } 
-              catch (IOException e) {
-                GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+              InetAddress deviceAddress = getWifiInetAddress();
+              if (deviceAddress==null)
+                executeAppCommand("errorDialog(\"Can not start zero conf daemon! WLAN not active?\")");
+              else {
+                //Logger logger = Logger.getLogger("javax.jmdns.impl.SocketListener");
+                //logger.setLevel(Level.FINEST);
+                try {
+                  jmDNS = JmDNS.create(deviceAddress);
+                  dashboardServiceListener = new GDDashboardServiceListener(jmDNS);
+                  jmDNS.addServiceListener(GDApplication.dashboardNetworkServiceType, dashboardServiceListener);
+                  executeAppCommand("infoDialog(\"" + deviceAddress.toString() + "\")");
+                } catch (IOException e) {
+                  GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", e.getMessage());
+                  executeAppCommand("errorDialog(\"Could not start zero conf daemon!\")");
+                }
               }
             } else {
-              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "could not get multicast lock");                              
+              executeAppCommand("errorDialog(\"Could not get multicast lock!\")");
             }
           } else {
-            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "no wifi manager available");              
+            executeAppCommand("errorDialog(\"No WiFi manager available?\")");
           }
         }
 
@@ -582,7 +569,8 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
                   }
                 }
                 catch (IOException e) {
-                  GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.toString());
+                  GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", e.toString());
+                  executeAppCommand("errorDialog(\"Could not lookup address cache!\")");
                 }
                 
                 // Sleep for the defined time
@@ -852,7 +840,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       if (cockpitEngine!=null) {
         cockpitEngine.stop();
       }
-      cockpitEngine=new CockpitEngine(application);
+      cockpitEngine=new CockpitEngine(this,application);
       cmdExecuted=false; // forward message to activity
     }
     if (cmd.startsWith("updateNavigationInfos(")) {

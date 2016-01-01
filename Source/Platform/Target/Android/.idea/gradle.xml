@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/mobile" />
             <option value="$PROJECT_DIR$/wear" />
             <option value="$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference" />
+            <option value="$PROJECT_DIR$/../../../../ThirdParty/jmdns" />
             <option value="$PROJECT_DIR$/../../../../ThirdParty/material-dialogs/library" />
           </set>
         </option>

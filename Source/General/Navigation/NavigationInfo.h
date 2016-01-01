@@ -33,8 +33,14 @@ protected:
   // Undefined angle
   const static double unknownAngle;
 
+  // Undefined speed
+  const static double unknownSpeed;
+
   // Direction of current movement
   double locationBearing;
+
+  // Speed of current movement
+  double locationSpeed;
 
   // Bearing towards the given target
   double targetBearing;
@@ -126,6 +132,10 @@ public:
     return unknownDuration;
   }
 
+  static const double getUnknownSpeed() {
+    return unknownSpeed;
+  }
+
   bool getOffRoute() const {
     return offRoute;
   }
@@ -149,6 +159,15 @@ public:
   void setRouteDistance(double routeDistance) {
     this->routeDistance = routeDistance;
   }
+
+  double getLocationSpeed() const {
+    return locationSpeed;
+  }
+
+  void setLocationSpeed(double locationSpeed) {
+    this->locationSpeed = locationSpeed;
+  }
+
 };
 
 } /* namespace GEODISCOVERER */

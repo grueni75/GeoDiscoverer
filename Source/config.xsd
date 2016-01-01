@@ -151,6 +151,11 @@
                               <xsd:documentation>Minimum duration between off route alerts in seconds.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
+                          <xsd:element name="speakDelay" type="xsd:integer" default="6">
+                            <xsd:annotation>
+                              <xsd:documentation>Average delay in seconds the text-to-speech engine requires for preparing the voice.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
                         </xsd:sequence>
                       </xsd:complexType>
                     </xsd:element>
@@ -236,6 +241,17 @@
                   <xsd:documentation>Time in milliseconds to wait before vibrating to ensure that app is updated.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="audioWakeupDelay" type="xsd:integer" default="2">
+                <xsd:annotation>
+                  <xsd:documentation>Time in seconds the audio device (e.g., bluetooth speaker) requires to wake up.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="audioWakeupDuration" type="xsd:integer" default="5">
+                <xsd:annotation>
+                  <xsd:documentation>Time in seconds the audio device (e.g., bluetooth speaker) stays awake.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>

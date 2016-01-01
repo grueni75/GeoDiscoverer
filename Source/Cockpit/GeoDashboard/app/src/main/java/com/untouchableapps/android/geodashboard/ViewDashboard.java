@@ -15,6 +15,7 @@ package com.untouchableapps.android.geodashboard;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -22,6 +23,8 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Enumeration;
 
@@ -30,8 +33,10 @@ import javax.jmdns.ServiceInfo;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
@@ -54,7 +59,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.untouchableapps.android.geodashboard.util.SystemUiHider;
@@ -89,17 +96,17 @@ public class ViewDashboard extends Activity {
    * The flags to pass to {@link SystemUiHider#getInstance}.
    */
   private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
-    
+
   // Infos about the screen
   private int orientation = 1;  // from Screen.h in Geo Discoverer
   private int width;
   private int height;
-  
+
   /**
    * Indicates that the network service shall be restarted
    */
   boolean restartNetworkService = false;
-  
+
   /**
    * Indicates that WLAN is active
    */
@@ -109,7 +116,7 @@ public class ViewDashboard extends Activity {
    * Indicates that the app is active
    */
   boolean appActive = false;
-  
+
   /**
    * Indicates that the service is active
    */
@@ -119,36 +126,58 @@ public class ViewDashboard extends Activity {
    * References to the full screen image view
    */
   ImageView dashboardView;
-  
+
+  /**
+   * References to the sound buttons bar
+   */
+  LinearLayout soundButtonsView;
+
   /**
    * Handler that receives message from the server thread
    */
   Handler serverThreadHandler;
-  
+
   /**
    * Lock for multicast on WLAN
    */
   MulticastLock multicastLock;
-  
+
   /**
    * The JmDNS object
    */
   JmDNS jmDNS;
-  
+
   /**
    * WiFi system service
    */
   WifiManager wifiManager;
-  
+
+  /**
+   * Port to listen to
+   */
+  int serverPort = 11111;
+
+  /**
+   * Internet address of last client
+   */
+  String lastClientAddress = null;
+
   // Actions for message handling
   static final int ACTION_DISPLAY_BITMAP = 0;
   static final int ACTION_DISPLAY_TOAST = 1;
-  
+
+  // Network commands
+  static final int NET_CMD_GET_INFO = 1;
+  static final int NET_CMD_DISPLAY_BITMAP = 2;
+  static final int NET_CMD_PLAY_SOUND_DOG = 3;
+  static final int NET_CMD_PLAY_SOUND_SHIP = 4;
+  static final int NET_CMD_PLAY_SOUND_CAR = 5;
+
   /**
    * Registers the network service of this app
    */
   private boolean registerService(int port) {
-        
+
     ServiceInfo serviceInfo = ServiceInfo.create(
         "_geodashboard._tcp.",
         "GeoDashboard", port,
@@ -161,50 +190,27 @@ public class ViewDashboard extends Activity {
       Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
       msg.sendToTarget();
       return false;
-    } 
+    }
     return true;
   }
 
   /**
-   * Finds all IP addresses of the wlan adapter
-   */
-  private Enumeration<InetAddress> getWifiInetAddresses(final Context context) {
-    final WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-    final String macAddress = wifiInfo.getMacAddress();
-    final String[] macParts = macAddress.split(":");
-    final byte[] macBytes = new byte[macParts.length];
-    for (int i = 0; i< macParts.length; i++) {
-      macBytes[i] = (byte)Integer.parseInt(macParts[i], 16);
-    }
-    try {
-      final Enumeration<NetworkInterface> e =  NetworkInterface.getNetworkInterfaces();
-      while (e.hasMoreElements()) {
-        final NetworkInterface networkInterface = e.nextElement();
-        if (Arrays.equals(networkInterface.getHardwareAddress(), macBytes)) {
-          return networkInterface.getInetAddresses();
-        }
-      }
-    } catch (SocketException e) {
-      Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-    }
-    return null;
-  }
-
-  /**
-   * Returns the requested IP address class 
+   * Returns the IP4 address of the wlan interface
    */
   @SuppressWarnings("unchecked")
-  private <T extends InetAddress> T getWifiInetAddress(final Context context, final Class<T> inetClass) {
-      final Enumeration<InetAddress> e = getWifiInetAddresses(context);
-      if (e==null)
-        return null;
-      while (e.hasMoreElements()) {
-          final InetAddress inetAddress = e.nextElement();
-          if (inetAddress.getClass() == inetClass) {
-              return (T)inetAddress;
-          }
-      }
-      return null;
+  private InetAddress getWifiInetAddress() {
+    int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
+    if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
+      ipAddress = Integer.reverseBytes(ipAddress);
+    }
+    byte[] ipByteArray = BigInteger.valueOf(ipAddress).toByteArray();
+    InetAddress inetAddress=null;
+    try {
+      inetAddress = InetAddress.getByAddress(ipByteArray);
+    } catch (UnknownHostException e) {
+      //Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+    }
+    return inetAddress;
   }
 
   /**
@@ -220,7 +226,7 @@ public class ViewDashboard extends Activity {
     canvas.drawText(text, width/2, height/2, paint);
     return image;
   }
-  
+
   /**
    * Displays a bitmap with a text
    */
@@ -229,15 +235,48 @@ public class ViewDashboard extends Activity {
     Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,b);
     msg.sendToTarget();
   }
-  
+
+  /**
+   * Sends a message to the client
+   */
+  class SendMessageOnClickListener implements View.OnClickListener {
+    int cmd;
+    SendMessageOnClickListener(int cmd) {
+      this.cmd=cmd;
+    }
+    @Override
+    public void onClick(View v) {
+      Thread networkThread = new Thread(new Runnable() {
+
+        @Override
+        public void run() {
+
+          try {
+            if (lastClientAddress != null) {
+              Socket s = new Socket(lastClientAddress, serverPort+1);
+              s.getOutputStream().write(cmd);
+              s.close();
+            }
+          } catch (IOException e) {
+            Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
+            msg.sendToTarget();
+          }
+
+        }
+
+      });
+      networkThread.start();
+    }
+  }
+
   /**
    * Starts the network service
    */
   private void startService(boolean wait) {
-        
+
     quitServerThread=false;
     serverThread = new Thread(new Runnable() {
-      
+
       @Override
       public void run() {
 
@@ -246,7 +285,7 @@ public class ViewDashboard extends Activity {
           try {
             serverSocket = new ServerSocket();
             serverSocket.setReuseAddress(true);
-            serverSocket.bind(new InetSocketAddress(11111));
+            serverSocket.bind(new InetSocketAddress(serverPort));
           }
           catch (IOException e) {
             Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
@@ -258,7 +297,7 @@ public class ViewDashboard extends Activity {
         }
 
         // Create the JmDNS object
-        InetAddress address = getWifiInetAddress(ViewDashboard.this, Inet4Address.class);
+        InetAddress address = getWifiInetAddress();
         if (address==null) {
           Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,getString(R.string.no_wlan_address));
           msg.sendToTarget();
@@ -292,19 +331,20 @@ public class ViewDashboard extends Activity {
         while (!quitServerThread) {
           try {
             Socket client = serverSocket.accept();
+            lastClientAddress = client.getInetAddress().getHostAddress();
             int cmd = client.getInputStream().read();
             switch(cmd) {
-              case 1: 
+              case NET_CMD_GET_INFO:
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 DataOutputStream dos = new DataOutputStream(baos);
-                dos.writeInt(orientation);  
-                dos.writeInt(width);  
-                dos.writeInt(height);  
+                dos.writeInt(orientation);
+                dos.writeInt(width);
+                dos.writeInt(height);
                 client.getOutputStream().write(baos.toByteArray());
                 baos = null;
                 dos = null;
                 break;
-              case 2:
+              case NET_CMD_DISPLAY_BITMAP:
                 Bitmap dashboardBitmap = BitmapFactory.decodeStream(client.getInputStream());
                 msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,dashboardBitmap);
                 msg.sendToTarget();
@@ -318,7 +358,7 @@ public class ViewDashboard extends Activity {
             msg.sendToTarget();
           }
         }
-        
+
         // Unregister the service
         jmDNS.unregisterAllServices();
         try {
@@ -328,15 +368,15 @@ public class ViewDashboard extends Activity {
           Toast.makeText(ViewDashboard.this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
         displayTextBitmap(getString(R.string.server_down));
-        
+
       }
-      
+
     });
     serverThread.start();
-    
+
     // Display text to indicate initialization
     displayTextBitmap(getString(R.string.init_server));
-    
+
     // Shall we wait
     if (wait) {
       while (!serviceActive) {
@@ -348,7 +388,7 @@ public class ViewDashboard extends Activity {
       }
     }
   }
-  
+
   /**
    * Stops the network service
    */
@@ -386,33 +426,33 @@ public class ViewDashboard extends Activity {
           repeat=true;
         }
       }
-    } 
+    }
   }
-  
-  /** 
-   * Restarts the network service 
+
+  /**
+   * Restarts the network service
    */
   protected void restartService() {
     //restartNetworkService=true;
     stopService(false);
   }
 
-  
+
   /**
    * Socket that receives the communication with geo discoverer
    */
   ServerSocket serverSocket = null;
-  
-  /** 
+
+  /**
    * Tells the server thread that it shall quit
    */
   private boolean quitServerThread = false;
-  
+
   /**
    * Thread that handles the communication with geo discoverer
    */
   private Thread serverThread = null;
-  
+
   /**
    * The instance of the {@link SystemUiHider} for this activity.
    */
@@ -421,11 +461,15 @@ public class ViewDashboard extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    
-    setContentView(R.layout.view_dashboard);
 
+    // Set the content
+    setContentView(R.layout.view_dashboard);
     dashboardView = (ImageView)findViewById(R.id.fullscreen_content);
-    
+    soundButtonsView = (LinearLayout)findViewById(R.id.sound_buttons);
+
+    // Keep the screen on
+    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
     // Set up an instance of SystemUiHider to control the system UI for
     // this activity.
     mSystemUiHider = SystemUiHider.getInstance(this, dashboardView, HIDER_FLAGS);
@@ -441,6 +485,7 @@ public class ViewDashboard extends Activity {
               // Schedule a hide().
               delayedHide(AUTO_HIDE_DELAY_MILLIS);
             }
+            soundButtonsView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
           }
         });
 
@@ -455,7 +500,7 @@ public class ViewDashboard extends Activity {
         }
       }
     });
-        
+
     // Update the properties of the device
     WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
     Display display = wm.getDefaultDisplay();
@@ -463,7 +508,7 @@ public class ViewDashboard extends Activity {
     display.getRealSize(size);
     width = size.x;
     height = size.y;
-    
+
     // Handle messages from the server thread
     serverThreadHandler = new Handler(Looper.getMainLooper()) {
       @Override
@@ -477,11 +522,11 @@ public class ViewDashboard extends Activity {
           case ViewDashboard.ACTION_DISPLAY_TOAST:
             String message = (String) inputMessage.obj;
             Toast.makeText(ViewDashboard.this, message, Toast.LENGTH_LONG).show();
-            break;          
+            break;
         }
       }
     };
-    
+
     // Get notifications if WLAN changes
     IntentFilter intentFilter = new IntentFilter();
     intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
@@ -490,34 +535,34 @@ public class ViewDashboard extends Activity {
       public void onReceive(Context context, Intent intent) {
         boolean connectionEstablished = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
         if (connectionEstablished) {
-          wlanActive=true;
+          wlanActive = true;
         } else {
-          wlanActive=false;
+          wlanActive = false;
         }
       }
-      
+
     }, intentFilter);
-       
+
     // Start thread that handles wlan changes
     wifiManager = (android.net.wifi.WifiManager) getSystemService(android.content.Context.WIFI_SERVICE);
     new Thread(new Runnable() {
-      
+
       @Override
       public void run() {
 
         // Set the correct WLAN state
-        InetAddress address = getWifiInetAddress(ViewDashboard.this, Inet4Address.class);
+        InetAddress address = getWifiInetAddress();
         if (address!=null) {
           wlanActive=true;
         } else {
           wlanActive=false;
         }
-        
+
         // Endless loop
         while (true) {
           if ((appActive)&&(wlanActive)) {
             if (!serviceActive) {
-              address = getWifiInetAddress(ViewDashboard.this, Inet4Address.class);
+              address = getWifiInetAddress();
               if (address!=null) {
                 startService(true);
               }
@@ -539,6 +584,17 @@ public class ViewDashboard extends Activity {
 
     // Service is down
     displayTextBitmap(getString(R.string.server_down));
+
+    // Set the onclick handlers for the buttons
+    ((ImageButton)findViewById(R.id.sound_button_car)).setOnClickListener(new
+            SendMessageOnClickListener(NET_CMD_PLAY_SOUND_CAR)
+    );
+    ((ImageButton)findViewById(R.id.sound_button_dog)).setOnClickListener(new
+            SendMessageOnClickListener(NET_CMD_PLAY_SOUND_DOG)
+    );
+    ((ImageButton)findViewById(R.id.sound_button_ship)).setOnClickListener(new
+            SendMessageOnClickListener(NET_CMD_PLAY_SOUND_SHIP)
+    );
   }
 
   @Override
@@ -558,7 +614,7 @@ public class ViewDashboard extends Activity {
       mSystemUiHider.hide();
     }
   };
-  
+
   /**
    * Schedules a call to hide() in [delay] milliseconds, canceling any
    * previously scheduled calls.
@@ -567,7 +623,7 @@ public class ViewDashboard extends Activity {
     mHideHandler.removeCallbacks(mHideRunnable);
     mHideHandler.postDelayed(mHideRunnable, delayMillis);
   }
-  
+
   /**
    * Called when activity is resumed
    */
@@ -579,26 +635,26 @@ public class ViewDashboard extends Activity {
     multicastLock = wifiManager.createMulticastLock("Geo Dashboard lock for JmDNS");
     multicastLock.setReferenceCounted(true);
     multicastLock.acquire();
-    
+
     // App is available
     appActive=true;
   }
-  
+
   /**
    * Called when the activity is paused
    */
   @Override
   protected void onPause() {
     super.onPause();
-    
+
     // App is not available
     appActive=false;
-    
+
     // Release the multicast lock
     if (multicastLock!=null)
       multicastLock.release();
   }
-    
+
   /** Create the action buttons */
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -607,7 +663,7 @@ public class ViewDashboard extends Activity {
     inflater.inflate(R.menu.view_dashboard_actions, menu);
     return super.onCreateOptionsMenu(menu);
   }
-    
+
   /** Respond to action buttons */
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
@@ -615,11 +671,25 @@ public class ViewDashboard extends Activity {
       case R.id.action_refresh:
         restartService();
         return true;
+      case R.id.action_about:
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder
+            .setTitle(R.string.about_title)
+            .setMessage(R.string.about_message)
+            .setCancelable(true)
+            .setNeutralButton(R.string.about_dismiss,new DialogInterface.OnClickListener() {
+              public void onClick(DialogInterface dialog,int id) {
+                dialog.cancel();
+              }
+            });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+        return true;
       default:
         return super.onOptionsItemSelected(item);
     }
   }
-  
+
   /** Close the socket on destroy */
   @Override
   protected void onDestroy() {
@@ -640,5 +710,5 @@ public class ViewDashboard extends Activity {
     }
     super.onDestroy();
   }
-  
+
 }

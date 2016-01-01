@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/GeoDashboard.iml" filepath="$PROJECT_DIR$/GeoDashboard.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../ThirdParty/jmdns/jmDNS.iml" filepath="$PROJECT_DIR$/../../../ThirdParty/jmdns/jmDNS.iml" />
     </modules>
   </component>
 </project>

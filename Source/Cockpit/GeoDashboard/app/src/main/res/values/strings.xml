@@ -10,10 +10,30 @@
     <string name="service_unregistered">Dashboard service unregistered!</string>
     <string name="fullscreen_content_description">Shows the dashboard</string>
     <string name="refresh_title">Restart the network service</string>
+    <string name="about">About</string>
     <string name="waiting_for_connection">Waiting at %1$s:%2$d&#8230;</string>
     <string name="init_server">Initializing network service&#8230;</string>
     <string name="deinit_server">Shutting down network service&#8230;</string>
     <string name="server_down">Network service is down!</string>
     <string name="no_wlan_address">No WLAN IP address found! Is WLAN on and associated?</string>
- 
+    <string name="about_title">Copyright (C) Matthias Grünewald\nAll Rights Reserved</string>
+    <string name="about_message">
+        Geo Dashboard has been developed by Matthias Grünewald.
+        He owns the copyright for the application, this help and all the media used.\nThis work is
+        licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
+        International License. Please contact the author if you want to use Geo Dashboard for
+        commercial purposes.\nThis app uses the JmDNS library for network service discovery. The
+        project was originally developed by Arthur van Hoff under the GNU Lesser General Public
+        License as jRendevous. It was moved to Sourceforge by Rick Blair and renamed to JmDNS with
+        the Arthur\'s kind permission. Currently it has been re-released under the Apache License,
+        Version 2.0.\nThe dog icon has been designed by Nathan Hwang. It is licensed under the
+        Creative Commons Attribution 3.0 Unported license.\nThe car icon has been designed by
+        Google Inc. It is licensed under the Creative Commons Attribution-Share Alike 4.0
+        International license.\nThe ship icon is from the AIGA symbol signs collection which was
+        produced through a collaboration between AIGA and the U.S. Department of Transportation
+        (DOT) in 1974 and 1979. All images in the collection are public domain.
+    </string>
+    <string name="about_dismiss">OK</string>
+
+
 </resources>
