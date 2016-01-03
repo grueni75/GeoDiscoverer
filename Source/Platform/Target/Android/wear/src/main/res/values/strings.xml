@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">GeoDiscoverer</string>
+  <string name="app_name">GeoDiscoverer</string>
+  <string name="title_activity_view_map">ViewMap</string>
+  <string name="hello_world">Hello World!</string>
 </resources>

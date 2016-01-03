@@ -11,50 +11,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b578a301-10f4-4fb1-9459-91cdc01d1a52" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/.idea/libraries/jmdns_r353.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/libs/jmdns-r353.jar" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/appcompat_v7_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/design_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/gridlayout_v7_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/jmdns_r353.xml" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/wear/src/main/res/layout/view_map.xml" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/play_services_base_7_8_0.xml" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/play_services_wearable_7_8_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/recyclerview_v7_22_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/recyclerview_v7_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_annotations_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_v4_22_2_0.xml" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/wearable_1_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/colorPickerPreference/colorPickerPreference.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/materialDialogs/materialDialogs.iml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/libs/jmdns-r353.jar" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../../../../ThirdParty/jmdns-svn-r353.tar.gz" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/.idea/.name" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/.idea/.name" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitAppVoice.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitAppVoice.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitEngine.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitEngine.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitInfos.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitInfos.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/App/Commander.cpp" afterPath="$PROJECT_DIR$/../../../General/App/Commander.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Android/Icon/Makefile" afterPath="$PROJECT_DIR$/../../../Media/Android/Icon/Makefile" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Navigation/NavigationEngine.cpp" afterPath="$PROJECT_DIR$/../../../General/Navigation/NavigationEngine.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Navigation/NavigationInfo.cpp" afterPath="$PROJECT_DIR$/../../../General/Navigation/NavigationInfo.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Navigation/NavigationInfo.h" afterPath="$PROJECT_DIR$/../../../General/Navigation/NavigationInfo.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/src/main/java/com/untouchableapps/android/geodashboard/ViewDashboard.java" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/src/main/java/com/untouchableapps/android/geodashboard/ViewDashboard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/app.iml" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/app.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/build.gradle" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/build.gradle" afterPath="$PROJECT_DIR$/mobile/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../config.xsd" afterPath="$PROJECT_DIR$/../../../config.xsd" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/.idea/gradle.xml" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/.idea/gradle.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/gradle.xml" afterPath="$PROJECT_DIR$/.idea/gradle.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Help/public/index.html" afterPath="$PROJECT_DIR$/../Help/public/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/mobile.iml" afterPath="$PROJECT_DIR$/mobile/mobile.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/.idea/modules.xml" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/.idea/modules.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/settings.gradle" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/settings.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/settings.gradle" afterPath="$PROJECT_DIR$/settings.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/src/main/res/values/strings.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/src/main/res/layout/view_dashboard.xml" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/src/main/res/layout/view_dashboard.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/src/main/res/menu/view_dashboard_actions.xml" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/app/src/main/res/menu/view_dashboard_actions.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../../../Cockpit/GeoDashboard/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wear/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/wear/src/main/AndroidManifest.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wear/build.gradle" afterPath="$PROJECT_DIR$/wear/build.gradle" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wear/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/wear/src/main/res/values/strings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wear/wear.iml" afterPath="$PROJECT_DIR$/wear/wear.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="GeoDiscoverer.iws" />
@@ -306,53 +272,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="GDDashboardServiceListener.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDDashboardServiceListener.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="36" column="28" selection-start-line="36" selection-start-column="28" selection-end-line="36" selection-end-column="28" />
-              <folding>
-                <element signature="method#GDDashboardServiceListener#0;class#GDDashboardServiceListener#0" expanded="true" />
-                <element signature="method#serviceAdded#0;class#GDDashboardServiceListener#0" expanded="true" />
-                <element signature="method#serviceResolved#0;class#GDDashboardServiceListener#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="JmDNSImpl.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../../../../ThirdParty/jmdns/src/main/java/javax/jmdns/impl/JmDNSImpl.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="1398" column="0" selection-start-line="1398" selection-start-column="0" selection-end-line="1398" selection-end-column="0" />
-              <folding>
-                <element signature="method#JmDNSImpl#0;class#JmDNSImpl#0" expanded="true" />
-                <element signature="method#start#0;class#JmDNSImpl#0" expanded="true" />
-                <element signature="method#openMulticastSocket#0;class#JmDNSImpl#0" expanded="true" />
-                <element signature="method#updateRecord#0;class#JmDNSImpl#0" expanded="true" />
-                <element signature="method#handleResponse#0;class#JmDNSImpl#0" expanded="true" />
-                <element signature="method#handleQuery#0;class#JmDNSImpl#0" expanded="true" />
-                <element signature="method#startReaper#0;class#JmDNSImpl#0" expanded="true" />
-                <element signature="method#setLastThrottleIncrement#0;class#JmDNSImpl#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="CockpitEngine.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitEngine.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="384" column="10" selection-start-line="384" selection-start-column="10" selection-end-line="384" selection-end-column="10" />
               <folding>
-                <element signature="method#startNetworkService#0;class#CockpitEngine#0" expanded="true" />
-                <element signature="method#CockpitEngine#0;class#CockpitEngine#0" expanded="true" />
-                <element signature="method#start#0;class#CockpitEngine#0" expanded="true" />
-                <element signature="method#quitVibrateThread#0;class#CockpitEngine#0" expanded="true" />
-                <element signature="method#stop#0;class#CockpitEngine#0" expanded="true" />
-                <element signature="method#isActive#0;class#CockpitEngine#0" expanded="true" />
-                <element signature="method#audioWakeup#0;class#CockpitEngine#0" expanded="true" />
-                <element signature="method#audioIsAsleep#0;class#CockpitEngine#0" expanded="true" />
+                <element signature="e#0#16584#0" expanded="false" />
+                <element signature="imports" expanded="false" />
+                <element signature="method#run#0;class#2639:4912" expanded="false" />
+                <element signature="method#onCompletion#0;class#4345:4711" expanded="false" />
+                <element signature="method#stopNetworkService#0;class#CockpitEngine#0" expanded="false" />
+                <element signature="method#run#0;class#5055:5438" expanded="false" />
+                <element signature="method#run#0;class#7938:10911" expanded="false" />
+                <element signature="method#onCompletion#0;class#15413:15743" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -363,21 +296,8 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Thread.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../../../../../android/android-sdk/sources/android-22/java/lang/Thread.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="983" column="23" selection-start-line="983" selection-start-column="23" selection-end-line="983" selection-end-column="23" />
               <folding>
-                <element signature="method#getDefaultUncaughtExceptionHandler#0;class#Thread#0" expanded="false" />
-                <element signature="method#setDefaultUncaughtExceptionHandler#0;class#Thread#0" expanded="false" />
-                <element signature="method#setUncaughtExceptionHandler#0;class#Thread#0" expanded="false" />
-                <element signature="method#sleep#0;class#Thread#0" expanded="true" />
+                <element signature="e#0#1182#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -393,10 +313,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CockpitAppVoice.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="CockpitAppVoice.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitAppVoice.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.45825604">
+            <state vertical-scroll-proportion="0.0">
               <caret line="136" column="46" selection-start-line="136" selection-start-column="46" selection-end-line="136" selection-end-column="46" />
               <folding>
                 <element signature="method#CockpitAppVoice#0;class#CockpitAppVoice#0" expanded="true" />
@@ -412,40 +332,72 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CockpitAppMetaWatch.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitAppMetaWatch.java">
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="162" column="4" selection-start-line="162" selection-start-column="4" selection-end-line="162" selection-end-column="4" />
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="strings.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/src/main/res/values/strings.xml">
+      <file leaf-file-name="AndroidManifest.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wear/src/main/AndroidManifest.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="90" column="16" selection-start-line="90" selection-start-column="16" selection-end-line="90" selection-end-column="16" />
+            <state vertical-scroll-proportion="-15.178572">
+              <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GDCore.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java">
+      <file leaf-file-name="ViewMap.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="842" column="31" selection-start-line="842" selection-start-column="31" selection-end-line="842" selection-end-column="31" />
+            <state vertical-scroll-proportion="-0.62152135">
+              <caret line="22" column="21" selection-start-line="22" selection-start-column="21" selection-end-line="22" selection-end-column="21" />
               <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="method#getWifiInetAddress#0;class#GDCore#0" expanded="true" />
-                <element signature="method#updateHome#0;class#GDCore#0" expanded="true" />
-                <element signature="method#start#0;class#GDCore#0" expanded="true" />
-                <element signature="method#stop#0;class#GDCore#0" expanded="true" />
-                <element signature="method#cockpitEngineIsActive#0;class#GDCore#0" expanded="true" />
-                <element signature="method#sendNativeCrashReport#0;class#GDCore#0" expanded="true" />
+                <element signature="e#0#2240#0" expanded="true" />
+                <element signature="method#onExitAmbient#0;class#ViewMap#0" expanded="true" />
+                <element signature="method#updateDisplay#0;class#ViewMap#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wear/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ViewMap.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="11" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#64784#0" expanded="true" />
+                <element signature="method#onCreate#0;class#ViewMap#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="view_map.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wear/src/main/res/layout/view_map.xml">
+          <provider selected="true" editor-type-id="android-designer">
+            <state />
+          </provider>
+          <provider editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -1223,19 +1175,29 @@
                 <option name="name" value="prepareComAndroidSupportRecyclerviewV72200Library" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
-                <option name="description" value="Prepare com.google.android.gms:play-services-base:7.8.0" />
+                <option name="description" value="Prepare com.android.support:support-v4:23.0.0" />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
-                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesBase780Library" />
+                <option name="name" value="prepareComAndroidSupportSupportV42300Library" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
-                <option name="description" value="Prepare com.google.android.gms:play-services-wearable:7.8.0" />
+                <option name="description" value="Prepare com.google.android.gms:play-services-base:8.4.0" />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
-                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesWearable780Library" />
+                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesBase840Library" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
-                <option name="description" value="Prepare com.google.android.support:wearable:1.2.0" />
+                <option name="description" value="Prepare com.google.android.gms:play-services-basement:8.4.0" />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
-                <option name="name" value="prepareComGoogleAndroidSupportWearable120Library" />
+                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesBasement840Library" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Prepare com.google.android.gms:play-services-wearable:8.4.0" />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
+                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesWearable840Library" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Prepare com.google.android.support:wearable:1.3.0" />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$" />
+                <option name="name" value="prepareComGoogleAndroidSupportWearable130Library" />
               </ExternalTaskPojo>
             </list>
           </value>
@@ -2216,24 +2178,29 @@
                 <option name="name" value="prepareComAndroidSupportRecyclerviewV72200Library" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
-                <option name="description" value="Prepare com.android.support:support-v4:22.2.0" />
+                <option name="description" value="Prepare com.android.support:support-v4:23.0.0" />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/wear" />
-                <option name="name" value="prepareComAndroidSupportSupportV42220Library" />
+                <option name="name" value="prepareComAndroidSupportSupportV42300Library" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
-                <option name="description" value="Prepare com.google.android.gms:play-services-base:7.8.0" />
+                <option name="description" value="Prepare com.google.android.gms:play-services-base:8.4.0" />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/wear" />
-                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesBase780Library" />
+                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesBase840Library" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
-                <option name="description" value="Prepare com.google.android.gms:play-services-wearable:7.8.0" />
+                <option name="description" value="Prepare com.google.android.gms:play-services-basement:8.4.0" />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/wear" />
-                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesWearable780Library" />
+                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesBasement840Library" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
-                <option name="description" value="Prepare com.google.android.support:wearable:1.2.0" />
+                <option name="description" value="Prepare com.google.android.gms:play-services-wearable:8.4.0" />
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/wear" />
-                <option name="name" value="prepareComGoogleAndroidSupportWearable120Library" />
+                <option name="name" value="prepareComGoogleAndroidGmsPlayServicesWearable840Library" />
+              </ExternalTaskPojo>
+              <ExternalTaskPojo>
+                <option name="description" value="Prepare com.google.android.support:wearable:1.3.0" />
+                <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/wear" />
+                <option name="name" value="prepareComGoogleAndroidSupportWearable130Library" />
               </ExternalTaskPojo>
               <ExternalTaskPojo>
                 <option name="linkedExternalProjectPath" value="$PROJECT_DIR$/wear" />
@@ -3628,7 +3595,7 @@
     </option>
     <option name="modificationStamps">
       <map>
-        <entry key="$PROJECT_DIR$" value="10146435482859" />
+        <entry key="$PROJECT_DIR$" value="10147370393219" />
       </map>
     </option>
     <option name="projectBuildClasspath">
@@ -4338,12 +4305,13 @@
                             <option value="$APPLICATION_HOME_DIR$/gradle/m2repository/com/intellij/annotations/12.0/annotations-12.0.jar" />
                             <option value="$APPLICATION_HOME_DIR$/gradle/m2repository/com/android/tools/external/lombok/lombok-ast/0.2.3/lombok-ast-0.2.3-sources.jar" />
                             <option value="$APPLICATION_HOME_DIR$/gradle/m2repository/com/android/tools/external/lombok/lombok-ast/0.2.3/lombok-ast-0.2.3.jar" />
-                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/google/m2repository/com/google/android/support/wearable/1.2.0/wearable-1.2.0.aar" />
-                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/google/m2repository/com/google/android/gms/play-services-wearable/7.8.0/play-services-wearable-7.8.0.aar" />
+                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/google/m2repository/com/google/android/support/wearable/1.3.0/wearable-1.3.0.aar" />
+                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/google/m2repository/com/google/android/gms/play-services-wearable/8.4.0/play-services-wearable-8.4.0.aar" />
                             <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/android/m2repository/com/android/support/recyclerview-v7/22.0.0/recyclerview-v7-22.0.0.aar" />
-                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/google/m2repository/com/google/android/gms/play-services-base/7.8.0/play-services-base-7.8.0.aar" />
-                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/android/m2repository/com/android/support/support-v4/22.2.0/support-v4-22.2.0.aar" />
-                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/android/m2repository/com/android/support/support-annotations/22.2.0/support-annotations-22.2.0.jar" />
+                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/google/m2repository/com/google/android/gms/play-services-base/8.4.0/play-services-base-8.4.0.aar" />
+                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/google/m2repository/com/google/android/gms/play-services-basement/8.4.0/play-services-basement-8.4.0.aar" />
+                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/android/m2repository/com/android/support/support-v4/23.0.0/support-v4-23.0.0.aar" />
+                            <option value="$PROJECT_DIR$/../../../../../android/android-sdk/extras/android/m2repository/com/android/support/support-annotations/23.0.0/support-annotations-23.0.0.jar" />
                           </list>
                         </option>
                         <option name="path" value="$PROJECT_DIR$/wear" />
@@ -4936,6 +4904,8 @@
         <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDCore.java" />
         <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitEngine.java" />
         <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitAppVoice.java" />
+        <option value="$PROJECT_DIR$/wear/src/main/AndroidManifest.xml" />
+        <option value="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" />
       </list>
     </option>
   </component>
@@ -4953,7 +4923,7 @@
     <order />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-8" />
+    <option name="x" value="1432" />
     <option name="y" value="-4" />
     <option name="width" value="1936" />
     <option name="height" value="1092" />
@@ -5063,8 +5033,7 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="AndroidView" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -5093,7 +5062,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="mobile" />
+              <option name="myItemId" value="wear" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -5107,7 +5076,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="mobile" />
+              <option name="myItemId" value="wear" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -5129,33 +5098,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="mobile" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="res" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GeoDiscoverer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Android" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="mobile" />
+              <option name="myItemId" value="wear" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -5170,8 +5113,100 @@
               <option name="myItemId" value="res" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+          </PATH>
+          <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="raw" />
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wear" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="layout" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wear" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="geodiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="mobile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -5246,25 +5281,14 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="androidTest" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="geodiscoverer" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
+      <pane id="AndroidView" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -5275,7 +5299,7 @@
     <property name="android.project.structure.last.selected" value="lib" />
     <property name="android.project.structure.proportion" value="0.15" />
     <property name="android.sdk.path" value="$PROJECT_DIR$/../../../../../android/android-sdk" />
-    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="TA045089FR" />
+    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="14522D2D868E648" />
     <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_AVD" value="Nexus_5_API_22_x86" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../Cockpit/GeoDashboard" />
     <property name="ExportApk.ApkPath" value="$PROJECT_DIR$/export" />
@@ -5288,7 +5312,7 @@
       <recent name="com.untouchableapps.android.geodiscoverer" />
     </key>
   </component>
-  <component name="RunManager" selected="Android Application.mobile">
+  <component name="RunManager" selected="Android Application.wear">
     <configuration default="false" name="Android [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -5511,7 +5535,7 @@
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
       <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
       <option name="FORCE_STOP_RUNNING_APP" value="true" />
-      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="true" />
       <option name="PREFERRED_AVD" value="" />
       <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="0" />
       <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
@@ -5588,7 +5612,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-4" width="1936" height="1092" extended-state="6" />
+    <frame x="1432" y="-4" width="1936" height="1092" extended-state="6" />
     <editor active="false" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -5596,14 +5620,14 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3264642" sideWeight="0.46203208" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32994652" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.38611713" sideWeight="0.5117647" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Android Monitor" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.38611713" sideWeight="0.5096257" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32941177" sideWeight="0.4732143" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39262474" sideWeight="0.53101605" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39251336" sideWeight="0.55576557" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3253796" sideWeight="0.56417114" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286334" sideWeight="0.48716578" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.38611713" sideWeight="0.4882353" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.38611713" sideWeight="0.49037433" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39251336" sideWeight="0.36495176" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3264642" sideWeight="0.4080214" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21550801" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -5627,15 +5651,15 @@
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32874355" sideWeight="0.63489497" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37859425" sideWeight="0.48811412" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32943678" sideWeight="0.5063898" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.4978701" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.49574015" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32943678" sideWeight="0.5063898" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37859425" sideWeight="0.48811412" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.49574015" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37859425" sideWeight="0.511076" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.4978701" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.4978701" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943678" sideWeight="0.49574015" order="11" side_tool="false" content_ui="tabs" />
@@ -5648,8 +5672,8 @@
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32837406" sideWeight="0.32428116" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32943678" sideWeight="0.49361023" order="13" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout-to-restore>
   </component>
@@ -5688,40 +5712,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDNavDrawerAdapter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="2.1367521">
-          <caret line="90" column="6" selection-start-line="90" selection-start-column="6" selection-end-line="90" selection-end-column="85" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/view_map.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.392857">
-          <caret line="79" column="18" selection-start-line="79" selection-start-column="18" selection-end-line="79" selection-end-column="18" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/menu/view_map.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/nav_drawer_header.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.47058824">
-          <caret line="20" column="42" selection-start-line="20" selection-start-column="42" selection-end-line="20" selection-end-column="42" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/collect_assets">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -5785,21 +5775,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDService.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="1.1707317">
           <caret line="43" column="16" selection-start-line="43" selection-start-column="15" selection-end-line="43" selection-end-column="16" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#onCreate#0;class#GDService#0" expanded="true" />
-            <element signature="method#onStart#0;class#GDService#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="method#onCreate#0;class#GDService#0" expanded="false" />
+            <element signature="method#onStart#0;class#GDService#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -5857,13 +5840,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="44" column="0" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="1391" column="13" selection-start-line="1391" selection-start-column="13" selection-end-line="1391" selection-end-column="13" />
         </state>
       </provider>
     </entry>
@@ -5930,7 +5906,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="860" column="0" selection-start-line="860" selection-start-column="0" selection-end-line="860" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -5996,9 +5971,9 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="36" column="28" selection-start-line="36" selection-start-column="28" selection-end-line="36" selection-end-column="28" />
           <folding>
-            <element signature="method#GDDashboardServiceListener#0;class#GDDashboardServiceListener#0" expanded="true" />
-            <element signature="method#serviceAdded#0;class#GDDashboardServiceListener#0" expanded="true" />
-            <element signature="method#serviceResolved#0;class#GDDashboardServiceListener#0" expanded="true" />
+            <element signature="method#GDDashboardServiceListener#0;class#GDDashboardServiceListener#0" expanded="false" />
+            <element signature="method#serviceAdded#0;class#GDDashboardServiceListener#0" expanded="false" />
+            <element signature="method#serviceResolved#0;class#GDDashboardServiceListener#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -6008,13 +5983,13 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="1398" column="0" selection-start-line="1398" selection-start-column="0" selection-end-line="1398" selection-end-column="0" />
           <folding>
-            <element signature="method#JmDNSImpl#0;class#JmDNSImpl#0" expanded="true" />
-            <element signature="method#start#0;class#JmDNSImpl#0" expanded="true" />
-            <element signature="method#openMulticastSocket#0;class#JmDNSImpl#0" expanded="true" />
-            <element signature="method#updateRecord#0;class#JmDNSImpl#0" expanded="true" />
-            <element signature="method#handleResponse#0;class#JmDNSImpl#0" expanded="true" />
-            <element signature="method#handleQuery#0;class#JmDNSImpl#0" expanded="true" />
-            <element signature="method#startReaper#0;class#JmDNSImpl#0" expanded="true" />
+            <element signature="method#JmDNSImpl#0;class#JmDNSImpl#0" expanded="false" />
+            <element signature="method#start#0;class#JmDNSImpl#0" expanded="false" />
+            <element signature="method#openMulticastSocket#0;class#JmDNSImpl#0" expanded="false" />
+            <element signature="method#updateRecord#0;class#JmDNSImpl#0" expanded="false" />
+            <element signature="method#handleResponse#0;class#JmDNSImpl#0" expanded="false" />
+            <element signature="method#handleQuery#0;class#JmDNSImpl#0" expanded="false" />
+            <element signature="method#startReaper#0;class#JmDNSImpl#0" expanded="false" />
             <element signature="method#setLastThrottleIncrement#0;class#JmDNSImpl#0" expanded="false" />
           </folding>
         </state>
@@ -6052,7 +6027,7 @@
             <element signature="method#getDefaultUncaughtExceptionHandler#0;class#Thread#0" expanded="false" />
             <element signature="method#setDefaultUncaughtExceptionHandler#0;class#Thread#0" expanded="false" />
             <element signature="method#setUncaughtExceptionHandler#0;class#Thread#0" expanded="false" />
-            <element signature="method#sleep#0;class#Thread#0" expanded="true" />
+            <element signature="method#sleep#0;class#Thread#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -6061,7 +6036,20 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="162" column="4" selection-start-line="162" selection-start-column="4" selection-end-line="162" selection-end-column="4" />
-          <folding />
+          <folding>
+            <element signature="e#0#12901#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+            <element signature="method#loadBitmapFromAssets#0;class#CockpitAppMetaWatch#0" expanded="false" />
+            <element signature="method#makeSendableArray#0;class#CockpitAppMetaWatch#0" expanded="false" />
+            <element signature="method#drawTriangle#0;class#CockpitAppMetaWatch#0" expanded="false" />
+            <element signature="method#CockpitAppMetaWatch#0;class#CockpitAppMetaWatch#0" expanded="false" />
+            <element signature="method#onReceive#0;class#4611:4999" expanded="false" />
+            <element signature="method#focus#0;class#CockpitAppMetaWatch#0" expanded="false" />
+            <element signature="method#inform#0;class#CockpitAppMetaWatch#0" expanded="false" />
+            <element signature="method#alert#0;class#CockpitAppMetaWatch#0" expanded="false" />
+            <element signature="method#update#0;class#CockpitAppMetaWatch#0" expanded="false" />
+            <element signature="method#stop#0;class#CockpitAppMetaWatch#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -6078,14 +6066,14 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="384" column="10" selection-start-line="384" selection-start-column="10" selection-end-line="384" selection-end-column="10" />
           <folding>
-            <element signature="method#startNetworkService#0;class#CockpitEngine#0" expanded="true" />
-            <element signature="method#CockpitEngine#0;class#CockpitEngine#0" expanded="true" />
-            <element signature="method#start#0;class#CockpitEngine#0" expanded="true" />
-            <element signature="method#quitVibrateThread#0;class#CockpitEngine#0" expanded="true" />
-            <element signature="method#stop#0;class#CockpitEngine#0" expanded="true" />
-            <element signature="method#isActive#0;class#CockpitEngine#0" expanded="true" />
-            <element signature="method#audioWakeup#0;class#CockpitEngine#0" expanded="true" />
-            <element signature="method#audioIsAsleep#0;class#CockpitEngine#0" expanded="true" />
+            <element signature="e#0#16584#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+            <element signature="method#run#0;class#2639:4912" expanded="false" />
+            <element signature="method#onCompletion#0;class#4345:4711" expanded="false" />
+            <element signature="method#stopNetworkService#0;class#CockpitEngine#0" expanded="false" />
+            <element signature="method#run#0;class#5055:5438" expanded="false" />
+            <element signature="method#run#0;class#7938:10911" expanded="false" />
+            <element signature="method#onCompletion#0;class#15413:15743" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -6094,13 +6082,15 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#0#1182#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/CockpitAppVoice.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.45825604">
+        <state vertical-scroll-proportion="0.0">
           <caret line="136" column="46" selection-start-line="136" selection-start-column="46" selection-end-line="136" selection-end-column="46" />
           <folding>
             <element signature="method#CockpitAppVoice#0;class#CockpitAppVoice#0" expanded="true" />
@@ -6111,6 +6101,64 @@
             <element signature="method#update#0;class#CockpitAppVoice#0" expanded="true" />
             <element signature="method#stop#0;class#CockpitAppVoice#0" expanded="true" />
             <element signature="method#onInit#0;class#CockpitAppVoice#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wear/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-15.178572">
+          <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wear/src/main/res/layout/view_map.xml">
+      <provider selected="true" editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="11" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#64784#0" expanded="true" />
+            <element signature="method#onCreate#0;class#ViewMap#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wear/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.62152135">
+          <caret line="22" column="21" selection-start-line="22" selection-start-column="21" selection-end-line="22" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#2240#0" expanded="true" />
+            <element signature="method#onExitAmbient#0;class#ViewMap#0" expanded="true" />
+            <element signature="method#updateDisplay#0;class#ViewMap#0" expanded="true" />
           </folding>
         </state>
       </provider>
