@@ -1,0 +1,58 @@
+apply plugin: 'com.android.library'
+
+def computeVersionName() {
+    def date = new Date()
+    return date.format('yyyyMMdd')
+}
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+    publishNonDefault true
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 22
+        versionCode 1
+        versionName computeVersionName()
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            project.ext.set('releaseAppABI', 'all32')
+        }
+        debug {
+            project.ext.set('debugAppABI', 'armeabi-v7a')
+        }
+    }
+
+    sourceSets.main {
+        jniLibs.srcDir 'src/main/libs' // use the jni .so compiled from the manual ndk-build command
+        jni.srcDirs = [] //disable automatic ndk-build call
+    }
+
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:22.2.1'
+}
+
+android.buildTypes.all{ buildType ->
+    def collectSymbolsTask = task("collect${buildType.name.capitalize()}Symbols", type: Exec) {
+        workingDir 'src/main'
+        commandLine './collect_symbols', 'obj'
+    }
+    def buildNativeCodeTask = task("build${buildType.name.capitalize()}NativeCode", type: Exec) {
+        workingDir 'src/main'
+        commandLine './build_native', "${buildType.name}", 'APP_ABI=' + project.ext.get("${buildType.name}AppABI")
+    }
+    collectSymbolsTask.dependsOn buildNativeCodeTask
+    tasks.whenTaskAdded { task ->
+        if (task.name == "package${buildType.name.capitalize()}JniLibs") {
+            task.dependsOn collectSymbolsTask
+        }
+    }
+}

@@ -30,6 +30,8 @@ import android.os.Message;
 import android.support.v7.app.NotificationCompat;
 import android.widget.Toast;
 
+import com.untouchableapps.android.geodiscoverer.core.GDCore;
+
 public class GDService extends Service {
   
   // Managers
@@ -193,7 +195,7 @@ public class GDService extends Service {
       state=coreObject.executeCoreCommand("getMapDownloadActive()");
       if (state.equals("false")||state.equals(""))
         downloadingMaps = false;
-      if ((!coreObject.cockpitEngineIsActive())&&(!recordingPosition)&&(!downloadingMaps)) {
+      if ((!((GDApplication)getApplication()).cockpitEngineIsActive())&&(!recordingPosition)&&(!downloadingMaps)) {
         locationManager.removeUpdates(coreObject);
         locationWatchStarted = false;
         if (serviceInForeground) {

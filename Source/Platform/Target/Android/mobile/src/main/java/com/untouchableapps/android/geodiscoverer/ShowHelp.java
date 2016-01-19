@@ -24,6 +24,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings.TextSize;
 import android.webkit.WebView;
 
+import com.untouchableapps.android.geodiscoverer.core.GDCore;
+
 public class ShowHelp extends GDActivity {
 
   // Web view showing the help
@@ -59,7 +61,7 @@ public class ShowHelp extends GDActivity {
     });*/
     
     // Load the help
-    webview.loadUrl("file://" + GDApplication.getHomeDirPath() + "/Help/index.html");
+    webview.loadUrl("file://" + GDCore.getHomeDirPath() + "/Help/index.html");
 
   }
   

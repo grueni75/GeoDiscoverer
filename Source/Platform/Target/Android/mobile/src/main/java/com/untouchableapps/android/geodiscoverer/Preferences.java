@@ -54,6 +54,7 @@ import android.view.ViewGroup;
 
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
 import com.afollestad.materialdialogs.prefs.MaterialListPreference;
+import com.untouchableapps.android.geodiscoverer.core.GDCore;
 
 public class Preferences extends PreferenceActivity implements
     OnPreferenceClickListener,OnPreferenceChangeListener {

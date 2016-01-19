@@ -22,6 +22,8 @@ import android.os.Build.VERSION_CODES;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+import com.untouchableapps.android.geodiscoverer.core.GDCore;
+
 /** Does the rendering with the OpenGL API */
 public class GDMapSurfaceView extends GLSurfaceView {
 

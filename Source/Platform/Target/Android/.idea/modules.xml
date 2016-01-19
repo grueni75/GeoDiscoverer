@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Android.iml" filepath="$PROJECT_DIR$/Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference/colorPickerPreference.iml" filepath="$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference/colorPickerPreference.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../../../ThirdParty/jmdns/jmDNS.iml" filepath="$PROJECT_DIR$/../../../../ThirdParty/jmdns/jmDNS.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../../../ThirdParty/material-dialogs/library/materialDialogs.iml" filepath="$PROJECT_DIR$/../../../../ThirdParty/material-dialogs/library/materialDialogs.iml" />
       <module fileurl="file://$PROJECT_DIR$/mobile/mobile.iml" filepath="$PROJECT_DIR$/mobile/mobile.iml" />

@@ -1,0 +1,7 @@
+#!/bin/bash
+#echo $1
+#echo `cat mode.txt`
+if [ "$1" == `cat mode.txt` ] || [ "all" == `cat mode.txt` ]; then
+  ndk-build $2
+fi
+

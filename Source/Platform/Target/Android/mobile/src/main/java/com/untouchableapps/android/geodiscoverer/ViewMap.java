@@ -38,7 +38,6 @@ import org.acra.ReportingInteractionMode;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
@@ -90,6 +89,8 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.AlertDialogWrapper;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.core.GDTools;
 
 public class ViewMap extends GDActivity {
     
@@ -506,7 +507,7 @@ public class ViewMap extends GDActivity {
       public void onTextChanged(CharSequence s, int start, int before, int count) {
         
         // Check if route exists
-        String dstFilename = GDApplication.getHomeDirPath() + "/Route/" + s;
+        String dstFilename = GDCore.getHomeDirPath() + "/Route/" + s;
         final File dstFile = new File(dstFilename);
         if ((s=="")||(!dstFile.exists())) 
           routeExistsTextView.setVisibility(View.GONE);          
@@ -724,7 +725,7 @@ public class ViewMap extends GDActivity {
         String srcFilename = coreObject.homePath + "/Track/" + trackName;
         String dstFilename = coreObject.homePath + "/Route/" + trackName;
         try {
-          GDApplication.copyFile(srcFilename, dstFilename);
+          GDTools.copyFile(srcFilename, dstFilename);
         } catch (IOException exception) {
           GDApplication.showMessageBar(ViewMap.this, String.format(getString(R.string.cannot_copy_file), srcFilename, dstFilename), GDApplication.MESSAGE_BAR_DURATION_LONG);
         }
@@ -844,7 +845,7 @@ public class ViewMap extends GDActivity {
         
         // Create the destination file
         try {
-          GDApplication.copyFile(gpxContents, dstFilename);
+          GDTools.copyFile(gpxContents, dstFilename);
           gpxContents.close();
         } 
         catch (IOException e) {
@@ -1217,7 +1218,7 @@ public class ViewMap extends GDActivity {
 
       // Create some variables
       final String name = srcURI.getLastPathSegment();
-      final String dstFilename = GDApplication.getHomeDirPath() + "/Route/" + name;
+      final String dstFilename = GDCore.getHomeDirPath() + "/Route/" + name;
 
       // Check if download is already ongoing
       DownloadManager.Query query = new DownloadManager.Query();
@@ -1322,7 +1323,7 @@ public class ViewMap extends GDActivity {
     // Get the core object
     coreObject=GDApplication.coreObject;    
     coreObject.setDisplayMetrics(getResources().getDisplayMetrics());
-    coreObject.setActivity(this);
+    ((GDApplication)getApplication()).setActivity(this);
 
     // Get important handles
     locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -1571,7 +1572,7 @@ public class ViewMap extends GDActivity {
         if (uri.getPath().endsWith(".gda")) {
         
           // Ask the user if a new map shall be created based on the archive
-          String mapFolderFilename = GDApplication.getHomeDirPath() + "/Map/" + srcFile.getName();
+          String mapFolderFilename = GDCore.getHomeDirPath() + "/Map/" + srcFile.getName();
           mapFolderFilename = mapFolderFilename.substring(0, mapFolderFilename.lastIndexOf('.'));
           final String mapInfoFilename = mapFolderFilename + "/info.gds";
           final File mapFolder = new File(mapFolderFilename);
@@ -1637,8 +1638,7 @@ public class ViewMap extends GDActivity {
   public void onDestroy() {    
     super.onDestroy();
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onDestroy called by " + Thread.currentThread().getName());
-    if (coreObject!=null)
-      coreObject.setActivity(null);
+    ((GDApplication)getApplication()).setActivity(null);
     if ((wakeLock!=null)&&(wakeLock.isHeld()))
       wakeLock.release();
     if (downloadCompleteReceiver!=null)

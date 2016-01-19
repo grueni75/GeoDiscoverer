@@ -17,6 +17,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
@@ -38,7 +39,7 @@ public class GDActivity extends AppCompatActivity {
   static final int ERROR_DIALOG = 2;
   static final int WARNING_DIALOG = 1;
   static final int INFO_DIALOG = 3;
-    
+
   /** Shows a dialog  */
   public synchronized void dialog(int kind, String message) {  
     if (kind==WARNING_DIALOG) {      

@@ -27,11 +27,6 @@ android {
         }
     }
 
-    sourceSets.main {
-        jniLibs.srcDir 'src/main/libs' // use the jni .so compiled from the manual ndk-build command
-        jni.srcDirs = [] //disable automatic ndk-build call
-    }
-
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             if (variant.name == "release") {
@@ -51,6 +46,8 @@ dependencies {
     compile 'com.android.support:design:22.2.0'
     compile 'com.android.support:recyclerview-v7:22.2.0'
     compile 'com.android.support:gridlayout-v7:22.2.0'
+    releaseCompile project(path: ':core', configuration: 'release')
+    debugCompile project(path: ':core', configuration: 'debug')
     compile project(':materialDialogs')
     compile project(':colorPickerPreference')
     compile project(':jmDNS')
@@ -63,19 +60,26 @@ task collectAssets(type: Exec) {
 preBuild.dependsOn collectAssets
 
 android.buildTypes.all{ buildType ->
-    def collectSymbolsTask = task("collect${buildType.name.capitalize()}Symbols", type: Exec) {
-        workingDir 'src/main'
-        commandLine './collect_symbols', 'obj'
+    def setNativeCodeConfigTask = task("set${buildType.name.capitalize()}NativeCodeConfig", type: Exec) {
+        commandLine 'echo', "${buildType.name}"
+        doFirst {
+            standardOutput = new FileOutputStream("core/src/main/mode.txt");
+        }
     }
-    def buildNativeCodeTask = task("build${buildType.name.capitalize()}NativeCode", type: Exec) {
-        workingDir 'src/main'
-        commandLine 'ndk-build', 'APP_ABI=' + project.ext.get("${buildType.name}AppABI")
+    def resetNativeCodeConfigTask = task("reset${buildType.name.capitalize()}NativeCodeConfig", type: Exec) {
+        commandLine 'echo', "all"
+        doFirst {
+            standardOutput = new FileOutputStream("core/src/main/mode.txt");
+        }
     }
-    collectSymbolsTask.dependsOn buildNativeCodeTask
     tasks.whenTaskAdded { task ->
-        if (task.name == "preDex${buildType.name.capitalize()}") {
-            task.dependsOn collectSymbolsTask
+        if (task.name == "check${buildType.name.capitalize()}Manifest") {
+            task.dependsOn setNativeCodeConfigTask
+        }
+        if (task.name == "compile${buildType.name.capitalize()}Ndk") {
+            task.dependsOn resetNativeCodeConfigTask
         }
     }
 }
+
 

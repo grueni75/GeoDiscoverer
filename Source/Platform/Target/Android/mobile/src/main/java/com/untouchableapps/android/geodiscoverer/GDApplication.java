@@ -12,26 +12,39 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
 
 import org.acra.ACRA;
-import org.acra.ACRAConfigurationException;
+import org.acra.ACRAConstants;
+import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Message;
 import android.support.design.widget.Snackbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import com.untouchableapps.android.geodiscoverer.cockpit.CockpitEngine;
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
+import com.untouchableapps.android.geodiscoverer.core.GDCore;
 
 /* Configuration of ACRA for reporting crashes */
 @ReportsCrashes(
@@ -54,7 +67,7 @@ import android.widget.Toast;
 )
 
 /* Main application class */
-public class GDApplication extends Application {
+public class GDApplication extends Application implements GDAppInterface {
 
   /** Interface to the native C++ core */
   public static GDCore coreObject=null;
@@ -64,33 +77,26 @@ public class GDApplication extends Application {
   
   /** Maximum size of the message log */
   final static int maxMessagesSize = 4096;
-  
-  // Severity levels for messages
-  public static final int ERROR_MSG = 0;
-  public static final int WARNING_MSG = 1;
-  public static final int INFO_MSG = 2;
-  public static final int DEBUG_MSG = 3;
-  public static final int FATAL_MSG = 4;
-  
+
   /** Dashboard network service type */
   public static final String dashboardNetworkServiceType = "_geodashboard._tcp.local.";
-  
-  /** Application context */
-  public static Context appContext;
-  
+
+  /** Cockpit engine */
+  CockpitEngine cockpitEngine = null;
+
+  /** Reference to the viewmap activity */
+  ViewMap activity = null;
+
   /** Called when the application starts */
   @Override
   public void onCreate() {
     super.onCreate();  
-    
-    // Get application context
-    appContext = getApplicationContext();
-    
+
     // Init crash reporting
     ACRA.init(this);
         
     // Initialize the core object
-    String homeDirPath = GDApplication.getHomeDirPath();
+    String homeDirPath = GDCore.getHomeDirPath();
     if (homeDirPath.equals("")) {
       Toast.makeText(this, String.format(String.format(getString(R.string.no_home_dir),homeDirPath)), Toast.LENGTH_LONG).show();
       System.exit(1);
@@ -107,7 +113,7 @@ public class GDApplication extends Application {
           File file2 = new File(file.getAbsoluteFile() + ".base64");
           if (!file2.exists()) {
             ACRA.getConfig().setResToastText(R.string.crash_toast_text_left_over_report);
-            coreObject.sendNativeCrashReport(file.getAbsolutePath(), true);
+            sendNativeCrashReport(file.getAbsolutePath(), true);
             break; // only one report at a time
           }
         }
@@ -115,71 +121,8 @@ public class GDApplication extends Application {
     }
   }
 
-  /** Copies a source file to a destination file */
-  public static void copyFile(String srcFilename, String dstFilename) throws IOException {
-    File dstFile = new File(dstFilename);
-    File srcFile = new File(srcFilename);    
-    if(!dstFile.exists()) {
-      dstFile.createNewFile();
-    }
-    FileChannel source = null;
-    FileChannel destination = null;
-    try {
-      source = new FileInputStream(srcFile).getChannel();
-      destination = new FileOutputStream(dstFile).getChannel();
-      destination.transferFrom(source, 0, source.size());
-    }
-    finally {
-      if(source != null) {
-        source.close();
-      }
-      if(destination != null) {
-        destination.close();
-      }
-    }
-  }  
-  
-  /** Copies a source file to a destination file */
-  public static void copyFile(InputStream srcInputStream, String dstFilename) throws IOException {
-    File dstFile = new File(dstFilename);    
-    if(!dstFile.exists()) {
-      dstFile.createNewFile();
-    }
-    FileChannel source = ((FileInputStream)srcInputStream).getChannel();
-    FileChannel destination = null;
-    try {
-      destination = new FileOutputStream(dstFile).getChannel();
-      destination.transferFrom(source, 0, source.size());
-    }
-    finally {
-      if(destination != null) {
-        destination.close();
-      }
-    }
-  }  
-
-  /** Returns the path of the home dir */
-  public static String getHomeDirPath() {
-
-    // Create the home directory if necessary
-    //File homeDir=Environment.getExternalStorageDirectory(getString(R.string.home_directory));
-    File externalStorageDirectory=Environment.getExternalStorageDirectory(); 
-    String homeDirPath = externalStorageDirectory.getAbsolutePath() + "/GeoDiscoverer";
-    File homeDir=new File(homeDirPath);
-    if (!homeDir.exists()) {
-      try {
-        homeDir.mkdir();
-      }
-      catch (Exception e){
-        return "";
-      }
-    }
-    return homeDir.getAbsolutePath();
-    
-  }
-  
   /** Adds a message to the log */
-  public synchronized static void addMessage(int severityNumber, String tag, String message) {
+  public static synchronized void addMessage(int severityNumber, String tag, String message) {
     String severityString;
     switch (severityNumber) {
       case DEBUG_MSG: severityString="DEBUG"; if (!tag.equals("GDCore")) Log.d(tag, message); break;
@@ -200,7 +143,7 @@ public class GDApplication extends Application {
       coreObject.executeAppCommand("updateMessages()");
     }
   }
-  
+
   public static final long MESSAGE_BAR_DURATION_SHORT = 2000;
   public static final long MESSAGE_BAR_DURATION_LONG = 4000;
   
@@ -214,4 +157,124 @@ public class GDApplication extends Application {
     .make(v, message, Snackbar.LENGTH_LONG)
     .show(); // Don’t forget to show!
   }
+
+  /** Sets the view map activity */
+  public void setActivity(ViewMap activity) {
+    this.activity = activity;
+  }
+
+
+  // Cockpit engine related interface methods
+  @Override
+  public void cockpitEngineStart() {
+    if (cockpitEngine!=null)
+      cockpitEngineStop();
+    cockpitEngine=new CockpitEngine(this);
+  }
+  @Override
+  public void cockputEngineUpdate(String infos) {
+    if (cockpitEngine!=null)
+      cockpitEngine.update(infos, false);
+
+  }
+  @Override
+  public void cockpitEngineStop() {
+    if (cockpitEngine!=null) {
+      cockpitEngine.stop();
+      cockpitEngine=null;
+    }
+  }
+  @Override
+  public boolean cockpitEngineIsActive() {
+    if (cockpitEngine!=null) {
+      return cockpitEngine.isActive();
+    } else {
+      return false;
+    }
+  }
+
+  // Sends a native crash report
+  @Override
+  public void sendNativeCrashReport(String dumpBinPath, boolean quitApp) {
+
+    // Get the content of the minidump file and format it in base64
+    ACRA.getErrorReporter().putCustomData("nativeMinidumpPath", dumpBinPath);
+    String dumpTxtPath = dumpBinPath.concat(".base64");
+    try {
+      DataInputStream dumpBinReader = new DataInputStream(new FileInputStream(dumpBinPath));
+      long len = new File(dumpBinPath).length();
+      if (len > Integer.MAX_VALUE) {
+        dumpBinReader.close();
+        throw new IOException("File "+dumpBinPath+" too large, was "+len+" bytes.");
+      }
+      byte[] bytes = new byte[(int) len];
+      dumpBinReader.readFully(bytes);
+      String dumpContents = Base64.encodeToString(bytes, Base64.DEFAULT);
+      BufferedWriter dumpTextWriter = new BufferedWriter(new FileWriter(dumpTxtPath));
+      dumpTextWriter.write(dumpContents);
+      dumpTextWriter.close();
+      String[] dumpContentsInLines = dumpContents.split("\n");
+      ReportField[] customReportFields = new ReportField[ACRAConstants.DEFAULT_REPORT_FIELDS.length+1];
+      System.arraycopy(ACRAConstants.DEFAULT_REPORT_FIELDS, 0, customReportFields, 0, ACRAConstants.DEFAULT_REPORT_FIELDS.length);
+      customReportFields[ACRAConstants.DEFAULT_REPORT_FIELDS.length]=ReportField.APPLICATION_LOG;
+      ACRA.getConfig().setCustomReportContent(customReportFields);
+      ACRA.getConfig().setApplicationLogFileLines(dumpContentsInLines.length+1);
+      ACRA.getConfig().setApplicationLogFile(dumpTxtPath);
+      dumpBinReader.close();
+    }
+    catch (Exception e) {
+    }
+
+    // Send report via ACRA
+    Exception e = new Exception("GDCore has crashed");
+    ACRA.getErrorReporter().handleException(e,quitApp);
+  }
+
+  // Returns the application context
+  @Override
+  public Context getContext() {
+    return getApplicationContext();
+  }
+
+  // Sends a command to the activity
+  @Override
+  public void executeAppCommand(String cmd) {
+    if (activity != null) {
+      Message m = Message.obtain(activity.coreMessageHandler);
+      m.what = ViewMap.EXECUTE_COMMAND;
+      Bundle b = new Bundle();
+      b.putString("command", cmd);
+      m.setData(b);
+      activity.coreMessageHandler.sendMessage(m);
+    }
+  }
+
+  // Returns the orientation of the activity
+  @Override
+  public int getActivityOrientation() {
+    if (activity!=null) {
+      return activity.getResources().getConfiguration().orientation;
+    } else {
+      return Configuration.ORIENTATION_UNDEFINED;
+    }
+  }
+
+  // Returns an intent for the GDService
+  @Override
+  public Intent createServiceIntent() {
+    return new Intent(getApplicationContext(), GDService.class);
+  }
+
+  // Adds a message
+  @Override
+  public void addAppMessage(int severityNumber, String tag, String message) {
+    GDApplication.addMessage(severityNumber,tag,message);
+  }
+
+  // Returns the application
+  @Override
+  public Application getApplication() {
+    return this;
+  }
+
 }
