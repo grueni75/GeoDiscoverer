@@ -9,19 +9,87 @@
   tools:context="com.untouchableapps.android.geodiscoverer.ViewMap"
   tools:deviceIds="wear">
 
-  <TextView
-    android:id="@+id/text"
+  <FrameLayout
+    android:id="@+id/view_map"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:text="@string/hello_world"
-    app:layout_box="all"/>
+    android:background="@color/black">
 
-  <TextView
-    android:id="@+id/clock"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom|start"
-    android:textColor="@android:color/white"
-    app:layout_box="all"/>
+    <com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
+      android:id="@+id/view_map_map_surface_view"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent" />
+
+    <LinearLayout
+      android:id="@+id/view_map_progress_dialog"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="invisible"
+      android:orientation="vertical"
+      android:background="#df000000">
+
+      <TextView
+        android:id="@+id/view_map_progress_dialog_text"
+        android:gravity="center"
+        android:text="This is a message"
+        android:layout_height="0dp"
+        android:layout_weight="0.6"
+        android:layout_width="match_parent"
+        android:textColor="@color/white"
+        android:textSize="20sp"/>
+
+      <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.4">
+
+        <ProgressBar
+          android:id="@+id/view_map_progress_dialog_bar"
+          style="?android:attr/progressBarStyleHorizontal"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="top"
+          android:layout_marginLeft="20dp"
+          android:layout_marginRight="20sp"
+          android:indeterminate="false"
+          android:max="100"
+          android:progress="50"
+          android:progressDrawable="@drawable/progress_bar"
+          />
+
+      </FrameLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/view_map_message_dialog"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="invisible"
+      android:orientation="vertical"
+      android:background="#df000000">
+
+      <TextView
+        android:id="@+id/view_map_message_dialog_text"
+        android:gravity="center"
+        android:text="This is a message"
+        android:layout_height="0dp"
+        android:layout_weight="0.75"
+        android:layout_width="match_parent"
+        android:textColor="@color/white"
+        android:textSize="20sp"/>
+
+      <ImageButton
+        android:id="@+id/view_map_message_dialog_button"
+        android:background="@null"
+        android:layout_weight="0.25"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:src="@drawable/ok" />
+
+    </LinearLayout>
+
+  </FrameLayout>
 
 </android.support.wearable.view.BoxInsetLayout>

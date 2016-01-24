@@ -142,7 +142,7 @@ public class GDService extends Service {
         .setContentText(getText(R.string.notification_service_in_foreground_message))
         .setSmallIcon(R.drawable.notification_running)
         .setContentIntent(pendingIntent)
-        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
         .build();
   }
 
@@ -218,7 +218,7 @@ public class GDService extends Service {
                             intent.getIntExtra("tilesLeft",0),intent.getStringExtra("timeLeft")))
             .setSmallIcon(R.drawable.notification_downloading)
             .setContentIntent(pendingIntent)
-            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
             .setProgress(tilesTotal,tilesDone,false)
             .build();
       }

@@ -55,7 +55,7 @@ dependencies {
 
 task collectAssets(type: Exec) {
     workingDir 'src/main'
-    commandLine './collect_assets'
+    commandLine '../../../collect_assets', 'mobile'
 }
 preBuild.dependsOn collectAssets
 

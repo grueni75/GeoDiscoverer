@@ -90,6 +90,7 @@ import com.afollestad.materialdialogs.AlertDialogWrapper;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView;
 import com.untouchableapps.android.geodiscoverer.core.GDTools;
 
 public class ViewMap extends GDActivity {
@@ -1021,7 +1022,7 @@ public class ViewMap extends GDActivity {
     builder.setTitle(R.string.welcome_dialog_title);
     builder.setMessage(R.string.welcome_dialog_message);
     builder.setCancelable(true);
-    builder.setPositiveButton(R.string.button_label_ok,null);
+    builder.setPositiveButton(R.string.button_label_ok, null);
     builder.setNeutralButton(R.string.button_label_donate,
         new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int which) {
@@ -1066,7 +1067,7 @@ public class ViewMap extends GDActivity {
     builder.itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
       @Override
       public boolean onSelection(MaterialDialog dialog, Integer[] which,
-          CharSequence[] text) {
+                                 CharSequence[] text) {
         CopyTracksTask copyTracksTask = new CopyTracksTask();
         LinkedList<String> trackNames = new LinkedList<String>();
         for (int i = 0; i < which.length; i++) {
@@ -1130,7 +1131,52 @@ public class ViewMap extends GDActivity {
       restartCore(false);
     }
   }
-  
+
+  /** Finds the geographic position for the given address */
+  private class LocationFromAddressTask extends AsyncTask<Void, Void, Void> {
+
+    String subject;
+    String text;
+    boolean locationFound=false;
+
+    protected void onPreExecute() {
+    }
+
+    protected Void doInBackground(Void... params) {
+
+      // Go through all lines and treat each line as an address
+      // If the geocoder finds the address, add it as a POI
+      String[] addressLines = text.split("\n");
+      Geocoder geocoder = new Geocoder(ViewMap.this);
+      for (String addressLine : addressLines) {
+        try {
+          List<Address> addresses = geocoder.getFromLocationName(addressLine, 1);
+          if (addresses.size()>0) {
+            Address address = addresses.get(0);
+            locationFound=true;
+            coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate(" + address.getLongitude() + "," + address.getLatitude() + ")");
+          }
+        }
+        catch(IOException e) {
+          GDApplication.addMessage(GDApplication.WARNING_MSG, "GDApp", "Geocoding not successful: " + e.getMessage());
+        }
+      }
+      return null;
+    }
+
+    protected void onPostExecute(Void result) {
+      if (!locationFound) {
+        warningDialog(String.format(getString(R.string.location_not_found),text));
+      }
+      lastAddressSubject=subject;
+      lastAddressText=text;
+      SharedPreferences.Editor prefsEditor = prefs.edit();
+      prefsEditor.putString("lastAddressSubject", lastAddressSubject);
+      prefsEditor.putString("lastAddressText", lastAddressText);
+      prefsEditor.commit();
+    }
+  }
+
   /** Removes routes from the route directory */
   void removeRoutes() {
 
@@ -1174,41 +1220,6 @@ public class ViewMap extends GDActivity {
     });
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
     builder.show();
-  }
-
-  /** Prepares activity for functions only available on gingerbread */
-  @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-  void onCreateGingerbread() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-      downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-      IntentFilter filter = new IntentFilter();
-      filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-      downloadCompleteReceiver = new BroadcastReceiver() {
-        
-        @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-        @Override
-        public void onReceive(Context context, Intent intent) {
-          
-          // If one of the requested download finished, restart the core
-          for (Bundle download : downloads) {
-            DownloadManager.Query query = new DownloadManager.Query();
-            query.setFilterById(download.getLong("ID"));
-            Cursor cur = downloadManager.query(query);
-            int col = cur.getColumnIndex(DownloadManager.COLUMN_STATUS);
-            if (cur.moveToFirst()) {
-              if (cur.getInt(col)==DownloadManager.STATUS_SUCCESSFUL) {
-                restartCore(false);
-              } else {
-                errorDialog(getString(R.string.download_failed,download.getLong("Name")));
-              }
-            }
-            downloads.remove(download);
-            break;
-          }
-        }
-      };
-      registerReceiver(downloadCompleteReceiver, filter);
-    }
   }
 
   /** Downloads files extracted from intents */
@@ -1283,7 +1294,42 @@ public class ViewMap extends GDActivity {
     }
     
   }
-  
+
+  /** Prepares activity for functions only available on gingerbread */
+  @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+  void onCreateGingerbread() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+      downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+      IntentFilter filter = new IntentFilter();
+      filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+      downloadCompleteReceiver = new BroadcastReceiver() {
+
+        @TargetApi(Build.VERSION_CODES.GINGERBREAD)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+          // If one of the requested download finished, restart the core
+          for (Bundle download : downloads) {
+            DownloadManager.Query query = new DownloadManager.Query();
+            query.setFilterById(download.getLong("ID"));
+            Cursor cur = downloadManager.query(query);
+            int col = cur.getColumnIndex(DownloadManager.COLUMN_STATUS);
+            if (cur.moveToFirst()) {
+              if (cur.getInt(col)==DownloadManager.STATUS_SUCCESSFUL) {
+                restartCore(false);
+              } else {
+                errorDialog(getString(R.string.download_failed,download.getLong("Name")));
+              }
+            }
+            downloads.remove(download);
+            break;
+          }
+        }
+      };
+      registerReceiver(downloadCompleteReceiver, filter);
+    }
+  }
+
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -1660,52 +1706,7 @@ public class ViewMap extends GDActivity {
     updateViewConfiguration(newConfig);
           
   }
-    
-  /** Finds the geographic position for the given address */
-  private class LocationFromAddressTask extends AsyncTask<Void, Void, Void> {
 
-    String subject;
-    String text;
-    boolean locationFound=false;
-    
-    protected void onPreExecute() {
-    }
-
-    protected Void doInBackground(Void... params) {
-
-      // Go through all lines and treat each line as an address
-      // If the geocoder finds the address, add it as a POI
-      String[] addressLines = text.split("\n");
-      Geocoder geocoder = new Geocoder(ViewMap.this);
-      for (String addressLine : addressLines) { 
-        try {
-          List<Address> addresses = geocoder.getFromLocationName(addressLine, 1);
-          if (addresses.size()>0) {
-            Address address = addresses.get(0);
-            locationFound=true;
-            coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate(" + address.getLongitude() + "," + address.getLatitude() + ")");
-          }
-        }
-        catch(IOException e) {
-          GDApplication.addMessage(GDApplication.WARNING_MSG, "GDApp", "Geocoding not successful: " + e.getMessage());        
-        }        
-      }
-      return null;
-    }
-
-    protected void onPostExecute(Void result) {
-      if (!locationFound) {
-        warningDialog(String.format(getString(R.string.location_not_found),text));
-      } 
-      lastAddressSubject=subject;
-      lastAddressText=text;
-      SharedPreferences.Editor prefsEditor = prefs.edit();
-      prefsEditor.putString("lastAddressSubject", lastAddressSubject);
-      prefsEditor.putString("lastAddressText", lastAddressText);
-      prefsEditor.commit();
-    }
-  }
-  
   /** Called when a called activity finishes */
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
       

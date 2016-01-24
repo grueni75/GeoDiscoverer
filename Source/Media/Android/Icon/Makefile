@@ -9,6 +9,8 @@ ANDROID_GDC = $(ROOT)/Source/Platform/Target/Android/mobile/src/main/res/
 ANDROID_GDC_QUOTED = $(subst /,\/,$(ANDROID_GDC))
 ANDROID_GDB = $(ROOT)/Source/Cockpit/GeoDashboard/app/src/main/res/
 ANDROID_GDB_QUOTED = $(subst /,\/,$(ANDROID_GDB))
+ANDROID_GDCW = $(ROOT)/Source/Platform/Target/Android/wear/src/main/res/
+ANDROID_GDCW_QUOTED = $(subst /,\/,$(ANDROID_GDCW))
 
 SVGS = exit.svg
 SVGS = $(shell find SVG -name '*.svg' -printf '%P\n')
@@ -42,10 +44,12 @@ $(foreach dpi,$(DPIS),$(eval $(call SVG2PNG,$(dpi),%.png,%.svg)))
 $(ANDROID_GDC): $(PNGS)
 	@echo Installing PNGs into android target
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_\(.*\)\)/cp \1\/* $(ANDROID_GDC_QUOTED)\2\//' | sh
-	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/cp $(ANDROID_GDC_QUOTED)\/drawable-\2\/ic_launcher.png $(ANDROID_GDC_QUOTED)\/mipmap-\2\/ic_launcher.png/' | sh
+	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/ic_launcher.png $(ANDROID_GDC_QUOTED)\/mipmap-\2\/ic_launcher.png/' | sh
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/car.png $(ANDROID_GDB_QUOTED)\/drawable-\2\//' | sh
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/ship.png $(ANDROID_GDB_QUOTED)\/drawable-\2\//' | sh
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/dog.png $(ANDROID_GDB_QUOTED)\/drawable-\2\//' | sh
+	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/ok.png $(ANDROID_GDCW_QUOTED)\/drawable-\2\//' | sh
+	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/cp $(ANDROID_GDC_QUOTED)\/mipmap-\2\/ic_launcher.png $(ANDROID_GDCW_QUOTED)\/mipmap-\2\/ic_launcher.png/' | sh
 	@touch $(ANDROID_GDC)
 
 # Cleaning the project

@@ -596,12 +596,14 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       if ((System.currentTimeMillis()/1000>lastDownloadStatusUpdate)||
           (tilesLeft==0)) {
         Intent intent = appIf.createServiceIntent();
-        intent.setAction("mapDownloadStatusUpdated");
-        intent.putExtra("tilesDone", Integer.parseInt(args[0]));
-        intent.putExtra("tilesLeft",tilesLeft);
-        intent.putExtra("timeLeft",args[2]);
-        lastDownloadStatusUpdate=System.currentTimeMillis()/1000;
-        appIf.getApplication().startService(intent);
+        if (intent!=null) {
+          intent.setAction("mapDownloadStatusUpdated");
+          intent.putExtra("tilesDone", Integer.parseInt(args[0]));
+          intent.putExtra("tilesLeft", tilesLeft);
+          intent.putExtra("timeLeft", args[2]);
+          lastDownloadStatusUpdate = System.currentTimeMillis() / 1000;
+          appIf.getApplication().startService(intent);
+        }
       }
       cmdExecuted=true;
     }

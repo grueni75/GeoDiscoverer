@@ -10,7 +10,7 @@
 //
 //============================================================================
 
-package com.untouchableapps.android.geodiscoverer;
+package com.untouchableapps.android.geodiscoverer.core;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -152,7 +152,7 @@ public class GDMapSurfaceView extends GLSurfaceView {
       }
     }
     catch (Throwable e) {
-      GDApplication.addMessage(GDApplication.WARNING_MSG, "GDApp", "can not call multitouch related methods");
+      coreObject.appIf.addAppMessage(coreObject.appIf.WARNING_MSG, "GDApp", "can not call multitouch related methods");
       System.exit(1);
     }   
   }

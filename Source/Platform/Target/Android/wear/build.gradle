@@ -24,4 +24,35 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.google.android.support:wearable:1.3.0'
     compile 'com.google.android.gms:play-services-wearable:8.4.0'
+    releaseCompile project(path: ':core', configuration: 'release')
+    debugCompile project(path: ':core', configuration: 'debug')
+}
+
+task collectAssets(type: Exec) {
+    workingDir 'src/main'
+    commandLine '../../../collect_assets', 'wear'
+}
+preBuild.dependsOn collectAssets
+
+android.buildTypes.all{ buildType ->
+    def setNativeCodeConfigTask = task("set${buildType.name.capitalize()}NativeCodeConfig", type: Exec) {
+        commandLine 'echo', "${buildType.name}"
+        doFirst {
+            standardOutput = new FileOutputStream("core/src/main/mode.txt");
+        }
+    }
+    def resetNativeCodeConfigTask = task("reset${buildType.name.capitalize()}NativeCodeConfig", type: Exec) {
+        commandLine 'echo', "all"
+        doFirst {
+            standardOutput = new FileOutputStream("core/src/main/mode.txt");
+        }
+    }
+    tasks.whenTaskAdded { task ->
+        if (task.name == "check${buildType.name.capitalize()}Manifest") {
+            task.dependsOn setNativeCodeConfigTask
+        }
+        if (task.name == "compile${buildType.name.capitalize()}Ndk") {
+            task.dependsOn resetNativeCodeConfigTask
+        }
+    }
 }

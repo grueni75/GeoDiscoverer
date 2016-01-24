@@ -13,121 +13,420 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
+import android.app.ActivityManager;
+import android.app.DownloadManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.opengl.EGLConfig;
-import android.opengl.GLSurfaceView;
+import android.content.pm.ConfigurationInfo;
+import android.hardware.SensorManager;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.support.wearable.activity.WearableActivity;
-import android.support.wearable.view.BoxInsetLayout;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
+import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView;
 
-import javax.microedition.khronos.opengles.GL10;
+import java.lang.ref.WeakReference;
+import java.util.Vector;
 
 public class ViewMap extends WearableActivity {
 
-  private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
-      new SimpleDateFormat("HH:mm", Locale.US);
+  /** Reference to the core object */
+  GDCore coreObject = null;
 
-  private BoxInsetLayout mContainerView;
-  private TextView mTextView;
-  private TextView mClockView;
+  // GUI components
+  FrameLayout rootFrameLayout;
+  GDMapSurfaceView mapSurfaceView;
+  LinearLayout messageDialogLayout;
+  TextView messageDialogTextView;
+  ImageButton messageDialogImageButton;
+  LinearLayout progressDialogLayout;
+  TextView progressDialogTextView;
+  ProgressBar progressDialogBar;
 
-  /** Does the rendering with the OpenGL API */
-  public class GDMapSurfaceView extends GLSurfaceView {
+  // Managers
+  PowerManager powerManager;
 
-    /** Constructor */
-    @SuppressLint("NewApi")
-    public GDMapSurfaceView(Context context, AttributeSet attrs) {
-      super(context, attrs);
+  // Wake lock
+  PowerManager.WakeLock wakeLock = null;
 
-      // Set the framebuffer
-      setEGLConfigChooser(8,8,8,8,16,0);
+  // Types of dialogs
+  static final int FATAL_DIALOG = 0;
+  static final int ERROR_DIALOG = 2;
+  static final int WARNING_DIALOG = 1;
+  static final int INFO_DIALOG = 3;
 
-      // Use OpenGL ES 2.0
-      setEGLContextClientVersion(2);
+  /** Time the last toast was shown */
+  long lastToastTimestamp = 0;
 
-      // Preserve the context if possible
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-        setPreserveEGLContextOnPause(true);
+  /** Minimum distance between two toasts in milliseconds */
+  int toastDistance = 5000;
+
+  /** Shows a dialog  */
+  public synchronized void dialog(int kind, String message) {
+    if (kind==WARNING_DIALOG) {
+      long diff= SystemClock.uptimeMillis()-lastToastTimestamp;
+      if (diff<=toastDistance) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping dialog request <" + message + "> because toast is still visible");
+        return;
+      }
+      GDApplication.showMessageBar(this, message, GDApplication.MESSAGE_BAR_DURATION_LONG);
+      lastToastTimestamp=SystemClock.uptimeMillis();
+    } else if (kind==INFO_DIALOG) {
+      GDApplication.showMessageBar(this, message, GDApplication.MESSAGE_BAR_DURATION_LONG);
+    } else {
+      if (messageDialogLayout.getVisibility() == messageDialogLayout.INVISIBLE) {
+        messageDialogTextView.setText(message);
+        if (kind == FATAL_DIALOG) {
+          messageDialogImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              messageDialogLayout.setVisibility(messageDialogLayout.INVISIBLE);
+              rootFrameLayout.requestLayout();
+              finish();
+            }
+          });
+        } else {
+          messageDialogImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              messageDialogLayout.setVisibility(messageDialogLayout.INVISIBLE);
+              rootFrameLayout.requestLayout();
+            }
+          });
+        }
+        messageDialogLayout.setVisibility(messageDialogLayout.VISIBLE);
+        rootFrameLayout.requestLayout();
+      } else {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping dialog request <" + message + "> because alert dialog is already visible");
       }
     }
   }
 
-  GDMapSurfaceView mGLView;
+  /** Shows a fatal dialog and quits the applications */
+  public void fatalDialog(String message) {
+    dialog(FATAL_DIALOG,message);
+  }
 
-  class ClearRenderer implements GLSurfaceView.Renderer {
+  /** Shows an error dialog without quitting the application */
+  public void errorDialog(String message) {
+    dialog(ERROR_DIALOG,message);
+  }
 
-    @Override
-    public void onSurfaceCreated(GL10 gl, javax.microedition.khronos.egl.EGLConfig config) {
+  /** Shows a warning dialog without quitting the application */
+  public void warningDialog(String message) {
+    dialog(WARNING_DIALOG,message);
+  }
 
+  /** Shows an info dialog without quitting the application */
+  public void infoDialog(String message) {
+    dialog(INFO_DIALOG,message);
+  }
+
+  // Variables for monitoring the state of the external storage
+  boolean externalStorageAvailable = false;
+  boolean externalStorageWritable = false;
+
+  /** Called when the external storage state changes */
+  synchronized void handleExternalStorageState() {
+
+    // If the external storage is not available, inform the user that this will not work
+    if ((!externalStorageAvailable)||(!externalStorageWritable)) {
+      GDApplication.addMessage(GDAppInterface.ERROR_MSG, "GDApp", String.format(getString(R.string.no_external_storage)));
+      if (coreObject.messageHandler!=null) {
+        Message m=Message.obtain(coreObject.messageHandler);
+        m.what = GDCore.HOME_DIR_NOT_AVAILABLE;
+        coreObject.messageHandler.sendMessage(m);
+      }
     }
 
-    @Override
-    public void onSurfaceChanged(GL10 gl, int width, int height) {
-      gl.glViewport(0, 0, width, height);
+    // If the external storage is available, start the native core
+    if ((externalStorageAvailable)&&(externalStorageWritable)) {
+      Message m=Message.obtain(coreObject.messageHandler);
+      m.what = GDCore.HOME_DIR_AVAILABLE;
+      coreObject.messageHandler.sendMessage(m);
     }
 
-    @Override
-    public void onDrawFrame(GL10 gl) {
-      gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+  }
+
+  /** Sets the current state of the external media */
+  void updateExternalStorageState() {
+    String state = Environment.getExternalStorageState();
+    if (Environment.MEDIA_MOUNTED.equals(state)) {
+      externalStorageAvailable = externalStorageWritable = true;
+    } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+      externalStorageAvailable = true;
+      externalStorageWritable = false;
+    } else {
+      externalStorageAvailable = externalStorageWritable = false;
+    }
+    handleExternalStorageState();
+  }
+
+  /** Sets the screen time out */
+  @SuppressLint("Wakelock")
+  void updateWakeLock() {
+    if (mapSurfaceView!=null) {
+      String state=coreObject.executeCoreCommand("getWakeLock()");
+      if (state.equals("true")) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","wake lock enabled");
+        if (!wakeLock.isHeld())
+          wakeLock.acquire();
+      } else {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","wake lock disabled");
+        if (wakeLock.isHeld())
+          wakeLock.release();
+      }
     }
   }
+
+  // Communication with the native core
+  public static final int EXECUTE_COMMAND = 0;
+  static protected class CoreMessageHandler extends Handler {
+
+    protected final WeakReference<ViewMap> weakViewMap;
+
+    CoreMessageHandler(ViewMap viewMap) {
+      this.weakViewMap = new WeakReference<ViewMap>(viewMap);
+    }
+
+    /** Called when the core has a message */
+    @SuppressLint("NewApi")
+    @Override
+    public void handleMessage(Message msg) {
+
+      // Abort if the object is not available anymore
+      ViewMap viewMap = weakViewMap.get();
+      if (viewMap==null)
+        return;
+
+      // Handle the message
+      Bundle b=msg.getData();
+      switch(msg.what) {
+        case EXECUTE_COMMAND:
+
+          // Extract the command
+          String command=b.getString("command");
+          int args_start=command.indexOf("(");
+          int args_end=command.lastIndexOf(")");
+          String commandFunction=command.substring(0, args_start);
+          String t=command.substring(args_start+1,args_end);
+          Vector<String> commandArgs = new Vector<String>();
+          boolean stringStarted=false;
+          int startPos=0;
+          for(int i=0;i<t.length();i++) {
+            if (t.substring(i,i+1).equals("\"")) {
+              if (stringStarted)
+                stringStarted=false;
+              else
+                stringStarted=true;
+            }
+            if (!stringStarted) {
+              if ((t.substring(i,i+1).equals(","))||(i==t.length()-1)) {
+                String arg;
+                if (i==t.length()-1)
+                  arg=t.substring(startPos,i+1);
+                else
+                  arg=t.substring(startPos,i);
+                if (arg.startsWith("\"")) {
+                  arg=arg.substring(1);
+                }
+                if (arg.endsWith("\"")) {
+                  arg=arg.substring(0,arg.length()-1);
+                }
+                commandArgs.add(arg);
+                startPos=i+1;
+              }
+            }
+          }
+
+          // Execute command
+          boolean commandExecuted=false;
+          if (commandFunction.equals("fatalDialog")) {
+            viewMap.fatalDialog(commandArgs.get(0));
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("errorDialog")) {
+            viewMap.errorDialog(commandArgs.get(0));
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("warningDialog")) {
+            viewMap.warningDialog(commandArgs.get(0));
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("infoDialog")) {
+            viewMap.infoDialog(commandArgs.get(0));
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("createProgressDialog")) {
+            if (viewMap.progressDialogLayout.getVisibility() == viewMap.progressDialogLayout.INVISIBLE) {
+              viewMap.progressDialogTextView.setText(commandArgs.get(0));
+              int max=Integer.parseInt(commandArgs.get(1));
+              viewMap.progressDialogBar.setIndeterminate(max==0?true:false);
+              viewMap.progressDialogBar.setMax(max);
+              viewMap.progressDialogBar.setProgress(0);
+              viewMap.progressDialogLayout.setVisibility(viewMap.progressDialogLayout.VISIBLE);
+              viewMap.rootFrameLayout.requestLayout();
+            } else {
+              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping progress dialog request <" + commandArgs.get(0) + "> because progress dialog is already visible");
+            }
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("updateProgressDialog")) {
+            viewMap.progressDialogTextView.setText(commandArgs.get(0));
+            int progress=Integer.parseInt(commandArgs.get(1));
+            viewMap.progressDialogBar.setProgress(progress);
+            viewMap.rootFrameLayout.requestLayout();
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("closeProgressDialog")) {
+            viewMap.progressDialogLayout.setVisibility(viewMap.progressDialogLayout.INVISIBLE);
+            viewMap.rootFrameLayout.requestLayout();
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("coreInitialized")) {
+            // Nothing to do as of now
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("initComplete")) {
+            // Nothing to do as of now
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("setSplashVisibility")) {
+            // Nothing to do as of now
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("updateWakeLock")) {
+            viewMap.updateWakeLock();
+            commandExecuted=true;
+          }
+          if (!commandExecuted) {
+            GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
+          }
+          break;
+      }
+    }
+  }
+  CoreMessageHandler coreMessageHandler = new CoreMessageHandler(this);
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    mGLView = new GDMapSurfaceView(this,null);
-    mGLView.setRenderer(new ClearRenderer());
-    setContentView(mGLView);
+    // Get important handles
+    powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
 
+    // Get a wake lock
+    wakeLock=powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActiveCPU");
+    if (wakeLock==null) {
+      fatalDialog("Can not obtain wake lock!");
+    }
 
-    /*setContentView(R.layout.view_map);
+    // Set the layout
+    setContentView(R.layout.view_map);
     setAmbientEnabled();
+    rootFrameLayout = (FrameLayout) findViewById(R.id.view_map);
+    mapSurfaceView = (GDMapSurfaceView) findViewById(R.id.view_map_map_surface_view);
+    messageDialogLayout = (LinearLayout) findViewById(R.id.view_map_message_dialog);
+    messageDialogTextView = (TextView) findViewById(R.id.view_map_message_dialog_text);
+    messageDialogImageButton = (ImageButton) findViewById(R.id.view_map_message_dialog_button);
+    progressDialogLayout = (LinearLayout) findViewById(R.id.view_map_progress_dialog);
+    progressDialogTextView = (TextView) findViewById(R.id.view_map_progress_dialog_text);
+    progressDialogBar = (ProgressBar) findViewById(R.id.view_map_progress_dialog_bar);
 
-    mContainerView = (BoxInsetLayout) findViewById(R.id.container);
-    mTextView = (TextView) findViewById(R.id.text);
-    mClockView = (TextView) findViewById(R.id.clock);*/
+    // Check for OpenGL ES 2.00
+    final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+    final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
+    final boolean supportsEs2 = (configurationInfo.reqGlEsVersion >= 0x20000) || (Build.FINGERPRINT.startsWith("generic"));
+    if (!supportsEs2)
+    {
+      fatalDialog(getString(R.string.opengles20_required));
+      return;
+    }
+
+    // Get the core object
+    coreObject=GDApplication.coreObject;
+    coreObject.setDisplayMetrics(getResources().getDisplayMetrics());
+    ((GDApplication)getApplication()).setActivity(this);
+
+    // Check for external storage
+    updateExternalStorageState();
+
+    // Prepare the window contents
+    mapSurfaceView.setCoreObject(coreObject);
+  }
+
+  /** Called when the app suspends */
+  @Override
+  public void onPause() {
+    super.onPause();
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onPause called by " + Thread.currentThread().getName());
+    if (mapSurfaceView!=null)
+      mapSurfaceView.onPause();
+    if (coreObject!=null)
+      coreObject.executeCoreCommand("maintenance()");
+  }
+
+  /** Called when the app resumes */
+  @Override
+  public void onResume() {
+    super.onResume();
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onResume called by " + Thread.currentThread().getName());
+
+    // Bug fix: Somehow the emulator calls onResume before onCreate
+    // But the code relies on the fact that onCreate is called before
+    // Do nothing if onCreate has not yet initialized the objects
+    if (coreObject==null)
+      return;
+
+    // Resume the map surface view
+    mapSurfaceView.onResume();
+
+    // Resume all components only if a exit or restart is not requested
+    updateWakeLock();
+    if (coreObject.coreStopped) {
+      Message m=Message.obtain(coreObject.messageHandler);
+      m.what = GDCore.START_CORE;
+      coreObject.messageHandler.sendMessage(m);
+    }
+  }
+
+  /** Called when the activity is destroyed */
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onDestroy called by " + Thread.currentThread().getName());
+    ((GDApplication)getApplication()).setActivity(null);
+    if ((wakeLock!=null)&&(wakeLock.isHeld()))
+      wakeLock.release();
   }
 
   @Override
   public void onEnterAmbient(Bundle ambientDetails) {
     super.onEnterAmbient(ambientDetails);
-    updateDisplay();
   }
 
   @Override
   public void onUpdateAmbient() {
     super.onUpdateAmbient();
-    updateDisplay();
   }
 
   @Override
   public void onExitAmbient() {
-    updateDisplay();
     super.onExitAmbient();
   }
 
-  private void updateDisplay() {
-    /*if (isAmbient()) {
-      mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
-      mTextView.setTextColor(getResources().getColor(android.R.color.white));
-      mClockView.setVisibility(View.VISIBLE);
-
-      mClockView.setText(AMBIENT_DATE_FORMAT.format(new Date()));
-    } else {
-      mContainerView.setBackground(null);
-      mTextView.setTextColor(getResources().getColor(android.R.color.black));
-      mClockView.setVisibility(View.GONE);
-    }*/
-  }
 }

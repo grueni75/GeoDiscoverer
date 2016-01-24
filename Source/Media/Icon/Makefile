@@ -6,7 +6,8 @@
 
 ROOT = $(shell cd ../../.. && pwd)
 LINUX = $(ROOT)/Source/Platform/Target/Linux/Icon/
-ANDROID = $(ROOT)/Source/Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Icon/
+ANDROID_MOBILE = $(ROOT)/Source/Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Icon/
+ANDROID_WEAR = $(ROOT)/Source/Platform/Target/Android/wear/src/main/assets/GeoDiscoverer/Icon/
 
 SVGS = $(shell find -name '*.svg' -printf '%P\n')
 DPIS = 120 160 240 320 480 640
@@ -33,7 +34,7 @@ all:    linux android
 .PHONY: all
 linux: $(LINUX)
 .PHONY: linux
-android: $(ANDROID)
+android: $(ANDROID_MOBILE) $(ANDROID_WEAR)
 .PHONY: android
 
 # Implicit rules:
@@ -55,17 +56,24 @@ $(LINUX): $(PNGS)
 	@cp -r 320dpi $(LINUX)/
 
 # Install icons into android target
-$(ANDROID): $(PNGS)
-	@echo Installing PNGs into android target
-	@mkdir -p $(ANDROID)
-	@rm -rf $(ANDROID)/*dpi
-	@cp -r *dpi $(ANDROID)/
+$(ANDROID_MOBILE): $(PNGS)
+	@echo Installing PNGs into android mobile target
+	@mkdir -p $(ANDROID_MOBILE)
+	@rm -rf $(ANDROID_MOBILE)/*dpi
+	@cp -r *dpi $(ANDROID_MOBILE)/
+
+# Install icons into android target
+$(ANDROID_WEAR): $(PNGS)
+	@echo Installing PNGs into android wear target
+	@mkdir -p $(ANDROID_WEAR)
+	@rm -rf $(ANDROID_WEAR)/*dpi
+	@cp -r *dpi $(ANDROID_WEAR)/
 
 # Cleaning the project
 clean:
 	@rm -rf $(PNGS)
 	@rm -rf $(LINUX)/240dpi
-	@rm -rf $(ANDROID)/*dpi
+	@rm -rf $(ANDROID_MOBILE)/*dpi
 
 # Debugging the makefile
 showvars: 

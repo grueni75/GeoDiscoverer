@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
         
-		    <com.untouchableapps.android.geodiscoverer.GDMapSurfaceView
+		    <com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
 		        android:id="@+id/view_map_map_surface_view"
 		        android:layout_width="match_parent"
 		        android:layout_height="match_parent" />
