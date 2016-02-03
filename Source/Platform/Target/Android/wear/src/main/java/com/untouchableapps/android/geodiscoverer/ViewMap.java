@@ -313,6 +313,11 @@ public class ViewMap extends WearableActivity {
             viewMap.updateWakeLock();
             commandExecuted=true;
           }
+          if (commandFunction.equals("createGDMapSurfaceView")) {
+            viewMap.mapSurfaceView=new GDMapSurfaceView(viewMap.rootFrameLayout.getContext(),null);
+            viewMap.mapSurfaceView.setCoreObject(viewMap.coreObject);
+            viewMap.rootFrameLayout.addView(viewMap.mapSurfaceView,0);
+          }
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
           }
@@ -339,7 +344,8 @@ public class ViewMap extends WearableActivity {
     setContentView(R.layout.view_map);
     setAmbientEnabled();
     rootFrameLayout = (FrameLayout) findViewById(R.id.view_map);
-    mapSurfaceView = (GDMapSurfaceView) findViewById(R.id.view_map_map_surface_view);
+    //see if init of mapSurfaceView later ensures that watch face goes into standby
+    //mapSurfaceView = (GDMapSurfaceView) findViewById(R.id.view_map_map_surface_view);
     messageDialogLayout = (LinearLayout) findViewById(R.id.view_map_message_dialog);
     messageDialogTextView = (TextView) findViewById(R.id.view_map_message_dialog_text);
     messageDialogImageButton = (ImageButton) findViewById(R.id.view_map_message_dialog_button);
@@ -365,8 +371,21 @@ public class ViewMap extends WearableActivity {
     // Check for external storage
     updateExternalStorageState();
 
+    // Add the map surface view delayed to ensure that watch face is not doing anything
+    Thread delayedGDMapSurfaceViewCreationThread = new Thread() {
+      public void run() {
+        try {
+          Thread.sleep(3000);
+        }
+        catch (InterruptedException e) {};
+        ((GDApplication)getApplication()).executeAppCommand("createGDMapSurfaceView()");
+      }
+    };
+    delayedGDMapSurfaceViewCreationThread.start();
+
     // Prepare the window contents
-    mapSurfaceView.setCoreObject(coreObject);
+    if (mapSurfaceView!=null)
+      mapSurfaceView.setCoreObject(coreObject);
   }
 
   /** Called when the app suspends */
@@ -393,7 +412,8 @@ public class ViewMap extends WearableActivity {
       return;
 
     // Resume the map surface view
-    mapSurfaceView.onResume();
+    if (mapSurfaceView!=null)
+      mapSurfaceView.onResume();
 
     // Resume all components only if a exit or restart is not requested
     updateWakeLock();
@@ -417,16 +437,36 @@ public class ViewMap extends WearableActivity {
   @Override
   public void onEnterAmbient(Bundle ambientDetails) {
     super.onEnterAmbient(ambientDetails);
+    if (mapSurfaceView!=null) {
+      mapSurfaceView.setRenderMode(GDMapSurfaceView.RENDERMODE_WHEN_DIRTY);
+      mapSurfaceView.onPause();
+      rootFrameLayout.removeView(mapSurfaceView);
+      mapSurfaceView.destroyDrawingCache();
+      mapSurfaceView=null;
+      System.gc();
+    }
+    //mapSurfaceView.onPause();
+    /*if (coreObject!=null)
+      coreObject.setDrawFrameSuspendTime(10);*/
   }
 
   @Override
   public void onUpdateAmbient() {
     super.onUpdateAmbient();
+    if (wakeLock.isHeld())
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","wake lock is held");
   }
 
   @Override
   public void onExitAmbient() {
     super.onExitAmbient();
+    if (mapSurfaceView!=null) {
+      mapSurfaceView.setRenderMode(GDMapSurfaceView.RENDERMODE_CONTINUOUSLY);
+      mapSurfaceView.onResume();
+    }
+    /*if (coreObject!=null)
+      coreObject.resetDrawFrameSuspendTime();*/
+    //mapSurfaceView.onResume();
   }
 
 }

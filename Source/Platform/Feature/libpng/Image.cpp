@@ -244,7 +244,7 @@ ImagePixel *Image::loadPNGIcon(Screen *screen, std::string filename, Int &imageW
             t=t.substr(0,dirpath.find_first_of("dpi"));
             Int dpi=atoi(t.c_str());
             Int dpiDistance=abs(screen->getDPI()-dpi);
-            if (dpiDistance<bestDPIDistance) {
+            if ((dpiDistance<bestDPIDistance)||((dpiDistance==bestDPIDistance)&&(dpi>bestDPI))) {
               bestIconPath=iconPath;
               bestDPIDistance=dpiDistance;
               bestDPI=dpi;

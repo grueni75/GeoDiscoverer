@@ -18,7 +18,7 @@
 #include <string.h>
 
 // Prototypes
-void GDApp_executeAppCommand(std::string command);
+std::string GDApp_executeAppCommand(std::string command);
 void GDApp_addMessage(int severity, std::string tag, std::string message);
 
 #ifdef __cplusplus
@@ -192,7 +192,7 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_core_GDCor
   }
 
   // Cache all required callback methods
-  executeAppCommandMethodID=GDApp_findJavaMethod(env,"executeAppCommand","(Ljava/lang/String;)V");
+  executeAppCommandMethodID=GDApp_findJavaMethod(env,"executeAppCommand","(Ljava/lang/String;)Ljava/lang/String;");
   if (!executeAppCommandMethodID) {
     __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not find executeAppCommand method!");
     Java_com_untouchableapps_android_geodiscoverer_core_GDCore_deinitJNI(env,thiz);
@@ -524,7 +524,7 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_core_GDCor
 #endif
 
 // Executes a command on the java side
-void GDApp_executeAppCommand(std::string command)
+std::string GDApp_executeAppCommand(std::string command)
 {
   JNIEnv *env;
   bool isAttached = false;
@@ -541,11 +541,17 @@ void GDApp_executeAppCommand(std::string command)
   }
 
   // Call the method
-  env->CallVoidMethod(coreObject, executeAppCommandMethodID, commandJavaString);
+  jstring returnJavaString = (jstring) env->CallObjectMethod(coreObject, executeAppCommandMethodID, commandJavaString);
+  const char *returnCString = env->GetStringUTFChars(returnJavaString, NULL);
+  std::string returnStdString(returnCString);
+  env->ReleaseStringUTFChars(returnJavaString, returnCString);
 
   // Release the env
   env->DeleteLocalRef(commandJavaString);
   GDApp_releaseJNIEnv(env,isAttached);
+
+  // Return value
+  return returnStdString;
 }
 
 // Sets the thread priority

@@ -1284,6 +1284,14 @@ void NavigationEngine::computeNavigationInfo() {
         navigationInfo.setTargetDuration(navigationInfo.getTargetDistance() / navigationInfo.getLocationSpeed());
     }
 
+    // Update remaining fields
+    lockRecordedTrack(__FILE__, __LINE__);
+    if (recordedTrack)
+      navigationInfo.setTrackLength(recordedTrack->getLength());
+    unlockRecordedTrack();
+    if (locationPos.getHasAltitude())
+      navigationInfo.setAltitude(locationPos.getAltitude());
+
     // Set the new navigation info
     lockNavigationInfo(__FILE__, __LINE__);
     this->navigationInfo=navigationInfo;

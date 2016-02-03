@@ -14,7 +14,7 @@
 #include <android/log.h>
 
 // Executes an command on the java side
-void GDApp_executeAppCommand(std::string command);
+std::string GDApp_executeAppCommand(std::string command);
 
 // Adds a message on the java side
 void GDApp_addMessage(int severity, std::string tag, std::string message);

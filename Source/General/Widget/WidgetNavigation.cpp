@@ -32,6 +32,10 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   durationLabelFontString=NULL;
   distanceValueFontString=NULL;
   durationValueFontString=NULL;
+  trackLengthLabelFontString=NULL;
+  trackLengthValueFontString=NULL;
+  altitudeLabelFontString=NULL;
+  altitudeValueFontString=NULL;
   locationBearingActual=0;
   locationBearingActual=0;
   directionChangeDuration=0;
@@ -39,6 +43,8 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   fontEngine->updateString(&distanceLabelFontString,"Distance");
   fontEngine->updateString(&durationLabelFontString,"Duration");
+  fontEngine->updateString(&altitudeLabelFontString,"Altitude");
+  fontEngine->updateString(&trackLengthLabelFontString,"Track Len");
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++)
@@ -64,10 +70,14 @@ WidgetNavigation::~WidgetNavigation() {
   fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   if (distanceLabelFontString) fontEngine->destroyString(distanceLabelFontString);
   if (durationLabelFontString) fontEngine->destroyString(durationLabelFontString);
+  if (altitudeLabelFontString) fontEngine->destroyString(altitudeLabelFontString);
+  if (trackLengthLabelFontString) fontEngine->destroyString(trackLengthLabelFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
   if (distanceValueFontString) fontEngine->destroyString(distanceValueFontString);
   if (durationValueFontString) fontEngine->destroyString(durationValueFontString);
+  if (altitudeValueFontString) fontEngine->destroyString(altitudeValueFontString);
+  if (trackLengthValueFontString) fontEngine->destroyString(trackLengthValueFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++) {
@@ -190,7 +200,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         fontEngine->updateString(&distanceValueFontString,infos.str());
         activateWidget=true;
       } else {
-        fontEngine->updateString(&distanceValueFontString,"infinite");
+        fontEngine->updateString(&distanceValueFontString,"unknown");
       }
       if (navigationInfo->getOffRoute()) {
         fontEngine->updateString(&durationValueFontString,"off route!");
@@ -201,7 +211,27 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         fontEngine->updateString(&durationValueFontString,infos.str());
         activateWidget=true;
       } else {
-        fontEngine->updateString(&durationValueFontString,"move!");
+        fontEngine->updateString(&durationValueFontString,"unknown");
+      }
+      if (textColumnCount==2) {
+        if (navigationInfo->getAltitude()!=NavigationInfo::getUnknownDistance()) {
+          unitConverter->formatMeters(navigationInfo->getAltitude(),value,unit);
+          infos.str("");
+          infos << value << " " << unit;
+          fontEngine->updateString(&altitudeValueFontString,infos.str());
+          activateWidget=true;
+        } else {
+          fontEngine->updateString(&altitudeValueFontString,"unknown");
+        }
+        if (navigationInfo->getTrackLength()!=NavigationInfo::getUnknownDistance()) {
+          unitConverter->formatMeters(navigationInfo->getTrackLength(),value,unit);
+          infos.str("");
+          infos << value << " " << unit;
+          fontEngine->updateString(&trackLengthValueFontString,infos.str());
+          activateWidget=true;
+        } else {
+          fontEngine->updateString(&trackLengthValueFontString,"unknown");
+        }
       }
     }
     fontEngine->unlockFont();
@@ -211,23 +241,66 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     separatorIcon.setX(x);
     separatorIcon.setY(y);
     if (distanceLabelFontString) {
-      distanceLabelFontString->setX(x+(iconWidth-distanceLabelFontString->getIconWidth())/2);
-      distanceLabelFontString->setY(y+targetDistanceLabelOffsetY);
+      distanceLabelFontString->setX((textColumnCount==1)?
+              x+(iconWidth-distanceLabelFontString->getIconWidth())/2 :
+              x+iconWidth/2-textColumnOffsetX-distanceLabelFontString->getIconWidth()
+      );
+      distanceLabelFontString->setY(y+textRowFirstOffsetY);
     }
     if (distanceValueFontString) {
-      distanceValueFontString->setX(x+(iconWidth-distanceValueFontString->getIconWidth())/2);
+      if (showTurn)
+        distanceValueFontString->setX(x+(iconWidth-distanceValueFontString->getIconWidth())/2);
+      else
+        distanceValueFontString->setX((textColumnCount==1)?
+            x+(iconWidth-distanceValueFontString->getIconWidth())/2 :
+            x+iconWidth/2-textColumnOffsetX-distanceValueFontString->getIconWidth()
+        );
       if (showTurn)
         distanceValueFontString->setY(y+turnDistanceValueOffsetY);
       else
-        distanceValueFontString->setY(y+targetDistanceValueOffsetY);
+        distanceValueFontString->setY(y+textRowSecondOffsetY);
     }
     if (durationLabelFontString) {
-      durationLabelFontString->setX(x+(iconWidth-durationLabelFontString->getIconWidth())/2);
-      durationLabelFontString->setY(y+durationLabelOffsetY);
+      durationLabelFontString->setX((textColumnCount==1)?
+          x+(iconWidth-durationLabelFontString->getIconWidth())/2 :
+          x+iconWidth/2-textColumnOffsetX-durationLabelFontString->getIconWidth()
+      );
+      durationLabelFontString->setY(y+textRowFourthOffsetY);
     }
     if (durationValueFontString) {
-      durationValueFontString->setX(x+(iconWidth-durationValueFontString->getIconWidth())/2);
-      durationValueFontString->setY(y+durationValueOffsetY);
+      durationValueFontString->setX((textColumnCount==1)?
+          x+(iconWidth-durationValueFontString->getIconWidth())/2 :
+          x+iconWidth/2-textColumnOffsetX-durationValueFontString->getIconWidth()
+      );
+      durationValueFontString->setY(y+textRowThirdOffsetY);
+    }
+    if (trackLengthLabelFontString) {
+      trackLengthLabelFontString->setX((textColumnCount==1)?
+              x+(iconWidth-trackLengthLabelFontString->getIconWidth())/2 :
+              x+iconWidth/2+textColumnOffsetX
+      );
+      trackLengthLabelFontString->setY(y+textRowFirstOffsetY);
+    }
+    if (trackLengthValueFontString) {
+      trackLengthValueFontString->setX((textColumnCount==1)?
+          x+(iconWidth-trackLengthValueFontString->getIconWidth())/2 :
+          x+iconWidth/2+textColumnOffsetX
+      );
+      trackLengthValueFontString->setY(y+textRowSecondOffsetY);
+    }
+    if (altitudeLabelFontString) {
+      altitudeLabelFontString->setX((textColumnCount==1)?
+          x+(iconWidth-altitudeLabelFontString->getIconWidth())/2 :
+          x+iconWidth/2+textColumnOffsetX
+      );
+      altitudeLabelFontString->setY(y+textRowFourthOffsetY);
+    }
+    if (altitudeValueFontString) {
+      altitudeValueFontString->setX((textColumnCount==1)?
+          x+(iconWidth-altitudeValueFontString->getIconWidth())/2 :
+          x+iconWidth/2+textColumnOffsetX
+      );
+      altitudeValueFontString->setY(y+textRowThirdOffsetY);
     }
     if (prevNavigationInfo.getLocationBearing()!=navigationInfo->getLocationBearing()) {
       if (navigationInfo->getLocationBearing()==NavigationInfo::getUnknownAngle()) {
@@ -385,6 +458,24 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     if (durationValueFontString) {
       durationValueFontString->setColor(color);
       durationValueFontString->draw(t);
+    }
+    if (textColumnCount==2) {
+      if (altitudeLabelFontString) {
+        altitudeLabelFontString->setColor(color);
+        altitudeLabelFontString->draw(t);
+      }
+      if (altitudeValueFontString) {
+        altitudeValueFontString->setColor(color);
+        altitudeValueFontString->draw(t);
+      }
+      if (trackLengthLabelFontString) {
+        trackLengthLabelFontString->setColor(color);
+        trackLengthLabelFontString->draw(t);
+      }
+      if (trackLengthValueFontString) {
+        trackLengthValueFontString->setColor(color);
+        trackLengthValueFontString->draw(t);
+      }
     }
   }
 

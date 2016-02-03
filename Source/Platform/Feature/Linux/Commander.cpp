@@ -15,11 +15,15 @@
 namespace GEODISCOVERER {
 
 // Called when the initialization is finished
-void Commander::dispatch(std::string command) {
+std::string Commander::dispatch(std::string command) {
   //DEBUG("command for parent app: %s",command.c_str());
   if (command=="decideContinueOrNewTrack()") {
-    execute("setRecordTrack(1)");
+    core->getCommander()->execute("setRecordTrack(1)");
   }
+  if (command=="getDeviceName()") {
+    return "Default";
+  }
+  return "";
 }
 
 }

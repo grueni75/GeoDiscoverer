@@ -63,6 +63,12 @@ protected:
   // Indicates if location is off route
   bool offRoute;
 
+  // Length of current track
+  double trackLength;
+
+  // Current altitude
+  double altitude;
+
 public:
 
   // Constructor
@@ -168,6 +174,21 @@ public:
     this->locationSpeed = locationSpeed;
   }
 
+  double getAltitude() const {
+    return altitude;
+  }
+
+  void setAltitude(double altitude) {
+    this->altitude = altitude;
+  }
+
+  double getTrackLength() const {
+    return trackLength;
+  }
+
+  void setTrackLength(double trackLength) {
+    this->trackLength = trackLength;
+  }
 };
 
 } /* namespace GEODISCOVERER */

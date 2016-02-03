@@ -267,8 +267,9 @@ bool Core::init() {
     FATAL("can not create dialog object",NULL);
     return false;
   }
-  DEBUG("initializing default device",NULL);
-  if (!(defaultDevice=new Device("Default",false,true))) {
+  std::string name=Commander::dispatch("getDeviceName()");
+  DEBUG("initializing default device with name <%s>",name.c_str());
+  if (!(defaultDevice=new Device(name,false,true))) {
     FATAL("can not create default device object",NULL);
     return false;
   }
@@ -277,7 +278,12 @@ bool Core::init() {
   defaultDevice->init();
   defaultDevice->setInitDone();
   DEBUG("initializing mapSource",NULL);
-  if (!(mapSource=MapSource::newMapSource())) {
+  if (defaultDevice->getName()=="Watch") {
+    mapSource=new MapSourceEmpty();
+  } else {
+    mapSource=MapSource::newMapSource();
+  }
+  if (!mapSource) {
     FATAL("can not create map source object",NULL);
     return false;
   }

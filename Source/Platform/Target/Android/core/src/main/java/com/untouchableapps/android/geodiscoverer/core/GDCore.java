@@ -61,7 +61,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   /** Current opengl context */
   GL10 currentGL = null;
-  
+
+  /** Current opengl thread */
+  Thread renderThread = null;
+
   /** Path to the home directory */
   public String homePath;
   
@@ -132,6 +135,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   // Reference to the object that implements the interface functions
   GDAppInterface appIf = null;
+
+  // Time in seconds to wait before drawing a new frame
+  long drawFrameSuspendTime = 0;
 
   //
   // Constructor and destructor
@@ -468,6 +474,18 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     executeAppCommand("restartActivity()");
   } 
 
+  /** Slows down the drawing */
+  public void setDrawFrameSuspendTime(long time) {
+    drawFrameSuspendTime=time;
+  }
+
+  /** Ractivates drawing at full speed */
+  public void resetDrawFrameSuspendTime() {
+    drawFrameSuspendTime=0;
+    if (renderThread!=null)
+      renderThread.interrupt();
+  }
+
   //
   // Functions implemented by the native core
   //
@@ -544,7 +562,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   /** Execute an command */
   @SuppressWarnings("resource")
-  public void executeAppCommand(final String cmd)
+  public String executeAppCommand(final String cmd)
   {
     boolean cmdExecuted = false;
     if (cmd.startsWith("sendNativeCrashReport(")) {
@@ -607,9 +625,19 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       }
       cmdExecuted=true;
     }
+    if (cmd.startsWith("getDeviceName()")) {
+      Configuration config = appIf.getContext().getResources().getConfiguration();
+      boolean isWatch = (config.uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_WATCH;
+      if (isWatch)
+        return "Watch";
+      else
+        return "Default";
+    }
+
     if (!cmdExecuted) {
       appIf.executeAppCommand(cmd);
     }
+    return "";
   }
 
   /** Sets the thread priority */
@@ -699,7 +727,13 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         executeAppCommand("setSplashVisibility(1)");
       }
       lastFrameDrawnByCore=false;
-    }    
+    }
+    if (drawFrameSuspendTime>0) {
+      try {
+        Thread.sleep(drawFrameSuspendTime*1000);
+      }
+      catch (InterruptedException e) {};
+    }
     lock.unlock();
   }
   
@@ -731,6 +765,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     graphicInvalidated=true;
     createGraphic=true;
     currentGL=gl;
+    renderThread=Thread.currentThread();
     lock.unlock();
   }
 

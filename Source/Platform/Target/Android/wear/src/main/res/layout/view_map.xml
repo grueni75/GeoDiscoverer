@@ -7,18 +7,19 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   tools:context="com.untouchableapps.android.geodiscoverer.ViewMap"
+  android:background="@color/black"
   tools:deviceIds="wear">
 
   <FrameLayout
     android:id="@+id/view_map"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/black">
+    android:layout_height="match_parent">
 
-    <com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
+    <!-- <com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
       android:id="@+id/view_map_map_surface_view"
       android:layout_width="match_parent"
-      android:layout_height="match_parent" />
+      android:layout_height="match_parent"/>
+    -->
 
     <LinearLayout
       android:id="@+id/view_map_progress_dialog"

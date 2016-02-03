@@ -641,26 +641,36 @@
 			                                    <xsd:documentation>Width of the text in percent of the widget width.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
-			                                <xsd:element name="durationLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
+			                                <xsd:element name="textRowFirstOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the duration label in percent of the widget height.</xsd:documentation>
+			                                    <xsd:documentation>Vertical offset for the first row in percent of the widget height.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>                                
-			                                <xsd:element name="durationValueOffsetY" type="xsd:double" default="0" minOccurs="0">
+			                                <xsd:element name="textRowSecondOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the duration value in percent of the widget height.</xsd:documentation>
+			                                    <xsd:documentation>Vertical offset for the second row in percent of the widget height.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>   
-			                                <xsd:element name="targetDistanceLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
+			                                <xsd:element name="textRowThirdOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the target distance label in percent of the widget height.</xsd:documentation>
+			                                    <xsd:documentation>Vertical offset for the third row in percent of the widget height.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>                                
-			                                <xsd:element name="targetDistanceValueOffsetY" type="xsd:double" default="0" minOccurs="0">
+			                                <xsd:element name="textRowFourthOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the target distance value in percent of the widget height.</xsd:documentation>
+			                                    <xsd:documentation>Vertical offset for the fourth row in percent of the widget height.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>   
+                                      <xsd:element name="textColumnOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset for each column in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>   
+                                      <xsd:element name="textColumnCount" type="xsd:integer" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Number of text columns to use.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>   
 			                                <xsd:element name="turnDistanceValueOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Vertical offset for the turn distance value in percent of the widget height.</xsd:documentation>

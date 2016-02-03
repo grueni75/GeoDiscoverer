@@ -57,10 +57,12 @@ protected:
   double locationBearingNominal,locationBearingActual;
 
   // Vertical positions of the different texts
-  Int durationLabelOffsetY;
-  Int durationValueOffsetY;
-  Int targetDistanceLabelOffsetY;
-  Int targetDistanceValueOffsetY;
+  Int textColumnCount;
+  Int textRowFirstOffsetY;
+  Int textRowSecondOffsetY;
+  Int textRowThirdOffsetY;
+  Int textRowFourthOffsetY;
+  Int textColumnOffsetX;
   Int turnDistanceValueOffsetY;
 
   // Color of the turn
@@ -80,6 +82,10 @@ protected:
   FontString *distanceValueFontString;
   FontString *durationLabelFontString;
   FontString *durationValueFontString;
+  FontString *trackLengthLabelFontString;
+  FontString *trackLengthValueFontString;
+  FontString *altitudeLabelFontString;
+  FontString *altitudeValueFontString;
   FontString *orientationLabelFontStrings[4];
 
   // Holds the points of the arrow
@@ -119,14 +125,6 @@ public:
     this->updateInterval=updateInterval;
   }
 
-   void setDurationLabelOffsetY(Int durationLabelOffsetY) {
-    this->durationLabelOffsetY = durationLabelOffsetY;
-  }
-
-  void setDurationValueOffsetY(Int durationValueOffsetY) {
-    this->durationValueOffsetY = durationValueOffsetY;
-  }
-
   GraphicRectangle *getDirectionIcon() {
     return &directionIcon;
   }
@@ -149,14 +147,6 @@ public:
 
   void setOrientationLabelRadius(double orientationLabelRadius) {
     this->orientationLabelRadius = orientationLabelRadius;
-  }
-
-  void setTargetDistanceLabelOffsetY(Int targetDistanceLabelOffsetY) {
-    this->targetDistanceLabelOffsetY = targetDistanceLabelOffsetY;
-  }
-
-  void setTargetDistanceValueOffsetY(Int targetDistanceValueOffsetY) {
-    this->targetDistanceValueOffsetY = targetDistanceValueOffsetY;
   }
 
   void setTurnDistanceValueOffsetY(Int turnDistanceValueOffsetY) {
@@ -193,6 +183,30 @@ public:
 
   void setTurnColor(const GraphicColor turnColor) {
     this->turnColor = turnColor;
+  }
+
+  void setTextColumnOffsetX(Int textColumnOffsetX) {
+    this->textColumnOffsetX = textColumnOffsetX;
+  }
+
+  void setTextRowFirstOffsetY(Int textRowFirstOffsetY) {
+    this->textRowFirstOffsetY = textRowFirstOffsetY;
+  }
+
+  void setTextRowFourthOffsetY(Int textRowFourthOffsetY) {
+    this->textRowFourthOffsetY = textRowFourthOffsetY;
+  }
+
+  void setTextRowSecondOffsetY(Int textRowSecondOffsetY) {
+    this->textRowSecondOffsetY = textRowSecondOffsetY;
+  }
+
+  void setTextRowThirdOffsetY(Int textRowThirdOffsetY) {
+    this->textRowThirdOffsetY = textRowThirdOffsetY;
+  }
+
+  void setTextColumnCount(Int textColumnCount) {
+    this->textColumnCount = textColumnCount;
   }
 };
 

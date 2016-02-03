@@ -30,6 +30,8 @@ NavigationInfo::NavigationInfo() {
   turnAngle=unknownAngle;
   routeDistance=unknownDistance;
   offRoute=false;
+  trackLength=unknownDistance;
+  altitude=unknownDistance;
 }
 
 NavigationInfo::~NavigationInfo() {

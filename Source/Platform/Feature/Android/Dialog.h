@@ -15,7 +15,7 @@
 #define DIALOG_H_
 
 // Executes an command on the java side
-void GDApp_executeAppCommand(std::string command);
+std::string GDApp_executeAppCommand(std::string command);
 
 namespace GEODISCOVERER {
 

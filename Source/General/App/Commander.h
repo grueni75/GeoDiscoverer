@@ -47,7 +47,7 @@ public:
   std::string execute(std::string cmd);
 
   // Dispatch a command to the parent app
-  void dispatch(std::string cmd);
+  static std::string dispatch(std::string cmd);
 
 };
 
