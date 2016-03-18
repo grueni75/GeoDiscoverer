@@ -1,7 +1,7 @@
 #!/bin/bash
 ROOT="`pwd`/../../../../../../../"
 sh -c "cd $ROOT/Source && make android"
-sed -i 's/<xsd:documentation>Geo Discoverer Config schema.*<\/xsd:documentation>/<xsd:documentation>Geo Discoverer Config schema '`date +"%Y%m%d-%H%M%S"`'<\/xsd:documentation>/' assets/GeoDiscoverer/config.shipped.xsd 
+sed -i 's/<xsd:documentation>Geo Discoverer Config schema.*<\/xsd:documentation>/<xsd:documentation>Geo Discoverer Config schema '`date +"%Y%m%d-%H%M%S"`'<\/xsd:documentation>/' assets/GeoDiscoverer/config.shipped.xsd
 sh -c "cd $ROOT/Source/Media/Icon && make android"
 if [ $1 == "mobile" ]; then
   sh -c "rsync -ahvz --progress --exclude .directory --exclude '*.xcf' --delete $ROOT/Source/Platform/Target/Help/public/ assets/GeoDiscoverer/Help"

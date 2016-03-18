@@ -15,18 +15,41 @@
    id="svg2869"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="navigationBackground.svg"
+   sodipodi:docname="navigationComplete.svg"
    inkscape:export-filename="/home/grueni/apps/GeoDiscoverer/Source/Media/wakeLockOn.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
      id="defs2871">
     <linearGradient
+       id="linearGradient4214">
+      <stop
+         id="stop4216"
+         offset="0"
+         style="stop-color:#aaaaaa;stop-opacity:1;" />
+      <stop
+         style="stop-color:#aaaaaa;stop-opacity:1;"
+         offset="0.37026557"
+         id="stop4054" />
+      <stop
+         style="stop-color:#aaaaaa;stop-opacity:1;"
+         offset="0.74053115"
+         id="stop4218" />
+      <stop
+         id="stop4220"
+         offset="1"
+         style="stop-color:#f0f0f0;stop-opacity:1;" />
+    </linearGradient>
+    <linearGradient
        id="linearGradient5604">
       <stop
          style="stop-color:#454545;stop-opacity:1;"
          offset="0"
          id="stop5606" />
+      <stop
+         id="stop4212"
+         offset="0.5"
+         style="stop-color:#454545;stop-opacity:1;" />
       <stop
          style="stop-color:#f0f0f0;stop-opacity:1;"
          offset="1"
@@ -793,18 +816,8 @@
        r="68.218086" />
     <radialGradient
        inkscape:collect="always"
-       xlink:href="#linearGradient5604"
+       xlink:href="#linearGradient4214"
        id="radialGradient4080"
-       gradientUnits="userSpaceOnUse"
-       cx="67.5"
-       cy="65.5"
-       fx="67.5"
-       fy="65.5"
-       r="67.5" />
-    <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient5604"
-       id="radialGradient4552"
        gradientUnits="userSpaceOnUse"
        cx="67.5"
        cy="65.5"
@@ -819,9 +832,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.9333883"
-     inkscape:cx="-51.632249"
-     inkscape:cy="84.377861"
+     inkscape:zoom="3.6096267"
+     inkscape:cx="42.101906"
+     inkscape:cy="88.569386"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:document-units="px"
@@ -829,9 +842,9 @@
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:snap-global="true"
-     inkscape:window-width="1280"
-     inkscape:window-height="696"
-     inkscape:window-x="-8"
+     inkscape:window-width="1920"
+     inkscape:window-height="1056"
+     inkscape:window-x="1432"
      inkscape:window-y="-4"
      inkscape:window-maximized="1"
      inkscape:snap-grids="true"
@@ -859,7 +872,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -873,7 +886,7 @@
        id="g4820-3" />
     <path
        sodipodi:type="arc"
-       style="fill:url(#radialGradient4552);fill-opacity:1;stroke:#909090;stroke-width:2.18916103;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:url(#radialGradient4080);fill-opacity:1;stroke:#909090;stroke-width:2.18916103000000017;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path3390"
        sodipodi:cx="67.5"
        sodipodi:cy="65.5"

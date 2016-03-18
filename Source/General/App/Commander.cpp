@@ -519,11 +519,41 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
-
   if (cmdName=="formatMeters") {
     std::string value,unit;
     core->getUnitConverter()->formatMeters(atof(args[0].c_str()),value,unit);
     result=value+" "+unit;
+    cmdExecuted=true;
+  }
+  if (cmdName=="setPlainNavigationInfo") {
+    NavigationInfo *navigationInfo=core->getNavigationEngine()->lockNavigationInfo(__FILE__,__LINE__);
+    navigationInfo->setType((NavigationInfoType)atoi(args[0].c_str()));
+    navigationInfo->setAltitude(atof(args[1].c_str()));
+    navigationInfo->setLocationBearing(atof(args[2].c_str()));
+    navigationInfo->setLocationSpeed(atof(args[3].c_str()));
+    navigationInfo->setTrackLength(atof(args[4].c_str()));
+    navigationInfo->setTargetBearing(atof(args[5].c_str()));
+    navigationInfo->setTargetDistance(atof(args[6].c_str()));
+    navigationInfo->setTargetDuration(atof(args[7].c_str()));
+    navigationInfo->setOffRoute(atoi(args[8].c_str()));
+    navigationInfo->setRouteDistance(atof(args[9].c_str()));
+    navigationInfo->setTurnAngle(atof(args[10].c_str()));
+    navigationInfo->setTurnDistance(atof(args[11].c_str()));
+    /*DEBUG("navigationInfos: %d %f %f %f %f %f %f %f %d %f %f %f",
+        navigationInfo->getType(),
+        navigationInfo->getAltitude(),
+        navigationInfo->getLocationBearing(),
+        navigationInfo->getLocationSpeed(),
+        navigationInfo->getTrackLength(),
+        navigationInfo->getTargetBearing(),
+        navigationInfo->getTargetDistance(),
+        navigationInfo->getTargetDuration(),
+        navigationInfo->getOffRoute(),
+        navigationInfo->getRouteDistance(),
+        navigationInfo->getTurnAngle(),
+        navigationInfo->getTurnDistance()
+        );*/
+    core->getNavigationEngine()->unlockNavigationInfo();
     cmdExecuted=true;
   }
 

@@ -34,6 +34,31 @@ NavigationInfo::NavigationInfo() {
   altitude=unknownDistance;
 }
 
+bool NavigationInfo::operator==(const NavigationInfo &rhs)
+{
+  if ((type==rhs.getType()) &&
+      (locationBearing==rhs.getLocationBearing()) &&
+      (locationSpeed==rhs.getLocationSpeed()) &&
+      (targetBearing==rhs.getTargetBearing()) &&
+      (targetDistance==rhs.getTargetDistance()) &&
+      (targetDuration==rhs.getTargetDuration()) &&
+      (turnDistance==rhs.getTurnDistance()) &&
+      (routeDistance==rhs.getRouteDistance()) &&
+      (turnAngle==rhs.getTurnAngle()) &&
+      (offRoute==rhs.getOffRoute()) &&
+      (trackLength==rhs.getTrackLength()) &&
+      (altitude==rhs.getAltitude())
+  )
+    return true;
+  else
+    return false;
+}
+
+bool NavigationInfo::operator!=(const NavigationInfo &rhs)
+{
+  return !(*this==rhs);
+}
+
 NavigationInfo::~NavigationInfo() {
   // TODO Auto-generated destructor stub
 }

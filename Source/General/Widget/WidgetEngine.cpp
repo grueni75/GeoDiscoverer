@@ -971,6 +971,8 @@ void WidgetEngine::createGraphic() {
       config.setParameter("iconFilename","navigationLargeBackground");
       config.setParameter("directionIconFilename","navigationLargeDirection");
       config.setParameter("separatorIconFilename","navigationLargeSeparator");
+      config.setParameter("orientationLabelRadius","91.0");
+      config.setParameter("targetRadius","89.5");
       config.setParameter("textColumnCount","2");
     } else {
       position=WidgetPosition();
@@ -986,20 +988,20 @@ void WidgetEngine::createGraphic() {
       config.setParameter("iconFilename","navigationBackground");
       config.setParameter("directionIconFilename","navigationDirection");
       config.setParameter("separatorIconFilename","navigationSeparator");
+      config.setParameter("orientationLabelRadius","86.5");
+      config.setParameter("targetRadius","86.0");
       config.setParameter("textColumnCount","1");
     }
     config.setActiveColor(GraphicColor(255,255,255,255));
     config.setParameter("textRowFirstOffsetY","71");
-    config.setParameter("textRowSecondOffsetY","58");
-    config.setParameter("textRowThirdOffsetY","38");
+    config.setParameter("textRowSecondOffsetY","57");
+    config.setParameter("textRowThirdOffsetY","37");
     config.setParameter("textRowFourthOffsetY","25");
     config.setParameter("textColumnOffsetX","5");
     config.setParameter("targetIconFilename","navigationTarget");
     config.setParameter("updateInterval","1000000");
     config.setParameter("turnDistanceValueOffsetY","25");
     config.setParameter("directionChangeDuration","500000");
-    config.setParameter("targetRadius","86.0");
-    config.setParameter("orientationLabelRadius","86.5");
     config.setParameter("turnLineWidth","15.0");
     config.setParameter("turnLineArrowOverhang","7.5");
     config.setParameter("turnLineArrowHeight","13.0");

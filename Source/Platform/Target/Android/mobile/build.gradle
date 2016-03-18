@@ -51,6 +51,7 @@ dependencies {
     compile project(':materialDialogs')
     compile project(':colorPickerPreference')
     compile project(':jmDNS')
+    compile 'com.google.android.gms:play-services:8.1.0'
 }
 
 task collectAssets(type: Exec) {
@@ -59,7 +60,7 @@ task collectAssets(type: Exec) {
 }
 preBuild.dependsOn collectAssets
 
-android.buildTypes.all{ buildType ->
+android.buildTypes.all { buildType ->
     def setNativeCodeConfigTask = task("set${buildType.name.capitalize()}NativeCodeConfig", type: Exec) {
         commandLine 'echo', "${buildType.name}"
         doFirst {

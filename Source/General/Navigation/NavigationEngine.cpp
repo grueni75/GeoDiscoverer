@@ -1224,7 +1224,7 @@ void NavigationEngine::computeNavigationInfo() {
     lastNavigationLocationPos=locationPos;
     forceNavigationInfoUpdate=false;
 
-    // Copy target pos
+    // Copy target possetPlain
     lockTargetPos(__FILE__, __LINE__);
     MapPosition targetPos=this->targetPos;
     unlockTargetPos();
@@ -1298,11 +1298,8 @@ void NavigationEngine::computeNavigationInfo() {
     unlockNavigationInfo();
 
     // Update the parent app
-    //Int counter=0;
-    //while(1) {
     infos.str("");
     std::string value,unit;
-    //navigationInfo.setLocationBearing(((float)rand())*359.0/(float)RAND_MAX);
     if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle())
       infos << navigationInfo.getLocationBearing();
     else
@@ -1312,13 +1309,11 @@ void NavigationEngine::computeNavigationInfo() {
       infos << ";" << value << " " << unit;
     } else
       infos << ";-";
-    //navigationInfo.setTargetBearing(((float)rand())*359.0/(float)RAND_MAX);
     if (navigationInfo.getTargetBearing()!=NavigationInfo::getUnknownAngle())
       infos << ";" << navigationInfo.getTargetBearing();
     else
       infos << ";-";
     infos << ";";
-    //navigationInfo.setTargetDistance(((float)rand())*10000/(float)RAND_MAX);
     if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance()) {
       core->getUnitConverter()->formatMeters(navigationInfo.getTargetDistance(),value,unit);
       infos << value << " " << unit;
@@ -1326,10 +1321,6 @@ void NavigationEngine::computeNavigationInfo() {
       infos << "infinite";
     }
     infos << ";";
-    //counter++;
-    //if (counter%30==0)
-    //  navigationInfo.setOffRoute(!navigationInfo.getOffRoute());
-    //navigationInfo.setTargetDuration(((float)rand())*30*60/(float)RAND_MAX);
     if (navigationInfo.getOffRoute()) {
       infos << "off route!";
     } else if (navigationInfo.getTargetDuration()!=NavigationInfo::getUnknownDuration()) {
@@ -1354,10 +1345,22 @@ void NavigationEngine::computeNavigationInfo() {
     } else {
       infos << ";no route;-";
     }
-    core->getCommander()->dispatch("updateNavigationInfos(" + infos.str() + ")");
-    //  sleep(1);
-    //}
-
+    core->getCommander()->dispatch("setFormattedNavigationInfo(" + infos.str() + ")");
+    infos.str("");
+    infos << navigationInfo.getType() << ",";
+    infos << navigationInfo.getAltitude() << ",";
+    infos << navigationInfo.getLocationBearing() << ",";
+    infos << navigationInfo.getLocationSpeed() << ",";
+    infos << navigationInfo.getTrackLength() << ",";
+    infos << navigationInfo.getTargetBearing() << ",";
+    infos << navigationInfo.getTargetDistance() << ",";
+    infos << navigationInfo.getTargetDuration() << ",";
+    infos << navigationInfo.getOffRoute() << ",";
+    infos << navigationInfo.getRouteDistance() << ",";
+    infos << navigationInfo.getTurnAngle() << ",";
+    infos << navigationInfo.getTurnDistance();
+    DEBUG("%s",infos.str().c_str());
+    core->getCommander()->dispatch("setPlainNavigationInfo(" + infos.str() + ")");
   }
 }
 

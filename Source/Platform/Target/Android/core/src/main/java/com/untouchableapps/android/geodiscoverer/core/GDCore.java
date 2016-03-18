@@ -25,6 +25,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
@@ -135,9 +136,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   // Reference to the object that implements the interface functions
   GDAppInterface appIf = null;
-
-  // Time in seconds to wait before drawing a new frame
-  long drawFrameSuspendTime = 0;
 
   //
   // Constructor and destructor
@@ -474,18 +472,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     executeAppCommand("restartActivity()");
   } 
 
-  /** Slows down the drawing */
-  public void setDrawFrameSuspendTime(long time) {
-    drawFrameSuspendTime=time;
-  }
-
-  /** Ractivates drawing at full speed */
-  public void resetDrawFrameSuspendTime() {
-    drawFrameSuspendTime=0;
-    if (renderThread!=null)
-      renderThread.interrupt();
-  }
-
   //
   // Functions implemented by the native core
   //
@@ -601,9 +587,13 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       appIf.cockpitEngineStart();
       cmdExecuted=false; // forward message to activity
     }
-    if (cmd.startsWith("updateNavigationInfos(")) {
+    if (cmd.startsWith("setFormattedNavigationInfo(")) {
       String infos = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
       appIf.cockputEngineUpdate(infos);
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("setPlainNavigationInfo(")) {
+      appIf.sendWearCommand(cmd);
       cmdExecuted=true;
     }
     if (cmd.startsWith("updateMapDownloadStatus(")) {
@@ -721,18 +711,12 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       blankScreen=true;
     }
     if (blankScreen) {
-      gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-      gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+      GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
       if (lastFrameDrawnByCore) {
         executeAppCommand("setSplashVisibility(1)");
       }
       lastFrameDrawnByCore=false;
-    }
-    if (drawFrameSuspendTime>0) {
-      try {
-        Thread.sleep(drawFrameSuspendTime*1000);
-      }
-      catch (InterruptedException e) {};
     }
     lock.unlock();
   }

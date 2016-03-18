@@ -22,6 +22,10 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Wearable;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 
@@ -33,8 +37,8 @@ public class GDApplication extends Application implements GDAppInterface {
   /** Interface to the native C++ core */
   public static GDCore coreObject=null;
 
-  /** Reference to the viewmap activity */
-  ViewMap activity = null;
+  /** Reference to the message handler of the watch face */
+  WatchFace.CoreMessageHandler messageHandler = null;
 
   /** Called when the application starts */
   @Override
@@ -73,15 +77,14 @@ public class GDApplication extends Application implements GDAppInterface {
   public static final long MESSAGE_BAR_DURATION_LONG = 4000;
   
   /** Shows a toast */
-  public static void showMessageBar(Activity activity, String message, long duration) {
-    Toast.makeText(activity.getApplicationContext(),message,(int)duration).show();
+  public static void showMessageBar(Context context, String message, long duration) {
+    Toast.makeText(context,message,(int)duration).show();
   }
 
-  /** Sets the view map activity */
-  public void setActivity(ViewMap activity) {
-    this.activity = activity;
+  /** Sets the message handler */
+  public void setMessageHandler(WatchFace.CoreMessageHandler messageHandler) {
+    this.messageHandler = messageHandler;
   }
-
 
   // Cockpit engine related interface methods
   @Override
@@ -113,24 +116,20 @@ public class GDApplication extends Application implements GDAppInterface {
   // Sends a command to the activity
   @Override
   public void executeAppCommand(String cmd) {
-    if (activity != null) {
-      Message m = Message.obtain(activity.coreMessageHandler);
-      m.what = ViewMap.EXECUTE_COMMAND;
+    if (messageHandler != null) {
+      Message m = Message.obtain(messageHandler);
+      m.what = WatchFace.EXECUTE_COMMAND;
       Bundle b = new Bundle();
       b.putString("command", cmd);
       m.setData(b);
-      activity.coreMessageHandler.sendMessage(m);
+      messageHandler.sendMessage(m);
     }
   }
 
   // Returns the orientation of the activity
   @Override
   public int getActivityOrientation() {
-    if (activity!=null) {
-      return activity.getResources().getConfiguration().orientation;
-    } else {
-      return Configuration.ORIENTATION_UNDEFINED;
-    }
+    return Configuration.ORIENTATION_PORTRAIT;
   }
 
   // Returns an intent for the GDService
@@ -149,6 +148,10 @@ public class GDApplication extends Application implements GDAppInterface {
   @Override
   public Application getApplication() {
     return this;
+  }
+
+  // Sends a command to the wear device
+  public void sendWearCommand( final String command ) {
   }
 
 }

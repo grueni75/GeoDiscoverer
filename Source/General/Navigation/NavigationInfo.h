@@ -77,6 +77,10 @@ public:
   // Destructor
   virtual ~NavigationInfo();
 
+  // Operators
+  bool operator ==(const NavigationInfo &rhs);
+  bool operator !=(const NavigationInfo &rhs);
+
   // Getters and setters
   double getLocationBearing() const {
     return locationBearing;

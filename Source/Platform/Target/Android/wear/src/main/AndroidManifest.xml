@@ -3,11 +3,14 @@
   package="com.untouchableapps.android.geodiscoverer"
   xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+
     <uses-feature android:name="android.hardware.type.watch"/>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
 
     <application
       android:allowBackup="true"
@@ -15,20 +18,39 @@
       android:label="@string/app_name"
       android:name=".GDApplication"
       android:theme="@android:style/Theme.DeviceDefault">
-        <uses-library
-          android:name="com.google.android.wearable"
-          android:required="false"/>
 
-        <activity
-          android:name=".ViewMap"
-          android:label="@string/app_name"
-          android:theme="@android:style/Theme.DeviceDefault.Light">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+      <uses-library
+        android:name="com.google.android.wearable"
+        android:required="false"/>
 
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
+      <service
+        android:name=".WatchFace"
+        android:label="@string/app_name"
+        android:permission="android.permission.BIND_WALLPAPER" >
+        <meta-data
+          android:name="android.service.wallpaper"
+          android:resource="@xml/watch_face" />
+        <meta-data
+          android:name="com.google.android.wearable.watchface.preview"
+          android:resource="@drawable/preview_digital" />
+        <meta-data
+          android:name="com.google.android.wearable.watchface.preview_circular"
+          android:resource="@drawable/preview_digital_circular" />
+
+        <intent-filter>
+          <action android:name="android.service.wallpaper.WallpaperService" />
+          <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
+        </intent-filter>
+
+      </service>
+
+      <service
+        android:name=".GDMessageListenerService" >
+        <intent-filter>
+          <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+        </intent-filter>
+      </service>
+
     </application>
 
 </manifest>

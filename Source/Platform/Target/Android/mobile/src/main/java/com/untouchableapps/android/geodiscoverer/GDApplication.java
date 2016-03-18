@@ -21,12 +21,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
+import java.util.concurrent.TimeUnit;
 
 import org.acra.ACRA;
 import org.acra.ACRAConstants;
 import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
+import org.acra.sender.GoogleFormSender;
 
 import android.app.Activity;
 import android.app.Application;
@@ -42,6 +44,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
 import com.untouchableapps.android.geodiscoverer.cockpit.CockpitEngine;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
@@ -67,7 +74,7 @@ import com.untouchableapps.android.geodiscoverer.core.GDCore;
 )
 
 /* Main application class */
-public class GDApplication extends Application implements GDAppInterface {
+public class GDApplication extends Application implements GDAppInterface, GoogleApiClient.ConnectionCallbacks {
 
   /** Interface to the native C++ core */
   public static GDCore coreObject=null;
@@ -86,6 +93,12 @@ public class GDApplication extends Application implements GDAppInterface {
 
   /** Reference to the viewmap activity */
   ViewMap activity = null;
+
+  /** Reference to the wear message api */
+  GoogleApiClient googleApiClient = null;
+
+  /** Time to wait for a connection */
+  final static long WEAR_CONNECTION_TIME_OUT_MS = 1000;
 
   /** Called when the application starts */
   @Override
@@ -119,6 +132,20 @@ public class GDApplication extends Application implements GDAppInterface {
         }
       }
     }
+
+    // Init the message api to communicate with wear device
+    googleApiClient = new GoogleApiClient.Builder(this).addApi(Wearable.API).build();
+    googleApiClient.connect();
+  }
+
+  /** Called when a connection to a wear device has been established */
+  @Override
+  public void onConnected(Bundle bundle) {
+  }
+
+  /** Called when a connection to a wear device has been shut down */
+  @Override
+  public void onConnectionSuspended(int cause) {
   }
 
   /** Adds a message to the log */
@@ -162,7 +189,6 @@ public class GDApplication extends Application implements GDAppInterface {
   public void setActivity(ViewMap activity) {
     this.activity = activity;
   }
-
 
   // Cockpit engine related interface methods
   @Override
@@ -275,6 +301,23 @@ public class GDApplication extends Application implements GDAppInterface {
   @Override
   public Application getApplication() {
     return this;
+  }
+
+  // Sends a command to the wear device
+  public void sendWearCommand( final String command ) {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
+        for (Node node : nodes.getNodes()) {
+          //googleApiClient.blockingConnect(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+          MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+              googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer",
+              command.getBytes()).await();
+          //googleApiClient.disconnect();
+        }
+      }
+    }).start();
   }
 
 }

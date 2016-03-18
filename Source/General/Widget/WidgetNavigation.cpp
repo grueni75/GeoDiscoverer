@@ -62,6 +62,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   hideTarget=true;
   showTurn=false;
   active=false;
+  firstRun=true;
 }
 
 // Destructor
@@ -100,11 +101,12 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   bool changed=WidgetPrimitive::work(t);
 
   // Only update the info at given update interval
-  if (t>=nextUpdateTime) {
+  NavigationInfo *navigationInfo=navigationEngine->lockNavigationInfo(__FILE__, __LINE__);
+  if ((*navigationInfo!=prevNavigationInfo)||(firstRun)) {
+    firstRun=false;
 
     // Is a turn coming?
     bool activateWidget = false;
-    NavigationInfo *navigationInfo=navigationEngine->lockNavigationInfo(__FILE__, __LINE__);
     fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
     if (navigationInfo->getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
 
@@ -383,6 +385,8 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     // Set the next update time
     nextUpdateTime=t+updateInterval;
 
+  } else {
+    navigationEngine->unlockNavigationInfo();
   }
 
   // Let the directionIcon work
@@ -446,7 +450,7 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
 
     // Draw the information about the target / route
     separatorIcon.setColor(color);
-    separatorIcon.draw(t);
+    //separatorIcon.draw(t);
     if (distanceLabelFontString) {
       distanceLabelFontString->setColor(color);
       distanceLabelFontString->draw(t);

@@ -81,4 +81,9 @@ public interface GDAppInterface {
    */
   Application getApplication();
 
+  /**
+   * Sends a command to the wear device
+   */
+  void sendWearCommand( final String command );
+
 }

@@ -103,6 +103,9 @@ protected:
   // Last navigation infos
   NavigationInfo prevNavigationInfo;
 
+  // Indicates that this is the first time the widget runs
+  bool firstRun;
+
 public:
 
   // Constructor

@@ -814,9 +814,13 @@
     <linearGradient
        id="linearGradient5604-1">
       <stop
-         style="stop-color:#454545;stop-opacity:1;"
+         style="stop-color:#aaaaaa;stop-opacity:1;"
          offset="0"
          id="stop5606-4" />
+      <stop
+         id="stop4564"
+         offset="0.82155985"
+         style="stop-color:#aaaaaa;stop-opacity:1;" />
       <stop
          style="stop-color:#f0f0f0;stop-opacity:1;"
          offset="1"
@@ -840,9 +844,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="96.88706"
-     inkscape:cy="183.33222"
+     inkscape:zoom="2.4610631"
+     inkscape:cx="82.533068"
+     inkscape:cy="107.21449"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:document-units="px"
@@ -850,9 +854,9 @@
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:snap-global="true"
-     inkscape:window-width="1280"
-     inkscape:window-height="696"
-     inkscape:window-x="-8"
+     inkscape:window-width="1920"
+     inkscape:window-height="1056"
+     inkscape:window-x="1432"
      inkscape:window-y="-4"
      inkscape:window-maximized="1"
      inkscape:snap-grids="true"
@@ -895,7 +899,7 @@
        id="g4820-3" />
     <path
        sodipodi:type="arc"
-       style="fill:url(#radialGradient4055);fill-opacity:1;stroke:#909090;stroke-width:1.50533187;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:url(#radialGradient4055);fill-opacity:1;stroke:#909090;stroke-width:1.50533187000000002;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path3390"
        sodipodi:cx="67.5"
        sodipodi:cy="65.5"
