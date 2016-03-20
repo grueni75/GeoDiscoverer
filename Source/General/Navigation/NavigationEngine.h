@@ -38,6 +38,9 @@ protected:
   // Distance in meter that indicates a significantly less accurate position
   Int locationSignificantlyInaccurateThreshold;
 
+  // Number of map containers to visualize per map update round
+  Int visualizationMaxContainerCountPerRound;
+
   // Indicates if the track recording is enabled or disabled
   bool recordTrack;
 
@@ -215,6 +218,14 @@ public:
 
   // Removes the viualization for the given map container
   void removeGraphics(MapContainer *container);
+
+  // Indicates if a graphic update is required
+  bool mapGraphicUpdateIsRequired() {
+    if (unvisualizedMapContainers.size()>0)
+      return true;
+    else
+      return false;
+  }
 
   // Loads all pathes in the background
   void backgroundLoader();

@@ -421,7 +421,7 @@ void Core::updateScreen(bool forceRedraw) {
     bool updateRequired=false;
     GraphicPosition visPos=*(getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
     getDefaultGraphicEngine()->unlockPos();
-    if (mapEngine->mapUpdateIsRequired(visPos))
+    if ((mapEngine->mapUpdateIsRequired(visPos))||(navigationEngine->mapGraphicUpdateIsRequired()))
       updateRequired=true;
 
     // Request an update of the map

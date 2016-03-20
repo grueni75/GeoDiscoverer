@@ -34,6 +34,7 @@ NavigationEngine::NavigationEngine() {
   locationOutdatedThreshold=core->getConfigStore()->getIntValue("Navigation","locationOutdatedThreshold", __FILE__, __LINE__);
   locationSignificantlyInaccurateThreshold=core->getConfigStore()->getIntValue("Navigation","locationSignificantlyInaccurateThreshold", __FILE__, __LINE__);
   trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance", __FILE__, __LINE__);
+  visualizationMaxContainerCountPerRound=core->getConfigStore()->getIntValue("Map","visualizationMaxContainerCountPerRound", __FILE__, __LINE__);
   backgroundLoaderFinishedMutex=core->getThread()->createMutex("navigation engine background loader finished mutex");
   activeRouteMutex=core->getThread()->createMutex("navigation engine active route mutex");
   recordedTrackMutex=core->getThread()->createMutex("navigation engine recorded track mutex");
@@ -70,7 +71,6 @@ NavigationEngine::NavigationEngine() {
   forceNavigationInfoUpdate=false;
   computeNavigationInfoThreadInfo=NULL;
   computeNavigationInfoSignal=core->getThread()->createSignal();
-
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -906,8 +906,12 @@ void NavigationEngine::updateMapGraphic() {
 
   // Get the current unfinished list
   core->getMapSource()->lockAccess(__FILE__,__LINE__);
-  containers = unvisualizedMapContainers;
-  unvisualizedMapContainers.clear();
+  for (Int i=0;i<visualizationMaxContainerCountPerRound;i++) {
+    if (unvisualizedMapContainers.empty())
+      break;
+    containers.push_back(unvisualizedMapContainers.front());
+    unvisualizedMapContainers.pop_front();
+  }
   core->getMapSource()->unlockAccess();
 
   // Process the unfinished tile list

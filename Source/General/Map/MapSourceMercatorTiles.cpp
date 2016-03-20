@@ -463,7 +463,7 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
   // Go through the directory list
   DIR *dfd;
   struct dirent *dp;
-  DEBUG("dirPath=%s",dirPath.c_str());
+  //DEBUG("dirPath=%s",dirPath.c_str());
   dfd=opendir(dirPath.c_str());
   if (dfd==NULL) {
     FATAL("can not read directory <%s>",dirPath.c_str());
