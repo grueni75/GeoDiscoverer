@@ -38,6 +38,9 @@ public:
   // Returns a formatted time string
   std::string getFormattedDate();
 
+  // Returns a date in the given format
+  std::string getFormattedDate(TimestampInSeconds timestamp, std::string format, bool asLocalTime);
+
   // Returns a formatted date string suitable for XML files
   std::string getXMLDate(TimestampInSeconds timestamp=0, bool asLocalTime=true);
 

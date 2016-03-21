@@ -64,6 +64,7 @@ protected:
   Int textRowFourthOffsetY;
   Int textColumnOffsetX;
   Int turnDistanceValueOffsetY;
+  Int clockOffsetY;
 
   // Color of the turn
   GraphicColor turnColor;
@@ -80,10 +81,10 @@ protected:
   // Font string objects for drawing
   FontString *distanceLabelFontString;
   FontString *distanceValueFontString;
+  FontString *turnFontString;
   FontString *durationLabelFontString;
   FontString *durationValueFontString;
-  FontString *trackLengthLabelFontString;
-  FontString *trackLengthValueFontString;
+  FontString *clockFontString;
   FontString *altitudeLabelFontString;
   FontString *altitudeValueFontString;
   FontString *orientationLabelFontStrings[4];
@@ -105,6 +106,9 @@ protected:
 
   // Indicates that this is the first time the widget runs
   bool firstRun;
+
+  // Last update of the clock
+  TimestampInSeconds lastClockUpdate;
 
 public:
 
@@ -211,6 +215,11 @@ public:
   void setTextColumnCount(Int textColumnCount) {
     this->textColumnCount = textColumnCount;
   }
+
+  void setClockOffsetY(Int clockOffsetY) {
+    this->clockOffsetY = clockOffsetY;
+  }
+
 };
 
 }

@@ -1363,7 +1363,7 @@ void NavigationEngine::computeNavigationInfo() {
     infos << navigationInfo.getRouteDistance() << ",";
     infos << navigationInfo.getTurnAngle() << ",";
     infos << navigationInfo.getTurnDistance();
-    DEBUG("%s",infos.str().c_str());
+    //DEBUG("%s",infos.str().c_str());
     core->getCommander()->dispatch("setPlainNavigationInfo(" + infos.str() + ")");
   }
 }

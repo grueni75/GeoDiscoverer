@@ -671,6 +671,11 @@
                                           <xsd:documentation>Number of text columns to use.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>   
+                                      <xsd:element name="clockOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the clock text in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>   
 			                                <xsd:element name="turnDistanceValueOffsetY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Vertical offset for the turn distance value in percent of the widget height.</xsd:documentation>
@@ -1313,6 +1318,11 @@
               <xsd:element name="averageMercatorTileSize" type="xsd:integer" default="128000">
                 <xsd:annotation>
                   <xsd:documentation>Average size of a mercator tile gda file.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="visualizationMaxContainerCountPerRound" type="xsd:integer" default="10">
+                <xsd:annotation>
+                  <xsd:documentation>Number of map containers to visualize per map update round.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="LastPosition" minOccurs="0">

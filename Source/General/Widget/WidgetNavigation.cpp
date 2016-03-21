@@ -32,8 +32,8 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   durationLabelFontString=NULL;
   distanceValueFontString=NULL;
   durationValueFontString=NULL;
-  trackLengthLabelFontString=NULL;
-  trackLengthValueFontString=NULL;
+  clockFontString=NULL;
+  turnFontString=NULL;
   altitudeLabelFontString=NULL;
   altitudeValueFontString=NULL;
   locationBearingActual=0;
@@ -41,10 +41,8 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   directionChangeDuration=0;
   FontEngine *fontEngine=widgetPage->getFontEngine();
   fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
-  fontEngine->updateString(&distanceLabelFontString,"Distance");
   fontEngine->updateString(&durationLabelFontString,"Duration");
   fontEngine->updateString(&altitudeLabelFontString,"Altitude");
-  fontEngine->updateString(&trackLengthLabelFontString,"Track Len");
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++)
@@ -63,27 +61,46 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   showTurn=false;
   active=false;
   firstRun=true;
+  lastClockUpdate=0;
 }
 
 // Destructor
 WidgetNavigation::~WidgetNavigation() {
   FontEngine *fontEngine=widgetPage->getFontEngine();
-  fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
+  if (textColumnCount==2)
+    fontEngine->lockFont("sansBoldSmall",__FILE__, __LINE__);
+  else
+    fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   if (distanceLabelFontString) fontEngine->destroyString(distanceLabelFontString);
+  fontEngine->unlockFont();
+  fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   if (durationLabelFontString) fontEngine->destroyString(durationLabelFontString);
   if (altitudeLabelFontString) fontEngine->destroyString(altitudeLabelFontString);
-  if (trackLengthLabelFontString) fontEngine->destroyString(trackLengthLabelFontString);
+  fontEngine->unlockFont();
+  if (textColumnCount==2) {
+    fontEngine->lockFont("sansLarge",__FILE__, __LINE__);
+  } else {
+    fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
+  }
+  if (distanceValueFontString) fontEngine->destroyString(distanceValueFontString);
+  fontEngine->unlockFont();
+  if (textColumnCount==2)
+    fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
+  else
+    fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
+  if (turnFontString) fontEngine->destroyString(turnFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
-  if (distanceValueFontString) fontEngine->destroyString(distanceValueFontString);
   if (durationValueFontString) fontEngine->destroyString(durationValueFontString);
   if (altitudeValueFontString) fontEngine->destroyString(altitudeValueFontString);
-  if (trackLengthValueFontString) fontEngine->destroyString(trackLengthValueFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++) {
     if (orientationLabelFontStrings[i]) fontEngine->destroyString(orientationLabelFontStrings[i]);
   }
+  fontEngine->unlockFont();
+  fontEngine->lockFont("sansNormal",__FILE__,__LINE__);
+  if (clockFontString) fontEngine->destroyString(clockFontString);
   fontEngine->unlockFont();
 }
 
@@ -100,23 +117,48 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   // Do the inherited stuff
   bool changed=WidgetPrimitive::work(t);
 
-  // Only update the info at given update interval
+  // Update the font strings (if not already)
+  if (distanceLabelFontString==NULL) {
+    if (textColumnCount==2)
+      fontEngine->lockFont("sansBoldSmall",__FILE__, __LINE__);
+    else
+      fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
+    fontEngine->updateString(&distanceLabelFontString,"Distance");
+    fontEngine->unlockFont();
+  }
+
+  // Update the clock
+  TimestampInSeconds t2=core->getClock()->getSecondsSinceEpoch();
+  if ((textColumnCount==2)&&(t2/60!=lastClockUpdate/60)) {
+    fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
+    fontEngine->updateString(&clockFontString,core->getClock()->getFormattedDate(t2,"%H:%M",true));
+    fontEngine->unlockFont();
+    lastClockUpdate=t2;
+    clockFontString->setX(x+(iconWidth-clockFontString->getIconWidth())/2);
+    clockFontString->setY(y+clockOffsetY);
+  }
+
+  // Only update the info if it has changed
   NavigationInfo *navigationInfo=navigationEngine->lockNavigationInfo(__FILE__, __LINE__);
   if ((*navigationInfo!=prevNavigationInfo)||(firstRun)) {
     firstRun=false;
 
     // Is a turn coming?
     bool activateWidget = false;
-    fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
     if (navigationInfo->getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
 
       // Get distance to turn
+      if (textColumnCount==2)
+        fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
+      else
+        fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
       showTurn=true;
       activateWidget=true;
       unitConverter->formatMeters(navigationInfo->getTurnDistance(),value,unit);
       infos.str("");
       infos << value << " " << unit;
-      fontEngine->updateString(&distanceValueFontString,infos.str());
+      fontEngine->updateString(&turnFontString,infos.str());
+      fontEngine->unlockFont();
 
       // Set the arrow to show
       turnArrowPointBuffer.reset();
@@ -187,6 +229,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
       // Only activate widget if target is shown or if off route
       // Get the current duration and distance to the target
+      fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
       showTurn=false;
       double distance;
       if (navigationInfo->getOffRoute())
@@ -195,25 +238,18 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         distance=navigationInfo->getTargetDistance();
       else
         distance=-1;
-      if (distance!=-1) {
-        unitConverter->formatMeters(distance,value,unit);
-        infos.str("");
-        infos << value << " " << unit;
-        fontEngine->updateString(&distanceValueFontString,infos.str());
-        activateWidget=true;
-      } else {
-        fontEngine->updateString(&distanceValueFontString,"unknown");
-      }
       if (navigationInfo->getOffRoute()) {
         fontEngine->updateString(&durationValueFontString,"off route!");
-      } else if (navigationInfo->getTargetDuration()!=NavigationInfo::getUnknownDuration()) {
+      } else if (navigationInfo->getTargetDuration()==NavigationInfo::getUnknownDuration()) {
+        fontEngine->updateString(&durationValueFontString,"unknown");
+      } else if (std::isinf(navigationInfo->getTargetDuration())) {
+        fontEngine->updateString(&durationValueFontString,"move!");
+      } else {
         unitConverter->formatTime(navigationInfo->getTargetDuration(),value,unit);
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&durationValueFontString,infos.str());
         activateWidget=true;
-      } else {
-        fontEngine->updateString(&durationValueFontString,"unknown");
       }
       if (textColumnCount==2) {
         if (navigationInfo->getAltitude()!=NavigationInfo::getUnknownDistance()) {
@@ -225,15 +261,17 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         } else {
           fontEngine->updateString(&altitudeValueFontString,"unknown");
         }
-        if (navigationInfo->getTrackLength()!=NavigationInfo::getUnknownDistance()) {
-          unitConverter->formatMeters(navigationInfo->getTrackLength(),value,unit);
-          infos.str("");
-          infos << value << " " << unit;
-          fontEngine->updateString(&trackLengthValueFontString,infos.str());
-          activateWidget=true;
-        } else {
-          fontEngine->updateString(&trackLengthValueFontString,"unknown");
-        }
+        fontEngine->unlockFont();
+        fontEngine->lockFont("sansLarge",__FILE__, __LINE__);
+      }
+      if (distance!=-1) {
+        unitConverter->formatMeters(distance,value,unit);
+        infos.str("");
+        infos << value << " " << unit;
+        fontEngine->updateString(&distanceValueFontString,infos.str());
+        activateWidget=true;
+      } else {
+        fontEngine->updateString(&distanceValueFontString,"unknown");
       }
     }
     fontEngine->unlockFont();
@@ -243,24 +281,16 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     separatorIcon.setX(x);
     separatorIcon.setY(y);
     if (distanceLabelFontString) {
-      distanceLabelFontString->setX((textColumnCount==1)?
-              x+(iconWidth-distanceLabelFontString->getIconWidth())/2 :
-              x+iconWidth/2-textColumnOffsetX-distanceLabelFontString->getIconWidth()
-      );
+      distanceLabelFontString->setX(x+(iconWidth-distanceLabelFontString->getIconWidth())/2);
       distanceLabelFontString->setY(y+textRowFirstOffsetY);
     }
     if (distanceValueFontString) {
-      if (showTurn)
-        distanceValueFontString->setX(x+(iconWidth-distanceValueFontString->getIconWidth())/2);
-      else
-        distanceValueFontString->setX((textColumnCount==1)?
-            x+(iconWidth-distanceValueFontString->getIconWidth())/2 :
-            x+iconWidth/2-textColumnOffsetX-distanceValueFontString->getIconWidth()
-        );
-      if (showTurn)
-        distanceValueFontString->setY(y+turnDistanceValueOffsetY);
-      else
-        distanceValueFontString->setY(y+textRowSecondOffsetY);
+      distanceValueFontString->setX(x+(iconWidth-distanceValueFontString->getIconWidth())/2);
+      distanceValueFontString->setY(y+textRowSecondOffsetY);
+    }
+    if (turnFontString) {
+      turnFontString->setX(x+(iconWidth-turnFontString->getIconWidth())/2);
+      turnFontString->setY(y+turnDistanceValueOffsetY);
     }
     if (durationLabelFontString) {
       durationLabelFontString->setX((textColumnCount==1)?
@@ -275,20 +305,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
           x+iconWidth/2-textColumnOffsetX-durationValueFontString->getIconWidth()
       );
       durationValueFontString->setY(y+textRowThirdOffsetY);
-    }
-    if (trackLengthLabelFontString) {
-      trackLengthLabelFontString->setX((textColumnCount==1)?
-              x+(iconWidth-trackLengthLabelFontString->getIconWidth())/2 :
-              x+iconWidth/2+textColumnOffsetX
-      );
-      trackLengthLabelFontString->setY(y+textRowFirstOffsetY);
-    }
-    if (trackLengthValueFontString) {
-      trackLengthValueFontString->setX((textColumnCount==1)?
-          x+(iconWidth-trackLengthValueFontString->getIconWidth())/2 :
-          x+iconWidth/2+textColumnOffsetX
-      );
-      trackLengthValueFontString->setY(y+textRowSecondOffsetY);
     }
     if (altitudeLabelFontString) {
       altitudeLabelFontString->setX((textColumnCount==1)?
@@ -445,12 +461,16 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     screen->setColor(turnColor.getRed(),turnColor.getGreen(),turnColor.getBlue(),color.getAlpha());
     turnArrowPointBuffer.drawAsTriangles();
     screen->endObject();
+    if (turnFontString) {
+      turnFontString->setColor(color);
+      turnFontString->draw(t);
+    }
 
   } else {
 
     // Draw the information about the target / route
     separatorIcon.setColor(color);
-    //separatorIcon.draw(t);
+    separatorIcon.draw(t);
     if (distanceLabelFontString) {
       distanceLabelFontString->setColor(color);
       distanceLabelFontString->draw(t);
@@ -463,6 +483,10 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
       durationValueFontString->setColor(color);
       durationValueFontString->draw(t);
     }
+    if (distanceValueFontString) {
+      distanceValueFontString->setColor(color);
+      distanceValueFontString->draw(t);
+    }
     if (textColumnCount==2) {
       if (altitudeLabelFontString) {
         altitudeLabelFontString->setColor(color);
@@ -472,21 +496,11 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
         altitudeValueFontString->setColor(color);
         altitudeValueFontString->draw(t);
       }
-      if (trackLengthLabelFontString) {
-        trackLengthLabelFontString->setColor(color);
-        trackLengthLabelFontString->draw(t);
-      }
-      if (trackLengthValueFontString) {
-        trackLengthValueFontString->setColor(color);
-        trackLengthValueFontString->draw(t);
+      if (clockFontString) {
+        clockFontString->setColor(color);
+        clockFontString->draw(t);
       }
     }
-  }
-
-  // Draw the distance text (independent if a turn is coming or not)
-  if (distanceValueFontString) {
-    distanceValueFontString->setColor(color);
-    distanceValueFontString->draw(t);
   }
 }
 

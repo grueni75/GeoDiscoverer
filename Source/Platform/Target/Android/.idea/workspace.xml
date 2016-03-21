@@ -10,7 +10,7 @@
       </config>
     </shared>
     <layouts>
-      <layout url="file://$PROJECT_DIR$/wear/src/main/res/layout/view_map.xml">
+      <layout url="file://$PROJECT_DIR$/wear/src/main/res/layout/dialog.xml">
         <config>
           <theme>@android:style/Theme.DeviceDefault.Light</theme>
         </config>
@@ -23,46 +23,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b578a301-10f4-4fb1-9459-91cdc01d1a52" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/appcompat_v7_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/appcompat_v7_22_2_1.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/design_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/gridlayout_v7_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/jmDNS_jmDNS.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/play_services_base_8_4_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/play_services_basement_8_4_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/play_services_wearable_8_4_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/recyclerview_v7_22_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/recyclerview_v7_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_annotations_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_annotations_22_2_1.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_annotations_23_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_v4_22_2_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_v4_22_2_1.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/support_v4_23_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/libraries/wearable_1_3_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/mobile/src/main/AndroidManifest.xml" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wear/src/main/res/layout/view_map.xml" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wear/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/wear/src/main/AndroidManifest.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/App/Commander.cpp" afterPath="$PROJECT_DIR$/../../../General/App/Commander.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDAppInterface.java" afterPath="$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDAppInterface.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" afterPath="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDCore.java" afterPath="$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDCore.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapSourceMercatorTiles.cpp" afterPath="$PROJECT_DIR$/../../../General/Map/MapSourceMercatorTiles.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Feature/POSIX/Clock.cpp" afterPath="$PROJECT_DIR$/../../Feature/POSIX/Clock.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Feature/POSIX/Clock.h" afterPath="$PROJECT_DIR$/../../Feature/POSIX/Clock.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/App/Core.cpp" afterPath="$PROJECT_DIR$/../../../General/App/Core.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Navigation/NavigationEngine.cpp" afterPath="$PROJECT_DIR$/../../../General/Navigation/NavigationEngine.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Navigation/NavigationInfo.cpp" afterPath="$PROJECT_DIR$/../../../General/Navigation/NavigationInfo.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Navigation/NavigationInfo.h" afterPath="$PROJECT_DIR$/../../../General/Navigation/NavigationInfo.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/WatchFace.java" afterPath="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/WatchFace.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetEngine.cpp" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetEngine.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetNavigation.cpp" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetNavigation.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetNavigation.h" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetNavigation.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/build.gradle" afterPath="$PROJECT_DIR$/mobile/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/collect_assets" afterPath="$PROJECT_DIR$/collect_assets" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/mobile.iml" afterPath="$PROJECT_DIR$/mobile/mobile.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Icon/navigationBackground.svg" afterPath="$PROJECT_DIR$/../../../Media/Icon/navigationBackground.svg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Icon/navigationComplete.svg" afterPath="$PROJECT_DIR$/../../../Media/Icon/navigationComplete.svg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Icon/navigationLargeBackground.svg" afterPath="$PROJECT_DIR$/../../../Media/Icon/navigationLargeBackground.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../config.xsd" afterPath="$PROJECT_DIR$/../../../config.xsd" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Icon/navigationLargeComplete.svg" afterPath="$PROJECT_DIR$/../../../Media/Icon/navigationLargeComplete.svg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Icon/target.svg" afterPath="$PROJECT_DIR$/../../../Media/Icon/target.svg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../Media/Icon/navigationLargeSeparator.svg" afterPath="$PROJECT_DIR$/../../../Media/Icon/navigationLargeSeparator.svg" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="GeoDiscoverer.iws" />
@@ -331,17 +304,31 @@
       <file leaf-file-name="WatchFace.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/WatchFace.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.42595977">
-              <caret line="31" column="47" selection-start-line="31" selection-start-column="47" selection-end-line="31" selection-end-column="47" />
+            <state vertical-scroll-proportion="0.26348227">
+              <caret line="394" column="22" selection-start-line="394" selection-start-column="22" selection-end-line="394" selection-end-column="22" />
               <folding>
-                <element signature="e#0#15066#0" expanded="true" />
+                <element signature="e#0#17610#0" expanded="true" />
+                <element signature="imports" expanded="true" />
                 <element signature="method#dialog#0;class#WatchFace#0" expanded="true" />
+                <element signature="e#3987#4222#0" expanded="true" />
+                <element signature="e#4221#4222#0" expanded="true" />
+                <element signature="e#4296#4501#0" expanded="true" />
+                <element signature="e#4500#4501#0" expanded="true" />
+                <element signature="e#4910#4911#0" expanded="true" />
+                <element signature="e#4948#4949#0" expanded="true" />
+                <element signature="e#5057#5058#0" expanded="true" />
+                <element signature="e#5095#5096#0" expanded="true" />
+                <element signature="e#5207#5208#0" expanded="true" />
+                <element signature="e#5248#5249#0" expanded="true" />
+                <element signature="e#5355#5356#0" expanded="true" />
+                <element signature="e#5392#5393#0" expanded="true" />
+                <element signature="method#handleExternalStorageState#0;class#WatchFace#0" expanded="true" />
                 <element signature="method#updateExternalStorageState#0;class#WatchFace#0" expanded="true" />
+                <element signature="method#updateWakeLock#0;class#WatchFace#0" expanded="true" />
                 <element signature="method#CoreMessageHandler#0;class#CoreMessageHandler#0;class#WatchFace#0" expanded="true" />
                 <element signature="method#handleMessage#0;class#CoreMessageHandler#0;class#WatchFace#0" expanded="true" />
                 <element signature="method#onCreate#0;class#WatchFace#0" expanded="true" />
                 <element signature="method#onCreateEngine#0;class#WatchFace#0" expanded="true" />
-                <element signature="method#onDestroy#0;class#WatchFace#0" expanded="true" />
                 <element signature="method#onCreate#0;class#Engine#0;class#WatchFace#0" expanded="true" />
                 <element signature="method#onDestroy#0;class#Engine#0;class#WatchFace#0" expanded="true" />
                 <element signature="method#onGlContextCreated#0;class#Engine#0;class#WatchFace#0" expanded="true" />
@@ -355,69 +342,48 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/build.gradle">
+      <file leaf-file-name="dialog.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wear/src/main/res/layout/dialog.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="43" column="59" selection-start-line="43" selection-start-column="59" selection-end-line="43" selection-end-column="59" />
+            <state vertical-scroll-proportion="-4.071429">
+              <caret line="6" column="25" selection-start-line="6" selection-start-column="25" selection-end-line="6" selection-end-column="25" />
               <folding />
             </state>
           </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="collect_symbols" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/src/main/collect_symbols">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
-            </state>
+          <provider editor-type-id="android-designer">
+            <state />
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mobile/build.gradle">
+      <file leaf-file-name="GDCore.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDCore.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="54" column="1" selection-start-line="54" selection-start-column="1" selection-end-line="54" selection-end-column="1" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="collect_assets" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/collect_assets">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="1" column="34" selection-start-line="1" selection-start-column="34" selection-end-line="1" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GDApplication.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="117" column="31" selection-start-line="117" selection-start-column="31" selection-end-line="117" selection-end-column="31" />
+              <caret line="244" column="31" selection-start-line="244" selection-start-column="26" selection-end-line="244" selection-end-column="36" />
               <folding>
-                <element signature="method#onCreate#0;class#GDApplication#0" expanded="true" />
-                <element signature="method#showMessageBar#0;class#GDApplication#0" expanded="true" />
-                <element signature="method#setMessageHandler#0;class#GDApplication#0" expanded="false" />
-                <element signature="method#sendNativeCrashReport#0;class#GDApplication#0" expanded="true" />
-                <element signature="method#executeAppCommand#0;class#GDApplication#0" expanded="true" />
-                <element signature="method#addAppMessage#0;class#GDApplication#0" expanded="true" />
+                <element signature="method#GDCore#0;class#GDCore#0" expanded="true" />
+                <element signature="method#finalize#0;class#GDCore#0" expanded="true" />
+                <element signature="method#handleMessage#0;class#AppMessageHandler#0;class#GDCore#0" expanded="true" />
+                <element signature="method#updateHome#0;class#GDCore#0" expanded="true" />
+                <element signature="method#start#0;class#GDCore#0" expanded="true" />
+                <element signature="method#restart#0;class#GDCore#0" expanded="true" />
+                <element signature="method#executeCoreCommand#0;class#GDCore#0" expanded="true" />
+                <element signature="method#executeAppCommand#0;class#GDCore#0" expanded="true" />
+                <element signature="method#getHomeDirPath#0;class#GDCore#0" expanded="true" />
+                <element signature="method#onDrawFrame#0;class#GDCore#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GDMessageListenerService.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/GDMessageListenerService.java">
+      <file leaf-file-name="ViewMap.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="35" column="0" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
-              <folding />
+              <caret line="1541" column="0" selection-start-line="1541" selection-start-column="0" selection-end-line="1541" selection-end-column="0" />
+              <folding>
+                <element signature="method#onDestroy#0;class#ViewMap#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -6116,7 +6082,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/mobile/src/main/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/Android.mk" />
         <option value="$PROJECT_DIR$/mobile/src/main/collect_symbols" />
         <option value="$PROJECT_DIR$/mobile/src/main/jni/GDCore.cpp" />
@@ -6161,11 +6126,12 @@
         <option value="$PROJECT_DIR$/mobile/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/res/values-v23/values-v23.xml" />
         <option value="$PROJECT_DIR$/mobile/build.gradle" />
         <option value="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" />
-        <option value="$PROJECT_DIR$/wear/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java" />
-        <option value="$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDCore.java" />
         <option value="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/GDMessageListenerService.java" />
         <option value="$PROJECT_DIR$/collect_assets" />
+        <option value="$PROJECT_DIR$/wear/src/main/res/layout/dialog.xml" />
+        <option value="$PROJECT_DIR$/wear/src/main/AndroidManifest.xml" />
+        <option value="$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDCore.java" />
         <option value="$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/WatchFace.java" />
       </list>
     </option>
@@ -6370,6 +6336,62 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wear" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="layout" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeoDiscoverer" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Android" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wear" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="java" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -6523,9 +6545,9 @@
         </subPane>
       </pane>
       <pane id="PackagesPane" />
+      <pane id="Scratches" />
       <pane id="Scope" />
       <pane id="AndroidView" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -6536,7 +6558,7 @@
     <property name="android.project.structure.last.selected" value="mobile" />
     <property name="android.project.structure.proportion" value="0.15" />
     <property name="android.sdk.path" value="$PROJECT_DIR$/../../../../../android/android-sdk" />
-    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="14522D2D868E648" />
+    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="TA045089FR" />
     <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_AVD" value="Nexus_5_API_22_x86" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../Cockpit/GeoDashboard" />
     <property name="ExportApk.ApkPath" value="$PROJECT_DIR$/export" />
@@ -6894,32 +6916,32 @@
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32307693" sideWeight="0.44714132" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3292683" sideWeight="0.5128617" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Android Monitor" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37744033" sideWeight="0.442246" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32941177" sideWeight="0.4732143" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4128114" sideWeight="0.40650406" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26681128" sideWeight="0.34652406" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3292683" sideWeight="0.4732143" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.389011" sideWeight="0.48274" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39251336" sideWeight="0.55576557" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39186993" sideWeight="0.55576557" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3264642" sideWeight="0.5181818" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3286334" sideWeight="0.48288772" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37744033" sideWeight="0.55775404" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29839572" sideWeight="0.5574913" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3813187" sideWeight="0.25458467" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26681128" sideWeight="0.65347594" order="10" side_tool="true" content_ui="tabs" />
+      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21138212" sideWeight="0.57238305" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.38069415" sideWeight="0.25347593" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2737968" sideWeight="0.4807074" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32637364" sideWeight="0.47950378" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24973261" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2495935" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3292683" sideWeight="0.48713827" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29839572" sideWeight="0.4425087" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.51648355" sideWeight="0.36731392" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.13903743" sideWeight="0.42761692" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5160142" sideWeight="0.36504066" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32960597" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4143167" sideWeight="0.4090909" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32831" sideWeight="0.53061223" order="14" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -6999,6 +7021,45 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/WatchFace.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#17610#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="method#dialog#0;class#WatchFace#0" expanded="true" />
+            <element signature="e#3987#4222#0" expanded="true" />
+            <element signature="e#4221#4222#0" expanded="true" />
+            <element signature="e#4296#4501#0" expanded="true" />
+            <element signature="e#4500#4501#0" expanded="true" />
+            <element signature="e#4910#4911#0" expanded="true" />
+            <element signature="e#4948#4949#0" expanded="true" />
+            <element signature="e#5057#5058#0" expanded="true" />
+            <element signature="e#5095#5096#0" expanded="true" />
+            <element signature="e#5207#5208#0" expanded="true" />
+            <element signature="e#5248#5249#0" expanded="true" />
+            <element signature="e#5355#5356#0" expanded="true" />
+            <element signature="e#5392#5393#0" expanded="true" />
+            <element signature="method#handleExternalStorageState#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#updateExternalStorageState#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#updateWakeLock#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#CoreMessageHandler#0;class#CoreMessageHandler#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#handleMessage#0;class#CoreMessageHandler#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onCreate#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onCreateEngine#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onCreate#0;class#Engine#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onDestroy#0;class#Engine#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onGlContextCreated#0;class#Engine#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onGlSurfaceCreated#0;class#Engine#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onAmbientModeChanged#0;class#Engine#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onVisibilityChanged#0;class#Engine#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onTimeTick#0;class#Engine#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#onDraw#0;class#Engine#0;class#WatchFace#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -7103,21 +7164,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33202356">
-          <caret line="1687" column="17" selection-start-line="1687" selection-start-column="9" selection-end-line="1687" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/nav_drawer_header.xml">
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.29745597">
           <caret line="8" column="33" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
         </state>
+      </provider>
+      <provider editor-type-id="android-designer">
+        <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core/src/main/jni/GDCore.cpp">
@@ -7156,23 +7210,13 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/res/layout/view_map.xml">
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.37281552">
           <caret line="11" column="46" selection-start-line="11" selection-start-column="46" selection-end-line="79" selection-end-column="4" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wear/src/main/res/layout/view_map.xml">
       <provider editor-type-id="android-designer">
         <state />
-      </provider>
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.6785714">
-          <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDMapSurfaceView.java">
@@ -7182,57 +7226,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/src/main/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="36" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/src/main/java/javax/test/MyWatchFace.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="511" column="0" selection-start-line="511" selection-start-column="0" selection-end-line="511" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/src/main/res/xml/watch_face.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wear/src/main/res/xml/watch_face.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
         </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/src/main/res/drawable-nodpi/preview_digital.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/src/main/res/drawable-nodpi/preview_digital_circular.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/src/main/res/mipmap-hdpi/ic_launcher.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/src/main/res/mipmap-xxhdpi/ic_launcher.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/src/main/res/mipmap-xhdpi/ic_launcher.png">
-      <provider selected="true" editor-type-id="images">
-        <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../../../../../android/android-sdk/sources/android-22/android/service/wallpaper/WallpaperService.java">
@@ -7284,14 +7282,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wear/src/main/AndroidManifest.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.08007449">
-          <caret line="32" column="18" selection-start-line="32" selection-start-column="18" selection-end-line="32" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/GDApplication.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.37243947">
@@ -7302,14 +7292,6 @@
             <element signature="method#executeAppCommand#0;class#GDApplication#0" expanded="false" />
             <element signature="method#sendWearCommand#0;class#GDApplication#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDCore.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.40792078">
-          <caret line="596" column="23" selection-start-line="596" selection-start-column="23" selection-end-line="596" selection-end-column="23" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -7333,12 +7315,12 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="117" column="31" selection-start-line="117" selection-start-column="31" selection-end-line="117" selection-end-column="31" />
           <folding>
-            <element signature="method#onCreate#0;class#GDApplication#0" expanded="true" />
-            <element signature="method#showMessageBar#0;class#GDApplication#0" expanded="true" />
+            <element signature="method#onCreate#0;class#GDApplication#0" expanded="false" />
+            <element signature="method#showMessageBar#0;class#GDApplication#0" expanded="false" />
             <element signature="method#setMessageHandler#0;class#GDApplication#0" expanded="false" />
-            <element signature="method#sendNativeCrashReport#0;class#GDApplication#0" expanded="true" />
-            <element signature="method#executeAppCommand#0;class#GDApplication#0" expanded="true" />
-            <element signature="method#addAppMessage#0;class#GDApplication#0" expanded="true" />
+            <element signature="method#sendNativeCrashReport#0;class#GDApplication#0" expanded="false" />
+            <element signature="method#executeAppCommand#0;class#GDApplication#0" expanded="false" />
+            <element signature="method#addAppMessage#0;class#GDApplication#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -7347,7 +7329,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="43" column="59" selection-start-line="43" selection-start-column="59" selection-end-line="43" selection-end-column="59" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -7355,7 +7336,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -7363,7 +7343,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="54" column="1" selection-start-line="54" selection-start-column="1" selection-end-line="54" selection-end-column="1" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -7371,23 +7350,84 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="1" column="34" selection-start-line="1" selection-start-column="34" selection-end-line="1" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wear/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="42" column="21" selection-start-line="42" selection-start-column="21" selection-end-line="42" selection-end-column="21" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wear/src/main/res/layout/dialog.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.071429">
+          <caret line="6" column="25" selection-start-line="6" selection-start-column="25" selection-end-line="6" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="1541" column="0" selection-start-line="1541" selection-start-column="0" selection-end-line="1541" selection-end-column="0" />
+          <folding>
+            <element signature="method#onDestroy#0;class#ViewMap#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDCore.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="244" column="31" selection-start-line="244" selection-start-column="26" selection-end-line="244" selection-end-column="36" />
+          <folding>
+            <element signature="method#GDCore#0;class#GDCore#0" expanded="true" />
+            <element signature="method#finalize#0;class#GDCore#0" expanded="true" />
+            <element signature="method#handleMessage#0;class#AppMessageHandler#0;class#GDCore#0" expanded="true" />
+            <element signature="method#updateHome#0;class#GDCore#0" expanded="true" />
+            <element signature="method#start#0;class#GDCore#0" expanded="true" />
+            <element signature="method#restart#0;class#GDCore#0" expanded="true" />
+            <element signature="method#executeCoreCommand#0;class#GDCore#0" expanded="true" />
+            <element signature="method#executeAppCommand#0;class#GDCore#0" expanded="true" />
+            <element signature="method#getHomeDirPath#0;class#GDCore#0" expanded="true" />
+            <element signature="method#onDrawFrame#0;class#GDCore#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wear/src/main/java/com/untouchableapps/android/geodiscoverer/WatchFace.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.42595977">
-          <caret line="31" column="47" selection-start-line="31" selection-start-column="47" selection-end-line="31" selection-end-column="47" />
+        <state vertical-scroll-proportion="0.26348227">
+          <caret line="394" column="22" selection-start-line="394" selection-start-column="22" selection-end-line="394" selection-end-column="22" />
           <folding>
-            <element signature="e#0#15066#0" expanded="true" />
+            <element signature="e#0#17610#0" expanded="true" />
+            <element signature="imports" expanded="true" />
             <element signature="method#dialog#0;class#WatchFace#0" expanded="true" />
+            <element signature="e#3987#4222#0" expanded="true" />
+            <element signature="e#4221#4222#0" expanded="true" />
+            <element signature="e#4296#4501#0" expanded="true" />
+            <element signature="e#4500#4501#0" expanded="true" />
+            <element signature="e#4910#4911#0" expanded="true" />
+            <element signature="e#4948#4949#0" expanded="true" />
+            <element signature="e#5057#5058#0" expanded="true" />
+            <element signature="e#5095#5096#0" expanded="true" />
+            <element signature="e#5207#5208#0" expanded="true" />
+            <element signature="e#5248#5249#0" expanded="true" />
+            <element signature="e#5355#5356#0" expanded="true" />
+            <element signature="e#5392#5393#0" expanded="true" />
+            <element signature="method#handleExternalStorageState#0;class#WatchFace#0" expanded="true" />
             <element signature="method#updateExternalStorageState#0;class#WatchFace#0" expanded="true" />
+            <element signature="method#updateWakeLock#0;class#WatchFace#0" expanded="true" />
             <element signature="method#CoreMessageHandler#0;class#CoreMessageHandler#0;class#WatchFace#0" expanded="true" />
             <element signature="method#handleMessage#0;class#CoreMessageHandler#0;class#WatchFace#0" expanded="true" />
             <element signature="method#onCreate#0;class#WatchFace#0" expanded="true" />
             <element signature="method#onCreateEngine#0;class#WatchFace#0" expanded="true" />
-            <element signature="method#onDestroy#0;class#WatchFace#0" expanded="true" />
             <element signature="method#onCreate#0;class#Engine#0;class#WatchFace#0" expanded="true" />
             <element signature="method#onDestroy#0;class#Engine#0;class#WatchFace#0" expanded="true" />
             <element signature="method#onGlContextCreated#0;class#Engine#0;class#WatchFace#0" expanded="true" />

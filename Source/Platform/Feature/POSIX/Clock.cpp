@@ -32,19 +32,8 @@ Clock::Clock() {
 Clock::~Clock() {
 }
 
-// Returns a formatted date string
-std::string Clock::getFormattedDate() {
-  const int buffer_len=256;
-  char date[buffer_len];
-  time_t t;
-  t=time(NULL);
-  strftime(date,buffer_len,"%Y%m%d-%H%M%S",localtime(&t));
-  std::string result=date;
-  return result;
-}
-
-// Returns a formatted date string suitable for XML files
-std::string Clock::getXMLDate(TimestampInSeconds timestamp, bool asLocalTime) {
+// Returns a date in the given format
+std::string Clock::getFormattedDate(TimestampInSeconds timestamp, std::string format, bool asLocalTime) {
   const int buffer_len=256;
   char date[buffer_len];
   time_t t;
@@ -58,8 +47,19 @@ std::string Clock::getXMLDate(TimestampInSeconds timestamp, bool asLocalTime) {
   else {
     tmp=gmtime(&t);
   }
-  strftime(date,buffer_len,"%Y-%m-%dT%H:%M:%S",tmp);
+  strftime(date,buffer_len,format.c_str(),tmp);
   std::string result=date;
+  return result;
+}
+
+// Returns a formatted date string
+std::string Clock::getFormattedDate() {
+  return getFormattedDate(getSecondsSinceEpoch(),"%Y%m%d-%H%M%S",true);
+}
+
+// Returns a formatted date string suitable for XML files
+std::string Clock::getXMLDate(TimestampInSeconds timestamp, bool asLocalTime) {
+  std::string result=getFormattedDate(timestamp,"%Y-%m-%dT%H:%M:%S",asLocalTime);
   if (!asLocalTime)
     result=result+"Z";
   return result;

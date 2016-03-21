@@ -16,6 +16,7 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.graphics.PixelFormat;
 import android.opengl.GLES20;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,7 +28,15 @@ import android.os.SystemClock;
 import android.support.wearable.watchface.Gles2WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
@@ -41,7 +50,18 @@ public class WatchFace extends Gles2WatchFaceService {
   GDCore coreObject = null;
 
   // Managers
-  PowerManager powerManager;
+  PowerManager powerManager = null;
+  WindowManager windowManager = null;
+  LayoutInflater inflater = null;
+
+  // Dialog window
+  FrameLayout dialogLayout = null;
+  TextView progressDialogText;
+  ProgressBar progressDialogBar;
+  LinearLayout progressDialogLayout;
+  TextView messageDialogText;
+  ImageButton messageDialogImageButton;
+  LinearLayout messageDialogLayout;
 
   // Wake lock
   PowerManager.WakeLock wakeLock = null;
@@ -71,31 +91,37 @@ public class WatchFace extends Gles2WatchFaceService {
     } else if (kind==INFO_DIALOG) {
       GDApplication.showMessageBar(getApplicationContext(), message, GDApplication.MESSAGE_BAR_DURATION_LONG);
     } else {
-      /*if (messageDialogLayout.getVisibility() == messageDialogLayout.INVISIBLE) {
-        messageDialogTextView.setText(message);
+      if (dialogLayout==null) {
+        dialogLayout = (FrameLayout) inflater.inflate(R.layout.dialog, null);
+        messageDialogText = (TextView) dialogLayout.findViewById(R.id.message_dialog_text);
+        messageDialogImageButton = (ImageButton) dialogLayout.findViewById(R.id.message_dialog_button);
+        messageDialogLayout = (LinearLayout) dialogLayout.findViewById(R.id.message_dialog);
+        WindowManager.LayoutParams params =  new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, 0, PixelFormat.TRANSLUCENT);
+        windowManager.addView(dialogLayout,params);
+        messageDialogText.setText(message);
         if (kind == FATAL_DIALOG) {
           messageDialogImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              messageDialogLayout.setVisibility(messageDialogLayout.INVISIBLE);
-              rootFrameLayout.requestLayout();
-              finish();
+              windowManager.removeView(dialogLayout);
+              dialogLayout=null;
+              System.exit(1);
             }
           });
         } else {
           messageDialogImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              messageDialogLayout.setVisibility(messageDialogLayout.INVISIBLE);
-              rootFrameLayout.requestLayout();
+              windowManager.removeView(dialogLayout);
+              dialogLayout=null;
             }
           });
         }
         messageDialogLayout.setVisibility(messageDialogLayout.VISIBLE);
-        rootFrameLayout.requestLayout();
+        dialogLayout.requestLayout();
       } else {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping dialog request <" + message + "> because alert dialog is already visible");
-      }*/
+      }
     }
   }
 
@@ -256,30 +282,38 @@ public class WatchFace extends Gles2WatchFaceService {
             //commandExecuted=true;
           }
           if (commandFunction.equals("createProgressDialog")) {
-            /*if (viewMap.progressDialogLayout.getVisibility() == viewMap.progressDialogLayout.INVISIBLE) {
-              viewMap.progressDialogTextView.setText(commandArgs.get(0));
+
+            // Create a new dialog if it does not yet exist
+            if (watchFace.dialogLayout==null) {
+              watchFace.dialogLayout = (FrameLayout) watchFace.inflater.inflate(R.layout.dialog, null);
+              watchFace.progressDialogText = (TextView) watchFace.dialogLayout.findViewById(R.id.progress_dialog_text);
+              watchFace.progressDialogBar = (ProgressBar) watchFace.dialogLayout.findViewById(R.id.progress_dialog_bar);
+              watchFace.progressDialogLayout = (LinearLayout) watchFace.dialogLayout.findViewById(R.id.progress_dialog);
+              WindowManager.LayoutParams params =  new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, 0, PixelFormat.TRANSLUCENT);
+              watchFace.windowManager.addView(watchFace.dialogLayout,params);
+              watchFace.progressDialogText.setText(commandArgs.get(0));
               int max=Integer.parseInt(commandArgs.get(1));
-              viewMap.progressDialogBar.setIndeterminate(max==0?true:false);
-              viewMap.progressDialogBar.setMax(max);
-              viewMap.progressDialogBar.setProgress(0);
-              viewMap.progressDialogLayout.setVisibility(viewMap.progressDialogLayout.VISIBLE);
-              viewMap.rootFrameLayout.requestLayout();
+              watchFace.progressDialogBar.setIndeterminate(max==0?true:false);
+              watchFace.progressDialogBar.setMax(max);
+              watchFace.progressDialogBar.setProgress(0);
+              watchFace.progressDialogLayout.setVisibility(watchFace.progressDialogLayout.VISIBLE);
+              watchFace.dialogLayout.requestLayout();
             } else {
               GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping progress dialog request <" + commandArgs.get(0) + "> because progress dialog is already visible");
-            }*/
-            //commandExecuted=true;
+            }
+            commandExecuted=true;
           }
           if (commandFunction.equals("updateProgressDialog")) {
-            /*viewMap.progressDialogTextView.setText(commandArgs.get(0));
+            watchFace.progressDialogText.setText(commandArgs.get(0));
             int progress=Integer.parseInt(commandArgs.get(1));
-            viewMap.progressDialogBar.setProgress(progress);
-            viewMap.rootFrameLayout.requestLayout();
-            commandExecuted=true;*/
+            watchFace.progressDialogBar.setProgress(progress);
+            watchFace.dialogLayout.requestLayout();
+            commandExecuted=true;
           }
           if (commandFunction.equals("closeProgressDialog")) {
-            /*viewMap.progressDialogLayout.setVisibility(viewMap.progressDialogLayout.INVISIBLE);
-            viewMap.rootFrameLayout.requestLayout();
-            commandExecuted=true;*/
+            watchFace.windowManager.removeView(watchFace.dialogLayout);
+            watchFace.dialogLayout=null;
+            commandExecuted=true;
           }
           if (commandFunction.equals("coreInitialized")) {
             // Nothing to do as of now
@@ -319,6 +353,8 @@ public class WatchFace extends Gles2WatchFaceService {
 
     // Get important handles
     powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+    windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+    inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
     // Get a wake lock
     if (wakeLock!=null)
@@ -371,15 +407,23 @@ public class WatchFace extends Gles2WatchFaceService {
       // Set the watch face style
       setWatchFaceStyle(new WatchFaceStyle.Builder(WatchFace.this)
           .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
+          .setAmbientPeekMode(WatchFaceStyle.AMBIENT_PEEK_MODE_HIDDEN)
           .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
-          .setStatusBarGravity(Gravity.CENTER)
-          .setHotwordIndicatorGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL)
+          .setStatusBarGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM)
+          .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM)
           .setShowSystemUiTime(false)
+          .setShowUnreadCountIndicator(true)
+          .setViewProtectionMode(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR)
           .build());
     }
 
     @Override
     public void onDestroy() {
+      if (dialogLayout!=null)
+        windowManager.removeView(dialogLayout);
+      Message m=Message.obtain(coreObject.messageHandler);
+      m.what = GDCore.STOP_CORE;
+      coreObject.messageHandler.sendMessage(m);
     }
 
     @Override

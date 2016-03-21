@@ -974,6 +974,11 @@ void WidgetEngine::createGraphic() {
       config.setParameter("orientationLabelRadius","91.0");
       config.setParameter("targetRadius","89.5");
       config.setParameter("textColumnCount","2");
+      config.setParameter("textRowFirstOffsetY","75");
+      config.setParameter("textRowSecondOffsetY","60");
+      config.setParameter("textRowThirdOffsetY","42");
+      config.setParameter("textRowFourthOffsetY","31");
+      config.setParameter("clockOffsetY","16");
     } else {
       position=WidgetPosition();
       position.setRefScreenDiagonal(0.0);
@@ -991,12 +996,12 @@ void WidgetEngine::createGraphic() {
       config.setParameter("orientationLabelRadius","86.5");
       config.setParameter("targetRadius","86.0");
       config.setParameter("textColumnCount","1");
+      config.setParameter("textRowFirstOffsetY","71");
+      config.setParameter("textRowSecondOffsetY","57");
+      config.setParameter("textRowThirdOffsetY","37");
+      config.setParameter("textRowFourthOffsetY","25");
     }
     config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setParameter("textRowFirstOffsetY","71");
-    config.setParameter("textRowSecondOffsetY","57");
-    config.setParameter("textRowThirdOffsetY","37");
-    config.setParameter("textRowFourthOffsetY","25");
     config.setParameter("textColumnOffsetX","5");
     config.setParameter("targetIconFilename","navigationTarget");
     config.setParameter("updateInterval","1000000");
@@ -1159,6 +1164,7 @@ void WidgetEngine::createGraphic() {
         navigation->setTextRowSecondOffsetY(c->getDoubleValue(widgetPath,"textRowSecondOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTextRowThirdOffsetY(c->getDoubleValue(widgetPath,"textRowThirdOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTextRowFourthOffsetY(c->getDoubleValue(widgetPath,"textRowFourthOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
+        navigation->setClockOffsetY(c->getDoubleValue(widgetPath,"clockOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTextColumnOffsetX(c->getDoubleValue(widgetPath,"textColumnOffsetX",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);
         navigation->setTurnDistanceValueOffsetY(c->getDoubleValue(widgetPath,"turnDistanceValueOffsetY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setDirectionChangeDuration(c->getDoubleValue(widgetPath,"directionChangeDuration",__FILE__, __LINE__));
