@@ -69,6 +69,15 @@ void ConfigStore::setIntValue(std::string path, std::string name, Int value, con
   setStringValue(path,name,valueString,file,line);
 }
 
+// Sets an long integer value in the config
+void ConfigStore::setLongValue(std::string path, std::string name, long value, const char *file, int line)
+{
+  std::stringstream out;
+  out << value;
+  std::string valueString = out.str();
+  setStringValue(path,name,valueString,file,line);
+}
+
 // Sets an integer value in the config
 void ConfigStore::setDoubleValue(std::string path, std::string name, double value, const char *file, int line)
 {
@@ -96,6 +105,17 @@ Int ConfigStore::getIntValue(std::string path, std::string name, const char *fil
   in >> valueInt;
   return valueInt;
 
+}
+
+// Gets a long integer value from the config
+long ConfigStore::getLongValue(std::string path, std::string name, const char *file, int line)
+{
+  std::string value;
+  long valueInt;
+  value=getStringValue(path,name,file,line);
+  std::istringstream in(value);
+  in >> valueInt;
+  return valueInt;
 }
 
 // Gets a double value from the config

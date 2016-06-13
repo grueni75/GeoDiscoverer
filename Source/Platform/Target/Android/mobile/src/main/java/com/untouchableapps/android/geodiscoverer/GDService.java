@@ -22,11 +22,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.NotificationCompat;
 import android.widget.Toast;
 
@@ -210,16 +214,19 @@ public class GDService extends Service {
       if (intent.getIntExtra("tilesLeft",0)==0) {
         notification = createDefaultNotification();
       } else {
-        int tilesDone=intent.getIntExtra("tilesDone",0);
-        int tilesTotal=intent.getIntExtra("tilesLeft",0)+tilesDone;
+        int tilesDone = intent.getIntExtra("tilesDone", 0);
+        int tilesTotal = intent.getIntExtra("tilesLeft", 0) + tilesDone;
+        /*Drawable notificationDownloadingDrawble= ResourcesCompat.getDrawable(getResources(),
+            R.drawable.notification_downloading,null);
+        DrawableCompat.setTint(notificationDownloadingDrawble,Color.WHITE);*/
         notification = new NotificationCompat.Builder(this)
             .setContentTitle(getText(R.string.notification_title))
             .setContentText(getString(R.string.notification_map_download_ongoing_message,
-                            intent.getIntExtra("tilesLeft",0),intent.getStringExtra("timeLeft")))
+                intent.getIntExtra("tilesLeft", 0), intent.getStringExtra("timeLeft")))
             .setSmallIcon(R.drawable.notification_downloading)
             .setContentIntent(pendingIntent)
             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-            .setProgress(tilesTotal,tilesDone,false)
+            .setProgress(tilesTotal, tilesDone, false)
             .build();
       }
       notificationManager.notify(R.string.notification_title, notification);
@@ -228,7 +235,6 @@ public class GDService extends Service {
   }
   
   /** Called when the service is stopped */
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   @Override
   public void onDestroy() {
     

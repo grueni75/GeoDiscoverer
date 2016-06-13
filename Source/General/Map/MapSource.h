@@ -160,6 +160,12 @@ public:
   // Processes all pending download jobs
   virtual void processDownloadJobs();
 
+  // Returns the number of unqueued tiles
+  virtual Int countUnqueuedDownloadTiles(bool peek);
+
+  // Trigger the download job processing
+  virtual void triggerDownloadJobProcessing();
+
   // Returns the name of the given zoom level
   std::string getMapLayerName(int zoomLevel);
 
@@ -212,6 +218,12 @@ public:
   }
 
   virtual void unlockAccess() {
+  }
+
+  virtual void lockDownloadJobProcessing(const char *file, int line) {
+  }
+
+  virtual void unlockDownloadJobProcessing() {
   }
 
   std::vector<MapContainer*>* getMapContainers() {

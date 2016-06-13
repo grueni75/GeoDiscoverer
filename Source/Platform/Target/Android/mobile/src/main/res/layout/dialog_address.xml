@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingLeft="@dimen/md_dialog_frame_margin"
+              android:paddingRight="@dimen/md_dialog_frame_margin"
+              android:paddingTop="@dimen/md_content_padding_top"
+              android:paddingBottom="@dimen/md_content_padding_bottom">
+
+  <ListView
+    android:id="@+id/dialog_address_history_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:layout_marginTop="16dp"
+    android:divider="@null"
+    android:dividerHeight="0dp"
+    android:layout_gravity="center_horizontal" />
+
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="@dimen/md_content_padding_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+    <android.support.design.widget.TextInputLayout
+      android:layout_width="match_parent"
+      android:layout_weight="1"
+      android:layout_height="wrap_content">
+
+      <EditText
+        android:id="@+id/dialog_address_input_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:inputType="text"
+        android:textSize="@dimen/md_content_textsize"
+        android:hint="@string/dialog_address_input_hint"
+        />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <ImageButton
+      android:id="@+id/dialog_address_history_entry_clear_button"
+      android:layout_width="wrap_content"
+      android:layout_height="48dp"
+      android:layout_gravity="center_horizontal|bottom"
+      android:paddingLeft="5dp"
+      android:paddingRight="5dp"
+      android:src="@drawable/clear"
+      android:background="?attr/selectableItemBackground"/>
+
+    <ImageButton
+      android:id="@+id/dialog_address_history_entry_add_button"
+      android:layout_width="wrap_content"
+      android:layout_height="48dp"
+      android:layout_gravity="center_horizontal|bottom"
+      android:paddingLeft="5dp"
+      android:paddingRight="5dp"
+      android:src="@drawable/add"
+      android:background="?attr/selectableItemBackground"/>
+
+  </LinearLayout>
+
+</LinearLayout>

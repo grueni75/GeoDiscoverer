@@ -968,6 +968,15 @@ void MapSource::addDownloadJob(bool estimateOnly, std::string zoomLevels) {
 void MapSource::processDownloadJobs() {
 }
 
+// Returns the number of unqueued but not downloaded tiles
+Int MapSource::countUnqueuedDownloadTiles(bool peek) {
+  return 0;
+}
+
+// Triggers the download job processing
+void MapSource::triggerDownloadJobProcessing() {
+}
+
 // Returns a list of names of the maps that have a legend
 std::list<std::string> MapSource::getLegendNames() {
   std::list<std::string> l;

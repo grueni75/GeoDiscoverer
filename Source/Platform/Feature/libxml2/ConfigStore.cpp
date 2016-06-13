@@ -182,7 +182,7 @@ void ConfigStore::rememberUserConfig(std::string path, XMLNode nodes) {
           }
         }
       }
-      if (std::string((const char *)i->name)=="attribute") {
+      if ((path!="")&&(std::string((const char *)i->name)=="attribute")) {
         if (i->properties) {
           for(XMLAttribute j=i->properties;j!=NULL;j=j->next) {
             if (std::string((const char *)j->name)=="name") {
@@ -224,7 +224,8 @@ void ConfigStore::rememberUserConfig(std::string path, XMLNode nodes) {
         }
       }
       if (i->children) {
-        if (attributeValues.size()>0) {
+        if (oneAttributeFound) {
+          //DEBUG("path=%s name=%s",path.c_str(),attributeName.c_str());
           for(std::list<std::string>::iterator j=attributeValues.begin();j!=attributeValues.end();j++) {
             rememberUserConfig(newPath + "[@" + attributeName + "='" + *j + "']",i->children);
           }
@@ -707,6 +708,8 @@ StringMap ConfigStore::getNodeInfo(std::string path) {
         std::string type=(char*)attr->children->content;
         if (type=="xsd:integer") {
           type="integer";
+        } else if (type=="xsd:long") {
+          type="long";
         } else if (type=="xsd:string") {
           type="string";
         } else if (type=="xsd:boolean") {

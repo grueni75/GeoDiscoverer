@@ -344,12 +344,12 @@ public class Preferences extends PreferenceActivity implements
 
       // Text-based entry nodes?
     } else if ((type.equals("string"))
-        || (type.equals("integer") || (type.equals("double")))) {
+        || (type.equals("integer") || (type.equals("double") || (type.equals("long"))))) {
       MaterialEditTextPreference editText = new MaterialEditTextPreference(this);
       entry = editText;
       entry.setDefaultValue(coreObject.configStoreGetStringValue(path, name));
       editText.setDialogTitle("Value of \"" + prettyName + "\"");
-      if (type.equals("integer")) {
+      if ((type.equals("integer"))||(type.equals("long"))) {
         DigitsKeyListener listener = new DigitsKeyListener(true, false);
         editText.getEditText().setKeyListener(listener);
       }

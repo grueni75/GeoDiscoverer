@@ -48,8 +48,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.v7.app.NotificationCompat;
 import android.text.format.Time;
 import android.util.Log;
 import android.widget.Toast;
@@ -794,6 +796,8 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
      *            Name of the report file to send.
      */
     private void notifySendReport(String reportFileName) {
+        Log.d(LOG_TAG, "Creating Notification for " + reportFileName);
+
         // This notification can't be set to AUTO_CANCEL because after a crash,
         // clicking on it restarts the application and this triggers a check
         // for pending reports which issues the notification back.
@@ -809,23 +813,27 @@ public class ErrorReporter implements Thread.UncaughtExceptionHandler {
 
         final CharSequence tickerText = mContext.getText(conf.resNotifTickerText());
         final long when = System.currentTimeMillis();
-        final Notification notification = new Notification(icon, tickerText, when);
-
         final CharSequence contentTitle = mContext.getText(conf.resNotifTitle());
         final CharSequence contentText = mContext.getText(conf.resNotifText());
 
         final Intent notificationIntent = new Intent(mContext, CrashReportDialog.class);
-        Log.d(LOG_TAG, "Creating Notification for " + reportFileName);
         notificationIntent.putExtra(ACRAConstants.EXTRA_REPORT_FILE_NAME, reportFileName);
         final PendingIntent contentIntent = PendingIntent.getActivity(mContext, mNotificationCounter++, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        notification.setLatestEventInfo(mContext, contentTitle, contentText, contentIntent);
 
         final Intent deleteIntent = new Intent(mContext, CrashReportDialog.class);
         deleteIntent.putExtra(ACRAConstants.EXTRA_FORCE_CANCEL, true);
         final PendingIntent pendingDeleteIntent = PendingIntent.getActivity(mContext, -1, deleteIntent, 0);
-        notification.deleteIntent = pendingDeleteIntent;
-        
+
+        final Notification notification = new NotificationCompat.Builder(mContext)
+            .setSmallIcon(icon)
+            .setTicker(tickerText)
+            .setWhen(when)
+            .setContentText(contentText)
+            .setContentTitle(contentTitle)
+            .setContentIntent(contentIntent)
+            .setDeleteIntent(pendingDeleteIntent)
+            .build();
+
         // Send new notification
         notificationManager.notify(ACRAConstants.NOTIF_CRASH_ID, notification);
     }

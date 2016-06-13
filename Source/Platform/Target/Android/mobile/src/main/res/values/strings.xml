@@ -54,9 +54,8 @@
 	<string name="context_menu_title">Map actions</string>
 	<string name="show_target">Show target</string>
 	<string name="manually_entered_address">Manually entered address</string>
-	<string name="address_dialog_title">Set target at address</string>
-	<string name="address_dialog_message">Enter the address to find in a single line:</string>
-  <string name="address_dialog_hint">Alexanderplatz 1, Berlin</string>
+	<string name="dialog_address_title">Set target at address</string>
+  <string name="dialog_address_input_hint">Alexanderplatz 1, Berlin (single line!)</string>
   <string name="device_admin_description">Allows Geo Discoverer to turn off the screen by locking it.</string>
 	<string name="device_admin_not_enabled">Screen can not be locked: Please allow GeoDiscoverer to act as a device admin in the system settings.</string>
 	<string name="replace_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;? There exists already a map folder that will be replaced.</string>
@@ -73,8 +72,8 @@
   <string name="skipping_download">Skipping download because there is already one ongoing.</string>
   <string name="download_failed">Downloading of file &lt;%1$s&gt; failed!</string>
   <string name="cannot_read_uri">Could not read contents of URI &lt;%1$s&gt;!</string>
-  <string name="route_name_dialog_title">Import route</string>
-  <string name="route_name_dialog_message">Enter the name of the route:</string>
+  <string name="dialog_route_name_title">Import route</string>
+  <string name="dialog_route_name_message">Enter the name of the route:</string>
   <string name="route_exists">Existing route will be overwritten.</string>
   <string name="importing_route">Importing route &lt;%1$s&gt;</string>
   <string name="cannot_import_route">Could not import route &lt;%1$s&gt; (I/O error)!</string>

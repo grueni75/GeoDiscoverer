@@ -23,6 +23,9 @@ protected:
   // Indicates if the engine is initialized
   bool isInitialized;
 
+  // Maximum number of address entries
+  Int maxAddressPointCount;
+
   // Current location
   MapPosition locationPos;
 
@@ -238,6 +241,12 @@ public:
 
   // Sets the end flag
   void setEndFlag(NavigationPath *path, Int index, const char *file, int line);
+
+  // Adds a new address point (and deletes on old one if max history is exceeded)
+  void addAddressPoint(NavigationPoint point);
+
+  // Renames an existing address point
+  void renameAddressPoint(std::string oldName, std::string newName);
 
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)

@@ -6,13 +6,13 @@ def computeVersionName() {
 }
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
     publishNonDefault true
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 22
+        targetSdkVersion 23
         versionCode 1
         versionName computeVersionName()
     }
@@ -51,7 +51,7 @@ android.buildTypes.all{ buildType ->
     }
     collectSymbolsTask.dependsOn buildNativeCodeTask
     tasks.whenTaskAdded { task ->
-        if (task.name == "package${buildType.name.capitalize()}JniLibs") {
+        if (task.name == "compile${buildType.name.capitalize()}JavaWithJavac") {
             task.dependsOn collectSymbolsTask
         }
     }

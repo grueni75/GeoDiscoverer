@@ -431,6 +431,7 @@ extern Core *core;
 #include <NavigationPath.h>
 #include <NavigationPathSegment.h>
 #include <NavigationTarget.h>
+#include <NavigationPoint.h>
 #include <NavigationEngine.h>
 #include <Commander.h>
 #include <Device.h>

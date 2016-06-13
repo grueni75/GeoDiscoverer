@@ -46,7 +46,6 @@ INCLUDES += -I$(ROOT)/Source/Platform/Feature/libcurl
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/libzip
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/libproj4
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/Linux
-INCLUDES += -I/usr/include/freetype2
 INCLUDES += -I$(ROOT)/Source/General/App
 INCLUDES += -I$(ROOT)/Source/General/Map
 INCLUDES += -I$(ROOT)/Source/General/Graphic
@@ -56,6 +55,8 @@ INCLUDES += -I$(ROOT)/Source/General/Navigation
 INCLUDES += -I$(ROOT)/Source/General/Math
 INCLUDES += -I$(ROOT)/Source/General/Config
 INCLUDES += -I$(ROOT)/Source/General/Profile
+INCLUDES += -I/usr/include/freetype2
+INCLUDES += -I/usr/include/libxml2
 
 LIBS += -lstdc++ -lglut -lpthread -lGLU -ljpeg -lxml2 -lfreetype -lpng -lcurl -lzip -lproj -lGL -lm
 

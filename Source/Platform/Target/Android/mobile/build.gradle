@@ -5,9 +5,14 @@ def computeVersionName() {
     return date.format('yyyyMMdd')
 }
 
+ext {
+    supportLibVersion = '23.2.1'
+}
+
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+    useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.untouchableapps.android.geodiscoverer"
@@ -40,12 +45,12 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    //wearApp project(':wear')
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.android.support:support-v4:22.2.0'
-    compile 'com.android.support:design:22.2.0'
-    compile 'com.android.support:recyclerview-v7:22.2.0'
-    compile 'com.android.support:gridlayout-v7:22.2.0'
+    wearApp project(':wear')
+    compile "com.android.support:appcompat-v7:${supportLibVersion}"
+    compile "com.android.support:support-v4:${supportLibVersion}"
+    compile "com.android.support:design:${supportLibVersion}"
+    compile "com.android.support:recyclerview-v7:${supportLibVersion}"
+    compile "com.android.support:gridlayout-v7:${supportLibVersion}"
     releaseCompile project(path: ':core', configuration: 'release')
     debugCompile project(path: ':core', configuration: 'debug')
     compile project(':materialDialogs')

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -68,6 +69,7 @@ import android.os.PowerManager.WakeLock;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.Editable;
@@ -79,9 +81,11 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -89,12 +93,14 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.AlertDialogWrapper;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.internal.MDTintHelper;
+import com.afollestad.materialdialogs.util.DialogUtils;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView;
 import com.untouchableapps.android.geodiscoverer.core.GDTools;
 
 public class ViewMap extends GDActivity {
-    
+
   // Request codes for calling other activities
   static final int SHOW_PREFERENCE_REQUEST = 0;
 
@@ -112,39 +118,35 @@ public class ViewMap extends GDActivity {
   NavigationView navDrawerList= null;
   CoordinatorLayout snackbarPosition=null;
   MaterialDialog mapDownloadDialog=null;
-  
+
   /** Reference to the core object */
   GDCore coreObject = null;
-  
-  // Info about the last address entered
-  String lastAddressSubject = "";
-  String lastAddressText = "";
-  
+
   // Info about the current gpx file
   String gpxName = "";
-  
+
   // Managers
   LocationManager locationManager;
   SensorManager sensorManager;
   PowerManager powerManager;
   DevicePolicyManager devicePolicyManager;
   DownloadManager downloadManager;
-  
+
   // Wake lock
   WakeLock wakeLock = null;
-  
+
   // Prefs
   SharedPreferences prefs = null;
-  
+
   // Flags
   boolean compassWatchStarted = false;
   boolean exitRequested = false;
   boolean restartRequested = false;
-  
+
   // Handles finished queued downloads
   LinkedList<Bundle> downloads = new LinkedList<Bundle>();
   BroadcastReceiver downloadCompleteReceiver = null;
-  
+
   /** Updates the progress dialog */
   protected void updateProgressDialog(String message, int progress) {
     progressCurrent=progress;
@@ -182,32 +184,32 @@ public class ViewMap extends GDActivity {
       busyTextView.setText(" " + getString(R.string.starting_core_object) + " ");
     }
   }
-    
+
   // Communication with the native core
   public static final int EXECUTE_COMMAND = 0;
   static protected class CoreMessageHandler extends Handler {
-    
-    protected final WeakReference<ViewMap> weakViewMap; 
-    
+
+    protected final WeakReference<ViewMap> weakViewMap;
+
     CoreMessageHandler(ViewMap viewMap) {
       this.weakViewMap = new WeakReference<ViewMap>(viewMap);
     }
-    
+
     /** Called when the core has a message */
     @SuppressLint("NewApi")
     @Override
-    public void handleMessage(Message msg) {  
-      
+    public void handleMessage(Message msg) {
+
       // Abort if the object is not available anymore
       ViewMap viewMap = weakViewMap.get();
       if (viewMap==null)
         return;
-    
+
       // Handle the message
       Bundle b=msg.getData();
       switch(msg.what) {
         case EXECUTE_COMMAND:
-          
+
           // Extract the command
           String command=b.getString("command");
           int args_start=command.indexOf("(");
@@ -222,12 +224,12 @@ public class ViewMap extends GDActivity {
               if (stringStarted)
                 stringStarted=false;
               else
-                stringStarted=true;                    
+                stringStarted=true;
             }
             if (!stringStarted) {
               if ((t.substring(i,i+1).equals(","))||(i==t.length()-1)) {
                 String arg;
-                if (i==t.length()-1) 
+                if (i==t.length()-1)
                   arg=t.substring(startPos,i+1);
                 else
                   arg=t.substring(startPos,i);
@@ -242,7 +244,7 @@ public class ViewMap extends GDActivity {
               }
             }
           }
-          
+
           // Execute command
           boolean commandExecuted=false;
           if (commandFunction.equals("fatalDialog")) {
@@ -287,7 +289,7 @@ public class ViewMap extends GDActivity {
           if (commandFunction.equals("coreInitialized")) {
             Intent intent = new Intent(viewMap, GDService.class);
             intent.setAction("coreInitialized");
-            viewMap.startService(intent);             
+            viewMap.startService(intent);
             commandExecuted=true;
           }
           if (commandFunction.equals("updateWakeLock")) {
@@ -315,7 +317,7 @@ public class ViewMap extends GDActivity {
             commandExecuted=true;
           }
           if (commandFunction.equals("askForAddress")) {
-            viewMap.askForAddress(viewMap.getString(R.string.manually_entered_address),viewMap.lastAddressText);
+            viewMap.askForAddress(viewMap.getString(R.string.manually_entered_address),"");
             commandExecuted=true;
           }
           if (commandFunction.equals("exitActivity")) {
@@ -323,8 +325,8 @@ public class ViewMap extends GDActivity {
             viewMap.stopService(new Intent(viewMap, GDService.class));
             viewMap.finish();
             commandExecuted=true;
-          } 
-          if (commandFunction.equals("restartActivity")) {            
+          }
+          if (commandFunction.equals("restartActivity")) {
             viewMap.stopService(new Intent(viewMap, GDService.class));
             SharedPreferences.Editor prefsEditor = viewMap.prefs.edit();
             prefsEditor.putBoolean("processIntent", false);
@@ -335,13 +337,13 @@ public class ViewMap extends GDActivity {
               viewMap.finish();
             }
             commandExecuted=true;
-          } 
+          }
           if (commandFunction.equals("initComplete")) {
 
             // Inform the user about the app drawer
             if (!viewMap.prefs.getBoolean("navDrawerHintShown", false)) {
               Snackbar
-              .make(viewMap.snackbarPosition, 
+              .make(viewMap.snackbarPosition,
                   viewMap.getString(R.string.nav_drawer_hint), Snackbar.LENGTH_LONG)
               .setAction(R.string.got_it, new OnClickListener() {
                 @Override
@@ -356,7 +358,7 @@ public class ViewMap extends GDActivity {
               })
               .show();
             }
-            
+
             // Replay the trace if it exists
             if (viewMap!=null) {
               File replayLog = new File(viewMap.coreObject.homePath + "/replay.log");
@@ -366,18 +368,18 @@ public class ViewMap extends GDActivity {
                     ViewMap viewMap = weakViewMap.get();
                     if (viewMap==null)
                       return;
-                    viewMap.coreObject.executeCoreCommand("replayTrace(" + viewMap.coreObject.homePath + "/replay.log" + ")");                    
+                    viewMap.coreObject.executeCoreCommand("replayTrace(" + viewMap.coreObject.homePath + "/replay.log" + ")");
                   }
                 }.start();
               }
-            }            
+            }
             commandExecuted=true;
-          } 
-          if (commandFunction.equals("decideContinueOrNewTrack")) {            
+          }
+          if (commandFunction.equals("decideContinueOrNewTrack")) {
             viewMap.decideContinueOrNewTrack();
             commandExecuted=true;
-          } 
-          if (commandFunction.equals("changeMapLayer")) {            
+          }
+          if (commandFunction.equals("changeMapLayer")) {
             viewMap.changeMapLayer();
             commandExecuted=true;
           }
@@ -418,7 +420,7 @@ public class ViewMap extends GDActivity {
       }
     }
   }
-      
+
   /** Start listening for compass bearing */
   synchronized void startWatchingCompass() {
     if ((mapSurfaceView!=null)&&(!compassWatchStarted)) {
@@ -427,7 +429,7 @@ public class ViewMap extends GDActivity {
       compassWatchStarted=true;
     }
   }
-  
+
   /** Stop listening for location fixes */
   synchronized void stopWatchingCompass() {
     if (compassWatchStarted) {
@@ -440,8 +442,8 @@ public class ViewMap extends GDActivity {
   void updateViewConfiguration(Configuration configuration) {
     if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
       messageLayout.setOrientation(LinearLayout.HORIZONTAL);
-    else 
-      messageLayout.setOrientation(LinearLayout.VERTICAL);  
+    else
+      messageLayout.setOrientation(LinearLayout.VERTICAL);
     viewMapRootLayout.requestLayout();
   }
 
@@ -453,30 +455,63 @@ public class ViewMap extends GDActivity {
     m.what = GDCore.RESTART_CORE;
     Bundle b = new Bundle();
     b.putBoolean("resetConfig", resetConfig);
-    m.setData(b);    
+    m.setData(b);
     coreObject.messageHandler.sendMessage(m);
   }
 
   /** Asks the user for confirmation of the address */
   void askForAddress(final String subject, final String text) {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
-    builder.title(R.string.address_dialog_title);
-    builder.content(R.string.address_dialog_message);
+    builder.title(R.string.dialog_address_title);
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
-    builder.inputType(InputType.TYPE_CLASS_TEXT);
-    builder.input(getString(R.string.address_dialog_hint), text, new MaterialDialog.InputCallback() {
+    builder.positiveText(R.string.finished);
+    //builder.negativeText(R.string.cancel);
+    builder.cancelable(true);
+    builder.customView(R.layout.dialog_address, false);
+    final String address = new String();
+    final MaterialDialog dialog=builder.build();
+    final EditText editText = (EditText) dialog.getCustomView().findViewById(R.id.dialog_address_input_text);
+    builder.formatEditText(editText);
+    editText.setText(text);
+    editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+    ListView listView = (ListView) dialog.getCustomView().findViewById(R.id.dialog_address_history_list);
+    final GDAddressHistoryAdapter adapter = new GDAddressHistoryAdapter(this,builder,dialog);
+    listView.setAdapter(adapter);
+    final ImageButton addAddressButton = (ImageButton) dialog.getCustomView().findViewById(R.id.dialog_address_history_entry_add_button);
+    final OnClickListener addAddressOnClickListener = new OnClickListener() {
       @Override
-      public void onInput(MaterialDialog dialog, CharSequence input) {
+      public void onClick(View v) {
         LocationFromAddressTask task = new LocationFromAddressTask();
-        task.subject = subject;
-        task.text = input.toString();
-        task.execute();
+        EditText editText = (EditText) dialog.getCustomView().findViewById(R.id.dialog_address_input_text);
+        if (!editText.getText().equals("")) {
+          task.subject = subject;
+          task.adapter = adapter;
+          task.text = editText.getText().toString();
+          task.execute();
+        }
+      }
+    };
+    addAddressButton.setOnClickListener(addAddressOnClickListener);
+    DrawableCompat.setTintList(addAddressButton.getDrawable(),navDrawerList.getItemIconTintList());
+    editText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+      @Override
+      public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+          addAddressOnClickListener.onClick(null);
+          return true;
+        }
+        return false;
       }
     });
-    builder.positiveText(R.string.finished);
-    builder.negativeText(R.string.cancel);
-    builder.cancelable(true);
-    builder.show();    
+    final ImageButton clearAddressButton = (ImageButton) dialog.getCustomView().findViewById(R.id.dialog_address_history_entry_clear_button);
+    DrawableCompat.setTintList(clearAddressButton.getDrawable(),navDrawerList.getItemIconTintList());
+    clearAddressButton.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        editText.setText("");
+      }
+    });
+    dialog.show();
   }
 
   /** Asks the user for confirmation of the route name */
@@ -484,10 +519,9 @@ public class ViewMap extends GDActivity {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
     final ImportRouteTask task = new ImportRouteTask();
     task.srcURI = srcURI;
-    final FrameLayout dialogRootLayout = new FrameLayout(this);
-    builder.title(R.string.route_name_dialog_title);
+    builder.title(R.string.dialog_route_name_title);
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
-    builder.customView(dialogRootLayout, false);
+    builder.customView(R.layout.dialog_route_name, false);
     builder.positiveText(R.string.finished);
     builder.negativeText(R.string.cancel);
     builder.cancelable(true);
@@ -498,28 +532,27 @@ public class ViewMap extends GDActivity {
         task.execute();
       }
     });
-    MaterialDialog alert = builder.build();
-    LayoutInflater inflater = alert.getLayoutInflater();
-    final View contentView = inflater.inflate(R.layout.route_name, dialogRootLayout);
-    final EditText editText = (EditText) contentView.findViewById(R.id.route_name_edit_text);
+    final MaterialDialog alert = builder.build();
+    final EditText editText = (EditText) alert.getCustomView().findViewById(R.id.dialog_route_name_input_text);
+    builder.formatEditText(editText);
     editText.setText(gpxName);
-    final TextView routeExistsTextView = (TextView) contentView.findViewById(R.id.route_name_route_exists_warning);
+    final TextView routeExistsTextView = (TextView) alert.getCustomView().findViewById(R.id.dialog_route_name_route_exists_warning);
     TextWatcher textWatcher = new TextWatcher() {
       public void onTextChanged(CharSequence s, int start, int before, int count) {
-        
+
         // Check if route exists
         String dstFilename = GDCore.getHomeDirPath() + "/Route/" + s;
         final File dstFile = new File(dstFilename);
-        if ((s=="")||(!dstFile.exists())) 
-          routeExistsTextView.setVisibility(View.GONE);          
+        if ((s.equals(""))||(!dstFile.exists()))
+          routeExistsTextView.setVisibility(View.GONE);
         else
           routeExistsTextView.setVisibility(View.VISIBLE);
-        contentView.requestLayout();
+        alert.getCustomView().requestLayout();
 
         // Remember the select name
         task.name=s.toString();
         task.dstFilename=dstFilename;
-        
+
       }
       public void beforeTextChanged(CharSequence s, int start, int count, int after) {
       }
@@ -528,7 +561,7 @@ public class ViewMap extends GDActivity {
     };
     textWatcher.onTextChanged(editText.getText(),0,0,0);
     editText.addTextChangedListener(textWatcher);
-    alert.show();                
+    alert.show();
   }
 
   /** Asks the user if the core shall be resetted */
@@ -671,10 +704,10 @@ public class ViewMap extends GDActivity {
             coreObject.executeCoreCommand("createNewTrack()");
           }
         });
-    builder.setNegativeButton(R.string.contine_track, 
+    builder.setNegativeButton(R.string.contine_track,
         new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int which) {
-            coreObject.executeCoreCommand("setRecordTrack(1)");            
+            coreObject.executeCoreCommand("setRecordTrack(1)");
           }
         });
     builder.setIcon(android.R.drawable.ic_dialog_info);
@@ -760,7 +793,7 @@ public class ViewMap extends GDActivity {
     }
 
     protected Void doInBackground(Void... params) {
-      
+
       int lineCount = 0;
       String sendLogPath = coreObject.homePath + "/Log/send.log";
       try {
@@ -771,7 +804,7 @@ public class ViewMap extends GDActivity {
           sendLogWriter.write(logPath + ":\n");
           lineCount++;
           BufferedReader logReader = new BufferedReader(new FileReader(logPath));
-          String inputLine; 
+          String inputLine;
           while ((inputLine=logReader.readLine())!=null) {
             sendLogWriter.write(inputLine + "\n");
             lineCount++;
@@ -780,12 +813,12 @@ public class ViewMap extends GDActivity {
           lineCount++;
           logReader.close();
         }
-        sendLogWriter.close();        
+        sendLogWriter.close();
       }
       catch (IOException e) {
         errorDialog(getString(R.string.send_logs_failed, e.getMessage()));
       }
-      
+
       // Tell ACRA to upload the complete log 
       ReportField[] customReportFields = new ReportField[ACRAConstants.DEFAULT_REPORT_FIELDS.length+1];
       System.arraycopy(ACRAConstants.DEFAULT_REPORT_FIELDS, 0, customReportFields, 0, ACRAConstants.DEFAULT_REPORT_FIELDS.length);
@@ -798,12 +831,12 @@ public class ViewMap extends GDActivity {
       try {
         ACRA.getConfig().setMode(ReportingInteractionMode.DIALOG);
         Exception e = new Exception("User has sent logs");
-        ACRA.getErrorReporter().handleException(e,false);  
+        ACRA.getErrorReporter().handleException(e,false);
         ACRA.getConfig().setMode(ReportingInteractionMode.NOTIFICATION);
       }
       catch (ACRAConfigurationException e) {
       }
-      
+
       return null;
     }
 
@@ -843,16 +876,16 @@ public class ViewMap extends GDActivity {
         errorDialog(getString(R.string.cannot_read_uri,srcURI.toString()));
       }
       if (gpxContents!=null) {
-        
+
         // Create the destination file
         try {
           GDTools.copyFile(gpxContents, dstFilename);
           gpxContents.close();
-        } 
+        }
         catch (IOException e) {
           GDApplication.showMessageBar(ViewMap.this, String.format(getString(R.string.cannot_import_route), name), GDApplication.MESSAGE_BAR_DURATION_LONG);
         }
-        
+
       }
 
       return null;
@@ -893,10 +926,10 @@ public class ViewMap extends GDActivity {
 
       // Create the map folder
       try {
-        
+
         // Find all gda files that have the pattern <name>.gda and <name>%d.gda
         String basename = srcFile.getName().replaceAll("(\\D*)\\d*\\.gda", "$1");
-        LinkedList<String> archives = new LinkedList<String>(); 
+        LinkedList<String> archives = new LinkedList<String>();
         File dir = new File(srcFile.getParent());
         File[] dirListing = dir.listFiles();
         if (dirListing != null) {
@@ -906,7 +939,7 @@ public class ViewMap extends GDActivity {
             }
           }
         }
-        
+
         // Create the info file
         mapFolder.mkdir();
         File cache = new File(mapFolder.getPath() + "/cache.bin");
@@ -920,15 +953,15 @@ public class ViewMap extends GDActivity {
         }
         writer.println("</GDS>");
         writer.close();
-        
+
         // Set the new folder
         coreObject.configStoreSetStringValue("Map", "folder", mapFolder.getName());
-        
+
       }
       catch(IOException e) {
         errorDialog(String.format(getString(R.string.cannot_create_map_folder), mapFolder.getName()));
       }
-      
+
       return null;
     }
 
@@ -944,7 +977,7 @@ public class ViewMap extends GDActivity {
       restartCore(false);
     }
   }
-  
+
   /** Send logs via ACRA */
   void sendLogs() {
 
@@ -964,7 +997,7 @@ public class ViewMap extends GDActivity {
     Arrays.sort(items, new Comparator<String>() {
 
       Comparator<String> stringComparator = Collections.reverseOrder();
-        
+
       @Override
       public int compare(String lhs, String rhs) {
         String pattern = "^(.*)-(\\d\\d\\d\\d\\d\\d\\d\\d-\\d\\d\\d\\d\\d\\d)\\.log$";
@@ -976,7 +1009,7 @@ public class ViewMap extends GDActivity {
         }
         return stringComparator.compare(lhs, rhs);
       }
-      
+
     });
 
     // Create the dialog
@@ -1040,7 +1073,7 @@ public class ViewMap extends GDActivity {
     Dialog alert = builder.create();
     alert.show();
   }
-  
+
   /** Copies tracks to the route directory */
   void addTracksAsRoutes() {
 
@@ -1137,7 +1170,9 @@ public class ViewMap extends GDActivity {
 
     String subject;
     String text;
+    GDAddressHistoryAdapter adapter;
     boolean locationFound=false;
+    ArrayList<String> validAddressLines = new ArrayList<String>();
 
     protected void onPreExecute() {
     }
@@ -1154,7 +1189,11 @@ public class ViewMap extends GDActivity {
           if (addresses.size()>0) {
             Address address = addresses.get(0);
             locationFound=true;
-            coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate(" + address.getLongitude() + "," + address.getLatitude() + ")");
+            coreObject.scheduleCoreCommand("addAddressPoint(\"" + addressLine + "\",\"" + addressLine +
+                "\","+ address.getLongitude()+","+address.getLatitude() + ")");
+            coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate(" +
+                address.getLongitude() + "," + address.getLatitude() + ")");
+            validAddressLines.add(addressLine);
           }
         }
         catch(IOException e) {
@@ -1167,13 +1206,17 @@ public class ViewMap extends GDActivity {
     protected void onPostExecute(Void result) {
       if (!locationFound) {
         warningDialog(String.format(getString(R.string.location_not_found),text));
+      } else {
+        for (String addressLine : validAddressLines) {
+          for (int i=0;i<adapter.getCount();i++) {
+            String s = adapter.getItem(i);
+            if (s.matches(addressLine)) {
+              adapter.remove(s);
+            }
+          }
+          adapter.insert(addressLine,0);
+        }
       }
-      lastAddressSubject=subject;
-      lastAddressText=text;
-      SharedPreferences.Editor prefsEditor = prefs.edit();
-      prefsEditor.putString("lastAddressSubject", lastAddressSubject);
-      prefsEditor.putString("lastAddressText", lastAddressText);
-      prefsEditor.commit();
     }
   }
 
@@ -1253,22 +1296,22 @@ public class ViewMap extends GDActivity {
         final File dstFile = new File(dstFilename);
         AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
         builder.setTitle(getTitle());
-        String message; 
+        String message;
         if (dstFile.exists())
-          message=getString(R.string.overwrite_route_question);              
+          message=getString(R.string.overwrite_route_question);
         else
           message=getString(R.string.copy_route_question);
         message = String.format(message, name);
-        builder.setMessage(message);              
+        builder.setMessage(message);
         builder.setCancelable(true);
         builder.setPositiveButton(R.string.yes,
           new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-              
+
               // Delete file if it exists
-              if (dstFile.exists()) 
+              if (dstFile.exists())
                 dstFile.delete();
-              
+
               // Request download of file
               DownloadManager.Request request = new DownloadManager.Request(srcURI);
               request.setDescription(getString(R.string.downloading_gpx_to_route_directory));
@@ -1280,7 +1323,7 @@ public class ViewMap extends GDActivity {
               download.putLong("ID", id);
               download.putString("Name",name);
               downloads.add(download);
-              
+
             }
           });
         builder.setNegativeButton(R.string.no, null);
@@ -1292,7 +1335,7 @@ public class ViewMap extends GDActivity {
     } else {
       errorDialog(getString(R.string.download_manager_not_available));
     }
-    
+
   }
 
   /** Prepares activity for functions only available on gingerbread */
@@ -1333,11 +1376,11 @@ public class ViewMap extends GDActivity {
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
-    
+
     super.onCreate(savedInstanceState);
     restartRequested=false;
     exitRequested=false;
-    
+
     // Check for OpenGL ES 2.00
     final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
     final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
@@ -1350,12 +1393,6 @@ public class ViewMap extends GDActivity {
 
     // Restore the last processed intent from the prefs
     prefs = getApplication().getSharedPreferences("viewMap",Context.MODE_PRIVATE);
-    if (prefs.contains("lastAddressSubject")) {
-      lastAddressSubject = prefs.getString("lastAddressSubject", "");
-    }
-    if (prefs.contains("lastAddressText")) {
-      lastAddressText = prefs.getString("lastAddressText", "");
-    }
     if (prefs.contains("processIntent")) {
       boolean processIntent = prefs.getBoolean("processIntent", true);
       if (!processIntent) {
@@ -1365,9 +1402,9 @@ public class ViewMap extends GDActivity {
       prefsEditor.putBoolean("processIntent", true);
       prefsEditor.commit();
     }
-    
+
     // Get the core object
-    coreObject=GDApplication.coreObject;    
+    coreObject=GDApplication.coreObject;
     coreObject.setDisplayMetrics(getResources().getDisplayMetrics());
     ((GDApplication)getApplication()).setActivity(this);
 
@@ -1376,7 +1413,7 @@ public class ViewMap extends GDActivity {
     sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
     powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
     devicePolicyManager = (DevicePolicyManager)this.getSystemService(Context.DEVICE_POLICY_SERVICE);
-         
+
     // Prepare the window contents
     setContentView(R.layout.view_map);
     mapSurfaceView = (GDMapSurfaceView) findViewById(R.id.view_map_map_surface_view);
@@ -1396,7 +1433,8 @@ public class ViewMap extends GDActivity {
     catch(NameNotFoundException e) {
       appVersion = "Version ?";
     }
-    TextView navDrawerAppVersion = (TextView) findViewById(R.id.nav_drawer_app_version);
+    View headerLayout = navDrawerList.getHeaderView(0);
+    TextView navDrawerAppVersion = (TextView) headerLayout.findViewById(R.id.nav_drawer_app_version);
     navDrawerAppVersion.setText(appVersion);
     navDrawerList.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
       @Override
@@ -1479,7 +1517,7 @@ public class ViewMap extends GDActivity {
     if (wakeLock==null) {
       fatalDialog("Can not obtain wake lock!");
     }
-    
+
     // Prepare activity for gingerbread
     onCreateGingerbread();
     
@@ -1499,11 +1537,11 @@ public class ViewMap extends GDActivity {
         }
       }
     }).start();*/
-    
+
     // Show welcome dialog
     //openWelcomeDialog();
   }
-    
+
   /** Called when the app suspends */
   @Override
   public void onPause() {
@@ -1519,9 +1557,9 @@ public class ViewMap extends GDActivity {
       intent.setAction("activityPaused");
       startService(intent);
     }
-    
+
   }
-  
+
   /** Called when the app resumes */
   @Override
   public void onResume() {
@@ -1538,7 +1576,7 @@ public class ViewMap extends GDActivity {
     mapSurfaceView.onResume();
 
     // If we shall restart or exit, don't init anything here
-    if ((exitRequested)||(restartRequested)) 
+    if ((exitRequested)||(restartRequested))
       return;
 
     // Resume all components only if a exit or restart is not requested
@@ -1550,9 +1588,9 @@ public class ViewMap extends GDActivity {
     if (coreObject.coreStopped) {
       Message m=Message.obtain(coreObject.messageHandler);
       m.what = GDCore.START_CORE;
-      coreObject.messageHandler.sendMessage(m);      
+      coreObject.messageHandler.sendMessage(m);
     }
-    
+
     // Extract the file path from the intent
     intent = getIntent();
     Uri uri = null;
@@ -1577,7 +1615,7 @@ public class ViewMap extends GDActivity {
           text=extras.getString(Intent.EXTRA_TEXT);
           isAddress=true;
         } else {
-          warningDialog(getString(R.string.unsupported_intent));        
+          warningDialog(getString(R.string.unsupported_intent));
         }
       }
       if (Intent.ACTION_VIEW.equals(intent.getAction())) {
@@ -1591,7 +1629,7 @@ public class ViewMap extends GDActivity {
         }
       }
     }
-    
+
     // Check if the intent was seen
     if (intent!=null) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "intent=" + intent.toString());
@@ -1603,20 +1641,20 @@ public class ViewMap extends GDActivity {
         isAddress=false;
       }
     }
-    
+
     // Handle the intent
     if (isAddress) {
       askForAddress(subject, text);
     }
     if (isGDA) {
-            
+
       // Ask the user if the file should be copied to the route directory
       final File srcFile = new File(uri.getPath());
       if (srcFile.exists()) {
 
         // Map archive?
         if (uri.getPath().endsWith(".gda")) {
-        
+
           // Ask the user if a new map shall be created based on the archive
           String mapFolderFilename = GDCore.getHomeDirPath() + "/Map/" + srcFile.getName();
           mapFolderFilename = mapFolderFilename.substring(0, mapFolderFilename.lastIndexOf('.'));
@@ -1624,12 +1662,12 @@ public class ViewMap extends GDActivity {
           final File mapFolder = new File(mapFolderFilename);
           AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
           builder.setTitle(R.string.import_map);
-          String message; 
+          String message;
           if (mapFolder.exists())
-            message=getString(R.string.replace_map_folder_question,mapFolder.getName(),srcFile);              
+            message=getString(R.string.replace_map_folder_question,mapFolder.getName(),srcFile);
           else
             message=getString(R.string.create_map_folder_question,mapFolder.getName(),srcFile);
-          builder.setMessage(message);              
+          builder.setMessage(message);
           builder.setCancelable(true);
           builder.setPositiveButton(R.string.yes,
             new DialogInterface.OnClickListener() {
@@ -1665,7 +1703,7 @@ public class ViewMap extends GDActivity {
     }
     setIntent(null);
   }
-  
+
   /** Called before the activity is put into background (outState is non persistent!) */
   @Override
   protected void onSaveInstanceState(Bundle outState) {
@@ -1681,7 +1719,7 @@ public class ViewMap extends GDActivity {
   /** Called when the activity is destroyed */
   @SuppressLint("Wakelock")
   @Override
-  public void onDestroy() {    
+  public void onDestroy() {
     super.onDestroy();
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onDestroy called by " + Thread.currentThread().getName());
     ((GDApplication)getApplication()).setActivity(null);
@@ -1689,7 +1727,7 @@ public class ViewMap extends GDActivity {
       wakeLock.release();
     if (downloadCompleteReceiver!=null)
       unregisterReceiver(downloadCompleteReceiver);
-    if (exitRequested) 
+    if (exitRequested)
       System.exit(0);
     if (restartRequested) {
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
@@ -1701,27 +1739,27 @@ public class ViewMap extends GDActivity {
 
   /** Called when a configuration change (e.g., caused by a screen rotation) has occured */
   public void onConfigurationChanged(Configuration newConfig) {
-    
+
     super.onConfigurationChanged(newConfig);
     updateViewConfiguration(newConfig);
-          
+
   }
 
   /** Called when a called activity finishes */
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-      
+
     // Did the activity changes prefs?
     if (requestCode == SHOW_PREFERENCE_REQUEST) {
       if (resultCode==1) {
-        
+
         // Restart the core object
         restartCore(false);
-        
+
       }
     }
   }
 
-  
+
   /** Called when a key is pressed */
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -1729,7 +1767,7 @@ public class ViewMap extends GDActivity {
         if (Integer.parseInt(coreObject.configStoreGetStringValue("General", "backButtonTurnsScreenOff"))!=0) {
           try {
             devicePolicyManager.lockNow();
-          } 
+          }
           catch (SecurityException e) {
             GDApplication.showMessageBar(this, getString(R.string.device_admin_not_enabled), GDApplication.MESSAGE_BAR_DURATION_LONG);
           }
@@ -1745,5 +1783,5 @@ public class ViewMap extends GDActivity {
     }
     return super.onKeyDown(keyCode,event);
   }
-     
+
 }

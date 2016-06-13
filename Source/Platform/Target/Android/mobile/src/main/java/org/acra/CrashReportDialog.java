@@ -73,7 +73,7 @@ public class CrashReportDialog extends AppCompatActivity implements DialogInterf
         if(resourceId != 0) {
             dialogBuilder.setIcon(resourceId);
         }
-        dialogBuilder.setView(buildCustomView(savedInstanceState));
+        dialogBuilder.setView(buildCustomView(dialogBuilder,savedInstanceState));
         dialogBuilder.setPositiveButton(android.R.string.ok, CrashReportDialog.this);
         dialogBuilder.setNegativeButton(android.R.string.cancel, CrashReportDialog.this);
         cancelNotification();
@@ -83,7 +83,7 @@ public class CrashReportDialog extends AppCompatActivity implements DialogInterf
         mDialog.show();
     }
 
-    private View buildCustomView(Bundle savedInstanceState) {
+    private View buildCustomView(AlertDialogWrapper.Builder builder, Bundle savedInstanceState) {
         final float textSize = 16;
         final LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -122,6 +122,8 @@ public class CrashReportDialog extends AppCompatActivity implements DialogInterf
                     LayoutParams.WRAP_CONTENT));
 
             userComment = new AppCompatEditText(this);
+
+            builder.formatEditText(userComment);
             userComment.setTextSize(textSize);
             userComment.setLines(3);
             userComment.setGravity(Gravity.TOP);
@@ -145,10 +147,11 @@ public class CrashReportDialog extends AppCompatActivity implements DialogInterf
             scrollable.addView(label);
 
             userEmail = new AppCompatEditText(this);
+
+            builder.formatEditText(userEmail);
             userEmail.setSingleLine();
             userEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
             userEmail.setTextSize(textSize);
-
             prefs = getSharedPreferences(ACRA.getConfig().sharedPreferencesName(), ACRA.getConfig()
                     .sharedPreferencesMode());
             String savedValue = null;

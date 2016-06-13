@@ -1394,6 +1394,11 @@
                   <xsd:documentation>Number of threads to spawn that download images.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="downloadQueueRecommendedSize" type="xsd:integer" default="100">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum number of tiles that should be queued in the download queue.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="DownloadJob">
                 <xsd:annotation>
                   <xsd:documentation>Defines a  map area that shall be downloaded to the device storage.</xsd:documentation>
@@ -1676,6 +1681,45 @@
                 <xsd:annotation>
                   <xsd:documentation>Minimum change of altitude required to update altitude meters.</xsd:documentation>
                 </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="maxAddressPointCount" type="xsd:integer" default="30">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum number of addresses to remember.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="AddressPoint" maxOccurs="unbounded">
+                <xsd:annotation>
+                  <xsd:documentation>Defines an address.</xsd:documentation>
+                </xsd:annotation>
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="address" type="xsd:string" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>The address in text form.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="lng" type="xsd:double" default="0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Longitude of the address.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="lat" type="xsd:double" default="0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Latitude of the address.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="timestamp" type="xsd:long" default="0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Timestamp in seconds that the entry was last updated.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>                    
+                  </xsd:sequence>
+                  <xsd:attribute name="name">
+                    <xsd:annotation>
+                      <xsd:documentation>Name of the address.</xsd:documentation>
+                    </xsd:annotation>
+                  </xsd:attribute>
+                </xsd:complexType>
               </xsd:element>
             </xsd:sequence>
           </xsd:complexType>

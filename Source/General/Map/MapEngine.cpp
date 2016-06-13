@@ -713,7 +713,6 @@ void MapEngine::updateMap() {
     core->getThread()->unlockMutex(forceCacheUpdateMutex);
   }
 
-
   // Get the current position from the graphic engine
   GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
 
@@ -1039,11 +1038,13 @@ void MapEngine::updateMap() {
 
   }
 
+  // Do we need to update the navigation graphic?
+  if ((mapChanged)||(core->getNavigationEngine()->mapGraphicUpdateIsRequired())) {
+    core->getNavigationEngine()->updateMapGraphic();
+  }
+
   // Was the map changed?
   if (mapChanged) {
-
-    // Update the tile graphic
-    core->getNavigationEngine()->updateMapGraphic();
 
     // Update any widgets
     lockCenterMapTiles(__FILE__,__LINE__);

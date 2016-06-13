@@ -3357,7 +3357,7 @@ Geo Discoverer is bundled with a set of small tools that can create the contents
 |[[GrabMaps.py|MapCreation/GrabMaps.py]]|Grabs map pictures from windows applications and creates &quot;.gdm&quot; files for them. The calibration data is also copied from the windows application. It contains support for Google Maps running in Firefox and Garmin's &quot;Deutschland Digital Topographische Karte&quot;. The script requires the software packages ~ActivePython-2.7.2.5, ~PIL-1.1.7 and ~MiniCap.|
 </pre>
 </div>
-<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201512211528" changecount="199">
+<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201606131510" changecount="200">
 <pre>The map view is the main activity of the app. It shows the map selected in the AppPreferences on the screen. The map can be moved by using one finger and zoomed by using two fingers. Each map can consist of multiple layers at different zoom levels. The app automatically selects the best layer depending on the zoom ratio. You can also create your own map. See MapCreation.
 ! Elements on the map&lt;html&gt;&lt;a name=&quot;ElementsOnTheMap&quot;/&gt;&lt;/html&gt;
 Besides the map itself, different graphical elements are placed on top of it. Here is an explanation:
@@ -3397,7 +3397,7 @@ The currently shown path in the path info widget can be locked with this toggle 
 This button sets the target to the map view center if you tap on it.
 !! Set target at address&lt;html&gt;&lt;a name=&quot;SetTargetAtAddress&quot;/&gt;&lt;/html&gt;
 &lt;html&gt;&lt;img src=&quot;MapView/MapWidget/setTargetAtAddress.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
-This button sets the target to an address if you tap on it. A dialog appears where you can enter the address or point-of-interest as text.
+This button sets the target to an address if you tap on it. A dialog appears where you can enter the address or point-of-interest as text. The dialog also allows to maintain a list of previously used addresses. 
 !! Toggle target visibility&lt;html&gt;&lt;a name=&quot;ToggleTargetVisibility&quot;/&gt;&lt;/html&gt;
 &lt;html&gt;&lt;img src=&quot;MapView/MapWidget/targetOn.svg&quot; style=&quot;height:4em&quot;/&gt;&lt;/html&gt;
 This toggle widget changes the visibility of the target. If the light is green, the target is visible. Otherwise, the target is not shown. If the visibility changes from hidden to visible, the map is centered at the target. Navigation  is always performed to the visble target, even if a route is currently active.

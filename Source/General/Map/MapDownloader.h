@@ -28,14 +28,18 @@ protected:
   std::list<MapContainer*> downloadQueue;                 // Queue of map containers that must be downloaded from the server
   ThreadMutexInfo *accessMutex;                           // Mutex for accessing the map downloader object
   std::vector<ThreadSignalInfo *> downloadStartSignals;   // Signals that triggers the download thread
-  bool quitMapImageDownloadThread;                        // Indicates that the map download image thread shall exit
+  bool quitThreads;                                       // Indicates that the map download image and the status thread shall exit
   std::vector<ThreadInfo *> mapImageDownloadThreadInfos;  // Threads for downloading the map images
+  ThreadSignalInfo *updateStatsStartSignal;               // Signal for starting the status update computation
+  ThreadInfo *updateStatsThreadInfo;                      // Thread that computes statistics about the download
   std::list<MapTileServer*> tileServers;                  // List of tile servers to download images from
   Int numberOfDownloadThreads;                            // Number of threads to spawn that download images
   std::vector<bool> downloadOngoing;                      // Indicates if the download thread is working
   std::list<std::string> layerGroupNames;                 // List of used layer group names
   TimestampInSeconds downloadStartTime;                   // Last time the first download was started
   Int downloadedImages;                                   // Number of downloaded images so far
+  Int downloadQueueRecommendedSize;                       // Size that the download queue should not exceed
+  bool downloadQueueRecommendedSizeExceeded;              // Indicates that the size of the download queue exceeds the recommended size
 
 public:
 
@@ -51,14 +55,17 @@ public:
   // Clears the downloader
   void deinit();
 
+  // Downloads map tiles from the tile server
+  void downloadMapImages(Int nr);
+
+  // Updates the download status
+  void updateDownloadStatus();
+
   // Adds a server url to the list of URLs a tile consists  of
   bool addTileServer(std::string serverURL, double overlayAlpha, ImageType imageType, std::string layerGroupName, Int minZoomLevel, Int maxZoomLevel);
 
   // Adds a map container to the download queue
   void queueMapContainerDownload(MapContainer *mapContainer);
-
-  // Downloads map tiles from the tile server
-  void downloadMapImages(Int nr);
 
   // Merges all so far downloaded zip archives into the first one
   void maintenance();
@@ -70,7 +77,10 @@ public:
   void getLayerGroupZoomLevelBounds(Int refZoomLevel, Int &minZoomLevelMap, Int &minZoomLevelServer, Int &maxZoomLevelServer);
 
   // Returns the number of active downloads
-  bool countActiveDownloads();
+  Int countActiveDownloads();
+
+  // Indicates if the queue has exceeded its recommended size
+  bool downloadQueueReachedRecommendedSize();
 
 };
 

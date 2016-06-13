@@ -27,9 +27,11 @@ protected:
   static const double lngBound;                     // Maximum allowed longitude value
   std::list<MapContainer*> obsoleteMapContainers;   // List of obsolete map containers
   ThreadMutexInfo *downloadJobsMutex;               // Mutex for accessing infos related to download jobs
-  std::list<std::string> processedDownloadJobs;     // List of job names that have been processed already
-  ThreadInfo *processDonwloadJobsThreadInfo;        // Thread that processes all download jobs
+  //std::list<std::string> processedDownloadJobs;     // List of job names that have been processed already
+  ThreadMutexInfo *processDownloadJobsThreadMutex;  // Mutex for accessing the process download jobs thread
+  ThreadInfo *processDownloadJobsThreadInfo;        // Thread that processes all download jobs
   bool quitProcessDownloadJobsThread;               // Indicates if the process download jobs thread shall quit
+  Int unqueuedDownloadTileCount;                    // Number of tiles that are not yet queued but must be downloaded
 
   // Fetches the map tile in which the given position lies from disk or server
   MapTile *fetchMapTile(MapPosition pos, Int zoomLevel);
@@ -48,6 +50,12 @@ protected:
 
   // Computes the mercator x and y ranges for the given area and zoom level
   void computeMercatorBounds(MapArea *displayArea,Int zMap,Int &zServer,Int &startX,Int &endX,Int &startY,Int &endY);
+
+  // Stops the download job processing
+  void stopDownloadJobProcessing();
+
+  // Starts the download job processing
+  void startDownloadJobProcessing();
 
 public:
 
@@ -90,6 +98,12 @@ public:
   // Processes all pending download jobs
   virtual void processDownloadJobs();
 
+  // Returns the number of unqueued tiles
+  virtual Int countUnqueuedDownloadTiles();
+
+  // Trigger the download job processing
+  virtual void triggerDownloadJobProcessing();
+
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {
     core->getThread()->lockMutex(accessMutex, file, line);
@@ -98,6 +112,10 @@ public:
   virtual void unlockAccess() {
     core->getThread()->unlockMutex(accessMutex);
   }
+
+  virtual void lockDownloadJobProcessing(const char *file, int line);
+
+  virtual void unlockDownloadJobProcessing();
 
   bool getDownloadWarningOccured() const {
     return downloadWarningOccured;

@@ -56,25 +56,42 @@ std::string Commander::execute(std::string cmd) {
   std::string unparsedCmdArgs=cmdArgs;
   //DEBUG("cmdArgs=%s",cmdArgs.c_str());
   std::vector<std::string> args;
-  Int endPos;
-  endPos=cmdArgs.find(',');
-  if (endPos==std::string::npos) {
-    endPos=cmdArgs.size();
-  }
-  while(endPos!=0) {
-    std::string currentArg=cmdArgs.substr(0,endPos);
-    //DEBUG("currentArg=%s",currentArg.c_str());
-    args.push_back(currentArg);
-    if (endPos!=cmdArgs.size()) {
-      cmdArgs=cmdArgs.substr(endPos+1);
-      //DEBUG("cmdArgs=%s",cmdArgs.c_str());
-      endPos=cmdArgs.find(',');
-      if (endPos==std::string::npos)
-        endPos=cmdArgs.size();
-    } else {
-      endPos=0;
+  enum { normal, ignoreCommas, } state = normal;
+  std::string currentArg="";
+  for (Int i=0;i<cmdArgs.size();i++) {
+    bool endFound=false;
+    switch (state) {
+    case normal:
+      switch (cmdArgs[i]) {
+      case '"':
+        state=ignoreCommas;
+        break;
+      case ',':
+        endFound=true;
+        break;
+      default:
+        currentArg+=cmdArgs[i];
+      }
+      break;
+    case ignoreCommas:
+      switch (cmdArgs[i]) {
+      case '"':
+        state=normal;
+        break;
+      default:
+        currentArg+=cmdArgs[i];
+      }
+      break;
+    }
+    if (endFound) {
+      //DEBUG("currentArg=%s",currentArg.c_str());
+      args.push_back(currentArg);
+      currentArg="";
     }
   }
+  //DEBUG("currentArg=%s",currentArg.c_str());
+  args.push_back(currentArg);
+  currentArg="";
 
   // Handle the command
   bool cmdExecuted=false;
@@ -515,7 +532,7 @@ std::string Commander::execute(std::string cmd) {
       if (mapDownloader&&mapDownloader->countActiveDownloads()>0)
         result="true";
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      //WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -554,6 +571,29 @@ std::string Commander::execute(std::string cmd) {
         navigationInfo->getTurnDistance()
         );*/
     core->getNavigationEngine()->unlockNavigationInfo();
+    cmdExecuted=true;
+  }
+  if (cmdName=="addAddressPoint") {
+    NavigationPoint point;
+    point.setName(args[0]);
+    point.setAddress(args[1]);
+    point.setLng(atof(args[2].c_str()));
+    point.setLat(atof(args[3].c_str()));
+    core->getNavigationEngine()->addAddressPoint(point);
+    cmdExecuted=true;
+  }
+  if (cmdName=="renameAddressPoint") {
+    core->getNavigationEngine()->renameAddressPoint(args[0],args[1]);
+    cmdExecuted=true;
+  }
+  if (cmdName=="setTargetAtAddressPoint") {
+    NavigationPoint point;
+    point.setName(args[0]);
+    point.readFromConfig("Navigation/AddressPoint");
+    core->getNavigationEngine()->setTargetAtGeographicCoordinate(point.getLng(),point.getLat(),true);
+    GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
+    visPos->updateLastUserModification();
+    core->getDefaultGraphicEngine()->unlockPos();
     cmdExecuted=true;
   }
 

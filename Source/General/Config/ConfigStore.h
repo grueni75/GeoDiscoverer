@@ -105,10 +105,12 @@ public:
   // Access methods to config values
   void setStringValue(std::string path, std::string name, std::string value, const char *file, int line);
   void setIntValue(std::string path, std::string name, Int value, const char *file, int line);
+  void setLongValue(std::string path, std::string name, long value, const char *file, int line);
   void setDoubleValue(std::string path, std::string name, double value, const char *file, int line);
   void setGraphicColorValue(std::string path, GraphicColor value, const char *file, int line);
   std::string getStringValue(std::string path, std::string name, const char *file, int line);
   Int getIntValue(std::string path, std::string name, const char *file, int line);
+  long getLongValue(std::string path, std::string name, const char *file, int line);
   double getDoubleValue(std::string path, std::string name, const char *file, int line);
   GraphicColor getGraphicColorValue(std::string path, const char *file, int line);
 
