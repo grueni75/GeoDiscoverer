@@ -13,6 +13,9 @@
 
 #include <Core.h>
 
+// Path to the mutex log if used
+std::string mutexLogPath = "";
+
 namespace GEODISCOVERER {
 
 // Quits the thread immediately
@@ -393,6 +396,7 @@ void Thread::debugMutexLocks() {
   Int waitTime = core->getConfigStore()->getIntValue("General","mutexLogUpdateInterval", __FILE__, __LINE__);
   FILE *mutexDebugLog;
   std::string logPath=core->getHomePath() + "/Log/mutex-" + core->getClock()->getFormattedDate() + ".log";
+  mutexLogPath = logPath + "\n";
 
   // Set the priority
   setThreadPriority(threadPriorityBackgroundLow);

@@ -44,21 +44,26 @@ jmethodID setThreadPriorityMethodID=NULL;
 // Crash handler
 char *dumpDir = NULL;
 google_breakpad::ExceptionHandler *google_breakpad_exception_handler = NULL;
+extern std::string messageLogPath;
+extern std::string traceLogPath;
+extern std::string mutexLogPath;
 static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
                          void* context,
                          bool succeeded)
 {
-  /*char *cmd = (char*)malloc(strlen("sendNativeCrashReport()")+strlen(descriptor.path())+1);
-  __android_log_write(ANDROID_LOG_DEBUG,"GDCore","dumpCallback");
-  if (!cmd) {
-    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create sendNativeCrashReport cmd!");
-  } else {
-    strcpy(cmd,"sendNativeCrashReport(");
-    strcat(cmd,descriptor.path());
-    strcat(cmd,")");
-    GDApp_executeAppCommand(cmd);
-    free(cmd);
-  }*/
+  // Remember the logs to send if the crash report is generated
+  std::string logsPath=descriptor.path();
+  logsPath=logsPath.substr(0,logsPath.length()-4);
+  logsPath+=".logs";
+  if ((messageLogPath!="")||(traceLogPath!="")||(mutexLogPath!="")) {
+    FILE *logsOut = fopen(logsPath.c_str(),"w");
+    if (logsOut) {
+      if (messageLogPath!="") fputs(messageLogPath.c_str(),logsOut);
+      if (traceLogPath!="") fputs(traceLogPath.c_str(),logsOut);
+      if (mutexLogPath!="") fputs(mutexLogPath.c_str(),logsOut);
+      fclose(logsOut);
+    }
+  }
   succeeded=false;
   return succeeded;
 }

@@ -52,21 +52,31 @@ if ($arch eq 'armeabi-v7a') {
 } else {
   die "CPU architecture $arch not supported!";
 }
-print $arch . "\n";
+#print $arch . "\n";
 
 # Decode the dump and write it to disk
 if ($report !~ m/.dmp$/) {
   print "Decoding native dump... ";
   my $decoded_dump = decode_base64($dump);
-  open (my $out, ">/tmp/crash.dmp") or die "Can not open </tmp/crash.dmp> for writing!";
+  open (my $out, ">/tmp/crash.bin") or die "Can not open </tmp/crash.dmp> for writing!";
   print $out $decoded_dump;
   close($out);
   print "Done!\n";
 } else {
-  system("cp \"" . $report . "\" /tmp/crash.dmp");
+  system("cp \"" . $report . "\" /tmp/crash.bin");
 }
 
+# Check if the bin file is a zip file
+my $status = system("unzip -t /tmp/crash.bin >/dev/null");
+if ($status == 0) {
+  print "Extracting log files to /tmp/crash...\n";
+  system("rm -rf /tmp/crash >/dev/null 2>&1");
+  mkdir "/tmp/crash";
+  system("cd /tmp/crash/; unzip /tmp/crash.bin");
+  system("cp /tmp/crash/crash.dmp /tmp/crash.bin");
+}
+ 
 # Output the stack trace
-system("minidump_stackwalk /tmp/crash.dmp sym/$arch");
+system("minidump_stackwalk /tmp/crash.bin sym/$arch 2>/dev/null");
 
 

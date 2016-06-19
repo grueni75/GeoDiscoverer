@@ -12,6 +12,12 @@
 
 #include <Core.h>
 
+// Path to the message log if used
+std::string messageLogPath = "";
+
+// Path to the trace log if used
+std::string traceLogPath = "";
+
 namespace GEODISCOVERER {
 
 // Constructor
@@ -87,6 +93,7 @@ void Debug::init() {
   // Open the trace log
   if (core->getConfigStore()->getIntValue("General","createTraceLog", __FILE__, __LINE__)) {
     std::string tracelog_filename = logPath + "/trace-" + timestamp  + ".log";
+    traceLogPath = tracelog_filename + "\n";
     //std::string tracelog_filename = logPath + "/trace-" + "" + ".log";
     if (!(tracelog=fopen(tracelog_filename.c_str(),"w"))) {
       puts("FATAL: can not open trace log for writing!");
@@ -97,6 +104,7 @@ void Debug::init() {
   // Open the message log
   if (core->getConfigStore()->getIntValue("General","createMessageLog", __FILE__, __LINE__)) {
     std::string messagelog_filename = logPath + "/message-" + timestamp + ".log";
+    messageLogPath = messagelog_filename + "\n";
     //std::string tracelog_filename = logPath + "/trace-" + "" + ".log";
     if (!(messagelog=fopen(messagelog_filename.c_str(),"w"))) {
       puts("FATAL: can not open message log for writing!");

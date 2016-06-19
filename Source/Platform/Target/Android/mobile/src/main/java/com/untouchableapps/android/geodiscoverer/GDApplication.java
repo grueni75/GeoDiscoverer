@@ -12,6 +12,7 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
@@ -20,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -27,6 +29,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.acra.ACRA;
 import org.acra.ACRAConstants;
@@ -134,7 +138,9 @@ public class GDApplication extends Application implements GDAppInterface, Google
     if (files!=null) {
       for (File file : files) {
         if ((file.isFile()) && (file.getAbsolutePath().endsWith(".dmp"))) {
-          File file2 = new File(file.getAbsoluteFile() + ".base64");
+          String txtPath = file.getAbsolutePath();
+          txtPath = txtPath.substring(0,txtPath.length()-4) + ".zip.base64";
+          File file2 = new File(txtPath);
           if (!file2.exists()) {
             ACRA.getConfig().setResToastText(R.string.crash_toast_text_left_over_report);
             sendNativeCrashReport(file.getAbsolutePath(), true);
@@ -257,36 +263,71 @@ public class GDApplication extends Application implements GDAppInterface, Google
     }
   }
 
+  // Adds a file to a zip archive
+  void zipFile(ZipOutputStream zipOut, String name, String path) throws IOException {
+    FileInputStream in = new FileInputStream(path);
+    zipOut.putNextEntry(new ZipEntry(name));
+    byte[] b = new byte[1024];
+    int count;
+    while ((count = in.read(b)) > 0) {
+      zipOut.write(b, 0, count);
+    }
+    in.close();
+  }
+
   // Sends a native crash report
   @Override
   public void sendNativeCrashReport(String dumpBinPath, boolean quitApp) {
 
     // Get the content of the minidump file and format it in base64
-    ACRA.getErrorReporter().putCustomData("nativeMinidumpPath", dumpBinPath);
-    String dumpTxtPath = dumpBinPath.concat(".base64");
+    String basePath = dumpBinPath.substring(0,dumpBinPath.length()-4);
+    String zipPath = basePath.concat(".zip");
+    String logsPath = basePath.concat(".logs");
+    ACRA.getErrorReporter().putCustomData("nativeZipPath", zipPath);
+    String txtPath = zipPath.concat(".base64");
     try {
-      DataInputStream dumpBinReader = new DataInputStream(new FileInputStream(dumpBinPath));
-      long len = new File(dumpBinPath).length();
+
+      // Create a zip file with the dump and all reported logs
+      ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipPath));
+      zipFile(zipOut,"crash.dmp",dumpBinPath);
+      File logsFile = new File(logsPath);
+      if (logsFile.exists()) {
+        String logPath;
+        InputStream fis = new FileInputStream(logsPath);
+        InputStreamReader isr = new InputStreamReader(fis);
+        BufferedReader br = new BufferedReader(isr);
+        while ((logPath = br.readLine()) != null) {
+          File logFile = new File(logPath);
+          if (logFile.exists())
+            zipFile(zipOut, logFile.getName(), logPath);
+        }
+      }
+      zipOut.close();
+
+      // Submit the zip file after text encoding
+      DataInputStream binReader = new DataInputStream(new FileInputStream(zipPath));
+      long len = new File(zipPath).length();
       if (len > Integer.MAX_VALUE) {
-        dumpBinReader.close();
+        binReader.close();
         throw new IOException("File "+dumpBinPath+" too large, was "+len+" bytes.");
       }
       byte[] bytes = new byte[(int) len];
-      dumpBinReader.readFully(bytes);
-      String dumpContents = Base64.encodeToString(bytes, Base64.DEFAULT);
-      BufferedWriter dumpTextWriter = new BufferedWriter(new FileWriter(dumpTxtPath));
-      dumpTextWriter.write(dumpContents);
-      dumpTextWriter.close();
-      String[] dumpContentsInLines = dumpContents.split("\n");
+      binReader.readFully(bytes);
+      String contents = Base64.encodeToString(bytes, Base64.DEFAULT);
+      BufferedWriter textWriter = new BufferedWriter(new FileWriter(txtPath));
+      textWriter.write(contents);
+      textWriter.close();
+      String[] contentsInLines = contents.split("\n");
       ReportField[] customReportFields = new ReportField[ACRAConstants.DEFAULT_REPORT_FIELDS.length+1];
       System.arraycopy(ACRAConstants.DEFAULT_REPORT_FIELDS, 0, customReportFields, 0, ACRAConstants.DEFAULT_REPORT_FIELDS.length);
       customReportFields[ACRAConstants.DEFAULT_REPORT_FIELDS.length]=ReportField.APPLICATION_LOG;
       ACRA.getConfig().setCustomReportContent(customReportFields);
-      ACRA.getConfig().setApplicationLogFileLines(dumpContentsInLines.length+1);
-      ACRA.getConfig().setApplicationLogFile(dumpTxtPath);
-      dumpBinReader.close();
+      ACRA.getConfig().setApplicationLogFileLines(contentsInLines.length+1);
+      ACRA.getConfig().setApplicationLogFile(txtPath);
+      binReader.close();
     }
     catch (Exception e) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
     }
 
     // Send report via ACRA
