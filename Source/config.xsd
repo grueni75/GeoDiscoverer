@@ -151,6 +151,11 @@
                               <xsd:documentation>Minimum duration between off route alerts in seconds.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
+                          <xsd:element name="forwardTurnMaxAngle" type="xsd:double" default="10.0">
+                            <xsd:annotation>
+                              <xsd:documentation>Maximum angle a turn is detected as a forward drive.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
                           <xsd:element name="speakDelay" type="xsd:integer" default="6">
                             <xsd:annotation>
                               <xsd:documentation>Average delay in seconds the text-to-speech engine requires for preparing the voice.</xsd:documentation>

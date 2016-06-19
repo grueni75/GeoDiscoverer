@@ -20,6 +20,7 @@ import android.speech.tts.TextToSpeech;
 
 import com.untouchableapps.android.geodiscoverer.GDApplication;
 import com.untouchableapps.android.geodiscoverer.R;
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 
 public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInitListener {
   
@@ -35,6 +36,9 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
   // Last time a navigation alert was spoken
   long lastAlert;
   long minDurationBetweenOffRouteAlerts;
+
+  // Maximum angle a turn is detected as a forward drive
+  float forwardTurnMaxAngle;
   
   // Text to speech engine for saying something
   TextToSpeech textToSpeech;
@@ -51,6 +55,7 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
     // Init parameters
     minDurationBetweenOffRouteAlerts = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "minDurationBetweenOffRouteAlerts")) *  1000;
     speakDelay = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "speakDelay")) *  1000;
+    forwardTurnMaxAngle = Float.parseFloat(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "forwardTurnMaxAngle"));
 
     // Remember variables
     this.context = context;
@@ -213,11 +218,16 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
     // Is a turn coming?
     if (!infos.turnAngle.equals("-")) {
       Float turnAngle = Float.valueOf(infos.turnAngle);
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("turnAngle=%f",turnAngle));
       distance = textDistanceToVoiceDistance(distance);
-      if (turnAngle>0)
-        navigationInstructions=context.getString(R.string.tts_turn_left, distance);
-      else
-        navigationInstructions=context.getString(R.string.tts_turn_right, distance);
+      if (Math.abs(turnAngle)<forwardTurnMaxAngle) {
+        navigationInstructions=context.getString(R.string.tts_drive_forward, distance);
+      } else {
+        if (turnAngle > 0)
+          navigationInstructions = context.getString(R.string.tts_turn_left, distance);
+        else
+          navigationInstructions = context.getString(R.string.tts_turn_right, distance);
+      }
     } else {
 
       // Are we off route?

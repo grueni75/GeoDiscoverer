@@ -89,6 +89,7 @@
   <string name="tts_cannot_set_language">Could not set Text-To-Speech language</string>
   <string name="tts_cannot_add_alert_earcon">Could not add Text-To-Speech alert earcon</string>
   <string name="tts_locale">en</string>
+  <string name="tts_drive_forward">Please drive straight ahead in %1$s!</string>
   <string name="tts_turn_left">Please turn left in %1$s!</string>
   <string name="tts_turn_right">Please turn right in %1$s!</string>
   <string name="tts_off_route">You are %1$s away from your route!</string>
