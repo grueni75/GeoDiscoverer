@@ -64,11 +64,25 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     layerName=core->getMapSource()->getMapLayerName(core->getMapEngine()->getZoomLevel());
 
     // Compute the scale in meters
+    GraphicPosition *visPos=widgetPage->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+    double angle=visPos->getAngleRad();
+    double zoom=visPos->getZoom();
+    widgetPage->getGraphicEngine()->unlockPos();
     MapPosition *pos=core->getMapEngine()->lockMapPos(__FILE__, __LINE__);
-    if ((pos->getLngScale()>0)&&(pos->getMapTile())) {
+    MapCalibrator *calibrator=NULL;
+    if ((pos->getLngScale()>0)&&(pos->getMapTile())&&(pos->getMapTile()->getParentMapContainer())&&((calibrator=pos->getMapTile()->getParentMapContainer()->getMapCalibrator())!=NULL)) {
+      //DEBUG("angle=%f zoom=%f",angle,zoom);
       MapPosition pos2=*pos;
-      pos2.setLng(pos->getLng()+(iconWidth/3)/pos->getLngScale());
-      metersPerTick=pos->computeDistance(pos2);
+      pos2.setX(iconWidth/zoom*cos(angle));
+      pos2.setY(-iconWidth/zoom*sin(angle));
+      //DEBUG("x=%d y=%d",pos2.getX(),pos2.getY());
+      calibrator->setGeographicCoordinates(pos2);
+      MapPosition pos3=pos2;
+      pos3.setX(0);
+      pos3.setY(0);
+      calibrator->setGeographicCoordinates(pos3);
+      metersPerTick=fabs(pos3.computeDistance(pos2))/3.0;
+      //DEBUG("metersPerTick=%f",metersPerTick);
     } else {
       metersPerTick=0;
     }

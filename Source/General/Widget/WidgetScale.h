@@ -27,7 +27,7 @@ protected:
   TimestampInMicroseconds nextUpdateTime;
 
   // Current meters per tick of the scale icon
-  Int metersPerTick;
+  double metersPerTick;
 
   // Current map name
   std::string mapName;
