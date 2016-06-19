@@ -19,9 +19,9 @@ define SVG2PNG
 $(1)dpi/$(2): $(3)
 	@echo Generating $$@
 	@mkdir -p $(1)dpi
-	@if [ "$$<" == "tileImageNotCached.svg" ] || [ "$$<" == "tileImageNotDownloaded.svg" ] || [ "$$<" == "pathDirection.svg" ]; then \
+	@if [ "$$<" = "tileImageNotCached.svg" ] || [ "$$<" = "tileImageNotDownloaded.svg" ] || [ "$$<" = "pathDirection.svg" ]; then \
 		inkscape --export-png=$$@ --export-dpi=90 $$<; \
-	elif [ "$(2)" == "navigationTarget.png" ]; then \
+	elif [ "$(2)" = "navigationTarget.png" ]; then \
 		inkscape --export-png=$$@ --export-dpi=`echo $(1)*90/240/12 | bc` $$<; \
 	else \
 		inkscape --export-png=$$@ --export-dpi=`echo $(1)*90/240 | bc` $$<; \
