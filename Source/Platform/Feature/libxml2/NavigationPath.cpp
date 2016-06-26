@@ -320,15 +320,9 @@ bool NavigationPath::readGPXFile() {
     WARNING("file <%s> contains both a route and a track, loading the track only",gpxFilename.c_str());
   }
   if (trackNodes.size()>0) {
-    if (trackNodes.size()>1) {
-      WARNING("file <%s> contains more than one track, only loading the first",gpxFilename.c_str());
-    }
     loadTrack=true;
   } else {
     if (routeNodes.size()>0) {
-      if (routeNodes.size()>1) {
-        WARNING("file <%s> contains more than one route, only loading the first",gpxFilename.c_str());
-      }
       loadRoute=true;
     } else {
       ERROR("file <%s> does neither contain a route nor a track",gpxFilename.c_str());
@@ -351,18 +345,68 @@ bool NavigationPath::readGPXFile() {
 
   // Load the points of the path
   if (loadTrack) {
-    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:trk[1]/*");
-    extractInformation(nodes);
-    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:trk[1]/gpx:trkseg/gpx:trkpt");
+    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:trk/gpx:trkseg/gpx:trkpt");
     totalNumberOfPoints=nodes.size();
     processedPoints=0;
-    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:trk[1]/gpx:trkseg");
-    numberOfSegments=nodes.size();
-    for(Int i=1;i<=numberOfSegments;i++) {
-      std::stringstream trksegPath;
-      trksegPath<<"/gpx:gpx/gpx:trk[1]/gpx:trkseg["<<i<<"]/gpx:trkpt";
-      nodes=findNodes(doc,xpathCtx,trksegPath.str());
-      numberOfPoints=nodes.size();
+    for (Int k=1;k<=trackNodes.size();k++) {
+      std::stringstream prefix;
+      prefix << "/gpx:gpx/gpx:trk["<<k<<"]";
+      if (trackNodes.size()==1) {
+        nodes=findNodes(doc,xpathCtx,prefix.str() + "/*");
+        extractInformation(nodes);
+      }
+      nodes=findNodes(doc,xpathCtx,prefix.str() + "/gpx:trkseg");
+      numberOfSegments=nodes.size();
+      for(Int i=1;i<=numberOfSegments;i++) {
+        std::stringstream trksegPath;
+        trksegPath<<prefix.str() + "/gpx:trkseg["<<i<<"]/gpx:trkpt";
+        nodes=findNodes(doc,xpathCtx,trksegPath.str());
+        numberOfPoints=nodes.size();
+        for(std::list<XMLNode>::iterator j=nodes.begin();j!=nodes.end();j++) {
+          XMLNode node=*j;
+          std::string error;
+          if (pos.readGPX(node,error)) {
+            addEndPosition(pos);
+          } else {
+            error="file <%s> " + error;
+            ERROR(error.c_str(),gpxFilename.c_str());
+            goto cleanup;
+          }
+          processedPoints++;
+          processedPercentage=processedPoints*100/totalNumberOfPoints;
+          if (processedPercentage>prevProcessedPercentage) {
+            progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
+            status.pop_front();
+            status.push_front(progress.str());
+            core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+          }
+          prevProcessedPercentage=processedPercentage;
+          if (core->getQuitCore())
+            break;
+          //core->getThread()->reschedule();
+        }
+        if (i!=numberOfSegments) {
+          addEndPosition(NavigationPath::getPathInterruptedPos());
+        }
+        if (core->getQuitCore())
+          break;
+      }
+      if (k!=trackNodes.size()) {
+        addEndPosition(NavigationPath::getPathInterruptedPos());
+      }
+    }
+  }
+  if (loadRoute) {
+    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:rte/gpx:rtept");
+    totalNumberOfPoints=nodes.size();
+    processedPoints=0;
+    for (Int k=1;k<=routeNodes.size();k++) {
+      std::stringstream prefix;
+      prefix << "/gpx:gpx/gpx:rte["<<k<<"]";
+      nodes=findNodes(doc,xpathCtx,prefix.str() + "/*");
+      if (routeNodes.size()==1) {
+        extractInformation(nodes);
+      }
       for(std::list<XMLNode>::iterator j=nodes.begin();j!=nodes.end();j++) {
         XMLNode node=*j;
         std::string error;
@@ -386,42 +430,9 @@ bool NavigationPath::readGPXFile() {
           break;
         //core->getThread()->reschedule();
       }
-      if (i!=numberOfSegments) {
+      if (k!=routeNodes.size()) {
         addEndPosition(NavigationPath::getPathInterruptedPos());
       }
-      if (core->getQuitCore())
-        break;
-    }
-  }
-  if (loadRoute) {
-    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:rte[1]/*");
-    extractInformation(nodes);
-    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:rte[1]/gpx:rtept");
-    numberOfPoints=nodes.size();
-    totalNumberOfPoints=numberOfPoints;
-    processedPoints=0;
-    for(std::list<XMLNode>::iterator j=nodes.begin();j!=nodes.end();j++) {
-      XMLNode node=*j;
-      std::string error;
-      if (pos.readGPX(node,error)) {
-        addEndPosition(pos);
-      } else {
-        error="file <%s> " + error;
-        ERROR(error.c_str(),gpxFilename.c_str());
-        goto cleanup;
-      }
-      processedPoints++;
-      processedPercentage=processedPoints*100/totalNumberOfPoints;
-      if (processedPercentage>prevProcessedPercentage) {
-        progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
-        status.pop_front();
-        status.push_front(progress.str());
-        core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
-      }
-      prevProcessedPercentage=processedPercentage;
-      if (core->getQuitCore())
-        break;
-      //core->getThread()->reschedule();
     }
   }
 
