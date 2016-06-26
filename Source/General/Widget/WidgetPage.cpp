@@ -143,14 +143,14 @@ bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 }
 
 // Called when the page is not touched anymore
-void WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
+void WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
 
   // Check all widgets
   std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
   if (!touchStartedOutside) {
     for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
       WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-      primitive->onTouchUp(t,x,y);
+      primitive->onTouchUp(t,x,y,cancel);
     }
   }
   deselectWidget(t);

@@ -58,8 +58,8 @@ bool WidgetButton::work(TimestampInMicroseconds t) {
 }
 
 // Executed if the widget has been untouched
-void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
-  WidgetPrimitive::onTouchUp(t,x,y);
+void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
+  WidgetPrimitive::onTouchUp(t,x,y,cancel);
   if (getIsHit()) {
 
     // Execute the command only if the repeating dispatching has not yet started

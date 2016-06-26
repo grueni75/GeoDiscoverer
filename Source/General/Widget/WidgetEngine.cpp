@@ -1408,7 +1408,7 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 }
 
 // Called when the screen is untouched
-bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
+bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
 
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   if (!currentPage) {
@@ -1420,7 +1420,7 @@ bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
     return false;
   }
   deselectPage();
-  currentPage->onTouchUp(t,x,y);
+  currentPage->onTouchUp(t,x,y,cancel);
   core->getThread()->unlockMutex(accessMutex);
   return true;
 }

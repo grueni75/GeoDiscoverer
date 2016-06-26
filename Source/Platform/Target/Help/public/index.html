@@ -3357,7 +3357,7 @@ Geo Discoverer is bundled with a set of small tools that can create the contents
 |[[GrabMaps.py|MapCreation/GrabMaps.py]]|Grabs map pictures from windows applications and creates &quot;.gdm&quot; files for them. The calibration data is also copied from the windows application. It contains support for Google Maps running in Firefox and Garmin's &quot;Deutschland Digital Topographische Karte&quot;. The script requires the software packages ~ActivePython-2.7.2.5, ~PIL-1.1.7 and ~MiniCap.|
 </pre>
 </div>
-<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201606131510" changecount="200">
+<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201606261002" changecount="201">
 <pre>The map view is the main activity of the app. It shows the map selected in the AppPreferences on the screen. The map can be moved by using one finger and zoomed by using two fingers. Each map can consist of multiple layers at different zoom levels. The app automatically selects the best layer depending on the zoom ratio. You can also create your own map. See MapCreation.
 ! Elements on the map&lt;html&gt;&lt;a name=&quot;ElementsOnTheMap&quot;/&gt;&lt;/html&gt;
 Besides the map itself, different graphical elements are placed on top of it. Here is an explanation:
@@ -3385,7 +3385,7 @@ If Geo Discoverer has something to do in the background, it shows this yellow st
 These meters shows your current altitude, your current speed and the length of the recorded track.
 !! Navigation
 &lt;html&gt;&lt;img src=&quot;MapView/MapWidget/navigationDefault.png&quot; style=&quot;height: 8em&quot;/&gt;&lt;img src=&quot;MapView/MapWidget/navigationTurn.png&quot; style=&quot;height: 8em&quot;/&gt;&lt;/html&gt;
-The navigation widget helps you to find your way. The small triangle shows your current heading, as reported by the GPS. The red circle shows the direction to your target. This can either be a point on the map or a route. Information such as the distance and the duration to the target or the route end flag is shown within the circle. This also includes arrows in case you approach a turn on the route. See the NavigationTasks tiddler for more information how to navigate with Geo Discoverer.
+The navigation widget helps you to find your way. The small triangle shows your current heading, as reported by the GPS. The red circle shows the direction to your target. This can either be a point on the map or a route. Information such as the distance and the duration to the target or the route end flag is shown within the circle. This also includes arrows in case you approach a turn on the route. The shown information in the second row can be changed by touching the widget. See the NavigationTasks tiddler for more information how to navigate with Geo Discoverer.
 !! Path info
 &lt;html&gt;&lt;img src=&quot;MapView/MapWidget/pathInfo.png&quot; style=&quot;height: 8em&quot;/&gt;&lt;/html&gt;
 This widget shows information about the focused path. The focused path is the one nearest to the map view center. It is also possible to lock the widget to a specific path with the &quot;path info lock widget&quot;. The path name is indicated in the top line. The right side shows the total length, the total altitude difference upward and downward, and the total duration of the path. The left side visualize its altitude profile. The small black triangle shows your current position on the path. The widget displays the information only for the path segment between the start and end flag. You can modify the altitude profile by using your fingers. Two fingers modify the zoom and one finger the visible part.
@@ -4871,9 +4871,10 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201606191038" changecount="35">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201606261005" changecount="41">
 <pre>|!Date |!Changes |
-|2015-06-13|Updated [[MapView]] with new history of searched addresses feature.| 
+|2016-06-26|Updated [[MapView]] to highlight that the infos shown in the navigation widget can be changed.|
+|2016-06-13|Updated [[MapView]] with new history of searched addresses feature.|
 |2015-12-23|Updated [[About]] with copyright notice of new maps.|
 |2015-12-21|Updated tiddlers regarding the new map download feature.|
 |2015-11-17|Replaced ~IcoMoon by material design icons in [[About]].|

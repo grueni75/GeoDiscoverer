@@ -36,6 +36,10 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   turnFontString=NULL;
   altitudeLabelFontString=NULL;
   altitudeValueFontString=NULL;
+  trackLengthLabelFontString=NULL;
+  trackLengthValueFontString=NULL;
+  speedLabelFontString=NULL;
+  speedValueFontString=NULL;
   locationBearingActual=0;
   locationBearingActual=0;
   directionChangeDuration=0;
@@ -43,6 +47,8 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   fontEngine->updateString(&durationLabelFontString,"Duration");
   fontEngine->updateString(&altitudeLabelFontString,"Altitude");
+  fontEngine->updateString(&trackLengthLabelFontString,"Track");
+  fontEngine->updateString(&speedLabelFontString,"Speed");
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++)
@@ -62,6 +68,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   active=false;
   firstRun=true;
   lastClockUpdate=0;
+  secondRowState=0;
 }
 
 // Destructor
@@ -76,6 +83,8 @@ WidgetNavigation::~WidgetNavigation() {
   fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
   if (durationLabelFontString) fontEngine->destroyString(durationLabelFontString);
   if (altitudeLabelFontString) fontEngine->destroyString(altitudeLabelFontString);
+  if (trackLengthLabelFontString) fontEngine->destroyString(trackLengthLabelFontString);
+  if (speedLabelFontString) fontEngine->destroyString(speedLabelFontString);
   fontEngine->unlockFont();
   if (textColumnCount==2) {
     fontEngine->lockFont("sansLarge",__FILE__, __LINE__);
@@ -93,6 +102,8 @@ WidgetNavigation::~WidgetNavigation() {
   fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
   if (durationValueFontString) fontEngine->destroyString(durationValueFontString);
   if (altitudeValueFontString) fontEngine->destroyString(altitudeValueFontString);
+  if (trackLengthValueFontString) fontEngine->destroyString(trackLengthValueFontString);
+  if (speedValueFontString) fontEngine->destroyString(speedValueFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++) {
@@ -251,18 +262,38 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         fontEngine->updateString(&durationValueFontString,infos.str());
         activateWidget=true;
       }
+      if (navigationInfo->getAltitude()!=NavigationInfo::getUnknownDistance()) {
+        unitConverter->formatMeters(navigationInfo->getAltitude(),value,unit);
+        infos.str("");
+        infos << value << " " << unit;
+        fontEngine->updateString(&altitudeValueFontString,infos.str());
+        activateWidget=true;
+      } else {
+        fontEngine->updateString(&altitudeValueFontString,"unknown");
+      }
+      if (navigationInfo->getTrackLength()!=NavigationInfo::getUnknownDistance()) {
+        unitConverter->formatMeters(navigationInfo->getTrackLength(),value,unit);
+        infos.str("");
+        infos << value << " " << unit;
+        fontEngine->updateString(&trackLengthValueFontString,infos.str());
+        activateWidget=true;
+      } else {
+        fontEngine->updateString(&trackLengthValueFontString,"unknown");
+      }
+      if (navigationInfo->getLocationSpeed()!=NavigationInfo::getUnknownSpeed()) {
+        unitConverter->formatMetersPerSecond(navigationInfo->getLocationSpeed(),value,unit,1);
+        infos.str("");
+        infos << value << " " << unit;
+        fontEngine->updateString(&speedValueFontString,infos.str());
+        activateWidget=true;
+      } else {
+        fontEngine->updateString(&speedValueFontString,"unknown");
+      }
+      fontEngine->unlockFont();
       if (textColumnCount==2) {
-        if (navigationInfo->getAltitude()!=NavigationInfo::getUnknownDistance()) {
-          unitConverter->formatMeters(navigationInfo->getAltitude(),value,unit);
-          infos.str("");
-          infos << value << " " << unit;
-          fontEngine->updateString(&altitudeValueFontString,infos.str());
-          activateWidget=true;
-        } else {
-          fontEngine->updateString(&altitudeValueFontString,"unknown");
-        }
-        fontEngine->unlockFont();
         fontEngine->lockFont("sansLarge",__FILE__, __LINE__);
+      } else {
+        fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
       }
       if (distance!=-1) {
         unitConverter->formatMeters(distance,value,unit);
@@ -273,8 +304,8 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       } else {
         fontEngine->updateString(&distanceValueFontString,"unknown");
       }
+      fontEngine->unlockFont();
     }
-    fontEngine->unlockFont();
     changed=true;
 
     // Set positions
@@ -319,6 +350,34 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
           x+iconWidth/2+textColumnOffsetX
       );
       altitudeValueFontString->setY(y+textRowThirdOffsetY);
+    }
+    if (trackLengthLabelFontString) {
+      trackLengthLabelFontString->setX((textColumnCount==1)?
+          x+(iconWidth-trackLengthLabelFontString->getIconWidth())/2 :
+          x+iconWidth/2-textColumnOffsetX-trackLengthLabelFontString->getIconWidth()
+      );
+      trackLengthLabelFontString->setY(y+textRowFourthOffsetY);
+    }
+    if (trackLengthValueFontString) {
+      trackLengthValueFontString->setX((textColumnCount==1)?
+          x+(iconWidth-trackLengthValueFontString->getIconWidth())/2 :
+          x+iconWidth/2-textColumnOffsetX-trackLengthValueFontString->getIconWidth()
+      );
+      trackLengthValueFontString->setY(y+textRowThirdOffsetY);
+    }
+    if (speedLabelFontString) {
+      speedLabelFontString->setX((textColumnCount==1)?
+          x+(iconWidth-speedLabelFontString->getIconWidth())/2 :
+          x+iconWidth/2+textColumnOffsetX
+      );
+      speedLabelFontString->setY(y+textRowFourthOffsetY);
+    }
+    if (speedValueFontString) {
+      speedValueFontString->setX((textColumnCount==1)?
+          x+(iconWidth-speedValueFontString->getIconWidth())/2 :
+          x+iconWidth/2+textColumnOffsetX
+      );
+      speedValueFontString->setY(y+textRowThirdOffsetY);
     }
     if (prevNavigationInfo.getLocationBearing()!=navigationInfo->getLocationBearing()) {
       if (navigationInfo->getLocationBearing()==NavigationInfo::getUnknownAngle()) {
@@ -475,31 +534,64 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
       distanceLabelFontString->setColor(color);
       distanceLabelFontString->draw(t);
     }
-    if (durationLabelFontString) {
-      durationLabelFontString->setColor(color);
-      durationLabelFontString->draw(t);
-    }
-    if (durationValueFontString) {
-      durationValueFontString->setColor(color);
-      durationValueFontString->draw(t);
-    }
     if (distanceValueFontString) {
       distanceValueFontString->setColor(color);
       distanceValueFontString->draw(t);
     }
+    FontString *leftLabelFontString = NULL;
+    FontString *leftValueFontString = NULL;
+    FontString *rightLabelFontString = NULL;
+    FontString *rightValueFontString = NULL;
     if (textColumnCount==2) {
-      if (altitudeLabelFontString) {
-        altitudeLabelFontString->setColor(color);
-        altitudeLabelFontString->draw(t);
+      switch (secondRowState) {
+      case 0:
+        leftLabelFontString=durationLabelFontString;
+        leftValueFontString=durationValueFontString;
+        rightLabelFontString=altitudeLabelFontString;
+        rightValueFontString=altitudeValueFontString;
+        break;
+      case 1:
+        leftLabelFontString=trackLengthLabelFontString;
+        leftValueFontString=trackLengthValueFontString;
+        rightLabelFontString=speedLabelFontString;
+        rightValueFontString=speedValueFontString;
+        break;
       }
-      if (altitudeValueFontString) {
-        altitudeValueFontString->setColor(color);
-        altitudeValueFontString->draw(t);
+    } else {
+      switch (secondRowState) {
+      case 0:
+        leftLabelFontString=durationLabelFontString;
+        leftValueFontString=durationValueFontString;
+        break;
+      case 1:
+        leftLabelFontString=altitudeLabelFontString;
+        leftValueFontString=altitudeValueFontString;
+        break;
+      case 2:
+        leftLabelFontString=trackLengthLabelFontString;
+        leftValueFontString=trackLengthValueFontString;
+        break;
+      case 3:
+        leftLabelFontString=speedLabelFontString;
+        leftValueFontString=speedValueFontString;
+        break;
       }
-      if (clockFontString) {
-        clockFontString->setColor(color);
-        clockFontString->draw(t);
-      }
+    }
+    if (leftLabelFontString) {
+      leftLabelFontString->setColor(color);
+      leftLabelFontString->draw(t);
+      leftValueFontString->setColor(color);
+      leftValueFontString->draw(t);
+    }
+    if (rightLabelFontString) {
+      rightLabelFontString->setColor(color);
+      rightLabelFontString->draw(t);
+      rightValueFontString->setColor(color);
+      rightValueFontString->draw(t);
+    }
+    if (clockFontString) {
+      clockFontString->setColor(color);
+      clockFontString->draw(t);
     }
   }
 }
@@ -508,6 +600,21 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
 void WidgetNavigation::updatePosition(Int x, Int y, Int z) {
   WidgetPrimitive::updatePosition(x,y,z);
   nextUpdateTime=0;
+}
+
+// Executed if the widget has been untouched
+void WidgetNavigation::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
+  WidgetPrimitive::onTouchUp(t,x,y,cancel);
+  if (getIsHit()) {
+    secondRowState++;
+    if (textColumnCount==2) {
+      if (secondRowState>1)
+        secondRowState=0;
+    } else {
+      if (secondRowState>3)
+        secondRowState=0;
+    }
+  }
 }
 
 

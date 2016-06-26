@@ -150,7 +150,7 @@ public:
   virtual void onTouchDown(TimestampInMicroseconds t, Int x, Int y);
 
   // Called when the widget is not touched anymore
-  virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y);
+  virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel);
 
   // Recomputes the visualization of the path info
   void updateVisualization();

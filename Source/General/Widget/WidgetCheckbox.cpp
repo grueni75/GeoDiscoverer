@@ -74,8 +74,8 @@ bool WidgetCheckbox::update(bool checked, bool executeCommand) {
 }
 
 // Executed if the widget has been untouched
-void WidgetCheckbox::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
-  WidgetPrimitive::onTouchUp(t,x,y);
+void WidgetCheckbox::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
+  WidgetPrimitive::onTouchUp(t,x,y,cancel);
   if (getIsHit()) {
     Int checked=core->getConfigStore()->getIntValue(stateConfigPath,stateConfigName,__FILE__, __LINE__);
     if (update(1-checked,true))

@@ -27,9 +27,11 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.wearable.watchface.Gles2WatchFaceService;
+import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.WindowManager;
@@ -415,6 +417,7 @@ public class WatchFace extends Gles2WatchFaceService {
           .setShowSystemUiTime(false)
           .setShowUnreadCountIndicator(true)
           .setViewProtectionMode(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR)
+          .setAcceptsTapEvents(true)
           .build());
     }
 
@@ -470,6 +473,29 @@ public class WatchFace extends Gles2WatchFaceService {
       // Draw every frame as long as we're visible and in interactive mode.
       if (isVisible() && !isInAmbientMode()) {
         invalidate();
+      }
+    }
+
+    @Override
+    public void onTapCommand(@TapType int tapType, int x, int y, long eventTime) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","event received");
+
+      switch (tapType) {
+        case WatchFaceService.TAP_TYPE_TAP:
+          coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");
+          break;
+
+        case WatchFaceService.TAP_TYPE_TOUCH:
+          coreObject.executeCoreCommand("touchDown(" + x + "," + y + ")");
+          break;
+
+        case WatchFaceService.TAP_TYPE_TOUCH_CANCEL:
+          coreObject.executeCoreCommand("touchCancel(" + x + "," + y + ")");
+          break;
+
+        default:
+          super.onTapCommand(tapType, x, y, eventTime);
+          break;
       }
     }
   }

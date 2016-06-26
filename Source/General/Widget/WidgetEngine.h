@@ -75,7 +75,7 @@ public:
   bool onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff);
 
   // Called when the screen is untouched
-  bool onTouchUp(TimestampInMicroseconds t, Int x, Int y);
+  bool onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel=false);
 
   // Called when a two fingure gesture is done on the screen
   bool onTouchDown(TimestampInMicroseconds t, Int x, Int y);

@@ -461,8 +461,8 @@ void WidgetPathInfo::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 }
 
 // Called when the widget is not touched anymore
-void WidgetPathInfo::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
-  WidgetPrimitive::onTouchUp(t,x,y);
+void WidgetPathInfo::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
+  WidgetPrimitive::onTouchUp(t,x,y,cancel);
   firstTouchDown=true;
 }
 

@@ -56,10 +56,12 @@ void WidgetPrimitive::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 }
 
 // Executed if the widget has been untouched
-void WidgetPrimitive::onTouchUp(TimestampInMicroseconds t, Int x, Int y) {
+void WidgetPrimitive::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
   updateFlags(x,y);
   isSelected=false;
   isFirstTimeSelected=false;
+  if (cancel)
+    isHit=false;
 }
 
 // Called when the map has changed

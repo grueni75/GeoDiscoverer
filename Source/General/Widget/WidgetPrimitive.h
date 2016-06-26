@@ -49,7 +49,7 @@ public:
   virtual void onTouchDown(TimestampInMicroseconds t, Int x, Int y);
 
   // Called when the widget is not touched anymore
-  virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y);
+  virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel);
 
   // Called when the map has changed
   virtual void onMapChange(bool widgetVisible, MapPosition pos);

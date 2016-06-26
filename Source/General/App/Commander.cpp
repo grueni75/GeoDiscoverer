@@ -182,6 +182,11 @@ std::string Commander::execute(std::string cmd) {
       if (core->getDefaultWidgetEngine()->onTouchUp(t,x,y))
         widgetTouched=true;
     }
+    if (cmdName=="touchCancel") {
+      //DEBUG("touchUp(%d,%d)",x,y);
+      if (core->getDefaultWidgetEngine()->onTouchUp(t,x,y,true))
+        widgetTouched=true;
+    }
 
     // Then do the map scrolling
     if (!widgetTouched) {

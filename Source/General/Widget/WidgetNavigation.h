@@ -50,6 +50,9 @@ protected:
   // Show the turn
   bool showTurn;
 
+  // Decides which info is displayed in the second row
+  Int secondRowState;
+
   // Indicates if widget is active
   bool active;
 
@@ -87,6 +90,10 @@ protected:
   FontString *clockFontString;
   FontString *altitudeLabelFontString;
   FontString *altitudeValueFontString;
+  FontString *trackLengthLabelFontString;
+  FontString *trackLengthValueFontString;
+  FontString *speedLabelFontString;
+  FontString *speedValueFontString;
   FontString *orientationLabelFontStrings[4];
 
   // Holds the points of the arrow
@@ -120,6 +127,9 @@ public:
 
   // Let the widget work
   virtual bool work(TimestampInMicroseconds t);
+
+  // Called when the widget is not touched anymore
+  virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel);
 
   // Called when the widget must be drawn
   virtual void draw(TimestampInMicroseconds t);
