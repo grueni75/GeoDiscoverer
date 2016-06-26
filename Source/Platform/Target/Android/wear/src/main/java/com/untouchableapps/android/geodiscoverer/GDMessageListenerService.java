@@ -25,9 +25,15 @@ public class GDMessageListenerService extends WearableListenerService{
             new String(messageEvent.getData()))
     );*/
     if (messageEvent.getPath().equals("/com.untouchableapps.android.geodiscoverer")) {
-      if (GDApplication.coreObject!=null) {
-        GDApplication.coreObject.executeCoreCommand(new String(messageEvent.getData()));
-        ((GDApplication) getApplication()).executeAppCommand("updateScreen()");
+      String cmd = new String(messageEvent.getData());
+      if (cmd.startsWith("setFormattedNavigationInfo(")) {
+        ((GDApplication) getApplication()).coreObject.executeAppCommand(cmd);
+      } else {
+        if (GDApplication.coreObject != null) {
+          GDApplication.coreObject.executeCoreCommand(cmd);
+          if (cmd.startsWith("setPlainNavigationInfo("))
+            ((GDApplication) getApplication()).executeAppCommand("updateScreen()");
+        }
       }
     }
   }

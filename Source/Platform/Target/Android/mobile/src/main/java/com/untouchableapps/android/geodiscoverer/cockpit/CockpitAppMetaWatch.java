@@ -31,6 +31,8 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 
 import com.untouchableapps.android.geodiscoverer.R;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppInterface;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 
 public class CockpitAppMetaWatch implements CockpitAppInterface {
 

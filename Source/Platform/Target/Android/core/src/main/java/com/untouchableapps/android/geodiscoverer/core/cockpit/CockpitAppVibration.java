@@ -10,10 +10,13 @@
 //
 //============================================================================
 
-package com.untouchableapps.android.geodiscoverer.cockpit;
+package com.untouchableapps.android.geodiscoverer.core.cockpit;
 
 import android.content.Context;
 import android.os.Vibrator;
+
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppInterface;
 
 public class CockpitAppVibration implements CockpitAppInterface {
 

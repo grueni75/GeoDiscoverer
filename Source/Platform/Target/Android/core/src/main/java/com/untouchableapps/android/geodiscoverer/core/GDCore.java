@@ -137,6 +137,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   // Reference to the object that implements the interface functions
   GDAppInterface appIf = null;
 
+  // Indicates if core is running on a watch
+  boolean isWatch = false;
+
   //
   // Constructor and destructor
   //
@@ -161,6 +164,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     // Copy variables
     this.homePath=homePath;
     this.appIf=appIf;
+
+    // Find out if this is a watch
+    Configuration config = appIf.getContext().getResources().getConfiguration();
+    isWatch = (config.uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_WATCH;
 
     // Prepare the JNI part
     initJNI();
@@ -590,10 +597,13 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     if (cmd.startsWith("setFormattedNavigationInfo(")) {
       String infos = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
       appIf.cockputEngineUpdate(infos);
+      if (!isWatch)
+        appIf.sendWearCommand(cmd);
       cmdExecuted=true;
     }
     if (cmd.startsWith("setPlainNavigationInfo(")) {
-      appIf.sendWearCommand(cmd);
+      if (!isWatch)
+        appIf.sendWearCommand(cmd);
       cmdExecuted=true;
     }
     if (cmd.startsWith("updateMapDownloadStatus(")) {
@@ -616,8 +626,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       cmdExecuted=true;
     }
     if (cmd.startsWith("getDeviceName()")) {
-      Configuration config = appIf.getContext().getResources().getConfiguration();
-      boolean isWatch = (config.uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_WATCH;
       if (isWatch)
         return "Watch";
       else

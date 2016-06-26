@@ -28,6 +28,7 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitEngine;
 
 import java.io.File;
 
@@ -39,6 +40,9 @@ public class GDApplication extends Application implements GDAppInterface {
 
   /** Reference to the message handler of the watch face */
   WatchFace.CoreMessageHandler messageHandler = null;
+
+  /** Cockpit engine */
+  CockpitEngine cockpitEngine = null;
 
   /** Called when the application starts */
   @Override
@@ -87,18 +91,34 @@ public class GDApplication extends Application implements GDAppInterface {
   }
 
   // Cockpit engine related interface methods
+  // Cockpit engine related interface methods
   @Override
   public void cockpitEngineStart() {
+    if (cockpitEngine!=null)
+      cockpitEngineStop();
+    cockpitEngine=new CockpitEngine(getContext(),coreObject);
+    cockpitEngine.start();
   }
   @Override
   public void cockputEngineUpdate(String infos) {
+    if (cockpitEngine!=null)
+      cockpitEngine.update(infos, false);
+
   }
   @Override
   public void cockpitEngineStop() {
+    if (cockpitEngine!=null) {
+      cockpitEngine.stop();
+      cockpitEngine=null;
+    }
   }
   @Override
   public boolean cockpitEngineIsActive() {
-    return false;
+    if (cockpitEngine!=null) {
+      return cockpitEngine.isActive();
+    } else {
+      return false;
+    }
   }
 
   // Sends a native crash report

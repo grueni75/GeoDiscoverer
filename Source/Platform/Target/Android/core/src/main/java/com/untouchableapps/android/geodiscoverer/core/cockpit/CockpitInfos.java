@@ -11,36 +11,36 @@
 //============================================================================
 
 
-package com.untouchableapps.android.geodiscoverer.cockpit;
+package com.untouchableapps.android.geodiscoverer.core.cockpit;
 
 /** Holds all infos that the cockpit apps can use */
 public class CockpitInfos {
   
   /** Direction of current movement */
-  String locationBearing;
+  public String locationBearing;
 
   /** Current speed in m/s */
-  String locationSpeed;
+  public String locationSpeed;
 
   /** Bearing towards the given target */
-  String targetBearing;
+  public String targetBearing;
 
   /** Remaining distance to the target */
-  String targetDistance;
+  public String targetDistance;
 
   /** Remaining travel time to the target */
-  String targetDuration;
+  public String targetDuration;
 
   /** Remaining distance to next turn */
-  String turnDistance;
+  public String turnDistance;
 
   /** Angle by which the turn will change the direction */
-  String turnAngle;
+  public String turnAngle;
 
   /** Indicates if location is off route */
-  boolean offRoute;
+  public boolean offRoute;
   
   /** Remaining distance to route */
-  String routeDistance;
+  public String routeDistance;
 
 }

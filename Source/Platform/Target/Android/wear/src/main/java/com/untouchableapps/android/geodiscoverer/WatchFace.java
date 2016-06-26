@@ -478,8 +478,6 @@ public class WatchFace extends Gles2WatchFaceService {
 
     @Override
     public void onTapCommand(@TapType int tapType, int x, int y, long eventTime) {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","event received");
-
       switch (tapType) {
         case WatchFaceService.TAP_TYPE_TAP:
           coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");

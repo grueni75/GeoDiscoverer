@@ -12,15 +12,16 @@
 
 package com.untouchableapps.android.geodiscoverer.cockpit;
 
-import java.util.Calendar;
-import java.util.Locale;
-
 import android.content.Context;
 import android.speech.tts.TextToSpeech;
 
 import com.untouchableapps.android.geodiscoverer.GDApplication;
 import com.untouchableapps.android.geodiscoverer.R;
-import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppInterface;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
+
+import java.util.Calendar;
+import java.util.Locale;
 
 public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInitListener {
   

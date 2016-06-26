@@ -10,7 +10,7 @@
 //
 //============================================================================
 
-package com.untouchableapps.android.geodiscoverer.cockpit;
+package com.untouchableapps.android.geodiscoverer.core.cockpit;
 
 /** Interface used by the cockpit engine on the cockpit apps */
 public interface CockpitAppInterface {

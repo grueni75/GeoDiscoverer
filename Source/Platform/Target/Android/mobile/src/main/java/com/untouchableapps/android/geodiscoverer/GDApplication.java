@@ -22,11 +22,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
@@ -37,7 +32,6 @@ import org.acra.ACRAConstants;
 import org.acra.ReportField;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
-import org.acra.sender.GoogleFormSender;
 
 import android.app.Activity;
 import android.app.Application;
@@ -45,7 +39,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.util.Base64;
@@ -240,6 +233,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
     if (cockpitEngine!=null)
       cockpitEngineStop();
     cockpitEngine=new CockpitEngine(this);
+    cockpitEngine.start();
   }
   @Override
   public void cockputEngineUpdate(String infos) {
