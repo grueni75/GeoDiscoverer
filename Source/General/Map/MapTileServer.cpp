@@ -103,7 +103,7 @@ bool MapTileServer::composeTileImage(std::string url, ImagePixel* &composedTileI
   threadImagePath << imagePath << "." << threadNr << ".bin";
 
   // Check if the path exist
-  if (stat(threadImagePath.str().c_str(),&stat_buffer)!=0)
+  if (core->statFile(threadImagePath.str(),&stat_buffer)!=0)
     return true;  // download was aborted but not flagged as error, so continue with image processing
 
   // Read in the image

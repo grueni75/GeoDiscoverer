@@ -36,14 +36,14 @@
                   </xsd:restriction>
                 </xsd:simpleType>
               </xsd:element>
-              <xsd:element name="fileOpenForWritingRetries" type="xsd:integer" default="10">
+              <xsd:element name="fileAccessRetries" type="xsd:integer" default="10">
                 <xsd:annotation>
-                  <xsd:documentation>Number of times to retry a file open for writing operation before aborting.</xsd:documentation>
+                  <xsd:documentation>Number of times to retry a file access operation before aborting.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="fileOpenForWritingWaitTime" type="xsd:integer" default="100">
+              <xsd:element name="fileAccessWaitTime" type="xsd:integer" default="100">
                 <xsd:annotation>
-                  <xsd:documentation>Wait time in microseconds after a file open for writing operation has failed before retrying.</xsd:documentation>
+                  <xsd:documentation>Wait time in microseconds after a file access operation has failed before retrying.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="maintenancePeriod" type="xsd:integer" default="60">
@@ -1394,16 +1394,26 @@
                   <xsd:documentation>Maximum number of retries before a download is aborted.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="numerOfDownloadThreads" type="xsd:integer" default="8">
+              <xsd:element name="numerOfDownloadThreads" type="xsd:integer" default="4">
                 <xsd:annotation>
                   <xsd:documentation>Number of threads to spawn that download images.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="downloadQueueRecommendedSize" type="xsd:integer" default="100">
+              <xsd:element name="downloadQueueRecommendedSize" type="xsd:integer" default="1000">
                 <xsd:annotation>
                   <xsd:documentation>Maximum number of tiles that should be queued in the download queue.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="downloadAreaLength" type="xsd:integer" default="50" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Length of the square in kilometers that is downloaded around a route position.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
+              <xsd:element name="downloadAreaMinDistance" type="xsd:integer" default="5">
+                <xsd:annotation>
+                  <xsd:documentation>Distance in kilometers that a route point must be away from the previous one before a new area is downloaded.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
               <xsd:element name="DownloadJob">
                 <xsd:annotation>
                   <xsd:documentation>Defines a  map area that shall be downloaded to the device storage.</xsd:documentation>
@@ -1428,6 +1438,11 @@
                     <xsd:element name="lngEast" type="xsd:double">
                       <xsd:annotation>
                         <xsd:documentation>Longitude of the east border in degrees.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="routeName" type="xsd:string" default="">
+                      <xsd:annotation>
+                        <xsd:documentation>Name of the route to download the map for.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
                     <xsd:element name="zoomLevels" type="xsd:string">

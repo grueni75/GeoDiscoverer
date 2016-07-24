@@ -390,7 +390,7 @@ void MapDownloader::downloadMapImages(Int threadNr) {
 
         // Add the image to the archive
         struct stat stat_buffer;
-        Int result=stat(tempFilePath.str().c_str(),&stat_buffer);
+        Int result=core->statFile(tempFilePath.str(),&stat_buffer);
         ZipArchive *mapArchive=NULL;
         if (result==0) {
           UByte *file_buffer = (UByte *)malloc(stat_buffer.st_size);

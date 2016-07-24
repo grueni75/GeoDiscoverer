@@ -74,7 +74,7 @@ public:
   bool operator !=(const MapPosition &rhs);
   MapPosition &operator=(const MapPosition &rhs);
 
-  // Computes the destination point from the given bearing and distance
+  // Computes the destination point from the given bearing (degrees, clockwise from north) and distance (meters)
   MapPosition computeTarget(double bearing, double distance);
 
   // Computes the bearing in degrees clockwise from north (0°) to the given destination point

@@ -310,8 +310,8 @@ bool Core::init() {
 
   // Get config
   maintenancePeriod=configStore->getIntValue("General","maintenancePeriod", __FILE__, __LINE__);
-  fileAccessRetries=configStore->getIntValue("General","fileOpenForWritingRetries", __FILE__, __LINE__);
-  fileAccessWaitTime=configStore->getIntValue("General","fileOpenForWritingWaitTime", __FILE__, __LINE__);
+  fileAccessRetries=configStore->getIntValue("General","fileAccessRetries", __FILE__, __LINE__);
+  fileAccessWaitTime=configStore->getIntValue("General","fileAccessWaitTime", __FILE__, __LINE__);
 
   // Create mutexes and signals for thread communication
   mapUpdateStartSignal=thread->createSignal();
@@ -834,16 +834,40 @@ void Core::unload() {
   ConfigStore::unload();
 }
 
-// Waits until the file is available
-void Core::waitForFile(std::string path) {
-  struct stat stat_buffer;
+// Waits until the file is available and get its stats
+Int Core::statFile(std::string path, struct stat *buffer) {
+  Int result = 1;
   for (int i=0;i<fileAccessRetries;i++) {
-    if (stat(path.c_str(),&stat_buffer)==0)
-      return;
-    usleep(fileAccessWaitTime);
+    result=stat(path.c_str(),buffer);
+    if (result) {
+      if (errno==EACCES) {
+        usleep(fileAccessWaitTime);
+      } else {
+        return result;
+      }
+    } else {
+      return result;
+    }
   }
   DEBUG("max retries reached but file still not available",NULL);
+  return result;
 }
+
+// Waits until the directory is available and open it
+DIR *Core::openDir(std::string path) {
+  DIR *dfd;
+  for (int i=0;i<fileAccessRetries;i++) {
+    dfd=opendir(path.c_str());
+    if (!dfd) {
+      usleep(fileAccessWaitTime);
+    } else {
+      return dfd;
+    }
+  }
+  DEBUG("max retries reached but directory still not available",NULL);
+  return NULL;
+}
+
 
 // Returns the default screen
 Screen *Core::getDefaultScreen() {

@@ -248,6 +248,9 @@ public:
   // Renames an existing address point
   void renameAddressPoint(std::string oldName, std::string newName);
 
+  // Finds a route with the given name
+  NavigationPath *findRoute(std::string name);
+
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)
   {

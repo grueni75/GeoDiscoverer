@@ -33,7 +33,7 @@ ZipArchive::~ZipArchive() {
 bool ZipArchive::init() {
   struct stat stat_buffer;
   std::string archiveFilePath = archiveFolder + "/" + archiveName;
-  if (stat(archiveFilePath.c_str(),&stat_buffer)==0) {
+  if (core->statFile(archiveFilePath,&stat_buffer)==0) {
     archive = zip_open(archiveFilePath.c_str(),0,&last_error);
   } else {
     archive = zip_open(archiveFilePath.c_str(),ZIP_CREATE,&last_error);
@@ -157,7 +157,7 @@ bool ZipArchive::writeChanges() {
 // Returns the size of the archive on disk
 Int ZipArchive::getUnchangedSize() {
   struct stat buffer;
-  if (stat((archiveFolder + "/" + archiveName).c_str(),&buffer)==0) {
+  if (core->statFile((archiveFolder + "/" + archiveName),&buffer)==0) {
     return buffer.st_size;
   } else {
     return 0;

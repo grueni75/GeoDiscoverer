@@ -97,7 +97,7 @@ MapPosition &MapPosition::operator=(const MapPosition &rhs)
   return *this;
 }
 
-// Computes the destination point from the given bearing and distance
+// Computes the destination point from the given bearing (degrees, clockwise from north) and distance (meters)
 MapPosition MapPosition::computeTarget(double bearing, double distance) {
   MapPosition target;
   bearing=FloatingPoint::degree2rad(bearing);

@@ -502,15 +502,13 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="addDownloadJob") {
     if (core->getIsInitialized()) {
-      core->getMapSource()->addDownloadJob(false,unparsedCmdArgs);
-    } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
-    }
-    cmdExecuted=true;
-  }
-  if (cmdName=="estimateDownloadJob") {
-    if (core->getIsInitialized()) {
-      core->getMapSource()->addDownloadJob(true,unparsedCmdArgs);
+      std::string zoomLevels = "";
+      for (Int i=2;i<args.size();i++) {
+        zoomLevels+=args[i];
+        if (i!=args.size()-1)
+          zoomLevels+=",";
+      }
+      core->getMapSource()->addDownloadJob(atoi(args[0].c_str()),args[1],zoomLevels);
     } else {
       WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
@@ -599,6 +597,15 @@ std::string Commander::execute(std::string cmd) {
     GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
     visPos->updateLastUserModification();
     core->getDefaultGraphicEngine()->unlockPos();
+    cmdExecuted=true;
+  }
+  if (cmdName=="downloadActiveRoute") {
+    const NavigationPath *activeRoute = core->getNavigationEngine()->getActiveRoute();
+    if (!activeRoute) {
+      ERROR("please activate a route first",NULL);
+    } else {
+      dispatch("askForMapDownloadDetails(" + activeRoute->getName() + ")");
+    }
     cmdExecuted=true;
   }
 

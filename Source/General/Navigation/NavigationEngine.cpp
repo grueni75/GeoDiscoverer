@@ -75,7 +75,7 @@ NavigationEngine::NavigationEngine() {
 
   // Create the track directory if it does not exist
   struct stat st;
-  if (stat(getTrackPath().c_str(), &st) != 0)
+  if (core->statFile(getTrackPath(), &st) != 0)
   {
     if (mkdir(getTrackPath().c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
       FATAL("can not create track directory!",NULL);
@@ -84,7 +84,7 @@ NavigationEngine::NavigationEngine() {
   }
 
   // Create the route directory if it does not exist
-  if (stat(getRoutePath().c_str(), &st) != 0)
+  if (core->statFile(getRoutePath(), &st) != 0)
   {
     if (mkdir(getRoutePath().c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
       FATAL("can not create route directory!",NULL);
@@ -218,7 +218,7 @@ void NavigationEngine::updateRoutes() {
   lockRoutes(__FILE__, __LINE__);
 
   // First get a list of all available route filenames
-  DIR *dp = opendir( getRoutePath().c_str() );
+  DIR *dp = core->openDir(getRoutePath());
   struct dirent *dirp;
   struct stat filestat;
   std::list<std::string> routes;
@@ -232,7 +232,7 @@ void NavigationEngine::updateRoutes() {
     std::string filepath = getRoutePath() + "/" + dirp->d_name;
 
     // If the file is a directory (or is in some way invalid) we'll skip it
-    if (stat( filepath.c_str(), &filestat ))        continue;
+    if (core->statFile( filepath, &filestat ))      continue;
     if (S_ISDIR( filestat.st_mode ))                continue;
 
     // If the file is a backup, skip it
@@ -1082,7 +1082,8 @@ void NavigationEngine::backgroundLoader() {
     }
   }
 
-  // Set the active route
+  // Trigger download job processing
+  core->getMapSource()->triggerDownloadJobProcessing();
 
   // Thread is finished
 exitThread:
@@ -1414,6 +1415,16 @@ void NavigationEngine::renameAddressPoint(std::string oldName, std::string newNa
     point.setName(newName);
     point.writeToConfig(path,point.getTimestamp());
   }
+}
+
+// Finds a route with the given name
+NavigationPath *NavigationEngine::findRoute(std::string name) {
+  for (std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
+    if ((*i)->getName()==name) {
+      return *i;
+    }
+  }
+  return NULL;
 }
 
 }

@@ -118,7 +118,7 @@ bool MapSourceCalibratedPictures::init()
 
   // Check if we can use the cache
   cacheRetrieved=false;
-  if (((stat(mapPath.c_str(),&mapFolderStat))==0)&&(stat(cacheFilepath.c_str(),&mapCacheStat)==0)) {
+  if (((core->statFile(mapPath,&mapFolderStat))==0)&&(core->statFile(cacheFilepath,&mapCacheStat)==0)) {
 
     // Is the cache newer than the folder?
     bool isOlder=false;
@@ -126,7 +126,7 @@ bool MapSourceCalibratedPictures::init()
       isOlder=true;
     }
     for(std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
-      if (stat((*i).c_str(),&mapArchiveStat)==0) {
+      if (core->statFile((*i),&mapArchiveStat)==0) {
         if (mapCacheStat.st_mtime<mapArchiveStat.st_mtime) {
           isOlder=true;
         }

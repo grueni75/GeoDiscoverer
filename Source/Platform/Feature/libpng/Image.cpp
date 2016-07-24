@@ -219,7 +219,7 @@ ImagePixel *Image::loadPNGIcon(Screen *screen, std::string filename, Int &imageW
     DIR *dp;
     struct dirent *dirp;
     struct stat filestat;
-    dp = opendir( iconFolder.c_str() );
+    dp = core->openDir(iconFolder);
     if (dp == NULL){
       FATAL("can not read available icons",NULL);
       return NULL;
@@ -231,7 +231,7 @@ ImagePixel *Image::loadPNGIcon(Screen *screen, std::string filename, Int &imageW
       std::string dirpath = dirp->d_name;
       if (dirpath.find_first_of("dpi")!=std::string::npos) {
         dirpath=iconFolder+"/"+dirpath;
-        if (stat( dirpath.c_str(), &filestat )) continue;
+        if (core->statFile( dirpath, &filestat )) continue;
         if (S_ISDIR( filestat.st_mode )) {
 
           // Check if the icon is available in this directory

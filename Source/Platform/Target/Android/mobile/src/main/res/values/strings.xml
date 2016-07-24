@@ -132,6 +132,9 @@
   <string name="general">General</string>
   <string name="debug">Debug</string>
   <string name="map_cleanup_question">The visible tiles will be removed from the storage! Please select which zoom levels shall be cleaned.</string>
+  <string name="map_download_type_question">Shall the visible map or a map along the selected route be downloaded?</string>
+  <string name="map_download_type_option1">Visible map</string>
+  <string name="map_download_type_option2">Selected route</string>
   <string name="map_cleanup_all_zoom_levels">All zoom levels</string>
   <string name="map_cleanup_current_zoom_level">Current zoom level</string>
   <string name="cleanup_map">Cleanup map</string>

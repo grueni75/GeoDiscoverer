@@ -254,12 +254,12 @@ void ConfigStore::read()
   core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
 
   // Compare the shipped and the current schema
-  if (stat(schemaShippedFilepath.c_str(),&schemaShippedStat)!=0) {
+  if (core->statFile(schemaShippedFilepath,&schemaShippedStat)!=0) {
     FATAL("can not obtain file stats of <%s>!",schemaShippedFilepath.c_str());
     core->getThread()->unlockMutex(accessMutex);
     return;
   }
-  if ((stat(schemaCurrentFilepath.c_str(),&schemaCurrentStat)!=0)||(access(configFilepath.c_str(),F_OK))) {
+  if ((core->statFile(schemaCurrentFilepath,&schemaCurrentStat)!=0)||(access(configFilepath.c_str(),F_OK))) {
 
     // Current schema or config does not exist, so re-create the config
     recreateConfig=true;
@@ -516,16 +516,22 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, cons
 
     // Get the default value
     xmlAttr *attr;
+    bool defaultValueFound=false;
     std::string defaultValue="";
     for (attr=schemaNodes.front()->properties;attr!=NULL;attr=attr->next) {
       if ((attr->type==XML_ATTRIBUTE_NODE)&&(strcmp((const char*)attr->name,"default")==0)) {
         defaultValue=(char *)attr->children->content;
+        defaultValueFound=true;
       }
     }
-    if (defaultValue=="") {
+    if (!defaultValueFound) {
       FATAL("can not find default value for config path <%s/%s>",path.c_str(),name.c_str());
       core->getThread()->unlockMutex(accessMutex);
       return "";
+    }
+    if (defaultValue=="") {
+      core->getThread()->unlockMutex(accessMutex);
+      return defaultValue;
     }
 
     // Create node

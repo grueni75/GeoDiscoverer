@@ -333,7 +333,7 @@ MapSource *MapSource::newMapSource() {
 
   // Check if the folder exists
   struct stat s;
-  int err = stat(folderPath.c_str(), &s);
+  int err = core->statFile(folderPath, &s);
   if ((err!=0)||(!S_ISDIR(s.st_mode))) {
     ERROR("map folder <%s> does not exist",folder.c_str());
     return new MapSourceEmpty();
@@ -379,7 +379,7 @@ MapSource *MapSource::newMapSource() {
     std::list<std::string> mapArchivePaths;
     struct dirent *dp;
     DIR *dfd;
-    dfd=opendir(folderPath.c_str());
+    dfd=core->openDir(folderPath);
     if (dfd==NULL) {
       FATAL("can not read directory <%s>",folderPath.c_str());
       return new MapSourceEmpty();
@@ -961,7 +961,7 @@ std::string MapSource::getMapLayerName(int zoomLevel) {
 }
 
 // Adds a download job from the current visible map
-void MapSource::addDownloadJob(bool estimateOnly, std::string zoomLevels) {
+void MapSource::addDownloadJob(bool estimateOnly, std::string routeName, std::string zoomLevels) {
 }
 
 // Processes all pending download jobs

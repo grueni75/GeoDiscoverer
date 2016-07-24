@@ -9,7 +9,7 @@ my $lib = shift;
 
 # Extract the breakpad dump
 my $dump = "";
-my $arch;
+my $arch = "armeabi-v7a";
 if ($report !~ m/.dmp$/) {
   print "Extracting native dump from crash report... ";
   open(my $in, $report) or die "Can not open <$report> for reading!";

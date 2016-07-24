@@ -390,6 +390,10 @@ public class ViewMap extends GDActivity {
             }
             commandExecuted=true;
           }
+          if (commandFunction.equals("askForMapDownloadDetails")) {
+            viewMap.askForMapDownloadDetails(commandArgs.get(0));
+            commandExecuted=true;
+          }
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
           }
@@ -600,8 +604,31 @@ public class ViewMap extends GDActivity {
     alert.show();
   }
 
+  /** Asks the user if the visible map or a map along a route shall be downloaded */
+  void askForMapDownloadType() {
+    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
+    builder.setTitle(getTitle());
+    builder.setMessage(R.string.map_download_type_question);
+    builder.setCancelable(true);
+    builder.setPositiveButton(R.string.map_download_type_option1,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            askForMapDownloadDetails("");
+          }
+        });
+    builder.setNegativeButton(R.string.map_download_type_option2,
+        new DialogInterface.OnClickListener() {
+          public void onClick(DialogInterface dialog, int which) {
+            coreObject.executeCoreCommand("downloadActiveRoute()");
+          }
+        });
+    builder.setIcon(android.R.drawable.ic_dialog_alert);
+    Dialog alert = builder.create();
+    alert.show();
+  }
+
   /** Asks the user which map layers of the visible map to download */
-  void askForMapDownload() {
+  void askForMapDownloadDetails(final String routeName) {
     String result=coreObject.executeCoreCommand("getMapLayers()");
     final String[] mapLayers=result.split(",");
     final String commandArgs=new String();
@@ -617,7 +644,7 @@ public class ViewMap extends GDActivity {
         mapDownloadDialog = null;
         if (selectedMapLayers.size() > 0) {
           String args = TextUtils.join(",", selectedMapLayers);
-          coreObject.executeCoreCommand("addDownloadJob(" + args + ")");
+          coreObject.executeCoreCommand("addDownloadJob(0,\"" + routeName + "\"," + args + ")");
         }
       }
     });
@@ -643,7 +670,7 @@ public class ViewMap extends GDActivity {
         }
         if (selectedMapLayers.size() > 0) {
           String args = TextUtils.join(",", selectedMapLayers);
-          coreObject.executeCoreCommand("estimateDownloadJob(" + args + ")");
+          coreObject.executeCoreCommand("addDownloadJob(1,\"" + routeName + "\"," + args + ")");
           mapDownloadDialog.setContent(R.string.download_job_estimating_size_message);
         } else {
           mapDownloadDialog.setContent(R.string.download_job_no_level_selected_message);
@@ -1494,7 +1521,7 @@ public class ViewMap extends GDActivity {
             break;
           case R.id.nav_map_download:
             if (mapSurfaceView!=null) {
-              askForMapDownload();
+              askForMapDownloadType();
             }
             break;
         }

@@ -457,18 +457,14 @@ public class Preferences extends PreferenceActivity implements
       generalCategory.setTitle("General");
       rootScreen.addPreference(generalCategory);
       addPreference(generalCategory, generalCategory, "General", "unitSystem");
-      addPreference(generalCategory, generalCategory, "Map", "folder");
       addPreference(generalCategory, generalCategory, "General", "wakeLock");
       addPreference(generalCategory, generalCategory, "General", "backButtonTurnsScreenOff");
       addPreference(generalCategory, generalCategory, "", "expertMode");
-      PreferenceCategory cockpitAppCategory = new PreferenceCategory(this);
-      cockpitAppCategory.setTitle("Cockpit");
-      rootScreen.addPreference(cockpitAppCategory);
-      String[] apps = coreObject.configStoreGetNodeNames("Cockpit/App");
-      Arrays.sort(apps);
-      for (String app : apps) {
-        addPreference(cockpitAppCategory, cockpitAppCategory, "Cockpit/App", app);        
-      }
+      PreferenceCategory mapCategory = new PreferenceCategory(this);
+      mapCategory.setTitle("Map");
+      rootScreen.addPreference(mapCategory);
+      addPreference(mapCategory, mapCategory, "Map", "folder");
+      addPreference(mapCategory, mapCategory, "Map", "downloadAreaLength");
       addPreference(rootScreen, rootScreen, "Navigation", "Route");
       PreferenceCategory navigationCategory = new PreferenceCategory(this);
       navigationCategory.setTitle("Navigation");
@@ -481,6 +477,14 @@ public class Preferences extends PreferenceActivity implements
       rootScreen.addPreference(targetCategory);
       addPreference(targetCategory, targetCategory, "Navigation/Target", "lng");
       addPreference(targetCategory, targetCategory, "Navigation/Target", "lat");
+      PreferenceCategory cockpitAppCategory = new PreferenceCategory(this);
+      cockpitAppCategory.setTitle("Cockpit");
+      rootScreen.addPreference(cockpitAppCategory);
+      String[] apps = coreObject.configStoreGetNodeNames("Cockpit/App");
+      Arrays.sort(apps);
+      for (String app : apps) {
+        addPreference(cockpitAppCategory, cockpitAppCategory, "Cockpit/App", app);
+      }
       PreferenceCategory debugCategory = new PreferenceCategory(this);
       debugCategory.setTitle("Debug");
       rootScreen.addPreference(debugCategory);

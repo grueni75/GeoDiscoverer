@@ -155,7 +155,7 @@ public:
   void selectMapLayer(std::string name);
 
   // Adds a download job from the current visible map
-  virtual void addDownloadJob(bool estimateOnly, std::string zoomLevels);
+  virtual void addDownloadJob(bool estimateOnly, std::string routeName, std::string zoomLevels);
 
   // Processes all pending download jobs
   virtual void processDownloadJobs();

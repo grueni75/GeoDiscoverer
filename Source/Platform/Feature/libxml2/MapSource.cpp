@@ -253,7 +253,7 @@ void MapSource::readAvailableGDSInfos() {
   legendPaths.clear();
 
   // First get a list of all available route filenames
-  DIR *dp = opendir( mapSourceFolderPath.c_str() );
+  DIR *dp = core->openDir(mapSourceFolderPath);
   struct dirent *dirp;
   struct stat filestat;
   if (dp == NULL){
@@ -265,7 +265,7 @@ void MapSource::readAvailableGDSInfos() {
     std::string filepath = mapSourceFolderPath + "/" + dirp->d_name + "/info.gds";
 
     // Only look for directories
-    if (stat( filepath.c_str(), &filestat ))        continue;
+    if (core->statFile( filepath, &filestat ))        continue;
     if (S_ISREG( filestat.st_mode )) {
 
       // Read the info file

@@ -29,6 +29,8 @@ void *mapSourceMercatorTilesProcessDownloadJobsThread(void *args) {
 MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   type=MapSourceTypeMercatorTiles;
   mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize",__FILE__, __LINE__);
+  downloadAreaLength=core->getConfigStore()->getIntValue("Map","downloadAreaLength",__FILE__, __LINE__) * 1000;
+  downloadAreaMinDistance=core->getConfigStore()->getIntValue("Map","downloadAreaMinDistance",__FILE__, __LINE__) * 1000;
   mapTileLength=256;
   accessMutex=core->getThread()->createMutex("map source mercator tiles access mutex");
   errorOccured=false;
@@ -91,7 +93,7 @@ bool MapSourceMercatorTiles::init() {
   DialogKey dialog=core->getDialog()->createProgress(title,0);
   struct dirent *dp;
   DIR *dfd;
-  dfd=opendir(mapPath.c_str());
+  dfd=core->openDir(mapPath);
   if (dfd==NULL) {
     FATAL("can not read directory <%s>",mapPath.c_str());
     return false;
@@ -147,9 +149,6 @@ bool MapSourceMercatorTiles::init() {
   for (int z=0;z<(maxZoomLevel-minZoomLevel)+2;z++) {
     zoomLevelSearchTrees.push_back(NULL);
   }
-
-  // Process the download jobs
-  processDownloadJobs();
 
   // Finished
   isInitialized=true;
@@ -215,6 +214,38 @@ MapCalibrator *MapSourceMercatorTiles::createMapCalibrator(double latNorth, doub
   return mapCalibrator;
 }
 
+// Crestes the path for the given zoom and x
+void MapSourceMercatorTiles::createTilePath(Int zMap, Int x, Int y, std::stringstream &archiveFileFolder, std::stringstream &archiveFileBase) {
+  archiveFileFolder << "Tiles";
+  std::string path;
+  path = getFolderPath() + "/" + archiveFileFolder.str();
+  struct stat s;
+  Int result;
+  if ((result=core->statFile(path, &s) != 0) || (!(s.st_mode & S_IFDIR))) {
+    //DEBUG("path=%s result=%d errno=%d",path.c_str(),result,errno);
+    if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+      FATAL("can not create directory <%s>", path.c_str());
+    }
+  }
+  archiveFileFolder << "/" << zMap;
+  path = getFolderPath() + "/" + archiveFileFolder.str();
+  if ((result=core->statFile(path, &s) != 0) || (!(s.st_mode & S_IFDIR))) {
+    //DEBUG("path=%s result=%d errno=%d",path.c_str(),result,errno);
+    if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+      FATAL("can not create directory <%s>", path.c_str());
+    }
+  }
+  archiveFileFolder << "/" << x;
+  path = getFolderPath() + "/" + archiveFileFolder.str();
+  if ((result=core->statFile(path, &s) != 0) || (!(s.st_mode & S_IFDIR))) {
+    //DEBUG("path=%s result=%d errno=%d",path.c_str(),result,errno);
+    if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+      FATAL("can not create directory <%s>", path.c_str());
+    }
+  }
+  archiveFileBase << zMap << "_" << x << "_" << y;
+}
+
 // Fetches the map tile in which the given position lies from disk or server
 MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
 
@@ -278,31 +309,9 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
 #endif
 
   // Prepare the filenames
+  std::stringstream archiveFileBase;
   std::stringstream archiveFileFolder;
-  archiveFileFolder << "Tiles";
-  std::string path;
-  path = getFolderPath() + "/" + archiveFileFolder.str();
-  struct stat s;
-  if ((stat(path.c_str(), &s)!=0)||(!(s.st_mode&S_IFDIR))) {
-    if (mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
-      FATAL("can not create directory <%s>",path.c_str());
-    }
-  }
-  archiveFileFolder << "/" << zMap;
-  path = getFolderPath() + "/" + archiveFileFolder.str();
-  if ((stat(path.c_str(), &s)!=0)||(!(s.st_mode&S_IFDIR))) {
-    if (mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
-      FATAL("can not create directory <%s>",path.c_str());
-    }
-  }
-  archiveFileFolder << "/" << x;
-  path = getFolderPath() + "/" + archiveFileFolder.str();
-  if ((stat(path.c_str(), &s)!=0)||(!(s.st_mode&S_IFDIR))) {
-    if (mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
-      FATAL("can not create directory <%s>",path.c_str());
-    }
-  }
-  std::stringstream archiveFileBase; archiveFileBase << zMap << "_" << x << "_" << y;
+  createTilePath(zMap, x, y, archiveFileFolder, archiveFileBase);
   std::string imageFileExtension = "png";
   ImageType imageType = ImageTypePNG;
   std::string archiveFileName = archiveFileBase.str() + ".gda";
@@ -461,10 +470,12 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
   // Go through the directory list
   DIR *dfd;
   struct dirent *dp;
+  struct stat buffer;
   //DEBUG("dirPath=%s",dirPath.c_str());
-  dfd=opendir(dirPath.c_str());
+  dfd=core->openDir(dirPath);
   if (dfd==NULL) {
     FATAL("can not read directory <%s>",dirPath.c_str());
+    return;
   }
   while ((dp = readdir(dfd)) != NULL) {
 
@@ -477,7 +488,7 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
     } else {
 
       // Is this left over from a write trial
-      if (entry.find(".gda.")!=std::string::npos) {
+      if (entry.find(".ack")!=std::string::npos) {
         remove(entryPath.c_str());
       }
 
@@ -675,11 +686,15 @@ cleanup:
 }
 
 // Adds a download job from the current visible map
-void MapSourceMercatorTiles::addDownloadJob(bool estimateOnly, std::string zoomLevels) {
+void MapSourceMercatorTiles::addDownloadJob(bool estimateOnly, std::string routeName, std::string zoomLevels) {
+
 
   // Get the display area to download
-  MapArea area = *(core->getMapEngine()->lockDisplayArea(__FILE__,__LINE__));
-  core->getMapEngine()->unlockDisplayArea();
+  MapArea area;
+  if (routeName=="") {
+    area = *(core->getMapEngine()->lockDisplayArea(__FILE__,__LINE__));
+    core->getMapEngine()->unlockDisplayArea();
+  }
 
   // Stop any ongoing download jobs
   stopDownloadJobProcessing();
@@ -700,10 +715,14 @@ void MapSourceMercatorTiles::addDownloadJob(bool estimateOnly, std::string zoomL
   std::string jobName=core->getClock()->getXMLDate(core->getClock()->getSecondsSinceEpoch(),true);
   //processedDownloadJobs.remove(jobName);
   std::string path="Map/DownloadJob[@name='" + jobName + "']";
-  c->setDoubleValue(path,"latNorth",area.getLatNorth(),__FILE__,__LINE__);
-  c->setDoubleValue(path,"latSouth",area.getLatSouth(),__FILE__,__LINE__);
-  c->setDoubleValue(path,"lngEast",area.getLngEast(),__FILE__,__LINE__);
-  c->setDoubleValue(path,"lngWest",area.getLngWest(),__FILE__,__LINE__);
+  if (routeName=="") {
+    c->setDoubleValue(path,"latNorth",area.getLatNorth(),__FILE__,__LINE__);
+    c->setDoubleValue(path,"latSouth",area.getLatSouth(),__FILE__,__LINE__);
+    c->setDoubleValue(path,"lngEast",area.getLngEast(),__FILE__,__LINE__);
+    c->setDoubleValue(path,"lngWest",area.getLngWest(),__FILE__,__LINE__);
+  } else {
+    c->setStringValue(path,"routeName",routeName,__FILE__,__LINE__);
+  }
   c->setStringValue(path,"zoomLevels",zoomLevels,__FILE__,__LINE__);
   c->setIntValue(path,"estimateOnly",estimateOnly,__FILE__,__LINE__);
   //DEBUG("jobName=%s",jobName.c_str());
@@ -769,21 +788,39 @@ void MapSourceMercatorTiles::processDownloadJobs() {
   for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
     //DEBUG("processing download job %s",(*i).c_str());
 
+    // Set status
+    std::list<std::string> status;
+    status.clear();
+    status.push_back("Processing download");
+    status.push_back((*i).c_str());
+    setStatus(status, __FILE__, __LINE__);
+
     // Process the download job
     double estimatedJobStorageSpace=0;
     bool allTilesDownloaded=true;
     std::string configPath="Map/DownloadJob[@name='" + *i + "']";
     bool estimateOnly=c->getIntValue(configPath,"estimateOnly",__FILE__,__LINE__);
     MapArea area;
-    double n;
-    n=c->getDoubleValue(configPath,"latNorth",__FILE__,__LINE__);
-    area.setLatNorth(n);
-    n=c->getDoubleValue(configPath,"latSouth",__FILE__,__LINE__);
-    area.setLatSouth(n);
-    n=c->getDoubleValue(configPath,"lngEast",__FILE__,__LINE__);
-    area.setLngEast(n);
-    n=c->getDoubleValue(configPath,"lngWest",__FILE__,__LINE__);
-    area.setLngWest(n);
+    NavigationPath *route=NULL;
+    std::string routeName = c->getStringValue(configPath,"routeName",__FILE__,__LINE__);
+    if (routeName!="") {
+      route=core->getNavigationEngine()->findRoute(routeName);
+      if (route==NULL) {
+        WARNING("removing download job because associated route <%s> can not be found",routeName.c_str());
+        finishedDownloadJobs.push_back(*i);
+        continue;
+      }
+    } else {
+      double n;
+      n=c->getDoubleValue(configPath,"latNorth",__FILE__,__LINE__);
+      area.setLatNorth(n);
+      n=c->getDoubleValue(configPath,"latSouth",__FILE__,__LINE__);
+      area.setLatSouth(n);
+      n=c->getDoubleValue(configPath,"lngEast",__FILE__,__LINE__);
+      area.setLngEast(n);
+      n=c->getDoubleValue(configPath,"lngWest",__FILE__,__LINE__);
+      area.setLngWest(n);
+    }
     std::istringstream s(c->getStringValue(configPath,"zoomLevels",__FILE__,__LINE__));
     std::string t;
     Int zMap;
@@ -796,50 +833,162 @@ void MapSourceMercatorTiles::processDownloadJobs() {
       zMap=i->second;
       //DEBUG("zMap=%d",zMap);
 
-      // Compute the tile ranges
-      Int zServer,startX,endX,startY,endY;
-      computeMercatorBounds(&area,zMap,zServer,startX,endX,startY,endY);
+      // Go through the route points if this is a route
+      std::list<MapArea> areas;
+      if (route==NULL) {
+        Int zServer,startX,endX,startY,endY;
+        computeMercatorBounds(&area,zMap,zServer,startX,endX,startY,endY);
+        area.setXWest(startX);
+        area.setXEast(endX);
+        area.setYNorth(startY);
+        area.setYSouth(endY);
+        area.setZoomLevel(zServer);
+        //DEBUG("west: %3d north: %3d east: %3d south: %3d zoom: %3d",area.getXWest(),area.getYNorth(),area.getXEast(),area.getYSouth(),area.getZoomLevel());
+        areas.push_back(area);
+      } else {
+        std::vector<MapPosition> mapPositions = route->getSelectedPoints();
+        MapArea prevArea;
+        bool storeCompletly = true;
+        MapPosition prevMapPosition = NavigationPath::getPathInterruptedPos();
+        for (std::vector<MapPosition>::iterator j=mapPositions.begin();j!=mapPositions.end();j++) {
+          MapArea area;
+          MapPosition mapPosition = *j;
+          if (mapPosition!=NavigationPath::getPathInterruptedPos()) {
+            if ((prevMapPosition==NavigationPath::getPathInterruptedPos())||(prevMapPosition.computeDistance(mapPosition)>=downloadAreaMinDistance)||(j+1==mapPositions.end())) {
+              prevMapPosition=mapPosition;
+              MapPosition t = mapPosition.computeTarget(0,downloadAreaLength/2);
+              area.setLatNorth(t.getLat());
+              t = mapPosition.computeTarget(90,downloadAreaLength/2);
+              area.setLngEast(t.getLng());
+              t = mapPosition.computeTarget(180,downloadAreaLength/2);
+              area.setLatSouth(t.getLat());
+              t = mapPosition.computeTarget(270,downloadAreaLength/2);
+              area.setLngWest(t.getLng());
+              Int zServer,startX,endX,startY,endY;
+              computeMercatorBounds(&area,zMap,zServer,startX,endX,startY,endY);
+              area.setXWest(startX);
+              area.setXEast(endX);
+              area.setYNorth(startY);
+              area.setYSouth(endY);
+              area.setZoomLevel(zServer);
+              if (!storeCompletly) {
 
-      // Go through the tile ranges
-      for (Int x=startX;x<=endX;x++) {
-        for (Int y=startY;y<=endY;y++) {
-
-          // Skip this if it is a estimate job and a quit is requested
-          if ((quitProcessDownloadJobsThread)&&(estimateOnly))
-            goto nextJob;
-
-          // Tile not yet downloaded?
-          std::stringstream filePath;
-          filePath << getFolderPath() << "/Tiles/" << zMap << "/" << x << "/" << zMap << "_" << x << "_" << y << ".gda";
-          //DEBUG("%s",filePath.str().c_str());
-          if (access(filePath.str().c_str(),F_OK)==-1) {
-            allTilesDownloaded=false;
-
-            // Check if disk space is exceeded
-            estimatedJobStorageSpace+=averageMercatorTileSize;
-            if (!estimateOnly) {
-              if (estimatedTotalStorageSpace+estimatedJobStorageSpace>freeStorageSpace) {
-                ERROR("suspending map download job because device has not enough free space (%d MB available)",freeStorageSpace);
-                goto nextJob;
+                // Check if no overlap with previous area
+                if ((prevArea.getYNorth()>area.getYSouth())||(prevArea.getYSouth()<area.getYNorth())||
+                    (prevArea.getXEast()<area.getXWest())||(prevArea.getXWest()>area.getXEast())) {
+                  //DEBUG("area of new point is outside previous area, storing new area completely",NULL);
+                  storeCompletly = true;
+                }
               }
-            }
+              if (storeCompletly) {
 
-            // Check if we shall quit
-            if (core->getQuitCore())
-              goto cleanup;
+                // Store the complete area
+                //DEBUG("west: %3d north: %3d east: %3d south: %3d zoom: %3d",area.getXWest(),area.getYNorth(),area.getXEast(),area.getYSouth(),area.getZoomLevel());
+                areas.push_back(area);
+                //DEBUG("lng=%f lat=%f",mapPosition.getLng(),mapPosition.getLat());
+                //DEBUG("latNorth=%f latSouth=%f lngEast=%f lngWest=%f",area.getLatNorth(),area.getLatSouth(),area.getLngEast(),area.getLngWest());
+                //DEBUG("horizontal length: %f vertical length: %f",eastPoint.computeDistance(westPoint),northPoint.computeDistance(southPoint));
+                storeCompletly=false;
 
-            // Queue it
-            if (!estimateOnly) {
-
-              // Only queue it if the queue is not too large
-              if (!mapDownloader->downloadQueueReachedRecommendedSize()) {
-                MapPosition pos;
-                pos.setFromMercatorTileXY(zServer,x,y);
-                lockAccess(__FILE__,__LINE__);
-                fetchMapTile(pos,zMap);
-                unlockAccess();
               } else {
-                unqueuedDownloadTileCount++;
+
+                // Compute the non-overlapping area along the border
+                MapArea area2;
+                area2.setZoomLevel(area.getZoomLevel());
+                if (area.getYNorth()<prevArea.getYNorth()) {
+                  area2.setYNorth(area.getYNorth());
+                  area2.setYSouth(prevArea.getYNorth()-1);
+                  area2.setXWest(area.getXWest()>prevArea.getXWest()?area.getXWest():prevArea.getXWest());
+                  area2.setXEast(area.getXEast());
+                  //DEBUG("storing north stripe",NULL);
+                  //DEBUG("west: %3d north: %3d east: %3d south: %3d zoom: %3d",area2.getXWest(),area2.getYNorth(),area2.getXEast(),area2.getYSouth(),area2.getZoomLevel());
+                  areas.push_back(area2);
+                }
+                if (area.getXEast()>prevArea.getXEast()) {
+                  area2.setXEast(area.getXEast());
+                  area2.setXWest(prevArea.getXEast()+1);
+                  area2.setYNorth(area.getYNorth()>prevArea.getYNorth()?area.getYNorth():prevArea.getYNorth());
+                  area2.setYSouth(area.getYSouth());
+                  //DEBUG("storing east stripe",NULL);
+                  //DEBUG("west: %3d north: %3d east: %3d south: %3d zoom: %3d",area2.getXWest(),area2.getYNorth(),area2.getXEast(),area2.getYSouth(),area2.getZoomLevel());
+                  areas.push_back(area2);
+                }
+                if (area.getYSouth()>prevArea.getYSouth()) {
+                  area2.setYNorth(prevArea.getYSouth()+1);
+                  area2.setYSouth(area.getYSouth());
+                  area2.setXEast(area.getXEast()<prevArea.getXEast()?area.getXEast():prevArea.getXEast());
+                  area2.setXWest(area.getXWest());
+                  //DEBUG("storing south stripe",NULL);
+                  //DEBUG("west: %3d north: %3d east: %3d south: %3d zoom: %3d",area2.getXWest(),area2.getYNorth(),area2.getXEast(),area2.getYSouth(),area2.getZoomLevel());
+                  areas.push_back(area2);
+                }
+                if (area.getXWest()<prevArea.getXWest()) {
+                  area2.setXEast(prevArea.getXWest()-1);
+                  area2.setXWest(area.getXWest());
+                  area2.setYNorth(area.getYNorth());
+                  area2.setYSouth(area.getYSouth()<prevArea.getYSouth()?area.getYSouth():prevArea.getYSouth());
+                  //DEBUG("storing west stripe",NULL);
+                  //DEBUG("west: %3d north: %3d east: %3d south: %3d zoom: %3d",area2.getXWest(),area2.getYNorth(),area2.getXEast(),area2.getYSouth(),area2.getZoomLevel());
+                  areas.push_back(area2);
+                }
+              }
+              prevArea=area;
+            }
+          }
+        }
+      }
+
+      // Go through all areas
+      Int areaNr=0;
+      for (std::list<MapArea>::iterator j=areas.begin();j!=areas.end();j++) {
+        MapArea area=*j;
+        status.pop_front();
+        std::stringstream progress; progress << "Processing download (" << areaNr*100/areas.size() << "%)";
+        status.push_front(progress.str());
+        setStatus(status, __FILE__, __LINE__);
+        areaNr++;
+
+        // Go through the tile ranges
+        for (Int x=area.getXWest();x<=area.getXEast();x++) {
+          for (Int y=area.getYNorth();y<=area.getYSouth();y++) {
+
+            // Skip this if it is a estimate job and a quit is requested
+            if ((quitProcessDownloadJobsThread)&&(estimateOnly))
+              goto nextJob;
+
+            // Tile not yet downloaded?
+            std::stringstream fileFolder, fileBase;
+            createTilePath(zMap, x, y, fileFolder, fileBase);
+            std::string filePath =  getFolderPath() + "/" + fileFolder.str() + "/" + fileBase.str();
+            if (access((filePath + ".gda").c_str(),F_OK)==-1) {
+              allTilesDownloaded=false;
+
+              // Check if disk space is exceeded
+              estimatedJobStorageSpace+=averageMercatorTileSize;
+              if (!estimateOnly) {
+                if (estimatedTotalStorageSpace+estimatedJobStorageSpace>freeStorageSpace) {
+                  ERROR("suspending map download job because device has not enough free space (%d MB available)",freeStorageSpace);
+                  goto nextJob;
+                }
+              }
+
+              // Check if we shall quit
+              if (core->getQuitCore())
+                goto cleanup;
+
+              // Queue it
+              if (!estimateOnly) {
+
+                // Only queue it if the queue is not too large
+                if (!mapDownloader->downloadQueueReachedRecommendedSize()) {
+                  MapPosition pos;
+                  pos.setFromMercatorTileXY(area.getZoomLevel(),x,y);
+                  lockAccess(__FILE__,__LINE__);
+                  fetchMapTile(pos,zMap);
+                  unlockAccess();
+                } else {
+                  unqueuedDownloadTileCount++;
+                }
               }
             }
           }
@@ -873,6 +1022,11 @@ nextJob:
     // Remember this jobs if it's finished
     if ((allTilesDownloaded)||(estimateOnly))
       finishedDownloadJobs.push_back(*i);
+
+    // Clear status
+    status.clear();
+    setStatus(status, __FILE__, __LINE__);
+
   }
   //DEBUG("estimatedStorageSpace: %lf MB",estimatedTotalStorageSpace);
   this->unqueuedDownloadTileCount=unqueuedDownloadTileCount;

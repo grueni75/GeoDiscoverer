@@ -21,6 +21,8 @@ protected:
 
   ThreadMutexInfo *accessMutex;                     // Mutex for accessing the map source object
   Int mapContainerCacheSize;                        // Number of map containers to hold in the cache
+  Int downloadAreaLength;                           // Length of the square in kilometers that is downloaded around a route position
+  Int downloadAreaMinDistance;                      // Distance in kilometers that a route point must be away from the previous one before a new area is downloaded.
   bool errorOccured;                                // Indicates that an error has occured
   bool downloadWarningOccured;                      // Indicates that a warning has occured
   static const double latBound;                     // Maximum allowed latitude value
@@ -56,6 +58,9 @@ protected:
 
   // Starts the download job processing
   void startDownloadJobProcessing();
+
+  // Creates the file path for the given tile
+  void createTilePath(Int zMap, Int x, Int y, std::stringstream &archiveFileFolder, std::stringstream &archiveFileBase);
 
 public:
 
@@ -93,7 +98,7 @@ public:
   virtual void removeObsoleteMapContainers(MapArea *displayArea=NULL, bool allZoomLevels=false);
 
   // Adds a download job from the current visible map
-  virtual void addDownloadJob(bool estimateOnly, std::string zoomLevels);
+  virtual void addDownloadJob(bool estimateOnly, std::string routeName, std::string zoomLevels);
 
   // Processes all pending download jobs
   virtual void processDownloadJobs();

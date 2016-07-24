@@ -82,7 +82,7 @@ void Debug::init() {
 
   // Check if the log directory exists
   struct stat st;
-  if (stat(logPath.c_str(), &st) != 0)
+  if (core->statFile(logPath, &st) != 0)
   {
     if (mkdir(logPath.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
       puts("FATAL: can not create log directory!");

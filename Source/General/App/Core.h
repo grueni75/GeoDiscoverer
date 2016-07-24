@@ -40,6 +40,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <signal.h>
+#include <errno.h>
 #ifdef TARGET_ANDROID
 #include <sys/vfs.h>
 #define statvfs statfs  // Android uses a statvfs-like statfs struct and call.
@@ -237,8 +238,11 @@ public:
   // Downloads a URL
   DownloadResult downloadURL(std::string url, std::string filePath, bool generateMessages=true, bool ignoreFileNotFoundErrors=false);
 
-  // Waits until the file is available
-  void waitForFile(std::string path);
+  // Get file attributes inclusive waiting until the file is available
+  Int statFile(std::string path, struct stat *buffer);
+
+  // Waits until the directory is available and open it
+  DIR *openDir(std::string path);
 
   // Waits until the core is initialized
   void waitForInitialization() {
