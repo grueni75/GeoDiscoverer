@@ -2,10 +2,10 @@
 <GDS 
   xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
   version="1.0">
-  <name>Open Cycle Map</name>
+  <name>Outdoors</name>
   <isMarkup>false</isMarkup>
   <TileServer>
-    <serverURL>http://b.tile.thunderforest.com/cycle/${z}/${x}/${y}.png?apikey=7dabb38fc03440968bbdf261b2db0494</serverURL>
+    <serverURL>http://b.tile.thunderforest.com/outdoors/${z}/${x}/${y}.png?apikey=7dabb38fc03440968bbdf261b2db0494</serverURL>
     <overlayAlpha>1.0</overlayAlpha>
   </TileServer>
   <minZoomLevel>0</minZoomLevel>

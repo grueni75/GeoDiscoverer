@@ -2,12 +2,12 @@
 <GDS 
   xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
   version="1.0">
-  <name>Map Quest</name>
+  <name>ÖPNVKarte</name>
   <isMarkup>false</isMarkup>
   <TileServer>
-    <serverURL>http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.jpg</serverURL>
+    <serverURL>http://tileserver.memomaps.de/tilegen/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>1.0</overlayAlpha>
   </TileServer>
   <minZoomLevel>0</minZoomLevel>
-  <maxZoomLevel>18</maxZoomLevel>
+  <maxZoomLevel>17</maxZoomLevel>
 </GDS>

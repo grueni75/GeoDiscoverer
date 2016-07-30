@@ -31,25 +31,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b578a301-10f4-4fb1-9459-91cdc01d1a52" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Map/MapQuest/info.gds" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/MapQuest/info.gds" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/App/Core.h" afterPath="$PROJECT_DIR$/../../../General/App/Core.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/App/Types.h" afterPath="$PROJECT_DIR$/../../../General/App/Types.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Image/Image.h" afterPath="$PROJECT_DIR$/../../../General/Image/Image.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapDownloader.cpp" afterPath="$PROJECT_DIR$/../../../General/Map/MapDownloader.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapDownloader.h" afterPath="$PROJECT_DIR$/../../../General/Map/MapDownloader.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapTileServer.cpp" afterPath="$PROJECT_DIR$/../../../General/Map/MapTileServer.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Map/MapTileServer.h" afterPath="$PROJECT_DIR$/../../../General/Map/MapTileServer.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Feature/libcurl/Core.cpp" afterPath="$PROJECT_DIR$/../../Feature/libcurl/Core.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Feature/libjpeg/Image.cpp" afterPath="$PROJECT_DIR$/../../Feature/libjpeg/Image.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Feature/libpng/Image.cpp" afterPath="$PROJECT_DIR$/../../Feature/libpng/Image.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/mobile.iml" afterPath="$PROJECT_DIR$/mobile/mobile.iml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/Kompass/legend.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/OEPNVKarte/legend.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/Outdoors/legend.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Map/OEPNVKarte/info.gds" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/Kompass/info.gds" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/OEPNVKarte/info.gds" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Map/MapQuest/info.gds" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Map/Outdoors/info.gds" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/MapQuest/info.gds" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/Outdoors/info.gds" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Map/Default/info.gds" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Map/Default/info.gds" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/OpenCycleMap/info.gds" afterPath="$PROJECT_DIR$/mobile/src/main/assets/GeoDiscoverer/Server/OpenCycleMap/info.gds" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wear/wear.iml" afterPath="$PROJECT_DIR$/wear/wear.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Help/public/index.html" afterPath="$PROJECT_DIR$/../Help/public/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../config.xsd" afterPath="$PROJECT_DIR$/../../../config.xsd" />
     </list>
     <ignored path="GeoDiscoverer.iws" />
     <ignored path=".idea/workspace.xml" />
