@@ -51,6 +51,8 @@
 #include <execinfo.h>
 #endif
 #include <libgen.h>
+#include <png.h>
+#include <jpeglib.h>
 
 // Mandatory application includes for the core class
 #include <Types.h>
@@ -236,7 +238,7 @@ public:
   void continueMapUpdate();
 
   // Downloads a URL
-  DownloadResult downloadURL(std::string url, std::string filePath, bool generateMessages=true, bool ignoreFileNotFoundErrors=false);
+  UByte *downloadURL(std::string url, DownloadResult &result, UInt &size, bool generateMessages, bool ignoreFileNotFoundErrors);
 
   // Get file attributes inclusive waiting until the file is available
   Int statFile(std::string path, struct stat *buffer);

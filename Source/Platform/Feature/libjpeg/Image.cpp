@@ -11,7 +11,6 @@
 //============================================================================
 
 #include <Core.h>
-#include <jpeglib.h>
 
 namespace GEODISCOVERER {
 
@@ -40,6 +39,30 @@ void Image::initJPEG() {
     FATAL("size of UByte does not match size of JSAMPLE",NULL);
     return;
   }
+}
+
+// Queries the dimension of the jpeg without loading it
+bool Image::queryJPEG(UByte *imageData, UInt imageSize, Int &width, Int &height) {
+
+  struct jpeg_decompress_struct cinfo;
+  struct jpegErrorHandlerInfo jerr;
+  bool result=true;
+
+  cinfo.err = jpeg_std_error(&jerr.mgr);
+  jerr.mgr.error_exit=jpegErrorHandler;
+  if (setjmp(jerr.setjmpBuffer)) {
+    result=false;
+    goto cleanup;
+  }
+  jpeg_create_decompress(&cinfo);
+  jpeg_mem_src(&cinfo,imageData,imageSize);
+  jpeg_read_header(&cinfo, TRUE);
+  width=cinfo.image_width;
+  height=cinfo.image_height;
+
+cleanup:
+  jpeg_destroy_decompress(&cinfo);
+  return result;
 }
 
 // Queries the dimension of the jpeg without loading it
@@ -72,14 +95,107 @@ cleanup:
   return result;
 }
 
-// Loads a jpeg
+// Loads a jpeg after initialization
+ImagePixel *Image::loadJPEG(struct jpeg_decompress_struct *cinfo, std::string imageDescription, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread) {
+
+  ImagePixel *image=NULL,*scanline=NULL;
+  UInt scanlineSize,imageSize;
+  Int y=0;
+
+  jpeg_read_header(cinfo, TRUE);
+  jpeg_start_decompress(cinfo);
+
+  // Check type of image
+  pixelSize=sizeof(JSAMPLE)*cinfo->output_components;
+  if (cinfo->out_color_space != JCS_RGB) {
+    DEBUG("the %s does not use the RGB color space",imageDescription.c_str());
+    return NULL;
+  }
+  if (cinfo->out_color_components != 3) {
+    DEBUG("the %s does not use three samples per pixel",imageDescription.c_str());
+    return NULL;
+  }
+  if (cinfo->output_components!=cinfo->out_color_components) {
+    FATAL("the color components used in the %s do not match the output color components",imageDescription.c_str());
+    return NULL;
+  }
+
+  // Copy properties
+  width=cinfo->output_width;
+  height=cinfo->output_height;
+
+  // Reserve memory for the image
+  scanlineSize=pixelSize*cinfo->output_width;
+  if (!(scanline=(ImagePixel *)malloc(scanlineSize))) {
+    FATAL("can not reserve memory for %s",imageDescription.c_str());
+    return NULL;
+  }
+  imageSize=scanlineSize*cinfo->output_height;
+  if (!(image=(ImagePixel *)malloc(imageSize))) {
+    FATAL("can not reserve memory for %s",imageDescription.c_str());
+    return NULL;
+  }
+
+  // Do the decompression
+  y=0;
+  while( cinfo->output_scanline < cinfo->output_height && ((!calledByMapUpdateThread)||(!abortLoad)) ) {
+    //DEBUG("output_scanline: %d output_height: %d",cinfo.output_scanline,cinfo.output_height);
+    jpeg_read_scanlines(cinfo, &scanline, 1);
+    memcpy(&image[y*scanlineSize], scanline, scanlineSize);
+    y++;
+    //if (calledByMapUpdateThread)
+    //  core->interruptAllowedHere(__FILE__, __LINE__);
+  }
+  free(scanline);
+  return image;
+}
+
+// Loads a jpeg from memory
+ImagePixel *Image::loadJPEG(UByte *imageData, UInt imageSize, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread) {
+
+  struct jpeg_decompress_struct cinfo;
+  ImagePixel *image=NULL;
+  struct jpegErrorHandlerInfo jerr;
+
+  DEBUG("imageData=0x%08x imageSize=%d",imageData,imageSize);
+
+  // Prepare the decompression
+  abortLoad=false;
+  cinfo.err = jpeg_std_error(&jerr.mgr);
+  jerr.mgr.error_exit=jpegErrorHandler;
+  if (setjmp(jerr.setjmpBuffer)) {
+    DEBUG("jpeg image can not be read",NULL);
+    if (image) free(image);
+    image=NULL;
+    goto cleanup;
+  }
+  jpeg_create_decompress(&cinfo);
+  jpeg_mem_src(&cinfo,imageData,imageSize);
+
+  // Decompress the image
+  image = loadJPEG(&cinfo,"image",width,height,pixelSize,calledByMapUpdateThread);
+
+cleanup:
+  if (calledByMapUpdateThread&&abortLoad) {
+    jpeg_abort_decompress(&cinfo);
+    if (image) free(image);
+    image=NULL;
+    abortLoad=false;
+  } else {
+    if (image)
+      jpeg_finish_decompress(&cinfo);
+  }
+  jpeg_destroy_decompress(&cinfo);
+  return image;
+
+}
+
+// Loads a jpeg from a file
 ImagePixel *Image::loadJPEG(std::string filepath, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread) {
 
   FILE *file;
   struct jpeg_decompress_struct cinfo;
-  ImagePixel *image=NULL,*scanline=NULL;
-  UInt scanlineSize,imageSize;
-  Int y=0;
+  ImagePixel *image=NULL;
   struct jpegErrorHandlerInfo jerr;
 
   // Prepare the decompression
@@ -96,50 +212,9 @@ ImagePixel *Image::loadJPEG(std::string filepath, Int &width, Int &height, UInt 
   }
   jpeg_create_decompress(&cinfo);
   jpeg_stdio_src(&cinfo, file);
-  jpeg_read_header(&cinfo, TRUE);
-  jpeg_start_decompress(&cinfo);
 
-  // Check type of image
-  pixelSize=sizeof(JSAMPLE)*cinfo.output_components;
-  if (cinfo.out_color_space != JCS_RGB) {
-    DEBUG("the image <%s> does not use the RGB color space",filepath.c_str());
-    goto cleanup;
-  }
-  if (cinfo.out_color_components != 3) {
-    DEBUG("the image <%s> does not use three samples per pixel",filepath.c_str());
-    goto cleanup;
-  }
-  if (cinfo.output_components!=cinfo.out_color_components) {
-    FATAL("the color components used in the image <%s> do not match the output color components",filepath.c_str());
-    goto cleanup;
-  }
-
-  // Copy properties
-  width=cinfo.output_width;
-  height=cinfo.output_height;
-
-  // Reserve memory for the image
-  scanlineSize=pixelSize*cinfo.output_width;
-  if (!(scanline=(ImagePixel *)malloc(scanlineSize))) {
-    FATAL("can not reserve memory for the image <%s>",filepath.c_str());
-    goto cleanup;
-  }
-  imageSize=scanlineSize*cinfo.output_height;
-  if (!(image=(ImagePixel *)malloc(imageSize))) {
-    FATAL("can not reserve memory for the image <%s>",filepath.c_str());
-    goto cleanup;
-  }
-
-  // Do the decompression
-  y=0;
-  while( cinfo.output_scanline < cinfo.output_height && ((!calledByMapUpdateThread)||(!abortLoad)) ) {
-    //DEBUG("output_scanline: %d output_height: %d",cinfo.output_scanline,cinfo.output_height);
-    jpeg_read_scanlines(&cinfo, &scanline, 1);
-    memcpy(&image[y*scanlineSize], scanline, scanlineSize);
-    y++;
-    //if (calledByMapUpdateThread)
-    //  core->interruptAllowedHere(__FILE__, __LINE__);
-  }
+  // Decompress the image
+  image = loadJPEG(&cinfo,"image <" + filepath + ">",width,height,pixelSize,calledByMapUpdateThread);
 
 cleanup:
   if (calledByMapUpdateThread&&abortLoad) {
@@ -152,7 +227,6 @@ cleanup:
   }
   jpeg_destroy_decompress(&cinfo);
   fclose(file);
-  if (scanline) free(scanline);
   return image;
 
 }

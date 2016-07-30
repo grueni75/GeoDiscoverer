@@ -15,37 +15,57 @@
 
 namespace GEODISCOVERER {
 
+struct curlMemoryStruct {
+  UByte *memory;
+  size_t size;
+};
+
+static size_t
+curlMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+  size_t realsize = size * nmemb;
+  struct curlMemoryStruct *mem = (struct curlMemoryStruct *)userp;
+  mem->memory = (UByte*)realloc((UByte*)mem->memory, mem->size + realsize + 1);
+  if(mem->memory == NULL) {
+    FATAL("not enough memory",NULL);
+    return 0;
+  }
+  memcpy(&(mem->memory[mem->size]), contents, realsize);
+  mem->size += realsize;
+  mem->memory[mem->size] = 0;
+  return realsize;
+}
+
+
 // Inits curl
 void Core::initCURL() {
   curl_global_init(CURL_GLOBAL_ALL);
 }
 
 // Downloads a URL
-DownloadResult Core::downloadURL(std::string url, std::string filePath, bool generateMessages, bool ignoreFileNotFoundErrors) {
+UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bool generateMessages, bool ignoreFileNotFoundErrors) {
 
-  FILE *out;
   char curlErrorBuffer[CURL_ERROR_SIZE];
-  DownloadResult result = DownloadResultOtherFail;
+  result = DownloadResultOtherFail;
   long curlResponseCode = 0;
+  struct curlMemoryStruct out;
 
-  // Open the file for writing
-  if (!(out=fopen(filePath.c_str(),"w"))) {
-    if (generateMessages) {
-      ERROR("can not create file <%s>",filePath.c_str());
-    }
-    return DownloadResultOtherFail;
-  }
+  // Reserve initial memory for download
+  out.memory = (UByte*)malloc(1);
+  out.size = 0;
 
   // Download it with curl
   CURL *curl;
   curl = curl_easy_init();
   if (!curl) {
     FATAL("can not initialize curl library",NULL);
-    return DownloadResultOtherFail;
+    result=DownloadResultOtherFail;
+    return NULL;
   }
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "Geo Discoverer (build on "  __DATE__  ")");
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, out);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &out);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlMemoryCallback);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,curlErrorBuffer);
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
   //DEBUG("downloading url %s",url.c_str());
@@ -53,10 +73,8 @@ DownloadResult Core::downloadURL(std::string url, std::string filePath, bool gen
   curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE, &curlResponseCode);
   curl_easy_cleanup(curl);
 
-  // Close the file
-  fclose(out);
-
   // Handle errors
+  size=0;
   switch(curlResult) {
     case CURLE_REMOTE_FILE_NOT_FOUND:
       result=DownloadResultFileNotFound;
@@ -65,6 +83,7 @@ DownloadResult Core::downloadURL(std::string url, std::string filePath, bool gen
       switch (curlResponseCode) {
         case 200:
           result=DownloadResultSuccess;
+          size=out.size;
           break;
         case 404:
           result=DownloadResultFileNotFound;
@@ -81,8 +100,9 @@ DownloadResult Core::downloadURL(std::string url, std::string filePath, bool gen
   }
   if (result!=DownloadResultSuccess) {
 
-    // Delete the created file
-    remove(filePath.c_str());
+    // Free the downloaded memory
+    free(out.memory);
+    out.memory=NULL;
 
     // Output warning
     if (generateMessages) {
@@ -96,7 +116,7 @@ DownloadResult Core::downloadURL(std::string url, std::string filePath, bool gen
       }
     }
   }
-  return result;
+  return out.memory;
 }
 
 }

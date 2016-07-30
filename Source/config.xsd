@@ -1394,7 +1394,7 @@
                   <xsd:documentation>Maximum number of retries before a download is aborted.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="numerOfDownloadThreads" type="xsd:integer" default="4">
+              <xsd:element name="numerOfDownloadThreads" type="xsd:integer" default="8">
                 <xsd:annotation>
                   <xsd:documentation>Number of threads to spawn that download images.</xsd:documentation>
                 </xsd:annotation>
@@ -1402,6 +1402,11 @@
               <xsd:element name="downloadQueueRecommendedSize" type="xsd:integer" default="1000">
                 <xsd:annotation>
                   <xsd:documentation>Maximum number of tiles that should be queued in the download queue.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="imageQueueMaxSize" type="xsd:integer" default="16">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum number of images that should be queued for writing onto the storage.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="downloadAreaLength" type="xsd:integer" default="50" gd:upgrade="restore">

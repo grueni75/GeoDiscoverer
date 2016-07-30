@@ -24,10 +24,17 @@ void *mapDownloaderWorkerThread(void *args) {
   return NULL;
 }
 
-// Map download statistics thread
+// Map downloader statistics thread
 void *mapDownloaderStatusThread(void *args) {
   MapDownloader *mapDownloader = (MapDownloader*)args;
   mapDownloader->updateDownloadStatus();
+  return NULL;
+}
+
+// Map downloader image writer thread
+void *mapDownloaderWriteImagesThread(void *args) {
+  MapDownloader *mapDownloader = (MapDownloader*)args;
+  mapDownloader->writeImages();
   return NULL;
 }
 
@@ -36,6 +43,7 @@ MapDownloader::MapDownloader(MapSourceMercatorTiles *mapSource) {
   numberOfDownloadThreads=core->getConfigStore()->getIntValue("Map","numerOfDownloadThreads",__FILE__, __LINE__);
   maxDownloadRetries=core->getConfigStore()->getIntValue("Map","maxDownloadRetries",__FILE__, __LINE__);
   downloadQueueRecommendedSize=core->getConfigStore()->getIntValue("Map","downloadQueueRecommendedSize",__FILE__, __LINE__);
+  imageQueueMaxSize=core->getConfigStore()->getIntValue("Map","imageQueueMaxSize",__FILE__, __LINE__);
   downloadQueueRecommendedSizeExceeded=false;
   accessMutex=core->getThread()->createMutex("map downloader access mutex");
   quitThreads=false;
@@ -60,7 +68,9 @@ MapDownloader::MapDownloader(MapSourceMercatorTiles *mapSource) {
     downloadOngoing[i]=false;
   }
   updateStatsStartSignal=core->getThread()->createSignal();
-  updateStatsThreadInfo=core->getThread()->createThread("map download stats thread",mapDownloaderStatusThread,(void*)this);
+  updateStatsThreadInfo=core->getThread()->createThread("map downloader stats thread",mapDownloaderStatusThread,(void*)this);
+  writeImagesStartSignal=core->getThread()->createSignal();
+  writeImagesThreadInfo=core->getThread()->createThread("map downloader write image thread",mapDownloaderWriteImagesThread,(void*)this);
 }
 
 MapDownloader::~MapDownloader() {
@@ -70,17 +80,22 @@ MapDownloader::~MapDownloader() {
   }
   core->getThread()->destroySignal(updateStatsStartSignal);
   core->getThread()->destroyMutex(accessMutex);
+  core->getThread()->destroySignal(writeImagesStartSignal);
 }
 
 // Deinitializes the map downloader
 void MapDownloader::deinit() {
 
-  // Stop the stats thread
+  // Stop all threads
   quitThreads=true;
   core->getThread()->issueSignal(updateStatsStartSignal);
   core->getThread()->waitForThread(updateStatsThreadInfo);
   core->getThread()->destroyThread(updateStatsThreadInfo);
   updateStatsThreadInfo=NULL;
+  core->getThread()->issueSignal(writeImagesStartSignal);
+  core->getThread()->waitForThread(writeImagesThreadInfo);
+  core->getThread()->destroyThread(writeImagesThreadInfo);
+  writeImagesThreadInfo=NULL;
 
   // Ensure that we have all mutexes
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
@@ -191,7 +206,11 @@ bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, Im
   // Check if the image is supported
   if (imageType==ImageTypeUnknown) {
     std::string imageFileExtension = serverURL.substr(serverURL.find_last_of(".")+1);
+    Int endPos = imageFileExtension.find_first_of("?");
+    if (endPos!=std::string::npos)
+      imageFileExtension=imageFileExtension.substr(0,endPos);
     std::string imageFileExtensionLC=imageFileExtension;
+    DEBUG("%s",imageFileExtensionLC.c_str());
     std::transform(imageFileExtensionLC.begin(),imageFileExtensionLC.end(),imageFileExtensionLC.begin(),::tolower);
     if (imageFileExtensionLC=="png") {
       imageType=ImageTypePNG;
@@ -207,7 +226,7 @@ bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, Im
   }
 
   // Remember the map tile server
-  if (!(mapTileServer=new MapTileServer(mapSource,layerGroupName,tileServers.size(),serverURL,overlayAlpha,imageType,minZoomLevel,maxZoomLevel))) {
+  if (!(mapTileServer=new MapTileServer(mapSource,layerGroupName,tileServers.size(),serverURL,overlayAlpha,imageType,minZoomLevel,maxZoomLevel,numberOfDownloadThreads))) {
     FATAL("can not create map tile server object",NULL);
     return false;
   }
@@ -365,9 +384,6 @@ void MapDownloader::downloadMapImages(Int threadNr) {
         // Create one tile image out of the downloaded ones
         ImagePixel *composedImagePixel=NULL;
         Int composedImageWidth, composedImageHeight;
-        std::stringstream tempFilePath;
-        tempFilePath << mapSource->getFolderPath() << "/download." << threadNr << ".bin";
-        remove(tempFilePath.str().c_str());
         Int j=0;
         for (std::list<MapTileServer*>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
           MapTileServer *tileServer=*i;
@@ -383,49 +399,35 @@ void MapDownloader::downloadMapImages(Int threadNr) {
             j++;
           }
         }
+        UByte *imageData=NULL;
+        UInt imageSize;
         if (composedImagePixel) {
-          core->getImage()->writePNG(composedImagePixel,tempFilePath.str(),composedImageWidth,composedImageHeight,core->getImage()->getRGBPixelSize());
+          imageData = core->getImage()->writePNG(composedImagePixel,composedImageWidth,composedImageHeight,core->getImage()->getRGBPixelSize(),imageSize);
           free(composedImagePixel);
         }
 
-        // Add the image to the archive
-        struct stat stat_buffer;
-        Int result=core->statFile(tempFilePath.str(),&stat_buffer);
-        ZipArchive *mapArchive=NULL;
-        if (result==0) {
-          UByte *file_buffer = (UByte *)malloc(stat_buffer.st_size);
-          if (file_buffer) {
-            FILE *in;
-            if ((in=fopen(tempFilePath.str().c_str(),"r"))) {
-              fread(file_buffer,stat_buffer.st_size,1,in);
-              fclose(in);
-              mapArchive=new ZipArchive(mapSource->getFolderPath() + "/" + mapContainer->getMapFileFolder(),mapContainer->getArchiveFileName());
-              if ((mapArchive==NULL)||(!mapArchive->init()))
-                FATAL("can not create zip archive object",NULL);
-              mapArchive->addEntry(mapContainer->getImageFilePath(),file_buffer,stat_buffer.st_size);
+        // Queue the image
+        if (imageData!=NULL) {
+          MapImage image;
+          image.imageData=imageData;
+          image.imageSize=imageSize;
+          image.mapContainer=mapContainer;
+          Int size;
+          do {
+            core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+            size=imageQueue.size();
+            if (size<imageQueueMaxSize) {
+              imageQueue.push_back(image);
+              core->getThread()->unlockMutex(accessMutex);
+            } else {
+              core->getThread()->unlockMutex(accessMutex);
+              //DEBUG("image queue is full",NULL);
+              sleep(1);
             }
           }
+          while (size>=imageQueueMaxSize);
+          core->getThread()->issueSignal(writeImagesStartSignal);
         }
-
-        // Write the gdm file
-        if (mapArchive) {
-          //DEBUG("writing calibration file of map container 0x%08x",mapContainer);
-          mapContainer->writeCalibrationFile(mapArchive);
-          mapArchive->writeChanges();
-          delete mapArchive;
-          mapArchive=NULL;
-        } else {
-          WARNING("can not store <%s>",mapContainer->getImageFileName().c_str());
-        }
-
-        // Update the map cache
-        mapSource->lockAccess(__FILE__, __LINE__);
-        mapContainer->setDownloadComplete(true);
-        mapSource->unlockAccess();
-        core->getMapEngine()->setForceCacheUpdate(__FILE__, __LINE__);
-        core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
-        downloadedImages++;
-        core->getThread()->unlockMutex(accessMutex);
 
       } else {
 
@@ -531,6 +533,69 @@ void MapDownloader::updateDownloadStatus() {
 
     // Let the download job processing continue
     mapSource->unlockDownloadJobProcessing();
+
+  }
+}
+
+// Updates the download status
+void MapDownloader::writeImages() {
+
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundHigh);
+
+  // Do an endless loop
+  while (1) {
+
+    // Wait for trigger
+    core->getThread()->waitForSignal(writeImagesStartSignal);
+
+    // Shall we quit?
+    if (quitThreads) {
+      core->getThread()->exitThread();
+    }
+
+    while (1) {
+
+      // Queue empty?
+      MapImage image;
+      core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+      bool imageQueueEmpty = (imageQueue.size()==0) ? true : false;
+      if (!imageQueueEmpty) {
+        image=imageQueue.front();
+        imageQueue.pop_front();
+      }
+      core->getThread()->unlockMutex(accessMutex);
+      if (imageQueueEmpty)
+        break;
+
+      // Add the image to the archive
+      ZipArchive *mapArchive=NULL;
+      mapArchive=new ZipArchive(mapSource->getFolderPath() + "/" + image.mapContainer->getMapFileFolder(),image.mapContainer->getArchiveFileName());
+      if ((mapArchive==NULL)||(!mapArchive->init()))
+        FATAL("can not create zip archive object",NULL);
+      mapArchive->addEntry(image.mapContainer->getImageFilePath(),(void*)image.imageData,(Int)image.imageSize);
+
+      // Write the gdm file
+      if (mapArchive) {
+        //DEBUG("writing calibration file of map container 0x%08x",mapContainer);
+        image.mapContainer->writeCalibrationFile(mapArchive);
+        mapArchive->writeChanges();
+        delete mapArchive;
+        mapArchive=NULL;
+      } else {
+        WARNING("can not store <%s>",image.mapContainer->getImageFileName().c_str());
+      }
+
+      // Update the map cache
+      mapSource->lockAccess(__FILE__, __LINE__);
+      image.mapContainer->setDownloadComplete(true);
+      mapSource->unlockAccess();
+      core->getMapEngine()->setForceCacheUpdate(__FILE__, __LINE__);
+      core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+      downloadedImages++;
+      core->getThread()->unlockMutex(accessMutex);
+
+    }
 
   }
 }

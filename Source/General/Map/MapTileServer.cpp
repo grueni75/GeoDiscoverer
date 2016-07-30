@@ -14,16 +14,24 @@
 
 namespace GEODISCOVERER {
 
-MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel) {
+MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel, UInt threadCount) {
   this->mapSource = mapSource;
   this->layerGroupName = layerGroupName;
   this->serverURL = serverURL;
   this->overlayAlpha = overlayAlpha;
   this->imageType = imageType;
   this->orderNr = orderNr;
-  std::stringstream imagePathStream;
-  imagePathStream << mapSource->getFolderPath() << "/download." << orderNr;
-  this->imagePath = imagePathStream.str();
+  this->images.resize(threadCount);
+  for (int i=0;i<threadCount;i++) {
+    images[i]=(Memory*)malloc(sizeof(Memory));
+    if (images[i]==NULL) {
+      FATAL("can not create memory struct",NULL);
+      return;
+    }
+    images[i]->data=NULL;
+    images[i]->size=0;
+    images[i]->pos=0;
+  }
   this->minZoomLevelServer=minZoomLevel;
   this->maxZoomLevelServer=maxZoomLevel;
   this->minZoomLevelMap=-1;
@@ -31,6 +39,12 @@ MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, std::string laye
 }
 
 MapTileServer::~MapTileServer() {
+  for (std::vector<Memory*>::iterator i=images.begin();i!=images.end();i++) {
+    if ((*i)->data)
+      free((*i)->data);
+    if (*i)
+      free(*i);
+  }
 }
 
 // Replaces a variable in a string
@@ -64,16 +78,20 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int 
   replaceVariableInServerURL(url,"${y}",y.str());
 
   // Download the file
-  std::stringstream threadImagePath;
-  threadImagePath << imagePath << "." << threadNr << ".bin";
-  DownloadResult result = core->downloadURL(url,threadImagePath.str(),!mapSource->getDownloadWarningOccured(),true);
+  DownloadResult result;
+  if (images[threadNr]->data!=NULL)
+    FATAL("previous image has not been freed",NULL);
+  UInt size;
+  images[threadNr]->data = core->downloadURL(url,result,images[threadNr]->size,!mapSource->getDownloadWarningOccured(),true);
   switch (result) {
     case DownloadResultSuccess:
 
       // Check if the image can be loaded
-      if ((!core->getImage()->queryPNG(threadImagePath.str(),imageWidth,imageHeight))&&
-         (!core->getImage()->queryJPEG(threadImagePath.str(),imageWidth,imageHeight))) {
+      if ((!core->getImage()->queryPNG(images[threadNr]->data,images[threadNr]->size,imageWidth,imageHeight))&&
+         (!core->getImage()->queryJPEG(images[threadNr]->data,images[threadNr]->size,imageWidth,imageHeight))) {
         WARNING("downloaded map from <%s> is not a valid image",url.c_str());
+        free(images[threadNr]->data);
+        images[threadNr]->data=NULL;
         return DownloadResultOtherFail;
       } else {
         return DownloadResultSuccess;
@@ -81,6 +99,9 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int 
 
     // Some tile servers do not have tiles for every location, so ignore file not found
     case DownloadResultFileNotFound:
+      if (images[threadNr]->data)
+        free(images[threadNr]->data);
+      images[threadNr]->data=NULL;
       return DownloadResultFileNotFound;
 
     case DownloadResultOtherFail:
@@ -89,6 +110,9 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int 
       mapSource->unlockAccess();
       break;
   }
+  if (images[threadNr]->data)
+    free(images[threadNr]->data);
+  images[threadNr]->data=NULL;
   return DownloadResultOtherFail;
 }
 
@@ -98,25 +122,24 @@ bool MapTileServer::composeTileImage(std::string url, ImagePixel* &composedTileI
   ImagePixel *tileImage;
   UInt pixelSize;
   Int width,height;
-  struct stat stat_buffer;
-  std::stringstream threadImagePath;
-  threadImagePath << imagePath << "." << threadNr << ".bin";
 
-  // Check if the path exist
-  if (core->statFile(threadImagePath.str(),&stat_buffer)!=0)
+  // Check if the image exists
+  if (images[threadNr]->data==NULL)
     return true;  // download was aborted but not flagged as error, so continue with image processing
 
   // Read in the image
   switch(imageType) {
     case ImageTypeJPEG:
-      tileImage=core->getImage()->loadJPEG(threadImagePath.str(),width,height,pixelSize,false);
+      tileImage=core->getImage()->loadJPEG(images[threadNr]->data,images[threadNr]->size,width,height,pixelSize,false);
       break;
     case ImageTypePNG:
-      tileImage=core->getImage()->loadPNG(threadImagePath.str(),width,height,pixelSize,false);
+      tileImage=core->getImage()->loadPNG(images[threadNr]->data,images[threadNr]->size,width,height,pixelSize,false);
       break;
     case ImageTypeUnknown:
       FATAL("image type not known",NULL);
   }
+  free(images[threadNr]->data);
+  images[threadNr]->data=NULL;
   if (!tileImage)
     return false;
   if ((pixelSize!=Image::getRGBPixelSize())&&(pixelSize!=Image::getRGBAPixelSize())) {

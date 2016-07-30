@@ -28,6 +28,13 @@ typedef unsigned short UShort;
 // Direction enum for searching
 typedef enum { north, south, west, east } Direction;
 
+// Piece of a memory of a given size
+struct Memory {
+  UByte *data;
+  UInt pos;
+  UInt size;
+};
+
 }
 
 #endif /* TYPES_H_ */

@@ -25,7 +25,7 @@ protected:
   std::string serverURL;                // URL of the tile server to use
   double overlayAlpha;                  // Alpha to use when creating the complete image
   ImageType imageType;                  // Type of the image
-  std::string imagePath;                // Path to the downloaded image
+  std::vector<Memory*> images;            // Memory that contains the image
   Int minZoomLevelServer;               // Minimum usable zoom level of this server
   Int maxZoomLevelServer;               // Maximum usable zoom level of this server
   Int minZoomLevelMap;                  // Minimum zoom level in map
@@ -37,7 +37,7 @@ protected:
 public:
 
   // Constructor
-  MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel);
+  MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel, UInt threadCount);
 
   // Destructor
   virtual ~MapTileServer();

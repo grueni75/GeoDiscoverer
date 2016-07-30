@@ -10,7 +10,6 @@
 //
 //============================================================================
 
-#include <png.h>
 #include <Core.h>
 
 namespace GEODISCOVERER {
@@ -23,15 +22,104 @@ void pngWriteDataToDevice(png_structp png_ptr, png_bytep data, png_size_t length
   }
 }
 
+// Writes PNG data to memory
+void pngWriteDataToMemory(png_structp png_ptr, png_bytep data, png_size_t length) {
+  Memory *mem = (Memory*)png_get_io_ptr(png_ptr);
+  mem->data = (UByte*)realloc((UByte*)mem->data, mem->size + length + 1);
+  if(mem->data == NULL) {
+    FATAL("not enough memory",NULL);
+    return;
+  }
+  memcpy(&(mem->data[mem->size]), data, length);
+  mem->size += length;
+  mem->data[mem->size] = 0;
+}
+
 // Dummy flush function for png library
 void pngFlush(png_structp png_ptr) {
 }
 
-// Ints the png part
+// Reads PNG data from memory
+void pngReadDataFromMemory(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead) {
+
+  Memory *image = (Memory*)png_get_io_ptr(png_ptr);
+  if (image == NULL) {
+    FATAL("image data missing",NULL);
+    return;
+  }
+  if (image->pos+byteCountToRead>image->size) {
+    DEBUG("png tries to read more memory than available",NULL);
+    return;
+  }
+  memcpy(outBytes,&image->data[image->pos],byteCountToRead);
+  image->pos+=byteCountToRead;
+}
+
+// Inits the png part
 void Image::initPNG() {
 }
 
-// Queries the dimension of the png without loading it
+// Inits the reading of a PNG file
+bool Image::initPNGRead(png_structp &png_ptr, png_infop &info_ptr) {
+
+  // Initialize the library for reading this file
+  png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!png_ptr) {
+    FATAL("can not create png read struct",NULL);
+    return false;
+  }
+  info_ptr = png_create_info_struct(png_ptr);
+  if (!info_ptr) {
+    FATAL("can not create png info struct",NULL);
+    return false;
+  }
+  png_set_sig_bytes(png_ptr, 8);
+  return true;
+}
+
+// Queries the dimension of the png from memory without loading it
+bool Image::queryPNG(UByte *imageData, UInt imageSize, Int &width, Int &height) {
+  png_structp png_ptr=NULL;
+  png_infop info_ptr=NULL;
+  bool result=true;
+  struct Memory image;
+
+  // Test memory for being a PNG
+  if (imageSize<8)
+    return false;
+  if (png_sig_cmp(imageData, 0, 8)) {
+    return false;
+  }
+
+  // Initialize the library for reading this file
+  if (!initPNGRead(png_ptr,info_ptr)) {
+    goto cleanup;
+  }
+  if (setjmp(png_jmpbuf(png_ptr))) {
+    DEBUG("can not set position in png image",NULL);
+    goto cleanup;
+  }
+  image.data=imageData;
+  image.pos=8;
+  image.size=imageSize;
+  png_set_read_fn(png_ptr, (png_voidp)&image, pngReadDataFromMemory);
+
+  // Read the header
+  png_read_info(png_ptr, info_ptr);
+  width = info_ptr->width;
+  height = info_ptr->height;
+
+cleanup:
+
+  // Deinit
+  if (png_ptr) {
+    png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+  }
+  return result;
+
+}
+
+// Queries the dimension of the png from a file without loading it
 bool Image::queryPNG(std::string filepath, Int &width, Int &height) {
   png_byte header[8]; // 8 is the maximum size that can be checked
   ImagePixel **image=NULL;
@@ -52,14 +140,7 @@ bool Image::queryPNG(std::string filepath, Int &width, Int &height) {
   }
 
   // Initialize the library for reading this file
-  png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!png_ptr) {
-    FATAL("can not create png read struct",NULL);
-    goto cleanup;
-  }
-  info_ptr = png_create_info_struct(png_ptr);
-  if (!info_ptr) {
-    FATAL("can not create png info struct",NULL);
+  if (!initPNGRead(png_ptr,info_ptr)) {
     goto cleanup;
   }
   if (setjmp(png_jmpbuf(png_ptr))) {
@@ -67,7 +148,6 @@ bool Image::queryPNG(std::string filepath, Int &width, Int &height) {
     goto cleanup;
   }
   png_init_io(png_ptr, fp);
-  png_set_sig_bytes(png_ptr, 8);
 
   // Read the header
   png_read_info(png_ptr, info_ptr);
@@ -85,45 +165,11 @@ cleanup:
   return result;
 }
 
-// Loads a png
-ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread) {
+// Loads a png after the library has been prepared
+ImagePixel *Image::loadPNG(png_structp png_ptr, png_infop info_ptr, std::string imageDescription, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread) {
 
-  png_byte header[8]; // 8 is the maximum size that can be checked
   ImagePixel *image=NULL;
-  png_structp png_ptr=NULL;
-  png_infop info_ptr=NULL;
   Int number_of_passes;
-
-  // Open file and test for it being a PNG
-  abortLoad=false;
-  FILE *fp = fopen(filepath.c_str(), "rb");
-  if (!fp) {
-    DEBUG("can not open <%s> for reading",filepath.c_str());
-    goto cleanup;
-  }
-  fread(header, 1, 8, fp);
-  if (png_sig_cmp(header, 0, 8)) {
-    DEBUG("file <%s> is not a PNG file",filepath.c_str());
-    goto cleanup;
-  }
-
-  // Initialize the library for reading this file
-  png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!png_ptr) {
-    FATAL("can not create png read struct",NULL);
-    goto cleanup;
-  }
-  info_ptr = png_create_info_struct(png_ptr);
-  if (!info_ptr) {
-    FATAL("can not create png info struct",NULL);
-    goto cleanup;
-  }
-  if (setjmp(png_jmpbuf(png_ptr))) {
-    DEBUG("error while reading png image <%s>",filepath.c_str());
-    goto cleanup;
-  }
-  png_init_io(png_ptr, fp);
-  png_set_sig_bytes(png_ptr, 8);
 
   // Read the header
   png_read_info(png_ptr, info_ptr);
@@ -152,23 +198,23 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
   } else if (info_ptr->color_type==PNG_COLOR_TYPE_RGB) {
     pixelSize=getRGBPixelSize();
   } else {
-    DEBUG("the image <%s> does not use the RGBA, RGB or palette color space",filepath.c_str());
-    goto cleanup;
+    DEBUG("the %s does not use the RGBA, RGB or palette color space",imageDescription.c_str());
+    return NULL;
   }
   if (info_ptr->bit_depth!=8) {
-    DEBUG("the image <%s> does not use 8-bit depth per color channel",filepath.c_str());
-    goto cleanup;
+    DEBUG("the %s does not use 8-bit depth per color channel",imageDescription.c_str());
+    return NULL;
   }
   if (info_ptr->rowbytes!=width*pixelSize) {
-    FATAL("the row bytes of image <%s> do not have the expected length",filepath.c_str());
-    goto cleanup;
+    FATAL("the row bytes of the %s do not have the expected length",imageDescription.c_str());
+    return NULL;
   }
 
   // Reserve memory for the image
   image=(ImagePixel*)malloc(pixelSize*width*height);
   if (!image) {
-    FATAL("can not reserve memory for the image <%s>",filepath.c_str());
-    goto cleanup;
+    FATAL("can not reserve memory for %s",imageDescription.c_str());
+    return NULL;
   }
 
   // Read the image
@@ -181,6 +227,44 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
   }
   if (((!calledByMapUpdateThread)||(!abortLoad)))
     png_read_end(png_ptr, info_ptr);
+
+  return image;
+}
+
+// Loads a png from a file
+ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread) {
+
+  png_byte header[8]; // 8 is the maximum size that can be checked
+  ImagePixel *image=NULL;
+  png_structp png_ptr=NULL;
+  png_infop info_ptr=NULL;
+  Int number_of_passes;
+
+  // Open file and test for it being a PNG
+  abortLoad=false;
+  FILE *fp = fopen(filepath.c_str(), "rb");
+  if (!fp) {
+    DEBUG("can not open <%s> for reading",filepath.c_str());
+    goto cleanup;
+  }
+  fread(header, 1, 8, fp);
+  if (png_sig_cmp(header, 0, 8)) {
+    DEBUG("file <%s> is not a PNG file",filepath.c_str());
+    goto cleanup;
+  }
+
+  // Initialize the library for reading this file
+  if (!initPNGRead(png_ptr,info_ptr)) {
+    goto cleanup;
+  }
+  if (setjmp(png_jmpbuf(png_ptr))) {
+    DEBUG("can not set position in png image <%s>",filepath.c_str());
+    goto cleanup;
+  }
+  png_init_io(png_ptr, fp);
+
+  // Read the pixel data
+  image = loadPNG(png_ptr,info_ptr,"image <"+filepath+">",width,height,pixelSize,calledByMapUpdateThread);
 
 cleanup:
 
@@ -195,6 +279,55 @@ cleanup:
   }
   if (fp)
     fclose(fp);
+  return image;
+}
+
+
+// Loads a png from memory
+ImagePixel *Image::loadPNG(UByte *imageData, UInt imageSize, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread) {
+
+  png_byte header[8]; // 8 is the maximum size that can be checked
+  ImagePixel *image=NULL;
+  png_structp png_ptr=NULL;
+  png_infop info_ptr=NULL;
+  Int number_of_passes;
+  Memory imageMemory;
+
+  // Test memory for being a PNG
+  abortLoad=false;
+  if (imageSize<8)
+    return NULL;
+  if (png_sig_cmp(imageData, 0, 8)) {
+    return NULL;
+  }
+
+  // Initialize the library for reading this file
+  if (!initPNGRead(png_ptr,info_ptr)) {
+    goto cleanup;
+  }
+  if (setjmp(png_jmpbuf(png_ptr))) {
+    DEBUG("can not set position in png image",NULL);
+    goto cleanup;
+  }
+  imageMemory.data=imageData;
+  imageMemory.pos=8;
+  imageMemory.size=imageSize;
+  png_set_read_fn(png_ptr, (png_voidp)&imageMemory, pngReadDataFromMemory);
+
+  // Read the pixel data
+  image = loadPNG(png_ptr,info_ptr,"image",width,height,pixelSize,calledByMapUpdateThread);
+
+cleanup:
+
+  // Deinit
+  if (calledByMapUpdateThread&&abortLoad) {
+    if (image) free(image);
+    image=NULL;
+    abortLoad=false;
+  }
+  if ((png_ptr)||(info_ptr)) {
+    png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+  }
   return image;
 }
 
@@ -275,6 +408,20 @@ ImagePixel *Image::loadPNGIcon(Screen *screen, std::string filename, Int &imageW
   return icon;
 }
 
+// Writes a png to memory
+UByte *Image::writePNG(ImagePixel *image, Int width, Int height, UInt pixelSize, UInt &imageSize, bool inverseRows) {
+
+  // Call the internal function
+  Memory imageMemory;
+  imageMemory.data = (UByte*)malloc(1);
+  imageMemory.size = 0;
+  bool result = writePNG(image,ImageOutputTargetTypeMemory,&imageMemory,width,height,pixelSize,inverseRows);
+  imageSize = imageMemory.size;
+
+  // Return result
+  return imageMemory.data;
+}
+
 // Writes a png to a file
 bool Image::writePNG(ImagePixel *image, std::string filepath, Int width, Int height, UInt pixelSize, bool inverseRows) {
 
@@ -333,6 +480,9 @@ bool Image::writePNG(ImagePixel *image, ImageOutputTargetType targetType, void *
       break;
     case ImageOutputTargetTypeDevice:
       png_set_write_fn(png_ptr, target, pngWriteDataToDevice, pngFlush);
+      break;
+    case ImageOutputTargetTypeMemory:
+      png_set_write_fn(png_ptr, target, pngWriteDataToMemory, pngFlush);
       break;
     default:
       FATAL("unsupported target type",NULL);

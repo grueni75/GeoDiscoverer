@@ -18,6 +18,12 @@ namespace GEODISCOVERER {
 typedef std::map<std::string, Int> MapLayerNameMap;
 typedef std::pair<std::string, Int> MapLayerNamePair;
 
+struct MapImage {
+  UByte *imageData;
+  UInt imageSize;
+  MapContainer *mapContainer;
+};
+
 class MapDownloader {
 
 protected:
@@ -40,6 +46,10 @@ protected:
   Int downloadedImages;                                   // Number of downloaded images so far
   Int downloadQueueRecommendedSize;                       // Size that the download queue should not exceed
   bool downloadQueueRecommendedSizeExceeded;              // Indicates that the size of the download queue exceeds the recommended size
+  std::list<MapImage> imageQueue;                         // Queue of images that must be written to storage
+  UInt imageQueueMaxSize;                                 // Maximum size of the image queue
+  ThreadSignalInfo *writeImagesStartSignal;               // Signal for starting the writing of images to storage
+  ThreadInfo *writeImagesThreadInfo;                      // Thread that writes images to storage
 
 public:
 
@@ -81,6 +91,9 @@ public:
 
   // Indicates if the queue has exceeded its recommended size
   bool downloadQueueReachedRecommendedSize();
+
+  // Writes downloaded images to storage
+  void writeImages();
 
 };
 

@@ -19,7 +19,7 @@ namespace GEODISCOVERER {
 typedef UByte ImagePixel;
 
 // Transfer types
-enum ImageOutputTargetType { ImageOutputTargetTypeFile, ImageOutputTargetTypeDevice };
+enum ImageOutputTargetType { ImageOutputTargetTypeFile, ImageOutputTargetTypeDevice, ImageOutputTargetTypeMemory };
 
 class Image {
 
@@ -37,14 +37,23 @@ protected:
   // Indicates that the current load operation shall be aborted
   bool abortLoad;
 
-  // Ints the jpeg part
+  // Inits the jpeg part
   void initJPEG();
 
-  // Ints the png part
+  // Intis the png part
   void initPNG();
 
   // Writes a png
   bool writePNG(ImagePixel *image, ImageOutputTargetType targetType, void *target, Int width, Int height, UInt pixelSize, bool inverseRows);
+
+  // Inits the reading of a PNG file
+  bool initPNGRead(png_structp &png_ptr, png_infop &info_ptr);
+
+  // Loads a png after the library has been prepared
+  ImagePixel *loadPNG(png_structp png_ptr, png_infop info_ptr, std::string imageDescription, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread);
+
+  // Loads a jpg after the library has been prepared
+  ImagePixel *loadJPEG(struct jpeg_decompress_struct *cinfo, std::string imageDescription, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread);
 
 public:
 
@@ -53,16 +62,20 @@ public:
   virtual ~Image();
 
   // Query the dimensions of a jpeg
+  bool queryJPEG(UByte *imageData, UInt imageSize, Int &width, Int &height);
   bool queryJPEG(std::string filepath, Int &width, Int &height);
 
   // Loads a jpeg
+  ImagePixel *loadJPEG(UByte *imageData, UInt imageSize, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread);
   ImagePixel *loadJPEG(std::string filepath, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread);
 
   // Queries the dimension of the png without loading it
   bool queryPNG(std::string filepath, Int &width, Int &height);
+  bool queryPNG(UByte *imageData, UInt imageSize, Int &width, Int &height);
 
   // Loads a png
   ImagePixel *loadPNG(std::string filepath, Int &width, Int &height,UInt &pixelSize, bool calledByMapUpdateThread);
+  ImagePixel *loadPNG(UByte *imageData, UInt imageSize, Int &width, Int &height, UInt &pixelSize, bool calledByMapUpdateThread);
 
   // Loads an PNG based icon
   // The correct file is determined from the screen dpi
@@ -73,6 +86,9 @@ public:
 
   // Writes a png to a device
   bool writePNG(ImagePixel *image, Device *device, Int width, Int height, UInt pixelSize, bool inverseRows=false);
+
+  // Writes a png to memory
+  UByte *writePNG(ImagePixel *image, Int width, Int height, UInt pixelSize, UInt &imageSize, bool inverseRows=false);
 
   // Aborts the current jpeg image loading
   void setAbortLoad()
