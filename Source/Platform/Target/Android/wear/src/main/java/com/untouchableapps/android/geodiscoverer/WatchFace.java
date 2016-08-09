@@ -155,42 +155,6 @@ public class WatchFace extends Gles2WatchFaceService {
   /** Last created engine */
   Engine lastEngine = null;
 
-  /** Called when the external storage state changes */
-  synchronized void handleExternalStorageState() {
-
-    // If the external storage is not available, inform the user that this will not work
-    if ((!externalStorageAvailable)||(!externalStorageWritable)) {
-      GDApplication.addMessage(GDAppInterface.ERROR_MSG, "GDApp", String.format(getString(R.string.no_external_storage)));
-      if (coreObject.messageHandler!=null) {
-        Message m=Message.obtain(coreObject.messageHandler);
-        m.what = GDCore.HOME_DIR_NOT_AVAILABLE;
-        coreObject.messageHandler.sendMessage(m);
-      }
-    }
-
-    // If the external storage is available, start the native core
-    if ((externalStorageAvailable)&&(externalStorageWritable)) {
-      Message m=Message.obtain(coreObject.messageHandler);
-      m.what = GDCore.HOME_DIR_AVAILABLE;
-      coreObject.messageHandler.sendMessage(m);
-    }
-
-  }
-
-  /** Sets the current state of the external media */
-  void updateExternalStorageState() {
-    String state = Environment.getExternalStorageState();
-    if (Environment.MEDIA_MOUNTED.equals(state)) {
-      externalStorageAvailable = externalStorageWritable = true;
-    } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-      externalStorageAvailable = true;
-      externalStorageWritable = false;
-    } else {
-      externalStorageAvailable = externalStorageWritable = false;
-    }
-    handleExternalStorageState();
-  }
-
   /** Sets the screen time out */
   @SuppressLint("Wakelock")
   void updateWakeLock() {
@@ -322,7 +286,11 @@ public class WatchFace extends Gles2WatchFaceService {
             // Nothing to do as of now
             commandExecuted=true;
           }
-          if (commandFunction.equals("initComplete")) {
+          if (commandFunction.equals("lateInitComplete")) {
+            // Nothing to do as of now
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("getLastKnownLocation")) {
             // Nothing to do as of now
             commandExecuted=true;
           }
@@ -379,11 +347,12 @@ public class WatchFace extends Gles2WatchFaceService {
 
     // Get the core object
     coreObject=GDApplication.coreObject;
-    coreObject.setDisplayMetrics(getResources().getDisplayMetrics());
     ((GDApplication)getApplication()).setMessageHandler(coreMessageHandler);
 
-    // Check for external storage
-    updateExternalStorageState();
+    // Start the core object
+    Message m=Message.obtain(coreObject.messageHandler);
+    m.what = GDCore.START_CORE;
+    coreObject.messageHandler.sendMessage(m);
   }
 
   @Override

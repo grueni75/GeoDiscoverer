@@ -210,7 +210,6 @@ bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, Im
     if (endPos!=std::string::npos)
       imageFileExtension=imageFileExtension.substr(0,endPos);
     std::string imageFileExtensionLC=imageFileExtension;
-    DEBUG("%s",imageFileExtensionLC.c_str());
     std::transform(imageFileExtensionLC.begin(),imageFileExtensionLC.end(),imageFileExtensionLC.begin(),::tolower);
     if (imageFileExtensionLC=="png") {
       imageType=ImageTypePNG;

@@ -13,7 +13,6 @@
 package com.untouchableapps.android.geodiscoverer.core;
 
 import android.annotation.TargetApi;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -83,12 +82,12 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   /** Indicates if the core is initialized */
   public boolean coreInitialized = false;
-  
+
+  /** Indicates if the core has finished its late initialization */
+  public boolean coreLateInitComplete = false;
+
   /** Indicates if the core is currently initialized or destroyed */
   boolean coreLifeCycleOngoing = false;
-
-  /** Indicates that home dir is available */
-  boolean homeDirAvailable = false;
 
   /** Indicates that the graphic must be re-created */
   boolean createGraphic = false;
@@ -172,6 +171,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     // Prepare the JNI part
     initJNI();
 
+    // Get infos about the screen
+    setDisplayMetrics(appIf.getApplication().getResources().getDisplayMetrics());
+
     // Start the thread that handles the starting and stopping
     thread = new Thread(this);
     thread.start(); 
@@ -231,14 +233,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           coreObject.stop();
           coreObject.executeAppCommand("exitActivity()");
           break;
-        case HOME_DIR_AVAILABLE:
-          coreObject.homeDirAvailable=true;
-          coreObject.start();
-          break;
-        case HOME_DIR_NOT_AVAILABLE:
-          coreObject.homeDirAvailable=false;
-          coreObject.stop();
-          break;
         default:
           coreObject.appIf.addAppMessage(GDAppInterface.ERROR_MSG, "GDApp", "unknown message received");
       }
@@ -252,8 +246,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   public static final int START_CORE = 0;  
   public static final int STOP_CORE = 1;  
   public static final int RESTART_CORE = 2;  
-  public static final int HOME_DIR_AVAILABLE = 3;  
-  public static final int HOME_DIR_NOT_AVAILABLE = 4;  
 
   // Handler thread
   public void run() {
@@ -262,10 +254,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
     // This is a background thread
     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        
+
     // Process messages
     Looper.prepare();
-    messageHandler = new AppMessageHandler(this);    
+    messageHandler = new AppMessageHandler(this);
     threadInitialized.signal();
     lock.unlock();
     Looper.loop();
@@ -372,7 +364,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   }
   
   /** Sets the display metrics */
-  public void setDisplayMetrics(DisplayMetrics metrics) {
+  void setDisplayMetrics(DisplayMetrics metrics) {
     lock.lock();
     this.screenDPI=metrics.densityDpi;
     double a=metrics.widthPixels/metrics.xdpi;
@@ -399,23 +391,18 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     
     // Check if home dir is available
     boolean initialized=false;
-    if (!homeDirAvailable) {
-      appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp","home dir not available");
-    } else {
-      
-      // Copy the assets files
-      if (!updateHome()) {
-        lock.lock();
-        coreLifeCycleOngoing=false;
-        lock.unlock();
-        return;
-      }
-      
-      // Init the core
-      initCore(homePath,screenDPI,screenDiagonal);    
-      initialized=true;
 
+    // Copy the assets files
+    if (!updateHome()) {
+      lock.lock();
+      coreLifeCycleOngoing=false;
+      lock.unlock();
+      return;
     }
+
+    // Init the core
+    initCore(homePath,screenDPI,screenDiagonal);
+    initialized=true;
 
     // Ensure that the screen is recreated
     lock.lock();    
@@ -449,6 +436,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     coreLifeCycleOngoing=true;
     coreStopped=true;
     coreInitialized=false;
+    coreLateInitComplete=false;
     lock.unlock();
 
     // Stop the cockpit apps
@@ -461,7 +449,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     lock.lock();
     coreLifeCycleOngoing=false;
     lock.unlock();
-  } 
+  }
 
   /** Deinits the core and restarts it */
   void restart(boolean resetConfig)
@@ -586,12 +574,17 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         }
       }
     }
-    if (cmd.equals("initComplete()")) {
+    if (cmd.equals("lateInitComplete()")) {
+      lock.lock();
       for (String queuedCmd : queuedCoreCommands) {
         executeCoreCommandInt(queuedCmd);
       }
       queuedCoreCommands.clear();
+      lock.unlock();
       appIf.cockpitEngineStart();
+      lock.lock();
+      coreLateInitComplete=true;
+      lock.unlock();
       cmdExecuted=false; // forward message to activity
     }
     if (cmd.startsWith("setFormattedNavigationInfo(")) {
@@ -688,7 +681,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     lock.lock();
     boolean blankScreen=false;
     if (gl==currentGL) {
-      if ((!coreStopped)&&(homeDirAvailable)) {
+      if (!coreStopped) {
         if (!suspendCore) {
           if (changeScreen) {
             executeCoreCommand(changeScreenCommand);

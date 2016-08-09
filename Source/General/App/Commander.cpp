@@ -411,7 +411,7 @@ std::string Commander::execute(std::string cmd) {
     core->getDefaultWidgetEngine()->setTargetAtAddress();
     cmdExecuted=true;
   }
-  if ((cmdName=="newNavigationInfos")||(cmdName=="initComplete")) {
+  if ((cmdName=="newNavigationInfos")||(cmdName=="lateInitComplete")) {
     core->getDefaultWidgetEngine()->showContextMenu();
     cmdExecuted=true;
   }
@@ -533,6 +533,8 @@ std::string Commander::execute(std::string cmd) {
     if (core->getIsInitialized()) {
       MapDownloader *mapDownloader=core->getMapSource()->getMapDownloader();
       if (mapDownloader&&mapDownloader->countActiveDownloads()>0)
+        result="true";
+      if (core->getMapSource()->hasDownloadJobs())
         result="true";
     } else {
       //WARNING("Please wait until map is loaded (command ignored)",NULL);

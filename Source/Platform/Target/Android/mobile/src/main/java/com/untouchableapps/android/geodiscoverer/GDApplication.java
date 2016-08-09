@@ -338,6 +338,11 @@ public class GDApplication extends Application implements GDAppInterface, Google
   // Sends a command to the activity
   @Override
   public void executeAppCommand(String cmd) {
+    if (cmd.equals("lateInitComplete()")) {
+      Intent intent = new Intent(this, GDService.class);
+      intent.setAction("lateInitComplete");
+      startService(intent);
+    }
     if (activity != null) {
       Message m = Message.obtain(activity.coreMessageHandler);
       m.what = ViewMap.EXECUTE_COMMAND;

@@ -1060,4 +1060,13 @@ void MapSourceMercatorTiles::unlockDownloadJobProcessing() {
   core->getThread()->unlockMutex(downloadJobsMutex);
 }
 
+// Indicates if the map source has download jobs
+bool MapSourceMercatorTiles::hasDownloadJobs() {
+  std::list<std::string> names=core->getConfigStore()->getAttributeValues("Map/DownloadJob","name",__FILE__,__LINE__);
+  if (names.size()>0)
+    return true;
+  else
+    return false;
+}
+
 } /* namespace GEODISCOVERER */

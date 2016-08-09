@@ -160,6 +160,9 @@ public:
   // Processes all pending download jobs
   virtual void processDownloadJobs();
 
+  // Indicates if the map source has download jobs
+  virtual bool hasDownloadJobs();
+
   // Returns the number of unqueued tiles
   virtual Int countUnqueuedDownloadTiles(bool peek);
 

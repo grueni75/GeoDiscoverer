@@ -964,6 +964,11 @@ std::string MapSource::getMapLayerName(int zoomLevel) {
 void MapSource::addDownloadJob(bool estimateOnly, std::string routeName, std::string zoomLevels) {
 }
 
+// Indicates if the map source has download jobs
+bool MapSource::hasDownloadJobs() {
+  return false;
+}
+
 // Processes all pending download jobs
 void MapSource::processDownloadJobs() {
 }

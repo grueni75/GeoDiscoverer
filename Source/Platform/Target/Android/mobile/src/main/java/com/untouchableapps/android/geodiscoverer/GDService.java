@@ -34,7 +34,10 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.NotificationCompat;
 import android.widget.Toast;
 
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
+
+import java.io.File;
 
 public class GDService extends Service {
   
@@ -45,6 +48,7 @@ public class GDService extends Service {
   // Flags
   boolean locationWatchStarted = false;
   boolean serviceInForeground = false;
+  boolean serviceRestarted = false;
   
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -53,47 +57,6 @@ public class GDService extends Service {
   PendingIntent pendingIntent = null;
   Notification notification = null;
 
-  // Variables for monitoring the state of the external storage
-  BroadcastReceiver externalStorageReceiver = null;
-  boolean externalStorageAvailable = false;
-  boolean externalStorageWritable = false;  
-  
-  /** Called when the external storage state changes */
-  synchronized void handleExternalStorageState() {
-
-    // If the external storage is not available, inform the user that this will not work
-    if ((!externalStorageAvailable)||(!externalStorageWritable)) {
-      Toast.makeText(this, String.format(getString(R.string.no_external_storage)), Toast.LENGTH_LONG).show();
-      if (coreObject.messageHandler!=null) {
-        Message m=Message.obtain(coreObject.messageHandler);
-        m.what = GDCore.HOME_DIR_NOT_AVAILABLE;
-        coreObject.messageHandler.sendMessage(m);
-      }
-    }
-    
-    // If the external storage is available, start the native core
-    if ((externalStorageAvailable)&&(externalStorageWritable)) {
-      Message m=Message.obtain(coreObject.messageHandler);
-      m.what = GDCore.HOME_DIR_AVAILABLE;
-      coreObject.messageHandler.sendMessage(m);
-    }
-
-  }
-  
-  /** Sets the current state of the external media */
-  void updateExternalStorageState() {
-    String state = Environment.getExternalStorageState();
-    if (Environment.MEDIA_MOUNTED.equals(state)) {
-      externalStorageAvailable = externalStorageWritable = true;
-    } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-      externalStorageAvailable = true;
-      externalStorageWritable = false;
-    } else {
-      externalStorageAvailable = externalStorageWritable = false;
-    }
-    handleExternalStorageState();
-  }
-    
   /** Called when the service is created the first time */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   @Override
@@ -103,33 +66,16 @@ public class GDService extends Service {
     
     // Get the core object
     coreObject=GDApplication.coreObject;
-    
-    // Set the screen DPI
-    coreObject.setDisplayMetrics(getResources().getDisplayMetrics());
-    
+
     // Get the location manager
     locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
     
     // Get the notification manager
     notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);    
 
-    // Start watching the external storage state
-    externalStorageReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "storage: " + intent.getData());
-        updateExternalStorageState();
-      }
-    };
-    IntentFilter filter = new IntentFilter();
-    filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-    filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-    registerReceiver(externalStorageReceiver, filter);
-    updateExternalStorageState();
-    
     // Prepare the notification
     Intent notificationIntent = new Intent(this, ViewMap.class);
-    pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);    
+    pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
   }
   
   /** No binding supported */
@@ -152,21 +98,30 @@ public class GDService extends Service {
 
   /** Called when the service is started */
   @Override
-  public void onStart(Intent intent, int startId) {    
+  public int onStartCommand(Intent intent, int flags, int startId) {
 
     // Ignore empty intents
-    if ((intent==null)||(intent.getAction()==null))
-      return;
-    
-    // Handle activity start / stop actions
-    if (intent.getAction().equals("activityResumed")) {
+    if (intent==null) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "service has been restarted due to low memory situation");
 
-      // If the external storage is available, enable the native core
-      if ((externalStorageAvailable)&&(externalStorageWritable)) {
-        Message m=Message.obtain(coreObject.messageHandler);
-        m.what = GDCore.HOME_DIR_AVAILABLE;
+      // Start the core if the service is re-created
+      if (coreObject.coreStopped) {
+        serviceRestarted=true;
+        Message m = Message.obtain(coreObject.messageHandler);
+        m.what = GDCore.START_CORE;
         coreObject.messageHandler.sendMessage(m);
       }
+
+      return START_STICKY;
+
+    } else {
+      if (intent.getAction()==null)
+        return START_STICKY;
+    }
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDapp",intent.getAction());
+
+    // Handle activity start / stop actions
+    if ((serviceRestarted)||(intent.getAction().equals("activityResumed"))) {
 
       // Start watching the location
       if (!locationWatchStarted) {
@@ -188,7 +143,7 @@ public class GDService extends Service {
         serviceInForeground=true;
       }
     }
-    if (intent.getAction().equals("activityPaused")) {
+    if ((serviceRestarted)||(intent.getAction().equals("activityPaused"))) {
 
       // Stop watching location if track recording is disabled
       boolean recordingPosition = true;
@@ -206,10 +161,30 @@ public class GDService extends Service {
           stopForeground(true);
           serviceInForeground=false;
         }
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "stopping service");
         stopSelf();
       }
 
     }
+
+    // Handle initialization of core
+    if (intent.getAction().equals("lateInitComplete")) {
+
+      // Service restart is complete
+      serviceRestarted=false;
+
+      // Replay the trace if it exists
+      File replayLog = new File(coreObject.homePath + "/replay.log");
+      if (replayLog.exists()) {
+        new Thread() {
+          public void run() {
+            coreObject.executeCoreCommand("replayTrace(" + coreObject.homePath + "/replay.log" + ")");
+          }
+        }.start();
+      }
+    }
+
+    // Handle download status updates
     if (intent.getAction().equals("mapDownloadStatusUpdated")) {
       if (intent.getIntExtra("tilesLeft",0)==0) {
         notification = createDefaultNotification();
@@ -232,6 +207,7 @@ public class GDService extends Service {
       notificationManager.notify(R.string.notification_title, notification);
     }
 
+    return START_STICKY;
   }
   
   /** Called when the service is stopped */
@@ -241,10 +217,6 @@ public class GDService extends Service {
     // Hide the notification
     stopForeground(true);
     //notificationManager.cancel(R.string.notification_title);
-
-    // Stop watching for external storage
-    unregisterReceiver(externalStorageReceiver);
-    externalStorageReceiver=null;
 
     // Stop watching location
     locationManager.removeUpdates(coreObject);

@@ -353,7 +353,7 @@ void Core::updateScreen(bool forceRedraw) {
   getDefaultDevice()->getScreen()->setAllowAllocation(true);
 
   // Check if all objects are initialized
-  if ((mapSource->getIsInitialized())&&(navigationEngine->getIsInitialized())) {
+  if ((mapSource->getIsInitialized())&&(navigationEngine->getIsInitialized())&&(mapEngine->getIsInitialized())) {
     mapUpdateStopped=false;
   } else {
     mapUpdateStopped=true;
@@ -363,14 +363,8 @@ void Core::updateScreen(bool forceRedraw) {
   if (!mapUpdateStopped) {
 
     // Init the map engine if required
-    if (!mapEngine->getIsInitialized()) {
+    if (!mapCache->getIsInitialized()) {
       mapCache->createGraphic();
-      mapEngine->initMap();
-      thread->lockMutex(isInitializedMutex, __FILE__, __LINE__);
-      isInitialized=true;
-      thread->unlockMutex(isInitializedMutex);
-      core->getThread()->issueSignal(isInitializedSignal);
-      core->getCommander()->dispatch("initComplete()");
       //PROFILE_ADD("init");
     }
 
@@ -659,11 +653,24 @@ void Core::lateInit() {
     navigationEngine->init();
   }
 
+  // Initialize map engine if required
+  if (!mapEngine->getIsInitialized()) {
+    DEBUG("late initializing mapEngine",NULL);
+    mapEngine->initMap();
+  }
+
   DEBUG("late initialization finished",NULL);
 
   // If you add other objects, please update also
-  // the mapUpdateStopped and mapEngine init code in
+  // the mapUpdateStopped and the init code in
   // the updateScreen method
+
+  // We are initialized
+  thread->lockMutex(isInitializedMutex,__FILE__,__LINE__);
+  isInitialized=true;
+  thread->unlockMutex(isInitializedMutex);
+  core->getThread()->issueSignal(isInitializedSignal);
+  core->getCommander()->dispatch("lateInitComplete()");
 }
 
 // Main loop of the maintenance thread

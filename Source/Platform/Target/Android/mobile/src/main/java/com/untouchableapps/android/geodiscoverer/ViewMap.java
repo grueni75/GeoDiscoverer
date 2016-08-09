@@ -282,9 +282,6 @@ public class ViewMap extends GDActivity {
             commandExecuted=true;
           }
           if (commandFunction.equals("coreInitialized")) {
-            Intent intent = new Intent(viewMap, GDService.class);
-            intent.setAction("coreInitialized");
-            viewMap.startService(intent);
             commandExecuted=true;
           }
           if (commandFunction.equals("updateWakeLock")) {
@@ -333,7 +330,10 @@ public class ViewMap extends GDActivity {
             }
             commandExecuted=true;
           }
-          if (commandFunction.equals("initComplete")) {
+          if (commandFunction.equals("lateInitComplete")) {
+
+            // Process the latest intent (if any)
+            viewMap.processIntent();
 
             // Inform the user about the app drawer
             if (!viewMap.prefs.getBoolean("navDrawerHintShown", false)) {
@@ -352,21 +352,6 @@ public class ViewMap extends GDActivity {
                 }
               })
               .show();
-            }
-
-            // Replay the trace if it exists
-            if (viewMap!=null) {
-              File replayLog = new File(viewMap.coreObject.homePath + "/replay.log");
-              if (replayLog.exists()) {
-                new Thread() {
-                  public void run() {
-                    ViewMap viewMap = weakViewMap.get();
-                    if (viewMap==null)
-                      return;
-                    viewMap.coreObject.executeCoreCommand("replayTrace(" + viewMap.coreObject.homePath + "/replay.log" + ")");
-                  }
-                }.start();
-              }
             }
             commandExecuted=true;
           }
@@ -1427,7 +1412,6 @@ public class ViewMap extends GDActivity {
 
     // Get the core object
     coreObject=GDApplication.coreObject;
-    coreObject.setDisplayMetrics(getResources().getDisplayMetrics());
     ((GDApplication)getApplication()).setActivity(this);
 
     // Get important handles
@@ -1613,7 +1597,17 @@ public class ViewMap extends GDActivity {
       coreObject.messageHandler.sendMessage(m);
     }
 
+    // Process intent only if geo discoverer is initialized
+    if (coreObject.coreLateInitComplete)
+      processIntent();
+
+  }
+
+  // Processes the intent of the activity
+  private void processIntent() {
+
     // Extract the file path from the intent
+    Intent intent;
     intent = getIntent();
     Uri uri = null;
     String subject = "";
