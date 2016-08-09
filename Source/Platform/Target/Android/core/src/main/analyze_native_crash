@@ -22,10 +22,15 @@ if ($report !~ m/.dmp$/) {
     } elsif ($state==1) {
       $state=2 if ($line =~ m/index\s*value/);
     } elsif ($state==2) {
-      if ($line !~ m/^\d*$/) {
+      if ($line =~ m/^\d+\s*(.*)$/) {
+        #print $1 . "\n";
+        if ($1 ne "") {
+          $dump = $dump . $1 . "\n";
+        } else {
+          $state=3;
+        }
+      } else {
         $state=4;
-      } else { 
-        $state=3;
       } 
     } elsif ($state==3) {
       $dump = $dump . $line . "\n";
@@ -57,6 +62,7 @@ if ($arch eq 'armeabi-v7a') {
 # Decode the dump and write it to disk
 if ($report !~ m/.dmp$/) {
   print "Decoding native dump... ";
+  #print($dump);
   my $decoded_dump = decode_base64($dump);
   open (my $out, ">/tmp/crash.bin") or die "Can not open </tmp/crash.dmp> for writing!";
   print $out $decoded_dump;
