@@ -20,6 +20,7 @@ GraphicEngine::GraphicEngine(Device *device) :
     centerIcon(device->getScreen()),
     locationIcon(device->getScreen()),
     targetIcon(device->getScreen()),
+    navigationPointIcon(device->getScreen()),
     arrowIcon(device->getScreen()),
     pathDirectionIcon(device->getScreen()),
     pathStartFlagIcon(device->getScreen()),
@@ -32,6 +33,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   // Init variables
   this->device=device;
   map=NULL;
+  addressPoints=NULL;
   drawingMutex=core->getThread()->createMutex("graphic engine drawing mutex");
   posMutex=core->getThread()->createMutex("graphic engine pos mutex");
   pos=GraphicPosition();
@@ -47,6 +49,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   compassConeIcon.setAngle(std::numeric_limits<double>::max());
   targetIcon.setColor(GraphicColor(255,255,255,0));
   arrowIcon.setColor(GraphicColor(255,255,255,0));
+  navigationPointIcon.setColor(GraphicColor(255,255,255,255));
   lastCenterIconFadeStartTime=0;
   isDrawing=false;
   lastDrawingStartTime=0;
@@ -85,6 +88,7 @@ void GraphicEngine::createGraphic() {
   pathEndFlagIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","pathEndFlagIconFilename",__FILE__, __LINE__));
   compassConeIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","compassConeFilename",__FILE__, __LINE__));
   targetIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","targetIconFilename",__FILE__, __LINE__));
+  navigationPointIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","navigationPointIconFilename",__FILE__, __LINE__));
   arrowIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","arrowIconFilename",__FILE__, __LINE__));
   tileImageNotCachedImage.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","tileImageNotCachedFilename",__FILE__, __LINE__));
   tileImageNotDownloadedFilename.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","tileImageNotDownloadedFilename",__FILE__, __LINE__));
@@ -100,6 +104,7 @@ void GraphicEngine::deinit() {
   pathStartFlagIcon.deinit();
   pathEndFlagIcon.deinit();
   targetIcon.deinit();
+  navigationPointIcon.deinit();
   arrowIcon.deinit();
   compassConeIcon.deinit();
   tileImageNotCachedImage.deinit();
@@ -495,6 +500,29 @@ bool GraphicEngine::draw(bool forceRedraw) {
       }
 
       //PROFILE_ADD("map drawing");
+
+      // Draw all address points
+      if (addressPoints) {
+        std::list<GraphicPrimitive*> *drawList=addressPoints->getDrawList();
+        screen->startObject();
+        screen->setColor(navigationPointIcon.getColor().getRed(),navigationPointIcon.getColor().getGreen(),navigationPointIcon.getColor().getBlue(),navigationPointIcon.getColor().getAlpha());
+        for(std::list<GraphicPrimitive *>::const_iterator i=drawList->begin(); i != drawList->end(); i++) {
+          GraphicRectangle *r = (GraphicRectangle*) *i;
+          screen->startObject();
+          screen->translate(r->getX(),r->getY(),0);
+          screen->rotate(-pos.getAngle(),0,0,1);
+          screen->scale(backScale,backScale,1.0);
+          x1=-r->getIconWidth()/2;
+          y1=0;
+          x2=x1+r->getWidth();
+          y2=y1+r->getHeight();
+          screen->drawRectangle(x1,y1,x2,y2,r->getTexture(),true);
+          screen->endObject();
+        }
+        screen->endObject();
+      }
+
+      //PROFILE_ADD("address points drawing");
 
       // Draw the location icon and the compass cone
       //DEBUG("locationIcon.getColor().getAlpha()=%d locationIcon.getX()=%d locationIcon.getY()=%d",locationIcon.getColor().getAlpha(),locationIcon.getX(),locationIcon.getY());

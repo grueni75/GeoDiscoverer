@@ -142,11 +142,20 @@ protected:
   // Signal to wakeup the navigation compute thread
   ThreadSignalInfo *computeNavigationInfoSignal;
 
+  // List of address points
+  std::list<NavigationPoint> addressPoints;
+
+  // Graphic object that represents the address points
+  GraphicObject addressPointsGraphicObject;
+
   // Forces an update of the navigation infos
   void triggerNavigationInfoUpdate() {
     forceNavigationInfoUpdate=true;
     core->getThread()->issueSignal(computeNavigationInfoSignal);
   }
+
+  // Reads the address points from disk
+  void initAddressPoints();
 
 public:
 
@@ -247,6 +256,9 @@ public:
 
   // Renames an existing address point
   void renameAddressPoint(std::string oldName, std::string newName);
+
+  // Removes an address point
+  void removeAddressPoint(std::string name);
 
   // Finds a route with the given name
   NavigationPath *findRoute(std::string name);

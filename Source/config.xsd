@@ -1211,6 +1211,11 @@
                   <xsd:documentation>Image of the target cursor.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="navigationPointIconFilename" type="xsd:string" default="navigationPoint">
+                <xsd:annotation>
+                  <xsd:documentation>Filename of the image showing a navigation point.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="arrowIconFilename" type="xsd:string" default="arrow">
                 <xsd:annotation>
                   <xsd:documentation>Image of the arrow indicating the direction to the target.</xsd:documentation>

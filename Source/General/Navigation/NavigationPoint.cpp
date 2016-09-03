@@ -18,6 +18,8 @@ NavigationPoint::NavigationPoint() {
   MapPosition undefPos;
   lng = undefPos.getLng();
   lat = undefPos.getLat();
+  graphicPrimitiveKey=0;
+  timestamp=0;
 }
 
 NavigationPoint::~NavigationPoint() {

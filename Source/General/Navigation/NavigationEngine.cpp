@@ -28,7 +28,9 @@ void *navigationEngineComputeNavigationInfoThread(void *args) {
 }
 
 // Constructor
-NavigationEngine::NavigationEngine() {
+NavigationEngine::NavigationEngine() :
+  addressPointsGraphicObject(core->getDefaultScreen(),true)
+{
 
   // Init variables
   locationOutdatedThreshold=core->getConfigStore()->getIntValue("Navigation","locationOutdatedThreshold", __FILE__, __LINE__);
@@ -197,6 +199,14 @@ void NavigationEngine::init() {
     showTarget(false);
   }
 
+  // Load the address points
+  initAddressPoints();
+
+  // Inform the graphic engine about the new objects
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+  core->getDefaultGraphicEngine()->setAddressPoints(&addressPointsGraphicObject);
+  core->getDefaultGraphicEngine()->unlockDrawing();
+
   // Start the background loader
   if (!(backgroundLoaderThreadInfo=core->getThread()->createThread("navigation engine background loader thread",navigationEngineBackgroundLoaderThread,this)))
     FATAL("can not start background loader thread",NULL);
@@ -287,6 +297,11 @@ void NavigationEngine::deinit() {
     core->getThread()->unlockMutex(backgroundLoaderFinishedMutex);
     core->getThread()->destroyThread(backgroundLoaderThreadInfo);
   }
+
+  // Reset the address points graphic object
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+  core->getDefaultGraphicEngine()->setAddressPoints(NULL);
+  core->getDefaultGraphicEngine()->unlockDrawing();
 
   // Save the track first
   if (recordedTrack) {
@@ -583,7 +598,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   lockLocationPos(__FILE__, __LINE__);
   showCursor=false;
   updatePosition=false;
-  if ((locationPos.isValid())&&(mapPos.getMapTile())) {
+  if ((locationPos.isValid())&&(displayArea.containsGeographicCoordinate(locationPos))&&(mapPos.getMapTile())) {
     showCursor=true;
     MapPosition newLocationPos=locationPos;
     MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
@@ -681,24 +696,24 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   Int zoomedScreenWidth=floor(((double)core->getDefaultScreen()->getWidth())/screenZoom);
   Int zoomedScreenHeight=floor(((double)core->getDefaultScreen()->getHeight())/screenZoom);
   //DEBUG("screenZoom=%f zoomedScreenWidth=%d zoomedScreenHeight=%d",screenZoom,zoomedScreenWidth,zoomedScreenHeight);
-  if ((targetPos.isValid())&&(mapPos.getMapTile())) {
+  if ((targetPos.isValid())&&(displayArea.containsGeographicCoordinate(targetPos))&&(mapPos.getMapTile())) {
     showCursor=true;
     MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
     //DEBUG("calibrator=%08x",calibrator);
     if (!calibrator->setPictureCoordinates(targetPos)) {
       showCursor=false;
     } else {
-      //DEBUG("locationPos.getX()=%d locationPos.getY()=%d",locationPos.getX(),locationPos.getY());
+      DEBUG("targetPos.getX()=%d targetPos.getY()=%d",targetPos.getX(),targetPos.getY());
       if (!Integer::add(targetPos.getX(),-mapPos.getX(),mapDiffX))
         showCursor=false;
       if (!Integer::add(targetPos.getY(),-mapPos.getY(),mapDiffY))
         showCursor=false;
-      //DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
+      DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
       if (!Integer::add(displayArea.getRefPos().getX(),mapDiffX,visPosX))
         showCursor=false;
       if (!Integer::add(displayArea.getRefPos().getY(),-mapDiffY,visPosY))
         showCursor=false;
-      //DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
+      DEBUG("visPosX=%d visPosY=%d",visPosX,visPosY);
       if (showCursor) {
         targetIconPosValid=true;
         if (abs(mapDiffX)>zoomedScreenWidth/2)
@@ -741,6 +756,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       if ((targetIcon->getX()!=visPosX)||((targetIcon->getY()!=visPosY))) {
         targetIcon->setX(visPosX);
         targetIcon->setY(visPosY);
+        //DEBUG("target icon => visPosX=%d visPosY=%d",visPosX,visPosY);
         targetIcon->setIsUpdated(true);
       }
     }
@@ -894,6 +910,64 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     }
   }
   core->getDefaultGraphicEngine()->unlockArrowIcon();
+
+  // Update the navigation points
+  for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
+
+    // Check if the address point is visible
+    MapPosition pos;
+    pos.setLat(i->getLat());
+    pos.setLng(i->getLng());
+    bool showAddressPoint=true;
+    MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
+    //DEBUG("calibrator=%08x",calibrator);
+    if (!displayArea.containsGeographicCoordinate(pos)) {
+      showAddressPoint=false;
+    } else {
+      if (!calibrator->setPictureCoordinates(pos)) {
+        showAddressPoint=false;
+      } else {
+        if (!Integer::add(pos.getX(),-mapPos.getX(),mapDiffX))
+          showAddressPoint=false;
+        if (!Integer::add(pos.getY(),-mapPos.getY(),mapDiffY))
+          showAddressPoint=false;
+        if (!Integer::add(displayArea.getRefPos().getX(),mapDiffX,visPosX))
+          showAddressPoint=false;
+        if (!Integer::add(displayArea.getRefPos().getY(),-mapDiffY,visPosY))
+          showAddressPoint=false;
+      }
+    }
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+    if (showAddressPoint) {
+
+      // Check if the point already exists
+      // If not, add it
+      GraphicRectangle *graphicRectangle=(GraphicRectangle*)addressPointsGraphicObject.getPrimitive(i->getGraphicPrimitiveKey());
+      if (!graphicRectangle) {
+        //DEBUG("%s => icon created",i->getName().c_str());
+        if (!(graphicRectangle=new GraphicRectangle(*core->getDefaultGraphicEngine()->getNavigationPointIcon()))) {
+          FATAL("can not create graphic rectangle object",NULL);
+        }
+        graphicRectangle->setDestroyTexture(false);
+        i->setGraphicPrimitiveKey(addressPointsGraphicObject.addPrimitive((GraphicPrimitive*)graphicRectangle));
+      }
+
+      // Update the position
+      graphicRectangle->setX(visPosX);
+      graphicRectangle->setY(visPosY);
+      //DEBUG("address point %s => visPosX=%d visPosY=%d",i->getName().c_str(),visPosX,visPosY);
+
+    } else {
+
+      // Remove icon if it is still visible
+      if (i->getGraphicPrimitiveKey()!=0) {
+        addressPointsGraphicObject.removePrimitive(i->getGraphicPrimitiveKey(),true);
+        i->setGraphicPrimitiveKey(0);
+        //DEBUG("%s => icon removed",i->getName().c_str());
+      }
+    }
+    core->getDefaultGraphicEngine()->unlockDrawing();
+  }
 
   // Unlock the drawing mutex
   core->getThread()->unlockMutex(updateGraphicsMutex);
@@ -1399,6 +1473,9 @@ void NavigationEngine::addAddressPoint(NavigationPoint point) {
 
   // Remember the new address point value
   point.writeToConfig("Navigation/AddressPoint");
+
+  // Re-create list of address points
+  initAddressPoints();
 }
 
 // Renames an existing address point
@@ -1414,6 +1491,36 @@ void NavigationEngine::renameAddressPoint(std::string oldName, std::string newNa
     configStore->removePath(path + "[@name='" + oldName + "']");
     point.setName(newName);
     point.writeToConfig(path,point.getTimestamp());
+    initAddressPoints();
+  }
+
+}
+
+// Removes an address point
+void NavigationEngine::removeAddressPoint(std::string name) {
+  std::string path = "Navigation/AddressPoint[@name='" + name + "']";
+  core->getConfigStore()->removePath(path);
+  initAddressPoints();
+}
+
+// Reads the address points from disk
+void NavigationEngine::initAddressPoints() {
+  std::string path = "Navigation/AddressPoint";
+  std::list<std::string> names = core->getConfigStore()->getAttributeValues(path,"name",__FILE__,__LINE__);
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+  for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
+    if (i->getGraphicPrimitiveKey()!=0) {
+      addressPointsGraphicObject.removePrimitive(i->getGraphicPrimitiveKey(),true);
+      i->setGraphicPrimitiveKey(0);
+    }
+  }
+  addressPoints.clear();
+  core->getDefaultGraphicEngine()->unlockDrawing();
+  for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
+    NavigationPoint addressPoint;
+    addressPoint.setName(*i);
+    addressPoint.readFromConfig(path);
+    addressPoints.push_back(addressPoint);
   }
 }
 

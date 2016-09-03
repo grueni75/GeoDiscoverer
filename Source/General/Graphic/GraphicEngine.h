@@ -26,6 +26,9 @@ protected:
   // Map object
   GraphicObject *map;
 
+  // Address points object
+  GraphicObject *addressPoints;
+
   // Path animators object
   GraphicObject pathAnimators;
 
@@ -37,6 +40,9 @@ protected:
 
   // Target indicator icon
   GraphicRectangle targetIcon;
+
+  // Navigation point indicator icon
+  GraphicRectangle navigationPointIcon;
 
   // Arrow icon
   GraphicRectangle arrowIcon;
@@ -167,6 +173,11 @@ public:
       this->map = map;
   }
 
+  void setAddressPoints(GraphicObject *addressPoints)
+  {
+      this->addressPoints = addressPoints;
+  }
+
   GraphicObject *lockPathAnimators(const char *file, int line)
   {
       core->getThread()->lockMutex(drawingMutex, file, line);
@@ -277,6 +288,10 @@ public:
 
   GraphicRectangle *getPathStartFlagIcon() {
     return &pathStartFlagIcon;
+  }
+
+  GraphicRectangle *getNavigationPointIcon() {
+    return &navigationPointIcon;
   }
 };
 
