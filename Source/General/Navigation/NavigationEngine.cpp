@@ -703,17 +703,17 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (!calibrator->setPictureCoordinates(targetPos)) {
       showCursor=false;
     } else {
-      DEBUG("targetPos.getX()=%d targetPos.getY()=%d",targetPos.getX(),targetPos.getY());
+      //DEBUG("targetPos.getX()=%d targetPos.getY()=%d",targetPos.getX(),targetPos.getY());
       if (!Integer::add(targetPos.getX(),-mapPos.getX(),mapDiffX))
         showCursor=false;
       if (!Integer::add(targetPos.getY(),-mapPos.getY(),mapDiffY))
         showCursor=false;
-      DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
+      //DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
       if (!Integer::add(displayArea.getRefPos().getX(),mapDiffX,visPosX))
         showCursor=false;
       if (!Integer::add(displayArea.getRefPos().getY(),-mapDiffY,visPosY))
         showCursor=false;
-      DEBUG("visPosX=%d visPosY=%d",visPosX,visPosY);
+      //DEBUG("visPosX=%d visPosY=%d",visPosX,visPosY);
       if (showCursor) {
         targetIconPosValid=true;
         if (abs(mapDiffX)>zoomedScreenWidth/2)
@@ -1498,6 +1498,7 @@ void NavigationEngine::renameAddressPoint(std::string oldName, std::string newNa
 
 // Removes an address point
 void NavigationEngine::removeAddressPoint(std::string name) {
+  DEBUG("name=%s",name.c_str());
   std::string path = "Navigation/AddressPoint[@name='" + name + "']";
   core->getConfigStore()->removePath(path);
   initAddressPoints();

@@ -106,7 +106,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     holder.removeButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        coreObject.executeCoreCommand("removeAddressPoint(" + name + ")");
+        coreObject.executeCoreCommand("removeAddressPoint(\"" + name + "\")");
         remove(name);
       }
     });
