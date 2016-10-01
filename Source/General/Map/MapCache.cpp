@@ -254,96 +254,96 @@ void MapCache::updateMapTileImages() {
         delete mapArchive;
         mapArchive=NULL;
       }
-      if (!currentImage)
-        continue; // Do not continue in case of error
-
     }
 
-    // Remove the oldest tile from the cached list if it has already its max length
-    if (cachedTiles.size()>=size) {
-      core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
-      cachedTiles.sort(MapTile::lastAccessSortPredicate);
-      MapTile *t=cachedTiles.front();
-      cachedTiles.pop_front();
-      uncachedTiles.push_back(t);
-      core->getThread()->unlockMutex(accessMutex);
-      GraphicTextureInfo m=t->getEndTexture();
-      core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      GraphicRectangle *r=t->getRectangle();
-      r->setZ(0);
-      core->getDefaultGraphicEngine()->unlockDrawing();
-      t->setIsCached(false);
-      core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
-      usedTextures.remove(m);
-      unusedTextures.push_back(m);
-      core->getThread()->unlockMutex(accessMutex);
-    }
+    // Skip the next step if image could not be loaded
+    if (currentImage) {
 
-    // Do some sanity checks
-    if ((t->getWidth()!=core->getMapSource()->getMapTileWidth())||(t->getHeight()!=core->getMapSource()->getMapTileHeight())) {
-      FATAL("tiles whose width or height does not match the default are not supported",NULL);
-      break;
-    }
+      // Remove the oldest tile from the cached list if it has already its max length
+      if (cachedTiles.size()>=size) {
+        core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+        cachedTiles.sort(MapTile::lastAccessSortPredicate);
+        MapTile *t=cachedTiles.front();
+        cachedTiles.pop_front();
+        uncachedTiles.push_back(t);
+        core->getThread()->unlockMutex(accessMutex);
+        GraphicTextureInfo m=t->getEndTexture();
+        core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+        GraphicRectangle *r=t->getRectangle();
+        r->setZ(0);
+        core->getDefaultGraphicEngine()->unlockDrawing();
+        t->setIsCached(false);
+        core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+        usedTextures.remove(m);
+        unusedTextures.push_back(m);
+        core->getThread()->unlockMutex(accessMutex);
+      }
 
-    // Do the image conversion depending on the supported texture format
-    if (core->getDefaultScreen()->isTextureFormatRGB888Supported()) {
-      // Copy the image of the map tile from the map image
-      for (Int y=0;y<t->getHeight();y++) {
-        for (Int x=0;x<t->getWidth();x++) {
-          Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
-          Int scratchPos=(y*t->getWidth()+x)*3;
-          tileImageScratch[scratchPos+0]=currentImage[imagePos+0];
-          tileImageScratch[scratchPos+1]=currentImage[imagePos+1];
-          tileImageScratch[scratchPos+2]=currentImage[imagePos+2];
+      // Do some sanity checks
+      if ((t->getWidth()!=core->getMapSource()->getMapTileWidth())||(t->getHeight()!=core->getMapSource()->getMapTileHeight())) {
+        FATAL("tiles whose width or height does not match the default are not supported",NULL);
+        break;
+      }
+
+      // Do the image conversion depending on the supported texture format
+      if (core->getDefaultScreen()->isTextureFormatRGB888Supported()) {
+        // Copy the image of the map tile from the map image
+        for (Int y=0;y<t->getHeight();y++) {
+          for (Int x=0;x<t->getWidth();x++) {
+            Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
+            Int scratchPos=(y*t->getWidth()+x)*3;
+            tileImageScratch[scratchPos+0]=currentImage[imagePos+0];
+            tileImageScratch[scratchPos+1]=currentImage[imagePos+1];
+            tileImageScratch[scratchPos+2]=currentImage[imagePos+2];
+          }
+        }
+      } else {
+        // Copy the image of the map tile from the map image
+        // Do the conversion to RGB565
+        UShort *scratch=(UShort*)tileImageScratch;
+        for (Int y=0;y<t->getHeight();y++) {
+          for (Int x=0;x<t->getWidth();x++) {
+            Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
+            Int scratchPos=(y*t->getWidth()+x);
+            scratch[scratchPos]=((currentImage[imagePos]>>3)<<11 | (currentImage[imagePos+1]>>2)<<5 | (currentImage[imagePos+2]>>3));
+          }
         }
       }
-    } else {
-      // Copy the image of the map tile from the map image
-      // Do the conversion to RGB565
-      UShort *scratch=(UShort*)tileImageScratch;
-      for (Int y=0;y<t->getHeight();y++) {
-        for (Int x=0;x<t->getWidth();x++) {
-          Int imagePos=((t->getMapY()+y)*currentImageWidth+(t->getMapX()+x))*currentImagePixelSize;
-          Int scratchPos=(y*t->getWidth()+x);
-          scratch[scratchPos]=((currentImage[imagePos]>>3)<<11 | (currentImage[imagePos+1]>>2)<<5 | (currentImage[imagePos+2]>>3));
+
+      // Ensure that the tile is drawn first
+      //t->getVisualization()->setZ(1);
+
+      // Update the texture
+      /*std::list<std::string> names = t->getVisName();
+      std::string firstName = names.front();
+      names.pop_front();
+      std::string secondName = names.front();
+      DEBUG("updating texture for tile %s (%s)",firstName.c_str(),secondName.c_str());*/
+      core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+      GraphicTextureInfo m=unusedTextures.front();
+      unusedTextures.pop_front();
+      usedTextures.push_back(m);
+      for(std::list<MapTile*>::iterator i=cachedTiles.begin();i!=cachedTiles.end();i++) {
+        MapTile *t=*i;
+        if (t->getRectangle()->getTexture()==m) {
+          FATAL("cached tile uses textures that is marked as unused",NULL);
         }
       }
+      core->getThread()->unlockMutex(accessMutex);
+      currentTile=t;
+      tileTextureAvailable=true;
+      core->tileTextureAvailable(__FILE__, __LINE__);
+      tileTextureAvailable=false;
+
+      // Remove the tile from the uncached list and add it to the cached
+      //DEBUG("before setIsCached",NULL);
+      t->setIsCached(true,usedTextures.back());
+      //DEBUG("after setIsCached",NULL);
+      core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+      uncachedTiles.remove(t);
+      cachedTiles.push_back(t);
+      core->getThread()->unlockMutex(accessMutex);
     }
-
-    // Ensure that the tile is drawn first
-    //t->getVisualization()->setZ(1);
-
-    // Update the texture
-    /*std::list<std::string> names = t->getVisName();
-    std::string firstName = names.front();
-    names.pop_front();
-    std::string secondName = names.front();
-    DEBUG("updating texture for tile %s (%s)",firstName.c_str(),secondName.c_str());*/
-    core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
-    GraphicTextureInfo m=unusedTextures.front();
-    unusedTextures.pop_front();
-    usedTextures.push_back(m);
-    for(std::list<MapTile*>::iterator i=cachedTiles.begin();i!=cachedTiles.end();i++) {
-      MapTile *t=*i;
-      if (t->getRectangle()->getTexture()==m) {
-        FATAL("cached tile uses textures that is marked as unused",NULL);
-      }
-    }
-    core->getThread()->unlockMutex(accessMutex);
-    currentTile=t;
-    tileTextureAvailable=true;
-    core->tileTextureAvailable(__FILE__, __LINE__);
-    tileTextureAvailable=false;
-
-    // Remove the tile from the uncached list and add it to the cached
-    //DEBUG("before setIsCached",NULL);
-    t->setIsCached(true,usedTextures.back());
-    //DEBUG("after setIsCached",NULL);
-    core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
-    uncachedTiles.remove(t);
-    cachedTiles.push_back(t);
-    core->getThread()->unlockMutex(accessMutex);
-
   }
 
   // Clean up
