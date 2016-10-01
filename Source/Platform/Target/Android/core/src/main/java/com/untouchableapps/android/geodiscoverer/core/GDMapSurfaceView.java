@@ -46,13 +46,13 @@ public class GDMapSurfaceView extends GLSurfaceView {
   @SuppressLint("NewApi")
   public GDMapSurfaceView(Context context, AttributeSet attrs) {
     super(context, attrs);
-    
-    // Set the framebuffer
-    setEGLConfigChooser(8,8,8,8,16,0);
-    
+
     // Use OpenGL ES 2.0
     setEGLContextClientVersion(2);
-    
+
+    // Set the framebuffer
+    setEGLConfigChooser(8,8,8,8,16,0);
+
     // Preserve the context if possible
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
       setPreserveEGLContextOnPause(true);
