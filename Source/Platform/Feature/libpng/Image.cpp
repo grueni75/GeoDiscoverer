@@ -106,8 +106,8 @@ bool Image::queryPNG(UByte *imageData, UInt imageSize, Int &width, Int &height) 
 
   // Read the header
   png_read_info(png_ptr, info_ptr);
-  width = info_ptr->width;
-  height = info_ptr->height;
+  width = png_get_image_width(png_ptr, info_ptr);
+  height = png_get_image_height(png_ptr, info_ptr);
 
 cleanup:
 
@@ -151,8 +151,8 @@ bool Image::queryPNG(std::string filepath, Int &width, Int &height) {
 
   // Read the header
   png_read_info(png_ptr, info_ptr);
-  width = info_ptr->width;
-  height = info_ptr->height;
+  width = png_get_image_width(png_ptr, info_ptr);
+  height = png_get_image_height(png_ptr, info_ptr);
 
 cleanup:
 
@@ -175,12 +175,13 @@ ImagePixel *Image::loadPNG(png_structp png_ptr, png_infop info_ptr, std::string 
   png_read_info(png_ptr, info_ptr);
 
   // Convert palette to RGB
-  if (info_ptr->color_type==PNG_COLOR_TYPE_PALETTE) {
+  png_byte color_type = png_get_color_type(png_ptr, info_ptr);
+  if (color_type==PNG_COLOR_TYPE_PALETTE) {
     png_set_palette_to_rgb(png_ptr);
   }
 
   // Convert gray to RGB
-  if (info_ptr->color_type==PNG_COLOR_TYPE_GRAY) {
+  if (color_type==PNG_COLOR_TYPE_GRAY) {
     png_set_gray_to_rgb(png_ptr);
   }
 
@@ -189,23 +190,25 @@ ImagePixel *Image::loadPNG(png_structp png_ptr, png_infop info_ptr, std::string 
   png_read_update_info(png_ptr, info_ptr);
 
   // Get information about the picture
-  width = info_ptr->width;
-  height = info_ptr->height;
+  width = png_get_image_width(png_ptr, info_ptr);
+  height = png_get_image_height(png_ptr, info_ptr);
 
   // Do some sanity check
-  if (info_ptr->color_type==PNG_COLOR_TYPE_RGB_ALPHA) {
+  if (color_type==PNG_COLOR_TYPE_RGB_ALPHA) {
     pixelSize=getRGBAPixelSize();
-  } else if (info_ptr->color_type==PNG_COLOR_TYPE_RGB) {
+  } else if (color_type==PNG_COLOR_TYPE_RGB) {
     pixelSize=getRGBPixelSize();
   } else {
     DEBUG("the %s does not use the RGBA, RGB or palette color space",imageDescription.c_str());
     return NULL;
   }
-  if (info_ptr->bit_depth!=8) {
+  png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+  if (bit_depth!=8) {
     DEBUG("the %s does not use 8-bit depth per color channel",imageDescription.c_str());
     return NULL;
   }
-  if (info_ptr->rowbytes!=width*pixelSize) {
+  png_size_t rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+  if (rowbytes!=width*pixelSize) {
     FATAL("the row bytes of the %s do not have the expected length",imageDescription.c_str());
     return NULL;
   }
@@ -269,6 +272,7 @@ ImagePixel *Image::loadPNG(std::string filepath, Int &width, Int &height, UInt &
 cleanup:
 
   // Deinit
+  //DEBUG("image=0x%08x",image);
   if (calledByMapUpdateThread&&abortLoad) {
     if (image) free(image);
     image=NULL;
@@ -279,6 +283,7 @@ cleanup:
   }
   if (fp)
     fclose(fp);
+  //DEBUG("image=0x%08x",image);
   return image;
 }
 

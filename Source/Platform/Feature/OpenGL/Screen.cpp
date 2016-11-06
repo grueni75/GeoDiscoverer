@@ -424,7 +424,7 @@ void Screen::setColorModeMultiply() {
 
 // Draws a rectangle
 void Screen::drawRectangle(Int x1, Int y1, Int x2, Int y2, GraphicTextureInfo texture, bool filled) {
-  float box[] = {x1,y1, x2,y1, x1,y2, x1,y2, x2,y1, x2,y2};
+  float box[] = {(float)x1, (float)y1, (float)x2,(float)y1, (float)x1,(float)y2, (float)x1,(float)y2, (float)x2,(float)y1, (float)x2,(float)y2};
   //DEBUG("x1=%d y1=%d x2=%d y2=%d",x1,y1,x2,y2);
   if (texture!=Screen::getTextureNotDefined()) {
     float tex[] = {0.0,1.0, 1.0,1.0, 0.0,0.0, 0.0,0.0, 1.0,1.0, 1.0,0.0};
