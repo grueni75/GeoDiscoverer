@@ -688,7 +688,6 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   //DEBUG("before location pos lock",NULL);
   lockTargetPos(__FILE__, __LINE__);
   showCursor=false;
-  double targetIconPosValid=false;
   updatePosition=false;
   bool updateAnimation=false;
   double screenZoom=visPos.getZoom();
@@ -715,7 +714,6 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
         showCursor=false;
       //DEBUG("visPosX=%d visPosY=%d",visPosX,visPosY);
       if (showCursor) {
-        targetIconPosValid=true;
         if (abs(mapDiffX)>zoomedScreenWidth/2)
           showCursor=false;
         if (abs(mapDiffY)>zoomedScreenHeight/2)
@@ -784,7 +782,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   updateAnimation=false;
   showCursor=false;
   Int translateEndX, translateEndY;
-  if ((targetIconPosValid)&&(!showCursor)) {
+  if ((targetPos.isValid())&&(!showCursor)) {
     if (!targetVisible) {
       showCursor=true;
       if (!arrowVisible)
@@ -955,7 +953,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       // Update the position
       graphicRectangle->setX(visPosX);
       graphicRectangle->setY(visPosY);
-      //DEBUG("address point %s => visPosX=%d visPosY=%d",i->getName().c_str(),visPosX,visPosY);
+      DEBUG("address point %s => visPosX=%d visPosY=%d",i->getName().c_str(),visPosX,visPosY);
 
     } else {
 
