@@ -6,9 +6,9 @@
   <type></type>
   <isMarkup>false</isMarkup>
     <TileServer>
-    <serverURL>http://a.tile.opentopomap.org/${z}/${x}/${y}.png</serverURL>
+    <serverURL>https://a.tile.opentopomap.org/${z}/${x}/${y}.png</serverURL>
     <overlayAlpha>1.0</overlayAlpha>
   </TileServer>
   <minZoomLevel>0</minZoomLevel>
-  <maxZoomLevel>15</maxZoomLevel>
+  <maxZoomLevel>17</maxZoomLevel>
 </GDS>
