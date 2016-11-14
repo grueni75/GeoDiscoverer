@@ -175,7 +175,7 @@ ImagePixel *Image::loadPNG(png_structp png_ptr, png_infop info_ptr, std::string 
   png_read_info(png_ptr, info_ptr);
 
   // Convert palette to RGB
-  png_byte color_type = png_get_color_type(png_ptr, info_ptr);
+  png_byte color_type = png_get_color_type(png_ptr, info_ptr);  
   if (color_type==PNG_COLOR_TYPE_PALETTE) {
     png_set_palette_to_rgb(png_ptr);
   }
@@ -194,6 +194,7 @@ ImagePixel *Image::loadPNG(png_structp png_ptr, png_infop info_ptr, std::string 
   height = png_get_image_height(png_ptr, info_ptr);
 
   // Do some sanity check
+  color_type = png_get_color_type(png_ptr, info_ptr);  
   if (color_type==PNG_COLOR_TYPE_RGB_ALPHA) {
     pixelSize=getRGBAPixelSize();
   } else if (color_type==PNG_COLOR_TYPE_RGB) {
