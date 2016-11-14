@@ -68,6 +68,8 @@ UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bo
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlMemoryCallback);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,curlErrorBuffer);
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+  //curl_easy_setopt(curl, CURLOPT_CAINFO, (core->getHomePath() + "/Misc/ca-certificates.crt").c_str());
   //DEBUG("downloading url %s",url.c_str());
   CURLcode curlResult = curl_easy_perform(curl);
   curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE, &curlResponseCode);

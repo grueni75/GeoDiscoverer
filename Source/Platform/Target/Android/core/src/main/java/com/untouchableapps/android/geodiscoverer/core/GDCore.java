@@ -151,6 +151,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     System.loadLibrary("gdfreetype");
     System.loadLibrary("gdjpeg");
     System.loadLibrary("gdpng");
+    System.loadLibrary("gdopenssl");
     System.loadLibrary("gdcurl");
     System.loadLibrary("gdproj4");
     System.loadLibrary("gdcore");
