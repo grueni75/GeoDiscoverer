@@ -526,7 +526,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Check if the class has changed
   Int size=sizeof(MapSourceCalibratedPictures);
 #ifdef TARGET_LINUX
-  if (size!=360) {
+  if (size!=432) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return false;
   }

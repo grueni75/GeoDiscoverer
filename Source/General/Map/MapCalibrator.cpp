@@ -142,7 +142,7 @@ MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize) {
     case MapCalibratorTypeSphericalNormalMercator:
       expectedSize=sizeof(MapCalibratorSphericalNormalMercator);
 #ifdef TARGET_LINUX
-      if (expectedSize!=56) {
+      if (expectedSize!=64) {
         FATAL("unknown size of object (%d), please adapt class storage",expectedSize);
         return NULL;
       }
