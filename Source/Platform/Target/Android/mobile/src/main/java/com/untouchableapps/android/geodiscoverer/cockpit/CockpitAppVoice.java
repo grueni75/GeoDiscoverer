@@ -252,7 +252,13 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
   public void onInit(int status) {
     if ((status == TextToSpeech.SUCCESS)&&(textToSpeech!=null)) {
       textToSpeechLocale = new Locale(context.getString(R.string.tts_locale));
-      int result = textToSpeech.setLanguage(textToSpeechLocale);
+      int result;
+      try {
+        result = textToSpeech.setLanguage(textToSpeechLocale);
+      }
+      catch (IllegalArgumentException e) {
+        result=TextToSpeech.LANG_NOT_SUPPORTED;
+      }
       if ((result == TextToSpeech.LANG_MISSING_DATA) || (result == TextToSpeech.LANG_NOT_SUPPORTED)) {
         GDApplication.coreObject.executeAppCommand("errorDialog(\"" + context.getString(R.string.tts_cannot_set_language) + "\")");
         return;
