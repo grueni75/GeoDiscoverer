@@ -263,6 +263,9 @@ public:
   // Finds a route with the given name
   NavigationPath *findRoute(std::string name);
 
+  // Returns the name of the address point at the given position
+  std::string getAddressPointName(GraphicPosition visPos);
+
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)
   {
@@ -359,6 +362,7 @@ public:
   const NavigationPath *getActiveRoute() const {
     return activeRoute;
   }
+
 };
 
 }

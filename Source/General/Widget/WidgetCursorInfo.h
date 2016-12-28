@@ -17,23 +17,23 @@ namespace GEODISCOVERER {
 
 class WidgetCursorInfo: public GEODISCOVERER::WidgetPrimitive {
 
-  // Update interval
-  TimestampInMicroseconds updateInterval;
-
-  // Width of the text label
+  // Width of the info label
   Int labelWidth;
-
-  // Horizontal position in the text label
-  Int labelPos;
-
-  // Next timestamp when to update the widget
-  TimestampInMicroseconds nextUpdateTime;
 
   // Current info string
   std::string info;
 
+  // Request to fade in the info
+  bool fadeIn;
+
+  // Request to fade out the info
+  bool fadeOut;
+
   // Graphical representation of the info string
   FontString *infoFontString;
+
+  // Update contents and position of the info font string
+  void updateInfoFontString();
 
 public:
 
@@ -54,14 +54,9 @@ public:
   virtual void onMapChange(bool widgetVisible, MapPosition pos);
 
   // Getters and setters
-  void setUpdateInterval(TimestampInMicroseconds updateInterval) {
-    this->updateInterval = updateInterval;
-  }
-
   void setLabelWidth(Int labelWidth) {
     this->labelWidth = labelWidth;
   }
-
 };
 
 } /* namespace GEODISCOVERER */

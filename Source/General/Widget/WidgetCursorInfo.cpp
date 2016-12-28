@@ -17,83 +17,103 @@ namespace GEODISCOVERER {
 // Constructor
 WidgetCursorInfo::WidgetCursorInfo(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
   widgetType=WidgetTypeCursorInfo;
-  updateInterval=100000;
   labelWidth=0;
-  nextUpdateTime=0;
-  labelPos=0;
   infoFontString=NULL;
   info="";
-  isHidden=true;
+  isHidden=true; // By intention set to hidden to prevent fade out after timeout
 }
 
 // Destructor
 WidgetCursorInfo::~WidgetCursorInfo() {
-  widgetPage->getFontEngine()->lockFont("sansSmall",__FILE__, __LINE__);
+  widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
   if (infoFontString) widgetPage->getFontEngine()->destroyString(infoFontString);
   widgetPage->getFontEngine()->unlockFont();
+}
+
+void WidgetCursorInfo::updateInfoFontString() {
+  if (info=="")
+    return;
+  FontEngine *fontEngine=widgetPage->getFontEngine();
+  fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
+  Int width = labelWidth*(double)widgetPage->getScreen()->getWidth()/100.0;
+  fontEngine->updateString(&infoFontString,info,width);
+  fontEngine->unlockFont();
+  infoFontString->setX(getX() - infoFontString->getIconWidth() / 2);
+  infoFontString->setY(getY());
+  //DEBUG("width=%d infoFontString->getWidth()=%d getX()=%d getY()=%d",width,infoFontString->getIconWidth(),getX(),getY());
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetCursorInfo::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=widgetPage->getFontEngine();
   Int textX, textY;
   std::list<std::string> status;
 
   // Do the inherited stuff
   bool changed=WidgetPrimitive::work(t);
 
-  // Only update the info at given update interval
-  if (t>=nextUpdateTime) {
+  // Shall we fade in the information?
+  if (fadeIn) {
 
-    /*
-    // First check if the navigation engine is doing something
-    status=core->getNavigationEngine()->getStatus(__FILE__, __LINE__);
+    // Update the text
+    //DEBUG("setting text to <%s>", info.c_str());
+    updateInfoFontString();
 
-    // Then check if the map source is doing something
-    if (status.size()==0)
-      status=core->getMapSource()->getStatus(__FILE__, __LINE__);
+    // Is a fade anim already ongoing?
+    if (fadeStartTime!=fadeEndTime) {
 
-    // Only display if a status is given
-    if (status.size()!=0) {
+      // Is it a fade in anim?
+      if (fadeEndColor==this->activeColor) {
 
-      // Compute the graphical representation of the status
-      fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
-      fontEngine->updateString(&firstStatusFontString,status.front(),labelWidth);
-      textY=y+(iconHeight/2)+fontEngine->getLineHeight()/2-fontEngine->getFontHeight()/3;
-      textX=x+(iconWidth/2)-(firstStatusFontString->getIconWidth())/2;
-      firstStatusFontString->setX(textX);
-      firstStatusFontString->setY(textY);
-      fontEngine->updateString(&secondStatusFontString,status.back(),labelWidth);
-      textY=y+(iconHeight/2)-fontEngine->getLineHeight()/2-fontEngine->getFontHeight()/3;
-      textX=x+(iconWidth/2)-(secondStatusFontString->getIconWidth())/2;
-      secondStatusFontString->setX(textX);
-      secondStatusFontString->setY(textY);
-      widgetPage->getFontEngine()->unlockFont();
-
-      // Start fade animation if the status was not displayed before
-      if ((color.getAlpha()==0)&&(fadeStartTime==fadeEndTime)) {
-        if (widgetPage->getWidgetEngine()->getWidgetsActive())
-          setFadeAnimation(t,color,this->activeColor,false,widgetPage->getGraphicEngine()->getFadeDuration());
-        else
-          setFadeAnimation(t,color,this->inactiveColor,false,widgetPage->getGraphicEngine()->getFadeDuration());
+        // No need to start it again
+        //DEBUG("text being faded in", NULL);
+        fadeIn=false;
       }
-      isHidden=false;
-
     } else {
 
-      // Start fade animation if the status was not displayed before
-      if ((color.getAlpha()!=0)&&(fadeStartTime==fadeEndTime)) {
-        setFadeAnimation(t,color,GraphicColor(255,255,255,0),false,widgetPage->getGraphicEngine()->getFadeDuration());
+      // Is the text already faded in?
+      if (color==this->activeColor) {
+
+        // No need to start a fade in anim
+        fadeIn=false;
+        //DEBUG("text already faded in", NULL);
       }
-      isHidden=true;
     }
+    if (fadeIn) {
+      //DEBUG("fading in", NULL);
+      setFadeAnimation(t,color,this->activeColor,false,widgetPage->getGraphicEngine()->getFadeDuration());
+    }
+    fadeIn=false;
+  }
 
-    // Set the next update time
-    nextUpdateTime=t+updateInterval;
+  // Shall we fade out the information?
+  if (fadeOut) {
 
-     */
+    // Is a fade anim already ongoing?
+    if (fadeStartTime!=fadeEndTime) {
 
+      // Is it a fade out anim?
+      if (fadeEndColor==GraphicColor(255,255,255,0)) {
+
+        // No need to start it again
+        fadeOut=false;
+        //DEBUG("text being faded out", NULL);
+      }
+    } else {
+
+      // Is the text already faded out?
+      if (color==GraphicColor(255,255,255,0)) {
+
+        // No need to start a fade out anim
+        fadeOut=false;
+        //DEBUG("text already faded out", NULL);
+      }
+    }
+    if (fadeOut) {
+      setFadeAnimation(t,color,GraphicColor(255,255,255,0),false,widgetPage->getGraphicEngine()->getFadeDuration());
+      //DEBUG("fading out", NULL);
+    }
+    fadeOut=false;
   }
 
   // Return result
@@ -119,15 +139,26 @@ void WidgetCursorInfo::draw(TimestampInMicroseconds t) {
 // Called when the widget has changed its position
 void WidgetCursorInfo::updatePosition(Int x, Int y, Int z) {
   WidgetPrimitive::updatePosition(x,y,z);
-  nextUpdateTime=0;
+  updateInfoFontString();
 }
 
 // Called when the map has changed
 void WidgetCursorInfo::onMapChange(bool widgetVisible, MapPosition pos) {
 
-  // Check if cursor is above address point icon
-
-
+  // Check if an address point was hit
+  GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+  core->getDefaultGraphicEngine()->unlockPos();
+  std::string name = core->getNavigationEngine()->getAddressPointName(visPos);
+  if ((info=="")&&(name!="")) {
+    info=name;
+    fadeIn=true;
+    fadeOut=false;
+  }
+  if ((info!="")&&(name=="")) {
+    info="";
+    fadeOut=true;
+    fadeIn=false;
+  }
 }
 
 } /* namespace GEODISCOVERER */

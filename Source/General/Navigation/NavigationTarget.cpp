@@ -89,7 +89,6 @@ void NavigationTarget::updateTileVisualization(std::list<MapContainer*> *mapCont
   core->getMapSource()->unlockAccess();
 }
 
-
 // Indicates that textures and buffers have been invalidated
 void NavigationTarget::recreateGraphic() {
 

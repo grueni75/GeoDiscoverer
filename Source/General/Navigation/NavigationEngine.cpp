@@ -129,7 +129,7 @@ void NavigationEngine::init() {
     FATAL("can not create track",NULL);
     return;
   }
-  recordedTrack->setNormalColor (c->getGraphicColorValue("Navigation/TrackColor", __FILE__, __LINE__), __FILE__, __LINE__);
+  recordedTrack->setNormalColor(c->getGraphicColorValue("Navigation/TrackColor", __FILE__, __LINE__), __FILE__, __LINE__);
 
   // Prepare the last recorded track if it does exist
   std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename", __FILE__, __LINE__);
@@ -947,13 +947,16 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
           FATAL("can not create graphic rectangle object",NULL);
         }
         graphicRectangle->setDestroyTexture(false);
+        std::list<std::string> l;
+        l.push_back(i->getName());
+        graphicRectangle->setName(l);
         i->setGraphicPrimitiveKey(addressPointsGraphicObject.addPrimitive((GraphicPrimitive*)graphicRectangle));
       }
 
       // Update the position
       graphicRectangle->setX(visPosX);
       graphicRectangle->setY(visPosY);
-      DEBUG("address point %s => visPosX=%d visPosY=%d",i->getName().c_str(),visPosX,visPosY);
+      //DEBUG("address point %s => visPosX=%d visPosY=%d",i->getName().c_str(),visPosX,visPosY);
 
     } else {
 
@@ -1531,6 +1534,30 @@ NavigationPath *NavigationEngine::findRoute(std::string name) {
     }
   }
   return NULL;
+}
+
+// Returns the name of the address point at the given position
+std::string NavigationEngine::getAddressPointName(GraphicPosition visPos) {
+
+  std::string result="";
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+  std::list<GraphicPrimitive*> *visibleAddressPoints = addressPointsGraphicObject.getDrawList();
+  //DEBUG("visPos.getX()=%d visPos.getY()=%d visPos.getZoom()=%f",visPos.getX(),visPos.getY(),visPos.getZoom());
+  for (std::list<GraphicPrimitive*>::iterator i=visibleAddressPoints->begin();i!=visibleAddressPoints->end();i++) {
+    GraphicRectangle *r=(GraphicRectangle*)*i;
+    double diffX = r->getX()-visPos.getX();
+    double diffY = r->getY()-visPos.getY();
+    double distance = sqrt( diffX*diffX + diffY*diffY ) * visPos.getZoom();
+    //DEBUG("distance=%f",distance);
+    //DEBUG("r.getX()=%d r.getY()=%d",r->getX(),r->getY());
+    if (distance < r->getIconHeight()/2) {
+      result=r->getName().front();
+      //DEBUG("result=%s",result.c_str());
+      break;
+    }
+  }
+  core->getDefaultGraphicEngine()->unlockDrawing();
+  return result;
 }
 
 }

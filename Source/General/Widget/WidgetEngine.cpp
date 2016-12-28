@@ -61,6 +61,7 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
     case WidgetTypeStatus: widgetTypeString="status"; break;
     case WidgetTypeNavigation: widgetTypeString="navigation"; break;
     case WidgetTypePathInfo: widgetTypeString="pathInfo"; break;
+    case WidgetTypeCursorInfo: widgetTypeString="cursorInfo"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
   c->setStringValue(path,"type",widgetTypeString,__FILE__, __LINE__);
@@ -616,6 +617,35 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeZ(1);
         config.addPosition(position);
         addWidgetToPage(config);
+        // ---------------------------------------------------------
+        config=WidgetConfig();
+        config.setPageName("Default");
+        config.setName("CursorInfo");
+        config.setType(WidgetTypeCursorInfo);
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(50.0);
+        position.setPortraitY(45.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(50.0);
+        position.setLandscapeY(41.0);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(7.0);
+        position.setPortraitX(50.0);
+        position.setPortraitY(47.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(50.0);
+        position.setLandscapeY(45.0);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+        config.setActiveColor(GraphicColor(255,255,255,255));
+        config.setInactiveColor(GraphicColor(255,255,255,100));
+        config.setParameter("labelWidth","70.0");
+        addWidgetToPage(config);
+        config.setPageName("Path Tools");
+        addWidgetToPage(config);
       }
       // ---------------------------------------------------------
       config=WidgetConfig();
@@ -1054,6 +1084,7 @@ void WidgetEngine::createGraphic() {
       WidgetStatus *status;
       WidgetNavigation *navigation;
       WidgetPathInfo *pathInfo;
+      WidgetCursorInfo *cursorInfo;
       if (widgetType=="button") {
         button=new WidgetButton(page);
         primitive=button;
@@ -1081,6 +1112,10 @@ void WidgetEngine::createGraphic() {
       if (widgetType=="pathInfo") {
         pathInfo=new WidgetPathInfo(page);
         primitive=pathInfo;
+      }
+      if (widgetType=="cursorInfo") {
+        cursorInfo=new WidgetCursorInfo(page);
+        primitive=cursorInfo;
       }
 
       // Set type-independent properties
@@ -1214,12 +1249,16 @@ void WidgetEngine::createGraphic() {
         pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth",__FILE__, __LINE__));
         pathInfo->getLocationIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
       }
+      if (widgetType=="cursorInfo") {
+        cursorInfo->setLabelWidth(c->getDoubleValue(widgetPath,"labelWidth",__FILE__, __LINE__));
+        GraphicColor c=cursorInfo->getColor();
+        c.setAlpha(0);
+        cursorInfo->setColor(c);
+      }
 
       // Add the widget to the page
       page->addWidget(primitive);
-
     }
-
   }
 
   // Set the default page on the graphic engine
