@@ -126,7 +126,7 @@ FontString *FontEngine::createString(std::string contents, Int widthLimit) {
 // Creates or updates a text with the current font type
 void FontEngine::updateString(FontString **fontString, std::string contents, Int widthLimit) {
   if (*fontString) {
-    if ((*fontString)->getContents()!=contents) {
+    if (((*fontString)->getContents()!=contents)||((*fontString)->getWidthLimit()!=widthLimit)) {
       currentFont->destroyString(*fontString);
       *fontString=currentFont->createString(contents,widthLimit);
     }
