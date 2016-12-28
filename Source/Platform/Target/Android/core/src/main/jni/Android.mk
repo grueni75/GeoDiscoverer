@@ -1058,24 +1058,24 @@ include $(BUILD_SHARED_LIBRARY)
 # Build the png library
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdpng
-MY_PNG_PATH := libpng-1.4.4
-LOCAL_CFLAGS :=  -DHAVE_CONFIG_H -Ijni/$(MY_PNG_PATH) -DPNG_CONFIGURE_LIBPNG 
+MY_PNG_PATH := libpng-1.6.26
+LOCAL_CFLAGS :=  -DHAVE_CONFIG_H -Ijni/$(MY_PNG_PATH) 
 LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,png.c)
-LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngset.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngerror.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngget.c)
-LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngrutil.c)
-LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngtrans.c)
-LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngwutil.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngmem.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngpread.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngread.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngrio.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngrtran.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngrutil.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngset.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngtrans.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngwio.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngwrite.c)
-LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngrtran.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngwtran.c)
-LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngmem.c)
-LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngerror.c)
-LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngpread.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngwutil.c)
 include $(BUILD_SHARED_LIBRARY)
 
 # Build the zip library
@@ -1228,7 +1228,7 @@ LOCAL_CFLAGS += -Ijni/$(MY_BREAKPAD_PATH)/src/common/android/include
 LOCAL_CFLAGS += -Ijni/libxml2-2.9.2/include
 LOCAL_CFLAGS += -Ijni/freetype-2.4.2/include 
 LOCAL_CFLAGS += -Ijni/jpeg-8b 
-LOCAL_CFLAGS += -Ijni/libpng-1.4.4 
+LOCAL_CFLAGS += -Ijni/libpng-1.6.26
 LOCAL_CFLAGS += -Ijni/curl-7.51.0/include 
 LOCAL_CFLAGS += -Ijni/libzip-0.10.1/lib 
 LOCAL_CFLAGS += -Ijni/proj-4.8.0/src 

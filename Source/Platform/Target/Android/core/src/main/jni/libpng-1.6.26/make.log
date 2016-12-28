@@ -1,0 +1,168 @@
+rm -f pnglibconf.c pnglibconf.tf[45]
+gawk -f ./scripts/options.awk out=pnglibconf.tf4 version=search\
+    ./pngconf.h ./scripts/pnglibconf.dfa\
+    ./pngusr.dfa  1>&2
+gawk -f ./scripts/options.awk out=pnglibconf.tf5 pnglibconf.tf4 1>&2
+rm pnglibconf.tf4
+mv pnglibconf.tf5 pnglibconf.c
+rm -f pnglibconf.out pnglibconf.tf[12]
+test -d scripts || mkdir scripts || test -d scripts
+gcc -E -DHAVE_CONFIG_H -I. \
+     -DPNGLIB_LIBNAME='PNG16_0' -DPNGLIB_VERSION='1.6.26' -DSYMBOL_PREFIX='' -DPNG_NO_USE_READ_MACROS -DPNG_BUILDING_SYMBOL_TABLE  pnglibconf.c > pnglibconf.tf1
+gawk -f "./scripts/dfn.awk" out="pnglibconf.tf2" pnglibconf.tf1 1>&2
+rm -f pnglibconf.tf1
+mv pnglibconf.tf2 pnglibconf.out
+rm -f pnglibconf.h
+cp pnglibconf.out pnglibconf.h
+make  all-am
+make[1]: Verzeichnis „/home/grueni/Apps/GeoDiscoverer/Source/Platform/Target/Android/core/src/main/jni/libpng-1.6.26“ wird betreten
+:>pngprefix.h
+depbase=`echo png.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT png.lo -MD -MP -MF $depbase.Tpo -c -o png.lo png.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT png.lo -MD -MP -MF .deps/png.Tpo -c png.c  -fPIC -DPIC -o .libs/png.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT png.lo -MD -MP -MF .deps/png.Tpo -c png.c -o png.o >/dev/null 2>&1
+depbase=`echo pngerror.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngerror.lo -MD -MP -MF $depbase.Tpo -c -o pngerror.lo pngerror.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngerror.lo -MD -MP -MF .deps/pngerror.Tpo -c pngerror.c  -fPIC -DPIC -o .libs/pngerror.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngerror.lo -MD -MP -MF .deps/pngerror.Tpo -c pngerror.c -o pngerror.o >/dev/null 2>&1
+depbase=`echo pngget.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngget.lo -MD -MP -MF $depbase.Tpo -c -o pngget.lo pngget.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngget.lo -MD -MP -MF .deps/pngget.Tpo -c pngget.c  -fPIC -DPIC -o .libs/pngget.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngget.lo -MD -MP -MF .deps/pngget.Tpo -c pngget.c -o pngget.o >/dev/null 2>&1
+depbase=`echo pngmem.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngmem.lo -MD -MP -MF $depbase.Tpo -c -o pngmem.lo pngmem.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngmem.lo -MD -MP -MF .deps/pngmem.Tpo -c pngmem.c  -fPIC -DPIC -o .libs/pngmem.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngmem.lo -MD -MP -MF .deps/pngmem.Tpo -c pngmem.c -o pngmem.o >/dev/null 2>&1
+depbase=`echo pngpread.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngpread.lo -MD -MP -MF $depbase.Tpo -c -o pngpread.lo pngpread.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngpread.lo -MD -MP -MF .deps/pngpread.Tpo -c pngpread.c  -fPIC -DPIC -o .libs/pngpread.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngpread.lo -MD -MP -MF .deps/pngpread.Tpo -c pngpread.c -o pngpread.o >/dev/null 2>&1
+depbase=`echo pngread.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngread.lo -MD -MP -MF $depbase.Tpo -c -o pngread.lo pngread.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngread.lo -MD -MP -MF .deps/pngread.Tpo -c pngread.c  -fPIC -DPIC -o .libs/pngread.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngread.lo -MD -MP -MF .deps/pngread.Tpo -c pngread.c -o pngread.o >/dev/null 2>&1
+depbase=`echo pngrio.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngrio.lo -MD -MP -MF $depbase.Tpo -c -o pngrio.lo pngrio.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngrio.lo -MD -MP -MF .deps/pngrio.Tpo -c pngrio.c  -fPIC -DPIC -o .libs/pngrio.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngrio.lo -MD -MP -MF .deps/pngrio.Tpo -c pngrio.c -o pngrio.o >/dev/null 2>&1
+depbase=`echo pngrtran.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngrtran.lo -MD -MP -MF $depbase.Tpo -c -o pngrtran.lo pngrtran.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngrtran.lo -MD -MP -MF .deps/pngrtran.Tpo -c pngrtran.c  -fPIC -DPIC -o .libs/pngrtran.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngrtran.lo -MD -MP -MF .deps/pngrtran.Tpo -c pngrtran.c -o pngrtran.o >/dev/null 2>&1
+depbase=`echo pngrutil.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngrutil.lo -MD -MP -MF $depbase.Tpo -c -o pngrutil.lo pngrutil.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngrutil.lo -MD -MP -MF .deps/pngrutil.Tpo -c pngrutil.c  -fPIC -DPIC -o .libs/pngrutil.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngrutil.lo -MD -MP -MF .deps/pngrutil.Tpo -c pngrutil.c -o pngrutil.o >/dev/null 2>&1
+depbase=`echo pngset.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngset.lo -MD -MP -MF $depbase.Tpo -c -o pngset.lo pngset.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngset.lo -MD -MP -MF .deps/pngset.Tpo -c pngset.c  -fPIC -DPIC -o .libs/pngset.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngset.lo -MD -MP -MF .deps/pngset.Tpo -c pngset.c -o pngset.o >/dev/null 2>&1
+depbase=`echo pngtrans.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngtrans.lo -MD -MP -MF $depbase.Tpo -c -o pngtrans.lo pngtrans.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngtrans.lo -MD -MP -MF .deps/pngtrans.Tpo -c pngtrans.c  -fPIC -DPIC -o .libs/pngtrans.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngtrans.lo -MD -MP -MF .deps/pngtrans.Tpo -c pngtrans.c -o pngtrans.o >/dev/null 2>&1
+depbase=`echo pngwio.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngwio.lo -MD -MP -MF $depbase.Tpo -c -o pngwio.lo pngwio.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngwio.lo -MD -MP -MF .deps/pngwio.Tpo -c pngwio.c  -fPIC -DPIC -o .libs/pngwio.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngwio.lo -MD -MP -MF .deps/pngwio.Tpo -c pngwio.c -o pngwio.o >/dev/null 2>&1
+depbase=`echo pngwrite.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngwrite.lo -MD -MP -MF $depbase.Tpo -c -o pngwrite.lo pngwrite.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngwrite.lo -MD -MP -MF .deps/pngwrite.Tpo -c pngwrite.c  -fPIC -DPIC -o .libs/pngwrite.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngwrite.lo -MD -MP -MF .deps/pngwrite.Tpo -c pngwrite.c -o pngwrite.o >/dev/null 2>&1
+depbase=`echo pngwtran.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngwtran.lo -MD -MP -MF $depbase.Tpo -c -o pngwtran.lo pngwtran.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngwtran.lo -MD -MP -MF .deps/pngwtran.Tpo -c pngwtran.c  -fPIC -DPIC -o .libs/pngwtran.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngwtran.lo -MD -MP -MF .deps/pngwtran.Tpo -c pngwtran.c -o pngwtran.o >/dev/null 2>&1
+depbase=`echo pngwutil.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngwutil.lo -MD -MP -MF $depbase.Tpo -c -o pngwutil.lo pngwutil.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngwutil.lo -MD -MP -MF .deps/pngwutil.Tpo -c pngwutil.c  -fPIC -DPIC -o .libs/pngwutil.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT pngwutil.lo -MD -MP -MF .deps/pngwutil.Tpo -c pngwutil.c -o pngwutil.o >/dev/null 2>&1
+depbase=`echo mips/mips_init.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT mips/mips_init.lo -MD -MP -MF $depbase.Tpo -c -o mips/mips_init.lo mips/mips_init.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT mips/mips_init.lo -MD -MP -MF mips/.deps/mips_init.Tpo -c mips/mips_init.c  -fPIC -DPIC -o mips/.libs/mips_init.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT mips/mips_init.lo -MD -MP -MF mips/.deps/mips_init.Tpo -c mips/mips_init.c -o mips/mips_init.o >/dev/null 2>&1
+depbase=`echo mips/filter_msa_intrinsics.lo | sed 's|[^/]*$|.deps/&|;s|\.lo$||'`;\
+/bin/bash ./libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H -I.     -m32 -MT mips/filter_msa_intrinsics.lo -MD -MP -MF $depbase.Tpo -c -o mips/filter_msa_intrinsics.lo mips/filter_msa_intrinsics.c &&\
+mv -f $depbase.Tpo $depbase.Plo
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT mips/filter_msa_intrinsics.lo -MD -MP -MF mips/.deps/filter_msa_intrinsics.Tpo -c mips/filter_msa_intrinsics.c  -fPIC -DPIC -o mips/.libs/filter_msa_intrinsics.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -m32 -MT mips/filter_msa_intrinsics.lo -MD -MP -MF mips/.deps/filter_msa_intrinsics.Tpo -c mips/filter_msa_intrinsics.c -o mips/filter_msa_intrinsics.o >/dev/null 2>&1
+rm -f scripts/vers.out scripts/vers.tf[12]
+test -d scripts || mkdir scripts || test -d scripts
+gcc -E -DHAVE_CONFIG_H -I. \
+     -DPNGLIB_LIBNAME='PNG16_0' -DPNGLIB_VERSION='1.6.26' -DSYMBOL_PREFIX='' -DPNG_NO_USE_READ_MACROS -DPNG_BUILDING_SYMBOL_TABLE  scripts/vers.c > scripts/vers.tf1
+gawk -f "./scripts/dfn.awk" out="scripts/vers.tf2" scripts/vers.tf1 1>&2
+rm -f scripts/vers.tf1
+mv scripts/vers.tf2 scripts/vers.out
+rm -f libpng.vers
+cp scripts/vers.out libpng.vers
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32 -no-undefined -export-dynamic -version-number 16:26:0  -Wl,--version-script=libpng.vers  -m32 -o libpng16.la -rpath /usr/local/lib png.lo pngerror.lo pngget.lo pngmem.lo pngpread.lo pngread.lo pngrio.lo pngrtran.lo pngrutil.lo pngset.lo pngtrans.lo pngwio.lo pngwrite.lo pngwtran.lo pngwutil.lo  mips/mips_init.lo mips/filter_msa_intrinsics.lo   -lm -lz -lm 
+libtool: link: gcc -shared  -fPIC -DPIC  .libs/png.o .libs/pngerror.o .libs/pngget.o .libs/pngmem.o .libs/pngpread.o .libs/pngread.o .libs/pngrio.o .libs/pngrtran.o .libs/pngrutil.o .libs/pngset.o .libs/pngtrans.o .libs/pngwio.o .libs/pngwrite.o .libs/pngwtran.o .libs/pngwutil.o mips/.libs/mips_init.o mips/.libs/filter_msa_intrinsics.o   -lz -lm  -m32 -Wl,--version-script=libpng.vers -m32   -Wl,-soname -Wl,libpng16.so.16 -o .libs/libpng16.so.16.26.0
+libtool: link: (cd ".libs" && rm -f "libpng16.so.16" && ln -s "libpng16.so.16.26.0" "libpng16.so.16")
+libtool: link: (cd ".libs" && rm -f "libpng16.so" && ln -s "libpng16.so.16.26.0" "libpng16.so")
+libtool: link: ar cru .libs/libpng16.a  png.o pngerror.o pngget.o pngmem.o pngpread.o pngread.o pngrio.o pngrtran.o pngrutil.o pngset.o pngtrans.o pngwio.o pngwrite.o pngwtran.o pngwutil.o mips/mips_init.o mips/filter_msa_intrinsics.o
+libtool: link: ranlib .libs/libpng16.a
+libtool: link: ( cd ".libs" && rm -f "libpng16.la" && ln -s "../libpng16.la" "libpng16.la" )
+depbase=`echo contrib/tools/pngfix.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DHAVE_CONFIG_H -I.     -m32 -MT contrib/tools/pngfix.o -MD -MP -MF $depbase.Tpo -c -o contrib/tools/pngfix.o contrib/tools/pngfix.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32  -m32 -o pngfix contrib/tools/pngfix.o libpng16.la -lm -lz -lm 
+libtool: link: gcc -m32 -m32 -o .libs/pngfix contrib/tools/pngfix.o  ./.libs/libpng16.so -lz -lm
+depbase=`echo contrib/tools/png-fix-itxt.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DHAVE_CONFIG_H -I.     -m32 -MT contrib/tools/png-fix-itxt.o -MD -MP -MF $depbase.Tpo -c -o contrib/tools/png-fix-itxt.o contrib/tools/png-fix-itxt.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32  -m32 -o png-fix-itxt contrib/tools/png-fix-itxt.o  -lm -lz -lm 
+libtool: link: gcc -m32 -m32 -o png-fix-itxt contrib/tools/png-fix-itxt.o  -lz -lm
+cp libpng-config libpng16-config
+cp libpng.pc libpng16.pc
+depbase=`echo pngtest.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DHAVE_CONFIG_H -I.     -m32 -MT pngtest.o -MD -MP -MF $depbase.Tpo -c -o pngtest.o pngtest.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32  -m32 -o pngtest pngtest.o libpng16.la -lm -lz -lm 
+libtool: link: gcc -m32 -m32 -o .libs/pngtest pngtest.o  ./.libs/libpng16.so -lz -lm
+depbase=`echo contrib/libtests/pngunknown.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DHAVE_CONFIG_H -I.     -m32 -MT contrib/libtests/pngunknown.o -MD -MP -MF $depbase.Tpo -c -o contrib/libtests/pngunknown.o contrib/libtests/pngunknown.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32  -m32 -o pngunknown contrib/libtests/pngunknown.o libpng16.la -lm -lz -lm 
+libtool: link: gcc -m32 -m32 -o .libs/pngunknown contrib/libtests/pngunknown.o  ./.libs/libpng16.so -lz -lm
+depbase=`echo contrib/libtests/pngstest.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DHAVE_CONFIG_H -I.     -m32 -MT contrib/libtests/pngstest.o -MD -MP -MF $depbase.Tpo -c -o contrib/libtests/pngstest.o contrib/libtests/pngstest.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32  -m32 -o pngstest contrib/libtests/pngstest.o libpng16.la -lm -lz -lm 
+libtool: link: gcc -m32 -m32 -o .libs/pngstest contrib/libtests/pngstest.o  ./.libs/libpng16.so -lz -lm
+depbase=`echo contrib/libtests/pngvalid.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DHAVE_CONFIG_H -I.     -m32 -MT contrib/libtests/pngvalid.o -MD -MP -MF $depbase.Tpo -c -o contrib/libtests/pngvalid.o contrib/libtests/pngvalid.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32  -m32 -o pngvalid contrib/libtests/pngvalid.o libpng16.la -lm -lz -lm 
+libtool: link: gcc -m32 -m32 -o .libs/pngvalid contrib/libtests/pngvalid.o  ./.libs/libpng16.so -lz -lm
+depbase=`echo contrib/libtests/pngimage.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DHAVE_CONFIG_H -I.     -m32 -MT contrib/libtests/pngimage.o -MD -MP -MF $depbase.Tpo -c -o contrib/libtests/pngimage.o contrib/libtests/pngimage.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32  -m32 -o pngimage contrib/libtests/pngimage.o libpng16.la -lm -lz -lm 
+libtool: link: gcc -m32 -m32 -o .libs/pngimage contrib/libtests/pngimage.o  ./.libs/libpng16.so -lz -lm
+depbase=`echo contrib/tools/pngcp.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DHAVE_CONFIG_H -I.     -m32 -MT contrib/tools/pngcp.o -MD -MP -MF $depbase.Tpo -c -o contrib/tools/pngcp.o contrib/tools/pngcp.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32  -m32 -o pngcp contrib/tools/pngcp.o libpng16.la -lm -lz -lm 
+libtool: link: gcc -m32 -m32 -o .libs/pngcp contrib/tools/pngcp.o  ./.libs/libpng16.so -lz -lm
+depbase=`echo contrib/libtests/timepng.o | sed 's|[^/]*$|.deps/&|;s|\.o$||'`;\
+gcc -DHAVE_CONFIG_H -I.     -m32 -MT contrib/libtests/timepng.o -MD -MP -MF $depbase.Tpo -c -o contrib/libtests/timepng.o contrib/libtests/timepng.c &&\
+mv -f $depbase.Tpo $depbase.Po
+/bin/bash ./libtool  --tag=CC   --mode=link gcc  -m32  -m32 -o timepng contrib/libtests/timepng.o libpng16.la -lm -lz -lm 
+libtool: link: gcc -m32 -m32 -o .libs/timepng contrib/libtests/timepng.o  ./.libs/libpng16.so -lz -lm
+make[1]: Verzeichnis „/home/grueni/Apps/GeoDiscoverer/Source/Platform/Target/Android/core/src/main/jni/libpng-1.6.26“ wird verlassen

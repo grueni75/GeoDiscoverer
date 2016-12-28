@@ -11,19 +11,245 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d4cd3b62-3857-4f07-a979-5f709e38d750" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../../.cproject" afterPath="$PROJECT_DIR$/../../../../.cproject" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Navigation/NavigationEngine.cpp" afterPath="$PROJECT_DIR$/../../../General/Navigation/NavigationEngine.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Navigation/NavigationEngine.h" afterPath="$PROJECT_DIR$/../../../General/Navigation/NavigationEngine.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Navigation/NavigationTarget.cpp" afterPath="$PROJECT_DIR$/../../../General/Navigation/NavigationTarget.cpp" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-png.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngerror.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngget.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngmem.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngpread.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngread.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngrio.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngrtran.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngrutil.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngset.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngtrans.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngwio.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngwrite.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngwtran.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/libpng14_la-pngwutil.Plo" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/.deps/pngtest.Po" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/ANNOUNCE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/CHANGES" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/CMakeLists.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/INSTALL" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/LICENSE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/Makefile" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/Makefile.am" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/Makefile.in" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/README" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/TODO" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/aclocal.m4" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/autogen.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/build.log" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/config.guess" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/config.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/config.h.in" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/config.log" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/config.status" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/config.sub" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/configure" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/configure.ac" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/COPYING" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/LICENSE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/Makefile.mingw32" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/Makefile.sgi" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/Makefile.unx" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/Makefile.w32" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/README" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/makevms.com" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/readpng.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/readpng.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/readpng2.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/readpng2.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/readppm.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/rpng-win.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/rpng-x.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/rpng2-win.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/rpng2-x.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/toucan.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/wpng.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/writepng.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/gregbook/writepng.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/decoder/README" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/decoder/gather.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/decoder/makefile" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/decoder/pngusr.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/encoder/README" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/encoder/gather.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/encoder/makefile" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/encoder/pngusr.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/preader/README" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/preader/gather.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/preader/makefile" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminim/preader/pngusr.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/README" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/makefile.std" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/makefile.tc3" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/makevms.com" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/png2pnm.bat" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/png2pnm.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/png2pnm.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/pngminus.bat" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/pngminus.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/pnm2png.bat" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/pnm2png.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngminus/pnm2png.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/README" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn0g01.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn0g02.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn0g04.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn0g08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn0g16.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn2c08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn2c16.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn3p01.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn3p02.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn3p04.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn3p08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn4a08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn4a16.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn6a08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/basn6a16.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftbbn1g04.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftbbn2c16.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftbbn3p08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftbgn2c16.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftbgn3p08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftbrn2c08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftbwn1g16.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftbwn3p08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftbyn3p08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftp0n1g08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftp0n2c08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftp0n3p08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/pngsuite/ftp1n3p08.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/PngFile.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/PngFile.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/README.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/VisualPng.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/VisualPng.dsp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/VisualPng.dsw" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/VisualPng.ico" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/VisualPng.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/VisualPng.rc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/cexcept.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/contrib/visupng/resource.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/depcomp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/example.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/install-sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/libpng-1.4.4.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/libpng-config" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/libpng-config.in" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/libpng.3" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/libpng.pc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/libpng.pc.in" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/libpngpf.3" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/libtool" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/ltmain.sh" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/missing" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/png.5" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/png.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/png.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngbar.jpg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngbar.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngconf.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngerror.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngget.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngmem.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngnow.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngpread.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngpriv.h" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngread.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngrio.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngrtran.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngrutil.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngset.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngtest.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngtest.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngtrans.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngwio.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngwrite.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngwtran.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/pngwutil.c" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc6/README.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc6/libpng.dsp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc6/libpng.dsw" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc6/pngtest.dsp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc71/PRJ0041.mak" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc71/README.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc71/README_zlib.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc71/libpng.sln" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc71/libpng.vcproj" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc71/pngtest.vcproj" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/visualc71/zlib.vcproj" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/vstudio/libpng/libpng.vcxproj" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/vstudio/pngtest/pngtest.vcxproj" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/vstudio/readme.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/vstudio/vstudio.sln" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/vstudio/zlib.props" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/vstudio/zlib/zlib.vcxproj" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/xcode/README.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/projects/xcode/libpng.xcodeproj/project.pbxproj" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/README.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/SCOPTIONS.ppc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/descrip.mms" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/libpng-config-body.in" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/libpng-config-head.in" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/libpng.pc.in" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.32sunu" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.64sunu" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.acorn" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.aix" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.amiga" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.atari" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.bc32" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.beos" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.bor" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.cegcc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.cygwin" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.darwin" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.dec" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.dj2" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.elf" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.freebsd" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.gcc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.hp64" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.hpgcc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.hpux" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.ibmc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.intel" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.knr" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.linux" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.mingw" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.mips" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.msc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.ne12bsd" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.netbsd" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.openbsd" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.os2" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.sco" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.sggcc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.sgi" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.so9" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.solaris" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.solaris-x86" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.std" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.sunos" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.tc3" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.vcwin32" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makefile.watcom" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/makevms.com" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/png32ce.def" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/pngos2.def" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/pngwin.def" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/pngwin.rc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/scripts/smakefile.ppc" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/stamp-h1" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/core/src/main/jni/libpng-1.4.4/test-pngtest.sh" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetCursorInfo.cpp" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetCursorInfo.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetCursorInfo.h" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetCursorInfo.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetEngine.cpp" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetEngine.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../General/Widget/WidgetNavigation.cpp" afterPath="$PROJECT_DIR$/../../../General/Widget/WidgetNavigation.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Feature/libfreetype2/FontEngine.cpp" afterPath="$PROJECT_DIR$/../../Feature/libfreetype2/FontEngine.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/build_native" afterPath="$PROJECT_DIR$/core/src/main/build_native" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/cockpit/CockpitAppVoice.java" afterPath="$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/cockpit/CockpitAppVoice.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference/colorPickerPreference.iml" afterPath="$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference/colorPickerPreference.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/core.iml" afterPath="$PROJECT_DIR$/core/core.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/jni/Android.mk" afterPath="$PROJECT_DIR$/core/src/main/jni/Android.mk" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mobile/mobile.iml" afterPath="$PROJECT_DIR$/mobile/mobile.iml" />
     </list>
     <ignored path="Android.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -69,14 +295,14 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file leaf-file-name="MDButton.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="MDButton.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/../../../../ThirdParty/material-dialogs/library/src/main/java/com/afollestad/materialdialogs/internal/MDButton.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="377">
-              <caret line="13" column="33" selection-start-line="13" selection-start-column="33" selection-end-line="13" selection-end-column="33" />
+            <state relative-caret-position="406">
+              <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
               <folding>
-                <element signature="e#2698#2699#0" expanded="false" />
-                <element signature="e#2739#2740#0" expanded="false" />
+                <element signature="imports" expanded="true" />
+                <element signature="e#1481#1574#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -107,10 +333,7 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="348">
               <caret line="60" column="0" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#23893#0" expanded="false" />
-                <element signature="imports" expanded="false" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -125,11 +348,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="build_native" pinned="false" current-in-tab="true">
+      <file leaf-file-name="build_native" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/src/main/build_native">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="290">
-              <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+            <state relative-caret-position="261">
+              <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -140,10 +363,7 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="7047">
               <caret line="262" column="131" selection-start-line="262" selection-start-column="8" selection-end-line="262" selection-end-column="131" />
-              <folding>
-                <element signature="e#0#10423#0" expanded="false" />
-                <element signature="imports" expanded="false" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -5556,8 +5776,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="PackagesPane" />
+      <pane id="Scratches" />
       <pane id="AndroidView">
         <subPane />
       </pane>
@@ -5642,7 +5862,7 @@
     <property name="android.sdk.path" value="$PROJECT_DIR$/../../../../../android/android-sdk" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.appearance" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
-    <property name="device.picker.selection" value="3204e31649e271a1" />
+    <property name="device.picker.selection" value="TA045089FR" />
     <property name="android.project.structure.last.selected" value="colorPickerPreference" />
     <property name="android.project.structure.proportion" value="0.15" />
   </component>
@@ -6116,20 +6336,20 @@
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Nl-Palette" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32902136" sideWeight="0.44759357" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32902136" sideWeight="0.44652405" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3256468" sideWeight="0.47406417" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32508436" sideWeight="0.4687166" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295838" sideWeight="0.49893048" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3256468" sideWeight="0.5259358" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32508436" sideWeight="0.53128344" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24919786" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32996276" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -6470,37 +6690,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="116">
-          <caret line="4" column="23" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../../../../ThirdParty/material-dialogs/library/src/main/java/com/afollestad/materialdialogs/internal/MDButton.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="377">
-          <caret line="13" column="33" selection-start-line="13" selection-start-column="33" selection-end-line="13" selection-end-column="33" />
-          <folding>
-            <element signature="e#2698#2699#0" expanded="false" />
-            <element signature="e#2739#2740#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../../../ThirdParty/material-dialogs/library/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="609">
           <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wear/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="725">
-          <caret line="25" column="45" selection-start-line="25" selection-start-column="45" selection-end-line="25" selection-end-column="45" />
           <folding />
         </state>
       </provider>
@@ -6517,10 +6710,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="348">
           <caret line="60" column="0" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#23893#0" expanded="false" />
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -6532,22 +6722,46 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/core/src/main/build_native">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="261">
+          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/cockpit/CockpitAppVoice.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="7047">
           <caret line="262" column="131" selection-start-line="262" selection-start-column="8" selection-end-line="262" selection-end-column="131" />
-          <folding>
-            <element signature="e#0#10423#0" expanded="false" />
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/src/main/build_native">
+    <entry file="file://$PROJECT_DIR$/wear/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="290">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+        <state relative-caret-position="725">
+          <caret line="25" column="45" selection-start-line="25" selection-start-column="45" selection-end-line="25" selection-end-column="45" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="116">
+          <caret line="4" column="23" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../ThirdParty/material-dialogs/library/src/main/java/com/afollestad/materialdialogs/internal/MDButton.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="406">
+          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1481#1574#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
