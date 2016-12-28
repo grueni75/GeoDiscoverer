@@ -140,7 +140,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
   // Update the clock
   TimestampInSeconds t2=core->getClock()->getSecondsSinceEpoch();
-  if ((textColumnCount==2)&&(t2/60!=lastClockUpdate/60)) {
+  if ((textColumnCount==2)&&((t2/60!=lastClockUpdate/60)||(firstRun))) {
     fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
     fontEngine->updateString(&clockFontString,core->getClock()->getFormattedDate(t2,"%H:%M",true));
     fontEngine->unlockFont();
@@ -152,7 +152,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   // Only update the info if it has changed
   NavigationInfo *navigationInfo=navigationEngine->lockNavigationInfo(__FILE__, __LINE__);
   if ((*navigationInfo!=prevNavigationInfo)||(firstRun)) {
-    firstRun=false;
 
     // Is a turn coming?
     bool activateWidget = false;
@@ -463,6 +462,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   } else {
     navigationEngine->unlockNavigationInfo();
   }
+  firstRun=false;
 
   // Let the directionIcon work
   changed |= compassObject.work(t);
@@ -600,6 +600,7 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
 void WidgetNavigation::updatePosition(Int x, Int y, Int z) {
   WidgetPrimitive::updatePosition(x,y,z);
   nextUpdateTime=0;
+  firstRun=true;
 }
 
 // Executed if the widget has been untouched
