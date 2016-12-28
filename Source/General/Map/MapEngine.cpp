@@ -821,7 +821,9 @@ void MapEngine::updateMap() {
     // Search all maps if no tile can be found for given zoom level
     core->getMapSource()->lockAccess(__FILE__,__LINE__);
     //DEBUG("lng=%f lat=%f",newMapPos.getLng(),newMapPos.getLat());
+    //DEBUG("zoomLevel=%d",zoomLevel);
     MapTile *bestMapTile=core->getMapSource()->findMapTileByGeographicCoordinate(newMapPos,zoomLevel,zoomLevelLock);
+    //DEBUG("bestMapTile->getZoomLevelMap()=%d",bestMapTile->getParentMapContainer()->getZoomLevelMap());
     //PROFILE_ADD("best map tile search");
     //DEBUG("bestMapTile=%08x",bestMapTile);
     if (bestMapTile) {
@@ -952,6 +954,7 @@ void MapEngine::updateMap() {
         // Set the new display area
         MapArea oldDisplayArea=displayArea;
         lockDisplayArea(__FILE__, __LINE__);
+        //DEBUG("newDisplayArea.getZoomLevel()=%d",newDisplayArea.getZoomLevel());
         this->displayArea=newDisplayArea;
         unlockDisplayArea();
 
@@ -1115,6 +1118,28 @@ void MapEngine::setMapPos(MapPosition mapPos)
   } else {
     DEBUG("requested map pos has been ignored because map contains no tile",NULL);
   }
+}
+
+// Sets the zoom level
+void MapEngine::setZoomLevel(Int zoomLevel) {
+  DEBUG("setZoomLevel(%d) called",zoomLevel);
+  setZoomLevelLock(true,false);
+  lockDisplayArea(__FILE__,__LINE__);
+  displayArea.setZoomLevel(zoomLevel);
+  unlockDisplayArea();
+  lockMapPos(__FILE__,__LINE__);
+  MapPosition mapPos=this->mapPos;
+  unlockMapPos();
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
+  MapTile *bestMapTile=core->getMapSource()->findMapTileByGeographicCoordinate(mapPos,zoomLevel,zoomLevelLock);
+  core->getMapSource()->unlockAccess();
+  if (bestMapTile) {
+    lockMapPos(__FILE__,__LINE__);
+    this->mapPos.setLngScale(bestMapTile->getLngScale());
+    this->mapPos.setLatScale(bestMapTile->getLatScale());
+    unlockMapPos();
+  }
+  setForceMapRecreation();
 }
 
 }
