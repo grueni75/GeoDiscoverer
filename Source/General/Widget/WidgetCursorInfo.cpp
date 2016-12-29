@@ -25,7 +25,7 @@ WidgetCursorInfo::WidgetCursorInfo(WidgetPage *widgetPage) : WidgetPrimitive(wid
 
 // Destructor
 WidgetCursorInfo::~WidgetCursorInfo() {
-  widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
+  widgetPage->getFontEngine()->lockFont("sansBoldLarge",__FILE__, __LINE__);
   if (infoFontString) widgetPage->getFontEngine()->destroyString(infoFontString);
   widgetPage->getFontEngine()->unlockFont();
 }
@@ -34,7 +34,7 @@ void WidgetCursorInfo::updateInfoFontString() {
   if (info=="")
     return;
   FontEngine *fontEngine=widgetPage->getFontEngine();
-  fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
+  fontEngine->lockFont("sansBoldLarge",__FILE__, __LINE__);
   Int width = labelWidth*(double)widgetPage->getScreen()->getWidth()/100.0;
   fontEngine->updateString(&infoFontString,info,width);
   fontEngine->unlockFont();
