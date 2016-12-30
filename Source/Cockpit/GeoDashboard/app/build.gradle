@@ -13,7 +13,7 @@ android {
         applicationId "com.untouchableapps.android.geodashboard"
         minSdkVersion 17
         targetSdkVersion 17
-        versionCode 2
+        versionCode 4
         versionName computeVersionName()
     }
 
@@ -21,6 +21,16 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            if (variant.name == "release") {
+                output.outputFile = new File(
+                        output.outputFile.parent,
+                        "GeoDashboard${variant.versionName}.apk")
+            }
         }
     }
 }

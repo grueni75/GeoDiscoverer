@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 
+def computeVersionName() {
+    def date = new Date()
+    return date.format('yyyyMMdd')
+}
 
 android {
     compileSdkVersion 23
@@ -8,14 +12,25 @@ android {
     defaultConfig {
         applicationId "com.untouchableapps.android.geodiscoverer"
         minSdkVersion 22
-        targetSdkVersion 22
-        versionCode 21
+        targetSdkVersion 23
+        versionCode 22
         versionName "1.0"
+        versionName computeVersionName()
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            if (variant.name == "release") {
+                output.outputFile = new File(
+                        output.outputFile.parent,
+                        "GeoDiscovererWear${variant.versionName}.apk")
+            }
         }
     }
 }
