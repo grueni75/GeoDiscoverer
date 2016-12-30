@@ -517,7 +517,7 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 </div></div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201611141827" changecount="141">
+<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201612300942" changecount="144">
 <pre>! Copyright (C) Matthias Grünewald - All Rights Reserved
 Geo Discoverer has been developed by Matthias Grünewald. He owns the copyright for the application, this help and all the media used. The app uses also many libraries and media from others. See [[Acknowledgements|About##Acknowledgements]]. 
 ! License
@@ -604,7 +604,9 @@ Matrix computations for ~OpenGL graphics are performed via the ~OpenGL Mathemati
 !! ~JmDNS
 Network service discovery is handled via the ~JmDNS library. The project was originally developed by Arthur van Hoff under the GNU Lesser General Public License as ~jRendevous.  It was moved to Sourceforge by Rick Blair and renamed to ~JmDNS with the Arthur's kind permission. Currently it has  been re-released under the Apache License, Version 2.0. See License-Apache-V20 for more information.
 !! Material Dialogs Library
-All dialogs are created by the material dialog library. The library has been developed by Aidan Michael Follestad. It is licensed under the MIT license. See License-MaterialDialog for more information.</pre>
+All dialogs are created by the material dialog library. The library has been developed by Aidan Michael Follestad. It is licensed under the MIT license. See License-MaterialDialog for more information.
+!! ~SLF4J Android
+The ~JmDNS library use the standardized java &quot;~SLF4J&quot; logging mechanism. An implementation for Android is provided by the ~SLF4J Android library. It is licensed under the MIT license. See License-SLF4J-Android for more information.</pre>
 </div>
 <div title="AppPreferences" creator="Matthias" modifier="Matthias" created="201412221203" changecount="1">
 <pre>The preferences of Geo Discoverer can be opened via the [[menu entry &quot;Preferences&quot;|MapView##Menu]]. Every entry has an explanation. So the preferences should be self explaining. By default, only the most important preferences are shown. An expert mode can be enabled that shows all available preferences. Please note that not all preferences are remembered if the app version is upgraded. If you think that your favorite preferences shall survive an app upgrade, please [[contact the developer|ContactDeveloper]]. </pre>
@@ -1406,9 +1408,11 @@ RevisionHistory
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201503130546" changecount="32">
+<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201612301118" changecount="38">
 <pre>! Introduction
 Geo Discoverer is an navigation app for hikers and bikers. It can be downloaded in the [[Google Play Store|https://play.google.com/store/apps/details?id=com.untouchableapps.android.geodiscoverer]]. After its first start, it displays an online map. The map consists of many small tiles (pictures) that are downloaded from the internet. It will take a few seconds before the contents of the map is displayed. Once the tiles are downloaded, they are stored on the device for fast retrieval. If you want to understand the map view and its interacting possibilities, the MapView tiddler explains all the details.
+! Privacy Policy
+This app does not read out any privacy related data. But it has to use the permission android.permission.~GET_ACCOUNTS. This permission is required for the usage of the Google Play Services. The Google Play Services provides functionality to communicate with Android Wear devices. This functionality is used to implement a Watchface that display the navigation widget. The app itself does not read out any info about your accounts. Please check the privacy policy of the [[Google Play Services|https://play.google.com/intl/en_us/about/play-terms.html]] to find out how this service uses your account data.
 ! Acknowledgements
 Geo Discoverer is using many contributios from others. See the [[About]] tiddler for a full list of all the related projects. Without those contributions, Geo Discover would not have been possible. So a big @@''&quot;Thank You!&quot;''@@ to the people behind those projects!
 ! News
@@ -3285,6 +3289,16 @@ I did the work.  Essentially all work was done by Gerald Evenden.
  DEALINGS IN THE SOFTWARE.
 </pre>
 </div>
+<div title="License-SLF4J-Android" creator="Matthias" modifier="Matthias" created="201612300943" changecount="1">
+<pre>Copyright (c) 2004-2013 QOS.ch 
+All rights reserved. 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. 
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</pre>
+</div>
 <div title="License-TiddlyTools" creator="Matthias" modifier="Matthias" created="201412201556" modified="201412201605" changecount="8">
 <pre>''Copyrights:''
 &lt;&lt;&lt;
@@ -3593,7 +3607,7 @@ There is also a menu available if you press the hardware menu button or if you s
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="NavigationTasks" creator="Matthias" modifier="Matthias" created="201412131407" modified="201505241030" changecount="37">
+<div title="NavigationTasks" creator="Matthias" modifier="Matthias" created="201412131407" modified="201612301052" changecount="40">
 <pre>You can use Geo Discoverer to navigate to a given target position or along a given route.
 !Navigating to a target
 You have several options for setting a target:
@@ -3624,8 +3638,9 @@ There is also a matching watch firmware available in case your current watch fir
 Geo Discoverer supports a second display for showing navigation infos (e.g., navigation, meters and path info widgets). For example, a device with an epaper display such as the Icarus ~E653BK, Boyue T61 or Boyue T62 can be used for this purpose. In comparison to LED displays, it can be easily read in direct sunlight. And the screen can be always on with long battery life time. So it makes navigation during tours much more simple because less time needs to be spend on interacting with the navigation device. 
 &lt;html&gt;&lt;img src=&quot;NavigationTasks/GeoDashboard.jpg&quot; style=&quot;width: 20em; max-width: 100%;]&quot;/&gt;&lt;/html&gt;
 To use this feature, the app [[Geo Dashboard|https://play.google.com/store/apps/details?id=com.untouchableapps.android.geodashboard]] has to be installed on the device that shall act as the second display. Afterwards, the two devices must be connected to the same network. This can either be done through a router or by using the WLAN hotspot feature on the device that runs Geo Discoverer. The dashboard feature is activated in the AppPreferences (Cockpit/Dashboard). It supports two methods for discovering devices that run the Geo Dashboard app: zero configuration network discover (aka Apple Bonjour) and address cache lookup. The first one can be used if both devices are connected to the same WLAN router as a client. The second one is more suitable if the device running Geo Discoverer acts as a WLAN hotspot. If Geo Dashboard displays the widgets too small or too big, try adjusting the &quot;Dots Per Inch&quot; preferences.
-
-
+!! Android Wear
+&lt;html&gt;&lt;img src=&quot;NavigationTasks/AndroidWearWatchface.jpg&quot; style=&quot;width: 15em; max-width: 100%;]&quot;/&gt;&lt;/html&gt;
+Geo Discoverer also includes a watchface for Android Wear based watches. It shows the navigation widget to allow easy navigation without pulling the phone out of the pocket. By touching the watchface, the displayed infos can be changed. The watchface is automatically installed on the watch once the mobile app has been installed on the phone. 
 </pre>
 </div>
 <div title="Notice-ACRA" creator="Matthias" modifier="Matthias" created="201412211426" changecount="1">
@@ -5006,8 +5021,9 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201611141836" changecount="43">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201612300944" changecount="44">
 <pre>|!Date |!Changes |
+|2016-12-30|Updated [[About]] with copyright notice of ~SLF4J-Android.|
 |2016-11-14|Updated [[About]] with copyright notice of ~OpenSSL.|
 |2016-06-26|Updated [[MapView]] to highlight that the infos shown in the navigation widget can be changed.|
 |2016-06-13|Updated [[MapView]] with new history of searched addresses feature.|
