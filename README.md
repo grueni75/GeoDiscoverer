@@ -45,7 +45,7 @@ See the [online help](http://geo-discoverer.appspot.com) for more information.
 
 ## Credits
 
-See the [About tiddler](http://geo-discoverer.appspot.com/#About).  
+See the [About tiddler](http://geo-discoverer.appspot.com/#About) in the online help.  
 
 ## License
 
