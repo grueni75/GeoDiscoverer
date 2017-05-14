@@ -23,6 +23,9 @@
       android:layout_height="0dp"
       android:layout_weight="0.6"
       android:layout_width="match_parent"
+      android:layout_marginTop="30dp"
+      android:layout_marginLeft="40dp"
+      android:layout_marginRight="40dp"
       android:textColor="@color/white"
       android:textSize="20sp"/>
 
@@ -64,8 +67,11 @@
       android:layout_height="0dp"
       android:layout_weight="0.75"
       android:layout_width="match_parent"
+      android:layout_marginTop="30dp"
+      android:layout_marginLeft="40dp"
+      android:layout_marginRight="40dp"
       android:textColor="@color/white"
-      android:textSize="20sp"/>
+      android:textSize="14sp"/>
 
     <ImageButton
       android:id="@+id/message_dialog_button"

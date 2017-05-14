@@ -244,19 +244,19 @@ public class WatchFace extends Gles2WatchFaceService {
           boolean commandExecuted=false;
           if (commandFunction.equals("fatalDialog")) {
             watchFace.fatalDialog(commandArgs.get(0));
-            //commandExecuted=true;
+            commandExecuted=true;
           }
           if (commandFunction.equals("errorDialog")) {
             watchFace.errorDialog(commandArgs.get(0));
-            //commandExecuted=true;
+            commandExecuted=true;
           }
           if (commandFunction.equals("warningDialog")) {
             watchFace.warningDialog(commandArgs.get(0));
-            //commandExecuted=true;
+            commandExecuted=true;
           }
           if (commandFunction.equals("infoDialog")) {
             watchFace.infoDialog(commandArgs.get(0));
-            //commandExecuted=true;
+            commandExecuted=true;
           }
           if (commandFunction.equals("createProgressDialog")) {
 
@@ -266,11 +266,11 @@ public class WatchFace extends Gles2WatchFaceService {
               watchFace.progressDialogText = (TextView) watchFace.dialogLayout.findViewById(R.id.progress_dialog_text);
               watchFace.progressDialogBar = (ProgressBar) watchFace.dialogLayout.findViewById(R.id.progress_dialog_bar);
               watchFace.progressDialogLayout = (LinearLayout) watchFace.dialogLayout.findViewById(R.id.progress_dialog);
-              WindowManager.LayoutParams params =  new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, 0, PixelFormat.TRANSLUCENT);
-              watchFace.windowManager.addView(watchFace.dialogLayout,params);
+              WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, 0, PixelFormat.TRANSLUCENT);
+              watchFace.windowManager.addView(watchFace.dialogLayout, params);
               watchFace.progressDialogText.setText(commandArgs.get(0));
-              int max=Integer.parseInt(commandArgs.get(1));
-              watchFace.progressDialogBar.setIndeterminate(max==0?true:false);
+              int max = Integer.parseInt(commandArgs.get(1));
+              watchFace.progressDialogBar.setIndeterminate(max == 0 ? true : false);
               watchFace.progressDialogBar.setMax(max);
               watchFace.progressDialogBar.setProgress(0);
               watchFace.progressDialogLayout.setVisibility(watchFace.progressDialogLayout.VISIBLE);
@@ -281,15 +281,19 @@ public class WatchFace extends Gles2WatchFaceService {
             commandExecuted=true;
           }
           if (commandFunction.equals("updateProgressDialog")) {
-            watchFace.progressDialogText.setText(commandArgs.get(0));
-            int progress=Integer.parseInt(commandArgs.get(1));
-            watchFace.progressDialogBar.setProgress(progress);
-            watchFace.dialogLayout.requestLayout();
+            if (watchFace.dialogLayout!=null) {
+              watchFace.progressDialogText.setText(commandArgs.get(0));
+              int progress = Integer.parseInt(commandArgs.get(1));
+              watchFace.progressDialogBar.setProgress(progress);
+              watchFace.dialogLayout.requestLayout();
+            }
             commandExecuted=true;
           }
           if (commandFunction.equals("closeProgressDialog")) {
-            watchFace.windowManager.removeView(watchFace.dialogLayout);
-            watchFace.dialogLayout=null;
+            if (watchFace.dialogLayout!=null) {
+              watchFace.windowManager.removeView(watchFace.dialogLayout);
+              watchFace.dialogLayout = null;
+            }
             commandExecuted=true;
           }
           if (commandFunction.equals("coreInitialized")) {
@@ -446,8 +450,17 @@ public class WatchFace extends Gles2WatchFaceService {
 
       //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","draw!");
 
-      // Let the core object draw
-      coreObject.onDrawFrame(null);
+      // In ambient mode, do not draw
+      if (isInAmbientMode()) {
+
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+
+      } else {
+
+        // Let the core object draw
+        coreObject.onDrawFrame(null);
+      }
 
       // Draw every frame as long as we're visible and in interactive mode.
       if (isVisible() && !isInAmbientMode()) {
