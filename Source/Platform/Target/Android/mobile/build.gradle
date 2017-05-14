@@ -17,8 +17,8 @@ android {
     defaultConfig {
         applicationId "com.untouchableapps.android.geodiscoverer"
         minSdkVersion 9
-        targetSdkVersion 23
-        versionCode 22
+        targetSdkVersion 22
+        versionCode 23
         versionName computeVersionName()
     }
     buildTypes {
