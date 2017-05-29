@@ -13,7 +13,7 @@ android {
         applicationId "com.untouchableapps.android.geodiscoverer"
         minSdkVersion 22
         targetSdkVersion 22
-        versionCode 23
+        versionCode 24
         versionName computeVersionName()
     }
     buildTypes {
