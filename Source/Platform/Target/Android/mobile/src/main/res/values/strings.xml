@@ -58,8 +58,8 @@
 	<string name="manually_entered_address">Manually entered address</string>
 	<string name="dialog_address_title">Set target at address</string>
   <string name="dialog_address_input_hint">Alexanderplatz 1, Berlin (single line!)</string>
-  <string name="device_admin_description">Allows Geo Discoverer to turn off the screen by locking it.</string>
-	<string name="device_admin_not_enabled">Screen can not be locked: Please allow GeoDiscoverer to act as a device admin in the system settings.</string>
+  <string name="device_admin_description">Allows Geo Discoverer to turn off the display by locking it.</string>
+	<string name="device_admin_not_enabled">Device admin permission required to turn off display! Please grant it in the device settings.</string>
 	<string name="replace_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;? There exists already a map folder that will be replaced.</string>
 	<string name="create_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;?</string>
 	<string name="cannot_create_map_folder">Map folder &lt;%1$s&gt; could not be created!</string>

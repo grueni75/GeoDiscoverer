@@ -58,7 +58,7 @@
               </xsd:element>
               <xsd:element name="backButtonTurnsScreenOff" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
-                  <xsd:documentation>Turns off the screen if the back button is pressed.</xsd:documentation>
+                  <xsd:documentation>Turns off the screen if the back button is pressed (to save energy). This requires that the app acts as a device admin. The device admin permission has to be granted manually in the device settings.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="createTraceLog" type="xsd:boolean" default="0" gd:upgrade="restore">

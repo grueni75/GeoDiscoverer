@@ -67,6 +67,9 @@ public class GDService extends Service {
   PendingIntent pendingIntent = null;
   Notification notification = null;
 
+  // Actions for notifications
+  NotificationCompat.Action exitAction = null;
+
   /** Called when the service is created the first time */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   @Override
@@ -86,6 +89,13 @@ public class GDService extends Service {
     // Prepare the notification
     Intent notificationIntent = new Intent(this, ViewMap.class);
     pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+    Intent exitIntent = new Intent(this, GDService.class);
+    exitIntent.setAction("exitApp");
+    PendingIntent pendingExitIntent = PendingIntent.getService(this, 0, exitIntent, 0);
+    exitAction = new NotificationCompat.Action.Builder(
+        R.drawable.exit, "Exit", pendingExitIntent
+    ).build();
+
   }
   
   /** No binding supported */
@@ -103,6 +113,7 @@ public class GDService extends Service {
         .setSmallIcon(R.drawable.notification_running)
         .setContentIntent(pendingIntent)
         .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+        .addAction(exitAction)
         .build();
   }
 
@@ -212,9 +223,23 @@ public class GDService extends Service {
             .setContentIntent(pendingIntent)
             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
             .setProgress(tilesTotal, tilesDone, false)
+            .addAction(exitAction)
             .build();
       }
       notificationManager.notify(R.string.notification_title, notification);
+    }
+
+    // Handle exit request
+    if (intent.getAction().equals("exitApp")) {
+      if (coreObject!=null) {
+        ViewMap viewMap = ((GDApplication)getApplication()).activity;
+        if (viewMap!=null) {
+          viewMap.setExitBusyText();
+        }
+        Message m=Message.obtain(coreObject.messageHandler);
+        m.what = GDCore.STOP_CORE;
+        coreObject.messageHandler.sendMessage(m);
+      }
     }
 
     return START_STICKY;

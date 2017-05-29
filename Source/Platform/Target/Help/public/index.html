@@ -1408,11 +1408,13 @@ RevisionHistory
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201612310822" changecount="39">
+<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201705291724" changecount="44">
 <pre>! Introduction
 Geo Discoverer is an navigation app for hikers and bikers. It can be downloaded in the [[Google Play Store|https://play.google.com/store/apps/details?id=com.untouchableapps.android.geodiscoverer]]. After its first start, it displays an online map. The map consists of many small tiles (pictures) that are downloaded from the internet. It will take a few seconds before the contents of the map is displayed. Once the tiles are downloaded, they are stored on the device for fast retrieval. If you want to understand the map view and its interacting possibilities, the MapView tiddler explains all the details.
 ! Privacy Policy
-This app does not read out any privacy related data. But it has to use the permission android.permission.~GET_ACCOUNTS. This permission is required for the usage of the Google Play Services. The Google Play Services provides functionality to communicate with Android Wear devices. This functionality is used to implement a Watchface that display the navigation widget. The app itself does not read out any info about your accounts. Please check the privacy policy of the [[Google Play Services|https://play.google.com/intl/en_us/about/play-terms.html]] to find out how this service uses your account data.
+This app does not read out any privacy related data. But it has to use the following permissions:
+* android.permission.~BIND_DEVICE_ADMIN: If enabled in the AppPreferences, the back key can be used to switch off the display. This feature is offered to save energy. It requires that Geo Discoverer acts as a device admin. In order to use this feature, you have to grant Geo Discoverer the device admin permission manually in the settings of your device. 
+* android.permission.~GET_ACCOUNTS: This permission is required for the usage of the Google Play Services. The Google Play Services provides functionality to communicate with Android Wear devices. This functionality is used to implement a Watchface that display the navigation widget. The app itself does not read out any info about your accounts. Please check the privacy policy of the [[Google Play Services|https://play.google.com/intl/en_us/about/play-terms.html]] to find out how this service uses your account data.
 ! Acknowledgements
 Geo Discoverer is using many contributios from others. See the [[About]] tiddler for a full list of all the related projects. Without those contributions, Geo Discover would not have been possible. So a big @@''&quot;Thank You!&quot;''@@ to the people behind those projects!
 ! News

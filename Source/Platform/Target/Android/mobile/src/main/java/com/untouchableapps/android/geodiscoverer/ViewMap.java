@@ -1390,6 +1390,11 @@ public class ViewMap extends GDActivity {
     }
   }
 
+  /** Sets the exit busy text */
+  public void setExitBusyText() {
+    busyTextView.setText(" " + getString(R.string.stopping_core_object) + " ");
+  }
+
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -1469,7 +1474,7 @@ public class ViewMap extends GDActivity {
             }
             break;
           case R.id.nav_exit:
-            busyTextView.setText(" " + getString(R.string.stopping_core_object) + " ");
+            setExitBusyText();
             Message m=Message.obtain(coreObject.messageHandler);
             m.what = GDCore.STOP_CORE;
             coreObject.messageHandler.sendMessage(m);
