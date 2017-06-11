@@ -44,12 +44,12 @@
 	<string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
 	<string name="notification_service_in_foreground_message">Taking care of your position.</string>
 	<string name="notification_title">Geo Discoverer</string>
-  <string name="notification_map_download_ongoing_message">Downloading %1$d tiles (%2$s left)...</string>
+    <string name="notification_map_download_ongoing_message">%1$d tiles / %2$s</string>
 	<string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
 	<string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
 	<string name="show_messages">Show messages</string>
 	<string name="hide_messages">Hide messages</string>
-  <string name="toggle_messages">Toggle messages</string>
+    <string name="toggle_messages">Toggle messages</string>
 	<string name="set_target_at_map_center">Set target at map center</string>
 	<string name="set_target_at_location">Set target at location</string>
 	<string name="hide_target">Hide target</string>
