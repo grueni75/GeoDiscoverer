@@ -158,6 +158,11 @@ Core::~Core() {
     thread->destroyThread(mapUpdateThreadInfo);
   }
 
+  // Ensure that all downloads have stopped
+  if (mapSource) {
+    mapSource->stopDownloadThreads();
+  }
+
   // Delete the components
   getDefaultDevice()->getScreen()->setAllowDestroying(true);
   DEBUG("deleting commander",NULL);

@@ -176,6 +176,12 @@ public:
   // Returns the number of unqueued tiles
   virtual Int countUnqueuedDownloadTiles(bool peek);
 
+  // Removes all download jobs
+  virtual void clearDownloadJobs();
+
+  // Ensures that all threads that download tiles are stopped
+  virtual void stopDownloadThreads();
+
   // Trigger the download job processing
   virtual void triggerDownloadJobProcessing();
 

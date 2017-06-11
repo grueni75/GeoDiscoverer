@@ -992,6 +992,14 @@ Int MapSource::countUnqueuedDownloadTiles(bool peek) {
 void MapSource::triggerDownloadJobProcessing() {
 }
 
+// Removes all download jobs
+void MapSource::clearDownloadJobs() {
+}
+
+// Ensures that all threads that download tiles are stopped
+void MapSource::stopDownloadThreads() {
+}
+
 // Returns a list of names of the maps that have a legend
 std::list<std::string> MapSource::getLegendNames() {
   std::list<std::string> l;

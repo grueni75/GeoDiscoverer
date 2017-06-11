@@ -84,7 +84,7 @@ MapDownloader::MapDownloader(MapSourceMercatorTiles *mapSource) {
 }
 
 MapDownloader::~MapDownloader() {
-  deinit();
+  // deinit(); // Is now called by map source directly
   for (Int i=0;i<numberOfDownloadThreads;i++) {
     core->getThread()->destroySignal(downloadStartSignals[i]);
   }
@@ -97,11 +97,13 @@ MapDownloader::~MapDownloader() {
 void MapDownloader::deinit() {
 
   // Stop all threads
+  DEBUG("stopping update stats thread",NULL);
   quitThreads=true;
   core->getThread()->issueSignal(updateStatsStartSignal);
   core->getThread()->waitForThread(updateStatsThreadInfo);
   core->getThread()->destroyThread(updateStatsThreadInfo);
   updateStatsThreadInfo=NULL;
+  DEBUG("stopping write images thread",NULL);
   core->getThread()->issueSignal(writeImagesStartSignal);
   core->getThread()->waitForThread(writeImagesThreadInfo);
   core->getThread()->destroyThread(writeImagesThreadInfo);
@@ -111,11 +113,13 @@ void MapDownloader::deinit() {
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
 
   // Wait until the download thread has finished
+  DEBUG("cancelling map image download thread",NULL);
   for (Int i=0;i<numberOfDownloadThreads;i++) {
     if (mapImageDownloadThreadInfos[i]) {
       core->getThread()->cancelThread(mapImageDownloadThreadInfos[i]);
     }
   }
+  DEBUG("stopping map image download thread",NULL);
   for (Int i=0;i<numberOfDownloadThreads;i++) {
     if (mapImageDownloadThreadInfos[i]) {
       core->getThread()->waitForThread(mapImageDownloadThreadInfos[i]);
@@ -128,6 +132,7 @@ void MapDownloader::deinit() {
   core->getThread()->unlockMutex(accessMutex);
 
   // Delete all tile servers
+  DEBUG("deleting tile servers",NULL);
   for(std::list<MapTileServer*>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
     delete *i;
   }
@@ -207,6 +212,17 @@ void MapDownloader::queueMapContainerDownload(MapContainer *mapContainer)
   core->getThread()->unlockMutex(accessMutex);
   for (Int i=0;i<numberOfDownloadThreads;i++)
     core->getThread()->issueSignal(downloadStartSignals[i]);
+}
+
+// Clears the download queue
+void MapDownloader::clearDownloadQueue()
+{
+  core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+  if (!downloadQueue.empty()) {
+    downloadQueue.clear();
+  }
+  core->getThread()->unlockMutex(accessMutex);
+  core->getThread()->issueSignal(updateStatsStartSignal);
 }
 
 // Adds a server url to the list of URLs a tile consists of
@@ -566,6 +582,7 @@ void MapDownloader::writeImages() {
     while (1) {
 
       // Queue empty?
+      //DEBUG("checking queue for new image",NULL);
       MapImage image;
       core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
       bool imageQueueEmpty = (imageQueue.size()==0) ? true : false;
@@ -574,11 +591,12 @@ void MapDownloader::writeImages() {
         imageQueue.pop_front();
       }
       core->getThread()->unlockMutex(accessMutex);
-      if (imageQueueEmpty)
+      if ((imageQueueEmpty)||(quitThreads))
         break;
 
       // Add the image to the archive
       ZipArchive *mapArchive=NULL;
+      //DEBUG("writing image data",NULL);
       mapArchive=new ZipArchive(mapSource->getFolderPath() + "/" + image.mapContainer->getMapFileFolder(),image.mapContainer->getArchiveFileName());
       if ((mapArchive==NULL)||(!mapArchive->init()))
         FATAL("can not create zip archive object",NULL);
@@ -586,7 +604,7 @@ void MapDownloader::writeImages() {
 
       // Write the gdm file
       if (mapArchive) {
-        //DEBUG("writing calibration file of map container 0x%08x",mapContainer);
+        //DEBUG("writing calibration data",NULL);
         image.mapContainer->writeCalibrationFile(mapArchive);
         mapArchive->writeChanges();
         delete mapArchive;
@@ -596,10 +614,13 @@ void MapDownloader::writeImages() {
       }
 
       // Update the map cache
+      //DEBUG("set download complete",NULL);
       mapSource->lockAccess(__FILE__, __LINE__);
       image.mapContainer->setDownloadComplete(true);
       mapSource->unlockAccess();
+      //DEBUG("set force cache update",NULL);
       core->getMapEngine()->setForceCacheUpdate(__FILE__, __LINE__);
+      //DEBUG("inceasing download counter",NULL);
       core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
       downloadedImages++;
       core->getThread()->unlockMutex(accessMutex);

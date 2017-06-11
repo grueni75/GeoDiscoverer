@@ -69,6 +69,7 @@ public class GDService extends Service {
 
   // Actions for notifications
   NotificationCompat.Action exitAction = null;
+  NotificationCompat.Action stopDownloadAction = null;
 
   /** Called when the service is created the first time */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -94,6 +95,12 @@ public class GDService extends Service {
     PendingIntent pendingExitIntent = PendingIntent.getService(this, 0, exitIntent, 0);
     exitAction = new NotificationCompat.Action.Builder(
         R.drawable.exit, "Exit", pendingExitIntent
+    ).build();
+    Intent stopDownloadIntent = new Intent(this, GDService.class);
+    stopDownloadIntent.setAction("stopDownload");
+    PendingIntent pendingStopDownloadIntent = PendingIntent.getService(this, 0, stopDownloadIntent, 0);
+    stopDownloadAction = new NotificationCompat.Action.Builder(
+        R.drawable.stop, "Stop Download", pendingStopDownloadIntent
     ).build();
 
   }
@@ -224,6 +231,7 @@ public class GDService extends Service {
             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
             .setProgress(tilesTotal, tilesDone, false)
             .addAction(exitAction)
+            .addAction(stopDownloadAction)
             .build();
       }
       notificationManager.notify(R.string.notification_title, notification);
@@ -239,6 +247,13 @@ public class GDService extends Service {
         Message m=Message.obtain(coreObject.messageHandler);
         m.what = GDCore.STOP_CORE;
         coreObject.messageHandler.sendMessage(m);
+      }
+    }
+
+    // Handle stop download request
+    if (intent.getAction().equals("stopDownload")) {
+      if (coreObject!=null) {
+        coreObject.executeCoreCommand("stopDownload()");
       }
     }
 

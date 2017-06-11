@@ -59,6 +59,7 @@ MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
 MapSourceMercatorTiles::~MapSourceMercatorTiles() {
 
   // Stop the map downloader object
+  DEBUG("deleting map downloader",NULL);
   delete mapDownloader;
   mapDownloader=NULL;
 
@@ -71,8 +72,7 @@ MapSourceMercatorTiles::~MapSourceMercatorTiles() {
 
 // Deinitializes the map source
 void MapSourceMercatorTiles::deinit() {
-  stopDownloadJobProcessing();
-  if (mapDownloader) mapDownloader->deinit();
+  DEBUG("deinit map source",NULL);
   MapSource::deinit();
 }
 
@@ -771,6 +771,28 @@ void MapSourceMercatorTiles::startDownloadJobProcessing() {
 void MapSourceMercatorTiles::triggerDownloadJobProcessing() {
   stopDownloadJobProcessing();
   startDownloadJobProcessing();
+}
+
+// Stops the download job processing
+void MapSourceMercatorTiles::clearDownloadJobs() {
+  DEBUG("stopping download job processing",NULL);
+  stopDownloadJobProcessing();
+  DEBUG("removing all download jobs",NULL);
+  std::list<std::string> names=core->getConfigStore()->getAttributeValues("Map/DownloadJob","name",__FILE__,__LINE__);
+  for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
+    std::string configPath="Map/DownloadJob[@name='" + *i + "']";
+    core->getConfigStore()->removePath(configPath);
+  }
+  DEBUG("clearing current download queue",NULL);
+  mapDownloader->clearDownloadQueue();
+}
+
+// Ensures that all threads that download tiles are stopped
+void MapSourceMercatorTiles::stopDownloadThreads() {
+  DEBUG("stopping download job processing",NULL);
+  stopDownloadJobProcessing();
+  DEBUG("deinit map downloader",NULL);
+  if (mapDownloader) mapDownloader->deinit();
 }
 
 // Processes all pending download jobs

@@ -63,9 +63,6 @@ protected:
   // Computes the mercator x and y ranges for the given area and zoom level
   void computeMercatorBounds(MapArea *displayArea,Int zMap,Int &zServer,Int &startX,Int &endX,Int &startY,Int &endY);
 
-  // Stops the download job processing
-  void stopDownloadJobProcessing();
-
   // Starts the download job processing
   void startDownloadJobProcessing();
 
@@ -116,11 +113,20 @@ public:
   // Indicates if the map source has download jobs
   virtual bool hasDownloadJobs();
 
+  // Stops the download job processing
+  virtual void stopDownloadJobProcessing();
+
   // Returns the number of unqueued tiles
   virtual Int countUnqueuedDownloadTiles();
 
   // Trigger the download job processing
   virtual void triggerDownloadJobProcessing();
+
+  // Removes all download jobs
+  virtual void clearDownloadJobs();
+
+  // Ensures that all threads that download tiles are stopped
+  virtual void stopDownloadThreads();
 
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {

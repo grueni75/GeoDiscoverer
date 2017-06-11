@@ -167,7 +167,7 @@ ImagePixel *Image::loadJPEG(UByte *imageData, UInt imageSize, Int &width, Int &h
   ImagePixel *image=NULL;
   struct jpegErrorHandlerInfo jerr;
 
-  DEBUG("imageData=0x%08x imageSize=%d",imageData,imageSize);
+  //DEBUG("imageData=0x%08x imageSize=%d",imageData,imageSize);
 
   // Prepare the decompression
   abortLoad=false;

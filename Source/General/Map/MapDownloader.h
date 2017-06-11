@@ -105,6 +105,9 @@ public:
   // Writes downloaded images to storage
   void writeImages();
 
+  // Clears the download queue
+  void clearDownloadQueue();
+
 };
 
 } /* namespace GEODISCOVERER */
