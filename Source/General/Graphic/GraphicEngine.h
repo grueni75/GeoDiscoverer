@@ -70,10 +70,13 @@ protected:
   GraphicRectangle compassConeIcon;
 
   // Not cached tile image
-  GraphicRectangle tileImageNotCachedImage;
+  GraphicRectangle tileImageNotCached;
 
   // Not downloaded tile image
-  GraphicRectangle tileImageNotDownloadedFilename;
+  GraphicRectangle tileImageNotDownloaded;
+
+  // Not downloaded tile image
+  GraphicRectangle tileImageDownloadErrorOccured;
 
   // Radiuses of the accuracy ellipse
   Int locationAccuracyRadiusX;
@@ -284,12 +287,17 @@ public:
 
   GraphicRectangle *getNotCachedTileImage()
   {
-      return &tileImageNotCachedImage;
+      return &tileImageNotCached;
+  }
+
+  GraphicRectangle *getDownloadErrorOccuredTileImage()
+  {
+      return &tileImageDownloadErrorOccured;
   }
 
   GraphicRectangle *getNotDownloadedTileImage()
   {
-      return &tileImageNotDownloadedFilename;
+      return &tileImageNotDownloaded;
   }
 
   GraphicRectangle *getPathEndFlagIcon() {

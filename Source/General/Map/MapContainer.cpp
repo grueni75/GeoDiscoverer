@@ -46,6 +46,7 @@ MapContainer::MapContainer(bool doNotDelete) {
     this->leftChild=NULL;
     this->rightChild=NULL;
     this->downloadComplete=true;
+    this->downloadErrorOccured=false;
     this->x=0;
     this->y=0;
     this->overlayGraphicInvalid=false;

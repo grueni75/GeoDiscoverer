@@ -36,8 +36,9 @@ GraphicEngine::GraphicEngine(Device *device) :
     pathStartFlagIcon(device->getScreen()),
     pathEndFlagIcon(device->getScreen()),
     compassConeIcon(device->getScreen()),
-    tileImageNotCachedImage(device->getScreen()),
-    tileImageNotDownloadedFilename(device->getScreen())
+    tileImageNotCached(device->getScreen()),
+    tileImageNotDownloaded(device->getScreen()),
+    tileImageDownloadErrorOccured(device->getScreen())
 {
 
   // Init variables
@@ -70,8 +71,9 @@ GraphicEngine::GraphicEngine(Device *device) :
   maxIdleTime=-std::numeric_limits<double>::max();
   totalIdleTime=0;
   frameCount=0;
-  tileImageNotCachedImage.setColor(GraphicColor(255,255,255,0));
-  tileImageNotDownloadedFilename.setColor(GraphicColor(255,255,255,0));
+  tileImageNotCached.setColor(GraphicColor(255,255,255,0));
+  tileImageNotDownloaded.setColor(GraphicColor(255,255,255,0));
+  tileImageDownloadErrorOccured.setColor(GraphicColor(255,255,255,0));
   fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration",__FILE__, __LINE__);
   blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration",__FILE__, __LINE__);
 
@@ -100,8 +102,9 @@ void GraphicEngine::createGraphic() {
   targetIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","targetIconFilename",__FILE__, __LINE__));
   navigationPointIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","navigationPointIconFilename",__FILE__, __LINE__));
   arrowIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","arrowIconFilename",__FILE__, __LINE__));
-  tileImageNotCachedImage.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","tileImageNotCachedFilename",__FILE__, __LINE__));
-  tileImageNotDownloadedFilename.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","tileImageNotDownloadedFilename",__FILE__, __LINE__));
+  tileImageNotCached.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","tileImageNotCachedFilename",__FILE__, __LINE__));
+  tileImageNotDownloaded.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","tileImageNotDownloadedFilename",__FILE__, __LINE__));
+  tileImageDownloadErrorOccured.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","tileImageDownloadErrorOccuredFilename",__FILE__, __LINE__));
   unlockDrawing();
 }
 
@@ -117,8 +120,9 @@ void GraphicEngine::deinit() {
   navigationPointIcon.deinit();
   arrowIcon.deinit();
   compassConeIcon.deinit();
-  tileImageNotCachedImage.deinit();
-  tileImageNotDownloadedFilename.deinit();
+  tileImageNotCached.deinit();
+  tileImageNotDownloaded.deinit();
+  tileImageDownloadErrorOccured.deinit();
   unlockDrawing();
 }
 

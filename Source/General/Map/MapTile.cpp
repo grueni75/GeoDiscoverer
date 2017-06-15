@@ -441,7 +441,10 @@ void MapTile::setIsCached(bool isCached, GraphicTextureInfo texture, bool fadeOu
   this->isCached = isCached;
   if (!isCached) {
     if (this->getParentMapContainer()->getDownloadComplete()) {
-      endTexture=core->getDefaultGraphicEngine()->getNotCachedTileImage()->getTexture();
+      if (this->getParentMapContainer()->getDownloadErrorOccured())
+        endTexture=core->getDefaultGraphicEngine()->getDownloadErrorOccuredTileImage()->getTexture();
+      else
+        endTexture=core->getDefaultGraphicEngine()->getNotCachedTileImage()->getTexture();
     } else {
       endTexture=core->getDefaultGraphicEngine()->getNotDownloadedTileImage()->getTexture();
     }

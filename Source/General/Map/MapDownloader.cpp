@@ -392,6 +392,7 @@ void MapDownloader::downloadMapImages(Int threadNr) {
           DownloadResult result = tileServer->downloadTileImage(mapContainer,threadNr,url);
           urls.push_back(url);
           if (result==DownloadResultOtherFail) {
+            DEBUG("other fail occured while downloading %s",url.c_str());
             downloadSuccess=false;
             break;
           }
@@ -404,7 +405,7 @@ void MapDownloader::downloadMapImages(Int threadNr) {
 
       // Process the image
       bool maxRetriesReached=(mapContainer->getDownloadRetries()>=maxDownloadRetries);
-      if (downloadSuccess||maxRetriesReached) {
+      if (downloadSuccess) {
 
         // Create one tile image out of the downloaded ones
         ImagePixel *composedImagePixel=NULL;
@@ -457,15 +458,30 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       } else {
 
         // Put the container back in the queue if the retry count is not reached
-        mapContainer->setDownloadRetries(mapContainer->getDownloadRetries()+1);
-        core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
-        downloadQueue.push_back(mapContainer);
-        if (downloadQueue.size()>downloadQueueRecommendedSize)
-          downloadQueueRecommendedSizeExceeded=true;
-        core->getThread()->unlockMutex(accessMutex);
+        if (!maxRetriesReached) {
+          mapContainer->setDownloadRetries(mapContainer->getDownloadRetries()+1);
+          core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+          downloadQueue.push_back(mapContainer);
+          if (downloadQueue.size()>downloadQueueRecommendedSize)
+            downloadQueueRecommendedSizeExceeded=true;
+          core->getThread()->unlockMutex(accessMutex);
 
-        // Wait some time before downloading again
-        sleep(downloadErrorWaitTime);
+          // Wait some time before downloading again
+          sleep(downloadErrorWaitTime);
+
+        } else {
+
+          // Mark the container as complete such that it can be removed
+          //DEBUG("set download complete",NULL);
+          mapSource->lockAccess(__FILE__, __LINE__);
+          mapContainer->setDownloadComplete(true);
+          mapContainer->setDownloadErrorOccured(true);
+          mapSource->unlockAccess();
+          core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+          downloadedImages++;
+          core->getThread()->unlockMutex(accessMutex);
+
+        }
 
       }
 

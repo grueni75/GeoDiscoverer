@@ -60,6 +60,7 @@ protected:
   MapContainer *leftChild;                  // Left child in the kd tree
   MapContainer *rightChild;                 // Right child in the kd tree
   bool downloadComplete;                    // Indicates that the image has been downloaded to disk
+  bool downloadErrorOccured;                // Indicates that the image could not been downloaded to disk correctly
   bool overlayGraphicInvalid;               // Indicates that this tile is missing it's overlay graphics
 
   // Lists of map tiles sorted by their boundaries
@@ -416,6 +417,14 @@ public:
 
   void setZoomLevelServer(Int zoomLevelServer) {
     this->zoomLevelServer = zoomLevelServer;
+  }
+
+  bool getDownloadErrorOccured() const {
+    return downloadErrorOccured;
+  }
+
+  void setDownloadErrorOccured(bool downloadErrorOccured) {
+    this->downloadErrorOccured = downloadErrorOccured;
   }
 };
 

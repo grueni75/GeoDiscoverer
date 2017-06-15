@@ -1241,6 +1241,11 @@
                   <xsd:documentation>Image of a not yet downloaded tile.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="tileImageDownloadErrorOccuredFilename" type="xsd:string" default="tileImageDownloadErrorOccured">
+                <xsd:annotation>
+                  <xsd:documentation>Image of a tile that had download errors.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="pathMinSegmentLength" type="xsd:integer" default="8">
                 <xsd:annotation>
                   <xsd:documentation>Minimum segment length of tracks, routes and other paths.</xsd:documentation>
