@@ -63,8 +63,9 @@ void GraphicPosition::pan(Int xi, Int yi) {
   // Compute the displacement depending on the zoom
   //DEBUG("before zoom adaption: x=%d y=%d",xi,yi);
   //DEBUG("zoomValue=%f",valueZoom);
-  double xd=(double)xi/valueZoom;
-  double yd=(double)yi/valueZoom;
+  double screenScale = core->getDefaultGraphicEngine()->getMapTileToScreenScale(core->getDefaultScreen());
+  double xd=(double)xi/(valueZoom*screenScale);
+  double yd=(double)yi/(valueZoom*screenScale);
   //DEBUG("after zoom adaption: x=%f y=%f",xd,yd);
 
   // Compute the new position

@@ -906,7 +906,8 @@ void MapEngine::updateMap() {
         double screenLength=ceil(core->getDefaultScreen()->getHeight()/sin(alpha));
 
         // Compute the height and width to fill
-        Int zoomedScreenHeight=ceil(screenLength/newZoom);
+        double screenScale = core->getDefaultGraphicEngine()->getMapTileToScreenScale(core->getDefaultScreen());
+        Int zoomedScreenHeight=ceil(screenLength/(newZoom*screenScale));
         Int zoomedScreenWidth=zoomedScreenHeight;
         //DEBUG("zoomedScreenHeight=%d zoomedScreenWidth=%d",zoomedScreenHeight,zoomedScreenWidth);
 

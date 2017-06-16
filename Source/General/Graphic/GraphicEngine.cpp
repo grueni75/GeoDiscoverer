@@ -76,6 +76,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   tileImageDownloadErrorOccured.setColor(GraphicColor(255,255,255,0));
   fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration",__FILE__, __LINE__);
   blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration",__FILE__, __LINE__);
+  mapReferenceDPI=core->getConfigStore()->getIntValue("Graphic","mapReferenceDotsPerInch",__FILE__,__LINE__);
 
   // Init the dynamic data
   init();
@@ -342,8 +343,9 @@ bool GraphicEngine::draw(bool forceRedraw) {
 
       // Set scaling factor
       //DEBUG("pos.getZoom()=%f",pos.getZoom());
-      scale=pos.getZoom();
-      backScale=1.0/pos.getZoom();
+      double screenScale = getMapTileToScreenScale(screen);
+      scale=pos.getZoom()*screenScale;
+      backScale=1.0/scale;
       //std::cout << "scale=" << scale << std::endl;
       //scale=scale/2;
       screen->scale(scale,scale,1.0);
@@ -355,6 +357,9 @@ bool GraphicEngine::draw(bool forceRedraw) {
       // Draw all primitives of the map object
       if (map) {
 
+        // Scale the map tiles according to the screen dpi
+
+        // Draw the tiles
         for(Int z=0;z<=4;z++) {
           std::list<GraphicPrimitive*> *mapDrawList=map->getDrawList();
           //DEBUG("tile count = %d",mapDrawList->size());
@@ -511,6 +516,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
             }
           }
         }
+
       }
 
       //PROFILE_ADD("map drawing");
@@ -738,6 +744,11 @@ void GraphicEngine::outputStats() {
   maxIdleTime=-std::numeric_limits<double>::max();
   totalIdleTime=0;
   unlockDrawing();
+}
+
+// Returns the additional scale to match the scale the map tiles have been made for
+double GraphicEngine::getMapTileToScreenScale(Screen *screen) {
+  return ((double)screen->getDPI()) / ((double)mapReferenceDPI);
 }
 
 }

@@ -121,6 +121,9 @@ protected:
   // Default duration of a blink animation
   TimestampInMicroseconds blinkDuration;
 
+  // Reference DPI the map tiles have been created for
+  Int mapReferenceDPI;
+
   // Statistical infos
   double minDrawingTime;
   double maxDrawingTime;
@@ -153,6 +156,9 @@ public:
 
   // Outputs statistical infos
   void outputStats();
+
+  // Returns the additional scale to match the scale the map tiles have been made for
+  double getMapTileToScreenScale(Screen *screen);
 
   // Getters and setters
   void lockDrawing(const char *file, int line) const {

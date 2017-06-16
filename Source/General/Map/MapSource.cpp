@@ -511,9 +511,8 @@ MapContainer *MapSource::findMapContainerByGeographicCoordinate(MapPosition pos,
 
       // Check if the position lies in this map
       if ((pos.getX()>=0)&&(pos.getX()<currentMapContainer->getWidth())&&(pos.getY()>=0)&&(pos.getY()<currentMapContainer->getHeight())) {
-
-        double distToLngScale=fabs(currentMapContainer->getLngScale()-pos.getLngScale());
-        double distToLatScale=fabs(currentMapContainer->getLatScale()-pos.getLatScale());
+        double distToLngScale=fabs(currentMapContainer->getLngScale()-(pos.getLngScale()));
+        double distToLatScale=fabs(currentMapContainer->getLatScale()-(pos.getLatScale()));
 
         // Shall we return all matching containers?
         if (foundMapContainers) {
