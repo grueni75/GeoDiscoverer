@@ -513,6 +513,7 @@ MapContainer *MapSource::findMapContainerByGeographicCoordinate(MapPosition pos,
       if ((pos.getX()>=0)&&(pos.getX()<currentMapContainer->getWidth())&&(pos.getY()>=0)&&(pos.getY()<currentMapContainer->getHeight())) {
         double distToLngScale=fabs(currentMapContainer->getLngScale()-(pos.getLngScale()));
         double distToLatScale=fabs(currentMapContainer->getLatScale()-(pos.getLatScale()));
+        //DEBUG("map=%s map.lngSccale=%f pos.lngScale=%f",currentMapContainer->getImageFileName().c_str(),currentMapContainer->getLngScale(),pos.getLngScale());
 
         // Shall we return all matching containers?
         if (foundMapContainers) {

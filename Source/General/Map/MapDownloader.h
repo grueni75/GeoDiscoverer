@@ -108,6 +108,10 @@ public:
   // Clears the download queue
   void clearDownloadQueue();
 
+  // Getters and setters
+  std::list<MapTileServer*> *getTileServers() {
+    return &tileServers;
+  }
 };
 
 } /* namespace GEODISCOVERER */

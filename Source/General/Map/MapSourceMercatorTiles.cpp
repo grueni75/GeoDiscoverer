@@ -167,35 +167,41 @@ bool MapSourceMercatorTiles::init() {
 
 // Finds the best matching zoom level
 Int MapSourceMercatorTiles::findBestMatchingZoomLevel(MapPosition pos, Int refZoomLevelMap, Int &minZoomLevelMap, Int &minZoomLevelServer) {
-  Int maxZoomLevelServer;
-  mapDownloader->getLayerGroupZoomLevelBounds(refZoomLevelMap,minZoomLevelMap,minZoomLevelServer,maxZoomLevelServer);
-  Int z=minZoomLevelServer;
-  double latSouth, latNorth, lngEast, lngWest;
-  double distToLngScale,distToLatScale;
   double distToNearestLngScale=-1,distToNearestLatScale;
-  double lngScale,latScale;
-  bool newCandidateFound;
-  for (int i=minZoomLevelServer;i<=maxZoomLevelServer;i++) {
-    pos.computeMercatorTileBounds(i,latNorth,latSouth,lngWest,lngEast);
-    lngScale=mapTileLength/fabs(lngEast-lngWest);
-    latScale=mapTileLength/fabs(latNorth-latSouth);
-    distToLngScale=fabs(lngScale-pos.getLngScale());
-    distToLatScale=fabs(latScale-pos.getLatScale());
-    newCandidateFound=false;
-    if (distToNearestLngScale==-1) {
-      newCandidateFound=true;
-    } else {
-      if ((distToLngScale<distToNearestLngScale)&&(distToLatScale<distToNearestLatScale)) {
-        newCandidateFound=true;
+  Int z=minZoomLevelServer;
+  std::list<MapTileServer*> *tileServers=mapDownloader->getTileServers();
+  for (std::list<MapTileServer*>::iterator j=tileServers->begin();j!=tileServers->end();j++) {
+    MapTileServer *tileServer=*j;
+    double latSouth, latNorth, lngEast, lngWest;
+    double distToLngScale,distToLatScale;
+    double lngScale,latScale;
+    bool newCandidateFound;
+    if ((refZoomLevelMap==std::numeric_limits<Int>::min())||(refZoomLevelMap>=tileServer->getMinZoomLevelMap())&&(refZoomLevelMap<=tileServer->getMaxZoomLevelMap())) {
+      for (int i=tileServer->getMinZoomLevelServer();i<=tileServer->getMaxZoomLevelServer();i++) {
+        pos.computeMercatorTileBounds(i,latNorth,latSouth,lngWest,lngEast);
+        lngScale=mapTileLength/fabs(lngEast-lngWest);
+        latScale=mapTileLength/fabs(latNorth-latSouth);
+        distToLngScale=fabs(lngScale-pos.getLngScale());
+        distToLatScale=fabs(latScale-pos.getLatScale());
+        newCandidateFound=false;
+        if (distToNearestLngScale==-1) {
+          newCandidateFound=true;
+        } else {
+          if ((distToLngScale<distToNearestLngScale)&&(distToLatScale<distToNearestLatScale)) {
+            newCandidateFound=true;
+          }
+        }
+        if (newCandidateFound) {
+          distToNearestLngScale=distToLngScale;
+          distToNearestLatScale=distToLatScale;
+          minZoomLevelMap=tileServer->getMinZoomLevelMap();
+          minZoomLevelServer=tileServer->getMinZoomLevelServer();
+          z=i-minZoomLevelServer+minZoomLevelMap;
+        }
       }
     }
-    if (newCandidateFound) {
-      distToNearestLngScale=distToLngScale;
-      distToNearestLatScale=distToLatScale;
-      z=i;
-    }
   }
-  return z-minZoomLevelServer+minZoomLevelMap;
+  return z;
 }
 
 // Creates the calibrator for the given bounds
@@ -279,7 +285,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
     zMap=minZoomLevel+zoomLevel-1;
     findBestMatchingZoomLevel(pos,zMap,minZoomLevelMap,minZoomLevelServer);
   } else {
-    zMap=findBestMatchingZoomLevel(pos,minZoomLevel,minZoomLevelMap,minZoomLevelServer);
+    zMap=findBestMatchingZoomLevel(pos,std::numeric_limits<Int>::min(),minZoomLevelMap,minZoomLevelServer);
   }
   if (zMap>maxZoomLevel) {
     zMap=maxZoomLevel;
@@ -400,20 +406,19 @@ MapTile *MapSourceMercatorTiles::findMapTileByGeographicCoordinate(MapPosition p
   if (!result) {
 
     // No, let's fetch it from the server or disk
-    return fetchMapTile(pos,zoomLevel);
+    result = fetchMapTile(pos,zoomLevel);
 
-  } else {
-
-    // Check that there is not one on the disk/server that better matches the scale
-    if (!lockZoomLevel) {
-      Int minZoomLevelMap, minZoomLevelServer;
-      Int newZoomLevelMap = findBestMatchingZoomLevel(pos,result->getParentMapContainer()->getZoomLevelMap(),minZoomLevelMap,minZoomLevelServer);
-      if (newZoomLevelMap!=result->getParentMapContainer()->getZoomLevelMap()) {
-        return fetchMapTile(pos,newZoomLevelMap);
-      }
-    }
-    return result;
   }
+
+  // Check that there is not one on the disk/server that better matches the scale
+  if (!lockZoomLevel) {
+    Int minZoomLevelMap, minZoomLevelServer;
+    Int newZoomLevelMap = findBestMatchingZoomLevel(pos,std::numeric_limits<Int>::min(),minZoomLevelMap,minZoomLevelServer);
+    if (newZoomLevelMap!=result->getParentMapContainer()->getZoomLevelMap()) {
+      return fetchMapTile(pos,newZoomLevelMap);
+    }
+  }
+  return result;
 }
 
 // Returns the map tile that lies in a given area
