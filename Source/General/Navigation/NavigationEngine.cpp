@@ -700,7 +700,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   showCursor=false;
   updatePosition=false;
   bool updateAnimation=false;
-  double screenZoom=visPos.getZoom();
+  double screenZoom=visPos.getZoom()*core->getDefaultGraphicEngine()->getMapTileToScreenScale(core->getDefaultScreen());
   double screenAngle=FloatingPoint::degree2rad(visPos.getAngle());
   Int zoomedScreenWidth=floor(((double)core->getDefaultScreen()->getWidth())/screenZoom);
   Int zoomedScreenHeight=floor(((double)core->getDefaultScreen()->getHeight())/screenZoom);
