@@ -69,10 +69,11 @@ MapPosition MapArea::getCenterPos() {
 
 // Checks if the given position is contained in the area
 bool MapArea::containsGeographicCoordinate(MapPosition pos) {
-  if ((pos.getLng()>=lngWest)&&(pos.getLng()<=lngEast)&&(pos.getLat()>=latSouth)&&(pos.getLat()<=latNorth))
+  if ((pos.getLng()>=lngWest)&&(pos.getLng()<=lngEast)&&(pos.getLat()>=latSouth)&&(pos.getLat()<=latNorth)) {
     return true;
-  else
+  } else {
     return false;
+  }
 }
 
 }

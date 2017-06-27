@@ -91,7 +91,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
       pos3.setX(0);
       pos3.setY(0);
       calibrator->setGeographicCoordinates(pos3);
-      metersPerTick=fabs(pos3.computeDistance(pos2))/3.0;
+      metersPerTick=fabs(pos3.computeDistance(pos2))/3.0/core->getDefaultGraphicEngine()->getMapTileToScreenScale(core->getDefaultScreen());
       //DEBUG("metersPerTick=%f",metersPerTick);
     } else {
       metersPerTick=0;
