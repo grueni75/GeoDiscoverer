@@ -24,6 +24,7 @@ package com.untouchableapps.android.geodiscoverer;
 
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 
 public class GDMessageListenerService extends WearableListenerService{
 
@@ -36,22 +37,22 @@ public class GDMessageListenerService extends WearableListenerService{
     );*/
     if (messageEvent.getPath().equals("/com.untouchableapps.android.geodiscoverer")) {
       String cmd = new String(messageEvent.getData());
-      if (cmd.startsWith("setAllNavigationInfo")) {
-        if (GDApplication.coreObject != null) {
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", cmd);
-          String args1 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", args1);
-          ((GDApplication) getApplication()).coreObject.executeAppCommand("setFormattedNavigationInfo" + args1);
-          cmd = cmd.substring(cmd.indexOf(")") + 1);
-          String args2 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", args2);
-          ((GDApplication) getApplication()).coreObject.executeCoreCommand("setPlainNavigationInfo" + args2);
-          ((GDApplication) getApplication()).executeAppCommand("updateScreen()");
-        }
+      if (cmd.startsWith("setWearDeviceSleeping(1)")) {
+        GDApplication.wearDeviceAlive = true;
+        GDApplication.wearDeviceSleeping = true;
       }
-      if (cmd.equals("getWearDeviceAlive()")) {
-        ((GDApplication) getApplication()).coreObject.executeAppCommand("setWearDeviceAlive(1)");
+      if (cmd.startsWith("setWearDeviceSleeping(0)")) {
+        GDApplication.wearDeviceAlive = true;
+        GDApplication.wearDeviceSleeping = false;
       }
+      if (cmd.startsWith("setWearDeviceAlive(1)")) {
+        GDApplication.wearDeviceAlive = true;
+      }
+      if (cmd.startsWith("setWearDeviceAlive(0)")) {
+        GDApplication.wearDeviceAlive = false;
+      }
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","wearDeviceSleeping=" + String.valueOf(GDApplication.wearDeviceSleeping));
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","wearDeviceAlive=" + String.valueOf(GDApplication.wearDeviceAlive));
     }
   }
 }

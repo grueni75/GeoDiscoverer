@@ -601,12 +601,20 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     if (cmd.startsWith("setFormattedNavigationInfo(")) {
       String infos = cmd.substring(cmd.indexOf("(")+1, cmd.indexOf(")"));
       appIf.cockputEngineUpdate(infos);
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("setAllNavigationInfo(")) {
       if (!isWatch)
         appIf.sendWearCommand(cmd);
       cmdExecuted=true;
     }
-    if (cmd.startsWith("setPlainNavigationInfo(")) {
-      if (!isWatch)
+    if (cmd.startsWith("setWearDeviceSleeping(")) {
+      if (isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("setWearDeviceAlive(")) {
+      if (isWatch)
         appIf.sendWearCommand(cmd);
       cmdExecuted=true;
     }

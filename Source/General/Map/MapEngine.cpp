@@ -904,6 +904,7 @@ void MapEngine::updateMap() {
         //DEBUG("screenHeight=%d screenWidth=%d",core->getScreen()->getHeight(),core->getScreen()->getWidth());
         double alpha=atan((double)core->getDefaultScreen()->getHeight()/(double)core->getDefaultScreen()->getWidth());
         double screenLength=ceil(core->getDefaultScreen()->getHeight()/sin(alpha));
+        //DEBUG("screenWidth=%d screenHeight=%d screenLength=%f",core->getDefaultScreen()->getWidth(),core->getDefaultScreen()->getHeight(),screenLength);
 
         // Compute the height and width to fill
         double screenScale = core->getDefaultGraphicEngine()->getMapTileToScreenScale(core->getDefaultScreen());

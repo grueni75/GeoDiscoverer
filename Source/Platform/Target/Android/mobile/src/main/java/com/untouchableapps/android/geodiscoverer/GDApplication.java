@@ -64,6 +64,8 @@ import com.google.android.gms.wearable.Wearable;
 import com.untouchableapps.android.geodiscoverer.cockpit.CockpitEngine;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppVibration;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 
 /* Configuration of ACRA for reporting crashes */
 @ReportsCrashes(
@@ -118,6 +120,12 @@ public class GDApplication extends Application implements GDAppInterface, Google
   /** Thread that sends commands */
   Thread wearThread = null;
 
+  /** Indicates if wear device is not shwoing anything */
+  static boolean wearDeviceSleeping = true;
+
+  /** Indicates if wear device is active (watch face visible) */
+  static boolean wearDeviceAlive = false;
+
   /** Called when the application starts */
   @Override
   public void onCreate() {
@@ -161,18 +169,66 @@ public class GDApplication extends Application implements GDAppInterface, Google
     wearThread = new Thread(new Runnable() {
       @Override
       public void run() {
+        boolean prevSendMessageForced=false;
+        long lastUpdate=0;
         while (true) {
           try {
+
+            // Get command
             String command = wearCommands.take();
             //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear command: " + command);
-            NodeApi.GetConnectedNodesResult nodes =
-                Wearable.NodeApi.getConnectedNodes(googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
-                    TimeUnit.MILLISECONDS);
-            if (nodes != null) {
-              for (Node node : nodes.getNodes()) {
-                MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                    googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer",
-                    command.getBytes()).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+
+            // Only process command if device is alive
+            if (wearDeviceAlive) {
+
+              // Check if it is necessary to send command
+              long t=System.currentTimeMillis();
+              boolean sendMessage = true;
+              if (command.startsWith("setAllNavigationInfo")) {
+
+                // If wear device is inactive, check if message needs to be sent
+                if (wearDeviceSleeping) {
+
+                  // Always send message if off route or target approaching
+                  String infosAsString = command.substring(command.indexOf("("), command.indexOf(")") + 1);
+                  //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", infosAsString);
+                  CockpitInfos infos = CockpitEngine.createCockpitInfo(infosAsString);
+                  if ((!infos.turnDistance.equals("-")) || (infos.offRoute)) {
+                    sendMessage = true;
+                    prevSendMessageForced = true;
+                  } else {
+
+                    // Send the next message also after important event is over such that watch face shows correct contents
+                    if (prevSendMessageForced)
+                      sendMessage = true;
+                    else {
+
+                      // Always update the watch face every minute
+                      if ((t-lastUpdate)>60*1000) {
+                        sendMessage = true;
+                      } else {
+                        sendMessage = false;
+                      }
+                    }
+                    prevSendMessageForced = false;
+                  }
+                }
+              }
+              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "sendMessage=" + String.valueOf(sendMessage));
+
+              // Send command
+              if (sendMessage) {
+                lastUpdate = t;
+                NodeApi.GetConnectedNodesResult nodes =
+                    Wearable.NodeApi.getConnectedNodes(googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
+                        TimeUnit.MILLISECONDS);
+                if (nodes != null) {
+                  for (Node node : nodes.getNodes()) {
+                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+                        googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer",
+                        command.getBytes()).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+                  }
+                }
               }
             }
           }
@@ -349,9 +405,14 @@ public class GDApplication extends Application implements GDAppInterface, Google
   @Override
   public void executeAppCommand(String cmd) {
     if (cmd.equals("lateInitComplete()")) {
+
+      // Inform the service
       Intent intent = new Intent(this, GDService.class);
       intent.setAction("lateInitComplete");
       startService(intent);
+
+      // Ask wear device for current power status
+      sendWearCommand("getWearDeviceAlive()");
     }
     if (activity != null) {
       Message m = Message.obtain(activity.coreMessageHandler);

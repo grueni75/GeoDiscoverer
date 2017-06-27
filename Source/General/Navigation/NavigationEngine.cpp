@@ -704,6 +704,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   double screenAngle=FloatingPoint::degree2rad(visPos.getAngle());
   Int zoomedScreenWidth=floor(((double)core->getDefaultScreen()->getWidth())/screenZoom);
   Int zoomedScreenHeight=floor(((double)core->getDefaultScreen()->getHeight())/screenZoom);
+  //DEBUG("zoomedScreenWidth=%d zoomedScreenHeight=%d angle=%f",zoomedScreenWidth,zoomedScreenHeight,visPos.getAngle());
   //DEBUG("screenZoom=%f zoomedScreenWidth=%d zoomedScreenHeight=%d",screenZoom,zoomedScreenWidth,zoomedScreenHeight);
   if ((targetPos.isValid())&&(displayArea.containsGeographicCoordinate(targetPos))&&(mapPos.getMapTile())) {
     showCursor=true;
@@ -724,9 +725,34 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
         showCursor=false;
       //DEBUG("visPosX=%d visPosY=%d",visPosX,visPosY);
       if (showCursor) {
-        if (abs(mapDiffX)>zoomedScreenWidth/2)
+
+        // Check if target lies within visible screen
+        //DEBUG("alpha=%f",visPos.getAngle());
+        //DEBUG("mapDiffX=%d mapDiffY=%d",mapDiffX,mapDiffY);
+        double l=sqrt((double)mapDiffX*(double)mapDiffX+(double)mapDiffY*(double)mapDiffY);
+        double beta;
+        if (mapDiffX!=0) {
+          beta=atan(fabs((double)mapDiffY)/fabs((double)mapDiffX));
+        } else {
+          beta=M_PI_2;
+        }
+        if (mapDiffY>0)
+          if (mapDiffX>0)
+            beta=4*M_PI_2-beta;
+          else
+            beta=2*M_PI_2+beta;
+        else
+          if (mapDiffX>0)
+            beta=0*M_PI_2+beta;
+          else
+            beta=2*M_PI_2-beta;
+        //DEBUG("beta=%f",FloatingPoint::rad2degree(beta));
+        Int rotMapDiffX=round(l*cos(visPos.getAngleRad()+beta));
+        Int rotMapDiffY=round(-l*sin(visPos.getAngleRad()+beta));
+        //DEBUG("rotMapDiffX=%d rotMapDiffY=%d",rotMapDiffX,rotMapDiffY);
+        if (abs(rotMapDiffX)>zoomedScreenWidth/2)
           showCursor=false;
-        if (abs(mapDiffY)>zoomedScreenHeight/2)
+        if (abs(rotMapDiffY)>zoomedScreenHeight/2)
           showCursor=false;
       }
       if (showCursor) {
@@ -1437,6 +1463,7 @@ void NavigationEngine::computeNavigationInfo() {
       infos << ";no route;-";
     }
     core->getCommander()->dispatch("setFormattedNavigationInfo(" + infos.str() + ")");
+    std::string cmd="setAllNavigationInfo(" + infos.str() + ")";
     infos.str("");
     infos << navigationInfo.getType() << ",";
     infos << navigationInfo.getAltitude() << ",";
@@ -1450,8 +1477,9 @@ void NavigationEngine::computeNavigationInfo() {
     infos << navigationInfo.getRouteDistance() << ",";
     infos << navigationInfo.getTurnAngle() << ",";
     infos << navigationInfo.getTurnDistance();
-    //DEBUG("%s",infos.str().c_str());
-    core->getCommander()->dispatch("setPlainNavigationInfo(" + infos.str() + ")");
+    cmd += "(" + infos.str() + ")";
+    //DEBUG("%s",cmd.c_str());
+    core->getCommander()->dispatch(cmd);
   }
 }
 

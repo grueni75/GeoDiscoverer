@@ -205,7 +205,23 @@ public class CockpitEngine {
     }
     vibrateThread=null;
   }
-  
+
+  /** Creates cockpit infos from a string */
+  static public CockpitInfos createCockpitInfo(String infos) {
+    CockpitInfos cockpitInfos = new CockpitInfos();
+    String[] infosAsArray = infos.split(";");
+    cockpitInfos.locationBearing = infosAsArray[0];
+    cockpitInfos.locationSpeed = infosAsArray[1];
+    cockpitInfos.targetBearing = infosAsArray[2];
+    cockpitInfos.targetDistance = infosAsArray[3];
+    cockpitInfos.targetDuration = infosAsArray[4];
+    cockpitInfos.turnAngle = infosAsArray[5];
+    cockpitInfos.turnDistance = infosAsArray[6];
+    cockpitInfos.offRoute = infosAsArray[7].equals("off route");
+    cockpitInfos.routeDistance = infosAsArray[8];
+    return cockpitInfos;
+  }
+
   /** Updates the cockpit apps with new infos */
   public void update(String infosAsSSV, boolean forceUpdate) {
     
@@ -216,24 +232,14 @@ public class CockpitEngine {
     lastInfosAsSSV = infosAsSSV;
 
     // Obtain the dashboard infos
-    CockpitInfos cockpitInfos = new CockpitInfos();
     if (infosAsSSV.equals(""))
       return;
-    String[] infosAsArray = infosAsSSV.split(";");
-    cockpitInfos.locationBearing = infosAsArray[0];
-    cockpitInfos.locationSpeed = infosAsArray[1];
-    cockpitInfos.targetBearing = infosAsArray[2];
-    cockpitInfos.targetDistance = infosAsArray[3];
-    cockpitInfos.targetDuration = infosAsArray[4];
-    cockpitInfos.turnAngle = infosAsArray[5];
-    cockpitInfos.turnDistance = infosAsArray[6];
-    cockpitInfos.offRoute = infosAsArray[7].equals("off route");
-    cockpitInfos.routeDistance = infosAsArray[8];
+    CockpitInfos cockpitInfos = createCockpitInfo(infosAsSSV);
     currentTurnDistance = cockpitInfos.turnDistance;
     currentOffRoute = cockpitInfos.offRoute;
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "update: currentOffRoute=" + Boolean.toString(currentOffRoute));
     
-    // If the turn has appeared or disappears, force an update
+    // If the turn has appeared or disappears or we are off route, force an update
     if ((currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals("-")))
       forceUpdate=true;
     if ((!currentTurnDistance.equals("-"))&&(lastTurnDistance.equals("-")))

@@ -24,7 +24,10 @@ package com.untouchableapps.android.geodiscoverer;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.PixelFormat;
 import android.opengl.GLES20;
@@ -386,6 +389,8 @@ public class WatchFace extends Gles2WatchFaceService {
 
   private class Engine extends Gles2WatchFaceService.Engine {
 
+    BroadcastReceiver screenStateReceiver = null;
+
     @Override
     public void onCreate(SurfaceHolder surfaceHolder) {
       super.onCreate(surfaceHolder);
@@ -398,14 +403,36 @@ public class WatchFace extends Gles2WatchFaceService {
           .setStatusBarGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM)
           .setHotwordIndicatorGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM)
           .setShowSystemUiTime(false)
-          .setShowUnreadCountIndicator(true)
+          .setShowUnreadCountIndicator(false)
           .setViewProtectionMode(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR)
           .setAcceptsTapEvents(true)
           .build());
+
+      // Get informed if screen is turned off
+      coreObject.executeAppCommand("setWearDeviceAlive(1)");
+      if (powerManager.isInteractive())
+        coreObject.executeAppCommand("setWearDeviceSleeping(0)");
+      else
+        coreObject.executeAppCommand("setWearDeviceSleeping(1)");
+      IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+      intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+      screenStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+            coreObject.executeAppCommand("setWearDeviceSleeping(1)");
+          } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+            coreObject.executeAppCommand("setWearDeviceSleeping(0)");
+          }
+        }
+      };
+      registerReceiver(screenStateReceiver, intentFilter);
     }
 
     @Override
     public void onDestroy() {
+      coreObject.executeAppCommand("setWearDeviceAlive(1)");
+      unregisterReceiver(screenStateReceiver);
       if (dialogLayout!=null)
         windowManager.removeView(dialogLayout);
       Message m=Message.obtain(coreObject.messageHandler);
@@ -429,6 +456,10 @@ public class WatchFace extends Gles2WatchFaceService {
     public void onAmbientModeChanged(boolean inAmbientMode) {
       super.onAmbientModeChanged(inAmbientMode);
       invalidate();
+      if (inAmbientMode)
+        coreObject.executeAppCommand("setWearDeviceSleeping(1)");
+      else
+        coreObject.executeAppCommand("setWearDeviceSleeping(0)");
     }
 
     @Override
