@@ -121,10 +121,13 @@ public class GDApplication extends Application implements GDAppInterface, Google
   Thread wearThread = null;
 
   /** Indicates if wear device is not shwoing anything */
-  static boolean wearDeviceSleeping = true;
+  private boolean wearDeviceSleeping = true;
 
   /** Indicates if wear device is active (watch face visible) */
-  static boolean wearDeviceAlive = false;
+  private boolean wearDeviceAlive = false;
+
+  /** Last command the wear thread has sent */
+  String wearLastCommand="";
 
   /** Called when the application starts */
   @Override
@@ -179,7 +182,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
             //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear command: " + command);
 
             // Only process command if device is alive
-            if (wearDeviceAlive) {
+            if ((wearDeviceAlive)||(command.equals("getWearDeviceAlive()"))) {
 
               // Check if it is necessary to send command
               long t=System.currentTimeMillis();
@@ -203,12 +206,13 @@ public class GDApplication extends Application implements GDAppInterface, Google
                       sendMessage = true;
                     else {
 
-                      // Always update the watch face every minute
+                      /* Always update the watch face every minute
                       if ((t-lastUpdate)>60*1000) {
                         sendMessage = true;
                       } else {
                         sendMessage = false;
-                      }
+                      }*/
+                      sendMessage=false;
                     }
                     prevSendMessageForced = false;
                   }
@@ -218,6 +222,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
               // Send command
               if (sendMessage) {
+                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
                 lastUpdate = t;
                 NodeApi.GetConnectedNodesResult nodes =
                     Wearable.NodeApi.getConnectedNodes(googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
@@ -229,6 +234,10 @@ public class GDApplication extends Application implements GDAppInterface, Google
                         command.getBytes()).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
                   }
                 }
+                wearLastCommand="";
+              } else {
+                wearLastCommand=command;
+                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "lastCommand=" + wearLastCommand);
               }
             }
           }
@@ -455,6 +464,19 @@ public class GDApplication extends Application implements GDAppInterface, Google
   // Sends a command to the wear device
   public void sendWearCommand( final String command ) {
     wearCommands.offer(command);
+  }
+
+  // Informs the application about the wear sleep state
+  public void setWearDeviceSleeping(boolean state) {
+    wearDeviceSleeping=state;
+    if ((wearDeviceAlive)&&(!wearLastCommand.equals(""))) {
+      sendWearCommand(wearLastCommand);
+    }
+  }
+
+  // Informs the application about the wear sleep state
+  public void setWearDeviceAlive(boolean state) {
+    wearDeviceAlive=state;
   }
 
 }
