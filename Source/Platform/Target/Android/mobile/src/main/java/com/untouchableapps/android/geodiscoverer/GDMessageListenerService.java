@@ -38,18 +38,18 @@ public class GDMessageListenerService extends WearableListenerService{
     if (messageEvent.getPath().equals("/com.untouchableapps.android.geodiscoverer")) {
       String cmd = new String(messageEvent.getData());
       if (cmd.startsWith("setWearDeviceSleeping(1)")) {
-        GDApplication.wearDeviceAlive = true;
-        GDApplication.wearDeviceSleeping = true;
+        ((GDApplication)getApplication()).setWearDeviceAlive(true);
+        ((GDApplication)getApplication()).setWearDeviceSleeping(true);
       }
       if (cmd.startsWith("setWearDeviceSleeping(0)")) {
-        GDApplication.wearDeviceAlive = true;
-        GDApplication.wearDeviceSleeping = false;
+        ((GDApplication)getApplication()).setWearDeviceAlive(true);
+        ((GDApplication)getApplication()).setWearDeviceSleeping(false);
       }
       if (cmd.startsWith("setWearDeviceAlive(1)")) {
-        GDApplication.wearDeviceAlive = true;
+        ((GDApplication) getApplication()).setWearDeviceAlive(true);
       }
       if (cmd.startsWith("setWearDeviceAlive(0)")) {
-        GDApplication.wearDeviceAlive = false;
+        ((GDApplication)getApplication()).setWearDeviceAlive(false);
       }
       //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","wearDeviceSleeping=" + String.valueOf(GDApplication.wearDeviceSleeping));
       //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","wearDeviceAlive=" + String.valueOf(GDApplication.wearDeviceAlive));
