@@ -264,6 +264,9 @@ public:
   void setStatus(std::list<std::string> status, const char *file, int line) {
     core->getThread()->lockMutex(statusMutex, file, line);
     this->status = status;
+    /*for (std::list<std::string>::iterator i=status.begin();i!=status.end();i++) {
+      DEBUG("%s",i->c_str());
+    }*/
     core->getThread()->unlockMutex(statusMutex);
   }
 

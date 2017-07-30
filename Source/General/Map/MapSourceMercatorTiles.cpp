@@ -823,7 +823,7 @@ void MapSourceMercatorTiles::processDownloadJobs() {
   double averageMercatorTileSize=((double)c->getIntValue("Map","averageMercatorTileSize",__FILE__,__LINE__))/1024.0/1024.0;
   std::list<std::string> names=c->getAttributeValues("Map/DownloadJob","name",__FILE__,__LINE__);
   for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
-    //DEBUG("processing download job %s",(*i).c_str());
+    DEBUG("processing download job %s",(*i).c_str());
 
     // Set status
     std::list<std::string> status;
@@ -861,13 +861,19 @@ void MapSourceMercatorTiles::processDownloadJobs() {
     std::istringstream s(c->getStringValue(configPath,"zoomLevels",__FILE__,__LINE__));
     std::string t;
     Int zMap;
+    Int zMapNr=0;
+    std::list<Int> zMapList;
     while (std::getline(s,t,',')) {
       //DEBUG("t=%s",t.c_str());
       MapLayerNameMap::iterator i=mapLayerNameMap.find(t);
       if (i==mapLayerNameMap.end()) {
         FATAL("can not find map layer <%s>", t.c_str());
       }
-      zMap=i->second;
+      zMapList.push_back(i->second);
+    }
+    double zMapStep = 100.0/(double)zMapList.size();
+    for (std::list<Int>::iterator k=zMapList.begin();k!=zMapList.end();k++) {
+      zMap=*k;
       //DEBUG("zMap=%d",zMap);
 
       // Go through the route points if this is a route
@@ -980,7 +986,10 @@ void MapSourceMercatorTiles::processDownloadJobs() {
       for (std::list<MapArea>::iterator j=areas.begin();j!=areas.end();j++) {
         MapArea area=*j;
         status.pop_front();
-        std::stringstream progress; progress << "Processing download (" << areaNr*100/areas.size() << "%)";
+        double progressValue;
+        progressValue=round(zMapNr*zMapStep+areaNr*zMapStep/areas.size());
+        std::stringstream progress; progress << "Processing download (" << (Int) progressValue << "%)";
+        //DEBUG("progressValue=%f",progressValue);
         status.push_front(progress.str());
         setStatus(status, __FILE__, __LINE__);
         areaNr++;
@@ -1031,6 +1040,7 @@ void MapSourceMercatorTiles::processDownloadJobs() {
           }
         }
       }
+      zMapNr++;
     }
 
 nextJob:
