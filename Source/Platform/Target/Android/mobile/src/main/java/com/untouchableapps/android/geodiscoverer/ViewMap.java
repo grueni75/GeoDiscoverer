@@ -206,7 +206,7 @@ public class ViewMap extends GDActivity {
     public void handleMessage(Message msg) {
 
       // Abort if the object is not available anymore
-      ViewMap viewMap = weakViewMap.get();
+      final ViewMap viewMap = weakViewMap.get();
       if (viewMap==null)
         return;
 
@@ -346,22 +346,30 @@ public class ViewMap extends GDActivity {
             viewMap.processIntent();
 
             // Inform the user about the app drawer
-            if (!viewMap.prefs.getBoolean("navDrawerHintShown", false)) {
-              Snackbar
-              .make(viewMap.snackbarPosition,
-                  viewMap.getString(R.string.nav_drawer_hint), Snackbar.LENGTH_LONG)
-              .setAction(R.string.got_it, new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                  ViewMap viewMap = weakViewMap.get();
-                  if (viewMap!=null) {
-                    SharedPreferences.Editor prefsEditor = viewMap.prefs.edit();
-                    prefsEditor.putBoolean("navDrawerHintShown", true);
-                    prefsEditor.commit();
-                  }
+            if (!viewMap.prefs.getBoolean("bindDeviceAdminHintShown", false)) {
+
+              AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(viewMap);
+              builder.setTitle(R.string.device_admin_info_dialog_title);
+              builder.setIcon(android.R.drawable.ic_dialog_info);
+              builder.setMessage(R.string.device_admin_info_dialog_description);
+              builder.setCancelable(false);
+              builder.setNegativeButton(viewMap.getString(R.string.button_label_do_not_show_again), new DialogInterface.OnClickListener() {
+                public void onClick(final DialogInterface dialog, int which) {
+                  SharedPreferences.Editor prefsEditor = viewMap.prefs.edit();
+                  prefsEditor.putBoolean("bindDeviceAdminHintShown", true);
+                  prefsEditor.commit();
+                  showNavDrawerHint(viewMap);
                 }
-              })
-              .show();
+              });
+              builder.setPositiveButton(viewMap.getString(R.string.button_label_ok), new DialogInterface.OnClickListener() {
+                public void onClick(final DialogInterface dialog, int which) {
+                  showNavDrawerHint(viewMap);
+                }
+              });
+              builder.create().show();
+
+            } else {
+              showNavDrawerHint(viewMap);
             }
             commandExecuted=true;
           }
@@ -393,6 +401,27 @@ public class ViewMap extends GDActivity {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
           }
           break;
+      }
+    }
+
+    // Inform the user about the app drawer
+    protected void showNavDrawerHint(ViewMap viewMap) {
+      if (!viewMap.prefs.getBoolean("navDrawerHintShown", false)) {
+        Snackbar
+            .make(viewMap.snackbarPosition,
+                viewMap.getString(R.string.nav_drawer_hint), Snackbar.LENGTH_LONG)
+            .setAction(R.string.got_it, new OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                ViewMap viewMap = weakViewMap.get();
+                if (viewMap != null) {
+                  SharedPreferences.Editor prefsEditor = viewMap.prefs.edit();
+                  prefsEditor.putBoolean("navDrawerHintShown", true);
+                  prefsEditor.commit();
+                }
+              }
+            })
+            .show();
       }
     }
   }
