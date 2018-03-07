@@ -6,17 +6,26 @@ def computeVersionName() {
 }
 
 ext {
-    supportLibVersion = '23.2.1'
+    supportLibVersion = '27.1.0'
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "24.0.1"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.untouchableapps.android.geodiscoverer"
-        minSdkVersion 9
+        minSdkVersion 14
         targetSdkVersion 22
         versionCode 27
         versionName computeVersionName()
@@ -33,30 +42,27 @@ android {
     }
 
     applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            if (variant.name == "release") {
-                output.outputFile = new File(
-                        output.outputFile.parent,
-                        "GeoDiscovererMobile${variant.versionName}.apk")
-            }
+        variant.outputs.all {
+            outputFileName = "GeoDiscoverer-Mobile-${variant.name}-${variant.versionName}.apk";
         }
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    wearApp project(':wear')
-    compile "com.android.support:appcompat-v7:${supportLibVersion}"
-    compile "com.android.support:support-v4:${supportLibVersion}"
-    compile "com.android.support:design:${supportLibVersion}"
-    compile "com.android.support:recyclerview-v7:${supportLibVersion}"
-    compile "com.android.support:gridlayout-v7:${supportLibVersion}"
-    releaseCompile project(path: ':core', configuration: 'release')
-    debugCompile project(path: ':core', configuration: 'debug')
-    compile project(':materialDialogs')
-    compile project(':colorPickerPreference')
-    compile project(':jmDNS')
-    compile 'com.google.android.gms:play-services:8.1.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //wearApp project(':wear')
+    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
+    implementation "com.android.support:support-v4:${supportLibVersion}"
+    implementation "com.android.support:design:${supportLibVersion}"
+    implementation "com.android.support:recyclerview-v7:${supportLibVersion}"
+    implementation "com.android.support:gridlayout-v7:${supportLibVersion}"
+    implementation project(':core')
+    implementation project(':colorPickerPreference')
+    //implementation group: 'org.jmdns', name: 'jmdns', version: '3.5.3'
+    //implementation 'com.google.android.gms:play-services:11.8.0'
+    implementation 'com.google.android.gms:play-services-wearable:11.8.0'
+    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+    implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
 }
 
 task collectAssets(type: Exec) {
