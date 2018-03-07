@@ -176,7 +176,7 @@ Int MapSourceMercatorTiles::findBestMatchingZoomLevel(MapPosition pos, Int refZo
     double distToLngScale,distToLatScale;
     double lngScale,latScale;
     bool newCandidateFound;
-    if ((refZoomLevelMap==std::numeric_limits<Int>::min())||(refZoomLevelMap>=tileServer->getMinZoomLevelMap())&&(refZoomLevelMap<=tileServer->getMaxZoomLevelMap())) {
+    if ((refZoomLevelMap==std::numeric_limits<Int>::min())||((refZoomLevelMap>=tileServer->getMinZoomLevelMap())&&(refZoomLevelMap<=tileServer->getMaxZoomLevelMap()))) {
       for (int i=tileServer->getMinZoomLevelServer();i<=tileServer->getMaxZoomLevelServer();i++) {
         pos.computeMercatorTileBounds(i,latNorth,latSouth,lngWest,lngEast);
         lngScale=mapTileLength/fabs(lngEast-lngWest);

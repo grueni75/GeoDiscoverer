@@ -132,6 +132,10 @@ void Debug::print(Verbosity verbosity, const char *file, int line, bool messageL
         case verbosityInfo:
           GDApp_executeAppCommand("infoDialog(\"" + message + "\")");
           break;
+        case verbosityDebug:
+          break;
+        case verbosityTrace:
+          break;
       }
     }
 

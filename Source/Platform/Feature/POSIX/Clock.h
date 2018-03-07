@@ -22,7 +22,7 @@
 
 
 #ifndef CLOCK_H_
-#define ClOCK_H_
+#define CLOCK_H_
 
 namespace GEODISCOVERER {
 
