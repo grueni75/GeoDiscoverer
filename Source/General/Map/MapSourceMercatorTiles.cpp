@@ -407,15 +407,16 @@ MapTile *MapSourceMercatorTiles::findMapTileByGeographicCoordinate(MapPosition p
 
     // No, let's fetch it from the server or disk
     result = fetchMapTile(pos,zoomLevel);
-
   }
 
   // Check that there is not one on the disk/server that better matches the scale
-  if (!lockZoomLevel) {
-    Int minZoomLevelMap, minZoomLevelServer;
-    Int newZoomLevelMap = findBestMatchingZoomLevel(pos,std::numeric_limits<Int>::min(),minZoomLevelMap,minZoomLevelServer);
-    if (newZoomLevelMap!=result->getParentMapContainer()->getZoomLevelMap()) {
-      return fetchMapTile(pos,newZoomLevelMap);
+  if (result!=NULL) {
+    if (!lockZoomLevel) {
+      Int minZoomLevelMap, minZoomLevelServer;
+      Int newZoomLevelMap = findBestMatchingZoomLevel(pos,std::numeric_limits<Int>::min(),minZoomLevelMap,minZoomLevelServer);
+      if (newZoomLevelMap!=result->getParentMapContainer()->getZoomLevelMap()) {
+        return fetchMapTile(pos,newZoomLevelMap);
+      }
     }
   }
   return result;
