@@ -1,4 +1,2 @@
-include ':mobile', ':wear', ':materialDialogs', ':colorPickerPreference', ':jmDNS', ':core'
-project(':materialDialogs').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/material-dialogs/library')
+include ':mobile', ':wear', ':colorPickerPreference', ':core'
 project(':colorPickerPreference').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/ColorPickerPreference')
-project(':jmDNS').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/jmdns')

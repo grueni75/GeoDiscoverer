@@ -5,14 +5,17 @@ def computeVersionName() {
     return date.format('yyyyMMdd')
 }
 
+ext {
+    supportLibVersion = '27.1.0'
+}
+
 android {
-    compileSdkVersion 23
-    buildToolsVersion "24.0.1"
-    publishNonDefault true
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
 
     defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 23
+        minSdkVersion 14
+        targetSdkVersion 22
         versionCode 1
         versionName computeVersionName()
     }
@@ -35,9 +38,18 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:22.2.1'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
+    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
 }
 
 android.buildTypes.all{ buildType ->
