@@ -1161,19 +1161,19 @@ include $(BUILD_SHARED_LIBRARY)
 # Build google breakpad client
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdbreakpad
-MY_BREAKPAD_PATH := google-breakpad-20151218
+MY_BREAKPAD_PATH := google-breakpad-20180304
 LOCAL_CPP_EXTENSION := .cc
 LOCAL_ARM_MODE := arm
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/crash_generation/crash_generation_client.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/dump_writer_common/thread_info.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/dump_writer_common/ucontext_reader.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/handler/exception_handler.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/handler/minidump_descriptor.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/log/log.cc)
-LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/dump_writer_common/thread_info.cc)
-LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/dump_writer_common/ucontext_reader.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/microdump_writer/microdump_writer.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/linux_dumper.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/linux_ptrace_dumper.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/minidump_writer.cc)
-LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/microdump_writer/microdump_writer.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/minidump_file_writer.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/android/breakpad_getcontext.S)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/convert_UTF.c)
@@ -1185,7 +1185,7 @@ LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/guid_creato
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/linux_libc_support.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/memory_mapped_file.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/safe_readlink.cc)
-LOCAL_CPPFLAGS := -std=gnu++11 -D__STDC_LIMIT_MACROS -DMG_SKIP_WRITE_APP_MEMORY
+LOCAL_CPPFLAGS := -std=gnu++11 # -D__STDC_LIMIT_MACROS -DMG_SKIP_WRITE_APP_MEMORY
 LOCAL_CFLAGS := -Ijni/$(MY_BREAKPAD_PATH)/src/common/android/include -Ijni/$(MY_BREAKPAD_PATH)/src
 include $(BUILD_STATIC_LIBRARY)
 
@@ -1232,7 +1232,7 @@ LOCAL_CFLAGS += -Ijni/libpng-1.6.26
 LOCAL_CFLAGS += -Ijni/curl-7.51.0/include 
 LOCAL_CFLAGS += -Ijni/libzip-0.10.1/lib 
 LOCAL_CFLAGS += -Ijni/proj-4.8.0/src 
-LOCAL_CFLAGS += -Ijni/google-breakpad-20151218/src
+LOCAL_CFLAGS += -Ijni/google-breakpad-20180304/src
 LOCAL_CFLAGS += -Ijni/glm-0.9.6.3
 LOCAL_LDLIBS += -lz -dl -llog -lGLESv2 -lEGL
 LOCAL_SRC_FILES := GDCore.cpp $(MY_GD_PLATFORM_SRCS) $(MY_GD_GENERAL_SRCS)

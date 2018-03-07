@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#define __STDC_FORMAT_MACROS
+
 #include <jni.h>
 #include <Core.h>
 #include <sys/user.h>
