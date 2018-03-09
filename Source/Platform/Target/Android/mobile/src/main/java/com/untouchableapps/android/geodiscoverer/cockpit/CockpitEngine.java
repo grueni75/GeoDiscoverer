@@ -42,8 +42,6 @@ import java.nio.ByteOrder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.jmdns.JmDNS;
-
 public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitEngine {
 
   // Time info for deciding if silence needs to be played to wake up bluetooth device
@@ -167,9 +165,6 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
 
   // References for jmDNS
   WifiManager wifiManager;
-  protected JmDNS jmDNS = null;
-  protected GDDashboardServiceListener dashboardServiceListener = null;
-  WifiManager.MulticastLock multicastLock = null;
 
   // References for the network discovery via ARP lookup
   Thread lookupARPCacheThread = null;
@@ -224,39 +219,6 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
 
     // Search for geo dashboard devices if configured
     if (Integer.valueOf(app.coreObject.configStoreGetStringValue("Cockpit/App/Dashboard", "active"))>0) {
-
-      // Use zero conf to discover devices if configured
-      if (Integer.valueOf(app.coreObject.configStoreGetStringValue("Cockpit/App/Dashboard", "useZeroConf"))!=0) {
-        app.addMessage(app.DEBUG_MSG, "GDApp", "acquiring multicast lock");
-        if (wifiManager!=null) {
-          multicastLock = wifiManager.createMulticastLock("Geo Discoverer lock for JmDNS");
-          if (multicastLock!=null) {
-            multicastLock.setReferenceCounted(true);
-            multicastLock.acquire();
-            app.addMessage(app.DEBUG_MSG, "GDApp", "starting jmDNS");
-            InetAddress deviceAddress = getWifiInetAddress();
-            if (deviceAddress==null)
-              app.executeAppCommand("errorDialog(\"Can not start zero conf daemon! WLAN not active?\")");
-            else {
-              //Logger logger = Logger.getLogger("javax.jmdns.impl.SocketListener");
-              //logger.setLevel(Level.FINEST);
-              try {
-                jmDNS = JmDNS.create(deviceAddress);
-                dashboardServiceListener = new GDDashboardServiceListener(jmDNS);
-                jmDNS.addServiceListener(app.dashboardNetworkServiceType, dashboardServiceListener);
-                app.executeAppCommand("infoDialog(\"" + deviceAddress.toString() + "\")");
-              } catch (IOException e) {
-                app.addMessage(app.ERROR_MSG, "GDApp", e.getMessage());
-                app.executeAppCommand("errorDialog(\"Could not start zero conf daemon!\")");
-              }
-            }
-          } else {
-            app.executeAppCommand("errorDialog(\"Could not get multicast lock!\")");
-          }
-        } else {
-          app.executeAppCommand("errorDialog(\"No WiFi manager available?\")");
-        }
-      }
 
       // Use ARP cache lookups to discover devices if configured
       if (Integer.valueOf(app.coreObject.configStoreGetStringValue("Cockpit/App/Dashboard", "useAddressCacheLookup"))!=0) {
@@ -322,24 +284,7 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
     // Stop the network service
     stopNetworkService();
 
-    // Stop service discovery
-    if (dashboardServiceListener!=null) {
-      app.addMessage(app.DEBUG_MSG, "GDApp", "stopping jmDNS");
-      jmDNS.removeServiceListener(app.dashboardNetworkServiceType, dashboardServiceListener);
-      try {
-        jmDNS.close();
-      }
-      catch (IOException e) {
-        app.addMessage(app.DEBUG_MSG, "GDApp", e.getMessage());
-      }
-      jmDNS=null;
-      dashboardServiceListener=null;
-    }
-    if (multicastLock!=null) {
-      app.addMessage(app.DEBUG_MSG, "GDApp", "releasing multicast lock");
-      multicastLock.release();
-      multicastLock=null;
-    }
+    // Stop ARP cache lookup
     if (lookupARPCacheThread!=null) {
       app.addMessage(app.DEBUG_MSG, "GDApp", "stopping ARP cache lookup thread");
       quitLookupARPCacheThread = true;

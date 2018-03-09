@@ -190,11 +190,6 @@
                               <xsd:documentation>Network port to use when communicating with the dashboard app.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="useZeroConf" type="xsd:boolean" default="0" gd:upgrade="restore">
-                            <xsd:annotation>
-                              <xsd:documentation>Use zero configuration networking to discover geo dashboard devices.</xsd:documentation>
-                            </xsd:annotation>
-                          </xsd:element>                          
                           <xsd:element name="useAddressCacheLookup" type="xsd:boolean" default="1" gd:upgrade="restore">
                             <xsd:annotation>
                               <xsd:documentation>Lookup geo dashboard devices from the ARP cache.</xsd:documentation>
