@@ -945,6 +945,17 @@ std::list<std::string> MapSource::getMapLayerNames() {
   return result;
 }
 
+// Returns the currently selected map layer
+std::string MapSource::getSelectedMapLayer() {
+  MapLayerNameMap::iterator i;
+  Int selectedZoomLevel = core->getMapEngine()->getZoomLevel();
+  for (i=mapLayerNameMap.begin();i!=mapLayerNameMap.end();i++) {
+    if (i->second==selectedZoomLevel)
+      return i->first;
+  }
+  return "";
+}
+
 // Selects the given map layer
 void MapSource::selectMapLayer(std::string name) {
   MapLayerNameMap::iterator i=mapLayerNameMap.find(name);

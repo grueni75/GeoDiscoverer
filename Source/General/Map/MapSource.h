@@ -164,6 +164,9 @@ public:
   // Selects the given map layer
   void selectMapLayer(std::string name);
 
+  // Returns the currently selected map layer
+  std::string getSelectedMapLayer();
+
   // Adds a download job from the current visible map
   virtual void addDownloadJob(bool estimateOnly, std::string routeName, std::string zoomLevels);
 

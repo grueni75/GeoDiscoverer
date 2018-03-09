@@ -22,15 +22,14 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
-import com.afollestad.materialdialogs.AlertDialogWrapper;
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.v4.app.FragmentActivity;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 /** Base class for all activities */
 public class GDActivity extends AppCompatActivity {
@@ -64,26 +63,30 @@ public class GDActivity extends AppCompatActivity {
       GDApplication.showMessageBar(this, message, GDApplication.MESSAGE_BAR_DURATION_LONG);
     } else {
       if (alertDialog == null) {
-        AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
-        builder.setTitle(getTitle());
-        builder.setIcon(android.R.drawable.ic_dialog_alert);
-        builder.setMessage(message);
-        builder.setCancelable(false);
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+        builder.title(getTitle());
+        builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_alert));
+        builder.content(message);
+        builder.cancelable(false);
         if (kind == FATAL_DIALOG) {
-          builder.setPositiveButton(getString(R.string.button_label_exit), new DialogInterface.OnClickListener() {
-            public void onClick(final DialogInterface dialog, int which) {
+          builder.positiveText(R.string.button_label_exit);
+          builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
               alertDialog=null;
               finish();
-            } 
-          }); 
+            }
+          });
         } else {
-          builder.setPositiveButton(getString(R.string.button_label_ok), new DialogInterface.OnClickListener() {
-            public void onClick(final DialogInterface dialog, int which) {
+          builder.positiveText(R.string.button_label_ok);
+          builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
               alertDialog=null;
             }
-          }); 
+          });
         }
-        alertDialog=builder.create();
+        alertDialog=builder.build();
         alertDialog.show();
       } else {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping dialog request <" + message + "> because alert dialog is already visible");

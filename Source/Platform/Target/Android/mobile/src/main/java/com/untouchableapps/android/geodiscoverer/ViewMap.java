@@ -52,6 +52,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -73,7 +74,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.AlertDialogWrapper;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
@@ -348,25 +348,29 @@ public class ViewMap extends GDActivity {
             // Inform the user about the app drawer
             if (!viewMap.prefs.getBoolean("bindDeviceAdminHintShown", false)) {
 
-              AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(viewMap);
-              builder.setTitle(R.string.device_admin_info_dialog_title);
-              builder.setIcon(android.R.drawable.ic_dialog_info);
-              builder.setMessage(R.string.device_admin_info_dialog_description);
-              builder.setCancelable(false);
-              builder.setNegativeButton(viewMap.getString(R.string.button_label_do_not_show_again), new DialogInterface.OnClickListener() {
-                public void onClick(final DialogInterface dialog, int which) {
-                  SharedPreferences.Editor prefsEditor = viewMap.prefs.edit();
-                  prefsEditor.putBoolean("bindDeviceAdminHintShown", true);
-                  prefsEditor.commit();
+              MaterialDialog.Builder builder = new MaterialDialog.Builder(viewMap);
+              builder.title(R.string.device_admin_info_dialog_title);
+              builder.icon(viewMap.getResources().getDrawable(android.R.drawable.ic_dialog_info));
+              builder.content(R.string.device_admin_info_dialog_description);
+              builder.cancelable(false);
+              builder.negativeText(viewMap.getString(R.string.button_label_do_not_show_again));
+              builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+                 @Override
+                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                   SharedPreferences.Editor prefsEditor = viewMap.prefs.edit();
+                   prefsEditor.putBoolean("bindDeviceAdminHintShown", true);
+                   prefsEditor.commit();
+                   showNavDrawerHint(viewMap);
+                 }
+               });
+              builder.positiveText(viewMap.getString(R.string.button_label_ok));
+              builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                   showNavDrawerHint(viewMap);
                 }
               });
-              builder.setPositiveButton(viewMap.getString(R.string.button_label_ok), new DialogInterface.OnClickListener() {
-                public void onClick(final DialogInterface dialog, int which) {
-                  showNavDrawerHint(viewMap);
-                }
-              });
-              builder.create().show();
+              builder.build().show();
 
             } else {
               showNavDrawerHint(viewMap);
@@ -494,7 +498,7 @@ public class ViewMap extends GDActivity {
     final String address = new String();
     final MaterialDialog dialog=builder.build();
     final EditText editText = (EditText) dialog.getCustomView().findViewById(R.id.dialog_address_input_text);
-    builder.formatEditText(editText);
+    //builder.formatEditText(editText);
     editText.setText(text);
     editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
     ListView listView = (ListView) dialog.getCustomView().findViewById(R.id.dialog_address_history_list);
@@ -557,7 +561,7 @@ public class ViewMap extends GDActivity {
     });
     final MaterialDialog alert = builder.build();
     final EditText editText = (EditText) alert.getCustomView().findViewById(R.id.dialog_route_name_input_text);
-    builder.formatEditText(editText);
+    //builder.formatEditText(editText);
     editText.setText(gpxName);
     final TextView routeExistsTextView = (TextView) alert.getCustomView().findViewById(R.id.dialog_route_name_route_exists_warning);
     TextWatcher textWatcher = new TextWatcher() {
@@ -589,65 +593,70 @@ public class ViewMap extends GDActivity {
 
   /** Asks the user if the core shall be resetted */
   void askForConfigReset() {
-    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
-    builder.setTitle(getTitle());
-    builder.setMessage(R.string.reset_question);
-    builder.setCancelable(true);
-    builder.setPositiveButton(R.string.yes,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            restartCore(true);
-          }
-        });
-    builder.setNegativeButton(R.string.no, null);
-    builder.setIcon(android.R.drawable.ic_dialog_alert);
-    Dialog alert = builder.create();
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
+    builder.title(getTitle());
+    builder.content(R.string.reset_question);
+    builder.cancelable(true);
+    builder.positiveText(R.string.yes);
+    builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        restartCore(true);
+      }
+    });
+    builder.negativeText(R.string.no);
+    builder.icon(getDrawable(android.R.drawable.ic_dialog_alert));
+    Dialog alert = builder.build();
     alert.show();
   }
 
   /** Asks the user if the only the current zoom level or all zoom levels shall be removed */
   void askForMapCleanup() {
-    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
-    builder.setTitle(getTitle());
-    builder.setMessage(R.string.map_cleanup_question);
-    builder.setCancelable(true);
-    builder.setPositiveButton(R.string.map_cleanup_all_zoom_levels,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            coreObject.executeCoreCommand("forceMapRedownload(1)");
-          }
-        });
-    builder.setNegativeButton(R.string.map_cleanup_current_zoom_level,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            coreObject.executeCoreCommand("forceMapRedownload(0)");
-          }
-        });
-    builder.setIcon(android.R.drawable.ic_dialog_alert);
-    Dialog alert = builder.create();
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
+    builder.title(getTitle());
+    builder.content(R.string.map_cleanup_question);
+    builder.cancelable(true);
+    builder.positiveText(R.string.map_cleanup_all_zoom_levels);
+    builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        coreObject.executeCoreCommand("forceMapRedownload(1)");
+      }
+    });
+    builder.negativeText(R.string.map_cleanup_current_zoom_level);
+    builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        coreObject.executeCoreCommand("forceMapRedownload(0)");
+      }
+    });
+    builder.icon(getDrawable(android.R.drawable.ic_dialog_alert));
+    Dialog alert = builder.build();
     alert.show();
   }
 
   /** Asks the user if the visible map or a map along a route shall be downloaded */
   void askForMapDownloadType() {
-    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
-    builder.setTitle(getTitle());
-    builder.setMessage(R.string.map_download_type_question);
-    builder.setCancelable(true);
-    builder.setPositiveButton(R.string.map_download_type_option1,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            askForMapDownloadDetails("");
-          }
-        });
-    builder.setNegativeButton(R.string.map_download_type_option2,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            coreObject.executeCoreCommand("downloadActiveRoute()");
-          }
-        });
-    builder.setIcon(android.R.drawable.ic_dialog_alert);
-    Dialog alert = builder.create();
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
+    builder.title(getTitle());
+    builder.content(R.string.map_download_type_question);
+    builder.cancelable(true);
+    builder.positiveText(R.string.map_download_type_option1);
+    builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        askForMapDownloadDetails("");
+      }
+    });
+    builder.negativeText(R.string.map_download_type_option2);
+    builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        coreObject.executeCoreCommand("downloadActiveRoute()");
+      }
+    });
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_alert));
+    Dialog alert = builder.build();
     alert.show();
   }
 
@@ -657,14 +666,15 @@ public class ViewMap extends GDActivity {
     final String[] mapLayers=result.split(",");
     final String commandArgs=new String();
     final LinkedList<String> selectedMapLayers = new LinkedList<String>();
-    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
-    builder.setTitle(R.string.download_job_level_selection_question);
-    builder.setMultiChoiceItems(mapLayers, null, null);
-    builder.setCancelable(true);
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    builder.setPositiveButton(R.string.finished, new DialogInterface.OnClickListener() {
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+    builder.title(R.string.download_job_level_selection_question);
+    builder.items(mapLayers);
+    builder.cancelable(true);
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    builder.positiveText(R.string.finished);
+    builder.onPositive(new MaterialDialog.SingleButtonCallback() {
       @Override
-      public void onClick(DialogInterface dialog, int which) {
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
         mapDownloadDialog = null;
         if (selectedMapLayers.size() > 0) {
           String args = TextUtils.join(",", selectedMapLayers);
@@ -672,21 +682,17 @@ public class ViewMap extends GDActivity {
         }
       }
     });
-    builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+    builder.negativeText(R.string.cancel);
+    builder.onNegative(new MaterialDialog.SingleButtonCallback() {
       @Override
-      public void onClick(DialogInterface dialog, int which) {
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
         mapDownloadDialog = null;
       }
     });
-    builder.setMessage(R.string.download_job_no_level_selected_message);
-    mapDownloadDialog = (MaterialDialog)builder.create();
-    mapDownloadDialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
-    ListView multiChoiceItemsListView = mapDownloadDialog.getListView();
-    final AdapterView.OnItemClickListener originalListener=multiChoiceItemsListView.getOnItemClickListener();
-    multiChoiceItemsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+    builder.content(R.string.download_job_no_level_selected_message);
+    builder.itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
       @Override
-      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        originalListener.onItemClick(parent,view,position,id);
+      public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
         Integer indexes[] = mapDownloadDialog.getSelectedIndices();
         selectedMapLayers.clear();
         for (Integer i : indexes) {
@@ -700,26 +706,32 @@ public class ViewMap extends GDActivity {
           mapDownloadDialog.setContent(R.string.download_job_no_level_selected_message);
         }
         mapDownloadDialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
+        return true;
       }
     });
+    builder.alwaysCallMultiChoiceCallback();
+    mapDownloadDialog = (MaterialDialog)builder.build();
+    mapDownloadDialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
     mapDownloadDialog.show();
   }
 
   /** Asks the user which map legend to show */
   void askForMapLegend(final String[] names) {
-    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
-    builder.setTitle(R.string.map_legend_selection_question);
-    builder.setItems(names,
-        new DialogInterface.OnClickListener() {
-          @Override
-          public void onClick(DialogInterface dialog, int which) {
-            showMapLegend(names[which]);
-          }
-        });
-    builder.setCancelable(true);
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    builder.setNegativeButton(R.string.cancel, null);
-    Dialog alert = builder.create();
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+    builder.title(R.string.map_legend_selection_question);
+    builder.items(names);
+    builder.itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+      @Override
+      public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+        showMapLegend(names[which]);
+        dialog.dismiss();
+        return true;
+      }
+    });
+    builder.cancelable(true);
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    builder.negativeText(R.string.cancel);
+    Dialog alert = builder.build();
     alert.show();
   }
 
@@ -739,45 +751,57 @@ public class ViewMap extends GDActivity {
 
   /** Asks the user if the track shall be continued or a new track shall be started */
   void decideContinueOrNewTrack() {
-    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(ViewMap.this);
-    builder.setTitle(getTitle());
-    builder.setMessage(R.string.continue_or_new_track_question);
-    builder.setCancelable(true);
-    builder.setPositiveButton(R.string.new_track,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            coreObject.executeCoreCommand("setRecordTrack(1)");
-            coreObject.executeCoreCommand("createNewTrack()");
-          }
-        });
-    builder.setNegativeButton(R.string.contine_track,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            coreObject.executeCoreCommand("setRecordTrack(1)");
-          }
-        });
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    Dialog alert = builder.create();
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
+    builder.title(getTitle());
+    builder.content(R.string.continue_or_new_track_question);
+    builder.cancelable(true);
+    builder.positiveText(R.string.new_track);
+    builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        coreObject.executeCoreCommand("setRecordTrack(1)");
+        coreObject.executeCoreCommand("createNewTrack()");
+      }
+    });
+    builder.negativeText(R.string.contine_track);
+    builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        coreObject.executeCoreCommand("setRecordTrack(1)");
+      }
+    });
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    Dialog alert = builder.build();
     alert.show();
   }
 
   /** Asks the user if which map layer shall be selected */
   void changeMapLayer() {
-    String result=coreObject.executeCoreCommand("getMapLayers()");
-    final String[] mapLayers=result.split(",");
-    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
-    builder.setTitle(R.string.map_layer_selection_question);
-    builder.setItems(mapLayers,
-        new DialogInterface.OnClickListener() {
-          @Override
-          public void onClick(DialogInterface dialog, int which) {
-            coreObject.executeCoreCommand("selectMapLayer(" + mapLayers[which]  + ")");
-          }
-        });
-    builder.setCancelable(true);
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    builder.setNegativeButton(R.string.cancel, null);
-    Dialog alert = builder.create();
+    String layers=coreObject.executeCoreCommand("getMapLayers()");
+    String selectedLayer=coreObject.executeCoreCommand("getSelectedMapLayer()");
+    final String[] mapLayers=layers.split(",");
+    int index=-1;
+    for (int i=0;i<mapLayers.length;i++) {
+      if (mapLayers[i].equals(selectedLayer)) {
+        index = i;
+        break;
+      }
+    }
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+    builder.title(R.string.map_layer_selection_question);
+    builder.items(mapLayers);
+    builder.itemsCallbackSingleChoice(index, new MaterialDialog.ListCallbackSingleChoice() {
+      @Override
+      public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+        coreObject.executeCoreCommand("selectMapLayer(" + mapLayers[which]  + ")");
+        dialog.dismiss();
+        return true;
+      }
+    });
+    builder.cancelable(true);
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    builder.negativeText(R.string.cancel);
+    Dialog alert = builder.build();
     alert.show();
   }
 
@@ -1097,26 +1121,28 @@ public class ViewMap extends GDActivity {
   void openWelcomeDialog() {
 
     // Create the dialog
-    AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
-    builder.setTitle(R.string.welcome_dialog_title);
-    builder.setMessage(R.string.welcome_dialog_message);
-    builder.setCancelable(true);
-    builder.setPositiveButton(R.string.button_label_ok, null);
-    builder.setNeutralButton(R.string.button_label_donate,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            donate();
-          }
-        });
-    builder.setNegativeButton(R.string.button_label_help,
-        new DialogInterface.OnClickListener() {
-          public void onClick(DialogInterface dialog, int which) {
-            Intent intent = new Intent(getApplicationContext(), ShowHelp.class);
-            startActivity(intent);
-          }
-        });
-    builder.setIcon(android.R.drawable.ic_dialog_info);
-    Dialog alert = builder.create();
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+    builder.title(R.string.welcome_dialog_title);
+    builder.content(R.string.welcome_dialog_message);
+    builder.cancelable(true);
+    builder.positiveText(R.string.button_label_ok);
+    builder.neutralText(R.string.button_label_donate);
+    builder.onNeutral(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        donate();
+      }
+    });
+    builder.negativeText(R.string.button_label_help);
+    builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        Intent intent = new Intent(getApplicationContext(), ShowHelp.class);
+        startActivity(intent);
+      }
+    });
+    builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+    Dialog alert = builder.build();
     alert.show();
   }
 
@@ -1340,41 +1366,40 @@ public class ViewMap extends GDActivity {
 
         // Ask the user if GPX file shall be downloaded and overwritten if file exists
         final File dstFile = new File(dstFilename);
-        AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
-        builder.setTitle(getTitle());
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+        builder.title(getTitle());
         String message;
         if (dstFile.exists())
           message=getString(R.string.overwrite_route_question);
         else
           message=getString(R.string.copy_route_question);
         message = String.format(message, name);
-        builder.setMessage(message);
-        builder.setCancelable(true);
-        builder.setPositiveButton(R.string.yes,
-          new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
+        builder.content(message);
+        builder.cancelable(true);
+        builder.positiveText(R.string.yes);
+        builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+          @Override
+          public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+            // Delete file if it exists
+            if (dstFile.exists())
+              dstFile.delete();
 
-              // Delete file if it exists
-              if (dstFile.exists())
-                dstFile.delete();
-
-              // Request download of file
-              DownloadManager.Request request = new DownloadManager.Request(srcURI);
-              request.setDescription(getString(R.string.downloading_gpx_to_route_directory));
-              request.setTitle(name);
-              request.setDestinationUri(Uri.fromFile(dstFile));
-              //request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-              long id = downloadManager.enqueue(request);
-              Bundle download = new Bundle();
-              download.putLong("ID", id);
-              download.putString("Name",name);
-              downloads.add(download);
-
-            }
-          });
-        builder.setNegativeButton(R.string.no, null);
-        builder.setIcon(android.R.drawable.ic_dialog_info);
-        Dialog alert = builder.create();
+            // Request download of file
+            DownloadManager.Request request = new DownloadManager.Request(srcURI);
+            request.setDescription(getString(R.string.downloading_gpx_to_route_directory));
+            request.setTitle(name);
+            request.setDestinationUri(Uri.fromFile(dstFile));
+            //request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            long id = downloadManager.enqueue(request);
+            Bundle download = new Bundle();
+            download.putLong("ID", id);
+            download.putString("Name",name);
+            downloads.add(download);
+          }
+        });
+        builder.negativeText(R.string.no);
+        builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+        Dialog alert = builder.build();
         alert.show();
       }
 
@@ -1509,6 +1534,7 @@ public class ViewMap extends GDActivity {
             coreObject.messageHandler.sendMessage(m);
             break;
           case R.id.nav_toggle_messages:
+            messageLayout=null;
             if (messageLayout.getVisibility()==LinearLayout.VISIBLE) {
               messageLayout.setVisibility(LinearLayout.INVISIBLE);
             } else {
@@ -1720,28 +1746,29 @@ public class ViewMap extends GDActivity {
           mapFolderFilename = mapFolderFilename.substring(0, mapFolderFilename.lastIndexOf('.'));
           final String mapInfoFilename = mapFolderFilename + "/info.gds";
           final File mapFolder = new File(mapFolderFilename);
-          AlertDialogWrapper.Builder builder = new AlertDialogWrapper.Builder(this);
-          builder.setTitle(R.string.import_map);
+          MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
+          builder.title(R.string.import_map);
           String message;
           if (mapFolder.exists())
             message=getString(R.string.replace_map_folder_question,mapFolder.getName(),srcFile);
           else
             message=getString(R.string.create_map_folder_question,mapFolder.getName(),srcFile);
-          builder.setMessage(message);
-          builder.setCancelable(true);
-          builder.setPositiveButton(R.string.yes,
-            new DialogInterface.OnClickListener() {
-              public void onClick(DialogInterface dialog, int which) {
-                ImportMapArchivesTask task = new ImportMapArchivesTask();
-                task.srcFile = srcFile;
-                task.mapFolder = mapFolder;
-                task.mapInfoFilename = mapInfoFilename;
-                task.execute();
-              }
-            });
-          builder.setNegativeButton(R.string.no, null);
-          builder.setIcon(android.R.drawable.ic_dialog_info);
-          Dialog alert = builder.create();
+          builder.content(message);
+          builder.cancelable(true);
+          builder.positiveText(R.string.yes);
+          builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+              ImportMapArchivesTask task = new ImportMapArchivesTask();
+              task.srcFile = srcFile;
+              task.mapFolder = mapFolder;
+              task.mapInfoFilename = mapInfoFilename;
+              task.execute();
+            }
+          });
+          builder.negativeText(R.string.no);
+          builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
+          Dialog alert = builder.build();
           alert.show();
         }
 

@@ -96,7 +96,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
       ViewHolder viewHolder = new ViewHolder();
       viewHolder.text = (TextView) rowView.findViewById(R.id.dialog_address_history_entry_text);
       viewHolder.editText = (EditText) rowView.findViewById(R.id.dialog_address_history_entry_edit_text);
-      builder.formatEditText(viewHolder.editText);
+      //builder.formatEditText(viewHolder.editText);
       viewHolder.editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
       viewHolder.removeButton = (ImageButton) rowView.findViewById(R.id.dialog_address_history_entry_remove_button);
       DrawableCompat.setTintList(viewHolder.removeButton.getDrawable(),itemIconTint);

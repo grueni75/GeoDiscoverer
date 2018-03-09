@@ -9,11 +9,6 @@ import java.io.IOException;
 import org.acra.collector.CrashReportData;
 import org.acra.util.ToastSender;
 
-import com.afollestad.materialdialogs.AlertDialogWrapper;
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.untouchableapps.android.geodiscoverer.R;
-
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.DialogInterface;
@@ -21,6 +16,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputType;
@@ -33,12 +29,15 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+
 /**
  * This is the dialog Activity used by ACRA to get authorization from the user
  * to send reports. Requires android:launchMode="singleInstance" in your
  * AndroidManifest to work properly.
  **/
-public class CrashReportDialog extends AppCompatActivity implements DialogInterface.OnClickListener, OnDismissListener {
+public class CrashReportDialog extends AppCompatActivity implements MaterialDialog.SingleButtonCallback, OnDismissListener {
     private static final String STATE_EMAIL = "email";
     private static final String STATE_COMMENT = "comment";
     private SharedPreferences prefs;
@@ -64,26 +63,28 @@ public class CrashReportDialog extends AppCompatActivity implements DialogInterf
         if (mReportFileName == null) {
             finish();
         }
-        AlertDialogWrapper.Builder dialogBuilder = new AlertDialogWrapper.Builder(this);
+        MaterialDialog.Builder dialogBuilder = new MaterialDialog.Builder(this);
         int resourceId = ACRA.getConfig().resDialogTitle();
         if(resourceId != 0) {
-            dialogBuilder.setTitle(resourceId);
+            dialogBuilder.title(resourceId);
         }
         resourceId = ACRA.getConfig().resDialogIcon();
         if(resourceId != 0) {
-            dialogBuilder.setIcon(resourceId);
+            dialogBuilder.icon(getResources().getDrawable(resourceId));
         }
-        dialogBuilder.setView(buildCustomView(dialogBuilder,savedInstanceState));
-        dialogBuilder.setPositiveButton(android.R.string.ok, CrashReportDialog.this);
-        dialogBuilder.setNegativeButton(android.R.string.cancel, CrashReportDialog.this);
+        dialogBuilder.customView(buildCustomView(dialogBuilder,savedInstanceState),true);
+        dialogBuilder.positiveText(android.R.string.ok);
+        dialogBuilder.onPositive(CrashReportDialog.this);
+        dialogBuilder.negativeText(android.R.string.cancel);
+        dialogBuilder.onNegative(CrashReportDialog.this);
         cancelNotification();
-        mDialog = dialogBuilder.create();
+        mDialog = dialogBuilder.build();
         mDialog.setCanceledOnTouchOutside(false);
         mDialog.setOnDismissListener(this);
         mDialog.show();
     }
 
-    private View buildCustomView(AlertDialogWrapper.Builder builder, Bundle savedInstanceState) {
+    private View buildCustomView(MaterialDialog.Builder builder, Bundle savedInstanceState) {
         final float textSize = 16;
         final LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -123,7 +124,7 @@ public class CrashReportDialog extends AppCompatActivity implements DialogInterf
 
             userComment = new AppCompatEditText(this);
 
-            builder.formatEditText(userComment);
+            //builder.formatEditText(userComment);
             userComment.setTextSize(textSize);
             userComment.setLines(3);
             userComment.setGravity(Gravity.TOP);
@@ -148,7 +149,7 @@ public class CrashReportDialog extends AppCompatActivity implements DialogInterf
 
             userEmail = new AppCompatEditText(this);
 
-            builder.formatEditText(userEmail);
+            //builder.formatEditText(userEmail);
             userEmail.setSingleLine();
             userEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
             userEmail.setTextSize(textSize);
@@ -177,14 +178,16 @@ public class CrashReportDialog extends AppCompatActivity implements DialogInterf
         notificationManager.cancel(ACRAConstants.NOTIF_CRASH_ID);
     }
 
-    public void onClick(DialogInterface dialog, int which) {
-        if (which == DialogInterface.BUTTON_POSITIVE)
+    @Override
+    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        if (which == DialogAction.POSITIVE)
             sendCrash();
         else {
             cancelReports();
         }
         finish();
         ErrorReporter.dialogWaitEnded = true;
+
     }
 
     private void cancelReports() {

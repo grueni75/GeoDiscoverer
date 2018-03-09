@@ -538,6 +538,14 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="getSelectedMapLayer") {
+    if (core->getIsInitialized()) {
+      result=core->getMapSource()->getSelectedMapLayer();
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
+    }
+    cmdExecuted=true;
+  }
   if (cmdName=="getMapDownloadActive") {
     result="false";
     if (core->getIsInitialized()) {
