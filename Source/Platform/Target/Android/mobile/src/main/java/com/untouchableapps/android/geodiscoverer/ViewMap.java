@@ -1534,7 +1534,6 @@ public class ViewMap extends GDActivity {
             coreObject.messageHandler.sendMessage(m);
             break;
           case R.id.nav_toggle_messages:
-            messageLayout=null;
             if (messageLayout.getVisibility()==LinearLayout.VISIBLE) {
               messageLayout.setVisibility(LinearLayout.INVISIBLE);
             } else {
