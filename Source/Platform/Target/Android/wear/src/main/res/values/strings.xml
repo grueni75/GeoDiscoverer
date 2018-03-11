@@ -1,6 +1,8 @@
 <resources>
-  <string name="app_name">Geo Discoverer</string>
-  <string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
-  <string name="opengles20_required">App requires OpenGL ES 2.0!</string>
-  <string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
+    <string name="app_name">Geo Discoverer</string>
+    <string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
+    <string name="opengles20_required">App requires OpenGL ES 2.0!</string>
+    <string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
+    <string name="title_activity_dialog">Dialog</string>
+    <string name="permission_instructions">Please grant required permissions and re-open watch face</string>
 </resources>

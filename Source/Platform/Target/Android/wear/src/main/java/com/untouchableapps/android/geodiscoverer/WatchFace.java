@@ -22,6 +22,7 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -29,7 +30,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ConfigurationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.Build;
 import android.os.Bundle;
@@ -70,14 +73,8 @@ public class WatchFace extends Gles2WatchFaceService {
   WindowManager windowManager = null;
   LayoutInflater inflater = null;
 
-  // Dialog window
-  FrameLayout dialogLayout = null;
-  TextView progressDialogText;
-  ProgressBar progressDialogBar;
-  LinearLayout progressDialogLayout;
-  TextView messageDialogText;
-  ImageButton messageDialogImageButton;
-  LinearLayout messageDialogLayout;
+  // Indicates if the dialog is open
+  boolean dialogVisible = false;
 
   // Wake lock
   PowerManager.WakeLock wakeLock = null;
@@ -107,37 +104,10 @@ public class WatchFace extends Gles2WatchFaceService {
     } else if (kind==INFO_DIALOG) {
       GDApplication.showMessageBar(getApplicationContext(), message, GDApplication.MESSAGE_BAR_DURATION_LONG);
     } else {
-      if (dialogLayout==null) {
-        dialogLayout = (FrameLayout) inflater.inflate(R.layout.dialog, null);
-        messageDialogText = (TextView) dialogLayout.findViewById(R.id.message_dialog_text);
-        messageDialogImageButton = (ImageButton) dialogLayout.findViewById(R.id.message_dialog_button);
-        messageDialogLayout = (LinearLayout) dialogLayout.findViewById(R.id.message_dialog);
-        WindowManager.LayoutParams params =  new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, 0, PixelFormat.TRANSLUCENT);
-        windowManager.addView(dialogLayout,params);
-        messageDialogText.setText(message);
-        if (kind == FATAL_DIALOG) {
-          messageDialogImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              windowManager.removeView(dialogLayout);
-              dialogLayout=null;
-              System.exit(1);
-            }
-          });
-        } else {
-          messageDialogImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              windowManager.removeView(dialogLayout);
-              dialogLayout=null;
-            }
-          });
-        }
-        messageDialogLayout.setVisibility(messageDialogLayout.VISIBLE);
-        dialogLayout.requestLayout();
-      } else {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping dialog request <" + message + "> because alert dialog is already visible");
-      }
+      Intent intent = new Intent(this, Dialog.class);
+      intent.putExtra(Dialog.EXTRA_TEXT, message);
+      intent.putExtra(Dialog.EXTRA_KIND, kind);
+      startActivity(intent);
     }
   }
 
@@ -264,38 +234,32 @@ public class WatchFace extends Gles2WatchFaceService {
           if (commandFunction.equals("createProgressDialog")) {
 
             // Create a new dialog if it does not yet exist
-            if (watchFace.dialogLayout==null) {
-              watchFace.dialogLayout = (FrameLayout) watchFace.inflater.inflate(R.layout.dialog, null);
-              watchFace.progressDialogText = (TextView) watchFace.dialogLayout.findViewById(R.id.progress_dialog_text);
-              watchFace.progressDialogBar = (ProgressBar) watchFace.dialogLayout.findViewById(R.id.progress_dialog_bar);
-              watchFace.progressDialogLayout = (LinearLayout) watchFace.dialogLayout.findViewById(R.id.progress_dialog);
-              WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, 0, PixelFormat.TRANSLUCENT);
-              watchFace.windowManager.addView(watchFace.dialogLayout, params);
-              watchFace.progressDialogText.setText(commandArgs.get(0));
+            if (!watchFace.dialogVisible) {
+              Intent intent = new Intent(watchFace, Dialog.class);
+              intent.putExtra(Dialog.EXTRA_TEXT, commandArgs.get(0));
               int max = Integer.parseInt(commandArgs.get(1));
-              watchFace.progressDialogBar.setIndeterminate(max == 0 ? true : false);
-              watchFace.progressDialogBar.setMax(max);
-              watchFace.progressDialogBar.setProgress(0);
-              watchFace.progressDialogLayout.setVisibility(watchFace.progressDialogLayout.VISIBLE);
-              watchFace.dialogLayout.requestLayout();
+              intent.putExtra(Dialog.EXTRA_MAX, max);
+              watchFace.startActivity(intent);
+              watchFace.dialogVisible=true;
             } else {
               GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "skipping progress dialog request <" + commandArgs.get(0) + "> because progress dialog is already visible");
             }
             commandExecuted=true;
           }
           if (commandFunction.equals("updateProgressDialog")) {
-            if (watchFace.dialogLayout!=null) {
-              watchFace.progressDialogText.setText(commandArgs.get(0));
-              int progress = Integer.parseInt(commandArgs.get(1));
-              watchFace.progressDialogBar.setProgress(progress);
-              watchFace.dialogLayout.requestLayout();
+            if (watchFace.dialogVisible) {
+              Intent intent = new Intent(watchFace, Dialog.class);
+              intent.putExtra(Dialog.EXTRA_PROGRESS, Integer.parseInt(commandArgs.get(1)));
+              watchFace.startActivity(intent);
             }
             commandExecuted=true;
           }
           if (commandFunction.equals("closeProgressDialog")) {
-            if (watchFace.dialogLayout!=null) {
-              watchFace.windowManager.removeView(watchFace.dialogLayout);
-              watchFace.dialogLayout = null;
+            if (watchFace.dialogVisible) {
+              Intent intent = new Intent(watchFace, Dialog.class);
+              intent.putExtra(Dialog.EXTRA_CLOSE, true);
+              watchFace.startActivity(intent);
+              watchFace.dialogVisible=false;
             }
             commandExecuted=true;
           }
@@ -362,14 +326,29 @@ public class WatchFace extends Gles2WatchFaceService {
       return;
     }
 
-    // Get the core object
-    coreObject=GDApplication.coreObject;
-    ((GDApplication)getApplication()).setMessageHandler(coreMessageHandler);
+    // Only start the core object if all permissions are available
+    if (permissionsGranted()) {
 
-    // Start the core object
-    Message m=Message.obtain(coreObject.messageHandler);
-    m.what = GDCore.START_CORE;
-    coreObject.messageHandler.sendMessage(m);
+      // Get the core object
+      coreObject = GDApplication.coreObject;
+      ((GDApplication) getApplication()).setMessageHandler(coreMessageHandler);
+
+      // Start the core object
+      Message m=Message.obtain(coreObject.messageHandler);
+      m.what = GDCore.START_CORE;
+      coreObject.messageHandler.sendMessage(m);
+
+    }
+  }
+
+  /** Checks if all required permissions are granted */
+  private boolean permissionsGranted() {
+    boolean allPermissionsGranted=true;
+    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+      allPermissionsGranted=false;
+    if (checkSelfPermission(Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED)
+      allPermissionsGranted=false;
+    return allPermissionsGranted;
   }
 
   @Override
@@ -409,16 +388,20 @@ public class WatchFace extends Gles2WatchFaceService {
           .build());
 
       // Get informed if screen is turned off
-      coreObject.executeAppCommand("setWearDeviceAlive(1)");
-      if (powerManager.isInteractive())
-        coreObject.executeAppCommand("setWearDeviceSleeping(0)");
-      else
-        coreObject.executeAppCommand("setWearDeviceSleeping(1)");
+      if (coreObject!=null) {
+        coreObject.executeAppCommand("setWearDeviceAlive(1)");
+        if (powerManager.isInteractive())
+          coreObject.executeAppCommand("setWearDeviceSleeping(0)");
+        else
+          coreObject.executeAppCommand("setWearDeviceSleeping(1)");
+      }
       IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
       intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
       screenStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+          if (coreObject==null)
+            return;
           if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
             coreObject.executeAppCommand("setWearDeviceSleeping(1)");
           } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
@@ -427,28 +410,40 @@ public class WatchFace extends Gles2WatchFaceService {
         }
       };
       registerReceiver(screenStateReceiver, intentFilter);
+
+      // Inform the user that permissions must be granted
+      if (coreObject==null) {
+        Intent intent = new Intent(getApplication(), Dialog.class);
+        intent.putExtra(Dialog.EXTRA_TEXT, getResources().getString(R.string.permission_instructions));
+        intent.putExtra(Dialog.EXTRA_KIND, ERROR_DIALOG);
+        intent.putExtra(Dialog.EXTRA_GET_PERMISSIONS, true);
+        startActivity(intent);
+      }
     }
 
     @Override
     public void onDestroy() {
-      coreObject.executeAppCommand("setWearDeviceAlive(1)");
+      if (coreObject!=null)
+        coreObject.executeAppCommand("setWearDeviceAlive(1)");
       unregisterReceiver(screenStateReceiver);
-      if (dialogLayout!=null)
-        windowManager.removeView(dialogLayout);
-      Message m=Message.obtain(coreObject.messageHandler);
-      m.what = GDCore.STOP_CORE;
-      coreObject.messageHandler.sendMessage(m);
+      if (coreObject!=null) {
+        Message m = Message.obtain(coreObject.messageHandler);
+        m.what = GDCore.STOP_CORE;
+        coreObject.messageHandler.sendMessage(m);
+      }
     }
 
     @Override
     public void onGlContextCreated() {
       super.onGlContextCreated();
+      if (coreObject==null) return;
       coreObject.onSurfaceCreated(null,null);
     }
 
     @Override
     public void onGlSurfaceCreated(int width, int height) {
       super.onGlSurfaceCreated(width,height);
+      if (coreObject==null) return;
       coreObject.onSurfaceChanged(null,width,height);
     }
 
@@ -456,6 +451,7 @@ public class WatchFace extends Gles2WatchFaceService {
     public void onAmbientModeChanged(boolean inAmbientMode) {
       super.onAmbientModeChanged(inAmbientMode);
       invalidate();
+      if (coreObject==null) return;
       if (inAmbientMode)
         coreObject.executeAppCommand("setWearDeviceSleeping(1)");
       else
@@ -490,7 +486,14 @@ public class WatchFace extends Gles2WatchFaceService {
       } else {
 
         // Let the core object draw
-        coreObject.onDrawFrame(null);
+        if (coreObject!=null)
+          coreObject.onDrawFrame(null);
+        else {
+          if (permissionsGranted())
+            System.exit(0);
+          GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+          GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        }
       }
 
       // Draw every frame as long as we're visible and in interactive mode.
@@ -501,6 +504,7 @@ public class WatchFace extends Gles2WatchFaceService {
 
     @Override
     public void onTapCommand(@TapType int tapType, int x, int y, long eventTime) {
+      if (coreObject==null) return;
       switch (tapType) {
         case WatchFaceService.TAP_TYPE_TAP:
           coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");
