@@ -43,14 +43,14 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.all {
-            outputFileName = "GeoDiscoverer-Mobile-${variant.name}-${variant.versionName}.apk";
+            outputFileName = "GeoDiscovererMobile${variant.name.capitalize()}${variant.versionName}.apk";
         }
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    //wearApp project(':wear')
+    wearApp project(':wear')
     implementation "com.android.support:appcompat-v7:${supportLibVersion}"
     implementation "com.android.support:support-v4:${supportLibVersion}"
     implementation "com.android.support:design:${supportLibVersion}"

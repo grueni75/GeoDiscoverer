@@ -3,8 +3,14 @@ source ~/.androidrc
 #echo $1
 #echo `cat mode.txt`
 
-if [ "$1" == `cat mode.txt` ] || [ "all" == `cat mode.txt` ]; then
-  #echo $PATH
+#if [ "$1" == `cat mode.txt` ] || [ "all" == `cat mode.txt` ]; then
+#  #echo $PATH
+#  ndk-build $2
+#fi
+#echo $2
+if [ "$2" == "APP_ABI=all" ]; then
+  ndk-build
+else
   ndk-build $2
 fi
 

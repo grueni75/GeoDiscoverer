@@ -23,7 +23,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            project.ext.set('releaseAppABI', 'all32')
+            project.ext.set('releaseAppABI', 'all')
         }
         debug {
             project.ext.set('debugAppABI', 'armeabi-v7a')
