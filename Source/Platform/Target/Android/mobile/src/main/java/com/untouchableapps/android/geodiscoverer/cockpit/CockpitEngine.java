@@ -199,7 +199,7 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
     this.app = app;
 
     // Get services
-    wifiManager = (WifiManager) app.getContext().getSystemService(android.content.Context.WIFI_SERVICE);
+    wifiManager = (WifiManager) app.getApplicationContext().getSystemService(android.content.Context.WIFI_SERVICE);
 
     // Init parameters
     audioWakeupDuration = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit", "audioWakeupDuration"))*1000;

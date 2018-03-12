@@ -26,7 +26,7 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 
-public class GDMessageListenerService extends WearableListenerService{
+public class GDMessageListenerService extends WearableListenerService {
 
   /** Called when a message is received */
   @Override
@@ -51,8 +51,6 @@ public class GDMessageListenerService extends WearableListenerService{
       if (cmd.startsWith("setWearDeviceAlive(0)")) {
         ((GDApplication)getApplication()).setWearDeviceAlive(false);
       }
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","wearDeviceSleeping=" + String.valueOf(GDApplication.wearDeviceSleeping));
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","wearDeviceAlive=" + String.valueOf(GDApplication.wearDeviceAlive));
     }
   }
 }
