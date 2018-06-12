@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+use Data::Dumper;
+use MIME::Base64;
+use JSON;
+
+# Get args
+die "Usage: pretty_print_crash <ACRA stack trace>" if (@ARGV != 1);
+my $report = shift;
+
+# Extract the breakpad dump
+open my $input, '<', $report or die "Cannot open <$report> for reading!";
+my $json = <$input>;
+close $input;
+my $decoded_json = decode_json( $json );
+print Dumper($decoded_json);
+
+

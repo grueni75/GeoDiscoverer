@@ -37,11 +37,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.acra.ACRA;
-import org.acra.ACRAConstants;
-import org.acra.ReportField;
-import org.acra.ReportingInteractionMode;
-import org.acra.annotation.ReportsCrashes;
+import org.acra.*;
+import org.acra.annotation.*;
 
 import android.app.Activity;
 import android.app.Application;
@@ -68,23 +65,18 @@ import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppVibratio
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 
 /* Configuration of ACRA for reporting crashes */
-@ReportsCrashes(
-    formKey = "", 
-    formUri = "https://grueni75.cloudant.com/acra-geodiscoverer/_design/acra-storage/_update/report", 
-    reportType = org.acra.sender.HttpSender.Type.JSON, 
-    httpMethod = org.acra.sender.HttpSender.Method.PUT, 
-    mode = ReportingInteractionMode.NOTIFICATION,
-    resNotifTickerText = R.string.crash_notification_ticker_text,
-    resNotifTitle = R.string.crash_notification_title,
-    resNotifText = R.string.crash_notification_text,
-    resDialogTitle = R.string.crash_dialog_title, 
-    resDialogText = R.string.crash_dialog_text, 
-    resDialogCommentPrompt = R.string.crash_dialog_comment_text, 
-    resDialogOkToast = R.string.crash_dialog_ok_toast_text, 
-    resDialogEmailPrompt = R.string.crash_dialog_email_text,
-    resToastText = R.string.crash_toast_text_new_report, 
-    formUriBasicAuthLogin = "tlyiessideratterandiffor", 
-    formUriBasicAuthPassword = "rhMR0V0AmdHU7If4jk2N1OIq"
+@AcraCore (
+    buildConfigClass = BuildConfig.class
+)
+@AcraMailSender(
+    mailTo = "geodiscoverer@gmail.com",
+    resSubject = R.string.crash_mail_subject
+)
+@AcraNotification(
+    resTickerText = R.string.crash_notification_ticker_text,
+    resTitle = R.string.crash_notification_title,
+    resText = R.string.crash_notification_text,
+    resChannelName = R.string.crash_notification_channel
 )
 
 /* Main application class */
@@ -129,14 +121,20 @@ public class GDApplication extends Application implements GDAppInterface, Google
   /** Last command the wear thread has sent */
   String wearLastCommand="";
 
+  /** Init Acra */
+  @Override
+  protected void attachBaseContext(Context base) {
+    super.attachBaseContext(base);
+
+    // The following line triggers the initialization of ACRA
+    ACRA.init(this);
+  }
+
   /** Called when the application starts */
   @Override
   public void onCreate() {
     super.onCreate();  
 
-    // Init crash reporting
-    ACRA.init(this);
-        
     // Initialize the core object
     String homeDirPath = GDCore.getHomeDirPath();
     if (homeDirPath.equals("")) {
@@ -156,7 +154,6 @@ public class GDApplication extends Application implements GDAppInterface, Google
           txtPath = txtPath.substring(0,txtPath.length()-4) + ".zip.base64";
           File file2 = new File(txtPath);
           if (!file2.exists()) {
-            ACRA.getConfig().setResToastText(R.string.crash_toast_text_left_over_report);
             sendNativeCrashReport(file.getAbsolutePath(), true);
             break; // only one report at a time
           }
@@ -386,13 +383,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
       BufferedWriter textWriter = new BufferedWriter(new FileWriter(txtPath));
       textWriter.write(contents);
       textWriter.close();
-      String[] contentsInLines = contents.split("\n");
-      ReportField[] customReportFields = new ReportField[ACRAConstants.DEFAULT_REPORT_FIELDS.length+1];
-      System.arraycopy(ACRAConstants.DEFAULT_REPORT_FIELDS, 0, customReportFields, 0, ACRAConstants.DEFAULT_REPORT_FIELDS.length);
-      customReportFields[ACRAConstants.DEFAULT_REPORT_FIELDS.length]=ReportField.APPLICATION_LOG;
-      ACRA.getConfig().setCustomReportContent(customReportFields);
-      ACRA.getConfig().setApplicationLogFileLines(contentsInLines.length+1);
-      ACRA.getConfig().setApplicationLogFile(txtPath);
+      ACRA.getErrorReporter().putCustomData("nativeZipContents",contents);
       binReader.close();
     }
     catch (Exception e) {

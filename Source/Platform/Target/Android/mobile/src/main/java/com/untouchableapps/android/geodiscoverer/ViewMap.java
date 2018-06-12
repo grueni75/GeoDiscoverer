@@ -76,15 +76,13 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView;
 import com.untouchableapps.android.geodiscoverer.core.GDTools;
 
-import org.acra.ACRA;
-import org.acra.ACRAConfigurationException;
-import org.acra.ACRAConstants;
-import org.acra.ReportField;
-import org.acra.ReportingInteractionMode;
+import org.acra.*;
+import org.acra.config.ACRAConfigurationException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -864,48 +862,33 @@ public class ViewMap extends GDActivity {
 
     protected Void doInBackground(Void... params) {
 
-      int lineCount = 0;
-      String sendLogPath = coreObject.homePath + "/Log/send.log";
+      // Read all logs into a string
+      infoDialog("Please wait while log files are read in the background");
+      String logContents = "";
       try {
-        // Create a text file that contains all logs
-        BufferedWriter sendLogWriter = new BufferedWriter(new FileWriter(sendLogPath));
         for (String logName : logNames) {
           String logPath = coreObject.homePath + "/Log/" + logName;
-          sendLogWriter.write(logPath + ":\n");
-          lineCount++;
+          logContents += logPath + ":\n";
           BufferedReader logReader = new BufferedReader(new FileReader(logPath));
           String inputLine;
           while ((inputLine=logReader.readLine())!=null) {
-            sendLogWriter.write(inputLine + "\n");
-            lineCount++;
+            logContents += inputLine + "\n";
+            //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",inputLine);
           }
-          sendLogWriter.write("\n");
-          lineCount++;
+          logContents += "\n";
           logReader.close();
         }
-        sendLogWriter.close();
       }
       catch (IOException e) {
         errorDialog(getString(R.string.send_logs_failed, e.getMessage()));
       }
 
-      // Tell ACRA to upload the complete log 
-      ReportField[] customReportFields = new ReportField[ACRAConstants.DEFAULT_REPORT_FIELDS.length+1];
-      System.arraycopy(ACRAConstants.DEFAULT_REPORT_FIELDS, 0, customReportFields, 0, ACRAConstants.DEFAULT_REPORT_FIELDS.length);
-      customReportFields[ACRAConstants.DEFAULT_REPORT_FIELDS.length]=ReportField.APPLICATION_LOG;
-      ACRA.getConfig().setCustomReportContent(customReportFields);
-      ACRA.getConfig().setApplicationLogFileLines(lineCount);
-      ACRA.getConfig().setApplicationLogFile(sendLogPath);
+      // Add the log to the ACRA report
+      ACRA.getErrorReporter().putCustomData("userLogContents",logContents);
 
       // Send report via ACRA
-      try {
-        ACRA.getConfig().setMode(ReportingInteractionMode.DIALOG);
-        Exception e = new Exception("User has sent logs");
-        ACRA.getErrorReporter().handleException(e,false);
-        ACRA.getConfig().setMode(ReportingInteractionMode.NOTIFICATION);
-      }
-      catch (ACRAConfigurationException e) {
-      }
+      Exception e = new Exception("User has sent logs");
+      ACRA.getErrorReporter().handleException(e,false);
 
       return null;
     }

@@ -1,9 +1,10 @@
 #!/usr/bin/perl
 use Data::Dumper;
 use MIME::Base64;
+use JSON;
 
 # Get args
-die "Usage: analyze_native_crash.pl <html report saved as text in firefox | binary crash dump>" if (@ARGV != 1);
+die "Usage: analyze_native_crash <ACRA stack trace | binary crash dump>" if (@ARGV != 1);
 my $report = shift;
 my $lib = shift;
 
@@ -12,38 +13,14 @@ my $dump = "";
 my $arch = "armeabi-v7a";
 if ($report !~ m/.dmp$/) {
   print "Extracting native dump from crash report... ";
-  open(my $in, $report) or die "Can not open <$report> for reading!";
-  my $state = 0;
-  while (my $line = <$in>) {
-    chomp $line;
-    #print $line . "\n";
-    if ($state==0) {
-      $state=1 if ($line eq 'APPLICATION_LOG');
-    } elsif ($state==1) {
-      $state=2 if ($line =~ m/index\s*value/);
-    } elsif ($state==2) {
-      if ($line =~ m/^\d+\s*(.*)$/) {
-        #print $1 . "\n";
-        if ($1 ne "") {
-          $dump = $dump . $1 . "\n";
-        } else {
-          $state=3;
-        }
-      } else {
-        $state=4;
-      } 
-    } elsif ($state==3) {
-      $dump = $dump . $line . "\n";
-      $state=2;
-    } elsif ($state==4) {
-      if ($line =~ m/CPU_ABI\s*(\S*)/) {
-        $arch = $1;
-        last;
-      }
-    }
-    #print $state . "\n";
-  }
-  close($in);
+  open my $input, '<', $report or die "Cannot open <$report> for reading!";
+  my $json = <$input>;
+  close $input;
+  my $decoded_json = decode_json( $json );
+  #print Dumper($decoded_json);
+  $arch = $decoded_json->{'BUILD'}->{'CPU_ABI'};
+  $dump = $decoded_json->{'CUSTOM_DATA'}->{'nativeZipContents'};
+  #print $arch . "\n";
   #print $dump;
   print "Done!\n";
 }
