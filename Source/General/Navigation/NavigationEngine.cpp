@@ -103,6 +103,15 @@ NavigationEngine::NavigationEngine() :
       return;
     }
   }
+
+  // Create the directory for exporting routes if it does not exist
+  if (core->statFile(getExportRoutePath(), &st) != 0)
+  {
+    if (mkdir(getExportRoutePath().c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
+      FATAL("can not create export route directory!",NULL);
+      return;
+    }
+  }
 }
 
 // Destructor
@@ -1597,6 +1606,22 @@ std::string NavigationEngine::getAddressPointName(GraphicPosition visPos) {
   core->getDefaultGraphicEngine()->unlockDrawing();
   return result;
 }
+
+// Exports the active route inclusive selection as an GPX file
+void NavigationEngine::exportActiveRoute() {
+  if (activeRoute!=NULL) {
+    activeRoute->lockAccess(__FILE__,__LINE__);
+    std::string name = activeRoute->getName() + " " + core->getClock()->getFormattedDate();
+    std::string filepath = getExportRoutePath() + "/" + name + ".gpx";
+    activeRoute->unlockAccess();
+    activeRoute->writeGPXFile(true,true,true,true,name,filepath);
+    INFO("exported to %s",getExportRoutePath().c_str());
+
+  } else {
+    WARNING("no route selected",NULL);
+  }
+}
+
 
 }
 

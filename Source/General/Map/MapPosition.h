@@ -97,7 +97,7 @@ public:
   double computeNormalDistance(MapPosition prevPos, MapPosition locationPos, bool insideOnly, bool debugMsgs=false);
 
   // Adds the point to the gpx xml tree
-  void writeGPX(XMLNode parentNode);
+  void writeGPX(XMLNode parentNode, bool skipExtensions=false);
 
   // Extracts the point from the gpx xml node list
   bool readGPX(XMLNode wptNode, std::string &error);

@@ -26,7 +26,7 @@
 namespace GEODISCOVERER {
 
 // Adds the point to the gpx xml tree
-void MapPosition::writeGPX(XMLNode parentNode) {
+void MapPosition::writeGPX(XMLNode parentNode, bool skipExtensions) {
 
   std::stringstream out;
   XMLNode node;
@@ -64,63 +64,68 @@ void MapPosition::writeGPX(XMLNode parentNode) {
     }
   }
 
-  // Create the geo discoverer point element in the extensions element
-  XMLNode extensionsNode = xmlNewNode(NULL, BAD_CAST "extensions");
-  if (!extensionsNode) {
-    FATAL("can not create xml node",NULL);
-    return;
-  }
-  xmlAddChild(pointNode,extensionsNode);
-  XMLNode gdNode = xmlNewNode(NULL, BAD_CAST "pt");
-  if (!gdNode) {
-    FATAL("can not create xml node",NULL);
-    return;
-  }
-  xmlAddChild(extensionsNode,gdNode);
+  // Only add extensions if explicitly requested
+  if (!skipExtensions) {
 
-  // Create the namespaces
-  xmlNsPtr geoDiscovererNamespace=xmlNewNs(gdNode,BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0", BAD_CAST NULL);
-  if (!geoDiscovererNamespace) {
-   FATAL("can not create xml namespace",NULL);
-   return;
-  }
-  xmlNsPtr xmlNamespace=xmlNewNs(gdNode,BAD_CAST "http://www.w3.org/2001/XMLSchema-instance", BAD_CAST "xsi");
-  if (!xmlNamespace) {
-   FATAL("can not create xml namespace",NULL);
-   return;
-  }
+    // Create the geo discoverer point element in the extensions element
+    XMLNode extensionsNode = xmlNewNode(NULL, BAD_CAST "extensions");
+    if (!extensionsNode) {
+      FATAL("can not create xml node",NULL);
+      return;
+    }
+    xmlAddChild(pointNode,extensionsNode);
+    XMLNode gdNode = xmlNewNode(NULL, BAD_CAST "pt");
+    if (!gdNode) {
+      FATAL("can not create xml node",NULL);
+      return;
+    }
+    xmlAddChild(extensionsNode,gdNode);
 
-  // Add the remaining information
-  if (source) {
-    node=xmlNewTextChild(gdNode, NULL, BAD_CAST "source", BAD_CAST source);
-    if (!node) {
-     FATAL("can not create xml node",NULL);
+    // Create the namespaces
+    xmlNsPtr geoDiscovererNamespace=xmlNewNs(gdNode,BAD_CAST "http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0", BAD_CAST NULL);
+    if (!geoDiscovererNamespace) {
+     FATAL("can not create xml namespace",NULL);
      return;
     }
-  }
-  if (hasBearing) {
-    out.str(""); out << bearing;
-    node=xmlNewChild(gdNode, NULL, BAD_CAST "bearing", BAD_CAST out.str().c_str());
-    if (!node) {
-     FATAL("can not create xml node",NULL);
+    xmlNsPtr xmlNamespace=xmlNewNs(gdNode,BAD_CAST "http://www.w3.org/2001/XMLSchema-instance", BAD_CAST "xsi");
+    if (!xmlNamespace) {
+     FATAL("can not create xml namespace",NULL);
      return;
     }
-  }
-  if (hasSpeed) {
-    out.str(""); out << speed;
-    node=xmlNewChild(gdNode, NULL, BAD_CAST "speed", BAD_CAST out.str().c_str());
-    if (!node) {
-     FATAL("can not create xml node",NULL);
-     return;
+
+    // Add the remaining information
+    if (source) {
+      node=xmlNewTextChild(gdNode, NULL, BAD_CAST "source", BAD_CAST source);
+      if (!node) {
+       FATAL("can not create xml node",NULL);
+       return;
+      }
     }
-  }
-  if (hasAccuracy) {
-    out.str(""); out << accuracy;
-    node=xmlNewChild(gdNode, NULL, BAD_CAST "accuracy", BAD_CAST out.str().c_str());
-    if (!node) {
-     FATAL("can not create xml node",NULL);
-     return;
+    if (hasBearing) {
+      out.str(""); out << bearing;
+      node=xmlNewChild(gdNode, NULL, BAD_CAST "bearing", BAD_CAST out.str().c_str());
+      if (!node) {
+       FATAL("can not create xml node",NULL);
+       return;
+      }
     }
+    if (hasSpeed) {
+      out.str(""); out << speed;
+      node=xmlNewChild(gdNode, NULL, BAD_CAST "speed", BAD_CAST out.str().c_str());
+      if (!node) {
+       FATAL("can not create xml node",NULL);
+       return;
+      }
+    }
+    if (hasAccuracy) {
+      out.str(""); out << accuracy;
+      node=xmlNewChild(gdNode, NULL, BAD_CAST "accuracy", BAD_CAST out.str().c_str());
+      if (!node) {
+       FATAL("can not create xml node",NULL);
+       return;
+      }
+    }
+
   }
 }
 

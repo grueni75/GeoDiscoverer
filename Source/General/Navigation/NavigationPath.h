@@ -115,7 +115,7 @@ public:
   void addEndPosition(MapPosition pos);
 
   // Stores a the object contents in a gpx file
-  void writeGPXFile();
+  void writeGPXFile(bool forceStorage = false, bool skipBackup = false, bool onlySelectedPath = false, bool skipExtensions = false, std::string name = "", std::string filepath = "");
 
   // Reads the path contents from a gpx file
   bool readGPXFile();

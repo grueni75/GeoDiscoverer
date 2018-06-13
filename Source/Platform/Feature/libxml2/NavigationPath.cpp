@@ -31,35 +31,54 @@ const char *GPX11Namespace="http://www.topografix.com/GPX/1/1";
 const char *GDNamespace="http://www.untouchableapps.de/GeoDiscoverer/GPXExtensions/1/0";
 
 // Writes the path contents into a gpx file
-void NavigationPath::writeGPXFile() {
+void NavigationPath::writeGPXFile(bool forceStorage, bool skipBackup, bool onlySelectedPath, bool skipExtensions, std::string name, std::string filepath) {
 
   xmlNodePtr segmentNode;
   xmlNodePtr node;
-  std::string filepath=gpxFilefolder + "/" + gpxFilename;
+
+  // Set the location to use
+  if (filepath=="")
+    filepath=gpxFilefolder + "/" + gpxFilename;
+  //DEBUG("filepath=%s",filepath.c_str());
 
   // Only store if it is initialized
   if (!getIsInit())
     return;
 
   // Only store if it has changed
-  if (isStored) {
-    //DEBUG("path is already stored, skipping write",NULL);
-    return;
-  } else {
-    //DEBUG("path has not been stored, writing to disk",NULL);
+  if (!forceStorage) {
+    if (isStored) {
+      //DEBUG("path is already stored, skipping write",NULL);
+      return;
+    } else {
+      //DEBUG("path has not been stored, writing to disk",NULL);
+    }
   }
 
   // Copy all the data needed such that we do not need to lock the path too long
   lockAccess(__FILE__, __LINE__);
-  std::string name=this->name;
+  if (name=="")
+    name=this->name;
   std::string description=this->description;
-  std::vector<MapPosition> mapPositions=this->mapPositions;
+  std::vector<MapPosition> mapPositions;
+  bool reverse=false;
+  if (onlySelectedPath) {
+    reverse=this->reverse;
+    mapPositions=getSelectedPoints();
+    if (reverse) {
+      std::reverse(mapPositions.begin(), mapPositions.end());
+    }
+  } else {
+    mapPositions=this->mapPositions;
+  }
   unlockAccess();
 
   // Backup the previous file
-  if (access(filepath.c_str(),F_OK)==0) {
-    std::string backupFilepath=filepath + "~";
-    rename(filepath.c_str(),backupFilepath.c_str());
+  if (!skipBackup) {
+    if (access(filepath.c_str(),F_OK)==0) {
+      std::string backupFilepath=filepath + "~";
+      rename(filepath.c_str(),backupFilepath.c_str());
+    }
   }
 
   // Create empty XML document
@@ -173,7 +192,7 @@ void NavigationPath::writeGPXFile() {
     } else {
 
       // Add the point to the segment
-      pos.writeGPX(segmentNode);
+      pos.writeGPX(segmentNode,skipExtensions);
 
     }
   }

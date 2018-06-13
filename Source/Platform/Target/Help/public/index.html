@@ -3508,7 +3508,7 @@ Geo Discoverer is bundled with a set of small tools that can create the contents
 |[[GrabMaps.py|MapCreation/GrabMaps.py]]|Grabs map pictures from windows applications and creates &quot;.gdm&quot; files for them. The calibration data is also copied from the windows application. It contains support for Google Maps running in Firefox and Garmin's &quot;Deutschland Digital Topographische Karte&quot;. The script requires the software packages ~ActivePython-2.7.2.5, ~PIL-1.1.7 and ~MiniCap.|
 </pre>
 </div>
-<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201606261002" changecount="201">
+<div title="MapView" creator="Matthias" modifier="Matthias" created="201412061420" modified="201806131000" changecount="202">
 <pre>The map view is the main activity of the app. It shows the map selected in the AppPreferences on the screen. The map can be moved by using one finger and zoomed by using two fingers. Each map can consist of multiple layers at different zoom levels. The app automatically selects the best layer depending on the zoom ratio. You can also create your own map. See MapCreation.
 ! Elements on the map&lt;html&gt;&lt;a name=&quot;ElementsOnTheMap&quot;/&gt;&lt;/html&gt;
 Besides the map itself, different graphical elements are placed on top of it. Here is an explanation:
@@ -3593,6 +3593,7 @@ There is also a menu available if you press the hardware menu button or if you s
 |Cleanup map|Deletes the tiles for the the current visible area. This can be used in case the map image is outdated, wrongly downloaded, or the storage space is needed.|
 |Add tracks as routes|Shows a dialog that allows you to convert previously recorded tracks into routes.|
 |Remove routes|Shows a dialog that allows you to delete routes. Attention: The routes are deleted permanently!|
+|Export selected route|Exports the route selected for navigation between the start and end flag.|
 |Help|Shows this help.|
 |Preferences|Opens the preferences of the app. See AppPreferences for more info.|
 |Exit|Exits the app.|
@@ -5023,8 +5024,9 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201705291916" changecount="46">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201806130959" changecount="48">
 <pre>|!Date |!Changes |
+|2018-06-13|Described export route feature in menu of MapView|
 |2017-05-29|Improved privacy policy by explaining ~BIND_DEVICE_ADMIN permission|
 |2016-12-30|Updated [[About]] with copyright notice of ~SLF4J-Android.|
 |2016-11-14|Updated [[About]] with copyright notice of ~OpenSSL.|

@@ -208,6 +208,9 @@ public:
   // Sets the active route
   void setActiveRoute(NavigationPath *route);
 
+  // Exports the active route inclusive selection as an GPX file
+  void exportActiveRoute();
+
   // Makes the target invisible
   void hideTarget();
 
@@ -291,6 +294,9 @@ public:
   }
   std::string getRoutePath() const {
     return core->getHomePath() + "/Route";
+  }
+  std::string getExportRoutePath() const {
+    return core->getHomePath() + "/Route/Export";
   }
   MapPosition *lockTargetPos(const char *file, int line)
   {

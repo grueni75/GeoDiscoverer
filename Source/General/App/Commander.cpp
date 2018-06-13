@@ -299,6 +299,14 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="exportActiveRoute") {
+    if (core->getIsInitialized()) {
+      core->getNavigationEngine()->exportActiveRoute();
+    } else {
+      WARNING("Please wait until map is loaded (command ignored)",NULL);
+    }
+    cmdExecuted=true;
+  }
   if (cmdName=="compassBearingChanged") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->newCompassBearing(atof(args[0].c_str()));

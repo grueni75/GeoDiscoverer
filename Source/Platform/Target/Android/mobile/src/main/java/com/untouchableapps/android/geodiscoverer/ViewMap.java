@@ -1560,6 +1560,9 @@ public class ViewMap extends GDActivity {
               askForMapDownloadType();
             }
             break;
+          case R.id.nav_export_selected_route:
+            coreObject.executeCoreCommand("exportActiveRoute()");
+            break;
         }
         viewMapRootLayout.closeDrawers();
         return true;

@@ -1,63 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources
     xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="MissingTranslation" >
+    tools:ignore="MissingTranslation">
     <string name="app_name">Geo Discoverer</string>
-	<string name="fatal_home_directory_creation">Could not create home directory!</string>
-	<string name="home_directory">GeoDiscoverer</string>
-	<string name="button_label_exit">Exit</string>
-	<string name="fatal_gdcore_initialization">Could not initialize the native core!</string>
-	<string name="busy_waiting_for_external_storage">Waiting for mounted and writable external storage</string>
-	<string name="fatal_log_directory_creation">Could not create log directory!</string>
-	<string name="log_directory">GeoDiscoverer/log</string>
-	<string name="button_label_ok">OK</string>
-	<string name="button_label_donate">Donate</string>
+    <string name="fatal_home_directory_creation">Could not create home directory!</string>
+    <string name="home_directory">GeoDiscoverer</string>
+    <string name="button_label_exit">Exit</string>
+    <string name="fatal_gdcore_initialization">Could not initialize the native core!</string>
+    <string name="busy_waiting_for_external_storage">Waiting for mounted and writable external storage</string>
+    <string name="fatal_log_directory_creation">Could not create log directory!</string>
+    <string name="log_directory">GeoDiscoverer/log</string>
+    <string name="button_label_ok">OK</string>
+    <string name="button_label_donate">Donate</string>
     <string name="button_label_help">Help</string>
     <string name="button_label_do_not_show_again">Do not show again</string>
     <string name="preferences">Preferences</string>
-	<string name="remove_routes">Remove routes</string><string name="add_tracks_as_routes">Add tracks as routes</string>
-	<string name="track_as_route_selection_question">Select the tracks to copy to the route directory:</string>
-	<string name="route_remove_selection_question">Select the routes to delete from the route directory:</string>
+    <string name="remove_routes">Remove routes</string>
+    <string name="export_selected_route">Export selected route</string>
+    <string name="add_tracks_as_routes">Add tracks as routes</string>
+    <string name="track_as_route_selection_question">Select the tracks to copy to the route directory:</string>
+    <string name="route_remove_selection_question">Select the routes to delete from the route directory:</string>
     <string name="log_selection_question">Select the logs to send to the developer:</string>
     <string name="map_legend_selection_question">Select the legend to show:</string>
-	<string name="finished">Finished</string>
-	<string name="cancel">Cancel</string>
-	<string name="copying_tracks">Copying tracks from track to route directory</string><string name="removing_routes">Removing routes from route directory</string>
-	<string name="starting_core_object">Starting core&#8230;</string>
-	<string name="restarting_core_object">Restarting core&#8230;</string>
-	<string name="stopping_core_object">Stopping core&#8230;</string>
-	<string name="reset">Reset</string>
-	<string name="no">No</string>
-	<string name="yes">Yes</string>
-	<string name="reset_question">Are you sure that you want to reset all preferences to their default values?</string>
-	<string name="exit">Exit</string>
-	<string name="file_does_not_exist">File does not exist!</string>
-	<string name="copy_route_question">Copy file &lt;%s&gt; to route directory?</string>
-	<string name="overwrite_route_question">Overwrite file &lt;%s&gt; in route directory?</string>
-	<string name="copying_file">Copying file &lt;%s&gt; to route directory</string>
-	<string name="unsupported_path">The path &lt;%s&gt; is not supported!</string>
-	<string name="unsupported_host">The host &lt;%s&gt; is not supported!</string>
-	<string name="unsupported_scheme">The scheme &lt;%s&gt; is not supported!</string>
-	<string name="unsupported_intent">This intent is not supported (has no stream)!</string>
-	<string name="unsupported_google_map_query">The Google Maps query is not supported!</string>
-	<string name="location_not_found">Can not find location &lt;%s&gt;</string>
-	<string name="cannot_copy_file">Can not copy file &lt;%1$s&gt; to &lt;%2$s&gt;!</string>
-	<string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
-	<string name="notification_service_in_foreground_message">Taking care of your position.</string>
-	<string name="notification_title">Geo Discoverer</string>
+    <string name="finished">Finished</string>
+    <string name="cancel">Cancel</string>
+    <string name="copying_tracks">Copying tracks from track to route directory</string>
+    <string name="removing_routes">Removing routes from route directory</string>
+    <string name="starting_core_object">Starting core&#8230;</string>
+    <string name="restarting_core_object">Restarting core&#8230;</string>
+    <string name="stopping_core_object">Stopping core&#8230;</string>
+    <string name="reset">Reset</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="reset_question">Are you sure that you want to reset all preferences to their default values?</string>
+    <string name="exit">Exit</string>
+    <string name="file_does_not_exist">File does not exist!</string>
+    <string name="copy_route_question">Copy file &lt;%s&gt; to route directory?</string>
+    <string name="overwrite_route_question">Overwrite file &lt;%s&gt; in route directory?</string>
+    <string name="copying_file">Copying file &lt;%s&gt; to route directory</string>
+    <string name="unsupported_path">The path &lt;%s&gt; is not supported!</string>
+    <string name="unsupported_host">The host &lt;%s&gt; is not supported!</string>
+    <string name="unsupported_scheme">The scheme &lt;%s&gt; is not supported!</string>
+    <string name="unsupported_intent">This intent is not supported (has no stream)!</string>
+    <string name="unsupported_google_map_query">The Google Maps query is not supported!</string>
+    <string name="location_not_found">Can not find location &lt;%s&gt;</string>
+    <string name="cannot_copy_file">Can not copy file &lt;%1$s&gt; to &lt;%2$s&gt;!</string>
+    <string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
+    <string name="notification_service_in_foreground_message">Taking care of your position.</string>
+    <string name="notification_title">Geo Discoverer</string>
     <string name="notification_map_download_ongoing_message">%1$d tiles / %2$s</string>
-	<string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
-	<string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
-	<string name="show_messages">Show messages</string>
-	<string name="hide_messages">Hide messages</string>
+    <string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
+    <string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
+    <string name="show_messages">Show messages</string>
+    <string name="hide_messages">Hide messages</string>
     <string name="toggle_messages">Toggle messages</string>
-	<string name="set_target_at_map_center">Set target at map center</string>
-	<string name="set_target_at_location">Set target at location</string>
-	<string name="hide_target">Hide target</string>
-	<string name="context_menu_title">Map actions</string>
-	<string name="show_target">Show target</string>
-	<string name="manually_entered_address">Manually entered address</string>
-	<string name="dialog_address_title">Set target at address</string>
+    <string name="set_target_at_map_center">Set target at map center</string>
+    <string name="set_target_at_location">Set target at location</string>
+    <string name="hide_target">Hide target</string>
+    <string name="context_menu_title">Map actions</string>
+    <string name="show_target">Show target</string>
+    <string name="manually_entered_address">Manually entered address</string>
+    <string name="dialog_address_title">Set target at address</string>
     <string name="dialog_address_input_hint">Alexanderplatz 1, Berlin (single line!)</string>
     <string name="device_admin_description">Allows Geo Discoverer to turn off the display by locking it.</string>
     <string name="device_admin_not_enabled">Device admin permission required to turn off display! Please grant it in the device settings.</string>
@@ -114,12 +117,12 @@
     <string name="welcome_dialog_title">Welcome to Geo Discoverer!</string>
     <string name="welcome_dialog_message">Geo Discoverer is a free navigation app. It comes with an extensive help that explains all features. If you like this app, please donate to support the development! </string>
     <string-array name="donation_google_catalog_values">
-      <item>1 €</item>
-      <item>2 €</item>
-      <item>3 €</item>
-      <item>5 €</item>
-      <item>10 €</item>
-      <item>20 €</item>
+        <item>1 €</item>
+        <item>2 €</item>
+        <item>3 €</item>
+        <item>5 €</item>
+        <item>10 €</item>
+        <item>20 €</item>
     </string-array>
     <string name="support_geodiscoverer">Support Geo Discoverer!</string>
     <string name="opengles20_required">The app is not compatible to this device because it does not support OpenGL ES 2.0.</string>
