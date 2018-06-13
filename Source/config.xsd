@@ -95,6 +95,25 @@
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
+        <xsd:element name="HeartRateMonitor">
+          <xsd:annotation>
+            <xsd:documentation>Preferences related to the heart rate monitor.</xsd:documentation>
+          </xsd:annotation>
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="bluetoothAddress" type="xsd:string" default="FD:64:F3:96:A3:8C" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Address of the bluetooth low energy device that transmits heart rate information.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="maxHeartRate" type="xsd:integer" default="172" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum heart rate above which an alarm sound is played.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
         <xsd:element name="Cockpit">
           <xsd:annotation>
             <xsd:documentation>Preferences related to cockpit apps.</xsd:documentation>

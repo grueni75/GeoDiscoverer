@@ -63,6 +63,9 @@ public class GDService extends Service {
   NotificationCompat.Action exitAction = null;
   NotificationCompat.Action stopDownloadAction = null;
 
+  // Heart rate monitor
+  GDHeartRateService heartRateService = null;
+
   /** Called when the service is created the first time */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   @Override
@@ -94,7 +97,6 @@ public class GDService extends Service {
     stopDownloadAction = new NotificationCompat.Action.Builder(
         R.drawable.stop, "Stop Download", pendingStopDownloadIntent
     ).build();
-
   }
   
   /** No binding supported */
@@ -193,6 +195,14 @@ public class GDService extends Service {
       // Service restart is complete
       serviceRestarted=false;
 
+      // Start the heart rate monitor (if supported)
+      if (GDHeartRateService.isSupported(this)) {
+        if (heartRateService!=null) {
+          heartRateService.deinit();
+        }
+        heartRateService = new GDHeartRateService(this,coreObject);
+      }
+
       // Replay the trace if it exists
       File replayLog = new File(coreObject.homePath + "/replay.log");
       if (replayLog.exists()) {
@@ -255,7 +265,13 @@ public class GDService extends Service {
   /** Called when the service is stopped */
   @Override
   public void onDestroy() {
-    
+
+    // Stop the heart rate monitor
+    if (heartRateService!=null) {
+      heartRateService.deinit();
+      heartRateService=null;
+    }
+
     // Hide the notification
     stopForeground(true);
     //notificationManager.cancel(R.string.notification_title);

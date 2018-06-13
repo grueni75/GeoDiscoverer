@@ -90,6 +90,9 @@ public class Preferences extends PreferenceActivity implements
   // Request codes for calling other activities
   static final int SHOW_PREFERENCE_SCREEN_REQUEST = 0;
 
+  /** List of discovered bluetooth devices */
+  static String[] knownBluetoothDevicesAddressArray;
+
   /** Collects entries for a list preference item */
   private class FillListPreferenceItemTask extends AsyncTask<Void, Integer, Void> {
 
@@ -141,7 +144,10 @@ public class Preferences extends PreferenceActivity implements
         valuesArray = coreObject.configStoreGetAttributeValues("Navigation/Route", "name");
         Arrays.sort(valuesArray);
       }
-      
+      if (key.equals("HeartRateMonitor/bluetoothAddress")) {
+        valuesArray = knownBluetoothDevicesAddressArray;
+      }
+
       return null;
     }
 
@@ -261,7 +267,16 @@ public class Preferences extends PreferenceActivity implements
       backgroundFill=true;
       //timings.addSplit("activeRoute");
     }
-    
+    if (key.equals("HeartRateMonitor/bluetoothAddress")) {
+
+      // Use an enumeration of available routes
+      if ((knownBluetoothDevicesAddressArray!=null)&&(knownBluetoothDevicesAddressArray.length>0)) {
+        info.putString("type", "enumeration");
+        backgroundFill = true;
+        //timings.addSplit("activeRoute");
+      }
+    }
+
     // Prepare some variables     
     String type = info.getString("type");
     Preference entry = null;
@@ -470,6 +485,11 @@ public class Preferences extends PreferenceActivity implements
       addPreference(generalCategory, generalCategory, "General", "wakeLock");
       addPreference(generalCategory, generalCategory, "General", "backButtonTurnsScreenOff");
       addPreference(generalCategory, generalCategory, "", "expertMode");
+      PreferenceCategory heartRateMonitorCategory = new PreferenceCategory(this);
+      heartRateMonitorCategory.setTitle("Heart Rate Monitor");
+      rootScreen.addPreference(heartRateMonitorCategory);
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "bluetoothAddress");
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "maxHeartRate");
       PreferenceCategory mapCategory = new PreferenceCategory(this);
       mapCategory.setTitle("Map");
       rootScreen.addPreference(mapCategory);
