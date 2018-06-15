@@ -517,7 +517,7 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 </div></div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201806131605" changecount="152">
+<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201806150639" changecount="155">
 <pre>! Copyright (C) Matthias Grünewald - All Rights Reserved
 Geo Discoverer has been developed by Matthias Grünewald. He owns the copyright for the application, this help and all the media used. The app uses also many libraries and media from others. See [[Acknowledgements|About##Acknowledgements]]. 
 ! License
@@ -564,6 +564,8 @@ The voice navigation is indicating a new instruction by a bosun whistle. The whi
 The sounds that can be triggered via the Geo Dashboard app are provided by Salamisound.de. They can be freely used in non-commercial projects. See their [[usage terms|http://www.salamisound.de/info1]] for more info.
 !! Heart rate alarm
 An alarm is played when the heart rate is above a user defined maximum rate. The sound has been created by user guitarguy1985 and uploaded to freesound.org. It is licensed under the [[Creative Commons CC0 1.0 Universal Public Domain Dedication License|https://creativecommons.org/publicdomain/zero/1.0/]]. The work is modified.
+!! Heart rate sensor connect and disconnect sounds
+If the sensor is connected or disconnected, a sound is played. The sounds are taken from the freedesktop sound theme. The copyright is owned by the Pidgin developers. They have been licensed under the [[GPLv2|https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html]] license.
 !! Earth Clip Art
 The icon of Geo Discoverer is showing a sphere of the earth in its background. A SVG graphic from the open clip art library has been used for this purpose. It is licensed under the [[Creative Commons CC0 1.0 Universal Public Domain Dedication License|http://creativecommons.org/publicdomain/zero/1.0/]].
 !! Material Design Icons
@@ -1376,10 +1378,10 @@ config.macros.copyTiddler = {
 };
 //}}}</pre>
 </div>
-<div title="DebugAids" creator="Matthias" modifier="Matthias" created="201412221309" modified="201412270853" changecount="18">
+<div title="DebugAids" creator="Matthias" modifier="Matthias" created="201412221309" modified="201806150642" changecount="19">
 <pre>Geo Discoverer offers several features that help to fix problems. You can also contact the developer by mail. See ContactDeveloper for more info.
 ! Crash reports
-If the app crashes, a report about the crash is created. The next time Geo Discoverer starts, it displays a notification that this report can be sent to the developer. If you select the notification, a dialog is opened. If you press &quot;OK&quot;, the crash report is sent to the developer. You can also enter additional information about the bug and your email address. This helps the developer to find the bug and he can contact you in case of questions. Please also send the crash report if you don't want to give additional information. The automatically collected report helps the developer already.
+If the app crashes, a report about the crash is created. The next time Geo Discoverer starts, it displays a notification that this report can be sent to the developer. If you select the notification, the report is sent by mail. You can also enter additional information about the bug in the mail body. This helps the developer to find the bug. Please also send the crash report if you don't want to give additional information. The automatically collected report helps the developer already.
 ! Log files
 Geo Discoverer can collect several types of information in log files during operation. The log files can be enabled in the AppPreferences. Each log file includes the date and time it was created in its file name. The following type of log files are available:
 |!Log |!Purpose |
@@ -5026,8 +5028,9 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201806130959" changecount="48">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201806150644" changecount="51">
 <pre>|!Date |!Changes |
+|2018-06-15|Added copyright notices related to the sounds of the heart rate monitor to [[About]]|
 |2018-06-13|Described export route feature in menu of MapView|
 |2017-05-29|Improved privacy policy by explaining ~BIND_DEVICE_ADMIN permission|
 |2016-12-30|Updated [[About]] with copyright notice of ~SLF4J-Android.|

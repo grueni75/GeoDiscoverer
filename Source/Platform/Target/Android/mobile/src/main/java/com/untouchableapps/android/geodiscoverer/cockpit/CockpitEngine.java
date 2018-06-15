@@ -44,11 +44,6 @@ import java.util.regex.Pattern;
 
 public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitEngine {
 
-  // Time info for deciding if silence needs to be played to wake up bluetooth device
-  long audioWakeupLastTrigger = 0;
-  long audioWakeupDelay = 0;
-  long audioWakeupDuration = 0;
-
   // GDApp
   GDApplication app;
 
@@ -94,6 +89,8 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
         while (!quitNetworkServerThread) {
           try {
             Socket client = networkServerSocket.accept();
+            if (quitNetworkServerThread)
+              break;
             int cmd = client.getInputStream().read();
             String soundFile = "";
             switch(cmd) {
@@ -108,7 +105,7 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
                 break;
             }
             client.close();
-            audioWakeup();
+            app.coreObject.audioWakeup();
             final AssetFileDescriptor afd = app.getContext().getAssets().openFd(soundFile);
             final MediaPlayer player = new MediaPlayer();
             player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
@@ -146,6 +143,7 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
           networkServerThread.join();
         }
         catch (Exception e) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
         }
         networkServiceActive=false;
       }
@@ -200,10 +198,6 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
 
     // Get services
     wifiManager = (WifiManager) app.getApplicationContext().getSystemService(android.content.Context.WIFI_SERVICE);
-
-    // Init parameters
-    audioWakeupDuration = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit", "audioWakeupDuration"))*1000;
-    audioWakeupDelay = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit", "audioWakeupDelay"))*1000;
 
     // Add all activated apps
     if (Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/MetaWatch", "active"))>0) {
@@ -309,52 +303,5 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
     // Do the inherited stuff
     super.stop();
 
-  }
-
-  /** Wakeups the audio device if required */
-  public synchronized void audioWakeup() {
-    long t = System.currentTimeMillis();
-    if (audioIsAsleep()) {
-      audioWakeupLastTrigger = t + audioWakeupDelay;
-      try {
-        final AssetFileDescriptor afd = app.getContext().getAssets().openFd("Sound/silence.mp3");
-        final MediaPlayer player = new MediaPlayer();
-        player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-        player.prepare();
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-          public void onCompletion(MediaPlayer mp) {
-            try {
-              afd.close();
-              player.release();
-            } catch (IOException e) {
-              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-            }
-          }
-        });
-        player.start();
-      }
-      catch (IOException e) {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-      }
-      boolean repeat=true;
-      while (repeat) {
-        try {
-          Thread.sleep(audioWakeupLastTrigger-t);
-          repeat=false;
-        } catch (InterruptedException e) {
-          t = System.currentTimeMillis();
-          if (t>=audioWakeupLastTrigger)
-            repeat=false;
-        }
-      }
-    }
-    audioWakeupLastTrigger = System.currentTimeMillis();
-    //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("lastTrigger=%d",audioWakeupLastTrigger));
-  }
-
-  /** Indicates if audio device is asleep */
-  public boolean audioIsAsleep() {
-    long t = System.currentTimeMillis();
-    return (t>audioWakeupLastTrigger+audioWakeupDuration);
   }
 }

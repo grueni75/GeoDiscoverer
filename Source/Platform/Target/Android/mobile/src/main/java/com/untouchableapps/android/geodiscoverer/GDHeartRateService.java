@@ -50,6 +50,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class GDHeartRateService {
 
@@ -70,7 +73,11 @@ public class GDHeartRateService {
 
   // Heart rate info
   int currentHeartRate = 0;
+  int currentHeartRateZone = 1;
   int maxHeartRate = Integer.MAX_VALUE;
+  int startHeartRateZoneTwo = Integer.MAX_VALUE;
+  int startHeartRateZoneThree = Integer.MAX_VALUE;
+  int startHeartRateZoneFour = Integer.MAX_VALUE;
 
   // Thread playing audio if heart rate limit is reached
   Thread alarmThread = null;
@@ -86,6 +93,51 @@ public class GDHeartRateService {
   // List of known bluetooth devices
   private LinkedList<String> knownDeviceAddresses = new LinkedList<String>();
 
+  /** Plays a sound from the asset directory */
+  private void playSound(String filename, int repeat) {
+    Thread playThread = new Thread(new Runnable() {
+      int remainingRepeats=repeat;
+      @Override
+      public void run() {
+        GDApplication.coreObject.audioWakeup();
+        try {
+          final AssetFileDescriptor afd = context.getAssets().openFd("Sound/" + filename);
+          MediaPlayer player = new MediaPlayer();
+          player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+          player.prepare();
+          player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+              remainingRepeats--;
+              if (remainingRepeats>0) {
+                player.reset();
+                try {
+                  player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                  player.prepare();
+                } catch (IOException e) {
+                  GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                }
+                player.start();
+              } else {
+                player.release();
+                try {
+                  afd.close();
+                } catch (IOException e) {
+                  GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                }
+              }
+            }
+          });
+          player.start();
+        }
+        catch (IOException e) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+        }
+      }
+    });
+    playThread.start();
+  }
+
   /** Extracts the heart rate from a characteristics */
   @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
   private void updateHeartRate(BluetoothGattCharacteristic characteristic) {
@@ -97,7 +149,7 @@ public class GDHeartRateService {
       format = BluetoothGattCharacteristic.FORMAT_UINT8;
     }
     currentHeartRate = characteristic.getIntValue(format, 1);
-    //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp", String.format("received heart rate: %d", currentHeartRate));
+    GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp", String.format("received heart rate: %d", currentHeartRate));
   }
 
   /** Callback for gatt service updates */
@@ -118,6 +170,7 @@ public class GDHeartRateService {
       } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","connection to bluetooth gatt service dropped");
         state = CONNECTING;
+        playSound("disconnect.ogg", 1);
       }
     }
 
@@ -150,6 +203,7 @@ public class GDHeartRateService {
               }
             }
           }
+          playSound("connect.ogg",1);
         }
       }
     }
@@ -229,6 +283,9 @@ public class GDHeartRateService {
     deviceAddress = coreObject.configStoreGetStringValue("HeartRateMonitor", "bluetoothAddress");
     knownDeviceAddresses.add(deviceAddress);
     maxHeartRate = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "maxHeartRate"));
+    startHeartRateZoneTwo = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneTwo"));
+    startHeartRateZoneThree = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneThree"));
+    startHeartRateZoneFour = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneFour"));
 
     // Setup bluetooth low energy
     bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -242,10 +299,13 @@ public class GDHeartRateService {
       MediaPlayer player = null;
       MediaPlayer player2 = null;
       AssetFileDescriptor afd = null;
+      final Lock playerLock = new ReentrantLock();
+      boolean alarmPlaying = false;
       @Override
       public void run() {
         while (!quitAlarmThread) {
 
+          // Handle the heart rate alarm
           try {
 
             // Alarm already playing?
@@ -253,15 +313,18 @@ public class GDHeartRateService {
 
               // Stop if heart rate is below maximum
               if (currentHeartRate<=maxHeartRate) {
+                playerLock.lock();
                 player.stop();
                 player2.stop();
+                alarmPlaying=false;
+                playerLock.unlock();
               }
 
               // Clean up if player is stopped
               if ((!player.isPlaying())&&(!player2.isPlaying())) {
-                afd.close();
                 player.release();
                 player2.release();
+                afd.close();
                 player=null;
                 player2=null;
               }
@@ -278,37 +341,44 @@ public class GDHeartRateService {
                 player2.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                 player2.prepare();
                 player.setNextMediaPlayer(player2);
-                player.start();
                 player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                   @Override
                   public void onCompletion(MediaPlayer mp) {
-                    player.reset();
-                    try {
-                      player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                      player.prepare();
+                    playerLock.lock();
+                    if (alarmPlaying) {
+                      player.reset();
+                      try {
+                        player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                        player.prepare();
+                      } catch (IOException e) {
+                        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                      }
+                      player2.setNextMediaPlayer(player);
+                      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player done, handing over to player2");
                     }
-                    catch(IOException e) {
-                      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-                    }
-                    player2.setNextMediaPlayer(player);
-                    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player done, handing over to player2");
+                    playerLock.unlock();
                   }
                 });
                 player2.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                   @Override
                   public void onCompletion(MediaPlayer mp) {
-                    player2.reset();
-                    try {
-                      player2.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                      player2.prepare();
+                    playerLock.lock();
+                    if (alarmPlaying) {
+                      player2.reset();
+                      try {
+                        player2.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                        player2.prepare();
+                      } catch (IOException e) {
+                        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                      }
+                      player.setNextMediaPlayer(player2);
+                      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player2 done, handing over to player");
                     }
-                    catch(IOException e) {
-                      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-                    }
-                    player.setNextMediaPlayer(player2);
-                    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player2 done, handing over to player");
+                    playerLock.unlock();
                   }
                 });
+                alarmPlaying=true;
+                player.start();
 
               }
             }
@@ -321,10 +391,51 @@ public class GDHeartRateService {
           catch(IOException e) {
             GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
           }
+
+          // Find out the zone the heart rate is in
+          int nextHeartRateZone=4;
+          if (currentHeartRate<startHeartRateZoneTwo)
+            nextHeartRateZone=1;
+          else if (currentHeartRate<startHeartRateZoneThree)
+            nextHeartRateZone=2;
+          else if (currentHeartRate<startHeartRateZoneFour)
+            nextHeartRateZone=3;
+          if (currentHeartRateZone!=nextHeartRateZone) {
+            playSound("heartRateZoneChange.ogg",nextHeartRateZone);
+            currentHeartRateZone=nextHeartRateZone;
+          }
+          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("current heart rate zone: %d",currentHeartRateZone));
         }
+
+        // Stop the player if it's still running
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","shutting down media player");
+        playerLock.lock();
+        alarmPlaying=false;
+        if (player!=null) {
+          player.stop();
+          player.release();
+          player=null;
+        }
+        if (player2!=null) {
+          player2.stop();
+          player2.release();
+          player2=null;
+        }
+        if (afd!=null) {
+          try {
+            afd.close();
+          }
+          catch(IOException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+          }
+          afd=null;
+        }
+        playerLock.unlock();
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","exiting alarm thread");
       }
     });
     alarmThread.start();
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","alarm thread started");
 
   }
 

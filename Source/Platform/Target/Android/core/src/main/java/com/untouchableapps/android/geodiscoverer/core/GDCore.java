@@ -26,6 +26,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.hardware.Sensor;
@@ -34,6 +35,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.media.MediaPlayer;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
@@ -68,6 +70,11 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   //
   // Variables
   //
+
+  // Time info for deciding if silence needs to be played to wake up bluetooth device
+  long audioWakeupLastTrigger = 0;
+  public long audioWakeupDelay = -1;
+  public long audioWakeupDuration = -1;
 
   /** Current opengl context */
   GL10 currentGL = null;
@@ -134,8 +141,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   float[] orientation = new float[3];
 
   // Thread signaling
-  final Lock lock = new ReentrantLock();
-  final Condition threadInitialized = lock.newCondition();
+  final Lock coreLock = new ReentrantLock();
+  final Lock audioWakeupLock = new ReentrantLock();
+  final Condition threadInitialized = coreLock.newCondition();
 
   // Indicates if a replay is active
   boolean replayTraceActive = false;
@@ -190,7 +198,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     thread.start(); 
     
     // Wait until the thread is initialized
-    lock.lock();
+    coreLock.lock();
     try {
       while (messageHandler==null)
       {           
@@ -199,7 +207,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     } catch (InterruptedException e) {
       e.printStackTrace();
     } finally {
-      lock.unlock();
+      coreLock.unlock();
     }    
   }
   
@@ -261,7 +269,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   // Handler thread
   public void run() {
     
-    lock.lock();
+    coreLock.lock();
 
     // This is a background thread
     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -270,7 +278,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     Looper.prepare();
     messageHandler = new AppMessageHandler(this);
     threadInitialized.signal();
-    lock.unlock();
+    coreLock.unlock();
     Looper.loop();
   }
   
@@ -376,38 +384,38 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   
   /** Sets the display metrics */
   void setDisplayMetrics(DisplayMetrics metrics) {
-    lock.lock();
+    coreLock.lock();
     this.screenDPI=metrics.densityDpi;
     double a=metrics.widthPixels/metrics.xdpi;
     double b=metrics.heightPixels/metrics.ydpi;
     this.screenDiagonal=Math.sqrt(a*a+b*b);
-    lock.unlock();
+    coreLock.unlock();
   }
 
   /** Starts the core */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   synchronized void start()
   {
-    lock.lock();
+    coreLock.lock();
     if (coreInitialized) {
-      lock.unlock();
+      coreLock.unlock();
       return;
     }
     if (coreLifeCycleOngoing) {
-      lock.unlock();
+      coreLock.unlock();
       return;
     }
     coreLifeCycleOngoing=true;
-    lock.unlock();
+    coreLock.unlock();
     
     // Check if home dir is available
     boolean initialized=false;
 
     // Copy the assets files
     if (!updateHome()) {
-      lock.lock();
+      coreLock.lock();
       coreLifeCycleOngoing=false;
-      lock.unlock();
+      coreLock.unlock();
       return;
     }
 
@@ -416,7 +424,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     initialized=true;
 
     // Ensure that the screen is recreated
-    lock.lock();    
+    coreLock.lock();
     if (initialized) {
       coreInitialized=true;
       executeAppCommand("coreInitialized()");
@@ -428,38 +436,40 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       createGraphic=true;
     }
     coreLifeCycleOngoing=false;
-    lock.unlock();
+    coreLock.unlock();
   } 
 
   /** Deinits the core */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   synchronized void stop()
   {
-    lock.lock();
+    coreLock.lock();
     if (!coreInitialized) {
-      lock.unlock();
+      coreLock.unlock();
       return;
     }
     if (coreLifeCycleOngoing) {
-      lock.unlock();
+      coreLock.unlock();
       return;
     }
     coreLifeCycleOngoing=true;
     coreStopped=true;
     coreInitialized=false;
     coreLateInitComplete=false;
-    lock.unlock();
+    coreLock.unlock();
 
     // Stop the cockpit apps
+    appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","before cockpit engine stop");
     appIf.cockpitEngineStop();
 
     // Deinit the core
+    appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","before deinit core");
     deinitCore();
 
     // Update flags
-    lock.lock();
+    coreLock.lock();
     coreLifeCycleOngoing=false;
-    lock.unlock();
+    coreLock.unlock();
   }
 
   /** Deinits the core and restarts it */
@@ -542,9 +552,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     if (coreInitialized) {
       executeCoreCommandInt(cmd);
     } else {
-      lock.lock();
+      coreLock.lock();
       queuedCoreCommands.add(cmd);
-      lock.unlock();
+      coreLock.unlock();
     }
   }
 
@@ -586,16 +596,18 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       }
     }
     if (cmd.equals("lateInitComplete()")) {
-      lock.lock();
+      coreLock.lock();
       for (String queuedCmd : queuedCoreCommands) {
         executeCoreCommandInt(queuedCmd);
       }
       queuedCoreCommands.clear();
-      lock.unlock();
+      coreLock.unlock();
+      audioWakeupDuration = Integer.parseInt(configStoreGetStringValue("General", "audioWakeupDuration"))*1000;
+      audioWakeupDelay = Integer.parseInt(configStoreGetStringValue("General", "audioWakeupDelay"))*1000;
       appIf.cockpitEngineStart();
-      lock.lock();
+      coreLock.lock();
       coreLateInitComplete=true;
-      lock.unlock();
+      coreLock.unlock();
       cmdExecuted=false; // forward message to activity
     }
     if (cmd.startsWith("setFormattedNavigationInfo(")) {
@@ -697,7 +709,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   
   /** Called when a frame needs to be drawn */
   public void onDrawFrame(GL10 gl) {
-    lock.lock();
+    coreLock.lock();
     boolean blankScreen=false;
     if (gl==currentGL) {
       if (!coreStopped) {
@@ -738,19 +750,19 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       }
       lastFrameDrawnByCore=false;
     }
-    lock.unlock();
+    coreLock.unlock();
   }
   
   /** Updates the splash visibility flag */
   public void setSplashIsVisible(boolean splashIsVisible) {
-    lock.lock();
+    coreLock.lock();
     this.splashIsVisible = splashIsVisible;
-    lock.unlock();
+    coreLock.unlock();
   }
   
   /** Called when the surface changes */
   public void onSurfaceChanged(GL10 gl, int width, int height) {
-    lock.lock();
+    coreLock.lock();
     int orientationValue = appIf.getActivityOrientation();
     if (orientationValue!= Configuration.ORIENTATION_UNDEFINED) {
       String orientationString="portrait";
@@ -759,18 +771,18 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       changeScreenCommand="screenChanged(" + orientationString + "," + width + "," + height + ")";
       changeScreen=true;
     }
-    lock.unlock();
+    coreLock.unlock();
   }
 
   /** Called when the surface is created */
   public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-    lock.lock();
+    coreLock.lock();
     // Context is lost, so tell the core to recreate any textures
     graphicInvalidated=true;
     createGraphic=true;
     currentGL=gl;
     renderThread=Thread.currentThread();
-    lock.unlock();
+    coreLock.unlock();
   }
 
   /** Called when a new fix is available */  
@@ -851,5 +863,61 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   // Other calls back from the sensor manager
   public void onAccuracyChanged(Sensor sensor, int accuracy) {
   }
-  
+
+  /** Wakeups the audio device if required */
+  public void audioWakeup() {
+
+    audioWakeupLock.lock();
+    if (audioWakeupDelay==-1) {
+      audioWakeupLock.unlock();
+      return;
+    }
+    //appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("audioWakeup called"));
+    long t = System.currentTimeMillis();
+    if (audioIsAsleep()) {
+      audioWakeupLastTrigger = t + audioWakeupDelay;
+      try {
+        final AssetFileDescriptor afd = appIf.getContext().getAssets().openFd("Sound/silence.mp3");
+        final MediaPlayer player = new MediaPlayer();
+        player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+        player.prepare();
+        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+          public void onCompletion(MediaPlayer mp) {
+            try {
+              afd.close();
+              player.release();
+            } catch (IOException e) {
+              appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", e.getMessage());
+            }
+          }
+        });
+        player.start();
+      }
+      catch (IOException e) {
+        appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", e.getMessage());
+      }
+      boolean repeat=true;
+      while (repeat) {
+        try {
+          Thread.sleep(audioWakeupLastTrigger-t);
+          repeat=false;
+        } catch (InterruptedException e) {
+          t = System.currentTimeMillis();
+          if (t>=audioWakeupLastTrigger)
+            repeat=false;
+        }
+      }
+    }
+    audioWakeupLastTrigger = System.currentTimeMillis();
+    //appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("lastTrigger=%d",audioWakeupLastTrigger));
+    audioWakeupLock.unlock();
+  }
+
+  /** Indicates if audio device is asleep */
+  public boolean audioIsAsleep() {
+    if (audioWakeupDuration==-1)
+      return true;
+    long t = System.currentTimeMillis();
+    return (t>audioWakeupLastTrigger+audioWakeupDuration);
+  }
 }

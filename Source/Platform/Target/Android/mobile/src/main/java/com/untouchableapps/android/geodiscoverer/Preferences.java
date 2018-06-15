@@ -490,6 +490,9 @@ public class Preferences extends PreferenceActivity implements
       rootScreen.addPreference(heartRateMonitorCategory);
       addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "bluetoothAddress");
       addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "maxHeartRate");
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "startHeartRateZoneTwo");
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "startHeartRateZoneThree");
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "startHeartRateZoneFour");
       PreferenceCategory mapCategory = new PreferenceCategory(this);
       mapCategory.setTitle("Map");
       rootScreen.addPreference(mapCategory);

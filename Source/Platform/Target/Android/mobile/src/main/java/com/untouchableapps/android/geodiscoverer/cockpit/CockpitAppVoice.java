@@ -27,6 +27,7 @@ import android.speech.tts.TextToSpeech;
 
 import com.untouchableapps.android.geodiscoverer.GDApplication;
 import com.untouchableapps.android.geodiscoverer.R;
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 
@@ -101,14 +102,14 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "voiceApp: got off route indication (repeated=" + String.valueOf(repeated) + ")");
       long diffToLastUpdate = t - lastAlert;
       if ((!repeated)||(diffToLastUpdate>minDurationBetweenOffRouteAlerts)) {
-        cockpitEngine.audioWakeup();
+        GDApplication.coreObject.audioWakeup();
         textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
         textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);
         lastAlert=t;
       }
     }
     if (type==AlertType.newTurn) {
-      cockpitEngine.audioWakeup();
+      GDApplication.coreObject.audioWakeup();
       textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
       textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);      
     }
@@ -200,8 +201,8 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
 
     // Delay the audio requires for speaking
     long audioDelay=speakDelay;
-    if (cockpitEngine.audioIsAsleep())
-      audioDelay+=cockpitEngine.audioWakeupDelay;
+    if (GDApplication.coreObject.audioIsAsleep())
+      audioDelay+=GDApplication.coreObject.audioWakeupDelay;
 
     // Adapt the distance to the audio delay
     if (!distance.equals("")) {
