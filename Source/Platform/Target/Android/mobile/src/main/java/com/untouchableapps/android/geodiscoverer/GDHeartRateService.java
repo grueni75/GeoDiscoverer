@@ -78,6 +78,8 @@ public class GDHeartRateService {
   int startHeartRateZoneTwo = Integer.MAX_VALUE;
   int startHeartRateZoneThree = Integer.MAX_VALUE;
   int startHeartRateZoneFour = Integer.MAX_VALUE;
+  int minHeartRateZoneChangeTime = 0;
+  long heartRateZoneChangeTimestamp = 0;
 
   // Thread playing audio if heart rate limit is reached
   Thread alarmThread = null;
@@ -286,6 +288,7 @@ public class GDHeartRateService {
     startHeartRateZoneTwo = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneTwo"));
     startHeartRateZoneThree = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneThree"));
     startHeartRateZoneFour = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneFour"));
+    minHeartRateZoneChangeTime = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "minHeartRateZoneChangeTime"));
 
     // Setup bluetooth low energy
     bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -393,6 +396,7 @@ public class GDHeartRateService {
           }
 
           // Find out the zone the heart rate is in
+          long t=System.currentTimeMillis()/1000;
           int nextHeartRateZone=4;
           if (currentHeartRate<startHeartRateZoneTwo)
             nextHeartRateZone=1;
@@ -401,8 +405,14 @@ public class GDHeartRateService {
           else if (currentHeartRate<startHeartRateZoneFour)
             nextHeartRateZone=3;
           if (currentHeartRateZone!=nextHeartRateZone) {
-            playSound("heartRateZoneChange.ogg",nextHeartRateZone);
-            currentHeartRateZone=nextHeartRateZone;
+            if (heartRateZoneChangeTimestamp==0) {             }
+
+            heartRateZoneChangeTimestamp=t;
+            }
+            if (t-heartRateZoneChangeTimestamp>=minHeartRateZoneChangeTime) {
+              playSound("heartRateZoneChange.ogg",nextHeartRateZone);
+              currentHeartRateZone=nextHeartRateZone;
+              heartRateZoneChangeTimestamp=0;
           }
           GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("current heart rate zone: %d",currentHeartRateZone));
         }

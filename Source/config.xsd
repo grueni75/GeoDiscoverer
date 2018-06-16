@@ -135,6 +135,11 @@
                   <xsd:documentation>Heart rate at which zone four starts.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
+              <xsd:element name="minHeartRateZoneChangeTime" type="xsd:integer" default="10" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Minimum time the heart rate needs to stay in a new zone before it is indicated by a sound..</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
