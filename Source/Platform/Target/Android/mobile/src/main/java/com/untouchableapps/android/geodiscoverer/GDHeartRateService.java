@@ -406,13 +406,14 @@ public class GDHeartRateService {
             nextHeartRateZone=3;
           if (currentHeartRateZone!=nextHeartRateZone) {
             if (heartRateZoneChangeTimestamp==0) {             }
-
-            heartRateZoneChangeTimestamp=t;
+              heartRateZoneChangeTimestamp=t;
             }
             if (t-heartRateZoneChangeTimestamp>=minHeartRateZoneChangeTime) {
               playSound("heartRateZoneChange.ogg",nextHeartRateZone);
               currentHeartRateZone=nextHeartRateZone;
               heartRateZoneChangeTimestamp=0;
+          } else {
+              heartRateZoneChangeTimestamp=t;
           }
           GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("current heart rate zone: %d",currentHeartRateZone));
         }
