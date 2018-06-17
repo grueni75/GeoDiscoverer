@@ -1,1 +1,5 @@
-/build
+build/intermediates
+build/generated
+build/outputs/logs
+build/outputs/apk/debug/*.json
+
