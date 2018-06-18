@@ -1176,9 +1176,13 @@ void NavigationEngine::backgroundLoader() {
       (*i)->setIsInit(true);
       std::string routePath="Navigation/Route[@name='" + (*i)->getGpxFilename() + "']";
       Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex", __FILE__, __LINE__);
+      DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
       if (startIndex==-1) startIndex=0;
+      DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
       Int endIndex=core->getConfigStore()->getIntValue(routePath,"endFlagIndex", __FILE__, __LINE__);
+      DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
       if (endIndex==-1) endIndex=(*i)->getSelectedSize()-1;
+      DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
       if ((*i)->getReverse()) {
         if (startIndex>endIndex) {
           (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
