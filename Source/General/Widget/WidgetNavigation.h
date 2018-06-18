@@ -60,6 +60,9 @@ protected:
   // Show the turn
   bool showTurn;
 
+  // Skip the current active turn
+  bool skipTurn;
+
   // Decides which info is displayed in the second row
   Int secondRowState;
 

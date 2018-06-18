@@ -75,6 +75,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   hideCompass=true;
   hideTarget=true;
   showTurn=false;
+  skipTurn=false;
   active=false;
   firstRun=true;
   lastClockUpdate=0;
@@ -522,7 +523,7 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
   }
 
   // Is a turn coming?
-  if (showTurn) {
+  if ((showTurn)&&(!skipTurn)) {
 
     // Draw the turn
     screen->startObject();
@@ -538,6 +539,8 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
   } else {
 
     // Draw the information about the target / route
+    if (!showTurn)
+      skipTurn=false;
     separatorIcon.setColor(color);
     separatorIcon.draw(t);
     if (distanceLabelFontString) {
@@ -617,13 +620,24 @@ void WidgetNavigation::updatePosition(Int x, Int y, Int z) {
 void WidgetNavigation::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
   WidgetPrimitive::onTouchUp(t,x,y,cancel);
   if (getIsHit()) {
-    secondRowState++;
-    if (textColumnCount==2) {
-      if (secondRowState>1)
-        secondRowState=0;
+
+    // Turn currently active?
+    if (showTurn) {
+
+      // Skip the current turn
+      skipTurn=true;
+
     } else {
-      if (secondRowState>3)
-        secondRowState=0;
+
+      // Rotate the infos
+      secondRowState++;
+      if (textColumnCount==2) {
+        if (secondRowState>1)
+          secondRowState=0;
+      } else {
+        if (secondRowState>3)
+          secondRowState=0;
+      }
     }
   }
 }
