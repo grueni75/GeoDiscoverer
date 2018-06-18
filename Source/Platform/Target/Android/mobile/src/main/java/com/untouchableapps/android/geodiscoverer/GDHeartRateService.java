@@ -80,6 +80,7 @@ public class GDHeartRateService {
   int startHeartRateZoneFour = Integer.MAX_VALUE;
   int minHeartRateZoneChangeTime = 0;
   long heartRateZoneChangeTimestamp = 0;
+  int volumeHeartRateZoneChange = 100;
 
   // Thread playing audio if heart rate limit is reached
   Thread alarmThread = null;
@@ -96,7 +97,7 @@ public class GDHeartRateService {
   private LinkedList<String> knownDeviceAddresses = new LinkedList<String>();
 
   /** Plays a sound from the asset directory */
-  private void playSound(String filename, int repeat) {
+  private void playSound(String filename, int repeat, int volume) {
     Thread playThread = new Thread(new Runnable() {
       int remainingRepeats=repeat;
       @Override
@@ -107,6 +108,9 @@ public class GDHeartRateService {
           MediaPlayer player = new MediaPlayer();
           player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
           player.prepare();
+          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("volume=%d",volume));
+          float log1=1.0f-(float)(Math.log(100-volume)/Math.log(100));
+          player.setVolume(log1,log1);
           player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -172,7 +176,7 @@ public class GDHeartRateService {
       } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","connection to bluetooth gatt service dropped");
         state = CONNECTING;
-        playSound("disconnect.ogg", 1);
+        playSound("disconnect.ogg", 1, 100);
       }
     }
 
@@ -205,7 +209,7 @@ public class GDHeartRateService {
               }
             }
           }
-          playSound("connect.ogg",1);
+          playSound("connect.ogg",1, 100);
         }
       }
     }
@@ -289,13 +293,16 @@ public class GDHeartRateService {
     startHeartRateZoneThree = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneThree"));
     startHeartRateZoneFour = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneFour"));
     minHeartRateZoneChangeTime = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "minHeartRateZoneChangeTime"));
+    volumeHeartRateZoneChange = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "volumeHeartRateZoneChange"));
 
     // Setup bluetooth low energy
     bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
     bluetoothAdapter = bluetoothManager.getAdapter();
     final UUID[] uuids = {UUID_HEART_RATE_MEASUREMENT};
-    //bluetoothAdapter.startLeScan(uuids,scanCallback);
-    bluetoothAdapter.startLeScan(scanCallback);
+    //bluetoothAdapter.startLeScan(scanCallback);
+    BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
+    bluetoothGatt = device.connectGatt(context, true, gattCallback);
+    state=CONNECTING;
 
     // Start alarm thread
     alarmThread = new Thread(new Runnable() {
@@ -409,14 +416,14 @@ public class GDHeartRateService {
               heartRateZoneChangeTimestamp=t;
             }
             if (t-heartRateZoneChangeTimestamp>=minHeartRateZoneChangeTime) {
-              playSound("heartRateZoneChange.ogg", nextHeartRateZone);
+              playSound("heartRateZoneChange.ogg", nextHeartRateZone, volumeHeartRateZoneChange);
               currentHeartRateZone = nextHeartRateZone;
               heartRateZoneChangeTimestamp = 0;
             }
           } else {
               heartRateZoneChangeTimestamp=0;
           }
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("current heart rate zone: %d",currentHeartRateZone));
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("current heart rate zone: %d",currentHeartRateZone));
         }
 
         // Stop the player if it's still running
