@@ -865,4 +865,19 @@ void ConfigStore::removePath(std::string path) {
   }
 }
 
+// Encodes a string into a representation that can be stored in the config
+std::string ConfigStore::encodeString(std::string name) {
+  if (configSection==NULL)
+    FATAL("no config available",NULL);
+  XMLDocument doc=configSection->getConfig();
+  if (doc==NULL)
+    FATAL("no config available",NULL);
+  //DEBUG("name before encoding: %s",name.c_str());
+  xmlChar *valueEncoded = xmlEncodeSpecialChars(doc,(const xmlChar *)name.c_str());
+  std::string result = std::string((char*)valueEncoded);
+  xmlFree(valueEncoded);
+  //DEBUG("name before encoding: %s",result.c_str());
+  return result;
+}
+
 }

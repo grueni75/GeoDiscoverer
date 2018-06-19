@@ -1,3 +1,3 @@
-handle SIGABRT nostop
-catch throw
+#handle SIGABRT nostop
+#catch throw
 

@@ -104,6 +104,9 @@ void *debugThread(void *args) {
   //sleep(5);
   //GEODISCOVERER::core->getCommander()->execute("addDownloadJob(13,14)");
 
+  // Add an address point
+  //GEODISCOVERER::core->getCommander()->execute("addAddressPoint(\"Dessauer Straße 19/20, 06886 Lutherstadt / Wittenberg\",\"Dessauer Straße 19/20, 06886 Lutherstadt Wittenberg\",0,0)");
+
   // Use the replay log if it exists
   GEODISCOVERER::core->getDebug()->replayTrace("replay.log");
 

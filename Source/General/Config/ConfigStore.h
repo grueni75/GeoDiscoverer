@@ -136,6 +136,9 @@ public:
   // Removes the node from the config
   void removePath(std::string path);
 
+  // Encodes a string into a compatible representation
+  std::string encodeString(std::string name);
+
 };
 
 }

@@ -84,12 +84,13 @@ public:
     this->lng = lng;
   }
 
-  const std::string& getName() const {
+  std::string getName() const {
     return name;
   }
 
-  void setName(const std::string& name) {
-    this->name = name;
+  void setName(std::string name) {
+    name.erase(std::remove(name.begin(), name.end(), '/'), name.end());
+    this->name = core->getConfigStore()->encodeString(name);
   }
 
   TimestampInSeconds getTimestamp() const {

@@ -1244,8 +1244,10 @@ public class ViewMap extends GDActivity {
           if (addresses.size()>0) {
             Address address = addresses.get(0);
             locationFound=true;
-            coreObject.scheduleCoreCommand("addAddressPoint(\"" + addressLine + "\",\"" + addressLine +
-                "\","+ address.getLongitude()+","+address.getLatitude() + ")");
+            String cmd = "addAddressPoint(\"" + addressLine + "\",\"" + addressLine +
+                "\","+ address.getLongitude()+","+address.getLatitude() + ")";
+            GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",cmd);
+            coreObject.scheduleCoreCommand(cmd);
             coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate(" +
                 address.getLongitude() + "," + address.getLatitude() + ")");
             validAddressLines.add(addressLine);
