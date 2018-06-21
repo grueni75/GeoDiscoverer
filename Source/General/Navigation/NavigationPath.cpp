@@ -1100,7 +1100,7 @@ void NavigationPath::updateFlagVisualization(NavigationPathVisualizationType typ
 // Sets the start flag at the given index
 void NavigationPath::setStartFlag(Int index, const char *file, int line) {
 
-  DEBUG("%s: index=%d",getGpxFilename().c_str(),index);
+  //DEBUG("%s: index=%d",getGpxFilename().c_str(),index);
 
   // Path may only be changed by one thread
   lockAccess(file,line);
@@ -1112,16 +1112,16 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
   // Shall the start flag be hidden?
   if (index==-1) {
     startIndex=-1;
-    DEBUG("startIndex=%d",startIndex);
+    //DEBUG("startIndex=%d",startIndex);
   } else {
 
     // First check if start flag is within range of path
-    DEBUG("index=%d",index);
+    //DEBUG("index=%d",index);
     if (index<0)
       index=0;
     if (index>mapPositions.size()-1)
       index=mapPositions.size()-1;
-    DEBUG("index=%d",index);
+    //DEBUG("index=%d",index);
 
     // If the new start flag is behind the end flag, set the end flag to the start flag
     bool updateEndFlag=false;
@@ -1148,12 +1148,12 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
       endIndex=newEndIndex;
       updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,false,true);
       core->getConfigStore()->setIntValue(routePath,"endFlagIndex",endIndex, __FILE__, __LINE__);
-      DEBUG("endIndex=%d",endIndex);
+      //DEBUG("endIndex=%d",endIndex);
     }
   }
 
-  DEBUG("%s: startIndex=%d",getGpxFilename().c_str(),startIndex);
-  DEBUG("%s: endIndex=%d",getGpxFilename().c_str(),endIndex);
+  //DEBUG("%s: startIndex=%d",getGpxFilename().c_str(),startIndex);
+  //DEBUG("%s: endIndex=%d",getGpxFilename().c_str(),endIndex);
 
   // Update the metrics of the path
   updateMetrics();
@@ -1168,7 +1168,7 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
 // Sets the end flag at the given index
 void NavigationPath::setEndFlag(Int index, const char *file, int line) {
 
-  DEBUG("%s: index=%d",getGpxFilename().c_str(),index);
+  //DEBUG("%s: index=%d",getGpxFilename().c_str(),index);
 
   // Path may only be changed by one thread
   lockAccess(file, line);
@@ -1180,16 +1180,16 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
   // Shall the end flag be hidden?
   if (index==-1) {
     endIndex=-1;
-    DEBUG("endIndex=%d",startIndex);
+    //DEBUG("endIndex=%d",startIndex);
   } else {
 
     // First check if end flag is within range of path
-    DEBUG("index=%d",index);
+    //DEBUG("index=%d",index);
     if (index<0)
       index=0;
     if (index>mapPositions.size()-1)
       index=mapPositions.size()-1;
-    DEBUG("index=%d",index);
+    //DEBUG("index=%d",index);
 
     // If the new end flag is behind the start flag, set the start flag to the end flag
     bool updateStartFlag=false;
@@ -1216,12 +1216,12 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
       startIndex=newStartIndex;
       updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,false,true);
       core->getConfigStore()->setIntValue(routePath,"startFlagIndex",startIndex, __FILE__, __LINE__);
-      DEBUG("startIndex=%d",endIndex);
+      //DEBUG("startIndex=%d",endIndex);
     }
   }
 
-  DEBUG("%s: startIndex=%d",getGpxFilename().c_str(),startIndex);
-  DEBUG("%s: endIndex=%d",getGpxFilename().c_str(),endIndex);
+  //DEBUG("%s: startIndex=%d",getGpxFilename().c_str(),startIndex);
+  //DEBUG("%s: endIndex=%d",getGpxFilename().c_str(),endIndex);
 
   // Update the metrics of the path
   updateMetrics();

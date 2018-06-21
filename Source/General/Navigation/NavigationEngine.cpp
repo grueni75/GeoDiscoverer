@@ -293,6 +293,12 @@ void NavigationEngine::updateRoutes() {
   unlockRoutes();
 }
 
+// Deinitializes a path
+void NavigationEngine::deletePath(NavigationPath *path) {
+  core->onPathChange(path,NavigationPathChangeTypeWillBeRemoved);
+  delete path;
+}
+
 // Deinitializes the engine
 void NavigationEngine::deinit() {
 
@@ -325,18 +331,17 @@ void NavigationEngine::deinit() {
   // Save the track first
   if (recordedTrack) {
     recordedTrack->writeGPXFile(); // locking is handled within writeGPXFile()
-    core->onPathChange(recordedTrack,NavigationPathChangeTypeWillBeRemoved);
+    NavigationPath *path=recordedTrack;
     lockRecordedTrack(__FILE__, __LINE__);
-    delete recordedTrack;
     recordedTrack=NULL;
     unlockRecordedTrack();
+    deletePath(path);
   }
 
   // Free all routes
   lockRoutes(__FILE__, __LINE__);
   for (std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    core->onPathChange(*i,NavigationPathChangeTypeWillBeRemoved);
-    delete *i;
+    deletePath(*i);
   }
   routes.clear();
   unlockRoutes();
@@ -1171,18 +1176,20 @@ void NavigationEngine::backgroundLoader() {
       goto exitThread;
     }
     if (!(*i)->readGPXFile()) { // locking is handled within method
+      NavigationPath *path=*i;
       i=routes.erase(i);
+      deletePath(path);
     } else {
       (*i)->setIsInit(true);
       std::string routePath="Navigation/Route[@name='" + (*i)->getGpxFilename() + "']";
       Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex", __FILE__, __LINE__);
-      DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
+      //DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
       if (startIndex==-1) startIndex=0;
-      DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
+      //DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
       Int endIndex=core->getConfigStore()->getIntValue(routePath,"endFlagIndex", __FILE__, __LINE__);
-      DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
+      //DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
       if (endIndex==-1) endIndex=(*i)->getSelectedSize()-1;
-      DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
+      //DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
       if ((*i)->getReverse()) {
         if (startIndex>endIndex) {
           (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
@@ -1218,7 +1225,7 @@ exitThread:
 
 // Adds a new point of interest
 void NavigationEngine::newPointOfInterest(std::string name, std::string description, double lng, double lat) {
-  DEBUG("name=%s description=%s lng=%f lat=%f",name.c_str(),description.c_str(),lng,lat);
+  //DEBUG("name=%s description=%s lng=%f lat=%f",name.c_str(),description.c_str(),lng,lat);
   setTargetAtGeographicCoordinate(lng,lat,true);
 }
 
@@ -1550,7 +1557,7 @@ void NavigationEngine::renameAddressPoint(std::string oldName, std::string newNa
 
 // Removes an address point
 void NavigationEngine::removeAddressPoint(std::string name) {
-  DEBUG("name=%s",name.c_str());
+  //DEBUG("name=%s",name.c_str());
   std::string path = "Navigation/AddressPoint[@name='" + name + "']";
   core->getConfigStore()->removePath(path);
   initAddressPoints();

@@ -466,7 +466,10 @@ bool NavigationPath::readGPXFile() {
   }
 
   // Cleanup
-  result=true;
+  if (core->getQuitCore())
+    result=false;
+  else
+    result=true;
 cleanup:
   if (xpathCtx) xmlXPathFreeContext(xpathCtx);
   if (doc) xmlFreeDoc(doc);

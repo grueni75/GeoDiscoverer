@@ -167,6 +167,9 @@ protected:
   // Reads the address points from disk
   void initAddressPoints();
 
+  // Deinitializes a path
+  void deletePath(NavigationPath *path);
+
 public:
 
   // Constructor
