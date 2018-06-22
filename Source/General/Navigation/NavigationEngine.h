@@ -156,7 +156,10 @@ protected:
   std::list<NavigationPoint> addressPoints;
 
   // Graphic object that represents the address points
-  GraphicObject addressPointsGraphicObject;
+  GraphicObject navigationPointsGraphicObject;
+
+  // List of navigation points that are visualized
+  std::list<NavigationPointVisualization> navigationPointsVisualization;
 
   // Forces an update of the navigation infos
   void triggerNavigationInfoUpdate() {
@@ -169,6 +172,9 @@ protected:
 
   // Deinitializes a path
   void deletePath(NavigationPath *path);
+
+  // Updates the flags of a route
+  void updateFlagVisualization(NavigationPath *path);
 
 public:
 

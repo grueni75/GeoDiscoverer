@@ -39,7 +39,7 @@ void *navigationEngineComputeNavigationInfoThread(void *args) {
 
 // Constructor
 NavigationEngine::NavigationEngine() :
-  addressPointsGraphicObject(core->getDefaultScreen(),true)
+  navigationPointsGraphicObject(core->getDefaultScreen(),true)
 {
 
   // Init variables
@@ -223,7 +223,7 @@ void NavigationEngine::init() {
 
   // Inform the graphic engine about the new objects
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-  core->getDefaultGraphicEngine()->setAddressPoints(&addressPointsGraphicObject);
+  core->getDefaultGraphicEngine()->setNavigationPoints(&navigationPointsGraphicObject);
   core->getDefaultGraphicEngine()->unlockDrawing();
 
   // Start the background loader
@@ -325,7 +325,7 @@ void NavigationEngine::deinit() {
 
   // Reset the address points graphic object
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-  core->getDefaultGraphicEngine()->setAddressPoints(NULL);
+  core->getDefaultGraphicEngine()->setNavigationPoints(NULL);
   core->getDefaultGraphicEngine()->unlockDrawing();
 
   // Save the track first
@@ -959,65 +959,10 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   }
   core->getDefaultGraphicEngine()->unlockArrowIcon();
 
-  // Update the navigation points
-  for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
-
-    // Check if the address point is visible
-    MapPosition pos;
-    pos.setLat(i->getLat());
-    pos.setLng(i->getLng());
-    bool showAddressPoint=true;
-    MapCalibrator *calibrator=mapPos.getMapTile()->getParentMapContainer()->getMapCalibrator();
-    //DEBUG("calibrator=%08x",calibrator);
-    if (!displayArea.containsGeographicCoordinate(pos)) {
-      showAddressPoint=false;
-    } else {
-      if (!calibrator->setPictureCoordinates(pos)) {
-        showAddressPoint=false;
-      } else {
-        if (!Integer::add(pos.getX(),-mapPos.getX(),mapDiffX))
-          showAddressPoint=false;
-        if (!Integer::add(pos.getY(),-mapPos.getY(),mapDiffY))
-          showAddressPoint=false;
-        if (!Integer::add(displayArea.getRefPos().getX(),mapDiffX,visPosX))
-          showAddressPoint=false;
-        if (!Integer::add(displayArea.getRefPos().getY(),-mapDiffY,visPosY))
-          showAddressPoint=false;
-      }
-    }
-    core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-    if (showAddressPoint) {
-
-      // Check if the point already exists
-      // If not, add it
-      GraphicRectangle *graphicRectangle=(GraphicRectangle*)addressPointsGraphicObject.getPrimitive(i->getGraphicPrimitiveKey());
-      if (!graphicRectangle) {
-        //DEBUG("%s => icon created",i->getName().c_str());
-        if (!(graphicRectangle=new GraphicRectangle(*core->getDefaultGraphicEngine()->getNavigationPointIcon()))) {
-          FATAL("can not create graphic rectangle object",NULL);
-        }
-        graphicRectangle->setDestroyTexture(false);
-        std::list<std::string> l;
-        l.push_back(i->getName());
-        graphicRectangle->setName(l);
-        i->setGraphicPrimitiveKey(addressPointsGraphicObject.addPrimitive((GraphicPrimitive*)graphicRectangle));
-      }
-
-      // Update the position
-      graphicRectangle->setX(visPosX);
-      graphicRectangle->setY(visPosY);
-      //DEBUG("address point %s => visPosX=%d visPosY=%d",i->getName().c_str(),visPosX,visPosY);
-
-    } else {
-
-      // Remove icon if it is still visible
-      if (i->getGraphicPrimitiveKey()!=0) {
-        addressPointsGraphicObject.removePrimitive(i->getGraphicPrimitiveKey(),true);
-        i->setGraphicPrimitiveKey(0);
-        //DEBUG("%s => icon removed",i->getName().c_str());
-      }
-    }
-    core->getDefaultGraphicEngine()->unlockDrawing();
+  // Update the visualization of the points
+  TimestampInMicroseconds t = core->getClock()->getMicrosecondsSinceStart();
+  for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
+    (*i).updateVisualization(t,mapPos,displayArea,&navigationPointsGraphicObject);
   }
 
   // Unlock the drawing mutex
@@ -1181,6 +1126,8 @@ void NavigationEngine::backgroundLoader() {
       deletePath(path);
     } else {
       (*i)->setIsInit(true);
+
+      // Update the position of the start and end flags
       std::string routePath="Navigation/Route[@name='" + (*i)->getGpxFilename() + "']";
       Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex", __FILE__, __LINE__);
       //DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
@@ -1207,6 +1154,11 @@ void NavigationEngine::backgroundLoader() {
           (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
         }
       }
+
+      // Add the visualization of the start and end flags
+      updateFlagVisualization(*i);
+
+      // Trigger navigation update if necessary
       if (*i==activeRoute)
         triggerNavigationInfoUpdate();
       i++;
@@ -1272,12 +1224,61 @@ void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, b
   showTarget(repositionMap);
 }
 
+// Updates the flags of a route
+void NavigationEngine::updateFlagVisualization(NavigationPath *path) {
+  std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
+  MapPosition startFlagPos=path->getStartFlagPos();
+  MapPosition endFlagPos=path->getEndFlagPos();
+  bool replaceStartFlag=true;
+  bool replaceEndFlag=true;
+  while (i!=navigationPointsVisualization.end()) {
+    if ((*i).getReference()==(void*)path) {
+      bool remove=false;
+      switch((*i).getVisualizationType()) {
+      case NavigationPointVisualizationTypeStartFlag:
+        if (((*i).getPos().getLat()==path->getStartFlagPos().getLat())&&((*i).getPos().getLng()==path->getStartFlagPos().getLng()))
+          replaceStartFlag=false;
+        else
+          remove=true;
+        break;
+      case NavigationPointVisualizationTypeEndFlag:
+        if (((*i).getPos().getLat()==path->getEndFlagPos().getLat())&&((*i).getPos().getLng()==path->getEndFlagPos().getLng()))
+          replaceEndFlag=false;
+        else
+          remove=true;
+        break;
+      default:
+        FATAL("unhandled case value",NULL);
+      }
+      if (remove) {
+        core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+        navigationPointsGraphicObject.removePrimitive((*i).getGraphicPrimitiveKey(),true);
+        core->getDefaultGraphicEngine()->unlockDrawing();
+        i=navigationPointsVisualization.erase(i);
+      } else {
+        i++;
+      }
+    } else {
+      i++;
+    }
+  }
+  if (replaceStartFlag) {
+    NavigationPointVisualization startFlagVis(startFlagPos.getLat(),startFlagPos.getLng(), NavigationPointVisualizationTypeStartFlag,path->getGpxFilename(),(void*)path);
+    navigationPointsVisualization.push_back(startFlagVis);
+  }
+  if (replaceEndFlag) {
+    NavigationPointVisualization endFlagVis(endFlagPos.getLat(),endFlagPos.getLng(), NavigationPointVisualizationTypeEndFlag,path->getGpxFilename(),(void*)path);
+    navigationPointsVisualization.push_back(endFlagVis);
+  }
+}
+
 // Sets the start flag on the nearest route
 void NavigationEngine::setStartFlag(NavigationPath *path, Int index, const char *file, int line) {
   if (path==recordedTrack) {
     WARNING("flags can not be set on tracks",NULL);
   } else {
     path->setStartFlag(index, file, line);
+    updateFlagVisualization(path);
   }
   triggerNavigationInfoUpdate();
 }
@@ -1288,10 +1289,10 @@ void NavigationEngine::setEndFlag(NavigationPath *path, Int index, const char *f
     WARNING("flags can not be set on tracks",NULL);
   } else {
     path->setEndFlag(index, file, line);
+    updateFlagVisualization(path);
   }
   triggerNavigationInfoUpdate();
 }
-
 
 // Sets the active route
 void NavigationEngine::setActiveRoute(NavigationPath *route) {
@@ -1568,19 +1569,24 @@ void NavigationEngine::initAddressPoints() {
   std::string path = "Navigation/AddressPoint";
   std::list<std::string> names = core->getConfigStore()->getAttributeValues(path,"name",__FILE__,__LINE__);
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-  for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
-    if (i->getGraphicPrimitiveKey()!=0) {
-      addressPointsGraphicObject.removePrimitive(i->getGraphicPrimitiveKey(),true);
-      i->setGraphicPrimitiveKey(0);
+  std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
+  while (i!=navigationPointsVisualization.end()) {
+    if ((*i).getVisualizationType()==NavigationPointVisualizationTypePoint) {
+      navigationPointsGraphicObject.removePrimitive((*i).getGraphicPrimitiveKey(),true);
+      i=navigationPointsVisualization.erase(i);
+    } else {
+      i++;
     }
   }
   addressPoints.clear();
   core->getDefaultGraphicEngine()->unlockDrawing();
-  for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
+  for (std::list<std::string>::iterator j=names.begin();j!=names.end();j++) {
     NavigationPoint addressPoint;
-    addressPoint.setName(*i);
+    addressPoint.setName(*j);
     addressPoint.readFromConfig(path);
     addressPoints.push_back(addressPoint);
+    NavigationPointVisualization pointVis(addressPoint.getLat(),addressPoint.getLng(), NavigationPointVisualizationTypePoint, addressPoint.getName(),NULL);
+    navigationPointsVisualization.push_back(pointVis);
   }
 }
 
@@ -1599,7 +1605,7 @@ std::string NavigationEngine::getAddressPointName(GraphicPosition visPos) {
 
   std::string result="";
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-  std::list<GraphicPrimitive*> *visibleAddressPoints = addressPointsGraphicObject.getDrawList();
+  std::list<GraphicPrimitive*> *visibleAddressPoints = navigationPointsGraphicObject.getDrawList();
   //DEBUG("visPos.getX()=%d visPos.getY()=%d visPos.getZoom()=%f",visPos.getX(),visPos.getY(),visPos.getZoom());
   for (std::list<GraphicPrimitive*>::iterator i=visibleAddressPoints->begin();i!=visibleAddressPoints->end();i++) {
     GraphicRectangle *r=(GraphicRectangle*)*i;
@@ -1608,7 +1614,7 @@ std::string NavigationEngine::getAddressPointName(GraphicPosition visPos) {
     double distance = sqrt( diffX*diffX + diffY*diffY ) * visPos.getZoom();
     //DEBUG("distance=%f",distance);
     //DEBUG("r.getX()=%d r.getY()=%d",r->getX(),r->getY());
-    if (distance < r->getIconHeight()/2) {
+    if (distance < r->getIconHeight()/8) {
       result=r->getName().front();
       //DEBUG("result=%s",result.c_str());
       break;

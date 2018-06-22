@@ -36,8 +36,8 @@ protected:
   // Map object
   GraphicObject *map;
 
-  // Address points object
-  GraphicObject *addressPoints;
+  // Navigation points object
+  GraphicObject *navigationPoints;
 
   // Path animators object
   GraphicObject pathAnimators;
@@ -192,9 +192,9 @@ public:
       this->map = map;
   }
 
-  void setAddressPoints(GraphicObject *addressPoints)
+  void setNavigationPoints(GraphicObject *navigationPoints)
   {
-      this->addressPoints = addressPoints;
+      this->navigationPoints = navigationPoints;
   }
 
   GraphicObject *lockPathAnimators(const char *file, int line)

@@ -59,10 +59,6 @@ void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
       tileVisualization->removePrimitive(tileInfo->getPathLineKey(),true);
     if (tileInfo->getPathArrowList())
       tileVisualization->removePrimitive(tileInfo->getPathArrowListKey(),true);
-    if (tileInfo->getPathStartFlag())
-      tileVisualization->removePrimitive(tileInfo->getPathStartFlagKey(),true);
-    if (tileInfo->getPathEndFlag())
-      tileVisualization->removePrimitive(tileInfo->getPathEndFlagKey(),true);
     core->getDefaultGraphicEngine()->unlockDrawing();
     tileInfoMap.erase(i);
   }
@@ -101,14 +97,6 @@ void NavigationPathVisualization::destroyGraphic() {
     if (rectangleList) {
       rectangleList->invalidate();
     }
-    GraphicRectangle *rectangle=tileInfo->getPathStartFlag();
-    if (rectangle) {
-      rectangle->invalidate();
-    }
-    rectangle=tileInfo->getPathEndFlag();
-    if (rectangle) {
-      rectangle->invalidate();
-    }
   }
 }
 
@@ -119,14 +107,6 @@ void NavigationPathVisualization::createGraphic() {
     GraphicRectangleList *rectangleList=tileInfo->getPathArrowList();
     if (rectangleList) {
       rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
-    }
-    GraphicRectangle *rectangle=tileInfo->getPathStartFlag();
-    if (rectangle) {
-      rectangle->setTexture(core->getDefaultGraphicEngine()->getPathStartFlagIcon()->getTexture());
-    }
-    rectangle=tileInfo->getPathEndFlag();
-    if (rectangle) {
-      rectangle->setTexture(core->getDefaultGraphicEngine()->getPathEndFlagIcon()->getTexture());
     }
   }
 }
@@ -141,14 +121,6 @@ void NavigationPathVisualization::optimizeGraphic() {
     GraphicRectangleList *rectangleList=i->second->getPathArrowList();
     core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
     if (rectangleList) rectangleList->optimize();
-    core->getDefaultGraphicEngine()->unlockDrawing();
-    GraphicRectangle *rectangle=i->second->getPathStartFlag();
-    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-    if (rectangle) rectangle->optimize();
-    core->getDefaultGraphicEngine()->unlockDrawing();
-    rectangle=i->second->getPathEndFlag();
-    core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-    if (rectangle) rectangle->optimize();
     core->getDefaultGraphicEngine()->unlockDrawing();
   }
 }

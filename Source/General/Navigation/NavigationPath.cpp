@@ -34,7 +34,6 @@ NavigationPath::NavigationPath() : animator(core->getDefaultScreen()) {
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength", __FILE__, __LINE__);
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance", __FILE__, __LINE__);
   pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth", __FILE__, __LINE__);
-  flagAnimationDuration=core->getConfigStore()->getIntValue("Graphic","flagAnimationDuration", __FILE__, __LINE__);
   minDistanceToRouteWayPoint=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToRouteWayPoint", __FILE__, __LINE__);
   minTurnAngle=core->getConfigStore()->getDoubleValue("Navigation","minTurnAngle", __FILE__, __LINE__);
   minDistanceToTurnWayPoint=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToTurnWayPoint", __FILE__, __LINE__);
@@ -254,155 +253,6 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
   core->getMapSource()->unlockAccess();
 }
 
-// Updates the visualization of the tile (start and end flag)
-void NavigationPath::updateTileVisualization(NavigationPathVisualizationType type, std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, bool remove, bool animate) {
-
-  // Get the position to search
-  MapPosition pos;
-  switch(type) {
-    case NavigationPathVisualizationTypeStartFlag:
-      if (startIndex!=-1)
-        pos = mapPositions[startIndex];
-      else
-        return;
-      break;
-    case NavigationPathVisualizationTypeEndFlag:
-      if (endIndex!=-1)
-        pos = mapPositions[endIndex];
-      else
-        return;
-      break;
-    default:
-      FATAL("unsupported visualization type",NULL);
-      return;
-  }
-
-  // Find all map tiles that overlap the given
-  std::list<MapContainer*> foundContainers;
-  MapArea area;
-  area.setZoomLevel(visualization->getZoomLevel());
-  core->getMapSource()->lockAccess(__FILE__,__LINE__);
-  if (!mapContainers) {
-    foundContainers=core->getMapSource()->findMapContainersByGeographicCoordinate(pos,visualization->getZoomLevel());
-  } else {
-    for (std::list<MapContainer*>::iterator i=mapContainers->begin();i!=mapContainers->end();i++) {
-      if ((pos.getLng()>=(*i)->getLngWest())&&(pos.getLng()<=(*i)->getLngEast())&&
-          (pos.getLat()>=(*i)->getLatSouth())&&(pos.getLat()<=(*i)->getLatNorth())) {
-        foundContainers.push_back(*i);
-      }
-    }
-  }
-
-  // Go through all of them
-  TimestampInMicroseconds t = core->getClock()->getMicrosecondsSinceStart();
-  for(std::list<MapContainer*>::iterator j=foundContainers.begin();j!=foundContainers.end();j++) {
-
-    // Compute the coordinates of the segment within the container
-    MapContainer *mapContainer=*j;
-    bool overflowOccured=false;
-    if (!mapContainer->getMapCalibrator()->setPictureCoordinates(pos)) {
-      overflowOccured=true;
-    }
-    if (!overflowOccured) {
-
-      // Find map tile that contains the position
-      MapTile *k=mapContainer->findMapTileByPictureCoordinate(pos);
-      if (k) {
-
-        // Check if the map tile has already graphic objects for this path
-        NavigationPathTileInfo *info=visualization->findTileInfo(k);
-        GraphicRectangle *flag=NULL;
-        switch(type) {
-          case NavigationPathVisualizationTypeStartFlag:
-            flag=info->getPathStartFlag();
-            break;
-          case NavigationPathVisualizationTypeEndFlag:
-            flag=info->getPathEndFlag();
-            break;
-        }
-        GraphicObject *tileVisualization=k->getVisualization();
-        if (!remove) {
-          if (!flag) {
-
-            // Create a new flag and add it to the tile
-            flag=new GraphicRectangle(core->getDefaultScreen());
-            if (!flag) {
-              FATAL("can not create graphic rectangle object",NULL);
-              return;
-            }
-            flag->setAnimator(&animator);
-            GraphicRectangle *ref = NULL;
-            switch(type) {
-              case NavigationPathVisualizationTypeStartFlag:
-                ref = core->getDefaultGraphicEngine()->getPathStartFlagIcon();
-                info->setPathStartFlag(flag);
-                flag->setZ(3); // ensure that start flag is drawn after tile and direction texture
-                break;
-              case NavigationPathVisualizationTypeEndFlag:
-                ref = core->getDefaultGraphicEngine()->getPathEndFlagIcon();
-                info->setPathEndFlag(flag);
-                flag->setZ(4); // ensure that end flag is drawn after start flag, tile and direction texture
-                break;
-            }
-            flag->setColor(GraphicColor(255,255,255,255));
-            flag->setTexture(ref->getTexture());
-            flag->setDestroyTexture(false);
-            flag->setIconWidth(ref->getIconWidth());
-            flag->setIconHeight(ref->getIconHeight());
-            flag->setWidth(ref->getWidth());
-            flag->setHeight(ref->getHeight());
-            Int endX=pos.getX()-k->getMapX(0)-flag->getIconWidth()/2;
-            Int endY=k->getHeight()-(pos.getY()-k->getMapY(0))-flag->getIconHeight()/2;
-            Int startX=endX;
-            Int startY=endY+core->getDefaultScreen()->getHeight();
-            if (animate) {
-              flag->setX(startX);
-              flag->setY(startY);
-              flag->setTranslateAnimation(t,startX,startY,endX,endY,false,flagAnimationDuration,GraphicTranslateAnimationTypeAccelerated);
-            } else {
-              flag->setX(endX);
-              flag->setY(endY);
-            }
-            core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            switch(type) {
-              case NavigationPathVisualizationTypeStartFlag:
-                info->setPathStartFlagKey(tileVisualization->addPrimitive(flag));
-                break;
-              case NavigationPathVisualizationTypeEndFlag:
-                info->setPathEndFlagKey(tileVisualization->addPrimitive(flag));
-                break;
-            }
-            core->getDefaultGraphicEngine()->unlockDrawing();
-          }
-        } else {
-          if (flag) {
-            GraphicPrimitiveKey key;
-            GraphicRectangle *flag;
-            switch(type) {
-              case NavigationPathVisualizationTypeStartFlag:
-                key=info->getPathStartFlagKey();
-                flag=info->getPathStartFlag();
-                info->setPathStartFlag(NULL);
-                info->setPathStartFlagKey(0);
-                break;
-              case NavigationPathVisualizationTypeEndFlag:
-                key=info->getPathEndFlagKey();
-                flag=info->getPathEndFlag();
-                info->setPathEndFlag(NULL);
-                info->setPathEndFlagKey(0);
-                break;
-            }
-            core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            tileVisualization->removePrimitive(key,true);
-            core->getDefaultGraphicEngine()->unlockDrawing();
-          }
-        }
-      }
-    }
-  }
-  core->getMapSource()->unlockAccess();
-}
-
 // Updates the crossing path segments in the map tiles of the given map containers for the new point
 void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, Int pos) {
 
@@ -534,10 +384,6 @@ void NavigationPath::addEndPosition(MapPosition pos) {
 
           // Add a line stroke to all matching tiles
           updateTileVisualization(NULL,visualization,visualization->getPrevLinePoint(),visualization->getPrevArrowPoint(),pos);
-
-          // Add the visualization of the flags
-          updateTileVisualization(NavigationPathVisualizationTypeStartFlag,NULL,visualization,false,false);
-          updateTileVisualization(NavigationPathVisualizationTypeEndFlag,NULL,visualization,false,false);
 
           // Update the previous point
           visualization->addPoint(pos);
@@ -705,10 +551,6 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
               prevArrowPoint=p;
           }
         }
-
-        // Add the visualization of the flags
-        updateTileVisualization(NavigationPathVisualizationTypeStartFlag,&mapContainersOfSameZoomLevel,visualization,false,false);
-        updateTileVisualization(NavigationPathVisualizationTypeEndFlag,&mapContainersOfSameZoomLevel,visualization,false,false);
       }
 
       // Create a new empty list
@@ -1089,14 +931,6 @@ void NavigationPath::updateMetrics() {
   }
 }
 
-// Updates the flag visualization for all zoom levels
-void NavigationPath::updateFlagVisualization(NavigationPathVisualizationType type, bool remove, bool animate) {
-  for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
-    NavigationPathVisualization *visualization=*i;
-    updateTileVisualization(type,NULL,visualization,remove,animate);
-  }
-}
-
 // Sets the start flag at the given index
 void NavigationPath::setStartFlag(Int index, const char *file, int line) {
 
@@ -1104,10 +938,6 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
 
   // Path may only be changed by one thread
   lockAccess(file,line);
-
-  // Remove the current visualization of start and end flag
-  if (startIndex!=-1)
-    updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,true,true);
 
   // Shall the start flag be hidden?
   if (index==-1) {
@@ -1140,13 +970,10 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
     }
 
     // Update the visualization
-    updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,false,true);
     std::string routePath="Navigation/Route[@name='" + getGpxFilename() + "']";
     core->getConfigStore()->setIntValue(routePath,"startFlagIndex",startIndex, __FILE__, __LINE__);
     if (updateEndFlag) {
-      updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,true,true);
       endIndex=newEndIndex;
-      updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,false,true);
       core->getConfigStore()->setIntValue(routePath,"endFlagIndex",endIndex, __FILE__, __LINE__);
       //DEBUG("endIndex=%d",endIndex);
     }
@@ -1172,10 +999,6 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
 
   // Path may only be changed by one thread
   lockAccess(file, line);
-
-  // Remove the current visualization of start and end flag
-  if (endIndex!=-1)
-    updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,true,true);
 
   // Shall the end flag be hidden?
   if (index==-1) {
@@ -1208,13 +1031,10 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
     }
 
     // Update the visualization
-    updateFlagVisualization(NavigationPathVisualizationTypeEndFlag,false,true);
     std::string routePath="Navigation/Route[@name='" + getGpxFilename() + "']";
     core->getConfigStore()->setIntValue(routePath,"endFlagIndex",endIndex, __FILE__, __LINE__);
     if (updateStartFlag) {
-      updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,true,true);
       startIndex=newStartIndex;
-      updateFlagVisualization(NavigationPathVisualizationTypeStartFlag,false,true);
       core->getConfigStore()->setIntValue(routePath,"startFlagIndex",startIndex, __FILE__, __LINE__);
       //DEBUG("startIndex=%d",endIndex);
     }

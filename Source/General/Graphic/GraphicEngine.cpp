@@ -44,7 +44,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   // Init variables
   this->device=device;
   map=NULL;
-  addressPoints=NULL;
+  navigationPoints=NULL;
   drawingMutex=core->getThread()->createMutex("graphic engine drawing mutex");
   posMutex=core->getThread()->createMutex("graphic engine pos mutex");
   pos=GraphicPosition();
@@ -259,6 +259,12 @@ bool GraphicEngine::draw(bool forceRedraw) {
       //DEBUG("requesting scene redraw due to changed location icon",NULL);
       redrawScene=true;
       arrowIcon.setIsUpdated(false);
+    }
+
+    // Let the navigation point primitives work
+    if ((navigationPoints)&&(navigationPoints->work(currentTime))) {
+      //DEBUG("requesting scene redraw due to paths work result",NULL);
+      redrawScene=true;
     }
 
     // Did the pos change?
@@ -521,9 +527,9 @@ bool GraphicEngine::draw(bool forceRedraw) {
 
       //PROFILE_ADD("map drawing");
 
-      // Draw all address points
-      if (addressPoints) {
-        std::list<GraphicPrimitive*> *drawList=addressPoints->getDrawList();
+      // Draw all navigation points
+      if (navigationPoints) {
+        std::list<GraphicPrimitive*> *drawList=navigationPoints->getDrawList();
         screen->startObject();
         screen->setColor(navigationPointIcon.getColor().getRed(),navigationPointIcon.getColor().getGreen(),navigationPointIcon.getColor().getBlue(),navigationPointIcon.getColor().getAlpha());
         for(std::list<GraphicPrimitive *>::const_iterator i=drawList->begin(); i != drawList->end(); i++) {
@@ -533,7 +539,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
           screen->rotate(-pos.getAngle(),0,0,1);
           screen->scale(backScale,backScale,1.0);
           x1=-r->getIconWidth()/2;
-          y1=0;
+          y1=-r->getIconHeight()/2;
           x2=x1+r->getWidth();
           y2=y1+r->getHeight();
           screen->drawRectangle(x1,y1,x2,y2,r->getTexture(),true);

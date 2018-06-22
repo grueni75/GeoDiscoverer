@@ -36,14 +36,6 @@ class NavigationPathTileInfo {
   GraphicPrimitiveKey pathArrowListKey;
   GraphicRectangleList *pathArrowList;
 
-  // Info about the start flag
-  GraphicPrimitiveKey pathStartFlagKey;
-  GraphicRectangle *pathStartFlag;
-
-  // Info about the end flag
-  GraphicPrimitiveKey pathEndFlagKey;
-  GraphicRectangle *pathEndFlag;
-
 public:
 
   // Constructor
@@ -93,37 +85,6 @@ public:
       this->pathArrowListKey = pathArrowListKey;
   }
 
-  GraphicRectangle* getPathEndFlag() const {
-    return pathEndFlag;
-  }
-
-  void setPathEndFlag(GraphicRectangle* pathEndFlag) {
-    this->pathEndFlag = pathEndFlag;
-  }
-
-  GraphicPrimitiveKey getPathEndFlagKey() const {
-    return pathEndFlagKey;
-  }
-
-  void setPathEndFlagKey(GraphicPrimitiveKey pathEndFlagKey) {
-    this->pathEndFlagKey = pathEndFlagKey;
-  }
-
-  GraphicRectangle* getPathStartFlag() const {
-    return pathStartFlag;
-  }
-
-  void setPathStartFlag(GraphicRectangle* pathStartFlag) {
-    this->pathStartFlag = pathStartFlag;
-  }
-
-  GraphicPrimitiveKey getPathStartFlagKey() const {
-    return pathStartFlagKey;
-  }
-
-  void setPathStartFlagKey(GraphicPrimitiveKey pathStartFlagKey) {
-    this->pathStartFlagKey = pathStartFlagKey;
-  }
 };
 
 }

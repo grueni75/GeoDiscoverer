@@ -67,7 +67,6 @@ protected:
   double minDistanceToBeOffRoute;                 // Minimum distance from nearest route point such that navigation considers location to be off route
   double averageTravelSpeed;                      // Speed in meters per second to use for calculating the duration of a route
   double minAltitudeChange;                       // Minimum change of altitude required to update altitude meters
-  TimestampInMicroseconds flagAnimationDuration;  // Duration in microseconds that the flag animation shall last
 
   // Information about the path
   double length;                                  // Current length of the track in meters
@@ -88,9 +87,6 @@ protected:
   // Updates the visualization of the tile (path line and arrows)
   void updateTileVisualization(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, MapPosition prevPos, MapPosition prevArrowPos, MapPosition currentPos);
 
-  // Updates the visualization of the tile (start and end flag)
-  void updateTileVisualization(NavigationPathVisualizationType type, std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, bool remove, bool animate);
-
   // Updates the crossing path segments in the map tiles of the given map containers for the new point
   void updateCrossingTileSegments(std::list<MapContainer*> *mapContainers, NavigationPathVisualization *visualization, Int pos);
 
@@ -99,9 +95,6 @@ protected:
 
   // Computes the metrics for the given map positions
   void updateMetrics(MapPosition prevPoint, MapPosition curPoint);
-
-  // Updates the flag visualization for all zoom levels
-  void updateFlagVisualization(NavigationPathVisualizationType type, bool remove, bool animate);
 
 public:
 
@@ -340,6 +333,10 @@ public:
   Int getSelectedSize() const {
     Int startIndex=0;
     Int endIndex=mapPositions.size()-1;
+    if (this->reverse) {
+      startIndex=endIndex;
+      endIndex=0;
+    }
     if (this->startIndex!=-1)
       startIndex=this->startIndex;
     if (this->endIndex!=-1)
@@ -348,6 +345,20 @@ public:
       return startIndex-endIndex+1;
     else
       return endIndex-startIndex+1;
+  }
+
+  MapPosition getStartFlagPos() const {
+    Int startIndex=reverse ? mapPositions.size()-1 : 0;
+    if (this->startIndex!=-1)
+      startIndex=this->startIndex;
+    return mapPositions[startIndex];
+  }
+
+  MapPosition getEndFlagPos() const {
+    Int endIndex=reverse ? 0 : mapPositions.size()-1;
+    if (this->endIndex!=-1)
+      endIndex=this->endIndex;
+    return mapPositions[endIndex];
   }
 };
 

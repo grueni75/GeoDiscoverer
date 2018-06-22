@@ -1303,9 +1303,9 @@
                   <xsd:documentation>Width of tracks, routes and other paths.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="flagAnimationDuration" type="xsd:integer" default="500000">
+              <xsd:element name="animationDuration" type="xsd:integer" default="500000">
                 <xsd:annotation>
-                  <xsd:documentation>Duration in microseconds of .</xsd:documentation>
+                  <xsd:documentation>Duration in microseconds of the naviation point appearance animation.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="lineNumberOfStrokesOtherSegemnts" type="xsd:integer" default="32">

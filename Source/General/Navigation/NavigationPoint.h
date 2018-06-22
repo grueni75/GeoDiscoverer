@@ -42,9 +42,6 @@ class NavigationPoint {
   // Last update
   TimestampInSeconds timestamp;
 
-  // Key of the graphic primitive that represents this point
-  GraphicPrimitiveKey graphicPrimitiveKey;
-
 public:
 
   // Constructor
@@ -95,14 +92,6 @@ public:
 
   TimestampInSeconds getTimestamp() const {
     return timestamp;
-  }
-
-  GraphicPrimitiveKey getGraphicPrimitiveKey() const {
-    return graphicPrimitiveKey;
-  }
-
-  void setGraphicPrimitiveKey(GraphicPrimitiveKey graphicPrimitiveKey) {
-    this->graphicPrimitiveKey = graphicPrimitiveKey;
   }
 };
 
