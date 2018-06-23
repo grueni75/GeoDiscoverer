@@ -277,7 +277,7 @@ public:
   void addAddressPoint(NavigationPoint point);
 
   // Renames an existing address point
-  void renameAddressPoint(std::string oldName, std::string newName);
+  std::string renameAddressPoint(std::string oldName, std::string newName);
 
   // Removes an address point
   void removeAddressPoint(std::string name);

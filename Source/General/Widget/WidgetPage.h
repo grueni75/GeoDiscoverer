@@ -70,6 +70,9 @@ public:
   // Called when a path has changed
   void onPathChange(bool pageVisible, NavigationPath *path, NavigationPathChangeType changeType);
 
+  // Called when some data has changed
+  void onDataChange();
+
   // Let the page work
   bool work(TimestampInMicroseconds t);
 

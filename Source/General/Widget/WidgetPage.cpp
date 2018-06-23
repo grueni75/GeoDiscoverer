@@ -200,6 +200,17 @@ void WidgetPage::onPathChange(bool pageVisible, NavigationPath *path, Navigation
   }
 }
 
+// Called when some data has changed
+void WidgetPage::onDataChange() {
+
+  // Check all widgets
+  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
+  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
+    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
+    primitive->onDataChange();
+  }
+}
+
 // Deselects currently selected widget
 void WidgetPage::deselectWidget(TimestampInMicroseconds t) {
   if (!touchStartedOutside) {

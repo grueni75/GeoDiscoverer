@@ -99,6 +99,9 @@ public:
   // Informs the engine that a path has changed
   void onPathChange(NavigationPath *path, NavigationPathChangeType changeType);
 
+  // Informs the engine that some data has changed
+  void onDataChange();
+
   // Let the engine work
   bool work(TimestampInMicroseconds t);
 

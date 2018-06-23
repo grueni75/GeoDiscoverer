@@ -45,7 +45,6 @@ import java.util.LinkedList;
 public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
   private final ViewMap viewMap;
   private final MaterialDialog dialog;
-  private final MaterialDialog.Builder builder;
   private GDCore coreObject;
   private ColorStateList itemIconTint;
 
@@ -58,7 +57,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     public ImageButton confirmButton;
   }
 
-  public GDAddressHistoryAdapter(ViewMap viewMap, MaterialDialog.Builder builder, MaterialDialog dialog) {
+  public GDAddressHistoryAdapter(ViewMap viewMap, MaterialDialog dialog) {
     super(viewMap, R.layout.dialog_address_history_entry);
 
     coreObject=GDApplication.coreObject;
@@ -81,7 +80,6 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     }
     this.viewMap = viewMap;
     this.dialog = dialog;
-    this.builder = builder;
     this.itemIconTint = viewMap.navDrawerList.getItemIconTintList();
   }
 
@@ -96,7 +94,6 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
       ViewHolder viewHolder = new ViewHolder();
       viewHolder.text = (TextView) rowView.findViewById(R.id.dialog_address_history_entry_text);
       viewHolder.editText = (EditText) rowView.findViewById(R.id.dialog_address_history_entry_edit_text);
-      //builder.formatEditText(viewHolder.editText);
       viewHolder.editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
       viewHolder.removeButton = (ImageButton) rowView.findViewById(R.id.dialog_address_history_entry_remove_button);
       DrawableCompat.setTintList(viewHolder.removeButton.getDrawable(),itemIconTint);
@@ -154,7 +151,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         if ((!newName.equals(""))&&(!newName.equals(name))) {
 
           // Rename the entry
-          coreObject.executeCoreCommand("renameAddressPoint(\"" + name + "\"," +
+          newName = coreObject.executeCoreCommand("renameAddressPoint(\"" + name + "\"," +
               "\"" + newName + "\")");
           remove(name);
           insert(newName, position);

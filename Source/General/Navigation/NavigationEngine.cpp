@@ -1536,10 +1536,13 @@ void NavigationEngine::addAddressPoint(NavigationPoint point) {
 
   // Re-create list of address points
   initAddressPoints();
+
+  // Inform widget engine that data has changed
+  core->onDataChange();
 }
 
 // Renames an existing address point
-void NavigationEngine::renameAddressPoint(std::string oldName, std::string newName) {
+std::string NavigationEngine::renameAddressPoint(std::string oldName, std::string newName) {
 
   ConfigStore *configStore = core->getConfigStore();
 
@@ -1554,6 +1557,11 @@ void NavigationEngine::renameAddressPoint(std::string oldName, std::string newNa
     initAddressPoints();
   }
 
+  // Inform widget engine that data has changed
+  core->onDataChange();
+
+  // Return new name (in case it has changed)
+  return point.getName();
 }
 
 // Removes an address point
@@ -1562,6 +1570,9 @@ void NavigationEngine::removeAddressPoint(std::string name) {
   std::string path = "Navigation/AddressPoint[@name='" + name + "']";
   core->getConfigStore()->removePath(path);
   initAddressPoints();
+
+  // Inform widget engine that data has changed
+  core->onDataChange();
 }
 
 // Reads the address points from disk

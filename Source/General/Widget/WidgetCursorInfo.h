@@ -63,6 +63,9 @@ public:
   // Called when the map has changed
   virtual void onMapChange(bool widgetVisible, MapPosition pos);
 
+  // Called when some data has changed
+  virtual void onDataChange();
+
   // Getters and setters
   void setLabelWidth(Int labelWidth) {
     this->labelWidth = labelWidth;

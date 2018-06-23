@@ -154,6 +154,12 @@ void WidgetCursorInfo::updatePosition(Int x, Int y, Int z) {
 
 // Called when the map has changed
 void WidgetCursorInfo::onMapChange(bool widgetVisible, MapPosition pos) {
+  onDataChange();
+}
+
+
+// Called when some data has changed
+void WidgetCursorInfo::onDataChange() {
 
   // Check if an address point was hit
   GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
@@ -170,5 +176,6 @@ void WidgetCursorInfo::onMapChange(bool widgetVisible, MapPosition pos) {
     fadeIn=false;
   }
 }
+
 
 } /* namespace GEODISCOVERER */

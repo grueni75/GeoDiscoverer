@@ -70,6 +70,9 @@ public:
   // Called when a path changes
   virtual void onPathChange(bool widgetVisible, NavigationPath *path, NavigationPathChangeType changeType);
 
+  // Called when some data has changed
+  virtual void onDataChange();
+
   // Called when the widget has changed his position
   virtual void updatePosition(Int x, Int y, Int z);
 

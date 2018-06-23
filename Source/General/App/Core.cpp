@@ -947,4 +947,17 @@ void Core::onPathChange(NavigationPath *path, NavigationPathChangeType changeTyp
   core->getThread()->unlockMutex(dashboardDevicesMutex);
 }
 
+// Informs the engines that some data has changed
+void Core::onDataChange() {
+  defaultDevice->getWidgetEngine()->onDataChange();
+  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
+    if (((*i)->isInitDone())&&((*i)->getWidgetEngine())) {
+      (*i)->getWidgetEngine()->onDataChange();
+    }
+  }
+  core->getThread()->unlockMutex(dashboardDevicesMutex);
+}
+
+
 }

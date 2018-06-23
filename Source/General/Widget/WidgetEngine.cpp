@@ -1658,6 +1658,16 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
   core->getThread()->unlockMutex(accessMutex);
 }
 
+// Informs the engine that some data has changed
+void WidgetEngine::onDataChange() {
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  WidgetPageMap::iterator i;
+  for(i = pageMap.begin(); i!=pageMap.end(); i++) {
+    i->second->onDataChange();
+  }
+  core->getThread()->unlockMutex(accessMutex);
+}
+
 // Sets the widgets of the current page active
 void WidgetEngine::setWidgetsActive(bool widgetsActive) {
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);

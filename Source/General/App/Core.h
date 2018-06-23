@@ -241,6 +241,9 @@ public:
   // Informs the engines that a path has changed
   void onPathChange(NavigationPath *path, NavigationPathChangeType changeType);
 
+  // Informs the engines that some data has changed
+  void onDataChange();
+
   // Stops the map update thread
   void interruptMapUpdate(const char *file, int line);
 

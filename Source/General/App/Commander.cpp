@@ -614,7 +614,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="renameAddressPoint") {
-    core->getNavigationEngine()->renameAddressPoint(args[0],args[1]);
+    result=core->getNavigationEngine()->renameAddressPoint(args[0],args[1]);
     cmdExecuted=true;
   }
   if (cmdName=="removeAddressPoint") {

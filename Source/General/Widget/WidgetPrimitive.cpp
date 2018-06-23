@@ -89,6 +89,11 @@ void WidgetPrimitive::onPathChange(bool widgetVisible, NavigationPath *path, Nav
 
 }
 
+// Called when some data has changed
+void WidgetPrimitive::onDataChange() {
+
+}
+
 // Called when a two fingure gesture is done on the widget
 void WidgetPrimitive::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff) {
   return;

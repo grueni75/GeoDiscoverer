@@ -499,8 +499,8 @@ public class ViewMap extends GDActivity {
     //builder.formatEditText(editText);
     editText.setText(text);
     editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-    ListView listView = (ListView) dialog.getCustomView().findViewById(R.id.dialog_address_history_list);
-    final GDAddressHistoryAdapter adapter = new GDAddressHistoryAdapter(this,builder,dialog);
+    final ListView listView = (ListView) dialog.getCustomView().findViewById(R.id.dialog_address_history_list);
+    GDAddressHistoryAdapter adapter = new GDAddressHistoryAdapter(this,dialog);
     listView.setAdapter(adapter);
     final ImageButton addAddressButton = (ImageButton) dialog.getCustomView().findViewById(R.id.dialog_address_history_entry_add_button);
     final OnClickListener addAddressOnClickListener = new OnClickListener() {
@@ -510,7 +510,9 @@ public class ViewMap extends GDActivity {
         EditText editText = (EditText) dialog.getCustomView().findViewById(R.id.dialog_address_input_text);
         if (!editText.getText().equals("")) {
           task.subject = subject;
-          task.adapter = adapter;
+          task.viewMap = ViewMap.this;
+          task.dialog = dialog;
+          task.listView = listView;
           task.text = editText.getText().toString();
           task.execute();
         }
@@ -1225,7 +1227,9 @@ public class ViewMap extends GDActivity {
 
     String subject;
     String text;
-    GDAddressHistoryAdapter adapter;
+    ListView listView;
+    ViewMap viewMap;
+    MaterialDialog dialog;
     boolean locationFound=false;
     ArrayList<String> validAddressLines = new ArrayList<String>();
 
@@ -1264,15 +1268,8 @@ public class ViewMap extends GDActivity {
       if (!locationFound) {
         warningDialog(String.format(getString(R.string.location_not_found),text));
       } else {
-        for (String addressLine : validAddressLines) {
-          for (int i=0;i<adapter.getCount();i++) {
-            String s = adapter.getItem(i);
-            if (s.matches(addressLine)) {
-              adapter.remove(s);
-            }
-          }
-          adapter.insert(addressLine,0);
-        }
+        GDAddressHistoryAdapter adapter = new GDAddressHistoryAdapter(viewMap, dialog);
+        listView.setAdapter(adapter);
       }
     }
   }
