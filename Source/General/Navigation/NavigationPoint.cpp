@@ -29,6 +29,9 @@ NavigationPoint::NavigationPoint() {
   lng = undefPos.getLng();
   lat = undefPos.getLat();
   timestamp=0;
+  distance=0;
+  x=0;
+  y=0;
 }
 
 NavigationPoint::~NavigationPoint() {

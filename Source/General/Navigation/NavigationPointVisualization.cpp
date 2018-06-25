@@ -74,7 +74,7 @@ void NavigationPointVisualization::updateVisualization(TimestampInMicroseconds t
     // If not, add it
     GraphicRectangle *graphicRectangle=(GraphicRectangle*)visualizationObject->getPrimitive(graphicPrimitiveKey);
     if (!graphicRectangle) {
-      //DEBUG("%s => icon created",i->getName().c_str());
+      //DEBUG("%s => icon created",name.c_str());
       switch(visualizationType) {
       case NavigationPointVisualizationTypePoint:
         if (!(graphicRectangle=new GraphicRectangle(*core->getDefaultGraphicEngine()->getNavigationPointIcon()))) {

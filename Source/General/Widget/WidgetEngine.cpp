@@ -696,7 +696,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("pathDurationOffsetX","74.5");
         config.setParameter("pathDurationOffsetY","8.25");
         config.setParameter("altitudeProfileWidth","50.5");
-        config.setParameter("altitudeProfileHeight","54.0");
+        config.setParameter("altitudeProfileHeightWithNavigationPoints","42.0");
+        config.setParameter("altitudeProfileHeightWithoutNavigationPoints","54.0");
         config.setParameter("altitudeProfileOffsetX","9.5");
         config.setParameter("altitudeProfileOffsetY","14.0");
         config.setParameter("noAltitudeProfileOffsetX","32.0");
@@ -730,7 +731,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("pathDurationOffsetX","80.5");
         config.setParameter("pathDurationOffsetY","75.0");
         config.setParameter("altitudeProfileWidth","87.0");
-        config.setParameter("altitudeProfileHeight","53.0");
+        config.setParameter("altitudeProfileHeightWithNavigationPoints","50.0");
+        config.setParameter("altitudeProfileHeightWithoutNavigationPoints","53.0");
         config.setParameter("altitudeProfileOffsetX","8.0");
         config.setParameter("altitudeProfileOffsetY","10.0");
         config.setParameter("noAltitudeProfileOffsetX","50.0");
@@ -759,6 +761,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("AltitudeProfileAxisColor/blue","0");
       config.setParameter("AltitudeProfileAxisColor/alpha","64");
       config.setParameter("locationIconFilename","pathInfoLocation");
+      config.setParameter("navigationPointIconFilename","pathInfoNavigationPoint");
       addWidgetToPage(config);
       // ---------------------------------------------------------
       if (deviceName=="Default") {
@@ -1240,7 +1243,8 @@ void WidgetEngine::createGraphic() {
         pathInfo->setPathDurationOffsetX(c->getDoubleValue(widgetPath,"pathDurationOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setPathDurationOffsetY(c->getDoubleValue(widgetPath,"pathDurationOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileWidth(c->getDoubleValue(widgetPath,"altitudeProfileWidth",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
-        pathInfo->setAltitudeProfileHeight(c->getDoubleValue(widgetPath,"altitudeProfileHeight",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileHeightWithNavigationPoints(c->getDoubleValue(widgetPath,"altitudeProfileHeightWithNavigationPoints",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
+        pathInfo->setAltitudeProfileHeightWithoutNavigationPoints(c->getDoubleValue(widgetPath,"altitudeProfileHeightWithoutNavigationPoints",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setAltitudeProfileOffsetY(c->getDoubleValue(widgetPath,"altitudeProfileOffsetY",__FILE__, __LINE__)*pathInfo->getIconHeight()/100.0);
         pathInfo->setAltitudeProfileLineWidth(c->getDoubleValue(widgetPath,"altitudeProfileLineWidth",__FILE__, __LINE__)*((double)device->getScreen()->getDPI())/160.0);
@@ -1258,6 +1262,7 @@ void WidgetEngine::createGraphic() {
         pathInfo->setAltitudeProfileXTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileXTickLabelWidth",__FILE__, __LINE__));
         pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth",__FILE__, __LINE__));
         pathInfo->getLocationIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
+        pathInfo->getNavigationPointIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"navigationPointIconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="cursorInfo") {
         cursorInfo->setLabelWidth(c->getDoubleValue(widgetPath,"labelWidth",__FILE__, __LINE__));

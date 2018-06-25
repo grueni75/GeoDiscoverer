@@ -853,9 +853,14 @@
 			                                    <xsd:documentation>Width of the altitude profile in percent of the widget width.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileHeight" type="xsd:double" default="0" minOccurs="0">
+			                                <xsd:element name="altitudeProfileHeightWithNavigationPoints" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
-			                                    <xsd:documentation>Height of the altitude profile in percent of the widget height.</xsd:documentation>
+			                                    <xsd:documentation>Height of the altitude profile in percent of the widget height if navigation points are present.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
+			                                <xsd:element name="altitudeProfileHeightWithoutNavigationPoints" type="xsd:double" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Height of the altitude profile in percent of the widget height if no navigation points are present.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
 			                                <xsd:element name="altitudeProfileOffsetX" type="xsd:double" default="0" minOccurs="0">
@@ -926,6 +931,11 @@
 			                                <xsd:element name="locationIconFilename" type="xsd:string" default="unknown" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Filename of the image showing the current location.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
+			                                <xsd:element name="navigationPointIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Filename of the image showing the navigation point.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
 			                                <xsd:element name="TurnColor">

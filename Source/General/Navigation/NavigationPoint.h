@@ -42,6 +42,12 @@ class NavigationPoint {
   // Last update
   TimestampInSeconds timestamp;
 
+  // Position on the screen
+  double x,y;
+
+  // Distance to a reference point
+  double distance;
+
 public:
 
   // Constructor
@@ -92,6 +98,30 @@ public:
 
   TimestampInSeconds getTimestamp() const {
     return timestamp;
+  }
+
+  double getDistance() const {
+    return distance;
+  }
+
+  void setDistance(double distance) {
+    this->distance = distance;
+  }
+
+  double getX() const {
+    return x;
+  }
+
+  void setX(double x) {
+    this->x = x;
+  }
+
+  double getY() const {
+    return y;
+  }
+
+  void setY(double y) {
+    this->y = y;
   }
 };
 

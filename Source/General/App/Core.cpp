@@ -424,14 +424,16 @@ void Core::updateScreen(bool forceRedraw) {
   //DEBUG("after unlock of update interrupt mutex",NULL);
 
   // Check if the map update thread is still running
+  //DEBUG("wakeupMapUpdateThread=%d",wakeupMapUpdateThread);
   if (wakeupMapUpdateThread) {
 
     // Check if an update of the map is required
     bool updateRequired=false;
     GraphicPosition visPos=*(getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
     getDefaultGraphicEngine()->unlockPos();
-    if ((mapEngine->mapUpdateIsRequired(visPos))||(navigationEngine->mapGraphicUpdateIsRequired()))
+    if ((mapEngine->mapUpdateIsRequired(visPos))||(navigationEngine->mapGraphicUpdateIsRequired())) {
       updateRequired=true;
+    }
 
     // Request an update of the map
     //DEBUG("waking up map update thread",NULL);
@@ -703,7 +705,7 @@ void Core::maintenance(bool endlessLoop) {
     // Ensure that only one thread is executing this at most
     thread->lockMutex(maintenanceMutex, __FILE__, __LINE__);
 
-    DEBUG("performing maintenance",NULL);
+    //DEBUG("performing maintenance",NULL);
 
     // Do the backup
     if ((navigationEngine)&&(navigationEngine->getIsInitialized()))

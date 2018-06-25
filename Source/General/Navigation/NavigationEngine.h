@@ -143,6 +143,9 @@ protected:
   // Mutex for accessing the navigation infos
   ThreadMutexInfo *navigationInfosMutex;
 
+  // Mutex for accessing the address points
+  ThreadMutexInfo *addressPointsMutex;
+
   // Navigation information
   NavigationInfo navigationInfo;
 
@@ -255,10 +258,11 @@ public:
 
   // Indicates if a graphic update is required
   bool mapGraphicUpdateIsRequired() {
-    if (unvisualizedMapContainers.size()>0)
+    if (unvisualizedMapContainers.size()>0) {
       return true;
-    else
+    } else {
       return false;
+    }
   }
 
   // Loads all pathes in the background
@@ -386,6 +390,16 @@ public:
 
   const NavigationPath *getActiveRoute() const {
     return activeRoute;
+  }
+
+  std::list<NavigationPoint>  *lockAddressPoints(const char *file, int line)
+  {
+    core->getThread()->lockMutex(addressPointsMutex, file, line);
+    return &addressPoints;
+  }
+  void unlockAddressPoints()
+  {
+    core->getThread()->unlockMutex(addressPointsMutex);
   }
 
 };

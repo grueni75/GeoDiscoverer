@@ -79,6 +79,7 @@ NavigationEngine::NavigationEngine() :
   targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor", __FILE__, __LINE__);
   backgroundLoaderFinished=false;
   navigationInfosMutex=core->getThread()->createMutex("navigation engine navigation infos mutex");
+  addressPointsMutex=core->getThread()->createMutex("navigation engine address points mutex");
   minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate", __FILE__, __LINE__);
   forceNavigationInfoUpdate=false;
   computeNavigationInfoThreadInfo=NULL;
@@ -130,6 +131,7 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(targetPosMutex);
   core->getThread()->destroyMutex(backgroundLoaderFinishedMutex);
   core->getThread()->destroyMutex(navigationInfosMutex);
+  core->getThread()->destroyMutex(addressPointsMutex);
   core->getThread()->destroyMutex(activeRouteMutex);
 }
 
@@ -1270,6 +1272,8 @@ void NavigationEngine::updateFlagVisualization(NavigationPath *path) {
     NavigationPointVisualization endFlagVis(endFlagPos.getLat(),endFlagPos.getLng(), NavigationPointVisualizationTypeEndFlag,path->getGpxFilename(),(void*)path);
     navigationPointsVisualization.push_back(endFlagVis);
   }
+  if ((replaceStartFlag)||(replaceEndFlag))
+    updateScreenGraphic(false);
 }
 
 // Sets the start flag on the nearest route
@@ -1589,8 +1593,9 @@ void NavigationEngine::initAddressPoints() {
       i++;
     }
   }
-  addressPoints.clear();
   core->getDefaultGraphicEngine()->unlockDrawing();
+  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
+  addressPoints.clear();
   for (std::list<std::string>::iterator j=names.begin();j!=names.end();j++) {
     NavigationPoint addressPoint;
     addressPoint.setName(*j);
@@ -1599,6 +1604,7 @@ void NavigationEngine::initAddressPoints() {
     NavigationPointVisualization pointVis(addressPoint.getLat(),addressPoint.getLng(), NavigationPointVisualizationTypePoint, addressPoint.getName(),NULL);
     navigationPointsVisualization.push_back(pointVis);
   }
+  core->getThread()->unlockMutex(addressPointsMutex);
 }
 
 // Finds a route with the given name

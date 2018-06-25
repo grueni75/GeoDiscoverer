@@ -95,6 +95,7 @@ class Commander;
 class MapPosition;
 class MapTile;
 class NavigationPath;
+class NavigationPoint;
 
 // Error types for downloads
 typedef enum { DownloadResultSuccess, DownloadResultFileNotFound, DownloadResultOtherFail } DownloadResult;

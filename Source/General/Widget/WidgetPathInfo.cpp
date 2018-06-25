@@ -37,12 +37,15 @@ void *widgetPathInfoThread(void *args) {
 // Constructor
 WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) :
   WidgetPrimitive(widgetPage),
-  locationIcon(screen)
+  locationIcon(screen),
+  navigationPointIcon(screen)
 {
 
   widgetType=WidgetTypePathInfo;
   altitudeProfileXTickCount=0;
   altitudeProfileYTickCount=0;
+  altitudeProfileHeightWithNavigationPoints=0;
+  altitudeProfileHeightWithoutNavigationPoints=0;
   pathNameFontString=NULL;
   pathLengthFontString=NULL;
   pathAltitudeUpFontString=NULL;
@@ -55,6 +58,7 @@ WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) :
   noAltitudeProfileFontString=NULL;
   altitudeProfileXTickFontStrings=NULL;
   altitudeProfileYTickFontStrings=NULL;
+  altitudeProfileNavigationPoints=NULL;
   redrawRequired=false;
   startIndex=0;
   endIndex=0;
@@ -84,6 +88,7 @@ WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) :
   visualizationAltitudeProfileXTickPoints=NULL;
   visualizationAltitudeProfileYTickLabels=NULL;
   visualizationAltitudeProfileYTickPoints=NULL;
+  visualizationAltitudeProfileNavigationPoints=NULL;
   visualizationNoAltitudeProfile=false;
   visualizationValid=false;
 }
@@ -107,6 +112,7 @@ WidgetPathInfo::~WidgetPathInfo() {
   if (altitudeProfileFillPointBuffer) delete altitudeProfileFillPointBuffer;
   if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
   if (altitudeProfileAxisPointBuffer) delete altitudeProfileAxisPointBuffer;
+  if (altitudeProfileNavigationPoints) delete altitudeProfileNavigationPoints;
   widgetPage->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
   if (altitudeProfileXTickFontStrings) {
     for (Int i=0;i<altitudeProfileXTickCount;i++)
@@ -217,6 +223,41 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
         altitudeProfileYTickFontStrings[i]->setY(this->y+visualizationAltitudeProfileYTickPoints->operator[](i).getY()-y);
       }
       fontEngine->unlockFont();
+
+      // Create the navigation points
+      if (altitudeProfileNavigationPoints) delete altitudeProfileNavigationPoints;
+      altitudeProfileNavigationPoints=NULL;
+      if (visualizationAltitudeProfileNavigationPoints) {
+        altitudeProfileNavigationPoints=new GraphicRectangleList(screen,visualizationAltitudeProfileNavigationPoints->size());
+        if (!altitudeProfileLinePointBuffer) {
+          FATAL("can not create point buffer for altitude profile",NULL);
+          return changed;
+        }
+        altitudeProfileNavigationPoints->setTexture(navigationPointIcon.getTexture());
+        altitudeProfileNavigationPoints->setDestroyTexture(false);
+        Int navigationPointWidth=navigationPointIcon.getWidth();
+        Int navigationPointHeight=navigationPointIcon.getHeight();
+        Int navigationPointIconWidth=navigationPointIcon.getIconWidth();
+        Int navigationPointIconHeight=navigationPointIcon.getIconHeight();
+        Int navigationPointIconOffsetX=(navigationPointWidth-navigationPointIconWidth)/2;
+        Int navigationPointIconOffsetY=(navigationPointHeight-navigationPointIconHeight)/2;
+        double navigationPointIconRadius=sqrt((double)(navigationPointWidth*navigationPointWidth/4+navigationPointHeight*navigationPointHeight/4));
+        altitudeProfileNavigationPoints->setParameter(navigationPointIconRadius,0,0);
+        std::list<double> usedX;
+        for (std::list<NavigationPoint>::iterator i=visualizationAltitudeProfileNavigationPoints->begin();i!=visualizationAltitudeProfileNavigationPoints->end();i++) {
+          bool found=false;
+          for (std::list<double>::iterator j=usedX.begin();j!=usedX.end();j++) {
+            if (*j==i->getX()) {
+              found=true;
+              break;
+            }
+          }
+          if (!found) {
+            altitudeProfileNavigationPoints->addRectangle(i->getX()+navigationPointIconOffsetX,i->getY()+navigationPointIconOffsetY,0);
+            usedX.push_back(i->getX());
+          }
+        }
+      }
     }
 
   }
@@ -277,6 +318,13 @@ void WidgetPathInfo::draw(TimestampInMicroseconds t) {
       if (!hideLocationIcon) {
         locationIcon.setColor(color);
         locationIcon.draw(t);
+      }
+      if (altitudeProfileNavigationPoints) {
+        screen->startObject();
+        screen->translate(getX()+altitudeProfileOffsetX,getY()+altitudeProfileOffsetY+altitudeProfileHeightWithNavigationPoints,getZ());
+        altitudeProfileNavigationPoints->setColor(color);
+        altitudeProfileNavigationPoints->draw();
+        screen->endObject();
       }
     } else {
       if (noAltitudeProfileFontString) {
@@ -515,6 +563,7 @@ void WidgetPathInfo::updateVisualization() {
     std::vector<GraphicPoint> *altitudeProfileXTickPoints = new std::vector<GraphicPoint>;
     std::vector<std::string> *altitudeProfileYTickLabels = new std::vector<std::string>;
     std::vector<GraphicPoint> *altitudeProfileYTickPoints = new std::vector<GraphicPoint>;
+    std::list<NavigationPoint> *altitudeProfileNavigationPoints = NULL;
     bool noAltitudeProfile=true;
 
     // Only update if we have a path
@@ -551,6 +600,22 @@ void WidgetPathInfo::updateVisualization() {
       }
       currentPath->unlockAccess();
       //PROFILE_ADD("get path info");
+
+      // Get navigation point infos
+      std::list<NavigationPoint> *navigationPoints=core->getNavigationEngine()->lockAddressPoints(__FILE__,__LINE__);
+      if (navigationPoints->size()>0) {
+        altitudeProfileNavigationPoints = new std::list<NavigationPoint>;
+        for (std::list<NavigationPoint>::iterator i=navigationPoints->begin();i!=navigationPoints->end();i++) {
+          NavigationPoint p = *i;
+          p.setDistance(std::numeric_limits<double>::max());
+          altitudeProfileNavigationPoints->push_back(p);
+        }
+      }
+      core->getNavigationEngine()->unlockAddressPoints();
+      Int altitudeProfileHeight=this->altitudeProfileHeightWithoutNavigationPoints;
+      if (altitudeProfileNavigationPoints) {
+        altitudeProfileHeight=altitudeProfileHeightWithNavigationPoints;
+      }
 
       // Update the labels
       *vPathName=pathName;
@@ -719,6 +784,21 @@ void WidgetPathInfo::updateVisualization() {
               } else {
                 altitudeProfileHideLocationIcon=true;
               }
+
+              // Remember for each navigation point the nearest position in the altitude profile
+              if (altitudeProfileNavigationPoints) {
+                for (std::list<NavigationPoint>::iterator i=altitudeProfileNavigationPoints->begin();i!=altitudeProfileNavigationPoints->end();i++) {
+                  MapPosition navigationPointPos;
+                  navigationPointPos.setLat(i->getLat());
+                  navigationPointPos.setLng(i->getLng());
+                  double currentDistance=curPos.computeDistance(navigationPointPos);
+                  if (currentDistance<i->getDistance()) {
+                    i->setDistance(currentDistance);
+                    i->setX(round(curX));
+                    i->setY(0);
+                  }
+                }
+              }
             }
             prevPos = curPos;
           }
@@ -813,6 +893,7 @@ void WidgetPathInfo::updateVisualization() {
     std::vector<GraphicPoint> *oldVisualizationAltitudeProfileXTickPoints;
     std::vector<std::string> *oldVisualizationAltitudeProfileYTickLabels;
     std::vector<GraphicPoint> *oldVisualizationAltitudeProfileYTickPoints;
+    std::list<NavigationPoint> *oldVisualizationNavigationPoints;
     core->getThread()->lockMutex(visualizationMutex,__FILE__, __LINE__);
     oldVisualizationPathName=this->visualizationPathName;
     this->visualizationPathName=vPathName;
@@ -842,6 +923,8 @@ void WidgetPathInfo::updateVisualization() {
     oldVisualizationAltitudeProfileYTickPoints=this->visualizationAltitudeProfileYTickPoints;
     this->visualizationAltitudeProfileYTickPoints=altitudeProfileYTickPoints;
     this->visualizationNoAltitudeProfile=noAltitudeProfile;
+    oldVisualizationNavigationPoints=this->visualizationAltitudeProfileNavigationPoints;
+    this->visualizationAltitudeProfileNavigationPoints=altitudeProfileNavigationPoints;
     redrawRequired=true;
     visualizationValid=true;
     core->getThread()->unlockMutex(visualizationMutex);
@@ -861,6 +944,7 @@ void WidgetPathInfo::updateVisualization() {
     delete oldVisualizationAltitudeProfileXTickPoints;
     delete oldVisualizationAltitudeProfileYTickLabels;
     delete oldVisualizationAltitudeProfileYTickPoints;
+    delete oldVisualizationNavigationPoints;
     //PROFILE_ADD("delete old objects");
 
     // Thread is not working anymore
@@ -887,6 +971,11 @@ void WidgetPathInfo::setAltitudeProfileYTickCount(Int altitudeProfileYTickCount)
 void WidgetPathInfo::updatePosition(Int x, Int y, Int z) {
   WidgetPrimitive::updatePosition(x,y,z);
   redrawRequired=true;
+}
+
+// Called when some data has changed
+void WidgetPathInfo::onDataChange() {
+  core->getThread()->issueSignal(updateVisualizationSignal);
 }
 
 } /* namespace GEODISCOVERER */

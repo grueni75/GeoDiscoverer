@@ -262,9 +262,11 @@ bool GraphicEngine::draw(bool forceRedraw) {
     }
 
     // Let the navigation point primitives work
-    if ((navigationPoints)&&(navigationPoints->work(currentTime))) {
-      //DEBUG("requesting scene redraw due to paths work result",NULL);
-      redrawScene=true;
+    if (navigationPoints) {
+      if (navigationPoints->work(currentTime)) {
+        //DEBUG("requesting scene redraw due to navigation points work result",NULL);
+        redrawScene=true;
+      }
     }
 
     // Did the pos change?

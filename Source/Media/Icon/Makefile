@@ -11,7 +11,7 @@ ANDROID_WEAR = $(ROOT)/Source/Platform/Target/Android/wear/src/main/assets/GeoDi
 
 SVGS = $(shell find -name '*.svg' -printf '%P\n')
 DPIS = 120 160 240 320 480 640
-PNGS = $(foreach dpi,$(DPIS),$(foreach svg,$(SVGS),$(dpi)dpi/$(patsubst %.svg,%.png,$(svg))) $(dpi)dpi/navigationTarget.png)
+PNGS = $(foreach dpi,$(DPIS),$(foreach svg,$(SVGS),$(dpi)dpi/$(patsubst %.svg,%.png,$(svg))) $(dpi)dpi/navigationTarget.png $(dpi)dpi/pathInfoNavigationPoint.png)
 
 # Macros:
 
@@ -20,11 +20,13 @@ $(1)dpi/$(2): $(3)
 	@echo Generating $$@
 	@mkdir -p $(1)dpi
 	@if [ "$$<" = "tileImageNotCached.svg" ] || [ "$$<" = "tileImageNotDownloaded.svg" ] || [ "$$<" = "tileImageDownloadErrorOccured.svg" ] || [ "$$<" = "pathDirection.svg" ]; then \
-		inkscape --export-png=$$@ --export-dpi=90 $$<; \
+		inkscape --export-png=$$@ --export-dpi=96 $$<; \
 	elif [ "$(2)" = "navigationTarget.png" ]; then \
-		inkscape --export-png=$$@ --export-dpi=`echo $(1)*90/240/12 | bc` $$<; \
+		inkscape --export-png=$$@ --export-dpi=`echo $(1)*96/240/12 | bc` $$<; \
+	elif [ "$(2)" = "pathInfoNavigationPoint.png" ]; then \
+		inkscape --export-png=$$@ --export-dpi=`echo $(1)*96/240/2 | bc` $$<; \
 	else \
-		inkscape --export-png=$$@ --export-dpi=`echo $(1)*90/240 | bc` $$<; \
+		inkscape --export-png=$$@ --export-dpi=`echo $(1)*96/240 | bc` $$<; \
 	fi >/dev/null
 endef
 
@@ -46,6 +48,9 @@ $(foreach dpi,$(DPIS),$(eval $(call SVG2PNG,$(dpi),%.png,%.svg)))
 
 # Convert target.svg into navigationTarget.png
 $(foreach dpi,$(DPIS),$(eval $(call SVG2PNG,$(dpi),navigationTarget.png,target.svg)))
+
+# Convert navigationPoint.svg into pathInfoNavigationPoint.png
+$(foreach dpi,$(DPIS),$(eval $(call SVG2PNG,$(dpi),pathInfoNavigationPoint.png,navigationPoint.svg)))
 
 # Install icons into linux target
 $(LINUX): $(PNGS)

@@ -31,6 +31,9 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   GraphicRectangle locationIcon;
   bool hideLocationIcon;
 
+  // Graphic showing the navigation point
+  GraphicRectangle navigationPointIcon;
+
   // Graphical representation of the strings
   FontString *pathNameFontString;
   FontString *pathLengthFontString;
@@ -45,6 +48,9 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   GraphicPointBuffer *altitudeProfileFillPointBuffer;
   GraphicPointBuffer *altitudeProfileLinePointBuffer;
   GraphicPointBuffer *altitudeProfileAxisPointBuffer;
+
+  // Holds the navigation points
+  GraphicRectangleList *altitudeProfileNavigationPoints;
 
   // Color the altitude profile
   GraphicColor altitudeProfileFillColor;
@@ -68,7 +74,8 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   Int pathDurationOffsetX;
   Int pathDurationOffsetY;
   Int altitudeProfileWidth;
-  Int altitudeProfileHeight;
+  Int altitudeProfileHeightWithoutNavigationPoints;
+  Int altitudeProfileHeightWithNavigationPoints;
   Int altitudeProfileOffsetX;
   Int altitudeProfileOffsetY;
   Int altitudeProfileLineWidth;
@@ -129,6 +136,7 @@ class WidgetPathInfo: public GEODISCOVERER::WidgetPrimitive {
   std::vector<GraphicPoint> *visualizationAltitudeProfileXTickPoints;
   std::vector<std::string> *visualizationAltitudeProfileYTickLabels;
   std::vector<GraphicPoint> *visualizationAltitudeProfileYTickPoints;
+  std::list<NavigationPoint> *visualizationAltitudeProfileNavigationPoints;
   bool visualizationNoAltitudeProfile;
   bool visualizationValid;
 
@@ -161,6 +169,9 @@ public:
 
   // Called when the widget is not touched anymore
   virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel);
+
+  // Called when some data has changed
+  virtual void onDataChange();
 
   // Recomputes the visualization of the path info
   void updateVisualization();
@@ -236,8 +247,12 @@ public:
     this->noAltitudeProfileOffsetY = noAltitudeProfileOffsetY;
   }
 
-  void setAltitudeProfileHeight(Int altitudeProfileHeight) {
-    this->altitudeProfileHeight = altitudeProfileHeight;
+  void setAltitudeProfileHeightWithoutNavigationPoints(Int altitudeProfileHeightWithoutNavigationPoints) {
+    this->altitudeProfileHeightWithoutNavigationPoints = altitudeProfileHeightWithoutNavigationPoints;
+  }
+
+  void setAltitudeProfileHeightWithNavigationPoints(Int altitudeProfileHeightWithNavigationPoints) {
+    this->altitudeProfileHeightWithNavigationPoints = altitudeProfileHeightWithNavigationPoints;
   }
 
   void setAltitudeProfileWidth(Int altitudeProfileWidth) {
@@ -268,6 +283,10 @@ public:
 
   GraphicRectangle *getLocationIcon() {
     return &locationIcon;
+  }
+
+  GraphicRectangle *getNavigationPointIcon() {
+    return &navigationPointIcon;
   }
 
   void setAltitudeProfileXTickLabelWidth(Int altitudeProfileXTickLabelWidth) {
