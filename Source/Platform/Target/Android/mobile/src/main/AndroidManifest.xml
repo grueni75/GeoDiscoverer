@@ -38,12 +38,6 @@
             android:name=".Donate"
             android:theme="@style/GDStyle.Dialog"/>
         <activity
-            android:name="org.acra.CrashReportDialog"
-            android:excludeFromRecents="true"
-            android:finishOnTaskLaunch="true"
-            android:launchMode="singleInstance"
-            android:theme="@style/GDStyle.Dialog"/>
-        <activity
             android:name=".ViewMap"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
