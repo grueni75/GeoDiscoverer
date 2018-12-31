@@ -37,12 +37,6 @@ public:
   // Initialzes the source
   virtual bool init();
 
-  // Returns the scale values for the given zoom level
-  virtual void getScales(Int zoomLevel, double &latScale, double &lngScale);
-
-  // Finds the calibrator for the given position
-  virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator);
-
 };
 
 }

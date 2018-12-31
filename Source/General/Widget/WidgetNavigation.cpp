@@ -33,7 +33,9 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     targetIcon(widgetPage->getScreen()),
     separatorIcon(widgetPage->getScreen()),
     targetObject(widgetPage->getScreen()),
-    compassObject(widgetPage->getScreen())
+    compassObject(widgetPage->getScreen()),
+    busyColor(),
+    normalColor()
 {
   widgetType=WidgetTypeNavigation;
   updateInterval=1000000;
@@ -80,6 +82,12 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   firstRun=true;
   lastClockUpdate=0;
   secondRowState=0;
+  if (widgetPage->getWidgetEngine()->getDevice()->getName()=="Watch")
+    isWatch=true;
+  else
+    isWatch=false;
+  panActive=false;
+  remoteServerActive=false;
 }
 
 // Destructor
@@ -139,6 +147,36 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   // Do the inherited stuff
   bool changed=WidgetPrimitive::work(t);
 
+  // Indicate if a download is ongoing
+  if (core->getRemoteServerActive()!=remoteServerActive) {
+    if (core->getRemoteServerActive())
+      activeColor=busyColor;
+    else
+      activeColor=normalColor;
+    setFadeAnimation(t,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
+    remoteServerActive=core->getRemoteServerActive();
+    DEBUG("remoteServerActive=%d",remoteServerActive);
+  }
+
+  // Pan the map if active
+  if (panActive) {
+    TimestampInMicroseconds dt = t-panStartTime;
+    panXDouble=panXDouble+panSpeed*dt*cos(panAngle);
+    panYDouble=panYDouble+panSpeed*dt*sin(panAngle);
+    //DEBUG("panXDouble=%f panYDouble=%f",panXDouble,panYDouble);
+    Int newPanXInt=round(panXDouble);
+    Int newPanYInt=round(panYDouble);
+    if ((newPanXInt!=panXInt)||(newPanYInt!=panYInt)) {
+      Int dX=newPanXInt-panXInt;
+      Int dY=newPanYInt-panYInt;
+      std::stringstream cmd;
+      cmd << "pan(" << dX << "," << dY << ")";
+      core->getCommander()->execute(cmd.str());
+      panXInt=newPanXInt;
+      panYInt=newPanYInt;
+    }
+  }
+
   // Update the font strings (if not already)
   if (distanceLabelFontString==NULL) {
     if (textColumnCount==2)
@@ -147,6 +185,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
     fontEngine->updateString(&distanceLabelFontString,"Distance");
     fontEngine->unlockFont();
+    changed=true;
   }
 
   // Update the clock
@@ -158,6 +197,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     lastClockUpdate=t2;
     clockFontString->setX(x+(iconWidth-clockFontString->getIconWidth())/2);
     clockFontString->setY(y+clockOffsetY);
+    changed=true;
   }
 
   // Only update the info if it has changed
@@ -541,70 +581,72 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     // Draw the information about the target / route
     if (!showTurn)
       skipTurn=false;
-    separatorIcon.setColor(color);
-    separatorIcon.draw(t);
-    if (distanceLabelFontString) {
-      distanceLabelFontString->setColor(color);
-      distanceLabelFontString->draw(t);
-    }
-    if (distanceValueFontString) {
-      distanceValueFontString->setColor(color);
-      distanceValueFontString->draw(t);
-    }
-    FontString *leftLabelFontString = NULL;
-    FontString *leftValueFontString = NULL;
-    FontString *rightLabelFontString = NULL;
-    FontString *rightValueFontString = NULL;
-    if (textColumnCount==2) {
-      switch (secondRowState) {
-      case 0:
-        leftLabelFontString=durationLabelFontString;
-        leftValueFontString=durationValueFontString;
-        rightLabelFontString=altitudeLabelFontString;
-        rightValueFontString=altitudeValueFontString;
-        break;
-      case 1:
-        leftLabelFontString=trackLengthLabelFontString;
-        leftValueFontString=trackLengthValueFontString;
-        rightLabelFontString=speedLabelFontString;
-        rightValueFontString=speedValueFontString;
-        break;
+    if (!isWatch) {
+      separatorIcon.setColor(color);
+      separatorIcon.draw(t);
+      if (distanceLabelFontString) {
+        distanceLabelFontString->setColor(color);
+        distanceLabelFontString->draw(t);
       }
-    } else {
-      switch (secondRowState) {
-      case 0:
-        leftLabelFontString=durationLabelFontString;
-        leftValueFontString=durationValueFontString;
-        break;
-      case 1:
-        leftLabelFontString=altitudeLabelFontString;
-        leftValueFontString=altitudeValueFontString;
-        break;
-      case 2:
-        leftLabelFontString=trackLengthLabelFontString;
-        leftValueFontString=trackLengthValueFontString;
-        break;
-      case 3:
-        leftLabelFontString=speedLabelFontString;
-        leftValueFontString=speedValueFontString;
-        break;
+      if (distanceValueFontString) {
+        distanceValueFontString->setColor(color);
+        distanceValueFontString->draw(t);
       }
-    }
-    if (leftLabelFontString) {
-      leftLabelFontString->setColor(color);
-      leftLabelFontString->draw(t);
-      leftValueFontString->setColor(color);
-      leftValueFontString->draw(t);
-    }
-    if (rightLabelFontString) {
-      rightLabelFontString->setColor(color);
-      rightLabelFontString->draw(t);
-      rightValueFontString->setColor(color);
-      rightValueFontString->draw(t);
-    }
-    if (clockFontString) {
-      clockFontString->setColor(color);
-      clockFontString->draw(t);
+      FontString *leftLabelFontString = NULL;
+      FontString *leftValueFontString = NULL;
+      FontString *rightLabelFontString = NULL;
+      FontString *rightValueFontString = NULL;
+      if (textColumnCount==2) {
+        switch (secondRowState) {
+        case 0:
+          leftLabelFontString=durationLabelFontString;
+          leftValueFontString=durationValueFontString;
+          rightLabelFontString=altitudeLabelFontString;
+          rightValueFontString=altitudeValueFontString;
+          break;
+        case 1:
+          leftLabelFontString=trackLengthLabelFontString;
+          leftValueFontString=trackLengthValueFontString;
+          rightLabelFontString=speedLabelFontString;
+          rightValueFontString=speedValueFontString;
+          break;
+        }
+      } else {
+        switch (secondRowState) {
+        case 0:
+          leftLabelFontString=durationLabelFontString;
+          leftValueFontString=durationValueFontString;
+          break;
+        case 1:
+          leftLabelFontString=altitudeLabelFontString;
+          leftValueFontString=altitudeValueFontString;
+          break;
+        case 2:
+          leftLabelFontString=trackLengthLabelFontString;
+          leftValueFontString=trackLengthValueFontString;
+          break;
+        case 3:
+          leftLabelFontString=speedLabelFontString;
+          leftValueFontString=speedValueFontString;
+          break;
+        }
+      }
+      if (leftLabelFontString) {
+        leftLabelFontString->setColor(color);
+        leftLabelFontString->draw(t);
+        leftValueFontString->setColor(color);
+        leftValueFontString->draw(t);
+      }
+      if (rightLabelFontString) {
+        rightLabelFontString->setColor(color);
+        rightLabelFontString->draw(t);
+        rightValueFontString->setColor(color);
+        rightValueFontString->draw(t);
+      }
+      if (clockFontString) {
+        clockFontString->setColor(color);
+        clockFontString->draw(t);
+      }
     }
   }
 }
@@ -614,6 +656,32 @@ void WidgetNavigation::updatePosition(Int x, Int y, Int z) {
   WidgetPrimitive::updatePosition(x,y,z);
   nextUpdateTime=0;
   firstRun=true;
+}
+
+// Called when the widget is touched
+void WidgetNavigation::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
+  WidgetPrimitive::onTouchDown(t,x,y);
+  if (getIsHit()) {
+
+    // Activate panning if compass cone is hit
+    double dx=x-(getX()+getIconWidth()/2);
+    double dy=y-(getY()+getIconHeight()/2);
+    double radius = sqrt(dx*dx+dy*dy);
+    //DEBUG("radius=%f",radius);
+    if (radius>minPanDetectionRadius) {
+      panAngle=FloatingPoint::computeAngle(dx,dy);
+      //DEBUG("panAngle=%f",panAngle);
+      panXDouble=0;
+      panXInt=0;
+      panYDouble=0;
+      panYInt=0;
+      panStartTime=t;
+      panActive=true;
+    } else {
+      panActive=false;
+    }
+
+  }
 }
 
 // Executed if the widget has been untouched
@@ -640,6 +708,7 @@ void WidgetNavigation::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool c
       }
     }
   }
+  panActive=false;
 }
 
 

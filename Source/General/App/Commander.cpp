@@ -37,35 +37,25 @@ Commander::~Commander() {
   core->getThread()->destroyMutex(accessMutex);
 }
 
-// Execute a command
-std::string Commander::execute(std::string cmd) {
-
-  //DEBUG("executing command <%s>",cmd.c_str());
-  core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
-  TRACE(cmd.c_str(),NULL);
-  core->getThread()->unlockMutex(accessMutex);
-  TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
-
-  // Set the default result
-  std::string result="";
+// Extracts the command name and its arguments from a command
+bool Commander::splitCommand(std::string cmdString, std::string& cmd, std::vector<std::string>& args) {
 
   // Extract the command to execute
-  Int argStart=cmd.find('(');
+  Int argStart=cmdString.find('(');
   if (argStart==std::string::npos) {
-    ERROR("can not extract start of arguments from command <%s>",cmd.c_str());
-    return "";
+    ERROR("can not extract start of arguments from command <%s>",cmdString.c_str());
+    return false;
   }
-  Int argEnd=cmd.find(')');
+  Int argEnd=cmdString.find(')');
   if (argEnd==std::string::npos) {
-    ERROR("can not extract end of arguments from command <%s>",cmd.c_str());
-    return "";
+    ERROR("can not extract end of arguments from command <%s>",cmdString.c_str());
+    return false;
   }
-  std::string cmdName=cmd.substr(0,argStart);
+  cmd=cmdString.substr(0,argStart);
   //DEBUG("cmdName=%s",cmdName.c_str());
-  std::string cmdArgs=cmd.substr(argStart+1,argEnd-argStart-1);
+  std::string cmdArgs=cmdString.substr(argStart+1,argEnd-argStart-1);
   std::string unparsedCmdArgs=cmdArgs;
   //DEBUG("cmdArgs=%s",cmdArgs.c_str());
-  std::vector<std::string> args;
   enum { normal, ignoreCommas, } state = normal;
   std::string currentArg="";
   for (Int i=0;i<cmdArgs.size();i++) {
@@ -102,6 +92,42 @@ std::string Commander::execute(std::string cmd) {
   //DEBUG("currentArg=%s",currentArg.c_str());
   args.push_back(currentArg);
   currentArg="";
+  return true;
+}
+
+// Creates a command string from the given arguments
+std::string Commander::joinCommand(std::string cmd, std::vector<std::string> args) {
+
+  std::stringstream cmdStr;
+  cmdStr << cmd << "(";
+  for (std::vector<std::string>::iterator i=args.begin();i!=args.end();i++) {
+    cmdStr << *i;
+    if (i!=args.end()-1)
+      cmdStr << ",";
+  }
+  cmdStr << ")";
+  return cmdStr.str();
+}
+
+// Execute a command
+std::string Commander::execute(std::string cmd) {
+
+  //DEBUG("executing command <%s>",cmd.c_str());
+  core->getThread()->lockMutex(accessMutex, __FILE__, __LINE__);
+  TRACE(cmd.c_str(),NULL);
+  core->getThread()->unlockMutex(accessMutex);
+  TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
+  //DEBUG("cmd=%s",cmd.c_str());
+
+  // Set the default result
+  std::string result="";
+
+  // Extract the command to execute
+  std::string cmdName;
+  std::vector<std::string> args;
+  if (!splitCommand(cmd,cmdName,args)) {
+    return "";
+  }
 
   // Handle the command
   bool cmdExecuted=false;
@@ -362,6 +388,10 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="forceMapRedownload") {
     core->getMapEngine()->setForceMapRedownload(atoi(args[0].c_str()),__FILE__,__LINE__);
+    core->getMapEngine()->setForceMapUpdate(__FILE__,__LINE__);
+    cmdExecuted=true;
+  }
+  if (cmdName=="forceMapUpdate") {
     core->getMapEngine()->setForceMapUpdate(__FILE__,__LINE__);
     cmdExecuted=true;
   }
@@ -642,6 +672,31 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="stopDownload") {
     core->getMapSource()->clearDownloadJobs();
+    cmdExecuted=true;
+  }
+  if (cmdName=="remoteMapInit") {
+    core->getMapSource()->remoteMapInit();
+    cmdExecuted=true;
+  }
+  if (cmdName=="findRemoteMapTileByGeographicCoordinate") {
+    core->getMapSource()->queueRemoteServerCommand(cmd);
+    cmdExecuted=true;
+  }
+  if (cmdName=="fillGeographicAreaWithRemoteTiles") {
+    core->getMapSource()->queueRemoteServerCommand(cmd);
+    cmdExecuted=true;
+  }
+  if (cmdName=="getFreeMapArchiveFilePath") {
+    result=core->getMapSource()->getFreeArchiveFilePath();
+    cmdExecuted=true;
+  }
+  if (cmdName=="addMapArchive") {
+    result=core->getMapSource()->addArchive(args[0]);
+    cmdExecuted=true;
+  }
+  if (cmdName=="setRemoteServerActive") {
+    DEBUG("%s",cmdName.c_str());
+    core->setRemoteServerActive(atoi(args[0].c_str()));
     cmdExecuted=true;
   }
 

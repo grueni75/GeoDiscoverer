@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.untouchableapps.android.geodiscoverer"> <!-- <uses-permission android:name="com.android.vending.BILLING"></uses-permission> -->
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="19"/>
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -145,6 +142,7 @@
         <service android:name=".GDMessageListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT"/>
                 <data android:scheme="wear" android:host="*" android:pathPrefix="/com.untouchableapps.android.geodiscoverer" />
             </intent-filter>
         </service>

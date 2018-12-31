@@ -52,6 +52,7 @@ MapContainer::MapContainer(bool doNotDelete) {
     this->overlayGraphicInvalid=false;
     this->downloadRetries=0;
     this->mapFileFolder=NULL;
+    this->archiveFileFolder=NULL;
     this->imageFileName=NULL;
     this->imageFilePath=NULL;
     this->calibrationFileName=NULL;
@@ -80,6 +81,7 @@ MapContainer::~MapContainer() {
   }
   if (!doNotDelete) {
     if (mapFileFolder) free(mapFileFolder);
+    if (archiveFileFolder) free(archiveFileFolder);
     if (imageFileName) free(imageFileName);
     if (imageFilePath) free(imageFilePath);
     if (calibrationFileName) free(calibrationFileName);
@@ -343,91 +345,6 @@ std::string MapContainer::getNextSemicolonField(std::string list, Int &start) {
   start=end+1;
   return field;
 }
-
-/* Reads a gmi file
-bool MapContainer::readGMICalibrationFile()
-{
-  std::string line;
-  Int imageWidth;
-  Int imageHeight;
-  std::ifstream in;
-  std::string t;
-  Int i,j,k;
-  double d;
-  enum { gmiHeader, gmiFilename, gmiWidth, gmiHeight, gmiCalibrationPoint, gmiFinished } parserState;
-  std::istringstream iss;
-
-  // Open the map calibration file
-  in.open (calibrationFilePath.c_str());
-  if (!in.is_open()) {
-    ERROR("can not open file <%s> for reading map calibration",calibrationFilePath.c_str());
-    return false;
-  }
-
-  // Create a new calibrator object
-  mapCalibrator=new MapCalibrator();
-  if (!mapCalibrator) {
-    FATAL("can not create map calibrator",NULL);
-    return false;
-  }
-
-  // Parse it contents
-  parserState=gmiHeader;
-  while(!in.eof() && parserState!=gmiFinished) {
-    getline(in,line);
-    while ((line.substr(line.size()-1)=="\n")||(line.substr(line.size()-1)=="\r"))
-      line=line.substr(0,line.size()-1);
-    switch(parserState) {
-      case gmiHeader:
-        if (line.substr(0,30)!="Map Calibration data file v3.0") {
-          ERROR("file format of <%s> is not supported (header incorrect)",calibrationFilePath.c_str());
-          return false;
-        }
-        parserState=gmiFilename;
-        break;
-      case gmiFilename:
-        imageFileName=line;
-        imageFilePath=mapFileFolder+"/"+imageFileName;
-        parserState=gmiWidth;
-        break;
-      case gmiWidth:
-        iss.str(line);
-        iss.clear();
-        iss >> imageWidth;
-        parserState=gmiHeight;
-        break;
-      case gmiHeight:
-        iss.str(line);
-        iss.clear();
-        iss >> imageHeight;
-        parserState=gmiCalibrationPoint;
-        break;
-      case gmiCalibrationPoint:
-        if (line=="Border and Scale") {
-          parserState=gmiFinished;
-        } else {
-          MapPosition pos;
-          i=0;
-          iss.str(getNextSemicolonField(line,i)); iss.clear(); iss >> k; pos.setX(k);
-          iss.str(getNextSemicolonField(line,i)); iss.clear(); iss >> k; pos.setY(k);
-          iss.str(getNextSemicolonField(line,i)); iss.clear(); iss >> d; pos.setLng(d);
-          iss.str(getNextSemicolonField(line,i)); iss.clear(); iss >> d; pos.setLat(d);
-          mapCalibrator->addCalibrationPoint(pos);
-        }
-        break;
-      default:
-        FATAL("unknown parser state",NULL);
-        return false;
-    }
-  }
-  in.close();
-  if (parserState!=gmiFinished) {
-    ERROR("parsing of <%s> could not be finished (file corrupt?)",calibrationFilePath.c_str());
-    return false;
-  }
-
-  return true;
-}*/
 
 // Reads a calibration file
 bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileBasename, std::string fileExtension)
@@ -737,6 +654,7 @@ void MapContainer::store(std::ofstream *ofs) {
   this->leftChild=leftChild;
   this->rightChild=rightChild;
   this->searchTree=searchTree;
+  Storage::storeString(ofs,archiveFileFolder);
   Storage::storeString(ofs,mapFileFolder);
   Storage::storeString(ofs,imageFileName);
   Storage::storeString(ofs,imageFilePath);
@@ -834,6 +752,7 @@ MapContainer *MapContainer::retrieve(char *&cacheData, Int &cacheSize) {
   //PROFILE_ADD("object creation");
 
   // Read the fields
+  Storage::retrieveString(cacheData,cacheSize,&mapContainer->archiveFileFolder);
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->mapFileFolder);
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->imageFileName);
   Storage::retrieveString(cacheData,cacheSize,&mapContainer->imageFilePath);

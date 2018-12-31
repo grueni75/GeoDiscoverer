@@ -231,9 +231,9 @@ void MapCache::updateMapTileImages() {
         }
       }
       if (!mapArchive) {
-        std::string path = core->getMapSource()->getFolderPath() + "/" + currentContainer->getArchiveFilePath();
+        std::string path = currentContainer->getArchiveFilePath();
         if (access(path.c_str(),F_OK)!=-1) {
-          mapArchive=new ZipArchive(core->getMapSource()->getFolderPath() + "/" + currentContainer->getMapFileFolder(),currentContainer->getArchiveFileName());
+          mapArchive=new ZipArchive(currentContainer->getArchiveFileFolder(), currentContainer->getArchiveFileName());
           if ((mapArchive==NULL)||(!mapArchive->init()))
             FATAL("can not create zip archive object",NULL);
           newMapArchive=true;

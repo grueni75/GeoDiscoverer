@@ -43,15 +43,4 @@ bool MapSourceEmpty::init()
   return true;
 }
 
-// Returns the scale values for the given zoom level
-void MapSourceEmpty::getScales(Int zoomLevel, double &latScale, double &lngScale) {
-  lngScale=1;
-  latScale=1;
-}
-
-// Finds the calibrator for the given position
-MapCalibrator *MapSourceEmpty::findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator) {
-  return NULL;
-}
-
 }

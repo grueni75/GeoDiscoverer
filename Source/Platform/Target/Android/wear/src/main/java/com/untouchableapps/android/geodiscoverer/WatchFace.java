@@ -29,6 +29,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
@@ -290,6 +291,17 @@ public class WatchFace extends Gles2WatchFaceService {
             }
             commandExecuted=true;
           }
+          if (commandFunction.equals("restartActivity")) {
+            if (GDApplication.coreObject!=null) {
+              Message m = Message.obtain(GDApplication.coreObject.messageHandler);
+              m.what = GDCore.START_CORE;
+              GDApplication.coreObject.messageHandler.sendMessage(m);
+            }
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("exitActivity")) {
+            commandExecuted=true;
+          }
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
           }
@@ -389,7 +401,6 @@ public class WatchFace extends Gles2WatchFaceService {
 
       // Get informed if screen is turned off
       if (coreObject!=null) {
-        coreObject.executeAppCommand("setWearDeviceAlive(1)");
         if (powerManager.isInteractive())
           coreObject.executeAppCommand("setWearDeviceSleeping(0)");
         else
@@ -424,7 +435,7 @@ public class WatchFace extends Gles2WatchFaceService {
     @Override
     public void onDestroy() {
       if (coreObject!=null)
-        coreObject.executeAppCommand("setWearDeviceAlive(1)");
+        coreObject.executeAppCommand("setWearDeviceAlive(0)");
       unregisterReceiver(screenStateReceiver);
       if (coreObject!=null) {
         Message m = Message.obtain(coreObject.messageHandler);
@@ -505,6 +516,7 @@ public class WatchFace extends Gles2WatchFaceService {
     @Override
     public void onTapCommand(@TapType int tapType, int x, int y, long eventTime) {
       if (coreObject==null) return;
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("%d %d %d",tapType,x,y));
       switch (tapType) {
         case WatchFaceService.TAP_TYPE_TAP:
           coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");

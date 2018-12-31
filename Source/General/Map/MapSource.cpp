@@ -28,6 +28,13 @@ namespace GEODISCOVERER {
 std::list<ConfigSection*> MapSource::availableGDSInfos;
 ConfigSection *MapSource::resolvedGDSInfo = NULL;
 
+// Map source server thread
+void *mapSourceRemoteServerThread(void *args) {
+  MapSource *mapSource = (MapSource*)args;
+  mapSource->remoteServer();
+  return NULL;
+}
+
 MapSource::MapSource() {
   folder=core->getConfigStore()->getStringValue("Map","folder", __FILE__, __LINE__);
   neighborPixelTolerance=core->getConfigStore()->getDoubleValue("Map","neighborPixelTolerance", __FILE__, __LINE__);
@@ -43,10 +50,21 @@ MapSource::MapSource() {
   std::string defaultLegendPath=core->getHomePath() + "/Map/" + folder + "/legend.png";
   if (access(defaultLegendPath.c_str(),F_OK)==0)
     legendPaths[getFolder()]=defaultLegendPath;
+  quitRemoteServerThread=false;
+  remoteServerStartSignal=NULL;
+  remoteServerThreadInfo=NULL;
+  resetRemoteServerThread=false;
 }
 
 MapSource::~MapSource() {
   deinit();
+  quitRemoteServerThread=true;
+  if (remoteServerThreadInfo) {
+    core->getThread()->issueSignal(remoteServerStartSignal);
+    core->getThread()->waitForThread(remoteServerThreadInfo);
+    core->getThread()->destroyThread(remoteServerThreadInfo);
+    core->getThread()->destroySignal(remoteServerStartSignal);
+  }
   core->getThread()->destroyMutex(statusMutex);
   core->getThread()->destroyMutex(mapArchivesMutex);
 }
@@ -1023,5 +1041,613 @@ std::list<std::string> MapSource::getLegendNames() {
 std::string MapSource::getLegendPath(std::string name) {
   return legendPaths[name];
 }
+
+// Finds the calibrator for the given position
+MapCalibrator *MapSource::findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator) {
+  deleteCalibrator=false;
+  MapTile *tile=findMapTileByGeographicCoordinate(pos,zoomLevel,true,NULL);
+  if (tile)
+    return tile->getParentMapContainer()->getMapCalibrator();
+  else
+    return NULL;
+}
+
+// Returns the scale values for the given zoom level
+void MapSource::getScales(Int zoomLevel, double &latScale, double &lngScale) {
+  if (zoomLevelSearchTrees[zoomLevel]!=NULL) {
+    MapContainer *c=zoomLevelSearchTrees[zoomLevel]->getContents();
+    lngScale=c->getLngScale();
+    latScale=c->getLatScale();
+  } else {
+    lngScale=1;
+    latScale=1;
+  }
+}
+
+// Update any wear device about the new map
+void MapSource::remoteMapInit() {
+
+  // Start the server (if not done already)
+  resetRemoteServerThread=true;
+  if ((remoteServerThreadInfo==NULL)&&((type==MapSourceTypeCalibratedPictures)||(type==MapSourceTypeMercatorTiles))) {
+    DEBUG("starting remote server thread",NULL);
+    remoteServerStartSignal=core->getThread()->createSignal();
+    remoteServerThreadInfo=core->getThread()->createThread("map source remote server thread",mapSourceRemoteServerThread,(void*)this);
+  }
+
+  // Inform the remote device
+  std::stringstream cmd;
+  cmd << "setNewRemoteMap"
+      << "(Map/Remote,folder," << folder << ")"
+      << "(Map/Remote,minZoomLevel," << minZoomLevel << ")"
+      << "(Map/Remote,maxZoomLevel," << maxZoomLevel << ")"
+      << "(Map/Remote,centerLng," << centerPosition->getLng() << ")"
+      << "(Map/Remote,centerLat," << centerPosition->getLat() << ")"
+      << "(Map/Remote,centerLngScale," << centerPosition->getLngScale() << ")"
+      << "(Map/Remote,centerLatScale," << centerPosition->getLatScale() << ")";
+  core->getCommander()->dispatch(cmd.str());
+  DEBUG(cmd.str().c_str(),NULL);
+}
+
+// Adds a new command for the remote server
+void MapSource::queueRemoteServerCommand(std::string cmd) {
+  if (!remoteServerStartSignal)
+    return;
+  lockAccess(__FILE__,__LINE__);
+  remoteServerCommandQueue.push_back(cmd);
+  unlockAccess();
+  core->getThread()->issueSignal(remoteServerStartSignal);
+}
+
+// Handles request from remote devices for tiles
+void MapSource::remoteServer() {
+
+  WARNING("Not yet implemented: handling of containers that are not yet downloaded",NULL);
+  WARNING("Not yet implemented: other map tile find commands",NULL);
+  std::string workPath = core->getHomePath() + "/Map";
+  std::list<std::string> servedMapContainers;
+
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+
+  // Delete any left over remote tiles
+  Int tileNr=0;
+  struct dirent *dp;
+  DIR *dfd;
+  dfd=core->openDir(workPath);
+  if (dfd==NULL) {
+    FATAL("can not read directory <%s>",workPath.c_str());
+    return;
+  }
+  std::list<std::string> leftoverRemoteTiles;
+  while ((dp = readdir(dfd)) != NULL)
+  {
+    if (sscanf(dp->d_name,"remoteTile%d.gda",&tileNr)==1) {
+      leftoverRemoteTiles.push_back(dp->d_name);
+    }
+  }
+  closedir(dfd);
+  tileNr=0;
+  for (std::list<std::string>::iterator i=leftoverRemoteTiles.begin();i!=leftoverRemoteTiles.end();i++) {
+    std::string path = workPath + "/" + *i;
+    remove(path.c_str());
+  }
+
+  // Do an endless loop
+  while (1) {
+
+    // Wait for trigger
+    core->getThread()->waitForSignal(remoteServerStartSignal);
+
+    // Shall we quit?
+    if (quitRemoteServerThread) {
+      core->getThread()->exitThread();
+    }
+
+    // Queue empty?
+    std::string cmd="idle";
+    lockAccess(__FILE__,__LINE__);
+    if (!remoteServerCommandQueue.empty()) {
+      cmd=remoteServerCommandQueue.front();
+      remoteServerCommandQueue.pop_front();
+    }
+    unlockAccess();
+    if (cmd!="idle") {
+
+      // Split the command
+      DEBUG("new cmd: %s",cmd.c_str());
+      std::string cmdName;
+      std::vector<std::string> args;
+      if (!core->getCommander()->splitCommand(cmd,cmdName,args)) {
+        FATAL("command %s can not be splitted",cmd.c_str());
+      }
+      bool commandProcessed=false;
+
+      // Reset requested?
+      if (resetRemoteServerThread) {
+        servedMapContainers.clear();
+        resetRemoteServerThread=false;
+      }
+
+      // Create the list of map images to serve
+      std::list<std::vector<std::string> > mapImagesToServe;
+
+      // Shall we provide a map tile from a geo area?
+      if (cmdName=="fillGeographicAreaWithRemoteTiles") {
+
+        // Convert the arguments
+        Int refX=atoi(args[0].c_str());
+        Int refY=atoi(args[1].c_str());
+        double lngScale=atof(args[2].c_str());
+        double latScale=atof(args[3].c_str());
+        Int zoomLevel=atoi(args[4].c_str());
+        Int yNorth=atoi(args[5].c_str());
+        Int ySouth=atoi(args[6].c_str());
+        Int xEast=atoi(args[7].c_str());
+        Int xWest=atoi(args[8].c_str());
+        double latNorth=atof(args[9].c_str());
+        double latSouth=atof(args[10].c_str());
+        double lngEast=atof(args[11].c_str());
+        double lngWest=atof(args[12].c_str());
+        Int maxTiles=atoi(args[13].c_str());
+        std::string preferredNeighborCalibrationPath=args[14];
+        Int mapX=atoi(args[15].c_str());
+        Int mapY=atoi(args[16].c_str());
+        MapPosition refPos;
+        refPos.setX(refX);
+        refPos.setY(refY);
+        refPos.setLngScale(lngScale);
+        refPos.setLatScale(latScale);
+        DEBUG("x=%d y=%d lngScale=%f latScale=%f",refPos.getX(),refPos.getY(),refPos.getLngScale(),refPos.getLatScale());
+        MapArea area;
+        area.setRefPos(refPos);
+        area.setZoomLevel(zoomLevel);
+        area.setYNorth(yNorth);
+        area.setYSouth(ySouth);
+        area.setXEast(xEast);
+        area.setXWest(xWest);
+        area.setLatNorth(latNorth);
+        area.setLatSouth(latSouth);
+        area.setLngEast(lngEast);
+        area.setLngWest(lngWest);
+        DEBUG("zoomLevel=%d yNorth=%d ySouth=%d xEast=%d xWest=%d latNorth=%f latSouth=%f lngEast=%f lngWest=%f",area.getZoomLevel(),
+            area.getYNorth(),area.getYSouth(),area.getXEast(),area.getXWest(),
+            area.getLatNorth(),area.getLatSouth(),area.getLngEast(),area.getLngWest());
+        MapTile *preferredNeighbor=NULL;
+        if (preferredNeighborCalibrationPath!="") {
+          lockAccess(__FILE__,__LINE__);
+          for (std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
+            if ((*i)->getCalibrationFilePath()==preferredNeighborCalibrationPath) {
+              if (preferredNeighbor) {
+                FATAL("two map containers use same calibration path",NULL);
+              }
+              std::vector<MapTile*> *tiles=(*i)->getMapTiles();
+              for (std::vector<MapTile*>::iterator j=tiles->begin();j!=tiles->end();j++) {
+                if (((*j)->getMapX()==mapX)&&((*j)->getMapY()==mapY)) {
+                  preferredNeighbor=*j;
+                }
+              }
+            }
+          }
+          unlockAccess();
+          if (!preferredNeighbor) {
+            FATAL("remote side has a preferred neighbor that is not available at this side",NULL);
+          }
+        }
+        if (preferredNeighbor)
+          DEBUG("preferredNeighbor: %s,%d,%d",preferredNeighbor->getParentMapContainer()->getCalibrationFilePath(),preferredNeighbor->getMapX(),preferredNeighbor->getMapY());
+
+        // Search for the map tile
+        lockAccess(__FILE__,__LINE__);
+        std::list<MapTile*> tiles;
+        bool abortUpdate=false;
+        DEBUG("maxTiles=%d",maxTiles);
+        fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,&tiles,&abortUpdate);
+        DEBUG("tiles.size()=%d",tiles.size());
+        for (std::list<MapTile*>::iterator i=tiles.begin();i!=tiles.end();i++) {
+
+          // Get the found tile
+          MapTile *t=*i;
+          DEBUG("t=ßx%08x",t);
+
+          // Does the remote side already know this one?
+          bool alreadyKnown=false;
+          DEBUG("%s %s",args[16].c_str(),args[17].c_str());
+          for (int j=17;j<args.size();j++) {
+            if (args[j]==t->getParentMapContainer()->getCalibrationFilePath()) {
+              DEBUG("remote side already has <%s>, skipping it",t->getParentMapContainer()->getCalibrationFilePath());
+              alreadyKnown=true;
+            }
+          }
+
+          // If not, serve it add it to the work queue
+          if (!alreadyKnown) {
+            std::vector<std::string> mapImage;
+            mapImage.push_back(t->getParentMapContainer()->getImageFilePath());
+            mapImage.push_back(t->getParentMapContainer()->getCalibrationFilePath());
+            mapImage.push_back(t->getParentMapContainer()->getArchiveFileFolder());
+            mapImage.push_back(t->getParentMapContainer()->getArchiveFileName());
+            mapImagesToServe.push_back(mapImage);
+            DEBUG("map container %s added to serve queue",t->getParentMapContainer()->getCalibrationFileName());
+          }
+        }
+        unlockAccess();
+        commandProcessed=true;
+      }
+
+
+      // Shall we provide a map tile from a geo coordinate?
+      if (cmdName=="findRemoteMapTileByGeographicCoordinate") {
+
+        // Convert the arguments
+        double lng=atof(args[0].c_str());
+        double lat=atof(args[1].c_str());
+        double lngScale=atof(args[2].c_str());
+        double latScale=atof(args[3].c_str());
+        Int zoomLevel=atoi(args[4].c_str());
+        bool lockZoomLevel=atoi(args[5].c_str());
+        std::string preferredMapContainerCalibrationPath=args[6];
+        MapPosition pos;
+        pos.setLng(lng);
+        pos.setLat(lat);
+        pos.setLngScale(lngScale);
+        pos.setLatScale(latScale);
+        MapContainer *preferredMapContainer=NULL;
+        if (preferredMapContainerCalibrationPath!="") {
+          lockAccess(__FILE__,__LINE__);
+          bool found=false;
+          for (std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
+            if ((*i)->getCalibrationFilePath()==preferredMapContainerCalibrationPath) {
+              if (preferredMapContainer) {
+                FATAL("two map containers use same calibration path",NULL);
+              }
+              preferredMapContainer=*i;
+            }
+          }
+          unlockAccess();
+          if (!preferredMapContainer) {
+            FATAL("remote side has a preferred map container that is not available at this side",NULL);
+          }
+        }
+
+        // Search for the map tile
+        lockAccess(__FILE__,__LINE__);
+        MapTile *t = findMapTileByGeographicCoordinate(pos,zoomLevel,lockZoomLevel,preferredMapContainer);
+        if (t) {
+          DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFileName());
+
+          // Does the remote side already know this one?
+          bool alreadyKnown=false;
+          for (int i=6;i<args.size();i++) {
+            if (args[i]==t->getParentMapContainer()->getCalibrationFilePath()) {
+              DEBUG("remote side already has <%s>, skipping it",t->getParentMapContainer()->getCalibrationFilePath());
+              alreadyKnown=true;
+            }
+          }
+
+          // If not, serve it add it to the work queue
+          if (!alreadyKnown) {
+            std::vector<std::string> mapImage;
+            mapImage.push_back(t->getParentMapContainer()->getImageFilePath());
+            mapImage.push_back(t->getParentMapContainer()->getCalibrationFilePath());
+            mapImage.push_back(t->getParentMapContainer()->getArchiveFileFolder());
+            mapImage.push_back(t->getParentMapContainer()->getArchiveFileName());
+            mapImagesToServe.push_back(mapImage);
+            DEBUG("map container %s added to serve queue",t->getParentMapContainer()->getCalibrationFileName());
+          }
+        }
+        unlockAccess();
+        commandProcessed=true;
+      }
+
+      // Serve all extracted map images
+      for (std::list<std::vector<std::string> >::iterator mapImage=mapImagesToServe.begin();mapImage!=mapImagesToServe.end();mapImage++) {
+
+        // Get the required filenames
+        std::string imageFilePath=(*mapImage)[0];
+        std::string calibrationFilePath=(*mapImage)[1];
+        std::string archiveFileFolder=(*mapImage)[2];
+        std::string archiveFileName=(*mapImage)[3];
+
+        // Only send this map container if not already sent
+        bool alreadyServed=false;
+        for (std::list<std::string>::iterator i=servedMapContainers.begin();i!=servedMapContainers.end();i++) {
+          if (*i==calibrationFilePath) {
+            DEBUG("requested map container <%s> already served, skipping it", calibrationFilePath.c_str());
+            alreadyServed=true;
+          }
+        }
+        if (alreadyServed)
+          continue;
+
+        // Extract the needed files
+        ZipArchive *mapArchive = new ZipArchive(archiveFileFolder,archiveFileName);
+        if (!mapArchive) {
+          FATAL("can not create zip archive",NULL);
+          continue;
+        }
+        if (!mapArchive->init()) {
+          delete mapArchive;
+          WARNING("can not open <%s/%s>",archiveFileFolder.c_str(),archiveFileName.c_str());
+          continue;
+        }
+        std::string imageExtension = imageFilePath.substr(imageFilePath.find_last_of(".")+1);
+        std::string imageTempFilepath = workPath + "/remoteTile." + imageExtension;
+        if (!mapArchive->exportEntry(imageFilePath,imageTempFilepath)) {
+          delete mapArchive;
+          WARNING("can not write to file <%s>",imageTempFilepath.c_str());
+          continue;
+        }
+        std::string calibrationExtension = calibrationFilePath.substr(calibrationFilePath.find_last_of(".")+1);
+        std::string calibrationTempFilepath = workPath + "/remoteTile." + calibrationExtension;
+        if (!mapArchive->exportEntry(calibrationFilePath,calibrationTempFilepath)) {
+          delete mapArchive;
+          WARNING("can not write to file <%s>",calibrationTempFilepath.c_str());
+          continue;
+        }
+        delete mapArchive;
+
+        // Create the remote tile archive
+        std::stringstream remoteTileFilename;
+        remoteTileFilename << "remoteTile" << tileNr << ".gda";
+        tileNr++;
+        mapArchive = new ZipArchive(workPath,remoteTileFilename.str());
+        if (!mapArchive) {
+          FATAL("can not create zip archive",NULL);
+          continue;
+        }
+        mapArchive->init();
+        if (!mapArchive->addEntry(imageFilePath,imageTempFilepath)) {
+          delete mapArchive;
+          WARNING("can not add entry to remote tile archive",NULL);
+          continue;
+        }
+        if (!mapArchive->addEntry(calibrationFilePath,calibrationTempFilepath)) {
+          delete mapArchive;
+          WARNING("can not add entry to remote tile archive",NULL);
+          continue;
+        }
+        if (!mapArchive->writeChanges()) {
+          delete mapArchive;
+          WARNING("can not write changes to remote tile archive",NULL);
+          continue;
+        }
+        delete mapArchive;
+        remove(imageTempFilepath.c_str());
+        remove(calibrationTempFilepath.c_str());
+
+        // Ask the app to transfer it to the remote side
+        DEBUG("sending %s to remote side",remoteTileFilename.str().c_str());
+        core->getCommander()->dispatch("serveRemoteMapArchive(" + workPath + "/" + remoteTileFilename.str() + ")");
+        servedMapContainers.push_back(calibrationFilePath);
+      }
+
+      // Indicate issue if command has not been processed
+      if (!commandProcessed) {
+        WARNING("unknown command %s received",cmd.c_str());
+      }
+    }
+  }
+}
+
+// Returns the next free map archive file name
+std::string MapSource::getFreeArchiveFilePath() {
+  return "";
+}
+
+// Adds a new map archive
+bool MapSource::addArchive(std::string path) {
+  return false;
+}
+
+// Fills the given area with tiles
+void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abortUpdate) {
+
+  // If an abort has been requested, stop here
+  if (*abortUpdate) {
+    DEBUG("update aborted",NULL);
+    return;
+  }
+
+  // Check if the area is plausible
+  if (area.getYNorth()<area.getYSouth()) {
+    DEBUG("north smaller than south",NULL);
+    return;
+  }
+  if (area.getXEast()<area.getXWest()) {
+    DEBUG("east smaller than west",NULL);
+    return;
+  }
+
+  // Check if the maximum number of tiles to display are reached
+  if (tiles->size()>=maxTiles) {
+    DEBUG("too many tiles (maxTiles=%d)",maxTiles);
+    return;
+  }
+
+  /* Visualize the search area
+  if (core->getGraphicEngine()->getDebugMode()) {
+    removeDebugPrimitives();
+    GraphicRectangle *r;
+    if (!(r=new GraphicRectangle())) {
+      FATAL("no memory for graphic rectangle object",NULL);
+      return;
+    }
+    //r->setColor(GraphicColor(((double)rand())/RAND_MAX*255,((double)rand())/RAND_MAX*255,((double)rand())/RAND_MAX*255));
+    r->setColor(GraphicColor(255,0,0));
+    r->setX(area.getXWest());
+    r->setY(area.getYSouth());
+    r->setWidth(area.getXEast()-area.getXWest());
+    r->setHeight(area.getYNorth()-area.getYSouth());
+    //r->setFilled(false);
+    std::list<std::string> names;
+    names.push_back("");
+    //r->setName(names);
+    r->setZ(-10);
+    map->addPrimitive(r);
+    core->interruptAllowedHere();
+    DEBUG("redraw!",NULL);
+  }*/
+
+  //DEBUG("search area is (%d,%d)x(%d,%d)",area.getXWest(),area.getYNorth(),area.getXEast(),area.getYSouth());
+
+  // Search for a tile that lies in the range
+  MapContainer *container;
+  MapTile *tile=findMapTileByGeographicArea(area,preferredNeighbor,container);
+  //DEBUG("tile=0x%08x",tile);
+
+  // Tile found?
+  Int searchedYNorth,searchedYSouth;
+  Int searchedXWest,searchedXEast;
+  double searchedLatNorth,searchedLatSouth,searchedLngEast,searchedLngWest;
+  Int visXByCalibrator,visYByCalibrator;
+  if (tile) {
+
+    // Remember the found tile
+    tiles->push_back(tile);
+    DEBUG("tile 0x%08x found",tile);
+
+    // Use the calibrator to compute the position
+    MapPosition pos=area.getRefPos();
+    tile->getParentMapContainer()->getMapCalibrator()->setPictureCoordinates(pos);
+    Int diffVisX=tile->getMapX()-pos.getX();
+    Int diffVisY=tile->getMapY()-pos.getY();
+    visXByCalibrator=area.getRefPos().getX()+diffVisX;
+    visYByCalibrator=area.getRefPos().getY()-diffVisY-tile->getHeight();
+
+    // If a tile has been found, reduce the search area by the found tile
+    searchedYNorth=visYByCalibrator+tile->getHeight()-1;
+    searchedYSouth=visYByCalibrator;
+    searchedXWest=visXByCalibrator;
+    searchedXEast=visXByCalibrator+tile->getWidth()-1;
+    searchedLatNorth=tile->getLatNorthMin();
+    searchedLatSouth=tile->getLatSouthMax();
+    searchedLngWest=tile->getLngWestMax();
+    searchedLngEast=tile->getLngEastMin();
+
+  } else {
+
+    DEBUG("no tile found, stopping search",NULL);
+    return;
+
+  }
+
+  //DEBUG("finished area is (%d,%d)x(%d,%d)",searchedXWest,searchedYNorth,searchedXEast,searchedYSouth);
+
+  // Fill the new areas recursively if there are areas left
+  MapArea nw=area;
+  if (searchedYNorth>=area.getYSouth()) {
+    nw.setYSouth(searchedYNorth+1);
+    nw.setLatSouth(searchedLatNorth);
+  }
+  if (searchedXWest<=area.getXEast()) {
+    nw.setXEast(searchedXWest-1);
+    nw.setLngEast(searchedLngWest);
+  }
+  //DEBUG("search for new tile in north west quadrant",NULL);
+  if (nw!=area)
+    fillGeographicAreaWithTiles(nw,tile,maxTiles,tiles,abortUpdate);
+  MapArea n=area;
+  if (searchedYNorth>=area.getYSouth()) {
+    n.setYSouth(searchedYNorth+1);
+    n.setLatSouth(searchedLatNorth);
+  }
+  if (searchedXWest>area.getXWest()) {
+    n.setXWest(searchedXWest);
+    n.setLngWest(searchedLngWest);
+  }
+  if (searchedXEast<area.getXEast()) {
+    n.setXEast(searchedXEast);
+    n.setLngEast(searchedLngEast);
+  }
+  //DEBUG("search for new tile in north quadrant",NULL);
+  if (n!=area)
+    fillGeographicAreaWithTiles(n,tile,maxTiles,tiles,abortUpdate);
+  MapArea ne=area;
+  if (searchedYNorth>=area.getYSouth()) {
+    ne.setYSouth(searchedYNorth+1);
+    ne.setLatSouth(searchedLatNorth);
+  }
+  if (searchedXEast>=area.getXWest()) {
+    ne.setXWest(searchedXEast+1);
+    ne.setLngWest(searchedLngEast);
+  }
+  //DEBUG("search for new tile in north east quadrant",NULL);
+  if (ne!=area)
+    fillGeographicAreaWithTiles(ne,tile,maxTiles,tiles,abortUpdate);
+  MapArea e=area;
+  if (searchedYNorth<area.getYNorth()) {
+    e.setYNorth(searchedYNorth);
+    e.setLatNorth(searchedLatNorth);
+  }
+  if (searchedYSouth>area.getYSouth()) {
+    e.setYSouth(searchedYSouth);
+    e.setLatSouth(searchedLatSouth);
+  }
+  if (searchedXEast>=area.getXWest()) {
+    e.setXWest(searchedXEast+1);
+    e.setLngWest(searchedLngEast);
+  }
+  //DEBUG("search for new tile in east quadrant",NULL);
+  if (e!=area)
+    fillGeographicAreaWithTiles(e,tile,maxTiles,tiles,abortUpdate);
+  MapArea se=area;
+  if (searchedYSouth<=area.getYNorth()) {
+    se.setYNorth(searchedYSouth-1);
+    se.setLatNorth(searchedLatSouth);
+  }
+  if (searchedXEast>=area.getXWest()) {
+    se.setXWest(searchedXEast+1);
+    se.setLngWest(searchedLngEast);
+  }
+  //DEBUG("search for new tile in south east quadrant",NULL);
+  if (se!=area)
+    fillGeographicAreaWithTiles(se,tile,maxTiles,tiles,abortUpdate);
+  MapArea s=area;
+  if (searchedYSouth<=area.getYNorth()) {
+    s.setYNorth(searchedYSouth-1);
+    s.setLatNorth(searchedLatSouth);
+  }
+  if (searchedXWest>area.getXWest()) {
+    s.setXWest(searchedXWest);
+    s.setLngWest(searchedLngWest);
+  }
+  if (searchedXEast<area.getXEast()) {
+    s.setXEast(searchedXEast);
+    s.setLngEast(searchedLngEast);
+  }
+  //DEBUG("search for new tile in south quadrant",NULL);
+  if (s!=area)
+    fillGeographicAreaWithTiles(s,tile,maxTiles,tiles,abortUpdate);
+  MapArea sw=area;
+  if (searchedYSouth<=area.getYNorth()) {
+    sw.setYNorth(searchedYSouth-1);
+    sw.setLatNorth(searchedLatSouth);
+  }
+  if (searchedXWest<=area.getXEast()) {
+    sw.setXEast(searchedXWest-1);
+    sw.setLngEast(searchedLngWest);
+  }
+  //DEBUG("search for new tile in south west quadrant",NULL);
+  if (sw!=area)
+    fillGeographicAreaWithTiles(sw,tile,maxTiles,tiles,abortUpdate);
+  MapArea w=area;
+  if (searchedYNorth<area.getYNorth()) {
+    w.setYNorth(searchedYNorth);
+    w.setLatNorth(searchedLatNorth);
+  }
+  if (searchedYSouth>area.getYSouth()) {
+    w.setYSouth(searchedYSouth);
+    w.setLatSouth(searchedLatSouth);
+  }
+  if (searchedXWest<=area.getXEast()) {
+    w.setXEast(searchedXWest-1);
+    w.setLngEast(searchedLngWest);
+  }
+  //DEBUG("search for new tile in west quadrant",NULL);
+  if (w!=area)
+    fillGeographicAreaWithTiles(w,tile,maxTiles,tiles,abortUpdate);
+}
+
 
 }

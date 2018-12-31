@@ -586,6 +586,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     xpath="/GDC/" + name;
   else
     xpath="/GDC/" + path + "/" + name;
+  //DEBUG("xpath=%s",xpath.c_str());
 
   // Only one thread may enter setStringValue
   core->getThread()->lockMutex(accessMutex, file, line);

@@ -22,6 +22,9 @@
 
 #include <Core.h>
 
+// Executes an command on the java side
+std::string GDApp_executeAppCommand(std::string command);
+
 namespace GEODISCOVERER {
 
 // Constant values
@@ -232,31 +235,27 @@ MapCalibrator *MapSourceMercatorTiles::createMapCalibrator(double latNorth, doub
 
 // Crestes the path for the given zoom and x
 void MapSourceMercatorTiles::createTilePath(Int zMap, Int x, Int y, std::stringstream &archiveFileFolder, std::stringstream &archiveFileBase) {
-  archiveFileFolder << "Tiles";
-  std::string path;
-  path = getFolderPath() + "/" + archiveFileFolder.str();
+  archiveFileFolder << getFolderPath() << "/" << "Tiles";
   struct stat s;
   Int result;
-  if ((result=core->statFile(path, &s) != 0) || (!(s.st_mode & S_IFDIR))) {
+  if ((result=core->statFile(archiveFileFolder.str(), &s) != 0) || (!(s.st_mode & S_IFDIR))) {
     //DEBUG("path=%s result=%d errno=%d",path.c_str(),result,errno);
-    if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
-      FATAL("can not create directory <%s>", path.c_str());
+    if (mkdir(archiveFileFolder.str().c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+      FATAL("can not create directory <%s>", archiveFileFolder.str().c_str());
     }
   }
   archiveFileFolder << "/" << zMap;
-  path = getFolderPath() + "/" + archiveFileFolder.str();
-  if ((result=core->statFile(path, &s) != 0) || (!(s.st_mode & S_IFDIR))) {
+  if ((result=core->statFile(archiveFileFolder.str(), &s) != 0) || (!(s.st_mode & S_IFDIR))) {
     //DEBUG("path=%s result=%d errno=%d",path.c_str(),result,errno);
-    if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
-      FATAL("can not create directory <%s>", path.c_str());
+    if (mkdir(archiveFileFolder.str().c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+      FATAL("can not create directory <%s>", archiveFileFolder.str().c_str());
     }
   }
   archiveFileFolder << "/" << x;
-  path = getFolderPath() + "/" + archiveFileFolder.str();
-  if ((result=core->statFile(path, &s) != 0) || (!(s.st_mode & S_IFDIR))) {
+  if ((result=core->statFile(archiveFileFolder.str(), &s) != 0) || (!(s.st_mode & S_IFDIR))) {
     //DEBUG("path=%s result=%d errno=%d",path.c_str(),result,errno);
-    if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
-      FATAL("can not create directory <%s>", path.c_str());
+    if (mkdir(archiveFileFolder.str().c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+      FATAL("can not create directory <%s>", archiveFileFolder.str().c_str());
     }
   }
   archiveFileBase << zMap << "_" << x << "_" << y;
@@ -340,8 +339,10 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
     FATAL("can not create map container",NULL);
     return NULL;
   }
-  mapContainer->setMapFileFolder(archiveFileFolder.str());
+  mapContainer->setMapFileFolder(".");
+  mapContainer->setArchiveFileFolder(archiveFileFolder.str());
   mapContainer->setArchiveFileName(archiveFileName);
+  //DEBUG("archiveFileName(int)=%s archiveFileName=%s archiveFilePath=%s mapFileFolder=%s",archiveFileName.c_str(),mapContainer->getArchiveFileName().c_str(),mapContainer->getArchiveFilePath().c_str(),mapContainer->getMapFileFolder().c_str());
   mapContainer->setImageFileName(imageFileName);
   mapContainer->setImageFileName(imageFileName);
   mapContainer->setCalibrationFileName(calibrationFileName);
@@ -376,7 +377,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
   mapContainer->createSearchTree();
 
   // Check if the tile has already been saved to disk
-  if (access((getFolderPath() + "/" + mapContainer->getArchiveFilePath()).c_str(),F_OK)==-1) {
+  if (access((mapContainer->getArchiveFilePath()).c_str(),F_OK)==-1) {
     mapDownloader->queueMapContainerDownload(mapContainer);
   }
 
@@ -603,6 +604,7 @@ void MapSourceMercatorTiles::maintenance() {
         break;
       }
     }
+    contentsChanged=false;
     unlockAccess();
 
     // Remove the obsolete map containers

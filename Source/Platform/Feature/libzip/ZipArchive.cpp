@@ -104,7 +104,29 @@ void ZipArchive::closeEntry(ZipArchiveEntry entry) {
   zip_fclose(entry);
 }
 
-// Adds an entry
+// Adds an entry from a file on the disk
+bool ZipArchive::addEntry(std::string entryFilename, std::string diskFilename) {
+  FILE *in;
+  if (!(in=fopen(diskFilename.c_str(),"r"))) {
+    DEBUG("can not open <%s> for reading", diskFilename.c_str());
+    return false;
+  }
+  fseek(in, 0, SEEK_END);
+  long size = ftell(in);
+  fseek(in, 0, SEEK_SET);
+  void *buffer;
+  if (!(buffer=malloc(size))) {
+    FATAL("can not create buffer of length %l",size);
+    return false;
+  }
+  fread(buffer,size,1,in);
+  fclose(in);
+  //DEBUG("buffer=0x%08x size=%d",buffer,size);
+  bool result = addEntry(entryFilename,buffer,size);
+  return result;
+}
+
+// Adds an entry from a buffer
 bool ZipArchive::addEntry(std::string filename, void *buffer, Int size) {
 
   // Compress the data
@@ -135,8 +157,10 @@ bool ZipArchive::exportEntry(std::string entryFilename, std::string diskFilename
   UByte buffer[buffer_size];
   Int read_size;
   FILE *out;
-  if (!(out=fopen(diskFilename.c_str(),"w")))
+  if (!(out=fopen(diskFilename.c_str(),"w"))) {
+    DEBUG("can not open <%s> for writing",diskFilename.c_str());
     return false;
+  }
   ZipArchiveEntry entry = openEntry(entryFilename);
   if (entry) {
     while ((read_size=readEntry(entry,buffer,buffer_size))>0) {
@@ -147,8 +171,37 @@ bool ZipArchive::exportEntry(std::string entryFilename, std::string diskFilename
   fclose(out);
   if (entry)
     return true;
-  else
+  else {
+    DEBUG("can not find entry <%s> in archive <%s/%s>",entryFilename.c_str(),archiveFolder.c_str(),archiveName.c_str());
     return false;
+  }
+}
+
+// Checks if the complete archive can be read
+bool ZipArchive::checkIntegrity() {
+  const Int buffer_size=16384;
+  UByte buffer[buffer_size];
+  Int read_size;
+  zip_error_clear(archive);
+  for (int i=0;i<getEntryCount();i++) {
+    ZipArchiveEntry entry = openEntry(getEntryFilename(i));
+    if (entry) {
+      zip_file_error_clear(entry);
+      while ((read_size=readEntry(entry,buffer,buffer_size))>0);
+      int ze, se;
+      zip_file_error_get(entry,&ze,&se);
+      closeEntry(entry);
+      if ((ze!=0)||(se!=0))
+        return false;
+    } else {
+      return false;
+    }
+  }
+  int ze, se;
+  zip_error_get(archive,&ze,&se);
+  if ((ze!=0)||(se!=0))
+    return false;
+  return true;
 }
 
 // Writes any changes within the archive to disk

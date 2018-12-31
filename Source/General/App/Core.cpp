@@ -95,6 +95,7 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   fileAccessRetries = 10;
   fileAccessWaitTime = 100;
   quitUpdateDashboardScreensThread = false;
+  remoteServerActive=false;
 
   // Create core objects that are required early
   if (!(thread=new Thread())) {
@@ -294,7 +295,7 @@ bool Core::init() {
   defaultDevice->setInitDone();
   DEBUG("initializing mapSource",NULL);
   if (defaultDevice->getName()=="Watch") {
-    mapSource=new MapSourceEmpty();
+    mapSource=new MapSourceRemote();
   } else {
     mapSource=MapSource::newMapSource();
   }

@@ -48,6 +48,9 @@ class WidgetConfig {
   // Inactive color
   GraphicColor inactiveColor;
 
+  // Busy color
+  GraphicColor busyColor;
+
   // Additional parameters
   ParameterMap parameters;
 
@@ -73,6 +76,14 @@ public:
 
   void setInactiveColor(const GraphicColor& inactiveColor) {
     this->inactiveColor = inactiveColor;
+  }
+
+  const GraphicColor& getBusyColor() const {
+    return busyColor;
+  }
+
+  void setBusyColor(const GraphicColor& busyColor) {
+    this->busyColor = busyColor;
   }
 
   const std::string& getName() const {

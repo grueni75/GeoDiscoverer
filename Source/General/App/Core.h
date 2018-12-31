@@ -175,6 +175,9 @@ protected:
   // Time in seconds between storing of unsaved data
   Int maintenancePeriod;
 
+  // Indicates if a remote server sends something
+  boolean remoteServerActive;
+
   // Handling of retries when opening a file for writing or accessing it
   Int fileAccessRetries;
   TimestampInMicroseconds fileAccessWaitTime;
@@ -373,6 +376,14 @@ public:
   WidgetEngine *getDefaultWidgetEngine();
 
   GraphicEngine *getDefaultGraphicEngine();
+
+  boolean getRemoteServerActive() const {
+    return remoteServerActive;
+  }
+
+  void setRemoteServerActive(boolean remoteServerActive) {
+    this->remoteServerActive = remoteServerActive;
+  }
 };
 
 // Pointer to the core
@@ -447,6 +458,7 @@ extern Core *core;
 #include <MapSourceEmpty.h>
 #include <MapSourceCalibratedPictures.h>
 #include <MapSourceMercatorTiles.h>
+#include <MapSourceRemote.h>
 #include <NavigationPathTileInfo.h>
 #include <NavigationPathVisualization.h>
 #include <NavigationPath.h>

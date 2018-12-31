@@ -359,6 +359,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
   bool isNewer=false;
 
   //PROFILE_START;
+  //DEBUG("checking new location pos (locationPos.getTimestamp()=%ld)",locationPos.getTimestamp());
 
   // Check if the new fix is older or newer
   if (newLocationPos.getTimestamp()>locationPos.getTimestamp()) {

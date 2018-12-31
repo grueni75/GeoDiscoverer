@@ -47,6 +47,9 @@ import android.os.Message;
 import android.os.Process;
 import android.util.DisplayMetrics;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.Wearable;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -55,6 +58,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
@@ -157,6 +161,12 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   // Indicates if core is running on a watch
   boolean isWatch = false;
 
+  // Stores the mapping of channel names to file names
+  public Hashtable channelPathToFilePath = new Hashtable<String, String>();
+
+  // Handle to the google API
+  public GoogleApiClient googleApiClient;
+
   //
   // Constructor and destructor
   //
@@ -192,6 +202,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
     // Get infos about the screen
     setDisplayMetrics(appIf.getApplication().getResources().getDisplayMetrics());
+
+    // Init the message api to communicate with wear device
+    googleApiClient = new GoogleApiClient.Builder(appIf.getContext()).addApi(Wearable.API).build();
+    googleApiClient.connect();
 
     // Start the thread that handles the starting and stopping
     thread = new Thread(this);
@@ -608,6 +622,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       coreLock.lock();
       coreLateInitComplete=true;
       coreLock.unlock();
+      if (isWatch) {
+        appIf.sendWearCommand("setWearDeviceAlive(1)");
+      }
       cmdExecuted=false; // forward message to activity
     }
     if (cmd.startsWith("setFormattedNavigationInfo(")) {
@@ -627,6 +644,31 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     }
     if (cmd.startsWith("setWearDeviceAlive(")) {
       if (isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("setNewRemoteMap(")) {
+      if (!isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("findRemoteMapTileByGeographicCoordinate(")) {
+      if (isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("fillGeographicAreaWithRemoteTiles(")) {
+      if (isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("serveRemoteMapArchive(")) {
+      if (!isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
+    }
+    if (cmd.equals("forceRemoteMapUpdate()")) {
+      if (!isWatch)
         appIf.sendWearCommand(cmd);
       cmdExecuted=true;
     }

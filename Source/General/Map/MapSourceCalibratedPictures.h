@@ -43,7 +43,7 @@ protected:
   static MapContainerTreeNode *retrieveSearchTree(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize);
 
   // Loads all calibrated pictures in the given directory
-  bool collectMapTiles(std::string directory, std::list<std::string> &mapFilebases);
+  bool collectMapTiles(std::string directory, std::list<std::vector<std::string> > &mapFilebases);
 
 public:
 
@@ -65,12 +65,6 @@ public:
 
   // Reads the contents of the object from a binary file
   static bool retrieve(MapSourceCalibratedPictures *mapSource, char *&cacheData, Int &cacheSize, std::string folder);
-
-  // Finds the calibrator for the given position
-  virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator);
-
-  // Returns the scale values for the given zoom level
-  virtual void getScales(Int zoomLevel, double &latScale, double &lngScale);
 
   // Getters and setters
 

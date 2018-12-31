@@ -35,6 +35,7 @@ protected:
 
   bool                doNotDelete;          // Indicates if the object has been alloacted by an own memory handler
   char                *mapFileFolder;       // Folder in which the picture and calibration data of the map is stored
+  char                *archiveFileFolder;   // Folder in which the map archive is stored
   char                *imageFileName;       // Filename of the picture of the map
   char                *imageFilePath;       // Complete path to the picture of the map
   ImageType           imageType;            // File format of the image
@@ -179,6 +180,11 @@ public:
       return std::string(mapFileFolder);
   }
 
+  std::string getArchiveFileFolder() const
+  {
+      return std::string(archiveFileFolder);
+  }
+
   std::string getImageFilePath() const
   {
       return std::string(imageFilePath);
@@ -201,12 +207,20 @@ public:
 
   std::string getArchiveFilePath() const
   {
+    if (archiveFilePath==NULL) {
+      return std::string("please/recreate/calibrated/picture/map/cache");
+    } else {
       return std::string(archiveFilePath);
+    }
   }
 
   std::string getArchiveFileName() const
   {
+    if (archiveFileName==NULL) {
+      return std::string("please/recreate/calibrated/picture/map/cache");
+    } else {
       return std::string(archiveFileName);
+    }
   }
 
   std::vector<MapTile*> *getMapTiles() {
@@ -381,10 +395,10 @@ public:
         FATAL("can not create string",NULL);
       }
       std::string path;
-      if (strcmp(mapFileFolder,".")==0)
+      if (strcmp(archiveFileFolder,".")==0)
         path = archiveFileName;
       else
-        path = std::string(mapFileFolder) + "/" + archiveFileName;
+        path = std::string(archiveFileFolder) + "/" + archiveFileName;
       if (this->archiveFilePath) free(this->archiveFilePath);
       if (!(this->archiveFilePath=strdup(path.c_str()))) {
         FATAL("can not create string",NULL);
@@ -398,6 +412,17 @@ public:
     } else {
       if (this->mapFileFolder) free(this->mapFileFolder);
       if (!(this->mapFileFolder=strdup(mapFileFolder.c_str()))) {
+        FATAL("can not create string",NULL);
+      }
+    }
+  }
+
+  void setArchiveFileFolder(std::string archiveFileFolder) {
+    if (doNotDelete) {
+      FATAL("can not set new archive file folder because memory is statically allocated",NULL);
+    } else {
+      if (this->archiveFileFolder) free(this->archiveFileFolder);
+      if (!(this->archiveFileFolder=strdup(archiveFileFolder.c_str()))) {
         FATAL("can not create string",NULL);
       }
     }

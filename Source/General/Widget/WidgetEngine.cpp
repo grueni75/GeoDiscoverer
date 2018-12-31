@@ -87,6 +87,8 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
   }
   c->setGraphicColorValue(path + "/ActiveColor",GraphicColor(config.getActiveColor().getRed(),config.getActiveColor().getGreen(),config.getActiveColor().getBlue(),config.getActiveColor().getAlpha()),__FILE__, __LINE__);
   c->setGraphicColorValue(path + "/InactiveColor",GraphicColor(config.getInactiveColor().getRed(),config.getInactiveColor().getGreen(),config.getInactiveColor().getBlue(),config.getInactiveColor().getAlpha()),__FILE__, __LINE__);
+  if (config.getType()==WidgetTypeNavigation)
+    c->setGraphicColorValue(path + "/BusyColor",GraphicColor(config.getBusyColor().getRed(),config.getBusyColor().getGreen(),config.getBusyColor().getBlue(),config.getBusyColor().getAlpha()),__FILE__, __LINE__);
   ParameterMap::iterator i;
   for (i=config.getParameters()->begin();i!=config.getParameters()->end();i++) {
     std::string innerPath = path;
@@ -198,33 +200,51 @@ void WidgetEngine::createGraphic() {
       config.setPageName("Path Tools");
       config.setParameter("command","setPage(Default,-1)");
       addWidgetToPage(config);
-      // ---------------------------------------------------------
+    }
+    // ---------------------------------------------------------
+    if ((deviceName=="Default")||(deviceName=="Watch")) {
       config=WidgetConfig();
       config.setPageName("Default");
       config.setName("Zoom In");
       config.setType(WidgetTypeButton);
       position=WidgetPosition();
-      position.setRefScreenDiagonal(4);
-      position.setPortraitX(87.5);
-      position.setPortraitY(23.0);
-      position.setPortraitZ(0);
-      position.setLandscapeX(89.5);
-      position.setLandscapeY(87.5);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
-      position=WidgetPosition();
-      position.setRefScreenDiagonal(7);
-      position.setPortraitX(tabletPortraitButtonGridX[0]);
-      position.setPortraitY(tabletPortraitButtonGridY[0]);
-      position.setPortraitZ(0);
-      position.setLandscapeX(tabletLandscapeButtonGridX[0]);
-      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
+      if (deviceName=="Default") {
+        position.setRefScreenDiagonal(4);
+        position.setPortraitX(87.5);
+        position.setPortraitY(23.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(89.5);
+        position.setLandscapeY(87.5);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(7);
+        position.setPortraitX(tabletPortraitButtonGridX[0]);
+        position.setPortraitY(tabletPortraitButtonGridY[0]);
+        position.setPortraitZ(0);
+        position.setLandscapeX(tabletLandscapeButtonGridX[0]);
+        position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+      }
+      if (deviceName=="Watch") {
+        position.setRefScreenDiagonal(0);
+        position.setPortraitX(90.0);
+        position.setPortraitY(65.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(90.0);
+        position.setLandscapeY(65.0);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+      }
       config.setActiveColor(GraphicColor(255,255,255,255));
-      config.setInactiveColor(GraphicColor(255,255,255,100));
+      if (deviceName=="Watch") {
+        config.setInactiveColor(GraphicColor(255,255,255,0));
+      } else {
+        config.setInactiveColor(GraphicColor(255,255,255,100));
+      }
       config.setParameter("iconFilename","zoomIn");
-      config.setParameter("command","zoom(1.125)");
+      config.setParameter("command","zoom(1.02)");
       config.setParameter("repeat","1");
       addWidgetToPage(config);
       // ---------------------------------------------------------
@@ -233,29 +253,47 @@ void WidgetEngine::createGraphic() {
       config.setName("Zoom Out");
       config.setType(WidgetTypeButton);
       position=WidgetPosition();
-      position.setRefScreenDiagonal(4.0);
-      position.setPortraitX(62.5);
-      position.setPortraitY(23.0);
-      position.setPortraitZ(0);
-      position.setLandscapeX(89.5);
-      position.setLandscapeY(62.5);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
-      position=WidgetPosition();
-      position.setRefScreenDiagonal(7.0);
-      position.setPortraitX(tabletPortraitButtonGridX[1]);
-      position.setPortraitY(tabletPortraitButtonGridY[0]);
-      position.setPortraitZ(0);
-      position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
+      if (deviceName=="Default") {
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(62.5);
+        position.setPortraitY(23.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(89.5);
+        position.setLandscapeY(62.5);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(7.0);
+        position.setPortraitX(tabletPortraitButtonGridX[1]);
+        position.setPortraitY(tabletPortraitButtonGridY[0]);
+        position.setPortraitZ(0);
+        position.setLandscapeX(tabletLandscapeButtonGridX[1]);
+        position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+      }
+      if (deviceName=="Watch") {
+        position.setRefScreenDiagonal(0);
+        position.setPortraitX(90.0);
+        position.setPortraitY(35.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(90.0);
+        position.setLandscapeY(35.0);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+      }
       config.setActiveColor(GraphicColor(255,255,255,255));
-      config.setInactiveColor(GraphicColor(255,255,255,100));
+      if (deviceName=="Watch") {
+        config.setInactiveColor(GraphicColor(255,255,255,0));
+      } else {
+        config.setInactiveColor(GraphicColor(255,255,255,100));
+      }
       config.setParameter("iconFilename","zoomOut");
-      config.setParameter("command","zoom(0.875)");
+      config.setParameter("command","zoom(0.98)");
       config.setParameter("repeat","1");
       addWidgetToPage(config);
+    }
+    if (deviceName=="Default") {
       // ---------------------------------------------------------
       config=WidgetConfig();
       config.setPageName("Default");
@@ -546,6 +584,56 @@ void WidgetEngine::createGraphic() {
       config.setParameter("unitY","10.0");
       addWidgetToPage(config);
       // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Status");
+      config.setType(WidgetTypeStatus);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(70.0);
+      position.setPortraitY(92.0);
+      position.setPortraitZ(1);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(88.0);
+      position.setLandscapeZ(1);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(tabletPortraitButtonGridX[1]);
+      position.setPortraitY(tabletPortraitButtonGridY[3]);
+      position.setPortraitZ(1);
+      position.setLandscapeX(tabletLandscapeButtonGridX[1]);
+      position.setLandscapeY(tabletLandscapeButtonGridY[2]);
+      position.setLandscapeZ(1);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","statusBackground");
+      config.setParameter("updateInterval","100000");
+      config.setParameter("labelWidth","95.0");
+      addWidgetToPage(config);
+      config.setPageName("Path Tools");
+      config.clearPositions();
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(50.0);
+      position.setPortraitY(30.0);
+      position.setPortraitZ(1);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(88.0);
+      position.setLandscapeZ(1);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX((tabletPortraitButtonGridX[2]+tabletPortraitButtonGridX[1])/2);
+      position.setPortraitY(tabletPortraitButtonGridY[4]);
+      position.setPortraitZ(1);
+      position.setLandscapeX((tabletLandscapeButtonGridX[2]+tabletLandscapeButtonGridX[1])/2);
+      position.setLandscapeY(tabletLandscapeButtonGridY[2]);
+      position.setLandscapeZ(1);
+      config.addPosition(position);
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
       if (deviceName=="Default") {
         config=WidgetConfig();
         config.setPageName("Default");
@@ -576,56 +664,6 @@ void WidgetEngine::createGraphic() {
         config.setParameter("tickLabelOffsetX","0");
         config.setParameter("mapLabelOffsetY","27.0");
         config.setParameter("layerLabelOffsetY","8.0");
-        addWidgetToPage(config);
-        // ---------------------------------------------------------
-        config=WidgetConfig();
-        config.setPageName("Default");
-        config.setName("Status");
-        config.setType(WidgetTypeStatus);
-        position=WidgetPosition();
-        position.setRefScreenDiagonal(4.0);
-        position.setPortraitX(70.0);
-        position.setPortraitY(92.0);
-        position.setPortraitZ(1);
-        position.setLandscapeX(50.0);
-        position.setLandscapeY(88.0);
-        position.setLandscapeZ(1);
-        config.addPosition(position);
-        position=WidgetPosition();
-        position.setRefScreenDiagonal(7.0);
-        position.setPortraitX(tabletPortraitButtonGridX[1]);
-        position.setPortraitY(tabletPortraitButtonGridY[3]);
-        position.setPortraitZ(1);
-        position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-        position.setLandscapeY(tabletLandscapeButtonGridY[2]);
-        position.setLandscapeZ(1);
-        config.addPosition(position);
-        config.setActiveColor(GraphicColor(255,255,255,255));
-        config.setInactiveColor(GraphicColor(255,255,255,100));
-        config.setParameter("iconFilename","statusBackground");
-        config.setParameter("updateInterval","100000");
-        config.setParameter("labelWidth","95.0");
-        addWidgetToPage(config);
-        config.setPageName("Path Tools");
-        config.clearPositions();
-        position=WidgetPosition();
-        position.setRefScreenDiagonal(4.0);
-        position.setPortraitX(50.0);
-        position.setPortraitY(30.0);
-        position.setPortraitZ(1);
-        position.setLandscapeX(50.0);
-        position.setLandscapeY(88.0);
-        position.setLandscapeZ(1);
-        config.addPosition(position);
-        position=WidgetPosition();
-        position.setRefScreenDiagonal(7.0);
-        position.setPortraitX((tabletPortraitButtonGridX[2]+tabletPortraitButtonGridX[1])/2);
-        position.setPortraitY(tabletPortraitButtonGridY[4]);
-        position.setPortraitZ(1);
-        position.setLandscapeX((tabletLandscapeButtonGridX[2]+tabletLandscapeButtonGridX[1])/2);
-        position.setLandscapeY(tabletLandscapeButtonGridY[2]);
-        position.setLandscapeZ(1);
-        config.addPosition(position);
         addWidgetToPage(config);
         // ---------------------------------------------------------
         config=WidgetConfig();
@@ -1011,11 +1049,10 @@ void WidgetEngine::createGraphic() {
       position.setLandscapeZ(0);
       config.addPosition(position);
       config.setInactiveColor(GraphicColor(255,255,255,255));
-      config.setParameter("iconFilename","navigationLargeBackground");
-      config.setParameter("directionIconFilename","navigationLargeDirection");
-      config.setParameter("separatorIconFilename","navigationLargeSeparator");
-      config.setParameter("orientationLabelRadius","91.0");
-      config.setParameter("targetRadius","89.5");
+      config.setParameter("iconFilename","navigationWatchBackground");
+      config.setParameter("directionIconFilename","navigationWatchDirection");
+      config.setParameter("orientationLabelRadius","90.5");
+      config.setParameter("targetRadius","90.0");
       config.setParameter("textColumnCount","2");
       config.setParameter("textRowFirstOffsetY","75");
       config.setParameter("textRowSecondOffsetY","60");
@@ -1045,6 +1082,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("textRowFourthOffsetY","25");
     }
     config.setActiveColor(GraphicColor(255,255,255,255));
+    config.setBusyColor(GraphicColor(255,0,0,255));
     config.setParameter("textColumnOffsetX","5");
     config.setParameter("targetIconFilename","navigationTarget");
     config.setParameter("updateInterval","1000000");
@@ -1061,6 +1099,8 @@ void WidgetEngine::createGraphic() {
     config.setParameter("TurnColor/green","0");
     config.setParameter("TurnColor/blue","0");
     config.setParameter("TurnColor/alpha","255");
+    config.setParameter("minPanDetectionRadius","75.0");
+    config.setParameter("panSpeed","0.00001");
     addWidgetToPage(config);
   }
 
@@ -1157,9 +1197,11 @@ void WidgetEngine::createGraphic() {
         navigation->getTargetIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"targetIconFilename",__FILE__, __LINE__));
         navigation->getTargetIcon()->setX(-navigation->getTargetIcon()->getIconWidth()/2);
         navigation->getTargetIcon()->setY(-navigation->getTargetIcon()->getIconHeight()/2);
-        navigation->getSeparatorIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
-        navigation->getSeparatorIcon()->setX(0);
-        navigation->getSeparatorIcon()->setY(0);
+        if (deviceName!="Watch") {
+          navigation->getSeparatorIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
+          navigation->getSeparatorIcon()->setX(0);
+          navigation->getSeparatorIcon()->setY(0);
+        }
       }
 
       // Set type-dependent properties
@@ -1226,6 +1268,9 @@ void WidgetEngine::createGraphic() {
         navigation->setTurnLineStartX(c->getDoubleValue(widgetPath,"turnLineStartX",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTurnLineStartY(c->getDoubleValue(widgetPath,"turnLineStartY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTurnColor(c->getGraphicColorValue(widgetPath+"/TurnColor",__FILE__, __LINE__));
+        navigation->setMinPanDetectionRadius(c->getDoubleValue(widgetPath,"minPanDetectionRadius",__FILE__, __LINE__)*navigation->getIconHeight()/2/100.0);
+        navigation->setPanSpeed(c->getDoubleValue(widgetPath,"panSpeed",__FILE__, __LINE__));
+        navigation->setBusyColor(c->getGraphicColorValue(widgetPath + "/BusyColor",__FILE__, __LINE__));
       }
       if (widgetType=="pathInfo") {
         pathInfo->setPathNameOffsetX(c->getDoubleValue(widgetPath,"pathNameOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);

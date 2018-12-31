@@ -43,6 +43,12 @@ public:
   Commander();
   virtual ~Commander();
 
+  // Extracts the command name and its arguments from a command
+  bool splitCommand(std::string cmdString, std::string& cmd, std::vector<std::string>& args);
+
+  // Creates a command string from the given arguments
+  std::string joinCommand(std::string cmd, std::vector<std::string> args);
+
   // Interrupts the commander
   void interruptOperation(const char *file, int line) const {
     core->getThread()->lockMutex(accessMutex, file, line);

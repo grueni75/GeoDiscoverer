@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum { MapSourceTypeCalibratedPictures, MapSourceTypeMercatorTiles, MapSourceTypeEmpty } MapSourceType;
+typedef enum { MapSourceTypeCalibratedPictures, MapSourceTypeMercatorTiles, MapSourceTypeEmpty, MapSourceTypeRemote } MapSourceType;
 
 class MapSource {
 
@@ -55,6 +55,11 @@ protected:
   Int minZoomLevel;                               // Minimum zoom value
   Int maxZoomLevel;                               // Maximum zoom value
   static StringMap legendPaths;                   // List of available legends with their names
+  bool quitRemoteServerThread;                    // Indicates that the remote server thread shall quit
+  ThreadInfo *remoteServerThreadInfo;             // Thread that handles the serving of tiles for remote devices
+  ThreadSignalInfo *remoteServerStartSignal;      // Signal for starting the remote server thread
+  std::list<std::string> remoteServerCommandQueue; // Holds the commands that the remote server shall process
+  bool resetRemoteServerThread;                   // Indicates if the remote server thread shall forget everything about the remote side
 
   // Lists of map containers sorted by their boundaries
   std::vector<Int> mapsIndexByLatNorth;
@@ -114,8 +119,17 @@ public:
   // Initialzes the source
   virtual bool init() = 0;
 
+  // Update any wear device about the map
+  void remoteMapInit();
+
   // Clears the source
   virtual void deinit();
+
+  // Handles request from remote devices for tiles
+  void remoteServer();
+
+  // Adds a new command for the remote server
+  void queueRemoteServerCommand(std::string cmd);
 
   // Returns the map tile in which the position lies
   virtual MapTile *findMapTileByGeographicCoordinate(MapPosition pos, Int zoomLevel, bool lockZoomLevel, MapContainer *preferredMapContainer=NULL);
@@ -129,10 +143,13 @@ public:
   // Returns a list of map containers in which the given position lies
   std::list<MapContainer*> findMapContainersByGeographicCoordinate(MapPosition pos, Int zoomLevel=0);
 
+  // Fills the given area with tiles
+  virtual void fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abortUpdate);
+
   // Initializes the progress bar
   void openProgress(std::string title, Int valueMax);
 
-  // Increases the progress by one tep
+  // Increases the progress by one step
   bool increaseProgress();
 
   // Closes the progress bar
@@ -145,10 +162,10 @@ public:
   virtual void maintenance();
 
   // Returns the scale values for the given zoom level
-  virtual void getScales(Int zoomLevel, double &latScale, double &lngScale) = 0;
+  virtual void getScales(Int zoomLevel, double &latScale, double &lngScale);
 
   // Finds the calibrator for the given position
-  virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator) = 0;
+  virtual MapCalibrator *findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator);
 
   // Marks a map container as obsolete
   // Please note that other objects might still use this map container
@@ -196,6 +213,12 @@ public:
 
   // Returns the file path to the legend with the given name
   static std::string getLegendPath(std::string name);
+
+  // Returns the next free map archive file name
+  virtual std::string getFreeArchiveFilePath();
+
+  // Adds a new map archive
+  virtual bool addArchive(std::string path);
 
   // Getters and setters
   Int getMapTileLength() const {

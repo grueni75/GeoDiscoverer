@@ -51,7 +51,7 @@ void MapSourceCalibratedPictures::deinit()
 }
 
 // Loads all calibrated pictures in the given directory
-bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::list<std::string> &mapFilebases)
+bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::list<std::vector<std::string> > &mapFilebases)
 {
   std::string filename;
 
@@ -95,7 +95,12 @@ bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::li
         continue;
 
       // Remember the basename of the file
-      mapFilebases.push_back(filebase);
+      std::vector<std::string> names;
+      names.push_back((*i)->getArchiveFolder());
+      names.push_back((*i)->getArchiveName());
+      names.push_back(filebase);
+      names.push_back(extension);
+      mapFilebases.push_back(names);
     }
   }
   unlockMapArchives();
@@ -110,7 +115,7 @@ bool MapSourceCalibratedPictures::init()
   double lngWest=+std::numeric_limits<double>::max(), lngEast=-std::numeric_limits<double>::max();;
   MapContainer *mapContainer;
   bool result;
-  std::list<std::string> mapFilebases;
+  std::list<std::vector<std::string> > mapFilebases;
   std::ofstream ofs;
   std::ifstream ifs;
   //FILE *in;
@@ -258,28 +263,17 @@ bool MapSourceCalibratedPictures::init()
     Int maxZoomLevel=std::numeric_limits<Int>::min();
     Int minZoomLevel=std::numeric_limits<Int>::max();
     //DEBUG("mapContainers.size()=%d",mapContainers.size());
-    for (std::list<std::string>::const_iterator i=mapFilebases.begin();i!=mapFilebases.end();i++) {
+    for (std::list<std::vector<std::string> >::const_iterator i=mapFilebases.begin();i!=mapFilebases.end();i++) {
 
-      std::string filebase=*i;
-      std::string extension;
+      std::string filebase=(*i)[2];
+      std::string extension=(*i)[3];
+      std::string filepath=filebase + "." + extension;
 
       // Shall we stop?
       if (core->getQuitCore()) {
         DEBUG("cache retrieve aborted because core quit requested",NULL);
         result=false;
         goto cleanup;
-      }
-
-      // Check which calibration file is present
-      std::string supportedExtension="-";
-      std::string filepath;
-      for (Int i=0;supportedExtension!="";i++) {
-        supportedExtension=MapContainer::getCalibrationFileExtension(i);
-        if (supportedExtension!="") {
-          filepath=filebase + "." + supportedExtension;
-          extension=supportedExtension;
-          break;
-        }
       }
 
       // Output some info
@@ -295,11 +289,14 @@ bool MapSourceCalibratedPictures::init()
         result=false;
         goto cleanup;
       }
+      mapContainer->setArchiveFileFolder((*i)[0]);
+      mapContainer->setArchiveFileName((*i)[1]);
       if (!(mapContainer->readCalibrationFile(std::string(dirname((char*)filebase.c_str())),std::string(basename((char*)filebase.c_str())),extension))) {
         result=false;
         delete mapContainer;
         goto cleanup;
       }
+      //DEBUG("archiveFileFolder=%s archiveFileName=%s archiveFilePath=%s",mapContainer->getArchiveFileFolder().c_str(),mapContainer->getArchiveFileName().c_str(),mapContainer->getArchiveFilePath().c_str());
       mapContainers.push_back(mapContainer);
 
       // Remember the map with the lowest scale
@@ -636,23 +633,5 @@ cleanup:
   // Return result
   return success;
 }
-
-// Finds the calibrator for the given position
-MapCalibrator *MapSourceCalibratedPictures::findMapCalibrator(Int zoomLevel, MapPosition pos, bool &deleteCalibrator) {
-  deleteCalibrator=false;
-  MapTile *tile=findMapTileByGeographicCoordinate(pos,zoomLevel,true,NULL);
-  if (tile)
-    return tile->getParentMapContainer()->getMapCalibrator();
-  else
-    return NULL;
-}
-
-// Returns the scale values for the given zoom level
-void MapSourceCalibratedPictures::getScales(Int zoomLevel, double &latScale, double &lngScale) {
-  MapContainer *c=zoomLevelSearchTrees[zoomLevel]->getContents();
-  lngScale=c->getLngScale();
-  latScale=c->getLatScale();
-}
-
 
 }

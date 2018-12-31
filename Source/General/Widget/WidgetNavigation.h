@@ -33,6 +33,12 @@ protected:
   // Update interval
   TimestampInMicroseconds updateInterval;
 
+  // Color if the widget is not busy
+  GraphicColor normalColor;
+
+  // Color if the widget is busy
+  GraphicColor busyColor;
+
   // Graphic showing the direction
   GraphicRectangle directionIcon;
 
@@ -130,6 +136,25 @@ protected:
   // Last update of the clock
   TimestampInSeconds lastClockUpdate;
 
+  // Indicates that the widget runs on a watch
+  bool isWatch;
+
+  // Min radius a touch has to have from the center to register as pan command
+  double minPanDetectionRadius;
+
+  // Speed at which the panning shall be performed
+  double panSpeed;
+
+  // Controls the panning of the map
+  bool panActive;
+  TimestampInMicroseconds panStartTime;
+  double panAngle;
+  Int panXInt, panYInt;
+  double panXDouble, panYDouble;
+
+  // Indicates if the remote server is active
+  bool remoteServerActive;
+
 public:
 
   // Constructor
@@ -143,6 +168,9 @@ public:
 
   // Called when the widget is not touched anymore
   virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel);
+
+  // Called when the widget is touched
+  virtual void onTouchDown(TimestampInMicroseconds t, Int x, Int y);
 
   // Called when the widget must be drawn
   virtual void draw(TimestampInMicroseconds t);
@@ -241,6 +269,19 @@ public:
 
   void setClockOffsetY(Int clockOffsetY) {
     this->clockOffsetY = clockOffsetY;
+  }
+
+  void setMinPanDetectionRadius(double minPanDetectionRadius) {
+    this->minPanDetectionRadius = minPanDetectionRadius;
+  }
+
+  void setPanSpeed(double panSpeed) {
+    this->panSpeed = panSpeed;
+  }
+
+  void setBusyColor(GraphicColor busyColor) {
+    this->normalColor = activeColor;
+    this->busyColor = busyColor;
   }
 
 };

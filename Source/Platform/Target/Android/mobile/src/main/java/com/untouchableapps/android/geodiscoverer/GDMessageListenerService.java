@@ -22,27 +22,30 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
+
+import java.util.HashMap;
 
 public class GDMessageListenerService extends WearableListenerService {
 
   /** Called when a message is received */
   @Override
   public void onMessageReceived( final MessageEvent messageEvent ) {
-    /*GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("message received: %s %s",
+    super.onMessageReceived(messageEvent);
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("message received: %s %s",
             messageEvent.getPath(),
             new String(messageEvent.getData()))
-    );*/
+    );
     if (messageEvent.getPath().equals("/com.untouchableapps.android.geodiscoverer")) {
       String cmd = new String(messageEvent.getData());
       if (cmd.startsWith("setWearDeviceSleeping(1)")) {
-        ((GDApplication)getApplication()).setWearDeviceAlive(true);
         ((GDApplication)getApplication()).setWearDeviceSleeping(true);
       }
       if (cmd.startsWith("setWearDeviceSleeping(0)")) {
-        ((GDApplication)getApplication()).setWearDeviceAlive(true);
         ((GDApplication)getApplication()).setWearDeviceSleeping(false);
       }
       if (cmd.startsWith("setWearDeviceAlive(1)")) {
@@ -50,6 +53,12 @@ public class GDMessageListenerService extends WearableListenerService {
       }
       if (cmd.startsWith("setWearDeviceAlive(0)")) {
         ((GDApplication)getApplication()).setWearDeviceAlive(false);
+      }
+      if (cmd.startsWith("findRemoteMapTileByGeographicCoordinate(")) {
+        ((GDApplication)getApplication()).coreObject.executeCoreCommand(cmd);
+      }
+      if (cmd.startsWith("fillGeographicAreaWithRemoteTiles(")) {
+        ((GDApplication)getApplication()).coreObject.executeCoreCommand(cmd);
       }
     }
   }

@@ -613,7 +613,7 @@ void MapDownloader::writeImages() {
       // Add the image to the archive
       ZipArchive *mapArchive=NULL;
       //DEBUG("writing image data",NULL);
-      mapArchive=new ZipArchive(mapSource->getFolderPath() + "/" + image.mapContainer->getMapFileFolder(),image.mapContainer->getArchiveFileName());
+      mapArchive=new ZipArchive(image.mapContainer->getArchiveFileFolder(), image.mapContainer->getArchiveFileName());
       if ((mapArchive==NULL)||(!mapArchive->init()))
         FATAL("can not create zip archive object",NULL);
       mapArchive->addEntry(image.mapContainer->getImageFilePath(),(void*)image.imageData,(Int)image.imageSize);

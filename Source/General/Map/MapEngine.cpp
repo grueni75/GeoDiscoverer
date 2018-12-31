@@ -235,65 +235,19 @@ void MapEngine::removeDebugPrimitives() {
 // Fills the given area with tiles
 void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, bool activateVisPos) {
 
-  // If an abort has been requested, stop here
-  if (abortUpdate) {
-    //DEBUG("update aborted",NULL);
-    return;
-  }
+  std::list<MapTile*> foundTiles;
 
-  // Check if the area is plausible
-  if (area.getYNorth()<area.getYSouth()) {
-    //DEBUG("north smaller than south",NULL);
-    return;
-  }
-  if (area.getXEast()<area.getXWest()) {
-    //DEBUG("east smaller than west",NULL);
-    return;
-  }
+  // Get the list of tiles in the area
+  core->getMapSource()->fillGeographicAreaWithTiles(area, preferredNeighbor, maxTiles, &foundTiles, &abortUpdate);
 
-  // Check if the maximum number of tiles to display are reached
-  if (tiles.size()>=maxTiles) {
-    //DEBUG("too many tiles (maxTiles=%d)",maxTiles);
-    return;
-  }
+  // Go through all found ones
+  for (std::list<MapTile*>::iterator i=foundTiles.begin();i!=foundTiles.end();i++) {
 
-  /* Visualize the search area
-  if (core->getGraphicEngine()->getDebugMode()) {
-    removeDebugPrimitives();
-    GraphicRectangle *r;
-    if (!(r=new GraphicRectangle())) {
-      FATAL("no memory for graphic rectangle object",NULL);
-      return;
-    }
-    //r->setColor(GraphicColor(((double)rand())/RAND_MAX*255,((double)rand())/RAND_MAX*255,((double)rand())/RAND_MAX*255));
-    r->setColor(GraphicColor(255,0,0));
-    r->setX(area.getXWest());
-    r->setY(area.getYSouth());
-    r->setWidth(area.getXEast()-area.getXWest());
-    r->setHeight(area.getYNorth()-area.getYSouth());
-    //r->setFilled(false);
-    std::list<std::string> names;
-    names.push_back("");
-    //r->setName(names);
-    r->setZ(-10);
-    map->addPrimitive(r);
-    core->interruptAllowedHere();
-    DEBUG("redraw!",NULL);
-  }*/
-
-  //DEBUG("search area is (%d,%d)x(%d,%d)",area.getXWest(),area.getYNorth(),area.getXEast(),area.getYSouth());
-
-  // Search for a tile that lies in the range
-  MapContainer *container;
-  MapTile *tile=core->getMapSource()->findMapTileByGeographicArea(area,preferredNeighbor,container);
-  //DEBUG("tile=0x%08x",tile);
-
-  // Tile found?
-  Int searchedYNorth,searchedYSouth;
-  Int searchedXWest,searchedXEast;
-  double searchedLatNorth,searchedLatSouth,searchedLngEast,searchedLngWest;
-  Int visXByCalibrator,visYByCalibrator;
-  if (tile) {
+    MapTile *tile=*i;;
+    //Int searchedYNorth,searchedYSouth;
+    //Int searchedXWest,searchedXEast;
+    //double searchedLatNorth,searchedLatSouth,searchedLngEast,searchedLngWest;
+    Int visXByCalibrator,visYByCalibrator;
 
     // Use the calibrator to compute the position
     MapPosition pos=area.getRefPos();
@@ -424,139 +378,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
       // Tile has been processed
       tile->setIsProcessed(true);
     }
-
-    // If a tile has been found, reduce the search area by the found tile
-    searchedYNorth=visYByCalibrator+tile->getHeight()-1;
-    searchedYSouth=visYByCalibrator;
-    searchedXWest=visXByCalibrator;
-    searchedXEast=visXByCalibrator+tile->getWidth()-1;
-    searchedLatNorth=tile->getLatNorthMin();
-    searchedLatSouth=tile->getLatSouthMax();
-    searchedLngWest=tile->getLngWestMax();
-    searchedLngEast=tile->getLngEastMin();
-
-  } else {
-
-    //DEBUG("no tile found, stopping search",NULL);
-    return;
-
   }
-
-  //DEBUG("finished area is (%d,%d)x(%d,%d)",searchedXWest,searchedYNorth,searchedXEast,searchedYSouth);
-
-  // Fill the new areas recursively if there are areas left
-  MapArea nw=area;
-  if (searchedYNorth>=area.getYSouth()) {
-    nw.setYSouth(searchedYNorth+1);
-    nw.setLatSouth(searchedLatNorth);
-  }
-  if (searchedXWest<=area.getXEast()) {
-    nw.setXEast(searchedXWest-1);
-    nw.setLngEast(searchedLngWest);
-  }
-  //DEBUG("search for new tile in north west quadrant",NULL);
-  if (nw!=area)
-    fillGeographicAreaWithTiles(nw,tile,activateVisPos);
-  MapArea n=area;
-  if (searchedYNorth>=area.getYSouth()) {
-    n.setYSouth(searchedYNorth+1);
-    n.setLatSouth(searchedLatNorth);
-  }
-  if (searchedXWest>area.getXWest()) {
-    n.setXWest(searchedXWest);
-    n.setLngWest(searchedLngWest);
-  }
-  if (searchedXEast<area.getXEast()) {
-    n.setXEast(searchedXEast);
-    n.setLngEast(searchedLngEast);
-  }
-  //DEBUG("search for new tile in north quadrant",NULL);
-  if (n!=area)
-    fillGeographicAreaWithTiles(n,tile,activateVisPos);
-  MapArea ne=area;
-  if (searchedYNorth>=area.getYSouth()) {
-    ne.setYSouth(searchedYNorth+1);
-    ne.setLatSouth(searchedLatNorth);
-  }
-  if (searchedXEast>=area.getXWest()) {
-    ne.setXWest(searchedXEast+1);
-    ne.setLngWest(searchedLngEast);
-  }
-  //DEBUG("search for new tile in north east quadrant",NULL);
-  if (ne!=area)
-    fillGeographicAreaWithTiles(ne,tile,activateVisPos);
-  MapArea e=area;
-  if (searchedYNorth<area.getYNorth()) {
-    e.setYNorth(searchedYNorth);
-    e.setLatNorth(searchedLatNorth);
-  }
-  if (searchedYSouth>area.getYSouth()) {
-    e.setYSouth(searchedYSouth);
-    e.setLatSouth(searchedLatSouth);
-  }
-  if (searchedXEast>=area.getXWest()) {
-    e.setXWest(searchedXEast+1);
-    e.setLngWest(searchedLngEast);
-  }
-  //DEBUG("search for new tile in east quadrant",NULL);
-  if (e!=area)
-    fillGeographicAreaWithTiles(e,tile,activateVisPos);
-  MapArea se=area;
-  if (searchedYSouth<=area.getYNorth()) {
-    se.setYNorth(searchedYSouth-1);
-    se.setLatNorth(searchedLatSouth);
-  }
-  if (searchedXEast>=area.getXWest()) {
-    se.setXWest(searchedXEast+1);
-    se.setLngWest(searchedLngEast);
-  }
-  //DEBUG("search for new tile in south east quadrant",NULL);
-  if (se!=area)
-    fillGeographicAreaWithTiles(se,tile,activateVisPos);
-  MapArea s=area;
-  if (searchedYSouth<=area.getYNorth()) {
-    s.setYNorth(searchedYSouth-1);
-    s.setLatNorth(searchedLatSouth);
-  }
-  if (searchedXWest>area.getXWest()) {
-    s.setXWest(searchedXWest);
-    s.setLngWest(searchedLngWest);
-  }
-  if (searchedXEast<area.getXEast()) {
-    s.setXEast(searchedXEast);
-    s.setLngEast(searchedLngEast);
-  }
-  //DEBUG("search for new tile in south quadrant",NULL);
-  if (s!=area)
-    fillGeographicAreaWithTiles(s,tile,activateVisPos);
-  MapArea sw=area;
-  if (searchedYSouth<=area.getYNorth()) {
-    sw.setYNorth(searchedYSouth-1);
-    sw.setLatNorth(searchedLatSouth);
-  }
-  if (searchedXWest<=area.getXEast()) {
-    sw.setXEast(searchedXWest-1);
-    sw.setLngEast(searchedLngWest);
-  }
-  //DEBUG("search for new tile in south west quadrant",NULL);
-  if (sw!=area)
-    fillGeographicAreaWithTiles(sw,tile,activateVisPos);
-  MapArea w=area;
-  if (searchedYNorth<area.getYNorth()) {
-    w.setYNorth(searchedYNorth);
-    w.setLatNorth(searchedLatNorth);
-  }
-  if (searchedYSouth>area.getYSouth()) {
-    w.setYSouth(searchedYSouth);
-    w.setLatSouth(searchedLatSouth);
-  }
-  if (searchedXWest<=area.getXEast()) {
-    w.setXEast(searchedXWest-1);
-    w.setLngEast(searchedLngWest);
-  }
-  //DEBUG("search for new tile in west quadrant",NULL);
-  if (w!=area)
-    fillGeographicAreaWithTiles(w,tile,activateVisPos);
 }
 
 // Checks if a map update is required

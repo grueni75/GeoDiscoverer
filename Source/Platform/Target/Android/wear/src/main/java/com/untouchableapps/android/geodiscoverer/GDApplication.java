@@ -58,9 +58,6 @@ public class GDApplication extends Application implements GDAppInterface {
   /** Cockpit engine */
   CockpitEngine cockpitEngine = null;
 
-  /** Reference to the wear message api */
-  GoogleApiClient googleApiClient = null;
-
   /** Time to wait for a connection */
   final static long WEAR_CONNECTION_TIME_OUT_MS = 1000;
 
@@ -84,10 +81,6 @@ public class GDApplication extends Application implements GDAppInterface {
       coreObject=new GDCore(this, homeDirPath);
     }
 
-    // Init the message api to communicate with wear device
-    googleApiClient = new GoogleApiClient.Builder(this).addApi(Wearable.API).build();
-    googleApiClient.connect();
-
     // Start the thread that handles the wear communication
     wearThread = new Thread(new Runnable() {
       @Override
@@ -101,12 +94,12 @@ public class GDApplication extends Application implements GDAppInterface {
 
             // Send command
             NodeApi.GetConnectedNodesResult nodes =
-                Wearable.NodeApi.getConnectedNodes(googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
+                Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
                     TimeUnit.MILLISECONDS);
             if (nodes != null) {
               for (Node node : nodes.getNodes()) {
                 MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                    googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer",
+                    coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer",
                     command.getBytes()).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
               }
             }

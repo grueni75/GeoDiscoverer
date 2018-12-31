@@ -397,7 +397,7 @@
                         <xsd:documentation>Time in microseconds to wait before dispatching repeating commands.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="buttonRepeatPeriod" type="xsd:integer" default="100000">
+                    <xsd:element name="buttonRepeatPeriod" type="xsd:integer" default="10000">
                       <xsd:annotation>
                         <xsd:documentation>Time distance in microseconds between command dispatching.</xsd:documentation>
                       </xsd:annotation>
@@ -579,6 +579,35 @@
 			                                        </xsd:annotation>
 			                                      </xsd:element>
 			                                      <xsd:element name="alpha" type="xsd:integer" default="100">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                    </xsd:sequence>
+			                                  </xsd:complexType>
+			                                </xsd:element>
+			                                <xsd:element name="BusyColor">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Color of the widget if it is busy.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                  <xsd:complexType>
+			                                    <xsd:sequence>
+			                                      <xsd:element name="red" type="xsd:integer" default="255">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>Red component [0-255]</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                      <xsd:element name="green" type="xsd:integer" default="255">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>Green component [0-255]</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                      <xsd:element name="blue" type="xsd:integer" default="255">
+			                                        <xsd:annotation>
+			                                          <xsd:documentation>Blue component [0-255]</xsd:documentation>
+			                                        </xsd:annotation>
+			                                      </xsd:element>
+			                                      <xsd:element name="alpha" type="xsd:integer" default="255">
 			                                        <xsd:annotation>
 			                                          <xsd:documentation>Alpha component [0-255]</xsd:documentation>
 			                                        </xsd:annotation>
@@ -786,6 +815,16 @@
 			                                <xsd:element name="turnLineStartY" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Start y position of the turn arrow.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
+			                                <xsd:element name="minPanDetectionRadius" type="xsd:double" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Min radius in percent of the widget height a touch has to have from the center to be registered as a pan command.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
+			                                <xsd:element name="panSpeed" type="xsd:double" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Speed of the map panning in pixels per microseconds.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
 			                                <xsd:element name="pathNameOffsetX" type="xsd:double" default="0" minOccurs="0">
@@ -1443,9 +1482,14 @@
               </xsd:element>
               <xsd:element name="mapContainerCacheSize" type="xsd:integer" default="256">
                 <xsd:annotation>
-                  <xsd:documentation>Number of map containers to remember if the source is using a cache.</xsd:documentation>
+                  <xsd:documentation>Number of map containers to remember if the source is using a memory cache.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="mapArchiveCacheSize" type="xsd:integer" default="1024">
+                <xsd:annotation>
+                  <xsd:documentation>Number of map archives to store if the source is using a disk cache.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
               <xsd:element name="downloadErrorWaitTime" type="xsd:integer" default="1">
                 <xsd:annotation>
                   <xsd:documentation>Time in seconds to wait after a download error before starting a new download.</xsd:documentation>
@@ -1483,7 +1527,7 @@
               </xsd:element>              
               <xsd:element name="DownloadJob">
                 <xsd:annotation>
-                  <xsd:documentation>Defines a  map area that shall be downloaded to the device storage.</xsd:documentation>
+                  <xsd:documentation>Defines a map area that shall be downloaded to the device storage.</xsd:documentation>
                 </xsd:annotation>
                 <xsd:complexType>
                   <xsd:sequence>
@@ -1530,6 +1574,55 @@
                   </xsd:attribute>
                 </xsd:complexType>
               </xsd:element>
+              <xsd:element name="Remote">
+                <xsd:annotation>
+                  <xsd:documentation>Information for receiving maps from a remote device (e.g., on a watch from a mobile phone).</xsd:documentation>
+                </xsd:annotation>
+                <xsd:complexType>
+                  <xsd:sequence>
+			              <xsd:element name="reset" type="xsd:integer" default="0" gd:upgrade="restore">
+			                <xsd:annotation>
+			                  <xsd:documentation>Indicates that the cached tiles need to be reset.</xsd:documentation>
+			                </xsd:annotation>
+			              </xsd:element>
+			              <xsd:element name="folder" type="xsd:string" default="Default" gd:upgrade="restore">
+			                <xsd:annotation>
+			                  <xsd:documentation>Remote folder that contains map images.</xsd:documentation>
+			                </xsd:annotation>
+			              </xsd:element>
+                    <xsd:element name="minZoomLevel" type="xsd:integer" default="0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Min zoom level of the remote map.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="maxZoomLevel" type="xsd:integer" default="0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Max zoom level of the remote map.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="centerLat" type="xsd:double" default="0.0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Latitude of the remote map center.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="centerLng" type="xsd:double" default="0.0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Longitude of the remote map center.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="centerLngScale" type="xsd:double" default="0.0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Latitude scale of the remote map center.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="centerLatScale" type="xsd:double" default="0.0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Longitude scale of the remote map center..</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>              
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>

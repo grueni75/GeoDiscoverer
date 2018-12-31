@@ -110,11 +110,12 @@ bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
   WidgetPrimitive *previousSelectedWidget=selectedWidget;
   selectedWidget=NULL;
   std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
-  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
+  for(std::list<GraphicPrimitive*>::reverse_iterator i = drawList->rbegin(); i!=drawList->rend(); i++) {
     WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
     primitive->onTouchDown(t,x,y);
     if (primitive->getIsSelected()) {
       selectedWidget=primitive;
+      break;
     }
   }
   if (previousSelectedWidget!=selectedWidget) {

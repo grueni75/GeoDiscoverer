@@ -47,6 +47,11 @@ void Debug::replayTrace(std::string filename) {
   Int x,y;
   double zoom,angle;
 
+  // Ensure that the current location is invalid
+  MapPosition pos=core->getNavigationEngine()->lockLocationPos(__FILE__,__LINE__);
+  pos.setTimestamp(0);
+  core->getNavigationEngine()->unlockLocationPos();
+
   // Time in microseconds to wait before executing the next command during replay
   TimestampInMicroseconds replayPeriod = core->getConfigStore()->getIntValue("General","replayPeriod",__FILE__,__LINE__);
 
@@ -59,6 +64,7 @@ void Debug::replayTrace(std::string filename) {
   // Go through it line by line
   while(!in.eof()) {
     getline(in,line);
+    //DEBUG(line.c_str(),NULL);
 
     // Extract the command
     std::stringstream strm(line);
@@ -70,6 +76,20 @@ void Debug::replayTrace(std::string filename) {
     if (cmd!="createGraphic()") {
       if (!core->getIsInitialized())
         return;
+      /*std::string cmdName;
+      std::vector<std::string> args;
+      if (!core->getCommander()->splitCommand(cmd,cmdName,args)) {
+        DEBUG("command %s can not be splitted",cmd.c_str());
+      } else {
+        if (cmdName=="locationChanged") {
+          unsigned long t=core->getClock()->getSecondsSinceEpoch() + core->getClock()->getMicrosecondsSinceStart() % 1000;
+          std::stringstream t2;
+          t2<<t;
+          args[1]=t2.str();
+          cmd=core->getCommander()->joinCommand(cmdName,args);
+          DEBUG("new cmd=%s",cmd.c_str());
+        }
+      }*/
       core->getCommander()->execute(cmd);
     }
 

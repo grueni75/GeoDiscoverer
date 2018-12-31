@@ -66,7 +66,10 @@ public:
   // Close the entry
   void closeEntry(ZipArchiveEntry entry);
 
-  // Adds an entry
+  // Adds an entry from a file on the disk
+  bool addEntry(std::string entryFilename, std::string diskFilename);
+
+  // Adds an entry from a buffer
   bool addEntry(std::string filename, void *buffer, Int size);
 
   // Writes the entry into a file
@@ -80,6 +83,9 @@ public:
 
   // Removes the entry from the zip archive
   void removeEntry(std::string filename);
+
+  // Checks if the complete archive can be read
+  bool checkIntegrity();
 
   // Getters and setters
   const std::string& getArchiveFolder() const {
