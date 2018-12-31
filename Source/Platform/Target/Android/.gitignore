@@ -1,4 +1,7 @@
-/build
+build
+core/build
+mobile/build
+wear/build
 .gradle
 .idea/workspace.xml
 .idea/tasks.xml
