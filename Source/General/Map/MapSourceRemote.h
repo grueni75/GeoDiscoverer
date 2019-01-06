@@ -52,7 +52,7 @@ public:
   virtual MapTile *findMapTileByGeographicCoordinate(MapPosition pos, Int zoomLevel, bool lockZoomLevel, MapContainer *preferredMapContainer=NULL);
 
   // Fills the given area with tiles
-  virtual void fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abortUpdate);
+  virtual void fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abort);
 
   // Returns the next free map archive file name
   virtual std::string getFreeArchiveFilePath();

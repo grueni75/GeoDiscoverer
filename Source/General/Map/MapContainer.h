@@ -62,7 +62,8 @@ protected:
   MapContainer *rightChild;                 // Right child in the kd tree
   bool downloadComplete;                    // Indicates that the image has been downloaded to disk
   bool downloadErrorOccured;                // Indicates that the image could not been downloaded to disk correctly
-  bool overlayGraphicInvalid;               // Indicates that this tile is missing it's overlay graphics
+  bool overlayGraphicInvalid;               // Indicates that this container is missing it's overlay graphics
+  bool serveToRemoteMap;                    // Indicates that this container shall be served to a remote side after download is complete
 
   // Lists of map tiles sorted by their boundaries
   std::vector<Int> mapTilesIndexByMapTop;
@@ -450,6 +451,14 @@ public:
 
   void setDownloadErrorOccured(bool downloadErrorOccured) {
     this->downloadErrorOccured = downloadErrorOccured;
+  }
+
+  bool getServeToRemoteMap() const {
+    return serveToRemoteMap;
+  }
+
+  void setServeToRemoteMap(bool serveToRemoteMap) {
+    this->serveToRemoteMap = serveToRemoteMap;
   }
 };
 

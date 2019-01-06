@@ -5,4 +5,5 @@
     <string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
     <string name="title_activity_dialog">Dialog</string>
     <string name="permission_instructions">Please grant required permissions and re-open watch face</string>
+    <string name="overlay_instructions">Please enable overlay permission</string>
 </resources>

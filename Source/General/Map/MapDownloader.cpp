@@ -631,9 +631,17 @@ void MapDownloader::writeImages() {
 
       // Update the map cache
       //DEBUG("set download complete",NULL);
+      bool serveToRemoteMap;
       mapSource->lockAccess(__FILE__, __LINE__);
       image.mapContainer->setDownloadComplete(true);
+      serveToRemoteMap=image.mapContainer->getServeToRemoteMap();
+      std::string calibrationFilePath = image.mapContainer->getCalibrationFilePath();
       mapSource->unlockAccess();
+      if (serveToRemoteMap) {
+        std::stringstream cmd;
+        cmd << "serveRemoteMapContainer(" << calibrationFilePath << ")";
+        mapSource->queueRemoteServerCommand(cmd.str());
+      }
       //DEBUG("set force cache update",NULL);
       core->getMapEngine()->setForceCacheUpdate(__FILE__, __LINE__);
       //DEBUG("inceasing download counter",NULL);

@@ -695,7 +695,6 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setRemoteServerActive") {
-    DEBUG("%s",cmdName.c_str());
     core->setRemoteServerActive(atoi(args[0].c_str()));
     cmdExecuted=true;
   }

@@ -3,7 +3,9 @@ package com.untouchableapps.android.geodiscoverer;
 import android.Manifest;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.wearable.activity.WearableActivity;
 import android.view.View;
 import android.view.WindowManager;
@@ -69,6 +71,12 @@ public class Dialog extends WearableActivity {
       requestPermissions(new String[]{
           Manifest.permission.WRITE_EXTERNAL_STORAGE,
           Manifest.permission.VIBRATE}, 0);
+      if (!Settings.canDrawOverlays(getApplicationContext())) {
+        GDApplication.showMessageBar(getApplicationContext(), getResources().getString(R.string.overlay_instructions), GDApplication.MESSAGE_BAR_DURATION_LONG);
+        final String packageName = getApplicationContext().getPackageName();
+        final Intent t = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + packageName));
+        startActivity(t);
+      }
     }
 
     // Max value for progress dialog?

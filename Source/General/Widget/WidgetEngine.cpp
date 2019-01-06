@@ -1082,7 +1082,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("textRowFourthOffsetY","25");
     }
     config.setActiveColor(GraphicColor(255,255,255,255));
-    config.setBusyColor(GraphicColor(255,0,0,255));
+    config.setBusyColor(GraphicColor(255,0,255,255));
     config.setParameter("textColumnOffsetX","5");
     config.setParameter("targetIconFilename","navigationTarget");
     config.setParameter("updateInterval","1000000");

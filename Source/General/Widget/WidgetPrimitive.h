@@ -44,7 +44,7 @@ protected:
   bool isHidden;                // Indicates that the widget shall not be activated
 
   // Updates various flags
-  void updateFlags(Int x, Int y);
+  virtual void updateFlags(Int x, Int y);
 
 public:
 

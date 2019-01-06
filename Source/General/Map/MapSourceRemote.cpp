@@ -93,7 +93,7 @@ bool MapSourceRemote::init()
   std::list<std::vector<std::string> > mapFilebases;
   MapContainer *mapContainer;
 
-  WARNING("Debug: check if preferred neighbor is correctly selected",NULL);
+  WARNING("zoom in on mercator map does not change zoom level",NULL);
 
   // Check if the log directory exists
   std::string path = core->getHomePath() + "/Map";
@@ -154,6 +154,7 @@ bool MapSourceRemote::init()
     }
   }
   closedir(dfd);
+  nextFreeArchiveNumber++;
   if (resetMapArchives) {
     DEBUG("removing all map archives because map source has changed",NULL);
     for (std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
@@ -237,7 +238,7 @@ bool MapSourceRemote::init()
     std::string filebase=(*i)[2];
     std::string extension=(*i)[3];
     std::string filepath=filebase + "." + extension;
-    //DEBUG("filebase=%s",filebase.c_str());
+    DEBUG("filebase=%s",filebase.c_str());
 
     // Output some info
     Int percentage=round(((double)progress*100)/(double)mapFilebases.size());
@@ -314,20 +315,25 @@ MapTile *MapSourceRemote::findMapTileByGeographicCoordinate(MapPosition pos, Int
   DEBUG("cmd=%s",cmd.str().c_str());
   core->getCommander()->dispatch(cmd.str());
 
+  if (result) {
+    DEBUG("chosen map container: %s", result->getParentMapContainer()->getCalibrationFilePath());
+  }
+
   return result;
 }
 
 // Fills the given area with tiles
-void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abortUpdate) {
+void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abort) {
 
   // Prepare the cmd for the remote side
   std::stringstream cmd;
   cmd << "fillGeographicAreaWithRemoteTiles("
-      << area.getRefPos().getX() << "," << area.getRefPos().getY() << ","
+      << area.getRefPos().getLng() << "," << area.getRefPos().getLat() << ","
       << area.getRefPos().getLngScale() << "," << area.getRefPos().getLatScale() << ","
       << area.getZoomLevel() << ","
-      << area.getYNorth( ) << "," << area.getYSouth() << "," << area.getXEast() << "," << area.getXWest() << ","
-      << area.getLatNorth( ) << "," << area.getLatSouth() << "," << area.getLngEast() << "," << area.getLngWest() << ","
+      << area.getRefPos().getX() << "," << area.getRefPos().getY() << ","
+      << area.getYNorth() << "," << area.getYSouth() << "," << area.getXEast() << "," << area.getXWest() << ","
+      << area.getLatNorth() << "," << area.getLatSouth() << "," << area.getLngEast() << "," << area.getLngWest() << ","
       << maxTiles << ",";
   if (preferredNeighbor) {
     cmd << preferredNeighbor->getParentMapContainer()->getCalibrationFilePath() << ","
@@ -337,7 +343,7 @@ void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferr
   }
 
   // First check what is available locally
-  MapSource::fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,tiles,abortUpdate);
+  MapSource::fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,tiles,abort);
 
   // Get all found map containers
   for (std::list<MapTile*>::iterator i=tiles->begin();i!=tiles->end();i++) {
@@ -346,8 +352,12 @@ void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferr
 
   // Ask the remote side to send any missing map containers
   cmd << ")";
-  DEBUG("cmd=%s",cmd.str().c_str());
-  core->getCommander()->dispatch(cmd.str());
+  if (!*abort) {
+    DEBUG("cmd=%s",cmd.str().c_str());
+    core->getCommander()->dispatch(cmd.str());
+  } else {
+    DEBUG("search operation was aborted, skipping cmd",NULL);
+  }
 }
 
 // Returns the next free map archive file name
@@ -423,14 +433,14 @@ bool MapSourceRemote::addArchive(std::string path) {
         delete mapArchive;
         remove(path.c_str());
         unlockMapArchives();
-        break;
+        return false;
       }
     }
   }
   mapArchives.push_back(mapArchive);
-  unlockMapArchives();
 
-  // Go through all entries in the archive
+  // Go through all entries in the archive and create map containers
+  std::list<MapContainer*> newMapContainers;
   for (Int i=0;i<mapArchive->getEntryCount();i++) {
 
     // Get the file name of the entry
@@ -458,6 +468,13 @@ bool MapSourceRemote::addArchive(std::string path) {
       return false;
     }
     mapContainer->setZoomLevelMap(mapContainer->getZoomLevelMap()-minZoomLevel+1);
+    newMapContainers.push_back(mapContainer);
+  }
+  unlockMapArchives();
+
+  // Now add all map containers
+  for (std::list<MapContainer*>::iterator i=newMapContainers.begin();i!=newMapContainers.end();i++) {
+    mapContainer=*i;
 
     // Add the new map container
     lockAccess(__FILE__,__LINE__);
@@ -466,9 +483,6 @@ bool MapSourceRemote::addArchive(std::string path) {
     insertNodeIntoSearchTree(mapContainer,0,NULL,false,GeographicBorderLatNorth);
     contentsChanged=true;
     unlockAccess();
-    for (int z=1;z<zoomLevelSearchTrees.size();z++) {
-      DEBUG("zoom level %d => first map container = 0x%08x",z,zoomLevelSearchTrees[z]);
-    }
 
     // Request the cache to add this tile
     std::vector<MapTile*> *tiles=mapContainer->getMapTiles();
@@ -481,7 +495,7 @@ bool MapSourceRemote::addArchive(std::string path) {
   }
 
   // Redraw the map
-  core->getMapEngine()->setForceMapRecreation();
+  core->getMapEngine()->setForceZoomReset();
 
   return true;
 }

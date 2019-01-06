@@ -1099,11 +1099,44 @@ void MapSource::queueRemoteServerCommand(std::string cmd) {
   core->getThread()->issueSignal(remoteServerStartSignal);
 }
 
+// Adds the given map container to the queue for sending to the remote server
+void MapSource::queueRemoteMapContainer(MapContainer* c, std::vector<std::string> *alreadyKnownMapContainers, Int startIndex, std::list<std::vector<std::string> > *mapImagesToServe) {
+
+  //DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFileName());
+
+  // Does the remote side already know this one?
+  bool alreadyKnown = false;
+  if (alreadyKnownMapContainers) {
+    for (int i = startIndex; i < alreadyKnownMapContainers->size(); i++) {
+      if ((*alreadyKnownMapContainers)[i] == c->getCalibrationFilePath()) {
+        //DEBUG("remote side already has <%s>, skipping it",t->getParentMapContainer()->getCalibrationFilePath());
+        alreadyKnown = true;
+      }
+    }
+  }
+
+  // If not, serve it add it to the work queue
+  if (!alreadyKnown) {
+
+    // If the container is not yet downloaded, indicate that this must be delivered to remote side
+    if (!c->getDownloadComplete()) {
+      c->setServeToRemoteMap(true);
+      DEBUG("map container %s not yet downloaded, requesting delivery after download", c->getCalibrationFileName());
+    } else {
+      std::vector<std::string> mapImage;
+      mapImage.push_back(c->getImageFilePath());
+      mapImage.push_back(c->getCalibrationFilePath());
+      mapImage.push_back(c->getArchiveFileFolder());
+      mapImage.push_back(c->getArchiveFileName());
+      mapImagesToServe->push_back(mapImage);
+      DEBUG("map container %s added to serve queue", c->getCalibrationFileName());
+    }
+  }
+}
+
 // Handles request from remote devices for tiles
 void MapSource::remoteServer() {
 
-  WARNING("Not yet implemented: handling of containers that are not yet downloaded",NULL);
-  WARNING("Not yet implemented: other map tile find commands",NULL);
   std::string workPath = core->getHomePath() + "/Map";
   std::list<std::string> servedMapContainers;
 
@@ -1144,15 +1177,14 @@ void MapSource::remoteServer() {
       core->getThread()->exitThread();
     }
 
-    // Queue empty?
-    std::string cmd="idle";
-    lockAccess(__FILE__,__LINE__);
-    if (!remoteServerCommandQueue.empty()) {
-      cmd=remoteServerCommandQueue.front();
+    // Repeat until queue is empty
+    while(!remoteServerCommandQueue.empty()) {
+
+      // Get command from queue
+      lockAccess(__FILE__,__LINE__);
+      std::string cmd=remoteServerCommandQueue.front();
       remoteServerCommandQueue.pop_front();
-    }
-    unlockAccess();
-    if (cmd!="idle") {
+      unlockAccess();
 
       // Split the command
       DEBUG("new cmd: %s",cmd.c_str());
@@ -1172,33 +1204,58 @@ void MapSource::remoteServer() {
       // Create the list of map images to serve
       std::list<std::vector<std::string> > mapImagesToServe;
 
+      // Shall we serve a map containr that was not yet downloaded?
+      if (cmdName=="serveRemoteMapContainer") {
+
+        // Find the map container
+        MapContainer *c=NULL;
+        lockAccess(__FILE__,__LINE__);
+        for (std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
+          if ((*i)->getCalibrationFilePath()==args[0]) {
+            c=*i;
+            break;
+          }
+        }
+        unlockAccess();
+        if (!c) {
+          FATAL("map container %s could not be found",args[0].c_str());
+        } else {
+          queueRemoteMapContainer(c,NULL,0,&mapImagesToServe);
+        }
+        commandProcessed=true;
+      }
+
       // Shall we provide a map tile from a geo area?
       if (cmdName=="fillGeographicAreaWithRemoteTiles") {
 
         // Convert the arguments
-        Int refX=atoi(args[0].c_str());
-        Int refY=atoi(args[1].c_str());
+        double lng=atof(args[0].c_str());
+        double lat=atof(args[1].c_str());
         double lngScale=atof(args[2].c_str());
         double latScale=atof(args[3].c_str());
         Int zoomLevel=atoi(args[4].c_str());
-        Int yNorth=atoi(args[5].c_str());
-        Int ySouth=atoi(args[6].c_str());
-        Int xEast=atoi(args[7].c_str());
-        Int xWest=atoi(args[8].c_str());
-        double latNorth=atof(args[9].c_str());
-        double latSouth=atof(args[10].c_str());
-        double lngEast=atof(args[11].c_str());
-        double lngWest=atof(args[12].c_str());
-        Int maxTiles=atoi(args[13].c_str());
-        std::string preferredNeighborCalibrationPath=args[14];
-        Int mapX=atoi(args[15].c_str());
-        Int mapY=atoi(args[16].c_str());
+        Int refX=atoi(args[5].c_str());
+        Int refY=atoi(args[6].c_str());
+        Int yNorth=atoi(args[7].c_str());
+        Int ySouth=atoi(args[8].c_str());
+        Int xEast=atoi(args[9].c_str());
+        Int xWest=atoi(args[10].c_str());
+        double latNorth=atof(args[11].c_str());
+        double latSouth=atof(args[12].c_str());
+        double lngEast=atof(args[13].c_str());
+        double lngWest=atof(args[14].c_str());
+        Int maxTiles=atoi(args[15].c_str());
+        std::string preferredNeighborCalibrationPath=args[16];
+        Int mapX=atoi(args[17].c_str());
+        Int mapY=atoi(args[18].c_str());
         MapPosition refPos;
-        refPos.setX(refX);
-        refPos.setY(refY);
+        refPos.setLng(lng);
+        refPos.setLat(lat);
         refPos.setLngScale(lngScale);
         refPos.setLatScale(latScale);
-        DEBUG("x=%d y=%d lngScale=%f latScale=%f",refPos.getX(),refPos.getY(),refPos.getLngScale(),refPos.getLatScale());
+        refPos.setX(refX);
+        refPos.setY(refY);
+        //DEBUG("x=%d y=%d lngScale=%f latScale=%f",refPos.getX(),refPos.getY(),refPos.getLngScale(),refPos.getLatScale());
         MapArea area;
         area.setRefPos(refPos);
         area.setZoomLevel(zoomLevel);
@@ -1210,9 +1267,9 @@ void MapSource::remoteServer() {
         area.setLatSouth(latSouth);
         area.setLngEast(lngEast);
         area.setLngWest(lngWest);
-        DEBUG("zoomLevel=%d yNorth=%d ySouth=%d xEast=%d xWest=%d latNorth=%f latSouth=%f lngEast=%f lngWest=%f",area.getZoomLevel(),
+        /*DEBUG("zoomLevel=%d yNorth=%d ySouth=%d xEast=%d xWest=%d latNorth=%f latSouth=%f lngEast=%f lngWest=%f",area.getZoomLevel(),
             area.getYNorth(),area.getYSouth(),area.getXEast(),area.getXWest(),
-            area.getLatNorth(),area.getLatSouth(),area.getLngEast(),area.getLngWest());
+            area.getLatNorth(),area.getLatSouth(),area.getLngEast(),area.getLngWest());*/
         MapTile *preferredNeighbor=NULL;
         if (preferredNeighborCalibrationPath!="") {
           lockAccess(__FILE__,__LINE__);
@@ -1241,40 +1298,16 @@ void MapSource::remoteServer() {
         lockAccess(__FILE__,__LINE__);
         std::list<MapTile*> tiles;
         bool abortUpdate=false;
-        DEBUG("maxTiles=%d",maxTiles);
         fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,&tiles,&abortUpdate);
-        DEBUG("tiles.size()=%d",tiles.size());
+        //DEBUG("tiles.size()=%d",tiles.size());
         for (std::list<MapTile*>::iterator i=tiles.begin();i!=tiles.end();i++) {
-
-          // Get the found tile
           MapTile *t=*i;
-          DEBUG("t=ßx%08x",t);
-
-          // Does the remote side already know this one?
-          bool alreadyKnown=false;
-          DEBUG("%s %s",args[16].c_str(),args[17].c_str());
-          for (int j=17;j<args.size();j++) {
-            if (args[j]==t->getParentMapContainer()->getCalibrationFilePath()) {
-              DEBUG("remote side already has <%s>, skipping it",t->getParentMapContainer()->getCalibrationFilePath());
-              alreadyKnown=true;
-            }
-          }
-
-          // If not, serve it add it to the work queue
-          if (!alreadyKnown) {
-            std::vector<std::string> mapImage;
-            mapImage.push_back(t->getParentMapContainer()->getImageFilePath());
-            mapImage.push_back(t->getParentMapContainer()->getCalibrationFilePath());
-            mapImage.push_back(t->getParentMapContainer()->getArchiveFileFolder());
-            mapImage.push_back(t->getParentMapContainer()->getArchiveFileName());
-            mapImagesToServe.push_back(mapImage);
-            DEBUG("map container %s added to serve queue",t->getParentMapContainer()->getCalibrationFileName());
-          }
+          DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFilePath());
+          queueRemoteMapContainer(t->getParentMapContainer(), &args, 19, &mapImagesToServe);
         }
         unlockAccess();
         commandProcessed=true;
       }
-
 
       // Shall we provide a map tile from a geo coordinate?
       if (cmdName=="findRemoteMapTileByGeographicCoordinate") {
@@ -1314,27 +1347,8 @@ void MapSource::remoteServer() {
         lockAccess(__FILE__,__LINE__);
         MapTile *t = findMapTileByGeographicCoordinate(pos,zoomLevel,lockZoomLevel,preferredMapContainer);
         if (t) {
-          DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFileName());
-
-          // Does the remote side already know this one?
-          bool alreadyKnown=false;
-          for (int i=6;i<args.size();i++) {
-            if (args[i]==t->getParentMapContainer()->getCalibrationFilePath()) {
-              DEBUG("remote side already has <%s>, skipping it",t->getParentMapContainer()->getCalibrationFilePath());
-              alreadyKnown=true;
-            }
-          }
-
-          // If not, serve it add it to the work queue
-          if (!alreadyKnown) {
-            std::vector<std::string> mapImage;
-            mapImage.push_back(t->getParentMapContainer()->getImageFilePath());
-            mapImage.push_back(t->getParentMapContainer()->getCalibrationFilePath());
-            mapImage.push_back(t->getParentMapContainer()->getArchiveFileFolder());
-            mapImage.push_back(t->getParentMapContainer()->getArchiveFileName());
-            mapImagesToServe.push_back(mapImage);
-            DEBUG("map container %s added to serve queue",t->getParentMapContainer()->getCalibrationFileName());
-          }
+          DEBUG("chosen map container: %s", t->getParentMapContainer()->getCalibrationFilePath());
+          queueRemoteMapContainer(t->getParentMapContainer(), &args, 6, &mapImagesToServe);
         }
         unlockAccess();
         commandProcessed=true;
@@ -1417,7 +1431,7 @@ void MapSource::remoteServer() {
         remove(calibrationTempFilepath.c_str());
 
         // Ask the app to transfer it to the remote side
-        DEBUG("sending %s to remote side",remoteTileFilename.str().c_str());
+        //DEBUG("sending %s to remote side",remoteTileFilename.str().c_str());
         core->getCommander()->dispatch("serveRemoteMapArchive(" + workPath + "/" + remoteTileFilename.str() + ")");
         servedMapContainers.push_back(calibrationFilePath);
       }
@@ -1441,27 +1455,27 @@ bool MapSource::addArchive(std::string path) {
 }
 
 // Fills the given area with tiles
-void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abortUpdate) {
+void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abort) {
 
   // If an abort has been requested, stop here
-  if (*abortUpdate) {
-    DEBUG("update aborted",NULL);
+  if (*abort) {
+    //DEBUG("update aborted",NULL);
     return;
   }
 
   // Check if the area is plausible
   if (area.getYNorth()<area.getYSouth()) {
-    DEBUG("north smaller than south",NULL);
+    //DEBUG("north smaller than south",NULL);
     return;
   }
   if (area.getXEast()<area.getXWest()) {
-    DEBUG("east smaller than west",NULL);
+    //DEBUG("east smaller than west",NULL);
     return;
   }
 
   // Check if the maximum number of tiles to display are reached
   if (tiles->size()>=maxTiles) {
-    DEBUG("too many tiles (maxTiles=%d)",maxTiles);
+    //DEBUG("too many tiles (maxTiles=%d)",maxTiles);
     return;
   }
 
@@ -1505,7 +1519,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
     // Remember the found tile
     tiles->push_back(tile);
-    DEBUG("tile 0x%08x found",tile);
+    //DEBUG("tile <%s> found",tile->getParentMapContainer()->getCalibrationFilePath());
 
     // Use the calibrator to compute the position
     MapPosition pos=area.getRefPos();
@@ -1527,7 +1541,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
   } else {
 
-    DEBUG("no tile found, stopping search",NULL);
+    //DEBUG("no tile found, stopping search",NULL);
     return;
 
   }
@@ -1546,7 +1560,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in north west quadrant",NULL);
   if (nw!=area)
-    fillGeographicAreaWithTiles(nw,tile,maxTiles,tiles,abortUpdate);
+    MapSource::fillGeographicAreaWithTiles(nw,tile,maxTiles,tiles,abort);
   MapArea n=area;
   if (searchedYNorth>=area.getYSouth()) {
     n.setYSouth(searchedYNorth+1);
@@ -1562,7 +1576,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in north quadrant",NULL);
   if (n!=area)
-    fillGeographicAreaWithTiles(n,tile,maxTiles,tiles,abortUpdate);
+    MapSource::fillGeographicAreaWithTiles(n,tile,maxTiles,tiles,abort);
   MapArea ne=area;
   if (searchedYNorth>=area.getYSouth()) {
     ne.setYSouth(searchedYNorth+1);
@@ -1574,7 +1588,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in north east quadrant",NULL);
   if (ne!=area)
-    fillGeographicAreaWithTiles(ne,tile,maxTiles,tiles,abortUpdate);
+    MapSource::fillGeographicAreaWithTiles(ne,tile,maxTiles,tiles,abort);
   MapArea e=area;
   if (searchedYNorth<area.getYNorth()) {
     e.setYNorth(searchedYNorth);
@@ -1590,7 +1604,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in east quadrant",NULL);
   if (e!=area)
-    fillGeographicAreaWithTiles(e,tile,maxTiles,tiles,abortUpdate);
+    MapSource::fillGeographicAreaWithTiles(e,tile,maxTiles,tiles,abort);
   MapArea se=area;
   if (searchedYSouth<=area.getYNorth()) {
     se.setYNorth(searchedYSouth-1);
@@ -1602,7 +1616,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in south east quadrant",NULL);
   if (se!=area)
-    fillGeographicAreaWithTiles(se,tile,maxTiles,tiles,abortUpdate);
+    MapSource::fillGeographicAreaWithTiles(se,tile,maxTiles,tiles,abort);
   MapArea s=area;
   if (searchedYSouth<=area.getYNorth()) {
     s.setYNorth(searchedYSouth-1);
@@ -1618,7 +1632,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in south quadrant",NULL);
   if (s!=area)
-    fillGeographicAreaWithTiles(s,tile,maxTiles,tiles,abortUpdate);
+    MapSource::fillGeographicAreaWithTiles(s,tile,maxTiles,tiles,abort);
   MapArea sw=area;
   if (searchedYSouth<=area.getYNorth()) {
     sw.setYNorth(searchedYSouth-1);
@@ -1630,7 +1644,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in south west quadrant",NULL);
   if (sw!=area)
-    fillGeographicAreaWithTiles(sw,tile,maxTiles,tiles,abortUpdate);
+    MapSource::fillGeographicAreaWithTiles(sw,tile,maxTiles,tiles,abort);
   MapArea w=area;
   if (searchedYNorth<area.getYNorth()) {
     w.setYNorth(searchedYNorth);
@@ -1646,7 +1660,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in west quadrant",NULL);
   if (w!=area)
-    fillGeographicAreaWithTiles(w,tile,maxTiles,tiles,abortUpdate);
+    MapSource::fillGeographicAreaWithTiles(w,tile,maxTiles,tiles,abort);
 }
 
 

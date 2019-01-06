@@ -155,7 +155,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       activeColor=normalColor;
     setFadeAnimation(t,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
     remoteServerActive=core->getRemoteServerActive();
-    DEBUG("remoteServerActive=%d",remoteServerActive);
+    //DEBUG("remoteServerActive=%d",remoteServerActive);
   }
 
   // Pan the map if active
@@ -661,27 +661,25 @@ void WidgetNavigation::updatePosition(Int x, Int y, Int z) {
 // Called when the widget is touched
 void WidgetNavigation::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
   WidgetPrimitive::onTouchDown(t,x,y);
-  if (getIsHit()) {
+  if ((isWatch)&&(getIsHit())) {
 
-    // Activate panning if compass cone is hit
+    // Activate panning
     double dx=x-(getX()+getIconWidth()/2);
     double dy=y-(getY()+getIconHeight()/2);
-    double radius = sqrt(dx*dx+dy*dy);
     //DEBUG("radius=%f",radius);
-    if (radius>minPanDetectionRadius) {
-      panAngle=FloatingPoint::computeAngle(dx,dy);
-      //DEBUG("panAngle=%f",panAngle);
-      panXDouble=0;
-      panXInt=0;
-      panYDouble=0;
-      panYInt=0;
-      panStartTime=t;
-      panActive=true;
-    } else {
-      panActive=false;
-    }
+    panAngle=FloatingPoint::computeAngle(dx,dy);
+    //DEBUG("panAngle=%f",panAngle);
+    panXDouble=0;
+    panXInt=0;
+    panYDouble=0;
+    panYInt=0;
+    panStartTime=t;
+    panActive=true;
 
+  } else {
+    panActive=false;
   }
+
 }
 
 // Executed if the widget has been untouched
@@ -711,5 +709,17 @@ void WidgetNavigation::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool c
   panActive=false;
 }
 
+// Updates various flags
+void WidgetNavigation::updateFlags(Int x, Int y) {
+  WidgetPrimitive::updateFlags(x,y);
+  if ((isWatch)&&(isHit)) {
+    double dx=x-(getX()+getIconWidth()/2);
+    double dy=y-(getY()+getIconHeight()/2);
+    double radius = sqrt(dx*dx+dy*dy);
+    if (radius<minPanDetectionRadius) {
+      isHit=false;
+    }
+  }
+}
 
 }

@@ -144,7 +144,8 @@ public class GDMessageListenerService extends WearableListenerService {
           //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",name);
           String value = args.substring(args.indexOf(",")+1,args.indexOf(")"));
           //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",value);
-          String oldValue = coreObject.configStoreGetStringValue(path,name);
+          String oldValue = coreObject.
+              configStoreGetStringValue(path,name);
           //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",oldValue + " ? "+ value);
           Bundle info = coreObject.configStoreGetNodeInfo(path + "/" + name);
           if (info.getString("type").equals("integer")) {

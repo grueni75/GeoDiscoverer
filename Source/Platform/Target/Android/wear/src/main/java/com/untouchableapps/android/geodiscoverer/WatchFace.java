@@ -25,6 +25,7 @@ package com.untouchableapps.android.geodiscoverer;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +33,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.Build;
@@ -46,6 +52,7 @@ import android.provider.Settings;
 import android.support.wearable.watchface.Gles2WatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -54,6 +61,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -76,6 +84,11 @@ public class WatchFace extends Gles2WatchFaceService {
 
   // Indicates if the dialog is open
   boolean dialogVisible = false;
+
+  // Indicates if an overlay window shall be used to capture gestures
+  View touchHandlerView = null;
+  WindowManager.LayoutParams touchHandlerLayoutParams = null;
+  boolean touchHandlerActive = false;
 
   // Wake lock
   PowerManager.WakeLock wakeLock = null;
@@ -151,6 +164,23 @@ public class WatchFace extends Gles2WatchFaceService {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","wake lock disabled");
       if (wakeLock.isHeld())
         wakeLock.release();
+    }
+  }
+
+  // Enables or disable the touch handler
+  void setTouchHandlerEnabled(boolean enable) {
+    if (touchHandlerView!=null) {
+      if (enable) {
+        if (!touchHandlerActive) {
+          windowManager.addView(touchHandlerView, touchHandlerLayoutParams);
+          touchHandlerActive = true;
+        }
+      } else {
+        if (touchHandlerActive) {
+          windowManager.removeView(touchHandlerView);
+          touchHandlerActive = false;
+        }
+      }
     }
   }
 
@@ -360,6 +390,8 @@ public class WatchFace extends Gles2WatchFaceService {
       allPermissionsGranted=false;
     if (checkSelfPermission(Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED)
       allPermissionsGranted=false;
+    if (!Settings.canDrawOverlays(getApplicationContext()))
+      allPermissionsGranted=false;
     return allPermissionsGranted;
   }
 
@@ -429,11 +461,44 @@ public class WatchFace extends Gles2WatchFaceService {
         intent.putExtra(Dialog.EXTRA_KIND, ERROR_DIALOG);
         intent.putExtra(Dialog.EXTRA_GET_PERMISSIONS, true);
         startActivity(intent);
+
+      } else {
+
+        // Create the touch handler
+        touchHandlerView = new View(getApplicationContext());
+        /*touchHandlerView = new ImageView(getApplicationContext());
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.eraseColor(Color.TRANSPARENT);
+        Paint paint = new Paint();
+        Canvas canvas = new Canvas(bitmap);
+        int lineWidth=8;
+        paint.setColor(0x80FF0000);
+        paint.setStrokeWidth(lineWidth);
+        paint.setStyle(Paint.Style.STROKE);
+        canvas.drawCircle(width/2,height/2, width/2, paint);
+        touchHandlerView.setImageBitmap(bitmap);*/
+        touchHandlerLayoutParams = new WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, 0, PixelFormat.RGBA_8888);
+        touchHandlerView.setOnTouchListener(new View.OnTouchListener() {
+          @Override
+          public boolean onTouch(View v, MotionEvent event) {
+            return coreObject.onTouchEvent(event);
+          }
+        });
       }
     }
 
     @Override
     public void onDestroy() {
+      if ((touchHandlerActive)&&(touchHandlerView!=null))
+        windowManager.removeView(touchHandlerView);
+      touchHandlerView=null;
       if (coreObject!=null)
         coreObject.executeAppCommand("setWearDeviceAlive(0)");
       unregisterReceiver(screenStateReceiver);
@@ -463,10 +528,12 @@ public class WatchFace extends Gles2WatchFaceService {
       super.onAmbientModeChanged(inAmbientMode);
       invalidate();
       if (coreObject==null) return;
-      if (inAmbientMode)
+      if (inAmbientMode) {
         coreObject.executeAppCommand("setWearDeviceSleeping(1)");
-      else
+        setTouchHandlerEnabled(false);
+      } else {
         coreObject.executeAppCommand("setWearDeviceSleeping(0)");
+      }
     }
 
     @Override
@@ -520,6 +587,7 @@ public class WatchFace extends Gles2WatchFaceService {
       switch (tapType) {
         case WatchFaceService.TAP_TYPE_TAP:
           coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");
+          setTouchHandlerEnabled(true);
           break;
 
         case WatchFaceService.TAP_TYPE_TOUCH:

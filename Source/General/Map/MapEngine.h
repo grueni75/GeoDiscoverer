@@ -53,6 +53,7 @@ protected:
   bool updateInProgress;                          // Indicates if the map is currently being updated
   bool forceMapUpdate;                            // Force an update of the map on the next call
   bool forceMapRecreation;                        // Force a complete recreation of the map on the next call
+  bool forceZoomReset;                            // Force a reset of the zoom level on the next call
   bool forceCacheUpdate;                          // Force an update of the map cache on the next call
   bool redownloadAllZoomLevels;                   // Indicates if all zoom levels shall be re-downloaded
   bool forceMapRedownload;                        // Forces a redownload of all visble tiles
@@ -133,6 +134,10 @@ public:
   void setForceMapRecreation()
   {
     forceMapRecreation=true;
+  }
+  void setForceZoomReset()
+  {
+    forceZoomReset=true;
   }
   void setForceMapRedownload(bool redownloadAllZoomLevels, const char *file, int line)
   {

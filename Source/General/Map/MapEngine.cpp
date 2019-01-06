@@ -38,6 +38,7 @@ MapEngine::MapEngine() {
   abortUpdate=false;
   forceMapUpdate=false;
   forceMapRecreation=false;
+  forceZoomReset=false;
   forceCacheUpdate=false;
   locationPosMutex=core->getThread()->createMutex("map engine location pos mutex");
   mapPosMutex=core->getThread()->createMutex("map engine map pos mutex");
@@ -425,7 +426,7 @@ bool MapEngine::mapUpdateIsRequired(GraphicPosition visPos, Int *diffVisX, Int *
 
   // Do not update map graphic if no change
   //DEBUG("diffVisX=%d diffVisY=%d diffZoom=%f",diffVisX,diffVisY,diffZoom);
-  if ((tmpDiffVisX==0)&&(tmpDiffVisY==0)&&(tmpDiffZoom==1.0)&&(forceMapUpdate==false)&&(forceCacheUpdate==false)&&(forceMapRecreation==false)) {
+  if ((tmpDiffVisX==0)&&(tmpDiffVisY==0)&&(tmpDiffZoom==1.0)&&(forceMapUpdate==false)&&(forceCacheUpdate==false)&&(forceMapRecreation==false)&&(forceZoomReset==false)) {
     return false;
   } else {
     return true;
@@ -615,11 +616,12 @@ void MapEngine::updateMap() {
     newMapPos.setLatScale(newMapPos.getLatScale()*diffZoom);
 
     // If the zoom has not changed, ensure that the last zoom level is used
-    if ((diffZoom==1.0)||(zoomLevelLock)) {
+    if (((!forceMapRecreation)&&(!forceZoomReset)&&(diffZoom==1.0))||(zoomLevelLock)) {
       zoomLevel=displayArea.getZoomLevel();
     } else {
       zoomLevel=0;
     }
+    forceZoomReset=false;
     //DEBUG("diffZoom=%f zoomLevelLock=%d zoomLevel=%d",diffZoom,zoomLevelLock,zoomLevel);
 
     // Check if visual position is near to overflow

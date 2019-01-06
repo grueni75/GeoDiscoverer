@@ -161,7 +161,7 @@ MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize) {
     case MapCalibratorTypeProj4:
       expectedSize=sizeof(MapCalibratorProj4);
 #ifdef TARGET_LINUX
-      if (expectedSize!=64) {
+      if (expectedSize!=72) {
         FATAL("unknown size of object (%d), please adapt class storage",expectedSize);
         return NULL;
       }

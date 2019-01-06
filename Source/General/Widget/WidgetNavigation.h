@@ -155,6 +155,9 @@ protected:
   // Indicates if the remote server is active
   bool remoteServerActive;
 
+  // Updates various flags
+  virtual void updateFlags(Int x, Int y);
+
 public:
 
   // Constructor

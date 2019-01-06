@@ -110,6 +110,9 @@ protected:
   // Renames the layers with the infos in the gds file
   void renameLayers();
 
+  // Adds the given map container to the queue for sending to the remote server
+  void queueRemoteMapContainer(MapContainer* c, std::vector<std::string> *alreadyKnownMapContainers, Int startIndex, std::list<std::vector<std::string> > *mapImagesToServe);
+
 public:
 
   // Constructurs and destructor
@@ -144,7 +147,7 @@ public:
   std::list<MapContainer*> findMapContainersByGeographicCoordinate(MapPosition pos, Int zoomLevel=0);
 
   // Fills the given area with tiles
-  virtual void fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abortUpdate);
+  virtual void fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abort);
 
   // Initializes the progress bar
   void openProgress(std::string title, Int valueMax);
@@ -308,7 +311,6 @@ public:
   MapDownloader* getMapDownloader() {
     return mapDownloader;
   }
-
 };
 
 }
