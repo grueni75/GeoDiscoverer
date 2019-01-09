@@ -101,10 +101,10 @@ public class GDMessageListenerService extends WearableListenerService {
   @Override
   public void onMessageReceived( final MessageEvent messageEvent ) {
     super.onMessageReceived(messageEvent);
-    /*GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("message received: %s %s",
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("message received: %s %s",
             messageEvent.getPath(),
             new String(messageEvent.getData()))
-    );*/
+    );
     GDCore coreObject = ((GDApplication) getApplication()).coreObject;
     if (coreObject==null)
       return;
@@ -115,16 +115,8 @@ public class GDMessageListenerService extends WearableListenerService {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","map update requested by remote server");
         coreObject.executeCoreCommand("forceMapUpdate()");
       }
-      if (cmd.startsWith("setAllNavigationInfo")) {
-        //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", cmd);
-        String args1 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
-        //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", args1);
-        coreObject.executeAppCommand("setFormattedNavigationInfo" + args1);
-        cmd = cmd.substring(cmd.indexOf(")") + 1);
-        String args2 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
-        //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", args2);
-        coreObject.executeCoreCommand("setPlainNavigationInfo" + args2);
-        ((GDApplication) getApplication()).executeAppCommand("updateScreen()");
+      if (cmd.startsWith("locationChanged")) {
+        coreObject.executeCoreCommand(cmd);
       }
       if (cmd.equals("getWearDeviceAlive()")) {
         coreObject.executeAppCommand("setWearDeviceAlive(1)");

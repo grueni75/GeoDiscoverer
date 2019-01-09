@@ -39,6 +39,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.opengl.GLES20;
 import android.os.Build;
@@ -81,6 +83,10 @@ public class WatchFace extends Gles2WatchFaceService {
   PowerManager powerManager = null;
   WindowManager windowManager = null;
   LayoutInflater inflater = null;
+  SensorManager sensorManager = null;
+
+  // Indicates that the compass provides readings
+  boolean compassWatchStarted = false;
 
   // Indicates if the dialog is open
   boolean dialogVisible = false;
@@ -349,6 +355,7 @@ public class WatchFace extends Gles2WatchFaceService {
     powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
     windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
     inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
 
     // Get a wake lock
     if (wakeLock!=null)
@@ -531,7 +538,16 @@ public class WatchFace extends Gles2WatchFaceService {
       if (inAmbientMode) {
         coreObject.executeAppCommand("setWearDeviceSleeping(1)");
         setTouchHandlerEnabled(false);
+        if (compassWatchStarted) {
+          sensorManager.unregisterListener(coreObject);
+          compassWatchStarted=false;
+        }
       } else {
+        if (!compassWatchStarted) {
+          sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
+          sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
+          compassWatchStarted=true;
+        }
         coreObject.executeAppCommand("setWearDeviceSleeping(0)");
       }
     }

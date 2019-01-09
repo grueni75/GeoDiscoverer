@@ -1187,7 +1187,7 @@ void MapSource::remoteServer() {
       unlockAccess();
 
       // Split the command
-      DEBUG("new cmd: %s",cmd.c_str());
+      //DEBUG("new cmd: %s",cmd.c_str());
       std::string cmdName;
       std::vector<std::string> args;
       if (!core->getCommander()->splitCommand(cmd,cmdName,args)) {
@@ -1302,7 +1302,7 @@ void MapSource::remoteServer() {
         //DEBUG("tiles.size()=%d",tiles.size());
         for (std::list<MapTile*>::iterator i=tiles.begin();i!=tiles.end();i++) {
           MapTile *t=*i;
-          DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFilePath());
+          //DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFilePath());
           queueRemoteMapContainer(t->getParentMapContainer(), &args, 19, &mapImagesToServe);
         }
         unlockAccess();
@@ -1347,7 +1347,7 @@ void MapSource::remoteServer() {
         lockAccess(__FILE__,__LINE__);
         MapTile *t = findMapTileByGeographicCoordinate(pos,zoomLevel,lockZoomLevel,preferredMapContainer);
         if (t) {
-          DEBUG("chosen map container: %s", t->getParentMapContainer()->getCalibrationFilePath());
+          //DEBUG("chosen map container: %s", t->getParentMapContainer()->getCalibrationFilePath());
           queueRemoteMapContainer(t->getParentMapContainer(), &args, 6, &mapImagesToServe);
         }
         unlockAccess();
@@ -1367,7 +1367,7 @@ void MapSource::remoteServer() {
         bool alreadyServed=false;
         for (std::list<std::string>::iterator i=servedMapContainers.begin();i!=servedMapContainers.end();i++) {
           if (*i==calibrationFilePath) {
-            DEBUG("requested map container <%s> already served, skipping it", calibrationFilePath.c_str());
+            //DEBUG("requested map container <%s> already served, skipping it", calibrationFilePath.c_str());
             alreadyServed=true;
           }
         }

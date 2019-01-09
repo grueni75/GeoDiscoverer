@@ -238,7 +238,7 @@ bool MapSourceRemote::init()
     std::string filebase=(*i)[2];
     std::string extension=(*i)[3];
     std::string filepath=filebase + "." + extension;
-    DEBUG("filebase=%s",filebase.c_str());
+    //DEBUG("filebase=%s",filebase.c_str());
 
     // Output some info
     Int percentage=round(((double)progress*100)/(double)mapFilebases.size());
@@ -312,12 +312,8 @@ MapTile *MapSourceRemote::findMapTileByGeographicCoordinate(MapPosition pos, Int
 
   // Ask the remote side to send any missing map containers
   cmd << ")";
-  DEBUG("cmd=%s",cmd.str().c_str());
+  //DEBUG("cmd=%s",cmd.str().c_str());
   core->getCommander()->dispatch(cmd.str());
-
-  if (result) {
-    DEBUG("chosen map container: %s", result->getParentMapContainer()->getCalibrationFilePath());
-  }
 
   return result;
 }
@@ -353,10 +349,10 @@ void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferr
   // Ask the remote side to send any missing map containers
   cmd << ")";
   if (!*abort) {
-    DEBUG("cmd=%s",cmd.str().c_str());
+    //DEBUG("cmd=%s",cmd.str().c_str());
     core->getCommander()->dispatch(cmd.str());
   } else {
-    DEBUG("search operation was aborted, skipping cmd",NULL);
+    //DEBUG("search operation was aborted, skipping cmd",NULL);
   }
 }
 
@@ -374,7 +370,7 @@ std::string MapSourceRemote::getFreeArchiveFilePath() {
 void MapSourceRemote::maintenance() {
 
   // Was the source modified?
-  DEBUG("maintenance called",NULL);
+  //DEBUG("maintenance called",NULL);
   if (contentsChanged) {
     contentsChanged=false;
   }
@@ -386,7 +382,7 @@ bool MapSourceRemote::addArchive(std::string path) {
   ZipArchive *mapArchive;
   MapContainer *mapContainer;
 
-  DEBUG("addArchive called with path %s",path.c_str());
+  //DEBUG("addArchive called with path %s",path.c_str());
 
   // Read in the archive
   std::string archiveFolder = dirname((char*)path.c_str());

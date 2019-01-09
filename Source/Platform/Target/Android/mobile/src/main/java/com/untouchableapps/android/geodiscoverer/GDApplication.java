@@ -184,7 +184,6 @@ public class GDApplication extends Application implements GDAppInterface, Google
     wearThread = new Thread(new Runnable() {
       @Override
       public void run() {
-        boolean prevSendMessageForced=false;
         long lastUpdate=0;
         while (true) {
           try {
@@ -199,42 +198,12 @@ public class GDApplication extends Application implements GDAppInterface, Google
               // Check if it is necessary to send command
               long t=System.currentTimeMillis();
               boolean sendMessage = true;
+              
+              // Handle attachments
               if (command.startsWith("serveRemoteMapArchive")) {
                 String path = command.substring(command.indexOf("(")+1, command.indexOf(")"));
                 attachment = new File(path);
               }
-              if (command.startsWith("setAllNavigationInfo")) {
-
-                // If wear device is inactive, check if message needs to be sent
-                if (wearDeviceSleeping) {
-
-                  // Always send message if off route or target approaching
-                  String infosAsString = command.substring(command.indexOf("("), command.indexOf(")") + 1);
-                  //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", infosAsString);
-                  CockpitInfos infos = CockpitEngine.createCockpitInfo(infosAsString);
-                  if ((!infos.turnDistance.equals("-")) || (infos.offRoute)) {
-                    sendMessage = true;
-                    prevSendMessageForced = true;
-                  } else {
-
-                    // Send the next message also after important event is over such that watch face shows correct contents
-                    if (prevSendMessageForced)
-                      sendMessage = true;
-                    else {
-
-                      /* Always update the watch face every minute
-                      if ((t-lastUpdate)>60*1000) {
-                        sendMessage = true;
-                      } else {
-                        sendMessage = false;
-                      }*/
-                      sendMessage=false;
-                    }
-                    prevSendMessageForced = false;
-                  }
-                }
-              }
-              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "sendMessage=" + String.valueOf(sendMessage));
 
               // Send command
               if (sendMessage) {

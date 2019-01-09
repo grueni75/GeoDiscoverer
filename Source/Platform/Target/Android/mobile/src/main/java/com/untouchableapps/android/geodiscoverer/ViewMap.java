@@ -455,7 +455,7 @@ public class ViewMap extends GDActivity {
     }
   }
 
-  /** Stop listening for location fixes */
+  /** Stop listening for compass bearing */
   synchronized void stopWatchingCompass() {
     if (compassWatchStarted) {
       sensorManager.unregisterListener(coreObject);

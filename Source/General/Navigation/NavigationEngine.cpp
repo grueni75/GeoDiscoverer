@@ -359,7 +359,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
   bool isNewer=false;
 
   //PROFILE_START;
-  //DEBUG("checking new location pos (locationPos.getTimestamp()=%ld)",locationPos.getTimestamp());
+  DEBUG("checking new location pos (locationPos.getTimestamp()=%ld)",locationPos.getTimestamp());
 
   // Check if the new fix is older or newer
   if (newLocationPos.getTimestamp()>locationPos.getTimestamp()) {
@@ -375,6 +375,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
 
     // If it is significantly older, discard it
     if (locationPos.getTimestamp()-newLocationPos.getTimestamp()>=locationOutdatedThreshold) {
+      //DEBUG("new location pos is too old, discarding it",NULL);
       return;
     }
 
@@ -453,6 +454,8 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     updateScreenGraphic(false);
     //PROFILE_ADD("graphics update");
 
+  } else {
+    //DEBUG("location pos has not been used",NULL);
   }
 
   //PROFILE_END;
@@ -1489,23 +1492,6 @@ void NavigationEngine::computeNavigationInfo() {
       infos << ";no route;-";
     }
     core->getCommander()->dispatch("setFormattedNavigationInfo(" + infos.str() + ")");
-    std::string cmd="setAllNavigationInfo(" + infos.str() + ")";
-    infos.str("");
-    infos << navigationInfo.getType() << ",";
-    infos << navigationInfo.getAltitude() << ",";
-    infos << navigationInfo.getLocationBearing() << ",";
-    infos << navigationInfo.getLocationSpeed() << ",";
-    infos << navigationInfo.getTrackLength() << ",";
-    infos << navigationInfo.getTargetBearing() << ",";
-    infos << navigationInfo.getTargetDistance() << ",";
-    infos << navigationInfo.getTargetDuration() << ",";
-    infos << navigationInfo.getOffRoute() << ",";
-    infos << navigationInfo.getRouteDistance() << ",";
-    infos << navigationInfo.getTurnAngle() << ",";
-    infos << navigationInfo.getTurnDistance();
-    cmd += "(" + infos.str() + ")";
-    //DEBUG("%s",cmd.c_str());
-    core->getCommander()->dispatch(cmd);
   }
 }
 

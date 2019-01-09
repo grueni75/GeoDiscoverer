@@ -1051,7 +1051,7 @@ void WidgetEngine::createGraphic() {
       config.setInactiveColor(GraphicColor(255,255,255,255));
       config.setParameter("iconFilename","navigationWatchBackground");
       config.setParameter("directionIconFilename","navigationWatchDirection");
-      config.setParameter("orientationLabelRadius","90.5");
+      config.setParameter("orientationLabelRadius","88.5");
       config.setParameter("targetRadius","90.0");
       config.setParameter("textColumnCount","2");
       config.setParameter("textRowFirstOffsetY","75");
