@@ -431,6 +431,9 @@ void NavigationPath::deinit() {
   pathAnimators->setIsUpdated(true);
   core->getDefaultGraphicEngine()->unlockPathAnimators();
 
+  // Delete all points
+  mapPositions.clear();
+
   // Is not initialized
   setIsInit(false);
 }
@@ -1083,6 +1086,85 @@ std::vector<MapPosition> NavigationPath::getSelectedPoints() {
     }
     return std::vector<MapPosition>(startIterator,endIterator);
   }
+}
+
+// Store the contents of the object in a binary file
+void NavigationPath::store(std::ofstream *ofs) {
+
+  // Write the size of the object for detecting changes later
+  Int size=sizeof(*this);
+  Storage::storeInt(ofs,size);
+
+  // Store all relevant fields
+  Storage::storeString(ofs,name.c_str());
+  Storage::storeString(ofs,description.c_str());
+
+  // Store all positions
+  Storage::storeInt(ofs,mapPositions.size());
+  for (int i=0;i<mapPositions.size();i++) {
+    mapPositions[i].store(ofs);
+  }
+}
+
+// Reads the contents of the object from a binary file
+bool NavigationPath::retrieve(NavigationPath *navigationPath, char *&cacheData, Int &cacheSize) {
+
+  //PROFILE_START;
+  bool success=true;
+
+  // Check if the class has changed
+  Int size=sizeof(NavigationPath);
+#ifdef TARGET_LINUX
+  if (size!=1432) {
+    FATAL("unknown size of object (%d), please adapt class storage",size);
+    return false;
+  }
+#endif
+
+  // Read the size of the object and check with current size
+  size=0;
+  Storage::retrieveInt(cacheData,cacheSize,size);
+  if (size!=sizeof(NavigationPath)) {
+    DEBUG("stored size of object does not match implemented object size, aborting retrieve",NULL);
+    return false;
+  }
+  //PROFILE_ADD("sanity check");
+
+  // Backup important data
+  std::string oldName = navigationPath->name;
+  std::string oldDescription = navigationPath->description;
+
+  // Read the fields
+  char *str;
+  Storage::retrieveString(cacheData,cacheSize,&str);
+  navigationPath->name=std::string(str);
+  Storage::retrieveString(cacheData,cacheSize,&str);
+  navigationPath->description=std::string(str);
+
+  // Read all positions
+  Storage::retrieveInt(cacheData,cacheSize,size);
+  navigationPath->mapPositions.resize(size);
+  for (int i=0;i<size;i++) {
+
+    // Retrieve the map container
+    MapPosition *p=MapPosition::retrieve(cacheData,cacheSize);
+    if (p==NULL) {
+      navigationPath->mapPositions.resize(i);
+      success=false;
+      goto cleanup;
+    }
+    navigationPath->addEndPosition(*p);
+  }
+
+  // Return result
+cleanup:
+  if (!success) {
+    navigationPath->name=oldName;
+    navigationPath->description=oldDescription;
+    navigationPath->mapPositions.clear();
+  }
+
+  return success;
 }
 
 }

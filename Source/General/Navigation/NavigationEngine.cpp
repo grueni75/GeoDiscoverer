@@ -269,6 +269,9 @@ void NavigationEngine::updateRoutes() {
     // If the file is a backup, skip it
     if (filename.substr(filename.length()-1)=="~")  continue;
 
+    // If the file is a cache, skip it
+    if (filename.substr(filename.length()-4)==".bin")  continue;
+
     // Add the found route
     routes.push_back(filename);
   }
@@ -359,7 +362,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
   bool isNewer=false;
 
   //PROFILE_START;
-  DEBUG("checking new location pos (locationPos.getTimestamp()=%ld)",locationPos.getTimestamp());
+  //DEBUG("checking new location pos (locationPos.getTimestamp()=%ld)",locationPos.getTimestamp());
 
   // Check if the new fix is older or newer
   if (newLocationPos.getTimestamp()>locationPos.getTimestamp()) {

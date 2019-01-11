@@ -96,6 +96,15 @@ protected:
   // Computes the metrics for the given map positions
   void updateMetrics(MapPosition prevPoint, MapPosition curPoint);
 
+  // Store the contents of the object in a binary file
+  void store(std::ofstream *ofs);
+
+  // Reads the contents of the object from a binary file
+  static bool retrieve(NavigationPath *navigationPath, char *&cacheData, Int &cacheSize);
+
+  // Writes the cache to a file
+  void writeCache();
+
 public:
 
   // Constructor

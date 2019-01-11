@@ -214,6 +214,9 @@ void NavigationPath::writeGPXFile(bool forceStorage, bool skipBackup, bool onlyS
   rename(tempFilepath.c_str(),filepath.c_str());
   //DEBUG("path storing is complete",NULL);
 
+  // Update the cache
+  writeCache();
+
   // Cleanup
   xmlFreeDoc(doc);
   lockAccess(__FILE__, __LINE__);
@@ -264,10 +267,30 @@ void NavigationPath::extractInformation(std::list<XMLNode> nodes) {
   }
 }
 
+// Writes the cache to a file
+void NavigationPath::writeCache() {
+  std::string filepath=gpxFilefolder + "/" + gpxFilename;
+  std::string cacheFilepath = filepath + ".bin";
+  std::ofstream ofs;
+  ofs.open(cacheFilepath.c_str(), std::ios::binary);
+  if (ofs.fail()) {
+    WARNING("can not open <%s> for writing", cacheFilepath.c_str());
+    remove(cacheFilepath.c_str());
+  } else {
+    store(&ofs);
+    if (ofs.bad()) {
+      WARNING("can not store object into <%s>", cacheFilepath.c_str());
+      remove(cacheFilepath.c_str());
+    }
+    ofs.close();
+  }
+}
+
 // Reads the path contents from a gpx file
 bool NavigationPath::readGPXFile() {
 
   std::string filepath=gpxFilefolder + "/" + gpxFilename;
+  std::string cacheFilepath = filepath + ".bin";
   XMLNode node;
   XMLDocument doc=NULL;
   XMLXPathContext xpathCtx=NULL;
@@ -286,111 +309,209 @@ bool NavigationPath::readGPXFile() {
   bool result=false;
   std::list<std::string> status;
   std::stringstream progress;
+  std::ofstream ofs;
+  std::ifstream ifs;
+  bool cacheRetrieved;
+  struct stat fileStat,cacheStat;
 
-  // Read the document
-  status.push_back("Loading path (Init):");
-  status.push_back(getGpxFilename());
-  core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
-  doc = xmlReadFile(filepath.c_str(), NULL, 0);
-  if (!doc) {
-    ERROR("can not read file <%s>",gpxFilename.c_str());
-    goto cleanup;
-  }
+  // Check if we can use the cache
+  cacheRetrieved=false;
+  if (((core->statFile(filepath,&fileStat))==0)&&(core->statFile(cacheFilepath,&cacheStat)==0)) {
 
-  // Prepare xpath evaluation
-  xpathCtx = xmlXPathNewContext(doc);
-  if (xpathCtx == NULL) {
-    FATAL("can not create xpath context",NULL);
-    goto cleanup;
-  }
-
-  // Check which version of gpx it is
-  namespaceURI="//*[namespace-uri()='" + std::string(GPX10Namespace) + "']";
-  nodes=findNodes(doc,xpathCtx,namespaceURI.c_str());
-  if (nodes.size()!=0) {
-    GPX10=true;
-  }
-  namespaceURI="//*[namespace-uri()='" + std::string(GPX11Namespace) + "']";
-  nodes=findNodes(doc,xpathCtx,namespaceURI.c_str());
-  if (nodes.size()!=0) {
-    GPX11=true;
-  }
-  if ((!GPX10)&&(!GPX11)) {
-    ERROR("file <%s> can not be parsed because it is not a V1.0 or V1.1 GPX file",gpxFilename.c_str());
-    goto cleanup;
-  }
-  if (GPX10&&GPX11) {
-    ERROR("file <%s> can not be parsed because it contains both V1.0 and V1.1 GPX elements",gpxFilename.c_str());
-    goto cleanup;
-  }
-
-  // Register namespaces
-  if (GPX10) {
-    if(xmlXPathRegisterNs(xpathCtx, BAD_CAST "gpx", BAD_CAST GPX10Namespace) != 0) {
-      FATAL("can not register namespace",NULL);
-      goto cleanup;
+    // Is the cache newer than the file?
+    bool isOlder=false;
+    if (cacheStat.st_mtime<fileStat.st_mtime) {
+      isOlder=true;
     }
-  }
-  if (GPX11) {
-    if(xmlXPathRegisterNs(xpathCtx, BAD_CAST "gpx", BAD_CAST GPX11Namespace) != 0) {
-      FATAL("can not register namespace",NULL);
-      goto cleanup;
-    }
-  }
-  if(xmlXPathRegisterNs(xpathCtx, BAD_CAST "gd", BAD_CAST GDNamespace) != 0) {
-    FATAL("can not register namespace",NULL);
-    goto cleanup;
-  }
+    if (!isOlder) {
 
-  // Decide which type to load (route or track)
-  trackNodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:trk");
-  routeNodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:rte");
-  if ((trackNodes.size()>0)&&(routeNodes.size()>0)) {
-    WARNING("file <%s> contains both a route and a track, loading the track only",gpxFilename.c_str());
-  }
-  if (trackNodes.size()>0) {
-    loadTrack=true;
-  } else {
-    if (routeNodes.size()>0) {
-      loadRoute=true;
-    } else {
-      ERROR("file <%s> does neither contain a route nor a track",gpxFilename.c_str());
-    }
-  }
+      // Load the cache
+      status.push_back("Loading path (from cache):");
+      status.push_back(getGpxFilename());
+      core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+      ifs.open(cacheFilepath.c_str(),std::ios::binary);
+      if (ifs.fail()) {
+        remove(cacheFilepath.c_str());
+        WARNING("can not open <%s> for reading",cacheFilepath.c_str());
+      } else {
 
-  // Extract data from the metadata section if it exists
-  if (GPX11) {
-    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:metadata/*");
-    lockAccess(__FILE__, __LINE__);
-    extractInformation(nodes);
-    unlockAccess();
-  }
-  if (GPX10) {
-    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/*");
-    lockAccess(__FILE__, __LINE__);
-    extractInformation(nodes);
-    unlockAccess();
-  }
+        // Load the complete file into memory
+        char *cacheData;
+        if (!(cacheData=(char*)malloc(cacheStat.st_size+1))) {
+          FATAL("can not allocate memory for cache",NULL);
+          return false;
+        }
+        ifs.read(cacheData,cacheStat.st_size);
+        ifs.close();
+        cacheData[cacheStat.st_size]=0; // to prevent that strings never end
+        Int cacheSize=cacheStat.st_size;
 
-  // Load the points of the path
-  if (loadTrack) {
-    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:trk/gpx:trkseg/gpx:trkpt");
-    totalNumberOfPoints=nodes.size();
-    processedPoints=0;
-    for (Int k=1;k<=trackNodes.size();k++) {
-      std::stringstream prefix;
-      prefix << "/gpx:gpx/gpx:trk["<<k<<"]";
-      if (trackNodes.size()==1) {
-        nodes=findNodes(doc,xpathCtx,prefix.str() + "/*");
-        extractInformation(nodes);
+        // Retrieve the objects
+        char *cacheData2=cacheData;
+        bool success = NavigationPath::retrieve(this,cacheData2,cacheSize);
+        if ((cacheSize!=0)||(!success)) {
+          remove(cacheFilepath.c_str());
+          WARNING("falling back to full gpx file read because cache is corrupted",NULL);
+        } else {
+          cacheRetrieved=true;
+        }
+        free(cacheData);
       }
-      nodes=findNodes(doc,xpathCtx,prefix.str() + "/gpx:trkseg");
-      numberOfSegments=nodes.size();
-      for(Int i=1;i<=numberOfSegments;i++) {
-        std::stringstream trksegPath;
-        trksegPath<<prefix.str() + "/gpx:trkseg["<<i<<"]/gpx:trkpt";
-        nodes=findNodes(doc,xpathCtx,trksegPath.str());
-        numberOfPoints=nodes.size();
+    }
+  }
+
+  // Load the gpx file if cache can not be used
+  if (!cacheRetrieved) {
+
+    // Read the document
+    status.push_back("Loading path (Init):");
+    status.push_back(getGpxFilename());
+    core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+    doc = xmlReadFile(filepath.c_str(), NULL, 0);
+    if (!doc) {
+      ERROR("can not read file <%s>",gpxFilename.c_str());
+      goto cleanup;
+    }
+
+    // Prepare xpath evaluation
+    xpathCtx = xmlXPathNewContext(doc);
+    if (xpathCtx == NULL) {
+      FATAL("can not create xpath context",NULL);
+      goto cleanup;
+    }
+
+    // Check which version of gpx it is
+    namespaceURI="//*[namespace-uri()='" + std::string(GPX10Namespace) + "']";
+    nodes=findNodes(doc,xpathCtx,namespaceURI.c_str());
+    if (nodes.size()!=0) {
+      GPX10=true;
+    }
+    namespaceURI="//*[namespace-uri()='" + std::string(GPX11Namespace) + "']";
+    nodes=findNodes(doc,xpathCtx,namespaceURI.c_str());
+    if (nodes.size()!=0) {
+      GPX11=true;
+    }
+    if ((!GPX10)&&(!GPX11)) {
+      ERROR("file <%s> can not be parsed because it is not a V1.0 or V1.1 GPX file",gpxFilename.c_str());
+      goto cleanup;
+    }
+    if (GPX10&&GPX11) {
+      ERROR("file <%s> can not be parsed because it contains both V1.0 and V1.1 GPX elements",gpxFilename.c_str());
+      goto cleanup;
+    }
+
+    // Register namespaces
+    if (GPX10) {
+      if(xmlXPathRegisterNs(xpathCtx, BAD_CAST "gpx", BAD_CAST GPX10Namespace) != 0) {
+        FATAL("can not register namespace",NULL);
+        goto cleanup;
+      }
+    }
+    if (GPX11) {
+      if(xmlXPathRegisterNs(xpathCtx, BAD_CAST "gpx", BAD_CAST GPX11Namespace) != 0) {
+        FATAL("can not register namespace",NULL);
+        goto cleanup;
+      }
+    }
+    if(xmlXPathRegisterNs(xpathCtx, BAD_CAST "gd", BAD_CAST GDNamespace) != 0) {
+      FATAL("can not register namespace",NULL);
+      goto cleanup;
+    }
+
+    // Decide which type to load (route or track)
+    trackNodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:trk");
+    routeNodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:rte");
+    if ((trackNodes.size()>0)&&(routeNodes.size()>0)) {
+      WARNING("file <%s> contains both a route and a track, loading the track only",gpxFilename.c_str());
+    }
+    if (trackNodes.size()>0) {
+      loadTrack=true;
+    } else {
+      if (routeNodes.size()>0) {
+        loadRoute=true;
+      } else {
+        ERROR("file <%s> does neither contain a route nor a track",gpxFilename.c_str());
+      }
+    }
+
+    // Extract data from the metadata section if it exists
+    if (GPX11) {
+      nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:metadata/*");
+      lockAccess(__FILE__, __LINE__);
+      extractInformation(nodes);
+      unlockAccess();
+    }
+    if (GPX10) {
+      nodes=findNodes(doc,xpathCtx,"/gpx:gpx/*");
+      lockAccess(__FILE__, __LINE__);
+      extractInformation(nodes);
+      unlockAccess();
+    }
+
+    // Load the points of the path
+    if (loadTrack) {
+      nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:trk/gpx:trkseg/gpx:trkpt");
+      totalNumberOfPoints=nodes.size();
+      processedPoints=0;
+      for (Int k=1;k<=trackNodes.size();k++) {
+        std::stringstream prefix;
+        prefix << "/gpx:gpx/gpx:trk["<<k<<"]";
+        if (trackNodes.size()==1) {
+          nodes=findNodes(doc,xpathCtx,prefix.str() + "/*");
+          extractInformation(nodes);
+        }
+        nodes=findNodes(doc,xpathCtx,prefix.str() + "/gpx:trkseg");
+        numberOfSegments=nodes.size();
+        for(Int i=1;i<=numberOfSegments;i++) {
+          std::stringstream trksegPath;
+          trksegPath<<prefix.str() + "/gpx:trkseg["<<i<<"]/gpx:trkpt";
+          nodes=findNodes(doc,xpathCtx,trksegPath.str());
+          numberOfPoints=nodes.size();
+          for(std::list<XMLNode>::iterator j=nodes.begin();j!=nodes.end();j++) {
+            XMLNode node=*j;
+            std::string error;
+            if (pos.readGPX(node,error)) {
+              addEndPosition(pos);
+            } else {
+              error="file <%s> " + error;
+              ERROR(error.c_str(),gpxFilename.c_str());
+              goto cleanup;
+            }
+            processedPoints++;
+            processedPercentage=processedPoints*100/totalNumberOfPoints;
+            if (processedPercentage>prevProcessedPercentage) {
+              progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
+              status.pop_front();
+              status.push_front(progress.str());
+              core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+            }
+            prevProcessedPercentage=processedPercentage;
+            if (core->getQuitCore())
+              break;
+            //core->getThread()->reschedule();
+          }
+          if (i!=numberOfSegments) {
+            addEndPosition(NavigationPath::getPathInterruptedPos());
+          }
+          if (core->getQuitCore())
+            break;
+        }
+        if (k!=trackNodes.size()) {
+          addEndPosition(NavigationPath::getPathInterruptedPos());
+        }
+      }
+    }
+    if (loadRoute) {
+      nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:rte/gpx:rtept");
+      totalNumberOfPoints=nodes.size();
+      processedPoints=0;
+      for (Int k=1;k<=routeNodes.size();k++) {
+        std::stringstream prefix;
+        prefix << "/gpx:gpx/gpx:rte["<<k<<"]";
+        nodes=findNodes(doc,xpathCtx,prefix.str() + "/*");
+        if (routeNodes.size()==1) {
+          extractInformation(nodes);
+        }
         for(std::list<XMLNode>::iterator j=nodes.begin();j!=nodes.end();j++) {
           XMLNode node=*j;
           std::string error;
@@ -414,55 +535,17 @@ bool NavigationPath::readGPXFile() {
             break;
           //core->getThread()->reschedule();
         }
-        if (i!=numberOfSegments) {
+        if (k!=routeNodes.size()) {
           addEndPosition(NavigationPath::getPathInterruptedPos());
         }
-        if (core->getQuitCore())
-          break;
-      }
-      if (k!=trackNodes.size()) {
-        addEndPosition(NavigationPath::getPathInterruptedPos());
       }
     }
-  }
-  if (loadRoute) {
-    nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:rte/gpx:rtept");
-    totalNumberOfPoints=nodes.size();
-    processedPoints=0;
-    for (Int k=1;k<=routeNodes.size();k++) {
-      std::stringstream prefix;
-      prefix << "/gpx:gpx/gpx:rte["<<k<<"]";
-      nodes=findNodes(doc,xpathCtx,prefix.str() + "/*");
-      if (routeNodes.size()==1) {
-        extractInformation(nodes);
-      }
-      for(std::list<XMLNode>::iterator j=nodes.begin();j!=nodes.end();j++) {
-        XMLNode node=*j;
-        std::string error;
-        if (pos.readGPX(node,error)) {
-          addEndPosition(pos);
-        } else {
-          error="file <%s> " + error;
-          ERROR(error.c_str(),gpxFilename.c_str());
-          goto cleanup;
-        }
-        processedPoints++;
-        processedPercentage=processedPoints*100/totalNumberOfPoints;
-        if (processedPercentage>prevProcessedPercentage) {
-          progress.str(""); progress << "Loading path (" << processedPercentage << "%):";
-          status.pop_front();
-          status.push_front(progress.str());
-          core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
-        }
-        prevProcessedPercentage=processedPercentage;
-        if (core->getQuitCore())
-          break;
-        //core->getThread()->reschedule();
-      }
-      if (k!=routeNodes.size()) {
-        addEndPosition(NavigationPath::getPathInterruptedPos());
-      }
-    }
+
+    // Write the cache
+    status.pop_front();
+    status.push_front("Writing cache");
+    core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+    writeCache();
   }
 
   // Cleanup
