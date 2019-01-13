@@ -772,6 +772,11 @@
 			                                    <xsd:documentation>Filename of the image showing the separator.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+			                                <xsd:element name="blindIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Filename of the image showing the background if below content shall be defocused.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
 			                                <xsd:element name="directionChangeDuration" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Duration in microseconds of a direction change.</xsd:documentation>

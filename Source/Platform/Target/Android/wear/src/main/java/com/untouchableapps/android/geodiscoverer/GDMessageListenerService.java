@@ -54,7 +54,7 @@ public class GDMessageListenerService extends WearableListenerService {
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel opened: " + channel.getPath());
     if (channel.getPath().startsWith("/com.untouchableapps.android.geodiscoverer/mapArchive/")) {
       String path=coreObject.executeCoreCommand("getFreeMapArchiveFilePath()");
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "creating map archive <" + path + ">");
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "creating map archive <" + path + ">");
       File f;
       try {
         f = new File(path);
@@ -66,7 +66,7 @@ public class GDMessageListenerService extends WearableListenerService {
       }
       coreObject.channelPathToFilePath.put(new String(channel.getPath()), path);
       channel.receiveFile(coreObject.googleApiClient, Uri.fromFile(f), false);
-      GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "setRemoteServerActive(1)");
+      //GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "setRemoteServerActive(1)");
       coreObject.executeCoreCommand("setRemoteServerActive(1)");
     }
   }
@@ -92,7 +92,7 @@ public class GDMessageListenerService extends WearableListenerService {
         }
         coreObject.channelPathToFilePath.remove(channel.getPath());
         if (coreObject.channelPathToFilePath.size()==0) {
-          GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "setRemoteServerActive(0)");
+          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "setRemoteServerActive(0)");
           coreObject.executeCoreCommand("setRemoteServerActive(0)");
         }
       }
@@ -103,10 +103,10 @@ public class GDMessageListenerService extends WearableListenerService {
   @Override
   public void onMessageReceived( final MessageEvent messageEvent ) {
     super.onMessageReceived(messageEvent);
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("message received: %s %s",
+    /*GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("message received: %s %s",
             messageEvent.getPath(),
             new String(messageEvent.getData()))
-    );
+    );*/
     GDCore coreObject = ((GDApplication) getApplication()).coreObject;
     if (coreObject==null)
       return;
@@ -114,7 +114,7 @@ public class GDMessageListenerService extends WearableListenerService {
       return;
     if (messageEvent.getPath().equals("/com.untouchableapps.android.geodiscoverer")) {
       String cmd = new String(messageEvent.getData());
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", cmd.substring(0,cmd.indexOf(")")+1));
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", cmd.substring(0,cmd.indexOf(")")+1));
       if (cmd.equals("forceRemoteMapUpdate()")) {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","map update requested by remote server");
         coreObject.executeCoreCommand("forceMapUpdate()");

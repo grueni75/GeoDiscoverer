@@ -1557,7 +1557,7 @@ void NavigationEngine::computeNavigationInfo() {
     infos << targetPos.getLng() << ",";
     infos << targetPos.getLat() << ",";
     cmd += "(" + infos.str() + ")";
-    DEBUG("%s",cmd.c_str());
+    //DEBUG("%s",cmd.c_str());
     core->getCommander()->dispatch(cmd);
   }
 }

@@ -1052,6 +1052,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("iconFilename","navigationWatchBackground");
       config.setParameter("directionIconFilename","navigationWatchDirection");
       config.setParameter("arrowIconFilename","navigationWatchArrow");
+      config.setParameter("blindIconFilename","navigationWatchBlind");
       config.setParameter("orientationLabelRadius","88.5");
       config.setParameter("targetRadius","90.0");
       config.setParameter("textColumnCount","2");
@@ -1206,6 +1207,9 @@ void WidgetEngine::createGraphic() {
           navigation->getArrowIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"arrowIconFilename",__FILE__, __LINE__));
           navigation->getArrowIcon()->setX(-navigation->getDirectionIcon()->getIconWidth()/2);
           navigation->getArrowIcon()->setY(-navigation->getDirectionIcon()->getIconHeight()/2);
+          navigation->getBlindIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"blindIconFilename",__FILE__, __LINE__));
+          navigation->getBlindIcon()->setX(-navigation->getBlindIcon()->getIconWidth()/2);
+          navigation->getBlindIcon()->setY(-navigation->getBlindIcon()->getIconHeight()/2);
         }
       }
 

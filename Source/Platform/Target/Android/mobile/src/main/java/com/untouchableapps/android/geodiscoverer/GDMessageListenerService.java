@@ -36,10 +36,10 @@ public class GDMessageListenerService extends WearableListenerService {
   @Override
   public void onMessageReceived( final MessageEvent messageEvent ) {
     super.onMessageReceived(messageEvent);
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("message received: %s %s",
+    /*GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("message received: %s %s",
             messageEvent.getPath(),
             new String(messageEvent.getData()))
-    );
+    );*/
     if (messageEvent.getPath().equals("/com.untouchableapps.android.geodiscoverer")) {
       String cmd = new String(messageEvent.getData());
       if (cmd.startsWith("setWearDeviceSleeping(1)")) {

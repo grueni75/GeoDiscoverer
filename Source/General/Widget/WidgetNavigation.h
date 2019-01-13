@@ -54,6 +54,9 @@ protected:
   // Graphic showing the separator
   GraphicRectangle separatorIcon;
 
+  // Graphic showing the blind background
+  GraphicRectangle blindIcon;
+
   // Container that represents the target (displacement)
   GraphicObject targetObject;
 
@@ -206,6 +209,10 @@ public:
 
   GraphicRectangle *getSeparatorIcon() {
     return &separatorIcon;
+  }
+
+  GraphicRectangle *getBlindIcon() {
+    return &blindIcon;
   }
 
   void setDirectionChangeDuration(double directionChangeDuration) {

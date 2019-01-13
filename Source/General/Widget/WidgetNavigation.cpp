@@ -33,6 +33,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     targetIcon(widgetPage->getScreen()),
     arrowIcon(widgetPage->getScreen()),
     separatorIcon(widgetPage->getScreen()),
+    blindIcon(widgetPage->getScreen()),
     targetObject(widgetPage->getScreen()),
     compassObject(widgetPage->getScreen()),
     busyColor(),
@@ -90,6 +91,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   targetIcon.setColor(GraphicColor(255,255,255,255));
   arrowIcon.setColor(GraphicColor(255,255,255,0));
   separatorIcon.setColor(GraphicColor(255,255,255,255));
+  blindIcon.setColor(GraphicColor(255,255,255,255));
   targetObject.setColor(GraphicColor(255,255,255,255));
   compassObject.setColor(GraphicColor(255,255,255,255));
 }
@@ -163,7 +165,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     }
     setFadeAnimation(t,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
     remoteServerActive=core->getRemoteServerActive();
-    DEBUG("remoteServerActive=%d",remoteServerActive);
+    //DEBUG("remoteServerActive=%d",remoteServerActive);
   }
 
   // Pan the map if active
@@ -558,6 +560,14 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
 
   // Let the primitive draw the background
   WidgetPrimitive::draw(t);
+
+  // Draw the blind if necessary
+  if ((isWatch)&&(showTurn)&&(!skipTurn)) {
+    c=blindIcon.getColor();
+    c.setAlpha(color.getAlpha());
+    blindIcon.setColor(c);
+    blindIcon.draw(t);
+  }
 
   // Draw the compass
   if (!hideCompass) {

@@ -197,7 +197,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
             // Get command
             String command = wearMessageCommands.take();
-            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear message command: " + command);
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear message command: " + command);
 
             // Only process command if device is alive
             if ((wearDeviceAlive)||(command.equals("getWearDeviceAlive()"))) {
@@ -241,7 +241,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
               // Send command
               if (sendMessage) {
-                GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
+                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
                 lastUpdate = t;
                 NodeApi.GetConnectedNodesResult nodes =
                     Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
@@ -279,7 +279,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
             // Get command
             String command = wearFileCommands.take();
-            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear file command: " + command);
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear file command: " + command);
 
             // Get the file to sent
             String postfix="unknown";
