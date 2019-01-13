@@ -93,8 +93,6 @@ bool MapSourceRemote::init()
   std::list<std::vector<std::string> > mapFilebases;
   MapContainer *mapContainer;
 
-  WARNING("zoom in on mercator map does not change zoom level",NULL);
-
   // Check if the log directory exists
   std::string path = core->getHomePath() + "/Map";
   struct stat st;

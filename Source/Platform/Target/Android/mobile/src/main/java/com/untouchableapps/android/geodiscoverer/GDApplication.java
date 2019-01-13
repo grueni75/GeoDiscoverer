@@ -119,10 +119,16 @@ public class GDApplication extends Application implements GDAppInterface, Google
   final static long WEAR_CONNECTION_TIME_OUT_MS = 1000;
 
   /** List of commands to send to wear */
-  LinkedBlockingQueue<String> wearCommands = new LinkedBlockingQueue<String>();
+  LinkedBlockingQueue<String> wearMessageCommands = new LinkedBlockingQueue<String>();
 
-  /** Thread that sends commands */
-  Thread wearThread = null;
+  /** List of files to send to wear */
+  LinkedBlockingQueue<String> wearFileCommands = new LinkedBlockingQueue<String>();
+
+  /** Threads that handles wear messages */
+  Thread wearMessageThread = null;
+
+  /** Threads that handles wear file transfers */
+  Thread wearFileThread = null;
 
   /** Indicates if wear device is not shwoing anything */
   private boolean wearDeviceSleeping = true;
@@ -180,17 +186,18 @@ public class GDApplication extends Application implements GDAppInterface, Google
     // Init the message api to communicate with wear device
     Wearable.ChannelApi.addListener(coreObject.googleApiClient, this);
 
-    // Start the thread that handles the wear communication
-    wearThread = new Thread(new Runnable() {
+    // Start the thread that handles the wear messages
+    wearMessageThread = new Thread(new Runnable() {
       @Override
       public void run() {
         long lastUpdate=0;
+        boolean prevSendMessageForced=false;
         while (true) {
           try {
 
             // Get command
-            String command = wearCommands.take();
-            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear command: " + command);
+            String command = wearMessageCommands.take();
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear message command: " + command);
 
             // Only process command if device is alive
             if ((wearDeviceAlive)||(command.equals("getWearDeviceAlive()"))) {
@@ -198,40 +205,52 @@ public class GDApplication extends Application implements GDAppInterface, Google
               // Check if it is necessary to send command
               long t=System.currentTimeMillis();
               boolean sendMessage = true;
-              
-              // Handle attachments
-              if (command.startsWith("serveRemoteMapArchive")) {
-                String path = command.substring(command.indexOf("(")+1, command.indexOf(")"));
-                attachment = new File(path);
+
+              // Handle navigation infos
+              if (command.startsWith("setAllNavigationInfo")) {
+
+                // If wear device is inactive, check if message needs to be sent
+                if (wearDeviceSleeping) {
+
+                  // Always send message if off route or target approaching
+                  String infosAsString = command.substring(command.indexOf("("), command.indexOf(")") + 1);
+                  CockpitInfos infos = CockpitEngine.createCockpitInfo(infosAsString);
+                  if ((!infos.turnDistance.equals("-")) || (infos.offRoute)) {
+                    sendMessage = true;
+                    prevSendMessageForced = true;
+                  } else {
+
+                    // Send the next message also after important event is over such that watch face shows correct contents
+                    if (prevSendMessageForced)
+                      sendMessage = true;
+                    else {
+
+                      /* Always update the watch face every minute
+                      if ((t-lastUpdate)>60*1000) {
+                        sendMessage = true;
+                      } else {
+                        sendMessage = false;
+                      }*/
+                      sendMessage=false;
+                    }
+                    prevSendMessageForced = false;
+                  }
+                }
               }
+              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "sendMessage=" + String.valueOf(sendMessage));
 
               // Send command
               if (sendMessage) {
-                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
+                GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
                 lastUpdate = t;
                 NodeApi.GetConnectedNodesResult nodes =
                     Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
                         TimeUnit.MILLISECONDS);
                 if (nodes != null) {
                   for (Node node : nodes.getNodes()) {
-                    if (attachment!=null) {
-                      ChannelApi.OpenChannelResult result = Wearable.ChannelApi.openChannel(coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer/mapArchive" + attachment.getAbsolutePath()).await();
-                      Channel channel = result.getChannel();
-                      attachmentSent=false;
-                      channel.sendFile(coreObject.googleApiClient, Uri.fromFile(attachment));
-                      synchronized (attachment) {
-                        while (!attachmentSent)
-                          attachment.wait();
-                      }
-                      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "file " + attachment.getAbsolutePath() + " sent to remote device");
-                      synchronized (attachment) {
-                        attachment=null;
-                      }
-                    } else {
-                      MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                          coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer",
-                          command.getBytes()).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-                    }
+                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+                        coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer",
+                        command.getBytes()).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
                   }
                 }
                 wearLastCommand="";
@@ -247,7 +266,56 @@ public class GDApplication extends Application implements GDAppInterface, Google
         }
       }
     });
-    wearThread.start();
+    wearMessageThread.start();
+
+    // Start the thread that handles the wear file transfers
+    wearFileThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        long lastUpdate=0;
+        boolean prevSendMessageForced=false;
+        while (true) {
+          try {
+
+            // Get command
+            String command = wearFileCommands.take();
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear file command: " + command);
+
+            // Get the file to sent
+            String postfix="unknown";
+            if (command.startsWith("serveRemoteMapArchive")) {
+              String path = command.substring(command.indexOf("(")+1, command.indexOf(")"));
+              attachment = new File(path);
+              postfix = "mapArchive";
+            }
+
+            // Send file
+            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+            if (nodes != null) {
+              for (Node node : nodes.getNodes()) {
+                ChannelApi.OpenChannelResult result = Wearable.ChannelApi.openChannel(coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer/" + postfix + attachment.getAbsolutePath()).await();
+                Channel channel = result.getChannel();
+                attachmentSent=false;
+                channel.sendFile(coreObject.googleApiClient, Uri.fromFile(attachment));
+                synchronized (attachment) {
+                  while (!attachmentSent)
+                    attachment.wait();
+                }
+                GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "file " + attachment.getAbsolutePath() + " sent to remote device");
+                synchronized (attachment) {
+                  attachment=null;
+                }
+              }
+            }
+          }
+          catch (InterruptedException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
+        }
+      }
+    });
+    wearFileThread.start();
+
   }
 
   /** Called when a connection to a wear device has been established */
@@ -457,7 +525,11 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
   // Sends a command to the wear device
   public void sendWearCommand( final String command ) {
-    wearCommands.offer(command);
+    if (command.startsWith("serveRemoteMapArchive")) {
+      wearFileCommands.offer(command);
+    } else {
+      wearMessageCommands.offer(command);
+    }
   }
 
   // Informs the application about the wear sleep state

@@ -355,6 +355,37 @@ void NavigationEngine::deinit() {
   isInitialized=false;
 }
 
+// Sets a location pos directly
+void NavigationEngine::setLocationPos(MapPosition newLocationPos, bool computeNavigationInfos, const char *file, int line) {
+
+  // Store the new fix
+  lockLocationPos(file, line);
+  locationPos=newLocationPos;
+  unlockLocationPos();
+  MapPosition *pos=core->getMapEngine()->lockLocationPos(__FILE__, __LINE__);
+  *pos=locationPos;
+  core->getMapEngine()->unlockLocationPos();
+
+  // Shall we update the navigation infos?
+  if (computeNavigationInfos) {
+
+    // Update the navigation infos
+    core->getThread()->issueSignal(computeNavigationInfoSignal);
+
+    // Update the current track
+    updateTrack();
+    //PROFILE_ADD("track update");
+
+  }
+
+  // Inform the widget engine
+  core->onLocationChange(locationPos);
+
+  // Update the graphics
+  updateScreenGraphic(false);
+  //PROFILE_ADD("graphics update");
+}
+
 // Updates the current location
 void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
 
@@ -434,28 +465,10 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     }
 
     // Store the new fix
-    lockLocationPos(__FILE__, __LINE__);
-    locationPos=newLocationPos;
-    unlockLocationPos();
-    MapPosition *pos=core->getMapEngine()->lockLocationPos(__FILE__, __LINE__);
-    *pos=locationPos;
-    core->getMapEngine()->unlockLocationPos();
+    setLocationPos(newLocationPos, true, __FILE__, __LINE__);
 
     //PROFILE_ADD("position update init");
 
-    // Update the navigation infos
-    core->getThread()->issueSignal(computeNavigationInfoSignal);
-
-    // Update the current track
-    updateTrack();
-    //PROFILE_ADD("track update");
-
-    // Inform the widget engine
-    core->onLocationChange(locationPos);
-
-    // Update the graphics
-    updateScreenGraphic(false);
-    //PROFILE_ADD("graphics update");
 
   } else {
     //DEBUG("location pos has not been used",NULL);
@@ -1233,6 +1246,18 @@ void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, b
   showTarget(repositionMap);
 }
 
+// Sets the target pos directly
+void NavigationEngine::setTargetPos(double lng, double lat) {
+  lockTargetPos(__FILE__, __LINE__);
+  targetPos.setLng(lng);
+  targetPos.setLat(lat);
+  if (targetPos.getIndex()==0) {
+    targetPos.setIsUpdated(true);
+    targetPos.setIndex(1);
+  }
+  unlockTargetPos();
+}
+
 // Updates the flags of a route
 void NavigationEngine::updateFlagVisualization(NavigationPath *path) {
   std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
@@ -1373,7 +1398,7 @@ void NavigationEngine::computeNavigationInfo() {
     lastNavigationLocationPos=locationPos;
     forceNavigationInfoUpdate=false;
 
-    // Copy target possetPlain
+    // Copy target pos
     lockTargetPos(__FILE__, __LINE__);
     MapPosition targetPos=this->targetPos;
     unlockTargetPos();
@@ -1495,6 +1520,42 @@ void NavigationEngine::computeNavigationInfo() {
       infos << ";no route;-";
     }
     core->getCommander()->dispatch("setFormattedNavigationInfo(" + infos.str() + ")");
+    std::string cmd="setAllNavigationInfo(" + infos.str() + ")";
+    infos.str("");
+    infos << navigationInfo.getType() << ",";
+    infos << navigationInfo.getAltitude() << ",";
+    infos << navigationInfo.getLocationBearing() << ",";
+    infos << navigationInfo.getLocationSpeed() << ",";
+    infos << navigationInfo.getTrackLength() << ",";
+    infos << navigationInfo.getTargetBearing() << ",";
+    infos << navigationInfo.getTargetDistance() << ",";
+    infos << navigationInfo.getTargetDuration() << ",";
+    infos << navigationInfo.getOffRoute() << ",";
+    infos << navigationInfo.getRouteDistance() << ",";
+    infos << navigationInfo.getTurnAngle() << ",";
+    infos << navigationInfo.getTurnDistance();
+    cmd += "(" + infos.str() + ")";
+    infos.str("");
+    infos << locationPos.getSource() << ",";
+    infos << locationPos.getTimestamp() << ",";
+    infos << locationPos.getLng() << ",";
+    infos << locationPos.getLat() << ",";
+    infos << locationPos.getHasAltitude() << ",";
+    infos << locationPos.getAltitude() << ",";
+    infos << locationPos.getIsWGS84Altitude() << ",";
+    infos << locationPos.getHasBearing() << ",";
+    infos << locationPos.getBearing() << ",";
+    infos << locationPos.getHasSpeed() << ",";
+    infos << locationPos.getSpeed() << ",";
+    infos << locationPos.getHasAccuracy() << ",";
+    infos << locationPos.getAccuracy();
+    cmd += "(" + infos.str() + ")";
+    infos.str("");
+    infos << targetPos.getLng() << ",";
+    infos << targetPos.getLat() << ",";
+    cmd += "(" + infos.str() + ")";
+    DEBUG("%s",cmd.c_str());
+    core->getCommander()->dispatch(cmd);
   }
 }
 

@@ -149,13 +149,17 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
   // Indicate if a download is ongoing
   if (core->getRemoteServerActive()!=remoteServerActive) {
-    if (core->getRemoteServerActive())
+    if (core->getRemoteServerActive()) {
       activeColor=busyColor;
-    else
+      inactiveColorBackup=inactiveColor;
+      inactiveColor=busyColor;
+    } else {
       activeColor=normalColor;
+      inactiveColor=inactiveColorBackup;
+    }
     setFadeAnimation(t,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
     remoteServerActive=core->getRemoteServerActive();
-    //DEBUG("remoteServerActive=%d",remoteServerActive);
+    DEBUG("remoteServerActive=%d",remoteServerActive);
   }
 
   // Pan the map if active

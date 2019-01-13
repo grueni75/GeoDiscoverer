@@ -656,12 +656,6 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         appIf.sendWearCommand(cmd);
       cmdExecuted = true;
     }
-    if (cmd.startsWith("locationChanged(")) {
-      if (!isWatch) {
-        appIf.sendWearCommand(cmd);
-      }
-      cmdExecuted=true;
-    }
     if (cmd.startsWith("setNewRemoteMap(")) {
       if (!isWatch)
         appIf.sendWearCommand(cmd);
@@ -711,6 +705,11 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         return "Watch";
       else
         return "Default";
+    }
+    if (cmd.startsWith("setAllNavigationInfo(")) {
+      if (!isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
     }
 
     if (!cmdExecuted) {

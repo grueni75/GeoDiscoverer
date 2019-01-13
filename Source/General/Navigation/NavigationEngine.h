@@ -217,6 +217,9 @@ public:
   // Shows the current target at the given position
   void setTargetAtGeographicCoordinate(double lng, double lat, bool repositionMap);
 
+  // Sets the target pos directly
+  void setTargetPos(double lng, double lat);
+
   // Sets the active route
   void setActiveRoute(NavigationPath *route);
 
@@ -292,6 +295,9 @@ public:
   // Returns the name of the address point at the given position
   std::string getAddressPointName(GraphicPosition visPos);
 
+  // Sets a location pos directly (e.g., on the watch)
+  void setLocationPos(MapPosition newLocationPos, bool computeNavigationInfos, const char *file, int line);
+
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)
   {
@@ -336,6 +342,7 @@ public:
       core->getThread()->lockMutex(locationPosMutex, file, line);
       return &locationPos;
   }
+  void setLocationPos(MapPosition pos, const char *file, int line);
   void unlockLocationPos()
   {
       core->getThread()->unlockMutex(locationPosMutex);

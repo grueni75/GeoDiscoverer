@@ -287,10 +287,34 @@ std::string Commander::execute(std::string cmd) {
 
       // Inform the location manager
       core->getNavigationEngine()->newLocationFix(pos);
-
-      // Udpdate the app (to inform any wear device)
-      dispatch(cmd);
     }
+    cmdExecuted=true;
+  }
+  if (cmdName=="setLocationPos") {
+
+    // Get the fix
+    MapPosition pos;
+    pos.setSource(std::string(args[0]));
+    pos.setTimestamp(atoll(args[1].c_str()));
+    pos.setLng(atof(args[2].c_str()));
+    pos.setLat(atof(args[3].c_str()));
+    pos.setHasAltitude(atoi(args[4].c_str()));
+    pos.setAltitude(atof(args[5].c_str()));
+    pos.setIsWGS84Altitude(atoi(args[6].c_str()));
+    pos.setHasBearing(atoi(args[7].c_str()));
+    pos.setBearing(atof(args[8].c_str()));
+    pos.setHasSpeed(atoi(args[9].c_str()));
+    pos.setSpeed(atof(args[10].c_str()));
+    pos.setHasAccuracy(atoi(args[11].c_str()));
+    pos.setAccuracy(atof(args[12].c_str()));
+
+    // Inform the location manager
+    core->getNavigationEngine()->setLocationPos(pos,false,__FILE__,__LINE__);
+
+    cmdExecuted=true;
+  }
+  if (cmdName=="setTargetPos") {
+    core->getNavigationEngine()->setTargetPos(atof(args[0].c_str()),atof(args[1].c_str()));
     cmdExecuted=true;
   }
   if (cmdName=="setRecordTrack") {
@@ -671,6 +695,37 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="setRemoteServerActive") {
     core->setRemoteServerActive(atoi(args[0].c_str()));
+    cmdExecuted=true;
+  }
+  if (cmdName=="setPlainNavigationInfo") {
+    NavigationInfo *navigationInfo=core->getNavigationEngine()->lockNavigationInfo(__FILE__,__LINE__);
+    navigationInfo->setType((NavigationInfoType)atoi(args[0].c_str()));
+    navigationInfo->setAltitude(atof(args[1].c_str()));
+    navigationInfo->setLocationBearing(atof(args[2].c_str()));
+    navigationInfo->setLocationSpeed(atof(args[3].c_str()));
+    navigationInfo->setTrackLength(atof(args[4].c_str()));
+    navigationInfo->setTargetBearing(atof(args[5].c_str()));
+    navigationInfo->setTargetDistance(atof(args[6].c_str()));
+    navigationInfo->setTargetDuration(atof(args[7].c_str()));
+    navigationInfo->setOffRoute(atoi(args[8].c_str()));
+    navigationInfo->setRouteDistance(atof(args[9].c_str()));
+    navigationInfo->setTurnAngle(atof(args[10].c_str()));
+    navigationInfo->setTurnDistance(atof(args[11].c_str()));
+    /*DEBUG("navigationInfos: %d %f %f %f %f %f %f %f %d %f %f %f",
+        navigationInfo->getType(),
+        navigationInfo->getAltitude(),
+        navigationInfo->getLocationBearing(),
+        navigationInfo->getLocationSpeed(),
+        navigationInfo->getTrackLength(),
+        navigationInfo->getTargetBearing(),
+        navigationInfo->getTargetDistance(),
+        navigationInfo->getTargetDuration(),
+        navigationInfo->getOffRoute(),
+        navigationInfo->getRouteDistance(),
+        navigationInfo->getTurnAngle(),
+        navigationInfo->getTurnDistance()
+        );*/
+    core->getNavigationEngine()->unlockNavigationInfo();
     cmdExecuted=true;
   }
 

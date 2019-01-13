@@ -39,6 +39,9 @@ protected:
   // Color if the widget is busy
   GraphicColor busyColor;
 
+  // Backup of the inactive color
+  GraphicColor inactiveColorBackup;
+
   // Graphic showing the direction
   GraphicRectangle directionIcon;
 

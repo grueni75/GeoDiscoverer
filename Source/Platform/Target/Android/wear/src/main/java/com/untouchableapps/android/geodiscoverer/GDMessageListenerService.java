@@ -54,7 +54,7 @@ public class GDMessageListenerService extends WearableListenerService {
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel opened: " + channel.getPath());
     if (channel.getPath().startsWith("/com.untouchableapps.android.geodiscoverer/mapArchive/")) {
       String path=coreObject.executeCoreCommand("getFreeMapArchiveFilePath()");
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "Creating map archive <" + path + ">");
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "creating map archive <" + path + ">");
       File f;
       try {
         f = new File(path);
@@ -66,6 +66,7 @@ public class GDMessageListenerService extends WearableListenerService {
       }
       coreObject.channelPathToFilePath.put(new String(channel.getPath()), path);
       channel.receiveFile(coreObject.googleApiClient, Uri.fromFile(f), false);
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "setRemoteServerActive(1)");
       coreObject.executeCoreCommand("setRemoteServerActive(1)");
     }
   }
@@ -84,13 +85,14 @@ public class GDMessageListenerService extends WearableListenerService {
       if (path != null) {
         if (closeReason == ChannelApi.ChannelListener.CLOSE_REASON_REMOTE_CLOSE) {
           coreObject.executeCoreCommand("addMapArchive(" + path + ")");
-          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "map archive <" + path + "> received");
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "map archive <" + path + "> created");
         } else {
           File f = new File(path);
           f.delete();
         }
         coreObject.channelPathToFilePath.remove(channel.getPath());
         if (coreObject.channelPathToFilePath.size()==0) {
+          GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "setRemoteServerActive(0)");
           coreObject.executeCoreCommand("setRemoteServerActive(0)");
         }
       }
@@ -108,6 +110,8 @@ public class GDMessageListenerService extends WearableListenerService {
     GDCore coreObject = ((GDApplication) getApplication()).coreObject;
     if (coreObject==null)
       return;
+    if (!coreObject.coreInitialized)
+      return;
     if (messageEvent.getPath().equals("/com.untouchableapps.android.geodiscoverer")) {
       String cmd = new String(messageEvent.getData());
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", cmd.substring(0,cmd.indexOf(")")+1));
@@ -115,8 +119,19 @@ public class GDMessageListenerService extends WearableListenerService {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","map update requested by remote server");
         coreObject.executeCoreCommand("forceMapUpdate()");
       }
-      if (cmd.startsWith("locationChanged")) {
-        coreObject.executeCoreCommand(cmd);
+      if (cmd.startsWith("setAllNavigationInfo")) {
+        String args1 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
+        coreObject.executeAppCommand("setFormattedNavigationInfo" + args1);
+        cmd = cmd.substring(cmd.indexOf(")") + 1);
+        String args2 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
+        coreObject.executeCoreCommand("setPlainNavigationInfo" + args2);
+        cmd = cmd.substring(cmd.indexOf(")") + 1);
+        String args3 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
+        coreObject.executeCoreCommand("setLocationPos" + args3);
+        cmd = cmd.substring(cmd.indexOf(")") + 1);
+        String args4 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
+        coreObject.executeCoreCommand("setTargetPos" + args4);
+        ((GDApplication) getApplication()).executeAppCommand("updateScreen()");
       }
       if (cmd.equals("getWearDeviceAlive()")) {
         coreObject.executeAppCommand("setWearDeviceAlive(1)");
@@ -127,18 +142,11 @@ public class GDMessageListenerService extends WearableListenerService {
         boolean configChanged=false;
         while (cmd.length()>0) {
           String args = cmd.substring(cmd.indexOf("("), cmd.indexOf(")") + 1);
-          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",args);
           String path = args.substring(1,args.indexOf(","));
-          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",path);
           args = args.substring(args.indexOf(",")+1);
-          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",args);
           String name = args.substring(0,args.indexOf(","));
-          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",name);
           String value = args.substring(args.indexOf(",")+1,args.indexOf(")"));
-          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",value);
-          String oldValue = coreObject.
-              configStoreGetStringValue(path,name);
-          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",oldValue + " ? "+ value);
+          String oldValue = coreObject.configStoreGetStringValue(path,name);
           Bundle info = coreObject.configStoreGetNodeInfo(path + "/" + name);
           if (info.getString("type").equals("integer")) {
             int t1 = Integer.valueOf(value);
@@ -146,7 +154,6 @@ public class GDMessageListenerService extends WearableListenerService {
             if (t1!=t2) {
               coreObject.configStoreSetStringValue(path, name, value);
               configChanged = true;
-              //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","config changed!");
             }
           }
           if (info.getString("type").equals("double")) {
@@ -155,18 +162,15 @@ public class GDMessageListenerService extends WearableListenerService {
             if (t1!=t2) {
               coreObject.configStoreSetStringValue(path, name, value);
               configChanged=true;
-              //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","config changed!");
             }
           }
           if (info.getString("type").equals("string")) {
             if (!value.equals(oldValue)) {
               coreObject.configStoreSetStringValue(path, name, value);
               configChanged=true;
-              //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","config changed!");
             }
           }
           cmd = cmd.substring(cmd.indexOf(")") + 1);
-          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",cmd);
         }
 
         // Restart the core
