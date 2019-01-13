@@ -536,7 +536,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   native void updateScreen(boolean forceRedraw);
   
   /** Send a command to the core */
-  native String executeCoreCommandInt(String cmd);
+  native String   executeCoreCommandInt(String cmd);
   
   /** Sets a string value in the config */
   public native void configStoreSetStringValue(String path, String name, String value);

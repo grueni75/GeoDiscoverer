@@ -409,6 +409,11 @@ public:
     core->getThread()->unlockMutex(addressPointsMutex);
   }
 
+  void getArrowInfo(bool &visible, double &angle) {
+    visible=arrowVisible;
+    angle=arrowAngle;
+  }
+
 };
 
 }

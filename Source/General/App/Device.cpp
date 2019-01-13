@@ -46,6 +46,10 @@ Device::Device(std::string name, bool whiteBackround, bool animationFriendly) {
   socketfd=-1;
   orientation=GraphicScreenOrientationProtrait;
   initDone=false;
+  if (name=="Watch")
+    isWatch=true;
+  else
+    isWatch=false;
 }
 
 // Destructor

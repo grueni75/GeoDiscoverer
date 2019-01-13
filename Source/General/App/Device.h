@@ -76,6 +76,9 @@ protected:
   // Indicates that the device is initialized
   bool initDone;
 
+  // Indicates if this device is a watch
+  bool isWatch;
+
 public:
 
   // Constructor
@@ -201,6 +204,10 @@ public:
 
   bool isInitDone() const {
     return initDone;
+  }
+
+  bool getIsWatch() const {
+    return isWatch;
   }
 };
 

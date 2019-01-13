@@ -31,6 +31,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     turnArrowPointBuffer(widgetPage->getScreen(),24),
     directionIcon(widgetPage->getScreen()),
     targetIcon(widgetPage->getScreen()),
+    arrowIcon(widgetPage->getScreen()),
     separatorIcon(widgetPage->getScreen()),
     targetObject(widgetPage->getScreen()),
     compassObject(widgetPage->getScreen()),
@@ -39,7 +40,6 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
 {
   widgetType=WidgetTypeNavigation;
   updateInterval=1000000;
-  nextUpdateTime=0;
   distanceLabelFontString=NULL;
   durationLabelFontString=NULL;
   distanceValueFontString=NULL;
@@ -76,18 +76,22 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   compassObject.addPrimitive(&targetObject);
   hideCompass=true;
   hideTarget=true;
+  hideArrow=true;
   showTurn=false;
   skipTurn=false;
   active=false;
   firstRun=true;
   lastClockUpdate=0;
   secondRowState=0;
-  if (widgetPage->getWidgetEngine()->getDevice()->getName()=="Watch")
-    isWatch=true;
-  else
-    isWatch=false;
+  isWatch=widgetPage->getWidgetEngine()->getDevice()->getIsWatch();
   panActive=false;
   remoteServerActive=false;
+  directionIcon.setColor(GraphicColor(255,255,255,255));
+  targetIcon.setColor(GraphicColor(255,255,255,255));
+  arrowIcon.setColor(GraphicColor(255,255,255,0));
+  separatorIcon.setColor(GraphicColor(255,255,255,255));
+  targetObject.setColor(GraphicColor(255,255,255,255));
+  compassObject.setColor(GraphicColor(255,255,255,255));
 }
 
 // Destructor
@@ -202,6 +206,30 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     clockFontString->setX(x+(iconWidth-clockFontString->getIconWidth())/2);
     clockFontString->setY(y+clockOffsetY);
     changed=true;
+  }
+
+  // Update the arrow
+  if (isWatch) {
+    bool arrowVisible;
+    double arrowAngle;
+    core->getNavigationEngine()->getArrowInfo(arrowVisible,arrowAngle);
+    if (arrowVisible) {
+      arrowIcon.setAngle(arrowAngle);
+      if (hideArrow) {
+        GraphicColor endColor=arrowIcon.getColor();
+        endColor.setAlpha(255);
+        arrowIcon.setFadeAnimation(t,arrowIcon.getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+      }
+      hideArrow=false;
+    } else {
+      if (!hideArrow) {
+        GraphicColor endColor=arrowIcon.getColor();
+        endColor.setAlpha(0);
+        arrowIcon.setFadeAnimation(t,arrowIcon.getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+      }
+      hideArrow=true;
+    }
+    changed |= arrowIcon.work(t);
   }
 
   // Only update the info if it has changed
@@ -511,9 +539,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       active=false;
     }
 
-    // Set the next update time
-    nextUpdateTime=t+updateInterval;
-
   } else {
     navigationEngine->unlockNavigationInfo();
   }
@@ -529,6 +554,8 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
 // Executed every time the graphic engine needs to draw
 void WidgetNavigation::draw(TimestampInMicroseconds t) {
 
+  GraphicColor c;
+
   // Let the primitive draw the background
   WidgetPrimitive::draw(t);
 
@@ -537,7 +564,9 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     screen->startObject();
     screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
     screen->rotate(compassObject.getAngle(),0,0,1);
-    directionIcon.setColor(color);
+    c=directionIcon.getColor();
+    c.setAlpha(color.getAlpha());
+    directionIcon.setColor(c);
     directionIcon.draw(t);
     screen->endObject();
     screen->startObject();
@@ -550,16 +579,37 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
       y-=orientationLabelFontStrings[i]->getBaselineOffsetY();
       orientationLabelFontStrings[i]->setX(round(x));
       orientationLabelFontStrings[i]->setY(round(y));
-      orientationLabelFontStrings[i]->setColor(color);
+      c=orientationLabelFontStrings[i]->getColor();
+      c.setAlpha(color.getAlpha());
+      orientationLabelFontStrings[i]->setColor(c);
       orientationLabelFontStrings[i]->draw(t);
     }
     screen->endObject();
+  }
+
+  // Draw the arrow
+  if (arrowIcon.getColor().getAlpha()>0) {
+    //DEBUG("drawing arrow",NULL);
+    screen->startObject();
+    screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
+    screen->rotate(arrowIcon.getAngle(),0,0,1);
+    c=arrowIcon.getColor();
+    c.setAlpha(c.getAlpha()*color.getAlpha()/255);
+    arrowIcon.setColor(c);
+    arrowIcon.draw(t);
+    screen->endObject();
+  }
+
+  // Draw the target
+  if (!hideCompass) {
     if (!hideTarget) {
       screen->startObject();
       screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
       screen->rotate(compassObject.getAngle(),0,0,1);
       screen->translate(targetRadius*sin(FloatingPoint::degree2rad(targetObject.getAngle())),targetRadius*cos(FloatingPoint::degree2rad(targetObject.getAngle())),getZ());
-      targetIcon.setColor(color);
+      c=targetIcon.getColor();
+      c.setAlpha(color.getAlpha());
+      targetIcon.setColor(c);
       screen->rotate(targetIcon.getAngle(),0,0,1);
       targetIcon.draw(t);
       screen->endObject();
@@ -576,7 +626,9 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     turnArrowPointBuffer.drawAsTriangles();
     screen->endObject();
     if (turnFontString) {
-      turnFontString->setColor(color);
+      c=turnFontString->getColor();
+      c.setAlpha(color.getAlpha());
+      turnFontString->setColor(c);
       turnFontString->draw(t);
     }
 
@@ -586,14 +638,20 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     if (!showTurn)
       skipTurn=false;
     if (!isWatch) {
-      separatorIcon.setColor(color);
+      c=separatorIcon.getColor();
+      c.setAlpha(color.getAlpha());
+      separatorIcon.setColor(c);
       separatorIcon.draw(t);
       if (distanceLabelFontString) {
-        distanceLabelFontString->setColor(color);
+        c=distanceLabelFontString->getColor();
+        c.setAlpha(color.getAlpha());
+        distanceLabelFontString->setColor(c);
         distanceLabelFontString->draw(t);
       }
       if (distanceValueFontString) {
-        distanceValueFontString->setColor(color);
+        c=distanceValueFontString->getColor();
+        c.setAlpha(color.getAlpha());
+        distanceValueFontString->setColor(c);
         distanceValueFontString->draw(t);
       }
       FontString *leftLabelFontString = NULL;
@@ -636,19 +694,29 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
         }
       }
       if (leftLabelFontString) {
-        leftLabelFontString->setColor(color);
+        c=leftLabelFontString->getColor();
+        c.setAlpha(color.getAlpha());
+        leftLabelFontString->setColor(c);
         leftLabelFontString->draw(t);
-        leftValueFontString->setColor(color);
+        c=leftValueFontString->getColor();
+        c.setAlpha(color.getAlpha());
+        leftValueFontString->setColor(c);
         leftValueFontString->draw(t);
       }
       if (rightLabelFontString) {
-        rightLabelFontString->setColor(color);
+        c=rightLabelFontString->getColor();
+        c.setAlpha(color.getAlpha());
+        rightLabelFontString->setColor(c);
         rightLabelFontString->draw(t);
-        rightValueFontString->setColor(color);
+        c=rightValueFontString->getColor();
+        c.setAlpha(color.getAlpha());
+        rightValueFontString->setColor(c);
         rightValueFontString->draw(t);
       }
       if (clockFontString) {
-        clockFontString->setColor(color);
+        c=clockFontString->getColor();
+        c.setAlpha(color.getAlpha());
+        clockFontString->setColor(c);
         clockFontString->draw(t);
       }
     }
@@ -658,7 +726,6 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
 // Called when the widget has changed its position
 void WidgetNavigation::updatePosition(Int x, Int y, Int z) {
   WidgetPrimitive::updatePosition(x,y,z);
-  nextUpdateTime=0;
   firstRun=true;
 }
 

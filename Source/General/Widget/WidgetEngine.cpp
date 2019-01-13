@@ -1051,6 +1051,7 @@ void WidgetEngine::createGraphic() {
       config.setInactiveColor(GraphicColor(255,255,255,255));
       config.setParameter("iconFilename","navigationWatchBackground");
       config.setParameter("directionIconFilename","navigationWatchDirection");
+      config.setParameter("arrowIconFilename","navigationWatchArrow");
       config.setParameter("orientationLabelRadius","88.5");
       config.setParameter("targetRadius","90.0");
       config.setParameter("textColumnCount","2");
@@ -1201,6 +1202,10 @@ void WidgetEngine::createGraphic() {
           navigation->getSeparatorIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
           navigation->getSeparatorIcon()->setX(0);
           navigation->getSeparatorIcon()->setY(0);
+        } else {
+          navigation->getArrowIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"arrowIconFilename",__FILE__, __LINE__));
+          navigation->getArrowIcon()->setX(-navigation->getDirectionIcon()->getIconWidth()/2);
+          navigation->getArrowIcon()->setY(-navigation->getDirectionIcon()->getIconHeight()/2);
         }
       }
 

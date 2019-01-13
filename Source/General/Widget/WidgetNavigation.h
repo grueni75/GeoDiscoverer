@@ -48,6 +48,9 @@ protected:
   // Graphic showing the target
   GraphicRectangle targetIcon;
 
+  // Graphic showing the arrow
+  GraphicRectangle arrowIcon;
+
   // Graphic showing the separator
   GraphicRectangle separatorIcon;
 
@@ -57,14 +60,14 @@ protected:
   // Container that represents the direction plus target
   GraphicObject compassObject;
 
-  // Next timestamp when to update the widget
-  TimestampInMicroseconds nextUpdateTime;
-
   // Decides if the compass is shown
   bool hideCompass;
 
   // Decides if the target is shown
   bool hideTarget;
+
+  // Decides if the arrow is shown
+  bool hideArrow;
 
   // Show the turn
   bool showTurn;
@@ -195,6 +198,10 @@ public:
 
   GraphicRectangle *getTargetIcon() {
     return &targetIcon;
+  }
+
+  GraphicRectangle *getArrowIcon() {
+    return &arrowIcon;
   }
 
   GraphicRectangle *getSeparatorIcon() {

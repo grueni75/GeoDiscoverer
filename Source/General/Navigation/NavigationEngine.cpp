@@ -979,6 +979,9 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       arrowVisible=false;
     }
   }
+  if (core->getDefaultDevice()->getIsWatch()) {
+    arrowIcon->setColor(GraphicColor(255,255,255,0));
+  }
   core->getDefaultGraphicEngine()->unlockArrowIcon();
 
   // Update the visualization of the points

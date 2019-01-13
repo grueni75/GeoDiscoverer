@@ -757,9 +757,14 @@
 			                                    <xsd:documentation>Filename of the image showing the direction of travel.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+			                                <xsd:element name="arrowIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Filename of the image showing the arrow.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
 			                                <xsd:element name="targetIconFilename" type="xsd:string" default="unknown" minOccurs="0">
 			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the direction of travel.</xsd:documentation>
+			                                    <xsd:documentation>Filename of the image showing the target.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
 			                                <xsd:element name="separatorIconFilename" type="xsd:string" default="unknown" minOccurs="0">
