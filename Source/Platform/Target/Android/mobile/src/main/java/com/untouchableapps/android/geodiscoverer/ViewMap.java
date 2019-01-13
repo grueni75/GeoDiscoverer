@@ -1139,8 +1139,9 @@ public class ViewMap extends GDActivity {
     LinkedList<String> routes = new LinkedList<String>();
     for (File file : folderFile.listFiles()) {
       if ((!file.isDirectory())
-          && (!file.getName().substring(file.getName().length() - 1)
-              .equals("~"))) {
+          && (!file.getName().substring(file.getName().length() - 1).equals("~"))
+          && (!file.getName().substring(file.getName().length() - 4).equals(".bin")))
+      {
         routes.add(file.getName());
       }
     }
@@ -1282,8 +1283,9 @@ public class ViewMap extends GDActivity {
     LinkedList<String> routes = new LinkedList<String>();
     for (File file : folderFile.listFiles()) {
       if ((!file.isDirectory())
-          && (!file.getName().substring(file.getName().length() - 1)
-              .equals("~"))) {
+          && (!file.getName().substring(file.getName().length() - 1).equals("~"))
+          && (!file.getName().substring(file.getName().length() - 4).equals(".bin")))
+      {
         routes.add(file.getName());
       }
     }

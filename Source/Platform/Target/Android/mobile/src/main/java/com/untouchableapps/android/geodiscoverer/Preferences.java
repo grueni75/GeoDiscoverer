@@ -127,8 +127,9 @@ public class Preferences extends PreferenceActivity implements
         LinkedList<String> values = new LinkedList<String>();
         for (File file : dir.listFiles()) {
           if ((!file.isDirectory())
-              && (!file.getName().substring(file.getName().length() - 1)
-                  .equals("~"))) {
+              && (!file.getName().substring(file.getName().length() - 1).equals("~"))
+              && (!file.getName().substring(file.getName().length() - 4).equals(".bin")))
+          {
             values.add(file.getName());
             if (file.getName().equals(currentValue))
               currentValueFound = true;
