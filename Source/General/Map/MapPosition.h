@@ -74,6 +74,7 @@ public:
   // Constructors and destructor
   MapPosition(bool doNotDelete=false);
   MapPosition(const MapPosition &pos);
+  MapPosition(MapPosition *pos, bool deepCopy);
   virtual ~MapPosition();
 
   // Destructs the objects correctly (i.e., if memory has not been allocated by new)

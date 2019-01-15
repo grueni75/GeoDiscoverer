@@ -1111,6 +1111,12 @@ bool NavigationPath::retrieve(NavigationPath *navigationPath, char *&cacheData, 
 
   //PROFILE_START;
   bool success=true;
+  std::list<std::string> status;
+  Int processedPercentage, prevProcessedPercentage=-1;
+  std::stringstream progress;
+
+  status.push_back("Loading cached path (init):");
+  status.push_back(navigationPath->getGpxFilename());
 
   // Check if the class has changed
   Int size=sizeof(NavigationPath);
@@ -1143,7 +1149,6 @@ bool NavigationPath::retrieve(NavigationPath *navigationPath, char *&cacheData, 
 
   // Read all positions
   Storage::retrieveInt(cacheData,cacheSize,size);
-  navigationPath->mapPositions.resize(size);
   for (int i=0;i<size;i++) {
 
     // Retrieve the map container
@@ -1153,7 +1158,16 @@ bool NavigationPath::retrieve(NavigationPath *navigationPath, char *&cacheData, 
       success=false;
       goto cleanup;
     }
-    navigationPath->addEndPosition(*p);
+    navigationPath->addEndPosition(MapPosition(p,true));
+
+    // Update status
+    processedPercentage=i*100/size;
+    if (processedPercentage>prevProcessedPercentage) {
+      progress.str(""); progress << "Loading cached path (" << processedPercentage << "%):";
+      status.pop_front();
+      status.push_front(progress.str());
+      core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+    }
   }
 
   // Return result

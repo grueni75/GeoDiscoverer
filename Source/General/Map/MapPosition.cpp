@@ -63,6 +63,16 @@ MapPosition::MapPosition(const MapPosition &pos) {
   *this=pos;
 }
 
+MapPosition::MapPosition(MapPosition *pos, bool deepCopy) {
+  source=NULL;
+  doNotDelete=pos->doNotDelete;
+  *this=*pos;
+  if (deepCopy) {
+    this->source=strdup(pos->source);
+    doNotDelete=false;
+  }
+}
+
 MapPosition::~MapPosition() {
   if (!doNotDelete) {
     if ((source)&&(source!=unknownSource)) free(source);

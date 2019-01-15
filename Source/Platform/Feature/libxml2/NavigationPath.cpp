@@ -326,7 +326,7 @@ bool NavigationPath::readGPXFile() {
     if (!isOlder) {
 
       // Load the cache
-      status.push_back("Loading path (from cache):");
+      status.push_back("Loading path from cache (init):");
       status.push_back(getGpxFilename());
       core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
       ifs.open(cacheFilepath.c_str(),std::ios::binary);
