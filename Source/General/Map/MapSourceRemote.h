@@ -31,10 +31,14 @@ class MapSourceRemote  : public MapSource {
 protected:
 
   Int mapArchiveCacheSize;                          // Number of map archives to hold in the disk cache
-  Int nextFreeArchiveNumber;                        // Next number to use to obtain a free map archive file
+  Int nextFreeMapArchiveNumber;                     // Next number to use to obtain a free map archive file
+  Int nextFreeOverlayArchiveNumber;                 // Next number to use to obtain a free map overlay file
 
   // Loads all calibrated pictures in the given directory
   bool collectMapTiles(std::string directory, std::list<std::vector<std::string> > &mapFilebases);
+
+  // Returns the next free map archive file name
+  std::string getFreeMapArchiveFilePath();
 
 public:
 
@@ -54,14 +58,14 @@ public:
   // Fills the given area with tiles
   virtual void fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abort);
 
-  // Returns the next free map archive file name
-  virtual std::string getFreeArchiveFilePath();
-
   // Performs maintenance (e.g., recreate degraded search tree)
   virtual void maintenance();
 
   // Adds a new map archive
-  virtual bool addArchive(std::string path);
+  virtual bool addMapArchive(std::string path, std::string hash);
+
+  // Adds a new overlay archive
+  virtual bool addOverlayArchive(std::string path, std::string hash);
 
   // Getters and setters
 

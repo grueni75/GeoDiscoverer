@@ -1102,15 +1102,29 @@ void MapSource::queueRemoteServerCommand(std::string cmd) {
 // Adds the given map container to the queue for sending to the remote server
 void MapSource::queueRemoteMapContainer(MapContainer* c, std::vector<std::string> *alreadyKnownMapContainers, Int startIndex, std::list<std::vector<std::string> > *mapImagesToServe) {
 
-  //DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFileName());
+  std::string workPath = core->getHomePath() + "/Map";
 
   // Does the remote side already know this one?
   bool alreadyKnown = false;
   if (alreadyKnownMapContainers) {
-    for (int i = startIndex; i < alreadyKnownMapContainers->size(); i++) {
+    for (int i = startIndex; i < alreadyKnownMapContainers->size(); i+=2) {
+      //DEBUG("mapContainer=%s remoteHash=%s",(*alreadyKnownMapContainers)[i].c_str(),(*alreadyKnownMapContainers)[i+1].c_str());
       if ((*alreadyKnownMapContainers)[i] == c->getCalibrationFilePath()) {
-        //DEBUG("remote side already has <%s>, skipping it",t->getParentMapContainer()->getCalibrationFilePath());
+        //DEBUG("remote side already has <%s>, skipping it",c->getCalibrationFilePath());
         alreadyKnown = true;
+
+        // If the overlay hash is not yet computed, create it
+        if (c->getOverlayGraphicHash()=="") {
+          c->storeOverlayGraphics(workPath,"remoteOverlay.gdo");
+          remove((workPath + "/remoteOverlay.gda").c_str());
+        }
+
+        // Did the overlay change?
+        //DEBUG("remoteHash=%s localHash=%s",(*alreadyKnownMapContainers)[i+1].c_str(),c->getOverlayGraphicHash().c_str());
+        if ((*alreadyKnownMapContainers)[i+1]!=c->getOverlayGraphicHash()) {
+          DEBUG("overlay for <%s> outdated at remote side, adding it to queue", c->getCalibrationFileName());
+          queueRemoteServerCommand("serveRemoteMapOverlay(" + std::string(c->getCalibrationFilePath()) + ")");
+        }
       }
     }
   }
@@ -1121,7 +1135,7 @@ void MapSource::queueRemoteMapContainer(MapContainer* c, std::vector<std::string
     // If the container is not yet downloaded, indicate that this must be delivered to remote side
     if (!c->getDownloadComplete()) {
       c->setServeToRemoteMap(true);
-      DEBUG("map container %s not yet downloaded, requesting delivery after download", c->getCalibrationFileName());
+      //DEBUG("map container %s not yet downloaded, requesting delivery after download", c->getCalibrationFileName());
     } else {
       std::vector<std::string> mapImage;
       mapImage.push_back(c->getImageFilePath());
@@ -1129,7 +1143,8 @@ void MapSource::queueRemoteMapContainer(MapContainer* c, std::vector<std::string
       mapImage.push_back(c->getArchiveFileFolder());
       mapImage.push_back(c->getArchiveFileName());
       mapImagesToServe->push_back(mapImage);
-      DEBUG("map container %s added to serve queue", c->getCalibrationFileName());
+      queueRemoteServerCommand("serveRemoteMapOverlay(" + std::string(c->getCalibrationFilePath()) + ")");
+      //DEBUG("map container %s added to serve queue", c->getCalibrationFileName());
     }
   }
 }
@@ -1139,6 +1154,9 @@ void MapSource::remoteServer() {
 
   std::string workPath = core->getHomePath() + "/Map";
   std::list<std::string> servedMapContainers;
+  std::list<std::string> servedMapOverlays;
+
+  WARNING("not yet implemented: arrows", NULL);
 
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
@@ -1166,6 +1184,28 @@ void MapSource::remoteServer() {
     remove(path.c_str());
   }
 
+  // Delete any left over remote overlays
+  Int overlayNr=0;
+  Int x,y;
+  dfd=core->openDir(workPath);
+  if (dfd==NULL) {
+    FATAL("can not read directory <%s>",workPath.c_str());
+    return;
+  }
+  std::list<std::string> leftoverRemoteOverlays;
+  while ((dp = readdir(dfd)) != NULL)
+  {
+    if (sscanf(dp->d_name,"remoteOverlay%d.gdo",&overlayNr)==1) {
+      leftoverRemoteOverlays.push_back(dp->d_name);
+    }
+  }
+  closedir(dfd);
+  overlayNr=0;
+  for (std::list<std::string>::iterator i=leftoverRemoteOverlays.begin();i!=leftoverRemoteOverlays.end();i++) {
+    std::string path = workPath + "/" + *i;
+    remove(path.c_str());
+  }
+
   // Do an endless loop
   while (1) {
 
@@ -1187,7 +1227,7 @@ void MapSource::remoteServer() {
       unlockAccess();
 
       // Split the command
-      //DEBUG("new cmd: %s",cmd.c_str());
+      DEBUG("new cmd: %s",cmd.c_str());
       std::string cmdName;
       std::vector<std::string> args;
       if (!core->getCommander()->splitCommand(cmd,cmdName,args)) {
@@ -1198,14 +1238,27 @@ void MapSource::remoteServer() {
       // Reset requested?
       if (resetRemoteServerThread) {
         servedMapContainers.clear();
+        servedMapOverlays.clear();
         resetRemoteServerThread=false;
       }
 
       // Create the list of map images to serve
       std::list<std::vector<std::string> > mapImagesToServe;
 
+      // Was a remote map served?
+      if (cmdName=="remoteMapArchiveServed") {
+        servedMapContainers.remove(args[0]);
+        commandProcessed=true;
+      }
+
+      // Was a remote overlay served?
+      if (cmdName=="remoteOverlayArchiveServed") {
+        servedMapOverlays.remove(args[0]);
+        commandProcessed=true;
+      }
+
       // Shall we serve a map containr that was not yet downloaded?
-      if (cmdName=="serveRemoteMapContainer") {
+      if (cmdName=="serveRemoteMapOverlay") {
 
         // Find the map container
         MapContainer *c=NULL;
@@ -1219,14 +1272,59 @@ void MapSource::remoteServer() {
         unlockAccess();
         if (!c) {
           FATAL("map container %s could not be found",args[0].c_str());
+          continue;
+        }
+
+        // Check if the overlay is already beeing served
+        bool alreadyServed=false;
+        for (std::list<std::string>::iterator i=servedMapOverlays.begin();i!=servedMapOverlays.end();i++) {
+          if (*i==c->getOverlayGraphicHash()) {
+            DEBUG("requested overlay <%s> already served, skipping it", c->getCalibrationFilePath());
+            alreadyServed=true;
+          }
+        }
+        if (alreadyServed)
+          continue;
+
+        // Create the overlay and queue it for sending
+        std::stringstream remoteOverlayFilename;
+        remoteOverlayFilename << "remoteOverlay" << overlayNr << ".gdo";
+        overlayNr++;
+        c->storeOverlayGraphics(workPath,remoteOverlayFilename.str());
+        std::string hash = Storage::computeMD5(workPath + "/" + remoteOverlayFilename.str());
+        core->getCommander()->dispatch("serveRemoteOverlayArchive(" + workPath + "/" + remoteOverlayFilename.str() + "," + hash + "," + hash + ")");
+        servedMapOverlays.push_back(c->getOverlayGraphicHash());
+        commandProcessed=true;
+      }
+
+      // Shall we serve a map containr that was not yet downloaded?
+      if (cmdName=="serveRemoteMapContainer") {
+
+        // Find the map container
+        MapContainer *c=NULL;
+        lockAccess(__FILE__,__LINE__);
+        for (std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
+          if ((*i)->getCalibrationFilePath()==args[0]) {
+            c=*i;
+            break;
+          }
+        }
+        if (!c) {
+          FATAL("map container %s could not be found",args[0].c_str());
         } else {
           queueRemoteMapContainer(c,NULL,0,&mapImagesToServe);
         }
+        unlockAccess();
         commandProcessed=true;
       }
 
       // Shall we provide a map tile from a geo area?
       if (cmdName=="fillGeographicAreaWithRemoteTiles") {
+
+        // Ensure that the map engine works and updates overlays (if screen is off)
+        if ((core->getNavigationEngine()->mapGraphicUpdateIsRequired(__FILE__,__LINE__))) {
+          core->getNavigationEngine()->updateMapGraphic();
+        }
 
         // Convert the arguments
         double lng=atof(args[0].c_str());
@@ -1312,6 +1410,11 @@ void MapSource::remoteServer() {
       // Shall we provide a map tile from a geo coordinate?
       if (cmdName=="findRemoteMapTileByGeographicCoordinate") {
 
+        // Ensure that the map engine works and updates overlays (if screen is off)
+        if ((core->getNavigationEngine()->mapGraphicUpdateIsRequired(__FILE__,__LINE__))) {
+          core->getNavigationEngine()->updateMapGraphic();
+        }
+
         // Convert the arguments
         double lng=atof(args[0].c_str());
         double lat=atof(args[1].c_str());
@@ -1348,7 +1451,7 @@ void MapSource::remoteServer() {
         MapTile *t = findMapTileByGeographicCoordinate(pos,zoomLevel,lockZoomLevel,preferredMapContainer);
         if (t) {
           //DEBUG("chosen map container: %s", t->getParentMapContainer()->getCalibrationFilePath());
-          queueRemoteMapContainer(t->getParentMapContainer(), &args, 6, &mapImagesToServe);
+          queueRemoteMapContainer(t->getParentMapContainer(), &args, 7, &mapImagesToServe);
         }
         unlockAccess();
         commandProcessed=true;
@@ -1389,7 +1492,7 @@ void MapSource::remoteServer() {
         std::string imageTempFilepath = workPath + "/remoteTile." + imageExtension;
         if (!mapArchive->exportEntry(imageFilePath,imageTempFilepath)) {
           delete mapArchive;
-          WARNING("can not write to file <%s>",imageTempFilepath.c_str());
+          WARNING("can not extract to file <%s>",imageTempFilepath.c_str());
           continue;
         }
         std::string calibrationExtension = calibrationFilePath.substr(calibrationFilePath.find_last_of(".")+1);
@@ -1432,7 +1535,8 @@ void MapSource::remoteServer() {
 
         // Ask the app to transfer it to the remote side
         //DEBUG("sending %s to remote side",remoteTileFilename.str().c_str());
-        core->getCommander()->dispatch("serveRemoteMapArchive(" + workPath + "/" + remoteTileFilename.str() + ")");
+        std::string hash = Storage::computeMD5(workPath + "/" + remoteTileFilename.str());
+        core->getCommander()->dispatch("serveRemoteMapArchive(" + workPath + "/" + remoteTileFilename.str() + "," + calibrationFilePath + "," + hash + ")");
         servedMapContainers.push_back(calibrationFilePath);
       }
 
@@ -1444,13 +1548,13 @@ void MapSource::remoteServer() {
   }
 }
 
-// Returns the next free map archive file name
-std::string MapSource::getFreeArchiveFilePath() {
-  return "";
+// Adds a new map archive
+bool MapSource::addMapArchive(std::string path, std::string hash) {
+  return false;
 }
 
-// Adds a new map archive
-bool MapSource::addArchive(std::string path) {
+// Adds a new overlay archive
+bool MapSource::addOverlayArchive(std::string path, std::string hash) {
   return false;
 }
 

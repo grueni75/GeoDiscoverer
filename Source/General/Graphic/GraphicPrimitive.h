@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum {GraphicTypePrimitive, GraphicTypeRectangle, GraphicTypeRectangleList, GraphicTypeText, GraphicTypeWidget, GraphicTypeLine, GraphicTypeObject } GraphicType;
+typedef enum {GraphicTypePrimitive=0, GraphicTypeRectangle=1, GraphicTypeRectangleList=2, GraphicTypeText=3, GraphicTypeWidget=4, GraphicTypeLine=5, GraphicTypeObject=6 } GraphicType;
 
 class GraphicPrimitive {
 
@@ -352,6 +352,22 @@ public:
 
   void setTranslateStartTime(TimestampInMicroseconds translateStartTime) {
     this->translateStartTime = translateStartTime;
+  }
+
+  TimestampInMicroseconds getFadeDuration() const {
+    return fadeDuration;
+  }
+
+  const GraphicColor& getFadeEndColor() const {
+    return fadeEndColor;
+  }
+
+  bool getFadeInfinite() const {
+    return fadeInfinite;
+  }
+
+  const GraphicColor& getFadeStartColor() const {
+    return fadeStartColor;
   }
 };
 

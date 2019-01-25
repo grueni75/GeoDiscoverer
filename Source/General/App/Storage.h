@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : BinaryStorage.h
+// Name        : Storage.h
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010-2016 Matthias Gruenewald
 //
@@ -37,6 +37,18 @@ public:
   // Read integer from file
   static void retrieveInt(char *&cacheData, Int &cacheSize, Int &value);
 
+  // Writes a short into file
+  static void storeShort(std::ofstream *ofs, Short value);
+
+  // Read short from file
+  static void retrieveShort(char *&cacheData, Int &cacheSize, Short &value);
+
+  // Writes a byte into file
+  static void storeByte(std::ofstream *ofs, Byte value);
+
+  // Read byte from file
+  static void retrieveByte(char *&cacheData, Int &cacheSize, Byte &value);
+
   // Write string into file
   static void storeString(std::ofstream *ofs, std::string string);
 
@@ -64,17 +76,26 @@ public:
   // Read a bool from file
   static void retrieveBool(char *&cacheData, Int &cacheSize, bool &value);
 
-  // Writes a timestamp into file
-  static void storeTimestampInMilliseconds(std::ofstream *ofs, TimestampInMilliseconds value);
-
-  // Read a timestamp from file
-  static void retrieveTimestampInMilliseconds(char *&cacheData, Int &cacheSize, TimestampInMilliseconds &value);
-
   // Writes a piece of memory into file
   static void storeMem(std::ofstream *ofs, char *mem, Int size, bool wordAligned);
 
   // Skips any padding added by storeMem in the given pointer
   static void skipPadding(char *& mem, Int & memSize);
+
+  // Writes a color into file
+  static void storeGraphicColor(std::ofstream *ofs, GraphicColor color);
+
+  // Read a color from file
+  static void retrieveGraphicColor(char *&cacheData, Int &cacheSize, GraphicColor &color);
+
+  // Computes a hash of a file
+  static std::string computeMD5(std::string filepath);
+
+  // Aligns the output to the given size
+  static void storeAlignment(std::ofstream *ofs, Int alignment);
+
+  // Aligns the input to the given size
+  static void retrieveAlignment(char *&cacheData, Int &cacheSize, Int alignment);
 
 };
 

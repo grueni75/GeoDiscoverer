@@ -72,6 +72,9 @@ public class GDApplication extends Application implements GDAppInterface {
   public void onCreate() {
     super.onCreate();  
 
+    // Delete any left over files in the map root
+
+
     // Initialize the core object
     String homeDirPath = GDCore.getHomeDirPath();
     if (homeDirPath.equals("")) {

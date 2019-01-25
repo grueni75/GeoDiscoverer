@@ -34,6 +34,8 @@ typedef int Int;
 typedef unsigned int UInt;
 typedef short Short;
 typedef unsigned short UShort;
+typedef long Long;
+typedef unsigned long ULong;
 
 // Direction enum for searching
 typedef enum { north, south, west, east } Direction;

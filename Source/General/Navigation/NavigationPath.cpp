@@ -152,6 +152,9 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
       area.setYSouth(area.getYSouth()+pathWidth);
       std::list<MapTile*> mapTiles=mapContainer->findMapTilesByPictureArea(area);
 
+      // Overlay graphics is modified, so indicate this
+      mapContainer->resetOverlayGraphicHash();
+
       // Go through all of them
       for(std::list<MapTile*>::iterator k=mapTiles.begin();k!=mapTiles.end();k++) {
 
@@ -251,6 +254,8 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
     }
   }
   core->getMapSource()->unlockAccess();
+  if (foundContainers.size()>0)
+    core->getCommander()->dispatch("forceRemoteMapUpdate()");
 }
 
 // Updates the crossing path segments in the map tiles of the given map containers for the new point
@@ -1179,6 +1184,26 @@ cleanup:
   }
 
   return success;
+}
+
+// Enable or disable the blinking of the route
+void NavigationPath::setBlinkMode(bool blinkMode, const char *file, int line)
+{
+  // Set the mode
+  this->blinkMode = blinkMode;
+
+  // Change the path animator
+  core->getDefaultGraphicEngine()->lockPathAnimators(file, line);
+  if (blinkMode)
+    animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getDefaultGraphicEngine()->getBlinkDuration());
+  else
+    animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
+
+  // The overlay for all map containers that containt this path are now outdated
+  for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
+    (*i)->resetOverlayGraphicHash();
+  }
 }
 
 }

@@ -66,6 +66,19 @@ bool GraphicRectangleListSegment::addRectangle(Short x[4], Short y[4]) {
   return true;
 }
 
+// Gets the rectangle for the given position
+void GraphicRectangleListSegment::getRectangle(Int pos, Short *x, Short *y) {
+  Short tx,ty;
+  triangleCoordinates->getPoint(6*pos+0,tx,ty);
+  x[0]=tx; y[0]=ty;
+  triangleCoordinates->getPoint(6*pos+1,tx,ty);
+  x[1]=tx; y[1]=ty;
+  triangleCoordinates->getPoint(6*pos+4,tx,ty);
+  x[2]=tx; y[2]=ty;
+  triangleCoordinates->getPoint(6*pos+2,tx,ty);
+  x[3]=tx; y[3]=ty;
+}
+
 // Draws the rectangle list
 void GraphicRectangleListSegment::draw(GraphicTextureInfo textureInfo) {
   triangleCoordinates->drawAsTexturedTriangles(textureInfo,textureCoordinates);

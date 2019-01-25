@@ -48,8 +48,11 @@ public:
   // Destructor
   virtual ~GraphicRectangleList();
 
-  // Adds a new rectangle
+  // Adds a new rectangle (from center point and angle)
   void addRectangle(double x, double y, double angle);
+
+  // Adds a new rectangle (from corner points)
+  void addRectangle(Short x[4], Short y[4]);
 
   // Frees all memories
   void deinit();
@@ -84,6 +87,34 @@ public:
       this->radius = radius;
       this->distanceToCenter=distanceToCenter;
       this->angleToCenter=angleToCenter;
+  }
+
+  double getAngleToCenter() const {
+    return angleToCenter;
+  }
+
+  double getDistanceToCenter() const {
+    return distanceToCenter;
+  }
+
+  double getRadius() const {
+    return radius;
+  }
+
+  Int getCutEnabled() const {
+    return cutEnabled;
+  }
+
+  Int getCutHeight() const {
+    return cutHeight;
+  }
+
+  Int getCutWidth() const {
+    return cutWidth;
+  }
+
+  std::list<GraphicRectangleListSegment*> *getSegments() {
+    return &segments;
   }
 };
 

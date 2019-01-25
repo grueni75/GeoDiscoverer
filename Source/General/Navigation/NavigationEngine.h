@@ -260,8 +260,11 @@ public:
   void removeGraphics(MapContainer *container);
 
   // Indicates if a graphic update is required
-  bool mapGraphicUpdateIsRequired() {
-    if (unvisualizedMapContainers.size()>0) {
+  bool mapGraphicUpdateIsRequired(const char *file, int line) {
+    core->getMapSource()->lockAccess(file,line);
+    Int size=unvisualizedMapContainers.size();
+    core->getMapSource()->unlockAccess();
+    if (size>0) {
       return true;
     } else {
       return false;

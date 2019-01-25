@@ -158,6 +158,9 @@ public:
   // Sets the end flag at the given index
   void setEndFlag(Int index, const char *file, int line);
 
+  // Enable or disable the blinking of the route
+  void setBlinkMode(bool blinkMode, const char *file, int line);
+
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)
   {
@@ -268,17 +271,6 @@ public:
   void setNormalColor(GraphicColor normalColor, const char *file, int line)
   {
       this->normalColor = normalColor;
-      core->getDefaultGraphicEngine()->lockPathAnimators(file, line);
-      if (blinkMode)
-        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getDefaultGraphicEngine()->getBlinkDuration());
-      else
-        animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,normalColor,false,0);
-      core->getDefaultGraphicEngine()->unlockPathAnimators();
-  }
-
-  void setBlinkMode(bool blinkMode, const char *file, int line)
-  {
-      this->blinkMode = blinkMode;
       core->getDefaultGraphicEngine()->lockPathAnimators(file, line);
       if (blinkMode)
         animator.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),normalColor,highlightColor,true,core->getDefaultGraphicEngine()->getBlinkDuration());

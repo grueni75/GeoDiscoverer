@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : BinaryStorage.cpp
+// Name        : Storage.cpp
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010-2016 Matthias Gruenewald
 //
@@ -97,6 +97,40 @@ void Storage::retrieveInt(char *&cacheData, Int &cacheSize, Int &value) {
   }
 }
 
+// Writes a byte into file
+void Storage::storeByte(std::ofstream *ofs, Byte value) {
+  ofs->write((char*)&value,sizeof(value));
+}
+
+// Read byte from file
+void Storage::retrieveByte(char *&cacheData, Int &cacheSize, Byte &value) {
+  if (cacheSize>=sizeof(value)) {
+    value=*((Int *)cacheData);
+    cacheSize-=sizeof(value);
+    cacheData+=sizeof(value);
+  } else {
+    value=0;
+    cacheSize=-1;
+  }
+}
+
+// Writes a short into file
+void Storage::storeShort(std::ofstream *ofs, Short value) {
+  ofs->write((char*)&value,sizeof(value));
+}
+
+// Read short from file
+void Storage::retrieveShort(char *&cacheData, Int &cacheSize, Short &value) {
+  if (cacheSize>=sizeof(value)) {
+    value=*((Int *)cacheData);
+    cacheSize-=sizeof(value);
+    cacheData+=sizeof(value);
+  } else {
+    value=0;
+    cacheSize=-1;
+  }
+}
+
 // Write an integer array into file
 void Storage::storeVectorOfInt(std::ofstream *ofs, std::vector<Int> vector) {
   Int size=vector.size();
@@ -154,22 +188,43 @@ void Storage::retrieveBool(char *&cacheData, Int &cacheSize, bool &value) {
   }
 }
 
-// Writes a timestamp into file
-void Storage::storeTimestampInMilliseconds(std::ofstream *ofs, TimestampInMilliseconds value) {
-  ofs->write((char*)&value,sizeof(value));
+// Writes a color into file
+void Storage::storeGraphicColor(std::ofstream *ofs, GraphicColor color) {
+  storeByte(ofs,color.getRed());
+  storeByte(ofs,color.getGreen());
+  storeByte(ofs,color.getBlue());
+  storeByte(ofs,color.getAlpha());
 }
 
-// Read a timestamp from file
-void Storage::retrieveTimestampInMilliseconds(char *&cacheData, Int &cacheSize, TimestampInMilliseconds &value) {
-  if (cacheSize>=sizeof(value)) {
-    value=*((TimestampInMilliseconds *)cacheData);
-    cacheSize-=sizeof(value);
-    cacheData+=sizeof(value);
-  } else {
-    value=0;
-    cacheSize=-1;
+// Read a color from file
+void Storage::retrieveGraphicColor(char *&cacheData, Int &cacheSize, GraphicColor &color) {
+  Byte value;
+  retrieveByte(cacheData,cacheSize,value);
+  color.setRed(value);
+  retrieveByte(cacheData,cacheSize,value);
+  color.setGreen(value);
+  retrieveByte(cacheData,cacheSize,value);
+  color.setBlue(value);
+  retrieveByte(cacheData,cacheSize,value);
+  color.setAlpha(value);
+}
+
+// Aligns the output to the given size
+void Storage::storeAlignment(std::ofstream *ofs, Int alignment) {
+  ULong pos=ofs->tellp();
+  ULong missingAlignment=alignment-(pos%alignment);
+  //DEBUG("missingAlignment=%d",missingAlignment);
+  for (UInt i=0;i<missingAlignment;i++) {
+    storeByte(ofs,0);
   }
 }
 
+// Aligns the input to the given size
+void Storage::retrieveAlignment(char *&cacheData, Int &cacheSize, Int alignment) {
+  ULong missingAlignment=alignment-(((ULong)cacheData)%alignment);
+  //DEBUG("missingAlignment=%d",missingAlignment);
+  cacheData+=missingAlignment;
+  cacheSize-=missingAlignment;
+}
 
 }

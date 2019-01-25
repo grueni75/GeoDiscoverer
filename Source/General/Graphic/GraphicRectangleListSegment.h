@@ -44,6 +44,9 @@ public:
   // Adds a new rectangle
   bool addRectangle(Short x[4], Short y[4]);
 
+  // Gets the rectangle for the given position
+  void getRectangle(Int pos, Short *x, Short *y);
+
   // Draws the rectangles
   void draw(GraphicTextureInfo textureInfo);
 
@@ -59,11 +62,25 @@ public:
     return triangleCoordinates->getSize();
   }
 
+  Int getRectangleCount() const
+  {
+    return triangleCoordinates->getSize()/6;
+  }
+
   bool getIsFull() const
   {
     return triangleCoordinates->getIsFull();
   }
 
+  GraphicPointBuffer *getTextureCoordinates() const
+  {
+    return textureCoordinates;
+  }
+
+  GraphicPointBuffer *getTriangleCoordinates() const
+  {
+    return triangleCoordinates;
+  }
 
 };
 

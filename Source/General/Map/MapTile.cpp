@@ -81,6 +81,7 @@ MapTile::MapTile(Int mapX, Int mapY, MapContainer *parent, bool doNotInit, bool 
 }
 
 MapTile::~MapTile() {
+  resetVisualization();
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   if (visualization.getPrimitiveMap()->size()!=1) {
     FATAL("expected only the rectangle in the visualization object",NULL);
@@ -94,6 +95,22 @@ MapTile::~MapTile() {
     delete pathSegments;
   }
   crossingPathSegmentsMap.clear();
+  resetVisualization();
+}
+
+// Removes all overlay graphics from the visualization
+void MapTile::resetVisualization() {
+  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  for (std::list<GraphicPrimitiveKey>::iterator i=retrievedAnimators.begin();i!=retrievedAnimators.end();i++) {
+    pathAnimators->removePrimitive(*i,true);
+  }
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
+  retrievedAnimators.clear();
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+  for (std::list<GraphicPrimitiveKey>::iterator i=retrievedPrimitives.begin();i!=retrievedPrimitives.end();i++) {
+    visualization.removePrimitive(*i,true);
+  }
+  core->getDefaultGraphicEngine()->unlockDrawing();
 }
 
 // Does the computationly intensive part of the initialization
@@ -503,6 +520,251 @@ void MapTile::removeCrossingNavigationPathSegments(NavigationPath *path) {
     }
     delete pathSegments;
     crossingPathSegmentsMap.erase(i);
+  }
+}
+
+// Stores an animator
+void MapTile::storeAnimator(std::ofstream *ofs, GraphicPrimitive *animator) {
+  Storage::storeGraphicColor(ofs,animator->getFadeStartColor());
+  Storage::storeGraphicColor(ofs,animator->getFadeEndColor());
+  Storage::storeInt(ofs,(Int)animator->getFadeDuration());
+  Storage::storeBool(ofs,animator->getFadeInfinite());
+}
+
+// Retrieves an animator
+GraphicPrimitive *MapTile::retrieveAnimator(TimestampInMicroseconds t, char *&data, Int &size) {
+  GraphicPrimitiveKey animatorKey;
+  GraphicObject *pathAnimators;
+  GraphicColor startColor;
+  GraphicColor endColor;
+  GraphicPrimitive *animator;
+  if (!(animator=new GraphicPrimitive(core->getDefaultScreen()))) {
+    FATAL("can not create graphic primitive object",NULL);
+    return NULL;
+  }
+  Storage::retrieveGraphicColor(data,size,startColor);
+  //DEBUG("r=%d g=%d b=%d a=%d",startColor.getRed(),startColor.getGreen(),startColor.getBlue(),startColor.getAlpha());
+  Storage::retrieveGraphicColor(data,size,endColor);
+  //DEBUG("r=%d g=%d b=%d a=%d",endColor.getRed(),endColor.getGreen(),endColor.getBlue(),endColor.getAlpha());
+  Int duration;
+  Storage::retrieveInt(data,size,duration);
+  //DEBUG("duration=%d",duration);
+  bool infinite;
+  Storage::retrieveBool(data,size,infinite);
+  //DEBUG("infinite=%d",infinite);
+  animator->setFadeAnimation(t,startColor,endColor,infinite,duration);
+  pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  animatorKey=pathAnimators->addPrimitive(animator);
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
+  retrievedAnimators.push_back(animatorKey);
+  return animator;
+}
+
+// Stores the overlayed graphics into a file (excluding the tile itself)
+void MapTile::storeOverlayGraphics(std::ofstream *ofs) {
+
+  Int size;
+  std::list<GraphicPointBuffer*> *lineSegments;
+  std::list<GraphicRectangleListSegment*> *rectangleListSegments;
+
+  GraphicPrimitive *animator;
+  GraphicLine *line;
+  GraphicRectangleList *rectangleList;
+
+  // Iterate through the graphics object
+  std::list<GraphicPrimitive*> *drawList = visualization.getDrawList();
+  for(std::list<GraphicPrimitive*>::iterator i=drawList->begin();i!=drawList->end();i++) {
+
+    // Which type?
+    switch((*i)->getType()) {
+
+    // Line object from a navigation path
+    case GraphicTypeLine:
+
+      // Store the important fields
+      line=(GraphicLine*)*i;
+      Storage::storeByte(ofs,(*i)->getType());
+      animator=line->getAnimator();
+      storeAnimator(ofs,animator);
+      Storage::storeShort(ofs,line->getWidth());
+      Storage::storeInt(ofs,line->getZ());
+      Storage::storeInt(ofs,line->getCutWidth());
+      Storage::storeInt(ofs,line->getCutHeight());
+      lineSegments=line->getSegments();
+      size=0;
+      for(std::list<GraphicPointBuffer*>::iterator j=lineSegments->begin();j!=lineSegments->end();j++) {
+        size+=(*j)->getSize();
+      }
+      Storage::storeInt(ofs,size);
+      for(std::list<GraphicPointBuffer*>::iterator j=lineSegments->begin();j!=lineSegments->end();j++) {
+        GraphicPointBuffer *pointBuffer=*j;
+        for(Int k=0;k<pointBuffer->getSize();k++) {
+          Short x,y;
+          pointBuffer->getPoint(k,x,y);
+          Storage::storeShort(ofs,x);
+          Storage::storeShort(ofs,y);
+        }
+      }
+      break;
+
+    // Arrow object from a navigation path
+    case GraphicTypeRectangleList:
+
+      // Store the important fields
+      rectangleList=(GraphicRectangleList*)*i;
+      Storage::storeByte(ofs,(*i)->getType());
+      animator=rectangleList->getAnimator();
+      storeAnimator(ofs,animator);
+      Storage::storeInt(ofs,rectangleList->getZ());
+      Storage::storeInt(ofs,rectangleList->getCutWidth());
+      Storage::storeInt(ofs,rectangleList->getCutHeight());
+      Storage::storeAlignment(ofs,sizeof(double));
+      Storage::storeDouble(ofs,rectangleList->getRadius());
+      Storage::storeDouble(ofs,rectangleList->getDistanceToCenter());
+      Storage::storeDouble(ofs,rectangleList->getAngleToCenter());
+      rectangleListSegments=rectangleList->getSegments();
+      size=0;
+      for(std::list<GraphicRectangleListSegment*>::iterator j=rectangleListSegments->begin();j!=rectangleListSegments->end();j++) {
+        size+=(*j)->getRectangleCount();
+      }
+      Storage::storeInt(ofs,size);
+      for(std::list<GraphicRectangleListSegment*>::iterator j=rectangleListSegments->begin();j!=rectangleListSegments->end();j++) {
+        GraphicRectangleListSegment *rectangleListSegment=*j;
+        for(Int k=0;k<rectangleListSegment->getRectangleCount();k++) {
+          Short x[4],y[4];
+          rectangleListSegment->getRectangle(k,&x[0],&y[0]);
+          for(Int l=0;l<4;l++) {
+            Storage::storeShort(ofs,x[l]);
+            Storage::storeShort(ofs,y[l]);
+          }
+        }
+      }
+      break;
+
+    default:
+      //DEBUG("graphic primitive type %d not yet implemented",(*i)->getType());
+      break;
+    }
+  }
+
+  // Mark the end
+  Storage::storeByte(ofs,127);
+
+  // That's it
+  return;
+}
+
+// Recreates the visualization from a binary file
+void MapTile::retrieveOverlayGraphics(char *&data, Int &size) {
+
+  GraphicPrimitiveKey lineKey;
+  GraphicPrimitiveKey rectangleListKey;
+  GraphicPrimitive *animator;
+  Short width;
+  Int temp;
+  double radius,distance,angle;
+
+  // Remove all overlayed graphics
+  resetVisualization();
+
+  // Get current time
+  TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
+
+  // Repeat until all data is consumed
+  bool complete=false;
+  while (!complete) {
+
+    // Get the type of graphic to create
+    Byte type;
+    Storage::retrieveByte(data,size,type);
+    //DEBUG("type=%d",type);
+    switch(type) {
+
+    // Line object from navigation path?
+    case GraphicTypeLine:
+
+      // Create the animator
+      animator=retrieveAnimator(t,data,size);
+
+      // Create the line
+      Storage::retrieveShort(data,size,width);
+      GraphicLine *line;
+      if (!(line=new GraphicLine(core->getDefaultScreen(),0,width))) {
+        FATAL("can not create graphic primitive object",NULL);
+      }
+      line->setAnimator(animator);
+      Storage::retrieveInt(data,size,temp);
+      line->setZ(temp);
+      line->setCutEnabled(true);
+      Storage::retrieveInt(data,size,temp);
+      line->setCutWidth(t);
+      Storage::retrieveInt(data,size,temp);
+      line->setCutHeight(t);
+      Int numberOfPoints;
+      Storage::retrieveInt(data,size,numberOfPoints);
+      for (Int i=0;i<numberOfPoints;i++) {
+        Short x,y;
+        Storage::retrieveShort(data,size,x);
+        Storage::retrieveShort(data,size,y);
+        line->addPoint(x,y);
+      }
+
+      // Add it to the visualization
+      core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+      lineKey=visualization.addPrimitive(line);
+      core->getDefaultGraphicEngine()->unlockDrawing();
+      retrievedPrimitives.push_back(lineKey);
+      break;
+
+    // Arrow object from navigation path?
+    case GraphicTypeRectangleList:
+
+      // Create the animator
+      animator=retrieveAnimator(t,data,size);
+
+      // Create the rectangle list
+      GraphicRectangleList *rectangleList;
+      if (!(rectangleList=new GraphicRectangleList(core->getDefaultScreen(),0))) {
+        FATAL("can not create graphic primitive object",NULL);
+      }
+      rectangleList->setAnimator(animator);
+      Storage::retrieveInt(data,size,temp);
+      rectangleList->setZ(temp);
+      rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
+      rectangleList->setDestroyTexture(false);
+      rectangleList->setCutEnabled(true);
+      Storage::retrieveInt(data,size,temp);
+      rectangleList->setCutWidth(temp);
+      Storage::retrieveInt(data,size,temp);
+      rectangleList->setCutHeight(temp);
+      Storage::retrieveAlignment(data,size,sizeof(double));
+      Storage::retrieveDouble(data,size,radius);
+      Storage::retrieveDouble(data,size,distance);
+      Storage::retrieveDouble(data,size,angle);
+      rectangleList->setParameter(radius,distance,angle);
+      Int numberOfRectangles;
+      Storage::retrieveInt(data,size,numberOfRectangles);
+      for (Int i=0;i<numberOfRectangles;i++) {
+        Short x[4],y[4];
+        for(Int k=0;k<4;k++) {
+          Storage::retrieveShort(data,size,x[k]);
+          Storage::retrieveShort(data,size,y[k]);
+        }
+        rectangleList->addRectangle(x,y);
+      }
+
+      // Add it to the visualization
+      core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+      rectangleListKey=visualization.addPrimitive(rectangleList);
+      core->getDefaultGraphicEngine()->unlockDrawing();
+      retrievedPrimitives.push_back(rectangleListKey);
+      break;
+
+    // End?
+    case 127:
+      complete=true;
+      break;
+    }
   }
 }
 

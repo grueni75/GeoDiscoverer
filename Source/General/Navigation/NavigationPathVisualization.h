@@ -74,6 +74,9 @@ public:
   // Adds a new point to the visualization
   void addPoint(MapPosition pos);
 
+  // Resets the overlay graphic hash for all map containers
+  void resetOverlayGraphicHash();
+
   // Getters and setters
   MapPosition getPoint(Int index) {
     return points[index];

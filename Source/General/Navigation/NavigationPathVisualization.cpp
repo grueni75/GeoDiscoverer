@@ -61,6 +61,7 @@ void NavigationPathVisualization::removeTileInfo(MapTile *tile) {
       tileVisualization->removePrimitive(tileInfo->getPathArrowListKey(),true);
     core->getDefaultGraphicEngine()->unlockDrawing();
     tileInfoMap.erase(i);
+    tile->getParentMapContainer()->resetOverlayGraphicHash();
   }
 }
 
@@ -140,6 +141,16 @@ void NavigationPathVisualization::addPoint(MapPosition pos) {
   }
   points.push_back(pos);
   prevLinePoint=pos;
+}
+
+// Resets the overlay graphic hash for all map containers
+void NavigationPathVisualization::resetOverlayGraphicHash() {
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
+  for (NavigationPathTileInfoMap::iterator i=tileInfoMap.begin();i!=tileInfoMap.end();i++) {
+    MapTile *t=i->first;
+    t->getParentMapContainer()->resetOverlayGraphicHash();
+  }
+  core->getMapSource()->unlockAccess();
 }
 
 }

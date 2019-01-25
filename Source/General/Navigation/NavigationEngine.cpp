@@ -1252,12 +1252,10 @@ void NavigationEngine::setTargetAtGeographicCoordinate(double lng, double lat, b
 // Sets the target pos directly
 void NavigationEngine::setTargetPos(double lng, double lat) {
   lockTargetPos(__FILE__, __LINE__);
+  if ((targetPos.getLng()!=lng)||(targetPos.getLat()!=lat))
+    targetPos.setIsUpdated(true);
   targetPos.setLng(lng);
   targetPos.setLat(lat);
-  if (targetPos.getIndex()==0) {
-    targetPos.setIsUpdated(true);
-    targetPos.setIndex(1);
-  }
   unlockTargetPos();
 }
 
@@ -1473,6 +1471,11 @@ void NavigationEngine::computeNavigationInfo() {
     lockNavigationInfo(__FILE__, __LINE__);
     this->navigationInfo=navigationInfo;
     unlockNavigationInfo();
+
+    // Copy target pos again to get the unmodified one
+    lockTargetPos(__FILE__, __LINE__);
+    targetPos=this->targetPos;
+    unlockTargetPos();
 
     // Update the parent app
     infos.str("");

@@ -38,6 +38,8 @@ import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
@@ -283,17 +285,33 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
             // Get the file to sent
             String postfix="unknown";
+            String acknowledgeCommand="";
+            String path="";
             if (command.startsWith("serveRemoteMapArchive")) {
-              String path = command.substring(command.indexOf("(")+1, command.indexOf(")"));
+              path = command.substring(command.indexOf("(")+1, command.indexOf(","));
               attachment = new File(path);
               postfix = "mapArchive";
+              command=command.substring(command.indexOf(",")+1);
+              String id = command.substring(0, command.indexOf(","));
+              acknowledgeCommand="remoteMapArchiveServed(" + id + ")";
             }
+            if (command.startsWith("serveRemoteOverlayArchive")) {
+              path = command.substring(command.indexOf("(")+1, command.indexOf(","));
+              attachment = new File(path);
+              postfix = "overlayArchive";
+              command=command.substring(command.indexOf(",")+1);
+              String id = command.substring(0, command.indexOf(","));
+              acknowledgeCommand="remoteOverlayArchiveServed(" + id + ")";
+            }
+            String hash = command.substring(command.indexOf(",")+1, command.indexOf(")"));
+            postfix = postfix + "/" + hash;
+            path = path.substring(path.indexOf("/Map"));
 
             // Send file
             NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
             if (nodes != null) {
               for (Node node : nodes.getNodes()) {
-                ChannelApi.OpenChannelResult result = Wearable.ChannelApi.openChannel(coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer/" + postfix + attachment.getAbsolutePath()).await();
+                ChannelApi.OpenChannelResult result = Wearable.ChannelApi.openChannel(coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer/" + postfix + path).await();
                 Channel channel = result.getChannel();
                 attachmentSent=false;
                 channel.sendFile(coreObject.googleApiClient, Uri.fromFile(attachment));
@@ -307,6 +325,15 @@ public class GDApplication extends Application implements GDAppInterface, Google
                 }
               }
             }
+
+            // Inform core that transfer is over after some delay
+            final String delayedCommand = acknowledgeCommand;
+            new Timer().schedule(new TimerTask() {
+              @Override
+              public void run() {
+                coreObject.executeCoreCommand(delayedCommand);
+              }
+            }, 1000);
           }
           catch (InterruptedException e) {
             GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
@@ -525,7 +552,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
   // Sends a command to the wear device
   public void sendWearCommand( final String command ) {
-    if (command.startsWith("serveRemoteMapArchive")) {
+    if ((command.startsWith("serveRemoteMapArchive"))||(command.startsWith("serveRemoteOverlayArchive"))) {
       wearFileCommands.offer(command);
     } else {
       wearMessageCommands.offer(command);

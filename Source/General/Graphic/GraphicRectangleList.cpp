@@ -53,7 +53,7 @@ void GraphicRectangleList::deinit() {
   segments.clear();
 }
 
-// Adds a new rectangle
+// Adds a new rectangle (from center point and angle)
 void GraphicRectangleList::addRectangle(double x, double y, double angle) {
 
   // Check if the point lies within the cut area
@@ -80,12 +80,19 @@ void GraphicRectangleList::addRectangle(double x, double y, double angle) {
   ry[3]=round(y+radius*sin(angle+M_PI/2+M_PI/4));
 
   // Add the rectangle
-  if (!currentSegment->addRectangle(rx,ry)) {
+  addRectangle(rx,ry);
+}
+
+// Adds a new rectangle (from center point and angle)
+void GraphicRectangleList::addRectangle(Short x[4], Short y[4]) {
+
+  // Add the rectangle
+  if (!currentSegment->addRectangle(x,y)) {
     if (!(currentSegment=new GraphicRectangleListSegment(screen, numberOfRectanglesOtherSegments))) {
       FATAL("can not create rectangle list entry",NULL);
       return;
     }
-    currentSegment->addRectangle(rx,ry);
+    currentSegment->addRectangle(x,y);
     segments.push_back(currentSegment);
   }
 }

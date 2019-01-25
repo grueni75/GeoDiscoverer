@@ -16,6 +16,7 @@ PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libfreetype2 -na
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libcurl -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libzip -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/libproj4 -name '*.cpp')
+PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/openssl -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Feature/Linux -name '*.cpp')
 PLATFORM_SRCS   += $(shell find $(ROOT)/Source/Platform/Target/Linux -name '*.cpp')
 GENERAL_SRCS     = $(shell find $(ROOT)/Source/General -name '*.cpp')
@@ -30,6 +31,7 @@ PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/libfreetype2 -n
 PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/libcurl -name '*.h')
 PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/libzip -name '*.h')
 PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/libproj4 -name '*.h')
+PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/openssl -name '*.h')
 PLATFORM_HEADERS += $(shell find $(ROOT)/Source/Platform/Feature/Linux -name '*.h')
 GENERAL_HEADERS   = $(shell find $(ROOT)/Source/General -name '*.h')
 HEADERS           = $(PLATFORM_HEADERS) $(GENERAL_HEADERS)
@@ -45,6 +47,7 @@ INCLUDES += -I$(ROOT)/Source/Platform/Feature/libfreetype2
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/libcurl
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/libzip
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/libproj4
+INCLUDES += -I$(ROOT)/Source/Platform/Feature/openssl
 INCLUDES += -I$(ROOT)/Source/Platform/Feature/Linux
 INCLUDES += -I$(ROOT)/Source/General/App
 INCLUDES += -I$(ROOT)/Source/General/Map
@@ -58,7 +61,7 @@ INCLUDES += -I$(ROOT)/Source/General/Profile
 INCLUDES += -I/usr/include/freetype2
 INCLUDES += -I/usr/include/libxml2
 
-LIBS += -lstdc++ -lglut -lpthread -lGLU -ljpeg -lxml2 -lfreetype -lpng -lcurl -lzip -lproj -lGL -lm
+LIBS += -lstdc++ -lglut -lpthread -lGLU -ljpeg -lxml2 -lfreetype -lpng -lcurl -lzip -lproj -lGL -lm -lcrypto
 
 CXXFLAGS += -DSRC_ROOT='"$(ROOT)/Source"' -DTARGET_LINUX -Wnon-virtual-dtor
 # normal debug

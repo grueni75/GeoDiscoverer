@@ -66,6 +66,8 @@ MapContainer::MapContainer(bool doNotDelete) {
     this->imageType=ImageTypeUnknown;
     this->width=0;
     this->height=0;
+    this->overlayGraphicHash="";
+    this->serveToRemoteMap=false;
   }
 }
 
@@ -819,7 +821,111 @@ TimestampInSeconds MapContainer::getLastAccess() {
   return newestAccess;
 }
 
+
+// Stores the overlayed graphics into a file (excluding the tile itself)
+void MapContainer::storeOverlayGraphics(std::string filefolder, std::string filename) {
+
+  // Create the overlay file
+  std::string filepath = filefolder + "/" + filename;
+  remove(filepath.c_str());
+  std::ofstream ofs;
+  ofs.open(filepath.c_str(),std::ios::binary);
+  if (ofs.fail()) {
+    FATAL("can not open <%s> for writing",filepath.c_str());
+    return;
+  }
+
+  // Write the name of the map container
+  Storage::storeString(&ofs,getCalibrationFilePath());
+
+  // Iterate through all map tiles
+  for(std::vector<MapTile*>::iterator i=mapTiles.begin();i!=mapTiles.end();i++) {
+
+    // Add the binary representation of the overlay
+    Storage::storeInt(&ofs,(*i)->getMapX());
+    Storage::storeInt(&ofs,(*i)->getMapY());
+    (*i)->storeOverlayGraphics(&ofs);
+  }
+
+  // Close the overlay file
+  ofs.close();
+
+  // Compute the hash
+  overlayGraphicHash=Storage::computeMD5(filepath);
+  //DEBUG("overlayGraphicHash=%s",overlayGraphicHash.c_str());
 }
 
+// Recreates the visualization from a binary file
+void MapContainer::retrieveOverlayGraphics(std::string filefolder, std::string filename) {
 
+  // Open the file
+  std::string filepath = filefolder + "/" + filename;
+  std::ifstream ifs;
+  ifs.open(filepath.c_str(),std::ios::binary);
+  if (ifs.fail()) {
+    ERROR("can not open <%s> for reading",filepath.c_str());
+    return;
+  }
 
+  // Load the complete file into memory
+  struct stat filestat;
+  char *dataUnaligned;
+  core->statFile(filepath,&filestat);
+  if (!(dataUnaligned=(char*)malloc(filestat.st_size+1+sizeof(double)-1))) {
+    FATAL("can not allocate memory for reading complete file",NULL);
+    return;
+  }
+  char *data=dataUnaligned+(((ULong)dataUnaligned)%sizeof(double));
+  DEBUG("data=0x%08x",data);
+  ifs.read(data,filestat.st_size);
+  ifs.close();
+  data[filestat.st_size]=0; // to prevent that strings never end
+  Int size=filestat.st_size;
+  //DEBUG("size=%d",size);
+
+  // Skip the map container name
+  char *calibrationFilePath;
+  Storage::retrieveString(data,size,&calibrationFilePath);
+  if (strcmp(calibrationFilePath,this->calibrationFilePath)!=0) {
+    FATAL("calibration file path mismatch",NULL);
+  }
+
+  // Iterate through all map tiles
+  while (size>0) {
+
+    // Get the coordinates of the map tile
+    Int x;
+    Storage::retrieveInt(data,size,x);
+    Int y;
+    Storage::retrieveInt(data,size,y);
+    DEBUG("loading overlay graphics for tile at coordinate (%d,%d)",x,y);
+
+    // Find the map tile
+    bool found=false;
+    for(std::vector<MapTile*>::iterator i=mapTiles.begin();i!=mapTiles.end();i++) {
+      MapTile *t=*i;
+      if ((t->getMapX()==x)&&(t->getMapY()==y)) {
+
+        // Add the overlay graphics to the tile
+        t->retrieveOverlayGraphics(data,size);
+        found=true;
+      }
+    }
+    if (!found) {
+      ERROR("no tile at coordinates (%d,%d)",x,y);
+      break;
+    }
+    DEBUG("size=%d",size);
+  }
+
+  // That's it!
+  if (size!=0) {
+    ERROR("not all data consumed",NULL);
+  }
+  free(dataUnaligned);
+
+  // Compute the hash
+  overlayGraphicHash=Storage::computeMD5(filepath);
+}
+
+}

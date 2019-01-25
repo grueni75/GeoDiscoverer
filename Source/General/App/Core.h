@@ -463,7 +463,6 @@ extern Core *core;
 #include <NavigationPathVisualization.h>
 #include <NavigationPath.h>
 #include <NavigationPathSegment.h>
-#include <NavigationTarget.h>
 #include <NavigationPoint.h>
 #include <NavigationPointVisualization.h>
 #include <NavigationEngine.h>

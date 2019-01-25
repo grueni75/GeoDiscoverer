@@ -878,7 +878,7 @@ void MapEngine::updateMap() {
   }
 
   // Do we need to update the navigation graphic?
-  if ((mapChanged)||(core->getNavigationEngine()->mapGraphicUpdateIsRequired())) {
+  if ((mapChanged)||(core->getNavigationEngine()->mapGraphicUpdateIsRequired(__FILE__,__LINE__))) {
     core->getNavigationEngine()->updateMapGraphic();
   }
 

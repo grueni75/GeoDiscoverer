@@ -42,9 +42,6 @@ protected:
   // Checks if an overflow has occured
   bool pointIsValid(double x, double y);
 
-  // Adds one point to the internal array
-  void addPoint(Short x, Short y);
-
   // Updates the point such that it lies within the cut range
   void cutPoint(Short &x, Short &y, double m, double ys);
 
@@ -55,6 +52,9 @@ public:
 
   // Adds two points to the line
   void addStroke(Short x0, Short y0, Short x1, Short y1);
+
+  // Adds one point to the internal array
+  void addPoint(Short x, Short y);
 
   // Frees all memories
   void deinit();
@@ -84,6 +84,25 @@ public:
       this->cutWidth = cutWidth;
   }
 
+  Int getCutEnabled() const {
+    return cutEnabled;
+  }
+
+  Int getCutHeight() const {
+    return cutHeight;
+  }
+
+  Int getCutWidth() const {
+    return cutWidth;
+  }
+
+  std::list<GraphicPointBuffer*> *getSegments() {
+    return &segments;
+  }
+
+  Short getWidth() const {
+    return width;
+  }
 };
 
 }

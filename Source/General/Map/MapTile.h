@@ -82,11 +82,24 @@ protected:
   // Path segments that cross this tile
   MapTileNavigationPathMap crossingPathSegmentsMap;
 
+  // Graphic primitives created during retrieving additional visualization
+  std::list<GraphicPrimitiveKey> retrievedAnimators;
+  std::list<GraphicPrimitiveKey> retrievedPrimitives;
+
   // Compares the latitude and longitude positions with the one of the given tile
   bool isNeighbor(MapTile *t, Int ownEdgeX, Int ownEdgeY, Int foreignEdgeX, Int foreignEdgeY) const;
 
   // Does the computationly intensive part of the initialization
   void init();
+
+  // Removes all overlay graphics from the visualization
+  void resetVisualization();
+
+  // Stores a animator
+  void storeAnimator(std::ofstream *ofs, GraphicPrimitive *animator);
+
+  // Retrieves an animator
+  GraphicPrimitive *retrieveAnimator(TimestampInMicroseconds t, char *&data, Int &size);
 
 public:
 
@@ -195,6 +208,12 @@ public:
 
   // Getters and setters
   Int getMapBorder(PictureBorder border);
+
+  // Stores the overlayed graphics into a file (excluding the tile itself)
+  void storeOverlayGraphics(std::ofstream *ofs);
+
+  // Recreates the visualization from a binary file
+  void retrieveOverlayGraphics(char *&data, Int &size);
 
   GraphicRectangle *getRectangle()
   {

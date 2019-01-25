@@ -217,11 +217,11 @@ public:
   // Returns the file path to the legend with the given name
   static std::string getLegendPath(std::string name);
 
-  // Returns the next free map archive file name
-  virtual std::string getFreeArchiveFilePath();
-
   // Adds a new map archive
-  virtual bool addArchive(std::string path);
+  virtual bool addMapArchive(std::string path, std::string hash);
+
+  // Adds a new overlay archive
+  virtual bool addOverlayArchive(std::string path, std::string hash);
 
   // Getters and setters
   Int getMapTileLength() const {

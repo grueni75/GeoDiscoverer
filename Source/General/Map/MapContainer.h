@@ -64,6 +64,7 @@ protected:
   bool downloadErrorOccured;                // Indicates that the image could not been downloaded to disk correctly
   bool overlayGraphicInvalid;               // Indicates that this container is missing it's overlay graphics
   bool serveToRemoteMap;                    // Indicates that this container shall be served to a remote side after download is complete
+  std::string overlayGraphicHash;           // Hash that represents the overlay content
 
   // Lists of map tiles sorted by their boundaries
   std::vector<Int> mapTilesIndexByMapTop;
@@ -157,6 +158,12 @@ public:
   // Creates the search tree
   void createSearchTree();
 
+  // Stores the overlayed graphics into a file (excluding the tile itself)
+  void storeOverlayGraphics(std::string filefolder, std::string filename);
+
+  // Recreates the visualization from a binary file
+  void retrieveOverlayGraphics(std::string filefolder, std::string filename);
+
   // Getters and setters
   bool getOverlayGraphicInvalid() const {
     return overlayGraphicInvalid;
@@ -222,6 +229,12 @@ public:
     } else {
       return std::string(archiveFileName);
     }
+  }
+
+  std::string getOverlayFileName() const
+  {
+    std::string overlayFilename = getArchiveFileName().substr(0,getArchiveFileName().length()-1) + "o";
+    return overlayFilename;
   }
 
   std::vector<MapTile*> *getMapTiles() {
@@ -460,6 +473,15 @@ public:
   void setServeToRemoteMap(bool serveToRemoteMap) {
     this->serveToRemoteMap = serveToRemoteMap;
   }
+
+  const std::string& getOverlayGraphicHash() const {
+    return overlayGraphicHash;
+  }
+
+  void resetOverlayGraphicHash() {
+    overlayGraphicHash="";
+  }
+
 };
 
 }

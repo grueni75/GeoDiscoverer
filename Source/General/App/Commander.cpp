@@ -685,12 +685,24 @@ std::string Commander::execute(std::string cmd) {
     core->getMapSource()->queueRemoteServerCommand(cmd);
     cmdExecuted=true;
   }
-  if (cmdName=="getFreeMapArchiveFilePath") {
-    result=core->getMapSource()->getFreeArchiveFilePath();
+  if (cmdName=="fillGeographicAreaWithRemoteTiles") {
+    core->getMapSource()->queueRemoteServerCommand(cmd);
+    cmdExecuted=true;
+  }
+  if (cmdName=="remoteMapArchiveServed") {
+    core->getMapSource()->queueRemoteServerCommand(cmd);
+    cmdExecuted=true;
+  }
+  if (cmdName=="remoteOverlayArchiveServed") {
+    core->getMapSource()->queueRemoteServerCommand(cmd);
     cmdExecuted=true;
   }
   if (cmdName=="addMapArchive") {
-    result=core->getMapSource()->addArchive(args[0]);
+    result=core->getMapSource()->addMapArchive(args[0],args[1]);
+    cmdExecuted=true;
+  }
+  if (cmdName=="addOverlayArchive") {
+    result=core->getMapSource()->addOverlayArchive(args[0],args[1]);
     cmdExecuted=true;
   }
   if (cmdName=="setRemoteServerActive") {

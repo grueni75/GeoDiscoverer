@@ -164,7 +164,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   boolean isWatch = false;
 
   // Stores the mapping of channel names to file names
-  public Hashtable channelPathToFilePath = new Hashtable<String, String>();
+  public Hashtable channelPathToFilePath = new Hashtable<String, Bundle>();
 
   // Handle to the google API
   public GoogleApiClient googleApiClient;
@@ -316,6 +316,20 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   
   /** Updates files on the sdcard with the latest ones */
   boolean updateHome() {
+
+    // Remove any temp downloaded files
+    File dir = new File(homePath + "/Map");
+    File[] directoryListing = dir.listFiles();
+    if (directoryListing != null) {
+      for (File child : directoryListing) {
+        if (child.getName().endsWith(".gda")) {
+          child.delete();
+        }
+        if (child.getName().endsWith(".gdo")) {
+          child.delete();
+        }
+      }
+    }
 
     // Check if the GeoDiscoverer assets need to be updated
     AssetManager am = appIf.getApplication().getAssets();
@@ -676,6 +690,11 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         appIf.sendWearCommand(cmd);
       cmdExecuted=true;
     }
+    if (cmd.startsWith("serveRemoteOverlayArchive(")) {
+      if (!isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
+    }
     if (cmd.equals("forceRemoteMapUpdate()")) {
       if (!isWatch)
         appIf.sendWearCommand(cmd);
@@ -765,6 +784,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   
   /** Called when a frame needs to be drawn */
   public void onDrawFrame(GL10 gl) {
+    //appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", "draw start");
     coreLock.lock();
     boolean blankScreen=false;
     if (gl==currentGL) {
@@ -807,6 +827,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       lastFrameDrawnByCore=false;
     }
     coreLock.unlock();
+    //appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", "draw end");
   }
   
   /** Updates the splash visibility flag */
