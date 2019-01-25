@@ -708,6 +708,7 @@ void MapTile::retrieveOverlayGraphics(char *&data, Int &size) {
         Storage::retrieveShort(data,size,y);
         line->addPoint(x,y);
       }
+      line->optimize();
 
       // Add it to the visualization
       core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
@@ -752,6 +753,7 @@ void MapTile::retrieveOverlayGraphics(char *&data, Int &size) {
         }
         rectangleList->addRectangle(x,y);
       }
+      rectangleList->optimize();
 
       // Add it to the visualization
       core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
@@ -764,6 +766,39 @@ void MapTile::retrieveOverlayGraphics(char *&data, Int &size) {
     case 127:
       complete=true;
       break;
+    }
+  }
+}
+
+// Indicates that textures and buffers shall be created
+void MapTile::createGraphic() {
+  for (std::list<GraphicPrimitiveKey>::iterator i=retrievedPrimitives.begin();i!=retrievedPrimitives.end();i++) {
+    GraphicPrimitive *p=visualization.getPrimitive(*i);
+    switch (p->getType()) {
+    case GraphicTypeLine:
+      break;
+    case GraphicTypeRectangleList:
+      ((GraphicRectangleList*)p)->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
+      break;
+    default:
+      FATAL("unsupported graphic primtive found",NULL);
+    }
+  }
+}
+
+// Indicates that textures and buffers have been cleared
+void MapTile::destroyGraphic() {
+  for (std::list<GraphicPrimitiveKey>::iterator i=retrievedPrimitives.begin();i!=retrievedPrimitives.end();i++) {
+    GraphicPrimitive *p=visualization.getPrimitive(*i);
+    switch (p->getType()) {
+    case GraphicTypeLine:
+      ((GraphicLine*)p)->invalidate();
+      break;
+    case GraphicTypeRectangleList:
+      ((GraphicRectangleList*)p)->invalidate();
+      break;
+    default:
+      FATAL("unsupported graphic primtive found",NULL);
     }
   }
 }

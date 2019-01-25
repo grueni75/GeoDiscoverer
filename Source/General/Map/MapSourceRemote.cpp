@@ -553,7 +553,6 @@ bool MapSourceRemote::addOverlayArchive(std::string path, std::string hash) {
   free(data);
 
   // Find the map container this overlay archive belongs to
-  DEBUG("calibrationFilepath=%s",calibrationFilepath.c_str());
   MapContainer *c=NULL;
   lockAccess(__FILE__,__LINE__);
   for (std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {

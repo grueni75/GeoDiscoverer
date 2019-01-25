@@ -876,7 +876,6 @@ void MapContainer::retrieveOverlayGraphics(std::string filefolder, std::string f
     return;
   }
   char *data=dataUnaligned+(((ULong)dataUnaligned)%sizeof(double));
-  DEBUG("data=0x%08x",data);
   ifs.read(data,filestat.st_size);
   ifs.close();
   data[filestat.st_size]=0; // to prevent that strings never end
@@ -898,7 +897,6 @@ void MapContainer::retrieveOverlayGraphics(std::string filefolder, std::string f
     Storage::retrieveInt(data,size,x);
     Int y;
     Storage::retrieveInt(data,size,y);
-    DEBUG("loading overlay graphics for tile at coordinate (%d,%d)",x,y);
 
     // Find the map tile
     bool found=false;
@@ -915,7 +913,6 @@ void MapContainer::retrieveOverlayGraphics(std::string filefolder, std::string f
       ERROR("no tile at coordinates (%d,%d)",x,y);
       break;
     }
-    DEBUG("size=%d",size);
   }
 
   // That's it!

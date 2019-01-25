@@ -1767,5 +1767,34 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
     MapSource::fillGeographicAreaWithTiles(w,tile,maxTiles,tiles,abort);
 }
 
+// Creates all graphics
+void MapSource::createGraphic() {
+  lockAccess(__FILE__,__LINE__);
+  std::vector<MapContainer *> *maps=core->getMapSource()->getMapContainers();
+  for (std::vector<MapContainer*>::const_iterator i=maps->begin();i!=maps->end();i++) {
+    MapContainer *c=*i;
+    std::vector<MapTile *> *tiles=c->getMapTiles();
+    for (std::vector<MapTile*>::const_iterator j=(*tiles).begin();j!=(*tiles).end();j++) {
+      MapTile *t=*j;
+      t->createGraphic();
+    }
+  }
+  unlockAccess();
+}
+
+// Destroys all graphics
+void MapSource::destroyGraphic() {
+  lockAccess(__FILE__,__LINE__);
+  std::vector<MapContainer *> *maps=core->getMapSource()->getMapContainers();
+  for (std::vector<MapContainer*>::const_iterator i=maps->begin();i!=maps->end();i++) {
+    MapContainer *c=*i;
+    std::vector<MapTile *> *tiles=c->getMapTiles();
+    for (std::vector<MapTile*>::const_iterator j=(*tiles).begin();j!=(*tiles).end();j++) {
+      MapTile *t=*j;
+      t->destroyGraphic();
+    }
+  }
+  unlockAccess();
+}
 
 }

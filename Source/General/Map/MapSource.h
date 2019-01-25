@@ -223,6 +223,12 @@ public:
   // Adds a new overlay archive
   virtual bool addOverlayArchive(std::string path, std::string hash);
 
+  // Creates all graphics
+  void createGraphic();
+
+  // Destroys all graphics
+  void destroyGraphic();
+
   // Getters and setters
   Int getMapTileLength() const {
     return mapTileLength;

@@ -215,6 +215,13 @@ public:
   // Recreates the visualization from a binary file
   void retrieveOverlayGraphics(char *&data, Int &size);
 
+  // Creates all graphics
+  void createGraphic();
+
+  // Destroys all graphics
+  void destroyGraphic();
+
+  // Getters and setters
   GraphicRectangle *getRectangle()
   {
       return &rectangle;

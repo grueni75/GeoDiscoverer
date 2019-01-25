@@ -810,6 +810,7 @@ void Core::updateGraphic(bool graphicInvalidated, bool destroyOnly) {
   Device *d=getDefaultDevice();
   d->getScreen()->setAllowDestroying(true);
   navigationEngine->destroyGraphic();
+  mapSource->destroyGraphic();
   if (isInitialized)
     mapCache->destroyGraphic();
   d->getGraphicEngine()->destroyGraphic();
@@ -828,6 +829,7 @@ void Core::updateGraphic(bool graphicInvalidated, bool destroyOnly) {
     d->getGraphicEngine()->createGraphic();
     if (isInitialized)
       mapCache->createGraphic();
+    mapSource->createGraphic();
     navigationEngine->createGraphic();
     d->getScreen()->setAllowAllocation(false);
   }
