@@ -357,33 +357,56 @@ void WidgetEngine::createGraphic() {
       config.setParameter("repeat","0");
       addWidgetToPage(config);
       // ---------------------------------------------------------
+    }
+    if ((deviceName=="Default")||(deviceName=="Watch")) {
       config=WidgetConfig();
       config.setPageName("Default");
       config.setName("Return To Location");
       config.setType(WidgetTypeCheckbox);
-      position=WidgetPosition();
-      position.setRefScreenDiagonal(4.0);
-      position.setPortraitX(37.5);
-      position.setPortraitY(23.0);
-      position.setPortraitZ(0);
-      position.setLandscapeX(89.5);
-      position.setLandscapeY(37.5);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
-      position=WidgetPosition();
-      position.setRefScreenDiagonal(7.0);
-      position.setPortraitX(tabletPortraitButtonGridX[2]);
-      position.setPortraitY(tabletPortraitButtonGridY[0]);
-      position.setPortraitZ(0);
-      position.setLandscapeX(tabletLandscapeButtonGridX[2]);
-      position.setLandscapeY(tabletLandscapeButtonGridY[0]);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
+      if (deviceName=="Default") {
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(37.5);
+        position.setPortraitY(23.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(89.5);
+        position.setLandscapeY(37.5);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(7.0);
+        position.setPortraitX(tabletPortraitButtonGridX[2]);
+        position.setPortraitY(tabletPortraitButtonGridY[0]);
+        position.setPortraitZ(0);
+        position.setLandscapeX(tabletLandscapeButtonGridX[2]);
+        position.setLandscapeY(tabletLandscapeButtonGridY[0]);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+      }
+      if (deviceName=="Watch") {
+        position.setRefScreenDiagonal(0);
+        position.setPortraitX(10.0);
+        position.setPortraitY(65.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(10.0);
+        position.setLandscapeY(65.0);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+      }
       config.setActiveColor(GraphicColor(255,255,255,255));
-      config.setInactiveColor(GraphicColor(255,255,255,100));
-      config.setParameter("uncheckedIconFilename","returnToLocationOff");
+      if (deviceName=="Watch") {
+        config.setInactiveColor(GraphicColor(255,255,255,0));
+      } else {
+        config.setInactiveColor(GraphicColor(255,255,255,100));
+      }
+      if (deviceName=="Watch") {
+        config.setParameter("uncheckedIconFilename","returnToLocationOffRightHand");
+        config.setParameter("checkedIconFilename","returnToLocationOnRightHand");
+      } else {
+        config.setParameter("uncheckedIconFilename","returnToLocationOff");
+        config.setParameter("checkedIconFilename","returnToLocationOn");
+      }
       config.setParameter("uncheckedCommand","setReturnToLocation(0)");
-      config.setParameter("checkedIconFilename","returnToLocationOn");
       config.setParameter("checkedCommand","setReturnToLocation(1)");
       config.setParameter("stateConfigPath","Map");
       config.setParameter("stateConfigName","returnToLocation");
@@ -394,26 +417,42 @@ void WidgetEngine::createGraphic() {
       config.setPageName("Default");
       config.setName("Zoom Level Lock");
       config.setType(WidgetTypeCheckbox);
-      position=WidgetPosition();
-      position.setRefScreenDiagonal(4.0);
-      position.setPortraitX(12.5);
-      position.setPortraitY(23.0);
-      position.setPortraitZ(0);
-      position.setLandscapeX(89.5);
-      position.setLandscapeY(12.5);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
-      position=WidgetPosition();
-      position.setRefScreenDiagonal(7.0);
-      position.setPortraitX(tabletPortraitButtonGridX[2]);
-      position.setPortraitY(tabletPortraitButtonGridY[1]);
-      position.setPortraitZ(0);
-      position.setLandscapeX(tabletLandscapeButtonGridX[2]);
-      position.setLandscapeY(tabletLandscapeButtonGridY[1]);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
+      if (deviceName=="Default") {
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(12.5);
+        position.setPortraitY(23.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(89.5);
+        position.setLandscapeY(12.5);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(7.0);
+        position.setPortraitX(tabletPortraitButtonGridX[2]);
+        position.setPortraitY(tabletPortraitButtonGridY[1]);
+        position.setPortraitZ(0);
+        position.setLandscapeX(tabletLandscapeButtonGridX[2]);
+        position.setLandscapeY(tabletLandscapeButtonGridY[1]);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+      }
+      if (deviceName=="Watch") {
+        position.setRefScreenDiagonal(0);
+        position.setPortraitX(10.0);
+        position.setPortraitY(35.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(10.0);
+        position.setLandscapeY(35.0);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+      }
       config.setActiveColor(GraphicColor(255,255,255,255));
-      config.setInactiveColor(GraphicColor(255,255,255,100));
+      if (deviceName=="Watch") {
+        config.setInactiveColor(GraphicColor(255,255,255,0));
+      } else {
+        config.setInactiveColor(GraphicColor(255,255,255,100));
+      }
       config.setParameter("uncheckedIconFilename","zoomLevelLockOff");
       config.setParameter("uncheckedCommand","setZoomLevelLock(0)");
       config.setParameter("checkedIconFilename","zoomLevelLockOn");
@@ -422,27 +461,29 @@ void WidgetEngine::createGraphic() {
       config.setParameter("stateConfigName","zoomLevelLock");
       config.setParameter("updateInterval","250000");
       addWidgetToPage(config);
-      config.setPageName("Path Tools");
-      config.clearPositions();
-      position=WidgetPosition();
-      position.setRefScreenDiagonal(4.0);
-      position.setPortraitX(12.5);
-      position.setPortraitY(93.0);
-      position.setPortraitZ(0);
-      position.setLandscapeX(10.5);
-      position.setLandscapeY(12.5);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
-      position=WidgetPosition();
-      position.setRefScreenDiagonal(7.0);
-      position.setPortraitX(tabletPortraitButtonGridX[3]);
-      position.setPortraitY(tabletPortraitButtonGridY[1]);
-      position.setPortraitZ(0);
-      position.setLandscapeX(tabletLandscapeButtonGridX[3]);
-      position.setLandscapeY(tabletLandscapeButtonGridY[1]);
-      position.setLandscapeZ(0);
-      config.addPosition(position);
-      addWidgetToPage(config);
+      if (deviceName=="Default") {
+        config.setPageName("Path Tools");
+        config.clearPositions();
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(12.5);
+        position.setPortraitY(93.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(10.5);
+        position.setLandscapeY(12.5);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(7.0);
+        position.setPortraitX(tabletPortraitButtonGridX[3]);
+        position.setPortraitY(tabletPortraitButtonGridY[1]);
+        position.setPortraitZ(0);
+        position.setLandscapeX(tabletLandscapeButtonGridX[3]);
+        position.setLandscapeY(tabletLandscapeButtonGridY[1]);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+        addWidgetToPage(config);
+      }
     }
     // ---------------------------------------------------------
     if (deviceName!="Watch") {
