@@ -442,7 +442,7 @@ void MapEngine::setReturnToLocation(bool returnToLocation, bool showInfo)
   }
   this->returnToLocation=returnToLocation;
   core->getConfigStore()->setIntValue("Map","returnToLocation",returnToLocation, __FILE__, __LINE__);
-  if (showInfo) {
+  if ((showInfo)&&(!core->getDefaultDevice()->getIsWatch())) {
     if (returnToLocation) {
       INFO("return to location is enabled",NULL);
     } else {
@@ -456,7 +456,7 @@ void MapEngine::setZoomLevelLock(bool zoomLevelLock, bool showInfo)
 {
   this->zoomLevelLock=zoomLevelLock;
   core->getConfigStore()->setIntValue("Map","zoomLevelLock",zoomLevelLock,__FILE__, __LINE__);
-  if (showInfo) {
+  if ((showInfo)&&(!core->getDefaultDevice()->getIsWatch())) {
     if (zoomLevelLock) {
       INFO("zoom level lock is enabled",NULL);
     } else {
