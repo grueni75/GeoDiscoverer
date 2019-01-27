@@ -24,9 +24,12 @@
 
 namespace GEODISCOVERER {
 
-typedef enum {NavigationPointVisualizationTypePoint, NavigationPointVisualizationTypeStartFlag, NavigationPointVisualizationTypeEndFlag } NavigationPointVisualizationType;
+typedef enum {NavigationPointVisualizationTypeUnknown=0, NavigationPointVisualizationTypePoint=1, NavigationPointVisualizationTypeStartFlag=2, NavigationPointVisualizationTypeEndFlag=3 } NavigationPointVisualizationType;
 
 class NavigationPointVisualization {
+
+  // Visualization object of this
+  GraphicObject *visualizationObject;
 
   // Position of the point
   MapPosition pos;
@@ -49,16 +52,34 @@ class NavigationPointVisualization {
   // Duration in microseconds that the point animation shall last
   TimestampInMicroseconds animationDuration;
 
+  // Code shared by the constructors
+  void init(GraphicObject *visualizationObject, TimestampInMicroseconds createTime);
+
 public:
 
   // Constructor
-  NavigationPointVisualization(double lat, double lng, NavigationPointVisualizationType visualizationType, std::string name, void *reference);
+  NavigationPointVisualization(GraphicObject *visualizationObject);
+
+  // Constructor
+  NavigationPointVisualization(GraphicObject *visualizationObject, double lat, double lng, NavigationPointVisualizationType visualizationType, std::string name, void *reference);
 
   // Destructor
   virtual ~NavigationPointVisualization();
 
   // Updates the visualization
-  void updateVisualization(TimestampInMicroseconds t, MapPosition mapPos, MapArea displayArea, GraphicObject *visualizationObject);
+  void updateVisualization(TimestampInMicroseconds t, MapPosition mapPos, MapArea displayArea);
+
+  // Indicates that textures and buffers have been cleared
+  void destroyGraphic();
+
+  // Indicates that textures and buffers shall be created
+  void createGraphic();
+
+  // Stores the content into a file
+  void store(std::ofstream *ofs);
+
+  // Recreates the content from a binary file
+  void retrieve(char *&data, Int &size);
 
   // Getters and setters
   const NavigationPointVisualizationType getVisualizationType() const {

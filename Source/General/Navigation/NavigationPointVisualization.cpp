@@ -24,24 +24,36 @@
 namespace GEODISCOVERER {
 
 // Constructor
-NavigationPointVisualization::NavigationPointVisualization(double lat, double lng, NavigationPointVisualizationType visualizationType, std::string name, void *reference) : pos() {
+NavigationPointVisualization::NavigationPointVisualization(GraphicObject *visualizationObject) {
+  init(visualizationObject,0);
+}
+
+// Constructor
+NavigationPointVisualization::NavigationPointVisualization(GraphicObject *visualizationObject, double lat, double lng, NavigationPointVisualizationType visualizationType, std::string name, void *reference) : pos() {
+  init(visualizationObject,core->getClock()->getMicrosecondsSinceStart());
   pos.setLng(lng);
   pos.setLat(lat);
   this->visualizationType=visualizationType;
   this->name=name;
   this->reference=reference;
-  graphicPrimitiveKey=0;
-  createTime=core->getClock()->getMicrosecondsSinceStart();
-  animationDuration=core->getConfigStore()->getIntValue("Graphic","animationDuration", __FILE__, __LINE__);
 }
 
+// Code shared by the constructors
+void NavigationPointVisualization::init(GraphicObject *visualizationObject, TimestampInMicroseconds createTime)  {
+  this->visualizationType=NavigationPointVisualizationTypeUnknown;
+  this->reference=NULL;
+  this->visualizationObject=visualizationObject;
+  graphicPrimitiveKey=0;
+  this->createTime=createTime;;
+  animationDuration=core->getConfigStore()->getIntValue("Graphic","animationDuration", __FILE__, __LINE__);
+}
 
 // Destructor
 NavigationPointVisualization::~NavigationPointVisualization() {
 }
 
 // Updates the visualization
-void NavigationPointVisualization::updateVisualization(TimestampInMicroseconds t, MapPosition mapPos, MapArea displayArea, GraphicObject *visualizationObject) {
+void NavigationPointVisualization::updateVisualization(TimestampInMicroseconds t, MapPosition mapPos, MapArea displayArea) {
 
   Int mapDiffX, mapDiffY;
   Int visPosX, visPosY;
@@ -121,6 +133,71 @@ void NavigationPointVisualization::updateVisualization(TimestampInMicroseconds t
     }
   }
   core->getDefaultGraphicEngine()->unlockDrawing();
+}
+
+
+// Stores the content into a file
+void NavigationPointVisualization::store(std::ofstream *ofs) {
+
+  // Store the fields
+  Storage::storeByte(ofs,visualizationType);
+  Storage::storeString(ofs,name);
+  Storage::storeAlignment(ofs,sizeof(double));
+  Storage::storeDouble(ofs,pos.getLng());
+  Storage::storeDouble(ofs,pos.getLat());
+}
+
+// Recreates the content from a binary file
+void NavigationPointVisualization::retrieve(char *&data, Int &size) {
+
+  // Read the fields
+  Byte type;
+  Storage::retrieveByte(data,size,type);
+  //DEBUG("type=%d",type);
+  this->visualizationType=(NavigationPointVisualizationType)type;
+  char *name;
+  Storage::retrieveString(data,size,&name);
+  this->name=std::string(name);
+  Storage::retrieveAlignment(data,size,sizeof(double));
+  double t;
+  Storage::retrieveDouble(data,size,t);
+  pos.setLng(t);
+  Storage::retrieveDouble(data,size,t);
+  pos.setLat(t);
+}
+
+// Indicates that textures and buffers shall be created
+void NavigationPointVisualization::createGraphic() {
+  if (graphicPrimitiveKey!=0) {
+    GraphicRectangle *graphicRectangle=(GraphicRectangle*)visualizationObject->getPrimitive(graphicPrimitiveKey);
+    if (graphicRectangle) {
+      DEBUG("createGraphic called for rectangle 0x%08x",graphicRectangle);
+      switch(visualizationType) {
+      case NavigationPointVisualizationTypePoint:
+        graphicRectangle->setTexture(core->getDefaultGraphicEngine()->getNavigationPointIcon()->getTexture());
+        break;
+      case NavigationPointVisualizationTypeStartFlag:
+        graphicRectangle->setTexture(core->getDefaultGraphicEngine()->getPathStartFlagIcon()->getTexture());
+        break;
+      case NavigationPointVisualizationTypeEndFlag:
+        graphicRectangle->setTexture(core->getDefaultGraphicEngine()->getPathEndFlagIcon()->getTexture());
+        break;
+      default:
+        FATAL("unknown navigation point visualization type",NULL);
+      }
+    }
+  }
+}
+
+// Indicates that textures and buffers have been cleared
+void NavigationPointVisualization::destroyGraphic() {
+  if (graphicPrimitiveKey!=0) {
+    GraphicRectangle *graphicRectangle=(GraphicRectangle*)visualizationObject->getPrimitive(graphicPrimitiveKey);
+    if (graphicRectangle) {
+      DEBUG("destroyGraphic called for rectangle 0x%08x",graphicRectangle);
+      graphicRectangle->invalidate();
+    }
+  }
 }
 
 } /* namespace GEODISCOVERER */

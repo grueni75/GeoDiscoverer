@@ -27,6 +27,7 @@
 namespace GEODISCOVERER {
 
 typedef enum { MapSourceTypeCalibratedPictures, MapSourceTypeMercatorTiles, MapSourceTypeEmpty, MapSourceTypeRemote } MapSourceType;
+typedef enum { OverlayArchiveTypeMapContainer=0, OverlayArchiveTypeNavigationEngine=1 } OverlayArchiveType;
 
 class MapSource {
 
@@ -112,6 +113,9 @@ protected:
 
   // Adds the given map container to the queue for sending to the remote server
   void queueRemoteMapContainer(MapContainer* c, std::vector<std::string> *alreadyKnownMapContainers, Int startIndex, std::list<std::vector<std::string> > *mapImagesToServe);
+
+  // Updates the navigation engine overlay archive if necessary
+  void queueRemoteNavigationEngineOverlayArchive(std::string remoteHash);
 
 public:
 

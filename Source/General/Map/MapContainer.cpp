@@ -835,6 +835,9 @@ void MapContainer::storeOverlayGraphics(std::string filefolder, std::string file
     return;
   }
 
+  // Write the type of overlay
+  Storage::storeByte(&ofs,OverlayArchiveTypeMapContainer);
+
   // Write the name of the map container
   Storage::storeString(&ofs,getCalibrationFilePath());
 
@@ -881,6 +884,10 @@ void MapContainer::retrieveOverlayGraphics(std::string filefolder, std::string f
   data[filestat.st_size]=0; // to prevent that strings never end
   Int size=filestat.st_size;
   //DEBUG("size=%d",size);
+
+  // Skip the type
+  Byte t;
+  Storage::retrieveByte(data,size,t);
 
   // Skip the map container name
   char *calibrationFilePath;

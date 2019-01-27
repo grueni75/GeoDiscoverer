@@ -79,12 +79,13 @@ NavigationEngine::NavigationEngine() :
   targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor", __FILE__, __LINE__);
   backgroundLoaderFinished=false;
   navigationInfosMutex=core->getThread()->createMutex("navigation engine navigation infos mutex");
-  addressPointsMutex=core->getThread()->createMutex("navigation engine address points mutex");
+  navigationPointsMutex=core->getThread()->createMutex("navigation engine navigation points mutex");
   minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate", __FILE__, __LINE__);
   forceNavigationInfoUpdate=false;
   computeNavigationInfoThreadInfo=NULL;
   computeNavigationInfoSignal=core->getThread()->createSignal();
   maxAddressPointCount=core->getConfigStore()->getIntValue("Navigation","maxAddressPointCount", __FILE__, __LINE__);
+  overlayGraphicHash="";
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -131,7 +132,7 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(targetPosMutex);
   core->getThread()->destroyMutex(backgroundLoaderFinishedMutex);
   core->getThread()->destroyMutex(navigationInfosMutex);
-  core->getThread()->destroyMutex(addressPointsMutex);
+  core->getThread()->destroyMutex(navigationPointsMutex);
   core->getThread()->destroyMutex(activeRouteMutex);
 }
 
@@ -235,6 +236,9 @@ void NavigationEngine::init() {
   // Start the navigation info calculator
   if (!(computeNavigationInfoThreadInfo=core->getThread()->createThread("navigation engine compute navigation info thread",navigationEngineComputeNavigationInfoThread,this)))
     FATAL("can not start compute navigation info thread",NULL);
+
+  // Inform the remote map
+  core->getCommander()->dispatch("forceRemoteMapUpdate()");
 
   // Object is initialized
   isInitialized=true;
@@ -985,10 +989,12 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   core->getDefaultGraphicEngine()->unlockArrowIcon();
 
   // Update the visualization of the points
+  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
   TimestampInMicroseconds t = core->getClock()->getMicrosecondsSinceStart();
   for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
-    (*i).updateVisualization(t,mapPos,displayArea,&navigationPointsGraphicObject);
+    (*i).updateVisualization(t,mapPos,displayArea);
   }
+  core->getThread()->unlockMutex(navigationPointsMutex);
 
   // Unlock the drawing mutex
   core->getThread()->unlockMutex(updateGraphicsMutex);
@@ -1037,8 +1043,6 @@ void NavigationEngine::updateMapGraphic() {
 
 // Destroys all graphics
 void NavigationEngine::destroyGraphic() {
-
-  // Clear the buffers used in the path object
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
     (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->destroyGraphic();
@@ -1049,6 +1053,11 @@ void NavigationEngine::destroyGraphic() {
     recordedTrack->destroyGraphic();
     recordedTrack->unlockAccess();
   }
+  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
+    (*i).destroyGraphic();
+  }
+  core->getThread()->unlockMutex(navigationPointsMutex);
 }
 
 // Creates all graphics
@@ -1070,6 +1079,11 @@ void NavigationEngine::createGraphic() {
     recordedTrack->createGraphic();
     recordedTrack->unlockAccess();
   }
+  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
+    (*i).createGraphic();
+  }
+  core->getThread()->unlockMutex(navigationPointsMutex);
 }
 
 // Recreate the objects to reduce the number of graphic point buffers
@@ -1261,6 +1275,7 @@ void NavigationEngine::setTargetPos(double lng, double lat) {
 
 // Updates the flags of a route
 void NavigationEngine::updateFlagVisualization(NavigationPath *path) {
+  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
   std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
   MapPosition startFlagPos=path->getStartFlagPos();
   MapPosition endFlagPos=path->getEndFlagPos();
@@ -1298,13 +1313,15 @@ void NavigationEngine::updateFlagVisualization(NavigationPath *path) {
     }
   }
   if (replaceStartFlag) {
-    NavigationPointVisualization startFlagVis(startFlagPos.getLat(),startFlagPos.getLng(), NavigationPointVisualizationTypeStartFlag,path->getGpxFilename(),(void*)path);
+    NavigationPointVisualization startFlagVis(&navigationPointsGraphicObject, startFlagPos.getLat(),startFlagPos.getLng(), NavigationPointVisualizationTypeStartFlag,path->getGpxFilename(),(void*)path);
     navigationPointsVisualization.push_back(startFlagVis);
   }
   if (replaceEndFlag) {
-    NavigationPointVisualization endFlagVis(endFlagPos.getLat(),endFlagPos.getLng(), NavigationPointVisualizationTypeEndFlag,path->getGpxFilename(),(void*)path);
+    NavigationPointVisualization endFlagVis(&navigationPointsGraphicObject, endFlagPos.getLat(),endFlagPos.getLng(), NavigationPointVisualizationTypeEndFlag,path->getGpxFilename(),(void*)path);
     navigationPointsVisualization.push_back(endFlagVis);
   }
+  resetOverlayGraphicHash();
+  core->getThread()->unlockMutex(navigationPointsMutex);
   if ((replaceStartFlag)||(replaceEndFlag))
     updateScreenGraphic(false);
 }
@@ -1640,28 +1657,30 @@ void NavigationEngine::removeAddressPoint(std::string name) {
 void NavigationEngine::initAddressPoints() {
   std::string path = "Navigation/AddressPoint";
   std::list<std::string> names = core->getConfigStore()->getAttributeValues(path,"name",__FILE__,__LINE__);
-  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
   std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
   while (i!=navigationPointsVisualization.end()) {
     if ((*i).getVisualizationType()==NavigationPointVisualizationTypePoint) {
+      core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
       navigationPointsGraphicObject.removePrimitive((*i).getGraphicPrimitiveKey(),true);
+      core->getDefaultGraphicEngine()->unlockDrawing();
       i=navigationPointsVisualization.erase(i);
     } else {
       i++;
     }
   }
-  core->getDefaultGraphicEngine()->unlockDrawing();
-  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
   addressPoints.clear();
   for (std::list<std::string>::iterator j=names.begin();j!=names.end();j++) {
     NavigationPoint addressPoint;
     addressPoint.setName(*j);
     addressPoint.readFromConfig(path);
     addressPoints.push_back(addressPoint);
-    NavigationPointVisualization pointVis(addressPoint.getLat(),addressPoint.getLng(), NavigationPointVisualizationTypePoint, addressPoint.getName(),NULL);
+    NavigationPointVisualization pointVis(&navigationPointsGraphicObject, addressPoint.getLat(),addressPoint.getLng(), NavigationPointVisualizationTypePoint, addressPoint.getName(),NULL);
     navigationPointsVisualization.push_back(pointVis);
   }
-  core->getThread()->unlockMutex(addressPointsMutex);
+  resetOverlayGraphicHash();
+  core->getThread()->unlockMutex(navigationPointsMutex);
+  core->getCommander()->dispatch("forceRemoteMapUpdate()");
 }
 
 // Finds a route with the given name
@@ -1711,6 +1730,102 @@ void NavigationEngine::exportActiveRoute() {
   } else {
     WARNING("no route selected",NULL);
   }
+}
+
+// Stores the navigation points into a file
+void NavigationEngine::storeOverlayGraphics(std::string filefolder, std::string filename) {
+
+  // Create the overlay file
+  std::string filepath = filefolder + "/" + filename;
+  remove(filepath.c_str());
+  std::ofstream ofs;
+  ofs.open(filepath.c_str(),std::ios::binary);
+  if (ofs.fail()) {
+    FATAL("can not open <%s> for writing",filepath.c_str());
+    return;
+  }
+
+  // Store the type of overlay
+  Storage::storeByte(&ofs,OverlayArchiveTypeNavigationEngine);
+
+  // Store all navigation points
+  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
+    (*i).store(&ofs);
+  }
+  core->getThread()->unlockMutex(navigationPointsMutex);
+
+  // Close the overlay file
+  ofs.close();
+
+  // Compute the hash
+  overlayGraphicHash=Storage::computeMD5(filepath);
+}
+
+// Recreates the navigation points from a binary file
+void NavigationEngine::retrieveOverlayGraphics(std::string filefolder, std::string filename) {
+
+  // Open the file
+  std::string filepath = filefolder + "/" + filename;
+  std::ifstream ifs;
+  ifs.open(filepath.c_str(),std::ios::binary);
+  if (ifs.fail()) {
+    ERROR("can not open <%s> for reading",filepath.c_str());
+    return;
+  }
+
+  // Load the complete file into memory
+  struct stat filestat;
+  char *dataUnaligned;
+  core->statFile(filepath,&filestat);
+  if (!(dataUnaligned=(char*)malloc(filestat.st_size+1+sizeof(double)-1))) {
+    FATAL("can not allocate memory for reading complete file",NULL);
+    return;
+  }
+  char *data=dataUnaligned+(((ULong)dataUnaligned)%sizeof(double));
+  ifs.read(data,filestat.st_size);
+  ifs.close();
+  data[filestat.st_size]=0; // to prevent that strings never end
+  Int size=filestat.st_size;
+  //DEBUG("size=%d",size);
+
+  // Skip the type
+  Byte t;
+  Storage::retrieveByte(data,size,t);
+
+  // Clear the navigation points
+  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
+  while (i!=navigationPointsVisualization.end()) {
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+    navigationPointsGraphicObject.removePrimitive((*i).getGraphicPrimitiveKey(),true);
+    core->getDefaultGraphicEngine()->unlockDrawing();
+    i=navigationPointsVisualization.erase(i);
+  }
+
+  // Read all navigation points
+  while (size>0) {
+    NavigationPointVisualization navigationPointVisualization(&navigationPointsGraphicObject);
+    navigationPointVisualization.retrieve(data,size);
+    navigationPointsVisualization.push_back(navigationPointVisualization);
+  }
+  core->getThread()->unlockMutex(navigationPointsMutex);
+
+  // That's it!
+  if (size!=0) {
+    ERROR("not all data consumed",NULL);
+  }
+  free(dataUnaligned);
+
+  // Compute the hash
+  overlayGraphicHash=Storage::computeMD5(filepath);
+}
+
+// Forces an update of the navigation infos
+void NavigationEngine::triggerNavigationInfoUpdate() {
+  forceNavigationInfoUpdate=true;
+  core->getThread()->issueSignal(computeNavigationInfoSignal);
+  core->getCommander()->dispatch("forceRemoteMapUpdate()");
 }
 
 

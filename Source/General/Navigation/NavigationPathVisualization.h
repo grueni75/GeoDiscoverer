@@ -77,6 +77,12 @@ public:
   // Resets the overlay graphic hash for all map containers
   void resetOverlayGraphicHash();
 
+  // Stores the content into a file
+  void store(std::ofstream *ofs);
+
+  // Recreates the content from a binary file
+  void retrieve(char *&data, Int &size);
+
   // Getters and setters
   MapPosition getPoint(Int index) {
     return points[index];

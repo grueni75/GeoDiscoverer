@@ -143,9 +143,6 @@ protected:
   // Mutex for accessing the navigation infos
   ThreadMutexInfo *navigationInfosMutex;
 
-  // Mutex for accessing the address points
-  ThreadMutexInfo *addressPointsMutex;
-
   // Navigation information
   NavigationInfo navigationInfo;
 
@@ -158,17 +155,20 @@ protected:
   // List of address points
   std::list<NavigationPoint> addressPoints;
 
+  // Mutex for accessing the navigation points
+  ThreadMutexInfo *navigationPointsMutex;
+
   // Graphic object that represents the address points
   GraphicObject navigationPointsGraphicObject;
 
   // List of navigation points that are visualized
   std::list<NavigationPointVisualization> navigationPointsVisualization;
 
+  // Hash that represents the overlay content
+  std::string overlayGraphicHash;
+
   // Forces an update of the navigation infos
-  void triggerNavigationInfoUpdate() {
-    forceNavigationInfoUpdate=true;
-    core->getThread()->issueSignal(computeNavigationInfoSignal);
-  }
+  void triggerNavigationInfoUpdate();
 
   // Reads the address points from disk
   void initAddressPoints();
@@ -178,6 +178,11 @@ protected:
 
   // Updates the flags of a route
   void updateFlagVisualization(NavigationPath *path);
+
+  // Resets the hash
+  void resetOverlayGraphicHash() {
+    overlayGraphicHash="";
+  }
 
 public:
 
@@ -301,6 +306,12 @@ public:
   // Sets a location pos directly (e.g., on the watch)
   void setLocationPos(MapPosition newLocationPos, bool computeNavigationInfos, const char *file, int line);
 
+  // Stores the navigation points into a file
+  void storeOverlayGraphics(std::string filefolder, std::string filename);
+
+  // Recreates the navigation points from a binary file
+  void retrieveOverlayGraphics(std::string filefolder, std::string filename);
+
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)
   {
@@ -404,12 +415,12 @@ public:
 
   std::list<NavigationPoint>  *lockAddressPoints(const char *file, int line)
   {
-    core->getThread()->lockMutex(addressPointsMutex, file, line);
+    core->getThread()->lockMutex(navigationPointsMutex, file, line);
     return &addressPoints;
   }
   void unlockAddressPoints()
   {
-    core->getThread()->unlockMutex(addressPointsMutex);
+    core->getThread()->unlockMutex(navigationPointsMutex);
   }
 
   void getArrowInfo(bool &visible, double &angle) {
@@ -417,6 +428,12 @@ public:
     angle=arrowAngle;
   }
 
+  const std::string getOverlayGraphicHash() const {
+    core->getThread()->lockMutex(navigationPointsMutex, __FILE__, __LINE__);
+    std::string hash=overlayGraphicHash;
+    core->getThread()->unlockMutex(navigationPointsMutex);
+    return hash;
+  }
 };
 
 }

@@ -1149,14 +1149,31 @@ void MapSource::queueRemoteMapContainer(MapContainer* c, std::vector<std::string
   }
 }
 
+// Updates the navigation engine overlay archive if necessary
+void MapSource::queueRemoteNavigationEngineOverlayArchive(std::string remoteHash) {
+
+  std::string workPath = core->getHomePath() + "/Map";
+
+  // If the overlay hash is not yet computed, create it
+  if (core->getNavigationEngine()->getOverlayGraphicHash()=="") {
+    core->getNavigationEngine()->storeOverlayGraphics(workPath,"navigationEngine.gdo");
+  }
+
+  // Did the overlay change?
+  //DEBUG("remoteHash=%s localHash=%s",(*alreadyKnownMapContainers)[i+1].c_str(),c->getOverlayGraphicHash().c_str());
+  if (remoteHash!=core->getNavigationEngine()->getOverlayGraphicHash()) {
+    DEBUG("navigation engine overlay out dated at remote side, adding it to queue", NULL);
+    queueRemoteServerCommand("serveRemoteNavigationEngineOverlay(" + workPath + "/navigationEngine.gdo)");
+  }
+
+}
+
 // Handles request from remote devices for tiles
 void MapSource::remoteServer() {
 
   std::string workPath = core->getHomePath() + "/Map";
   std::list<std::string> servedMapContainers;
-  std::list<std::string> servedMapOverlays;
-
-  WARNING("not yet implemented: arrows", NULL);
+  std::list<std::string> servedOverlays;
 
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
@@ -1206,6 +1223,9 @@ void MapSource::remoteServer() {
     remove(path.c_str());
   }
 
+  // Delete any left over navigation engine overlay
+  remove((workPath + "/navigationEngine.gdo").c_str());
+
   // Do an endless loop
   while (1) {
 
@@ -1238,7 +1258,7 @@ void MapSource::remoteServer() {
       // Reset requested?
       if (resetRemoteServerThread) {
         servedMapContainers.clear();
-        servedMapOverlays.clear();
+        servedOverlays.clear();
         resetRemoteServerThread=false;
       }
 
@@ -1253,7 +1273,28 @@ void MapSource::remoteServer() {
 
       // Was a remote overlay served?
       if (cmdName=="remoteOverlayArchiveServed") {
-        servedMapOverlays.remove(args[0]);
+        servedOverlays.remove(args[0]);
+        commandProcessed=true;
+      }
+
+      // Shall we serve a navigation engine overlay?
+      if (cmdName=="serveRemoteNavigationEngineOverlay") {
+
+        // Check if the overlay is already beeing served
+        std::string hash=core->getNavigationEngine()->getOverlayGraphicHash();
+        bool alreadyServed=false;
+        for (std::list<std::string>::iterator i=servedOverlays.begin();i!=servedOverlays.end();i++) {
+          if (*i==hash) {
+            DEBUG("requested navigation overlay already being served, skipping it", NULL);
+            alreadyServed=true;
+          }
+        }
+        if (alreadyServed)
+          continue;
+
+        // Create the overlay and queue it for sending
+        core->getCommander()->dispatch("serveRemoteOverlayArchive(" + args[0] + "," + hash + "," + hash + ")");
+        servedOverlays.push_back(hash);
         commandProcessed=true;
       }
 
@@ -1277,9 +1318,9 @@ void MapSource::remoteServer() {
 
         // Check if the overlay is already beeing served
         bool alreadyServed=false;
-        for (std::list<std::string>::iterator i=servedMapOverlays.begin();i!=servedMapOverlays.end();i++) {
+        for (std::list<std::string>::iterator i=servedOverlays.begin();i!=servedOverlays.end();i++) {
           if (*i==c->getOverlayGraphicHash()) {
-            DEBUG("requested overlay <%s> already served, skipping it", c->getCalibrationFilePath());
+            DEBUG("requested overlay <%s> already being served, skipping it", c->getCalibrationFilePath());
             alreadyServed=true;
           }
         }
@@ -1291,9 +1332,9 @@ void MapSource::remoteServer() {
         remoteOverlayFilename << "remoteOverlay" << overlayNr << ".gdo";
         overlayNr++;
         c->storeOverlayGraphics(workPath,remoteOverlayFilename.str());
-        std::string hash = Storage::computeMD5(workPath + "/" + remoteOverlayFilename.str());
+        std::string hash = c->getOverlayGraphicHash();
         core->getCommander()->dispatch("serveRemoteOverlayArchive(" + workPath + "/" + remoteOverlayFilename.str() + "," + hash + "," + hash + ")");
-        servedMapOverlays.push_back(c->getOverlayGraphicHash());
+        servedOverlays.push_back(hash);
         commandProcessed=true;
       }
 
@@ -1346,6 +1387,7 @@ void MapSource::remoteServer() {
         std::string preferredNeighborCalibrationPath=args[16];
         Int mapX=atoi(args[17].c_str());
         Int mapY=atoi(args[18].c_str());
+        std::string navigationEngineOverlayHash=args[19];
         MapPosition refPos;
         refPos.setLng(lng);
         refPos.setLat(lat);
@@ -1392,6 +1434,9 @@ void MapSource::remoteServer() {
         if (preferredNeighbor)
           DEBUG("preferredNeighbor: %s,%d,%d",preferredNeighbor->getParentMapContainer()->getCalibrationFilePath(),preferredNeighbor->getMapX(),preferredNeighbor->getMapY());
 
+        // Check if the navigation engine overlay hash is outdated
+        queueRemoteNavigationEngineOverlayArchive(navigationEngineOverlayHash);
+
         // Search for the map tile
         lockAccess(__FILE__,__LINE__);
         std::list<MapTile*> tiles;
@@ -1401,7 +1446,7 @@ void MapSource::remoteServer() {
         for (std::list<MapTile*>::iterator i=tiles.begin();i!=tiles.end();i++) {
           MapTile *t=*i;
           //DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFilePath());
-          queueRemoteMapContainer(t->getParentMapContainer(), &args, 19, &mapImagesToServe);
+          queueRemoteMapContainer(t->getParentMapContainer(), &args, 20, &mapImagesToServe);
         }
         unlockAccess();
         commandProcessed=true;
@@ -1423,6 +1468,7 @@ void MapSource::remoteServer() {
         Int zoomLevel=atoi(args[4].c_str());
         bool lockZoomLevel=atoi(args[5].c_str());
         std::string preferredMapContainerCalibrationPath=args[6];
+        std::string navigationEngineOverlayHash=args[7];
         MapPosition pos;
         pos.setLng(lng);
         pos.setLat(lat);
@@ -1446,12 +1492,15 @@ void MapSource::remoteServer() {
           }
         }
 
+        // Check if the navigation engine overlay hash is outdated
+        queueRemoteNavigationEngineOverlayArchive(navigationEngineOverlayHash);
+
         // Search for the map tile
         lockAccess(__FILE__,__LINE__);
         MapTile *t = findMapTileByGeographicCoordinate(pos,zoomLevel,lockZoomLevel,preferredMapContainer);
         if (t) {
           //DEBUG("chosen map container: %s", t->getParentMapContainer()->getCalibrationFilePath());
-          queueRemoteMapContainer(t->getParentMapContainer(), &args, 7, &mapImagesToServe);
+          queueRemoteMapContainer(t->getParentMapContainer(), &args, 8, &mapImagesToServe);
         }
         unlockAccess();
         commandProcessed=true;
@@ -1769,32 +1818,36 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 
 // Creates all graphics
 void MapSource::createGraphic() {
-  lockAccess(__FILE__,__LINE__);
-  std::vector<MapContainer *> *maps=core->getMapSource()->getMapContainers();
-  for (std::vector<MapContainer*>::const_iterator i=maps->begin();i!=maps->end();i++) {
-    MapContainer *c=*i;
-    std::vector<MapTile *> *tiles=c->getMapTiles();
-    for (std::vector<MapTile*>::const_iterator j=(*tiles).begin();j!=(*tiles).end();j++) {
-      MapTile *t=*j;
-      t->createGraphic();
+  if (isInitialized) {
+    lockAccess(__FILE__,__LINE__);
+    std::vector<MapContainer *> *maps=core->getMapSource()->getMapContainers();
+    for (std::vector<MapContainer*>::const_iterator i=maps->begin();i!=maps->end();i++) {
+      MapContainer *c=*i;
+      std::vector<MapTile *> *tiles=c->getMapTiles();
+      for (std::vector<MapTile*>::const_iterator j=(*tiles).begin();j!=(*tiles).end();j++) {
+        MapTile *t=*j;
+        t->createGraphic();
+      }
     }
+    unlockAccess();
   }
-  unlockAccess();
 }
 
 // Destroys all graphics
 void MapSource::destroyGraphic() {
-  lockAccess(__FILE__,__LINE__);
-  std::vector<MapContainer *> *maps=core->getMapSource()->getMapContainers();
-  for (std::vector<MapContainer*>::const_iterator i=maps->begin();i!=maps->end();i++) {
-    MapContainer *c=*i;
-    std::vector<MapTile *> *tiles=c->getMapTiles();
-    for (std::vector<MapTile*>::const_iterator j=(*tiles).begin();j!=(*tiles).end();j++) {
-      MapTile *t=*j;
-      t->destroyGraphic();
+  if (isInitialized) {
+    lockAccess(__FILE__,__LINE__);
+    std::vector<MapContainer *> *maps=core->getMapSource()->getMapContainers();
+    for (std::vector<MapContainer*>::const_iterator i=maps->begin();i!=maps->end();i++) {
+      MapContainer *c=*i;
+      std::vector<MapTile *> *tiles=c->getMapTiles();
+      for (std::vector<MapTile*>::const_iterator j=(*tiles).begin();j!=(*tiles).end();j++) {
+        MapTile *t=*j;
+        t->destroyGraphic();
+      }
     }
+    unlockAccess();
   }
-  unlockAccess();
 }
 
 }

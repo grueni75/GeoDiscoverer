@@ -93,10 +93,10 @@ bool MapSourceRemote::init()
   char *mapArchivePathCStr = NULL;
   std::list<std::vector<std::string> > mapFilebases;
   MapContainer *mapContainer;
+  struct stat st;
 
   // Check if the log directory exists
   std::string path = core->getHomePath() + "/Map";
-  struct stat st;
   if (core->statFile(path.c_str(), &st) != 0)
   {
     if (mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
@@ -134,6 +134,11 @@ bool MapSourceRemote::init()
   centerPosition->setLngScale(core->getConfigStore()->getDoubleValue("Map/Remote","centerLngScale",__FILE__, __LINE__));
   centerPosition->setLatScale(core->getConfigStore()->getDoubleValue("Map/Remote","centerLatScale",__FILE__, __LINE__));
 
+  // Read the overlay for the navigation engine (if it exists)
+  if (core->statFile(getFolderPath() + "/navigationEngine.gdo", &st)==0) {
+    core->getNavigationEngine()->retrieveOverlayGraphics(getFolderPath(),"navigationEngine.gdo");
+  }
+
   // Get all existing tiles of the map
   std::list<std::string> mapArchivePaths;
   struct dirent *dp;
@@ -159,7 +164,6 @@ bool MapSourceRemote::init()
     for (std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
       remove((*i).c_str());
       std::string overlayArchive = (*i).substr(0,(*i).length()-1) + "o";
-      DEBUG("overlayArchive=%s",overlayArchive.c_str());
       remove(overlayArchive.c_str());
     }
     mapArchivePaths.clear();
@@ -167,7 +171,7 @@ bool MapSourceRemote::init()
   }
   mapArchivePaths.sort();
   while (mapArchivePaths.size()>mapArchiveCacheSize) {
-    DEBUG("removing map archive %s from disk cache",mapArchivePaths.front().c_str());
+    DEBUG("removing map archive %s from disk cache to keep size",mapArchivePaths.front().c_str());
     remove(mapArchivePaths.front().c_str());
     std::string overlayArchive = mapArchivePaths.front().substr(0,mapArchivePaths.front().length()-1) + "o";
     DEBUG("overlayArchive=%s",overlayArchive.c_str());
@@ -176,8 +180,6 @@ bool MapSourceRemote::init()
   }
 
   // Open the zip archive that contains the maps
-  //title="Reading tiles of map " + folder;
-  //dialog=core->getDialog()->createProgress(title,mapArchivePaths.size());
   progress=0;
   lockMapArchives(__FILE__, __LINE__);
   for(std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
@@ -203,10 +205,8 @@ bool MapSourceRemote::init()
       delete mapArchive;
     }
     progress++;
-    //core->getDialog()->updateProgress(dialog,title,progress);
   }
   unlockMapArchives();
-  //core->getDialog()->closeProgress(dialog);
 
   // Prevent that phone switches off
   //core->getDefaultScreen()->setWakeLock(true, __FILE__, __LINE__, false);
@@ -219,31 +219,21 @@ bool MapSourceRemote::init()
   if (!collectMapTiles(getFolderPath(),mapFilebases)) {
     return false;
   }
-  //DEBUG("mapFilebases.size()=%d",mapFilebases.size());
 
   // Remove duplicates
   mapFilebases.sort();
   mapFilebases.unique();
-  //core->getDialog()->closeProgress(dialog);
-
-  // Create the progress dialog
-  //title="Reading files of map " + std::string(folder);
-  //dialog=core->getDialog()->createProgress(title,mapFilebases.size());
 
   // Go through all found maps
   progress=1;
-  //DEBUG("mapContainers.size()=%d",mapContainers.size());
   for (std::list<std::vector<std::string> >::const_iterator i=mapFilebases.begin();i!=mapFilebases.end();i++) {
 
     std::string filebase=(*i)[2];
     std::string extension=(*i)[3];
     std::string filepath=filebase + "." + extension;
-    //DEBUG("filebase=%s",filebase.c_str());
 
     // Output some info
     Int percentage=round(((double)progress*100)/(double)mapFilebases.size());
-    //INFO("reading map <%s> (%d%%)", filepath.c_str(), percentage);
-    //core->getDialog()->updateProgress(dialog,title,progress);
     progress++;
 
     // Create a new map container and read the calibration in
@@ -257,7 +247,6 @@ bool MapSourceRemote::init()
     if (!(mapContainer->readCalibrationFile(std::string(dirname((char*)filebase.c_str())),std::string(basename((char*)filebase.c_str())),extension))) {
       return false;
     }
-    //DEBUG("archiveFileFolder=%s archiveFileName=%s archiveFilePath=%s",mapContainer->getArchiveFileFolder().c_str(),mapContainer->getArchiveFileName().c_str(),mapContainer->getArchiveFilePath().c_str());
     mapContainers.push_back(mapContainer);
     if ((mapContainer->getZoomLevelMap()>maxZoomLevel)||(mapContainer->getZoomLevelMap()<minZoomLevel)) {
       DEBUG("zoom level bounds reported by remote server are not correct, requesting reset of map the next time and aborting this time",NULL);
@@ -267,7 +256,6 @@ bool MapSourceRemote::init()
 
     // Read the overlay in if it exists
     std::string overlayFilename = mapContainer->getOverlayFileName();
-    //DEBUG("overlayFilename=%s",overlayFilename.c_str());
     struct stat st;
     if (core->statFile(mapContainer->getArchiveFileFolder() + "/" + overlayFilename, &st)==0) {
       mapContainer->retrieveOverlayGraphics(mapContainer->getArchiveFileFolder(),overlayFilename);
@@ -281,15 +269,9 @@ bool MapSourceRemote::init()
   for (int z=0;z<(maxZoomLevel-minZoomLevel)+2;z++) {
     zoomLevelSearchTrees.push_back(NULL);
   }
-  //core->getDialog()->closeProgress(dialog);
 
   // Update the search structures
   createSearchDataStructures(false);
-
-  // Reset wakelock
-  //core->getDefaultScreen()->setWakeLock(core->getConfigStore()->getIntValue("General","wakeLock",__FILE__, __LINE__),__FILE__, __LINE__,false);
-
-  //DEBUG("centerPosition.lng=%e centerPosition.lat=%e",centerPosition->getLng(),centerPosition->getLat());
 
   // Finished
   isInitialized=true;
@@ -306,6 +288,7 @@ MapTile *MapSourceRemote::findMapTileByGeographicCoordinate(MapPosition pos, Int
       << zoomLevel << "," << (lockZoomLevel ? 1 : 0) << ",";
   if (preferredMapContainer)
     cmd << preferredMapContainer->getCalibrationFilePath();
+  cmd << "," << core->getNavigationEngine()->getOverlayGraphicHash();
 
   // Get all known map containers for all zoom levels
   for (Int z=1;z<zoomLevelSearchTrees.size();z++) {
@@ -320,7 +303,6 @@ MapTile *MapSourceRemote::findMapTileByGeographicCoordinate(MapPosition pos, Int
 
   // Ask the remote side to send any missing map containers
   cmd << ")";
-  //DEBUG("cmd=%s",cmd.str().c_str());
   core->getCommander()->dispatch(cmd.str());
 
   return result;
@@ -345,6 +327,7 @@ void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferr
   } else {
     cmd << ",0,0";
   }
+  cmd << "," << core->getNavigationEngine()->getOverlayGraphicHash();
 
   // First check what is available locally
   MapSource::fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,tiles,abort);
@@ -357,10 +340,7 @@ void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferr
   // Ask the remote side to send any missing map containers
   cmd << ")";
   if (!*abort) {
-    //DEBUG("cmd=%s",cmd.str().c_str());
     core->getCommander()->dispatch(cmd.str());
-  } else {
-    //DEBUG("search operation was aborted, skipping cmd",NULL);
   }
 }
 
@@ -378,7 +358,6 @@ std::string MapSourceRemote::getFreeMapArchiveFilePath() {
 void MapSourceRemote::maintenance() {
 
   // Was the source modified?
-  //DEBUG("maintenance called",NULL);
   if (contentsChanged) {
     contentsChanged=false;
   }
@@ -420,7 +399,6 @@ bool MapSourceRemote::addMapArchive(std::string path, std::string hash) {
   // Check if archive is already present
   lockMapArchives(__FILE__,__LINE__);
   for (std::list<ZipArchive*>::iterator i=mapArchives.begin();i!=mapArchives.end();i++) {
-    //DEBUG("checking if %s is different to %s",(*i)->getArchiveName().c_str(),mapArchive->getArchiveName().c_str());
     if ((*i)->getEntryCount()==mapArchive->getEntryCount()) {
       bool archiveDiffers=false;
       for (Int j=0;j<(*i)->getEntryCount();j++) {
@@ -432,7 +410,6 @@ bool MapSourceRemote::addMapArchive(std::string path, std::string hash) {
           }
         }
         if (!found) {
-          //DEBUG("archive %s and %s differ",(*i)->getArchiveName().c_str(),mapArchive->getArchiveName().c_str());
           archiveDiffers=true;
           break;
         }
@@ -513,6 +490,9 @@ bool MapSourceRemote::addMapArchive(std::string path, std::string hash) {
 bool MapSourceRemote::addOverlayArchive(std::string path, std::string hash) {
 
   MapContainer *mapContainer;
+  std::string newPath;
+  MapContainer *c;
+  std::string calibrationFilepath;
 
   DEBUG("addOverlayArchive called with path %s",path.c_str());
 
@@ -544,39 +524,62 @@ bool MapSourceRemote::addOverlayArchive(std::string path, std::string hash) {
   ifs.close();
   data[filestat.st_size]=0; // to prevent that strings never end
   Int size=filestat.st_size;
-  //DEBUG("size=%d",size);
 
-  // Get the map container name
-  char *t;
-  Storage::retrieveString(data,size,&t);
-  std::string calibrationFilepath=std::string(t);
-  free(data);
+  // Get the type
+  Byte type;
+  Storage::retrieveByte(data,size,type);
+  switch (type) {
+  case OverlayArchiveTypeMapContainer:
 
-  // Find the map container this overlay archive belongs to
-  MapContainer *c=NULL;
-  lockAccess(__FILE__,__LINE__);
-  for (std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
-    if ((*i)->getCalibrationFilePath()==calibrationFilepath) {
-      c=*i;
-      break;
+    // Get the map container name
+    char *t;
+    Storage::retrieveString(data,size,&t);
+    calibrationFilepath=std::string(t);
+    free(data);
+
+    // Find the map container this overlay archive belongs to
+    c=NULL;
+    lockAccess(__FILE__,__LINE__);
+    for (std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();i++) {
+      if ((*i)->getCalibrationFilePath()==calibrationFilepath) {
+        c=*i;
+        break;
+      }
     }
-  }
-  if (c==NULL) {
-    DEBUG("no map container found that the overlay <%s> belongs to, skipping it",path.c_str());
-    remove(path.c_str());
-    unlockAccess();
+    if (c==NULL) {
+      DEBUG("no map container found that the overlay <%s> belongs to, skipping it",path.c_str());
+      remove(path.c_str());
+      unlockAccess();
+      return false;
+    }
+
+    // Rename new archive to fit the expected name
+    newPath = getFolderPath() + "/" + c->getOverlayFileName();
+    rename(path.c_str(),newPath.c_str());
+
+    // Read in the overlay
+    c->retrieveOverlayGraphics(c->getArchiveFileFolder(),c->getOverlayFileName());
+
+    // Redraw the map
+    core->getMapEngine()->setForceZoomReset();
+    break;
+
+  case OverlayArchiveTypeNavigationEngine:
+
+    // Rename new archive to fit the expected name
+    newPath = getFolderPath() + "/navigationEngine.gdo";
+    rename(path.c_str(),newPath.c_str());
+
+    // Read in the overlay
+    core->getNavigationEngine()->retrieveOverlayGraphics(getFolderPath(),"navigationEngine.gdo");
+    break;
+
+  default:
+    DEBUG("overlay archive type unknown, skipping it",NULL);
+    free(data);
     return false;
+    break;
   }
-
-  // Rename new archive to fit the expected name
-  std::string newPath = getFolderPath() + "/" + c->getOverlayFileName();
-  rename(path.c_str(),newPath.c_str());
-
-  // Read in the overlay
-  c->retrieveOverlayGraphics(c->getArchiveFileFolder(),c->getOverlayFileName());
-
-  // Redraw the map
-  core->getMapEngine()->setForceZoomReset();
 
   // That's it
   unlockAccess();
