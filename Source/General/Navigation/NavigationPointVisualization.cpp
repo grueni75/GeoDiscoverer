@@ -171,7 +171,6 @@ void NavigationPointVisualization::createGraphic() {
   if (graphicPrimitiveKey!=0) {
     GraphicRectangle *graphicRectangle=(GraphicRectangle*)visualizationObject->getPrimitive(graphicPrimitiveKey);
     if (graphicRectangle) {
-      DEBUG("createGraphic called for rectangle 0x%08x",graphicRectangle);
       switch(visualizationType) {
       case NavigationPointVisualizationTypePoint:
         graphicRectangle->setTexture(core->getDefaultGraphicEngine()->getNavigationPointIcon()->getTexture());
@@ -194,7 +193,6 @@ void NavigationPointVisualization::destroyGraphic() {
   if (graphicPrimitiveKey!=0) {
     GraphicRectangle *graphicRectangle=(GraphicRectangle*)visualizationObject->getPrimitive(graphicPrimitiveKey);
     if (graphicRectangle) {
-      DEBUG("destroyGraphic called for rectangle 0x%08x",graphicRectangle);
       graphicRectangle->invalidate();
     }
   }

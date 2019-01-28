@@ -1077,14 +1077,16 @@ void MapSource::remoteMapInit() {
 
   // Inform the remote device
   std::stringstream cmd;
+  MapPosition *pos=core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
   cmd << "setNewRemoteMap"
       << "(Map/Remote,folder," << folder << ")"
       << "(Map/Remote,minZoomLevel," << minZoomLevel << ")"
       << "(Map/Remote,maxZoomLevel," << maxZoomLevel << ")"
-      << "(Map/Remote,centerLng," << centerPosition->getLng() << ")"
-      << "(Map/Remote,centerLat," << centerPosition->getLat() << ")"
-      << "(Map/Remote,centerLngScale," << centerPosition->getLngScale() << ")"
-      << "(Map/Remote,centerLatScale," << centerPosition->getLatScale() << ")";
+      << "(Map/Remote,centerLng," << pos->getLng() << ")"
+      << "(Map/Remote,centerLat," << pos->getLat() << ")"
+      << "(Map/Remote,centerLngScale," << pos->getLngScale() << ")"
+      << "(Map/Remote,centerLatScale," << pos->getLatScale() << ")";
+  core->getMapEngine()->unlockMapPos();
   core->getCommander()->dispatch(cmd.str());
   DEBUG(cmd.str().c_str(),NULL);
 }
