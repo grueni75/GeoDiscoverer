@@ -34,6 +34,8 @@ WidgetPrimitive::WidgetPrimitive(WidgetPage *widgetPage) : GraphicRectangle(widg
   isSelected=false;
   isFirstTimeSelected=false;
   isHidden=false;
+  xHidden=0;
+  yHidden=0;
 }
 
 // Destructor

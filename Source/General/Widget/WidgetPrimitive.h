@@ -42,6 +42,8 @@ protected:
   bool isHit;                   // Indicates that the widget is hit by the pointer
   bool isSelected;              // Indicates that the widget is selected
   bool isHidden;                // Indicates that the widget shall not be activated
+  Int xHidden;                  // X coordinate when widget is outside screen
+  Int yHidden;                  // Y coordinate when widget is outside screen
 
   // Updates various flags
   virtual void updateFlags(Int x, Int y);
@@ -130,6 +132,21 @@ public:
     this->isHidden = isHidden;
   }
 
+  Int getXHidden() const {
+    return xHidden;
+  }
+
+  Int getYHidden() const {
+    return yHidden;
+  }
+
+  void setXHidden(Int xHidden) {
+    this->xHidden = xHidden;
+  }
+
+  void setYHidden(Int yHidden) {
+    this->yHidden = yHidden;
+  }
 };
 
 }

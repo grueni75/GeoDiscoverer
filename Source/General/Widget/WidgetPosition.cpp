@@ -26,8 +26,8 @@ namespace GEODISCOVERER {
 
 WidgetPosition::WidgetPosition() {
   refScreenDiagonal=0;
-  landscapeX=landscapeY=landscapeZ=0;
-  portraitX=portraitY=portraitZ=0;
+  landscapeX=landscapeY=landscapeZ=landscapeXHidden=landscapeYHidden=0;
+  portraitX=portraitY=portraitZ=portraitXHidden=portraitYHidden=0;
 }
 
 WidgetPosition::~WidgetPosition() {

@@ -39,6 +39,7 @@ protected:
   WidgetPrimitive *selectedWidget;                      // The currently selected widget
   TimestampInMicroseconds touchEndTime;                 // Last time no widget was touched
   bool lastTouchStartedOutside;                         // Indicates if the last touch was not hitting any widgets
+  TimestampInMicroseconds hiddenAnimationDuration;      // Time duration in microseconds of the translate animation if a widget is outside the screen
 
 public:
 

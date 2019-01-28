@@ -35,6 +35,7 @@ WidgetPage::WidgetPage(WidgetEngine *widgetEngine, std::string name) : graphicOb
   touchEndTime=0;
   lastTouchStartedOutside=true;
   this->widgetEngine=widgetEngine;
+  hiddenAnimationDuration=core->getConfigStore()->getIntValue("Graphic/Widget","hiddenAnimationDuration",__FILE__, __LINE__);
 }
 
 // Destructor
@@ -71,11 +72,21 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
             //primitive->setColor(primitive->getActiveColor());
             widgetEngine->getGraphicEngine()->unlockDrawing();
           }
+          if ((primitive->getXHidden()!=0)||(primitive->getYHidden()!=0)) {
+            widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            primitive->setTranslateAnimation(t,primitive->getXHidden(),primitive->getYHidden(),primitive->getX(),primitive->getY(),false,hiddenAnimationDuration,GraphicTranslateAnimationTypeAccelerated);
+            widgetEngine->getGraphicEngine()->unlockDrawing();
+          }
         } else {
           widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
           primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
           widgetEngine->getGraphicEngine()->unlockDrawing();
           //primitive->setColor(primitive->getInactiveColor());
+          /*if ((primitive->getXHidden()!=0)||(primitive->getYHidden()!=0)) {
+            widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            primitive->setTranslateAnimation(t,primitive->getX(),primitive->getY(),primitive->getXHidden(),primitive->getYHidden(),false,hiddenAnimationDuration,GraphicTranslateAnimationTypeAccelerated);
+            widgetEngine->getGraphicEngine()->unlockDrawing();
+          }*/
         }
       }
     }

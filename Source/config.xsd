@@ -427,6 +427,11 @@
                         <xsd:documentation>Distance in percent of the screen width that the page change shall overshoot.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
+                    <xsd:element name="hiddenAnimationDuration" type="xsd:integer" default="500000">
+                      <xsd:annotation>
+                        <xsd:documentation>Time duration in microseconds of the translate animation if a widget is outside the screen.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>                    
                     <xsd:element name="Device" maxOccurs="unbounded">
                       <xsd:annotation>
                         <xsd:documentation>Collection of pages that are displayed on the given device.</xsd:documentation>
@@ -488,6 +493,16 @@
 			                                                <xsd:documentation>Y coordinate in percent.</xsd:documentation>
 			                                              </xsd:annotation>
 			                                            </xsd:element>
+			                                            <xsd:element name="xHidden" type="xsd:double" default="0">
+			                                              <xsd:annotation>
+			                                                <xsd:documentation>X coordinate in percent when widget is outside screen.</xsd:documentation>
+			                                              </xsd:annotation>
+			                                            </xsd:element>
+			                                            <xsd:element name="yHidden" type="xsd:double" default="0">
+			                                              <xsd:annotation>
+			                                                <xsd:documentation>Y coordinate in percent when widget is outside screen.</xsd:documentation>
+			                                              </xsd:annotation>
+			                                            </xsd:element>			                                            
 			                                            <xsd:element name="z" type="xsd:double" default="0">
 			                                              <xsd:annotation>
 			                                                <xsd:documentation>Z coordinate in percent.</xsd:documentation>
@@ -512,6 +527,16 @@
 			                                                <xsd:documentation>Y coordinate in percent.</xsd:documentation>
 			                                              </xsd:annotation>
 			                                            </xsd:element>
+			                                            <xsd:element name="xHidden" type="xsd:double" default="0">
+			                                              <xsd:annotation>
+			                                                <xsd:documentation>X coordinate in percent when widget is outside screen.</xsd:documentation>
+			                                              </xsd:annotation>
+			                                            </xsd:element>
+			                                            <xsd:element name="yHidden" type="xsd:double" default="0">
+			                                              <xsd:annotation>
+			                                                <xsd:documentation>Y coordinate in percent when widget is outside screen.</xsd:documentation>
+			                                              </xsd:annotation>
+			                                            </xsd:element>	
 			                                            <xsd:element name="z" type="xsd:double" default="0">
 			                                              <xsd:annotation>
 			                                                <xsd:documentation>Z coordinate in percent.</xsd:documentation>

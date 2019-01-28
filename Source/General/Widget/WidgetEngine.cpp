@@ -80,9 +80,13 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
     positionPath << path << "/Position[@refScreenDiagonal='" << i->getRefScreenDiagonal() << "']";
     c->setDoubleValue(positionPath.str() + "/Portrait","x",i->getPortraitX(),__FILE__, __LINE__);
     c->setDoubleValue(positionPath.str() + "/Portrait","y",i->getPortraitY(),__FILE__, __LINE__);
+    c->setDoubleValue(positionPath.str() + "/Portrait","xHidden",i->getPortraitXHidden(),__FILE__, __LINE__);
+    c->setDoubleValue(positionPath.str() + "/Portrait","yHidden",i->getPortraitYHidden(),__FILE__, __LINE__);
     c->setIntValue(positionPath.str() + "/Portrait","z",i->getPortraitZ(),__FILE__, __LINE__);
     c->setDoubleValue(positionPath.str() + "/Landscape","x",i->getLandscapeX(),__FILE__, __LINE__);
     c->setDoubleValue(positionPath.str() + "/Landscape","y",i->getLandscapeY(),__FILE__, __LINE__);
+    c->setDoubleValue(positionPath.str() + "/Landscape","xHidden",i->getLandscapeXHidden(),__FILE__, __LINE__);
+    c->setDoubleValue(positionPath.str() + "/Landscape","yHidden",i->getLandscapeYHidden(),__FILE__, __LINE__);
     c->setIntValue(positionPath.str() + "/Landscape","z",i->getLandscapeZ(),__FILE__, __LINE__);
   }
   c->setGraphicColorValue(path + "/ActiveColor",GraphicColor(config.getActiveColor().getRed(),config.getActiveColor().getGreen(),config.getActiveColor().getBlue(),config.getActiveColor().getAlpha()),__FILE__, __LINE__);
@@ -231,10 +235,14 @@ void WidgetEngine::createGraphic() {
         position.setRefScreenDiagonal(0);
         position.setPortraitX(90.0);
         position.setPortraitY(65.0);
+        position.setPortraitXHidden(150.0);
+        position.setPortraitYHidden(position.getPortraitY());
         position.setPortraitZ(1);
-        position.setLandscapeX(90.0);
-        position.setLandscapeY(65.0);
-        position.setLandscapeZ(1);
+        position.setLandscapeX(position.getPortraitX());
+        position.setLandscapeY(position.getPortraitY());
+        position.setLandscapeY(position.getPortraitXHidden());
+        position.setLandscapeY(position.getPortraitYHidden());
+        position.setLandscapeZ(position.getPortraitZ());
         config.addPosition(position);
       }
       config.setActiveColor(GraphicColor(255,255,255,255));
@@ -276,10 +284,14 @@ void WidgetEngine::createGraphic() {
         position.setRefScreenDiagonal(0);
         position.setPortraitX(90.0);
         position.setPortraitY(35.0);
+        position.setPortraitXHidden(150.0);
+        position.setPortraitYHidden(position.getPortraitY());
         position.setPortraitZ(1);
-        position.setLandscapeX(90.0);
-        position.setLandscapeY(35.0);
-        position.setLandscapeZ(1);
+        position.setLandscapeX(position.getPortraitX());
+        position.setLandscapeY(position.getPortraitY());
+        position.setLandscapeY(position.getPortraitXHidden());
+        position.setLandscapeY(position.getPortraitYHidden());
+        position.setLandscapeZ(position.getPortraitZ());
         config.addPosition(position);
       }
       config.setActiveColor(GraphicColor(255,255,255,255));
@@ -387,10 +399,14 @@ void WidgetEngine::createGraphic() {
         position.setRefScreenDiagonal(0);
         position.setPortraitX(10.0);
         position.setPortraitY(65.0);
+        position.setPortraitXHidden(-50.0);
+        position.setPortraitYHidden(position.getPortraitY());
         position.setPortraitZ(1);
-        position.setLandscapeX(10.0);
-        position.setLandscapeY(65.0);
-        position.setLandscapeZ(1);
+        position.setLandscapeX(position.getPortraitX());
+        position.setLandscapeY(position.getPortraitY());
+        position.setLandscapeY(position.getPortraitXHidden());
+        position.setLandscapeY(position.getPortraitYHidden());
+        position.setLandscapeZ(position.getPortraitZ());
         config.addPosition(position);
       }
       config.setActiveColor(GraphicColor(255,255,255,255));
@@ -441,10 +457,14 @@ void WidgetEngine::createGraphic() {
         position.setRefScreenDiagonal(0);
         position.setPortraitX(10.0);
         position.setPortraitY(35.0);
+        position.setPortraitXHidden(-50.0);
+        position.setPortraitYHidden(position.getPortraitY());
         position.setPortraitZ(1);
-        position.setLandscapeX(10.0);
-        position.setLandscapeY(35.0);
-        position.setLandscapeZ(1);
+        position.setLandscapeX(position.getPortraitX());
+        position.setLandscapeY(position.getPortraitY());
+        position.setLandscapeY(position.getPortraitXHidden());
+        position.setLandscapeY(position.getPortraitYHidden());
+        position.setLandscapeZ(position.getPortraitZ());
         config.addPosition(position);
       }
       config.setActiveColor(GraphicColor(255,255,255,255));
@@ -1460,8 +1480,13 @@ void WidgetEngine::updateWidgetPositions() {
 
       // Update the position
       primitive->updatePosition(width*c->getDoubleValue(path,"x",__FILE__, __LINE__)/100.0-width/2-primitive->getIconWidth()/2,height*c->getDoubleValue(path,"y",__FILE__, __LINE__)/100.0-height/2-primitive->getIconHeight()/2,c->getIntValue(path,"z",__FILE__, __LINE__));
+      double xHiddenPercent=c->getDoubleValue(path,"xHidden",__FILE__, __LINE__);
+      double yHiddenPercent=c->getDoubleValue(path,"yHidden",__FILE__, __LINE__);
+      if ((xHiddenPercent!=0.0)||(yHiddenPercent!=0.0)) {
+        primitive->setXHidden(width*xHiddenPercent/100.0-width/2-primitive->getIconWidth()/2);
+        primitive->setYHidden(height*yHiddenPercent/100.0-height/2-primitive->getIconHeight()/2);
+      }
       primitives.push_back(primitive);
-
     }
 
     // Re-add the widget to the graphic object to get them sorted

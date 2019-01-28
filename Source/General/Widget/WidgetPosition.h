@@ -32,10 +32,12 @@ class WidgetPosition {
 
   // Portrait coordinates of the widget
   double portraitX, portraitY;
+  double portraitXHidden, portraitYHidden;
   Int portraitZ;
 
   // Landscape coordinates of the widget
   double landscapeX, landscapeY;
+  double landscapeXHidden, landscapeYHidden;
   Int landscapeZ;
 
 public:
@@ -101,6 +103,38 @@ public:
 
   void setRefScreenDiagonal(double refScreenDiagonal) {
     this->refScreenDiagonal = refScreenDiagonal;
+  }
+
+  double getLandscapeXHidden() const {
+    return landscapeXHidden;
+  }
+
+  void setLandscapeXHidden(double landscapeXHidden) {
+    this->landscapeXHidden = landscapeXHidden;
+  }
+
+  double getLandscapeYHidden() const {
+    return landscapeYHidden;
+  }
+
+  void setLandscapeYHidden(double landscapeYHidden) {
+    this->landscapeYHidden = landscapeYHidden;
+  }
+
+  double getPortraitXHidden() const {
+    return portraitXHidden;
+  }
+
+  void setPortraitXHidden(double portraitXHidden) {
+    this->portraitXHidden = portraitXHidden;
+  }
+
+  double getPortraitYHidden() const {
+    return portraitYHidden;
+  }
+
+  void setPortraitYHidden(double portraitYHidden) {
+    this->portraitYHidden = portraitYHidden;
   }
 };
 
