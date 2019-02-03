@@ -90,6 +90,12 @@ void MapSource::deinit()
     delete *i;
   }
   mapArchives.clear();
+  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  for (std::list<GraphicPrimitiveKey>::iterator i=retrievedPathAnimators.begin();i!=retrievedPathAnimators.end();i++) {
+    pathAnimators->removePrimitive(*i,true);
+  }
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
+  retrievedPathAnimators.clear();
   isInitialized=false;
 }
 
@@ -1850,6 +1856,32 @@ void MapSource::destroyGraphic() {
     }
     unlockAccess();
   }
+}
+
+// Finds the path animator with the given name
+GraphicPrimitive *MapSource::findPathAnimator(std::string name) {
+  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  GraphicPrimitiveMap *primitiveMap=pathAnimators->getPrimitiveMap();
+  GraphicPrimitive *pathAnimator=NULL;
+  for (GraphicPrimitiveMap::iterator i=primitiveMap->begin();i!=primitiveMap->end();i++) {
+    GraphicPrimitive *p=i->second;
+    if (p) {
+      std::list<std::string> names = p->getName();
+      if (names.size()>0) {
+        if (names.front()==name) {
+          pathAnimator=p;
+          break;
+        }
+      }
+    }
+  }
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
+  return pathAnimator;
+}
+
+// Finds the path animator with the given name
+void MapSource::addPathAnimator(GraphicPrimitiveKey primitiveKey) {
+  retrievedPathAnimators.push_back(primitiveKey);
 }
 
 }

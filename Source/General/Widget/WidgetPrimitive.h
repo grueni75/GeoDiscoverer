@@ -44,6 +44,8 @@ protected:
   bool isHidden;                // Indicates that the widget shall not be activated
   Int xHidden;                  // X coordinate when widget is outside screen
   Int yHidden;                  // Y coordinate when widget is outside screen
+  Int xOriginal;                // Original x coordinate of the widget when it was on screen
+  Int yOriginal;                // Original y coordinate of the widget when it was on screen
 
   // Updates various flags
   virtual void updateFlags(Int x, Int y);
@@ -141,11 +143,21 @@ public:
   }
 
   void setXHidden(Int xHidden) {
+    this->xOriginal = x;
     this->xHidden = xHidden;
   }
 
   void setYHidden(Int yHidden) {
+    this->yOriginal = y;
     this->yHidden = yHidden;
+  }
+
+  Int getXOriginal() const {
+    return xOriginal;
+  }
+
+  Int getYOriginal() const {
+    return yOriginal;
   }
 };
 

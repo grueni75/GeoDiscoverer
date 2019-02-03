@@ -1167,8 +1167,7 @@ void WidgetEngine::createGraphic() {
     config.setParameter("TurnColor/green","0");
     config.setParameter("TurnColor/blue","0");
     config.setParameter("TurnColor/alpha","255");
-    config.setParameter("minPanDetectionRadius","75.0");
-    config.setParameter("panSpeed","0.00001");
+    config.setParameter("minTouchDetectionRadius","75.0");
     addWidgetToPage(config);
   }
 
@@ -1270,6 +1269,7 @@ void WidgetEngine::createGraphic() {
           navigation->getSeparatorIcon()->setX(0);
           navigation->getSeparatorIcon()->setY(0);
         } else {
+          navigation->setMinTouchDetectionRadius(c->getDoubleValue(widgetPath,"minTouchDetectionRadius",__FILE__, __LINE__)*navigation->getIconHeight()/2/100.0);
           navigation->getArrowIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"arrowIconFilename",__FILE__, __LINE__));
           navigation->getArrowIcon()->setX(-navigation->getDirectionIcon()->getIconWidth()/2);
           navigation->getArrowIcon()->setY(-navigation->getDirectionIcon()->getIconHeight()/2);
@@ -1345,8 +1345,6 @@ void WidgetEngine::createGraphic() {
         navigation->setTurnLineStartX(c->getDoubleValue(widgetPath,"turnLineStartX",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTurnLineStartY(c->getDoubleValue(widgetPath,"turnLineStartY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTurnColor(c->getGraphicColorValue(widgetPath+"/TurnColor",__FILE__, __LINE__));
-        navigation->setMinPanDetectionRadius(c->getDoubleValue(widgetPath,"minPanDetectionRadius",__FILE__, __LINE__)*navigation->getIconHeight()/2/100.0);
-        navigation->setPanSpeed(c->getDoubleValue(widgetPath,"panSpeed",__FILE__, __LINE__));
         if (device->getIsWatch()) {
           navigation->setBusyColor(c->getGraphicColorValue(widgetPath + "/BusyColor",__FILE__, __LINE__));
           navigation->setStatusTextWidthLimit(c->getDoubleValue(widgetPath,"statusTextWidthLimit",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);

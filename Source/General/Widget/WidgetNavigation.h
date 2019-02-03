@@ -167,21 +167,17 @@ protected:
   // Indicates that the widget runs on a watch
   bool isWatch;
 
-  // Min radius a touch has to have from the center to register as pan command
-  double minPanDetectionRadius;
+  // Min radius a touch has to have from the center to register as touch command
+  double minTouchDetectionRadius;
 
   // Speed at which the panning shall be performed
   double panSpeed;
 
-  // Controls the panning of the map
-  bool panActive;
-  TimestampInMicroseconds panStartTime;
-  double panAngle;
-  Int panXInt, panYInt;
-  double panXDouble, panYDouble;
-
   // Indicates if the remote server is active
   bool remoteServerActive;
+
+  // Indicates if the widget has been touched the first time after beeing inactive
+  bool firstTouchAfterInactive;
 
   // Updates various flags
   virtual void updateFlags(Int x, Int y);
@@ -317,12 +313,8 @@ public:
     this->clockOffsetY = clockOffsetY;
   }
 
-  void setMinPanDetectionRadius(double minPanDetectionRadius) {
-    this->minPanDetectionRadius = minPanDetectionRadius;
-  }
-
-  void setPanSpeed(double panSpeed) {
-    this->panSpeed = panSpeed;
+  void setMinTouchDetectionRadius(double minTouchDetectionRadius) {
+    this->minTouchDetectionRadius = minTouchDetectionRadius;
   }
 
   void setBusyColor(GraphicColor busyColor) {

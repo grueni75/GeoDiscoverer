@@ -857,9 +857,9 @@
 			                                    <xsd:documentation>Start y position of the turn arrow.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
-			                                <xsd:element name="minPanDetectionRadius" type="xsd:double" default="0" minOccurs="0">
+			                               	<xsd:element name="minTouchDetectionRadius" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
-			                                    <xsd:documentation>Min radius in percent of the widget height a touch has to have from the center to be registered as a pan command.</xsd:documentation>
+			                                    <xsd:documentation>Min radius in percent of the widget height a touch has to have from the center to be registered as a hit on the widget.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
 			                                <xsd:element name="statusTextWidthLimit" type="xsd:double" default="0" minOccurs="0">
@@ -882,11 +882,6 @@
 			                                    <xsd:documentation>Angle offset in degrees a status text on a watch shall have.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>	
-			                                <xsd:element name="panSpeed" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Speed of the map panning in pixels per microseconds.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
 			                                <xsd:element name="pathNameOffsetX" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Horizontal offset of the path name in percent of the widget width.</xsd:documentation>

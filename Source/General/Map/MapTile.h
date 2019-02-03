@@ -83,7 +83,6 @@ protected:
   MapTileNavigationPathMap crossingPathSegmentsMap;
 
   // Graphic primitives created during retrieving additional visualization
-  std::list<GraphicPrimitiveKey> retrievedAnimators;
   std::list<GraphicPrimitiveKey> retrievedPrimitives;
 
   // Compares the latitude and longitude positions with the one of the given tile
@@ -99,7 +98,7 @@ protected:
   void storeAnimator(std::ofstream *ofs, GraphicPrimitive *animator);
 
   // Retrieves an animator
-  GraphicPrimitive *retrieveAnimator(TimestampInMicroseconds t, char *&data, Int &size);
+  GraphicPrimitive *retrieveAnimator(char *&data, Int &size);
 
 public:
 

@@ -451,7 +451,7 @@ void NavigationPath::init() {
   hasSecondLastPoint=false;
   lastPoint=NavigationPath::getPathInterruptedPos();
   secondLastPoint=NavigationPath::getPathInterruptedPos();
-  gpxFilename="track-" + core->getClock()->getFormattedDate() + ".gpx";
+  setGpxFilename("track-" + core->getClock()->getFormattedDate() + ".gpx");
   setName("Track-" + core->getClock()->getFormattedDate());
   setDescription("Track recorded with GeoDiscoverer.");
   hasChanged=true;
@@ -1204,6 +1204,17 @@ void NavigationPath::setBlinkMode(bool blinkMode, const char *file, int line)
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
     (*i)->resetOverlayGraphicHash();
   }
+}
+
+// Sets the gpx file name of the path
+void NavigationPath::setGpxFilename(std::string gpxFilename)
+{
+  this->gpxFilename = gpxFilename;
+  core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  std::list<std::string> name;
+  name.push_back(gpxFilename);
+  animator.setName(name);
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
 }
 
 }

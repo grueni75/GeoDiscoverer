@@ -90,7 +90,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   lastClockUpdate=0;
   secondRowState=0;
   isWatch=widgetPage->getWidgetEngine()->getDevice()->getIsWatch();
-  panActive=false;
+  firstTouchAfterInactive=true;
   remoteServerActive=false;
   statusTextWidthLimit=-1;
   statusTextAngleOffset=0;
@@ -171,6 +171,11 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   // Do the inherited stuff
   bool changed=WidgetPrimitive::work(t);
 
+  // If the widgets are not active anymore, reset the first touch indicator
+  if (!widgetPage->getWidgetsActive()) {
+    firstTouchAfterInactive=true;
+  }
+
   // Indicate if a download is ongoing
   if (core->getRemoteServerActive()!=remoteServerActive) {
     if (core->getRemoteServerActive()) {
@@ -184,25 +189,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     setFadeAnimation(t,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
     remoteServerActive=core->getRemoteServerActive();
     //DEBUG("remoteServerActive=%d",remoteServerActive);
-  }
-
-  // Pan the map if active
-  if (panActive) {
-    TimestampInMicroseconds dt = t-panStartTime;
-    panXDouble=panXDouble+panSpeed*dt*cos(panAngle);
-    panYDouble=panYDouble+panSpeed*dt*sin(panAngle);
-    //DEBUG("panXDouble=%f panYDouble=%f",panXDouble,panYDouble);
-    Int newPanXInt=round(panXDouble);
-    Int newPanYInt=round(panYDouble);
-    if ((newPanXInt!=panXInt)||(newPanYInt!=panYInt)) {
-      Int dX=newPanXInt-panXInt;
-      Int dY=newPanYInt-panYInt;
-      std::stringstream cmd;
-      cmd << "pan(" << dX << "," << dY << ")";
-      core->getCommander()->execute(cmd.str());
-      panXInt=newPanXInt;
-      panYInt=newPanYInt;
-    }
   }
 
   // Update the circle strips (if not already)
@@ -655,7 +641,7 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
   }
 
   // Draw the clock
-  if ((isWatch)&&(clockFontString)) {
+  if ((isWatch)&&(clockFontString)&&(!((showTurn)&&(!skipTurn)))) {
     c=clockCircularStrip.getColor();
     c.setAlpha(color.getAlpha());
     clockCircularStrip.setColor(c);
@@ -859,25 +845,6 @@ void WidgetNavigation::updatePosition(Int x, Int y, Int z) {
 // Called when the widget is touched
 void WidgetNavigation::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
   WidgetPrimitive::onTouchDown(t,x,y);
-  if ((isWatch)&&(getIsHit())) {
-
-    // Activate panning
-    double dx=x-(getX()+getIconWidth()/2);
-    double dy=y-(getY()+getIconHeight()/2);
-    //DEBUG("radius=%f",radius);
-    panAngle=FloatingPoint::computeAngle(dx,dy);
-    //DEBUG("panAngle=%f",panAngle);
-    panXDouble=0;
-    panXInt=0;
-    panYDouble=0;
-    panYInt=0;
-    panStartTime=t;
-    panActive=true;
-
-  } else {
-    panActive=false;
-  }
-
 }
 
 // Executed if the widget has been untouched
@@ -893,18 +860,30 @@ void WidgetNavigation::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool c
 
     } else {
 
-      // Rotate the infos
-      secondRowState++;
-      if (textColumnCount==2) {
-        if (secondRowState>1)
-          secondRowState=0;
+      // On a watch?
+      if (isWatch) {
+
+        // Deactivate widgets after second touch up
+        if (!firstTouchAfterInactive) {
+          widgetPage->setWidgetsActive(t,false);
+        } else {
+          firstTouchAfterInactive=false;
+        }
+
       } else {
-        if (secondRowState>3)
-          secondRowState=0;
+
+        // Rotate the infos
+        secondRowState++;
+        if (textColumnCount==2) {
+          if (secondRowState>1)
+            secondRowState=0;
+        } else {
+          if (secondRowState>3)
+            secondRowState=0;
+        }
       }
     }
   }
-  panActive=false;
 }
 
 // Updates various flags
@@ -914,8 +893,11 @@ void WidgetNavigation::updateFlags(Int x, Int y) {
     double dx=x-(getX()+getIconWidth()/2);
     double dy=y-(getY()+getIconHeight()/2);
     double radius = sqrt(dx*dx+dy*dy);
-    if (radius<minPanDetectionRadius) {
+    if (radius<minTouchDetectionRadius) {
       isHit=false;
+      if (showTurn) {
+        skipTurn=true;
+      }
     }
   }
 }

@@ -161,6 +161,9 @@ public:
   // Enable or disable the blinking of the route
   void setBlinkMode(bool blinkMode, const char *file, int line);
 
+  // Sets the gpx file name of the path
+  void setGpxFilename(std::string gpxFilename);
+
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder)
   {
@@ -175,11 +178,6 @@ public:
   std::string getGpxFilename() const
   {
       return gpxFilename;
-  }
-
-  void setGpxFilename(std::string gpxFilename)
-  {
-      this->gpxFilename = gpxFilename;
   }
 
   std::string getDescription() const

@@ -100,12 +100,6 @@ MapTile::~MapTile() {
 
 // Removes all overlay graphics from the visualization
 void MapTile::resetVisualization() {
-  GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
-  for (std::list<GraphicPrimitiveKey>::iterator i=retrievedAnimators.begin();i!=retrievedAnimators.end();i++) {
-    pathAnimators->removePrimitive(*i,true);
-  }
-  core->getDefaultGraphicEngine()->unlockPathAnimators();
-  retrievedAnimators.clear();
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   for (std::list<GraphicPrimitiveKey>::iterator i=retrievedPrimitives.begin();i!=retrievedPrimitives.end();i++) {
     visualization.removePrimitive(*i,true);
@@ -525,6 +519,7 @@ void MapTile::removeCrossingNavigationPathSegments(NavigationPath *path) {
 
 // Stores an animator
 void MapTile::storeAnimator(std::ofstream *ofs, GraphicPrimitive *animator) {
+  Storage::storeString(ofs,animator->getName().front());
   Storage::storeGraphicColor(ofs,animator->getFadeStartColor());
   Storage::storeGraphicColor(ofs,animator->getFadeEndColor());
   Storage::storeInt(ofs,(Int)animator->getFadeDuration());
@@ -532,18 +527,16 @@ void MapTile::storeAnimator(std::ofstream *ofs, GraphicPrimitive *animator) {
 }
 
 // Retrieves an animator
-GraphicPrimitive *MapTile::retrieveAnimator(TimestampInMicroseconds t, char *&data, Int &size) {
-  GraphicPrimitiveKey animatorKey;
-  GraphicObject *pathAnimators;
+GraphicPrimitive *MapTile::retrieveAnimator(char *&data, Int &size) {
+
+  // Read all fields
+  char *name;
+  Storage::retrieveString(data,size,&name);
+  //DEBUG("name=%s",name);
   GraphicColor startColor;
-  GraphicColor endColor;
-  GraphicPrimitive *animator;
-  if (!(animator=new GraphicPrimitive(core->getDefaultScreen()))) {
-    FATAL("can not create graphic primitive object",NULL);
-    return NULL;
-  }
   Storage::retrieveGraphicColor(data,size,startColor);
   //DEBUG("r=%d g=%d b=%d a=%d",startColor.getRed(),startColor.getGreen(),startColor.getBlue(),startColor.getAlpha());
+  GraphicColor endColor;
   Storage::retrieveGraphicColor(data,size,endColor);
   //DEBUG("r=%d g=%d b=%d a=%d",endColor.getRed(),endColor.getGreen(),endColor.getBlue(),endColor.getAlpha());
   Int duration;
@@ -552,11 +545,29 @@ GraphicPrimitive *MapTile::retrieveAnimator(TimestampInMicroseconds t, char *&da
   bool infinite;
   Storage::retrieveBool(data,size,infinite);
   //DEBUG("infinite=%d",infinite);
-  animator->setFadeAnimation(t,startColor,endColor,infinite,duration);
-  pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
-  animatorKey=pathAnimators->addPrimitive(animator);
-  core->getDefaultGraphicEngine()->unlockPathAnimators();
-  retrievedAnimators.push_back(animatorKey);
+
+  // Check if the animator is already known
+  GraphicPrimitive *animator;
+  animator=core->getMapSource()->findPathAnimator(name);
+  if (!animator) {
+    //DEBUG("creating new animator for %s",name);
+    GraphicPrimitiveKey animatorKey;
+    GraphicObject *pathAnimators;
+    if (!(animator=new GraphicPrimitive(core->getDefaultScreen()))) {
+      FATAL("can not create graphic primitive object",NULL);
+      return NULL;
+    }
+    animator->setFadeAnimation(0,startColor,endColor,infinite,duration);
+    std::list<std::string> names;
+    names.push_back(name);
+    animator->setName(names);
+    pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+    animatorKey=pathAnimators->addPrimitive(animator);
+    core->getDefaultGraphicEngine()->unlockPathAnimators();
+    core->getMapSource()->addPathAnimator(animatorKey);
+  } else {
+    //DEBUG("reusing already known animator for %s",name);
+  }
   return animator;
 }
 
@@ -684,7 +695,7 @@ void MapTile::retrieveOverlayGraphics(char *&data, Int &size) {
     case GraphicTypeLine:
 
       // Create the animator
-      animator=retrieveAnimator(t,data,size);
+      animator=retrieveAnimator(data,size);
 
       // Create the line
       Storage::retrieveShort(data,size,width);
@@ -721,7 +732,7 @@ void MapTile::retrieveOverlayGraphics(char *&data, Int &size) {
     case GraphicTypeRectangleList:
 
       // Create the animator
-      animator=retrieveAnimator(t,data,size);
+      animator=retrieveAnimator(data,size);
 
       // Create the rectangle list
       GraphicRectangleList *rectangleList;

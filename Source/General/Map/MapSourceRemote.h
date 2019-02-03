@@ -30,9 +30,9 @@ class MapSourceRemote  : public MapSource {
 
 protected:
 
-  Int mapArchiveCacheSize;                          // Number of map archives to hold in the disk cache
-  Int nextFreeMapArchiveNumber;                     // Next number to use to obtain a free map archive file
-  Int nextFreeOverlayArchiveNumber;                 // Next number to use to obtain a free map overlay file
+  Int mapArchiveCacheSize;                            // Number of map archives to hold in the disk cache
+  Int nextFreeMapArchiveNumber;                       // Next number to use to obtain a free map archive file
+  Int nextFreeOverlayArchiveNumber;                   // Next number to use to obtain a free map overlay file
 
   // Loads all calibrated pictures in the given directory
   bool collectMapTiles(std::string directory, std::list<std::vector<std::string> > &mapFilebases);

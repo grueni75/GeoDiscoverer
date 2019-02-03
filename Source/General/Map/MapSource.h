@@ -62,6 +62,9 @@ protected:
   std::list<std::string> remoteServerCommandQueue; // Holds the commands that the remote server shall process
   bool resetRemoteServerThread;                   // Indicates if the remote server thread shall forget everything about the remote side
 
+  // Path animators loaded from overlay archives
+  std::list<GraphicPrimitiveKey> retrievedPathAnimators;
+
   // Lists of map containers sorted by their boundaries
   std::vector<Int> mapsIndexByLatNorth;
   std::vector<Int> mapsIndexByLatSouth;
@@ -232,6 +235,12 @@ public:
 
   // Destroys all graphics
   void destroyGraphic();
+
+  // Finds the path animator with the given name
+  GraphicPrimitive *findPathAnimator(std::string name);
+
+  // Finds the path animator with the given name
+  void addPathAnimator(GraphicPrimitiveKey primitiveKey);
 
   // Getters and setters
   Int getMapTileLength() const {

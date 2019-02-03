@@ -74,7 +74,7 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
           }
           if ((primitive->getXHidden()!=0)||(primitive->getYHidden()!=0)) {
             widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            primitive->setTranslateAnimation(t,primitive->getXHidden(),primitive->getYHidden(),primitive->getX(),primitive->getY(),false,hiddenAnimationDuration,GraphicTranslateAnimationTypeAccelerated);
+            primitive->setTranslateAnimation(t,primitive->getXHidden(),primitive->getYHidden(),primitive->getXOriginal(),primitive->getYOriginal(),false,hiddenAnimationDuration,GraphicTranslateAnimationTypeAccelerated);
             widgetEngine->getGraphicEngine()->unlockDrawing();
           }
         } else {
@@ -82,11 +82,12 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
           primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
           widgetEngine->getGraphicEngine()->unlockDrawing();
           //primitive->setColor(primitive->getInactiveColor());
-          /*if ((primitive->getXHidden()!=0)||(primitive->getYHidden()!=0)) {
+          if ((primitive->getXHidden()!=0)||(primitive->getYHidden()!=0)) {
             widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
             primitive->setTranslateAnimation(t,primitive->getX(),primitive->getY(),primitive->getXHidden(),primitive->getYHidden(),false,hiddenAnimationDuration,GraphicTranslateAnimationTypeAccelerated);
             widgetEngine->getGraphicEngine()->unlockDrawing();
-          }*/
+            DEBUG("xHidden=%d yHidden=%d x=%d y=%d",primitive->getXHidden(),primitive->getYHidden(),primitive->getX(),primitive->getY());
+          }
         }
       }
     }
