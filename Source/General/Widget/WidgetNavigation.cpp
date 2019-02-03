@@ -34,8 +34,10 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     arrowIcon(widgetPage->getScreen()),
     separatorIcon(widgetPage->getScreen()),
     blindIcon(widgetPage->getScreen()),
+    statusIcon(widgetPage->getScreen()),
     targetObject(widgetPage->getScreen()),
     compassObject(widgetPage->getScreen()),
+    clockCircularStrip(widgetPage->getScreen()),
     busyColor(),
     normalColor()
 {
@@ -56,13 +58,16 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   locationBearingActual=0;
   locationBearingActual=0;
   directionChangeDuration=0;
+  textColumnCount=1;
   FontEngine *fontEngine=widgetPage->getFontEngine();
-  fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
-  fontEngine->updateString(&durationLabelFontString,"Duration");
-  fontEngine->updateString(&altitudeLabelFontString,"Altitude");
-  fontEngine->updateString(&trackLengthLabelFontString,"Track");
-  fontEngine->updateString(&speedLabelFontString,"Speed");
-  fontEngine->unlockFont();
+  if (!isWatch) {
+    fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
+    fontEngine->updateString(&durationLabelFontString,"Duration");
+    fontEngine->updateString(&altitudeLabelFontString,"Altitude");
+    fontEngine->updateString(&trackLengthLabelFontString,"Track");
+    fontEngine->updateString(&speedLabelFontString,"Speed");
+    fontEngine->unlockFont();
+  }
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<4;i++)
     orientationLabelFontStrings[i]=NULL;
@@ -87,13 +92,20 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   isWatch=widgetPage->getWidgetEngine()->getDevice()->getIsWatch();
   panActive=false;
   remoteServerActive=false;
+  statusTextWidthLimit=-1;
+  statusTextAngleOffset=0;
+  statusTextRadius=0;
   directionIcon.setColor(GraphicColor(255,255,255,255));
   targetIcon.setColor(GraphicColor(255,255,255,255));
   arrowIcon.setColor(GraphicColor(255,255,255,0));
   separatorIcon.setColor(GraphicColor(255,255,255,255));
   blindIcon.setColor(GraphicColor(255,255,255,255));
+  statusIcon.setColor(GraphicColor(255,255,255,255));
   targetObject.setColor(GraphicColor(255,255,255,255));
   compassObject.setColor(GraphicColor(255,255,255,255));
+  for (int i=0;i<4;i++) {
+    circularStrip[i]=NULL;
+  }
 }
 
 // Destructor
@@ -138,6 +150,12 @@ WidgetNavigation::~WidgetNavigation() {
   fontEngine->lockFont("sansNormal",__FILE__,__LINE__);
   if (clockFontString) fontEngine->destroyString(clockFontString);
   fontEngine->unlockFont();
+  for (int i=0;i<4;i++) {
+    if (circularStrip[i]) {
+      delete circularStrip[i];
+      circularStrip[i]=NULL;
+    }
+  }
 }
 
 // Executed every time the graphic engine checks if drawing is required
@@ -187,8 +205,32 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     }
   }
 
+  // Update the circle strips (if not already)
+  if ((isWatch)&&(circularStrip[0]==NULL)) {
+    double offset=-statusTextAngleOffset;
+    for (int i=0;i<4;i++) {
+      circularStrip[i]=new GraphicCircularStrip(widgetPage->getScreen());
+      if (!circularStrip[i]) {
+        FATAL("can not create graphic circular strip object",NULL);
+        return false;
+      }
+      circularStrip[i]->setAngle(45.0+offset+i*90.0);
+      offset=-offset;
+      circularStrip[i]->setRadius(statusTextRadius);
+      circularStrip[i]->setColor(GraphicColor(255,255,255,255));
+      circularStrip[i]->setDestroyTexture(false);
+      if (i>=2)
+        circularStrip[i]->setInverse(true);
+    }
+    clockCircularStrip.setAngle(270.0);
+    clockCircularStrip.setRadius(clockRadius);
+    clockCircularStrip.setColor(GraphicColor(255,255,255,255));
+    clockCircularStrip.setDestroyTexture(false);
+    clockCircularStrip.setInverse(true);
+  }
+
   // Update the font strings (if not already)
-  if (distanceLabelFontString==NULL) {
+  if ((distanceLabelFontString==NULL)&&(!isWatch)) {
     if (textColumnCount==2)
       fontEngine->lockFont("sansBoldSmall",__FILE__, __LINE__);
     else
@@ -200,13 +242,19 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
   // Update the clock
   TimestampInSeconds t2=core->getClock()->getSecondsSinceEpoch();
-  if ((textColumnCount==2)&&((t2/60!=lastClockUpdate/60)||(firstRun))) {
+  if (((textColumnCount==2)||(isWatch))&&((t2/60!=lastClockUpdate/60)||(firstRun))) {
     fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
     fontEngine->updateString(&clockFontString,core->getClock()->getFormattedDate(t2,"%H:%M",true));
     fontEngine->unlockFont();
     lastClockUpdate=t2;
     clockFontString->setX(x+(iconWidth-clockFontString->getIconWidth())/2);
     clockFontString->setY(y+clockOffsetY);
+    if (isWatch) {
+      clockCircularStrip.setWidth(clockFontString->getWidth());
+      clockCircularStrip.setHeight(clockFontString->getHeight());
+      clockCircularStrip.setIconWidth(clockFontString->getIconWidth());
+      clockCircularStrip.setIconHeight(clockFontString->getIconHeight());
+    }
     changed=true;
   }
 
@@ -231,7 +279,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       }
       hideArrow=true;
     }
-    changed |= arrowIcon.work(t);
+    changed|=arrowIcon.work(t);
   }
 
   // Only update the info if it has changed
@@ -243,7 +291,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     if (navigationInfo->getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
 
       // Get distance to turn
-      if (textColumnCount==2)
+      if ((textColumnCount==2)||(isWatch))
         fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
       else
         fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
@@ -334,44 +382,45 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       else
         distance=-1;
       if (navigationInfo->getOffRoute()) {
-        fontEngine->updateString(&durationValueFontString,"off route!");
+        fontEngine->updateString(&durationValueFontString,"off route!",statusTextWidthLimit);
       } else if (navigationInfo->getTargetDuration()==NavigationInfo::getUnknownDuration()) {
-        fontEngine->updateString(&durationValueFontString,"unknown");
+        fontEngine->updateString(&durationValueFontString,"unknown",statusTextWidthLimit);
       } else if (std::isinf(navigationInfo->getTargetDuration())) {
-        fontEngine->updateString(&durationValueFontString,"move!");
+        fontEngine->updateString(&durationValueFontString,"move!",statusTextWidthLimit);
       } else {
-        unitConverter->formatTime(navigationInfo->getTargetDuration(),value,unit);
+        unitConverter->formatTime(navigationInfo->getTargetDuration(),value,unit,isWatch ? 0 : 2);
         infos.str("");
         infos << value << " " << unit;
-        fontEngine->updateString(&durationValueFontString,infos.str());
+        fontEngine->updateString(&durationValueFontString,infos.str(),statusTextWidthLimit);
         activateWidget=true;
       }
       if (navigationInfo->getAltitude()!=NavigationInfo::getUnknownDistance()) {
-        unitConverter->formatMeters(navigationInfo->getAltitude(),value,unit);
+        std::string lockedUnit = unitConverter->getUnitSystem()==ImperialSystem ? "mi" : "m";
+        unitConverter->formatMeters(navigationInfo->getAltitude(),value,unit,isWatch ? 0 : 2,lockedUnit);
         infos.str("");
         infos << value << " " << unit;
-        fontEngine->updateString(&altitudeValueFontString,infos.str());
+        fontEngine->updateString(&altitudeValueFontString,infos.str(),statusTextWidthLimit);
         activateWidget=true;
       } else {
-        fontEngine->updateString(&altitudeValueFontString,"unknown");
+        fontEngine->updateString(&altitudeValueFontString,"unknown",statusTextWidthLimit);
       }
       if (navigationInfo->getTrackLength()!=NavigationInfo::getUnknownDistance()) {
-        unitConverter->formatMeters(navigationInfo->getTrackLength(),value,unit);
+        unitConverter->formatMeters(navigationInfo->getTrackLength(),value,unit,isWatch ? 0 : 2);
         infos.str("");
         infos << value << " " << unit;
-        fontEngine->updateString(&trackLengthValueFontString,infos.str());
+        fontEngine->updateString(&trackLengthValueFontString,infos.str(),statusTextWidthLimit);
         activateWidget=true;
       } else {
-        fontEngine->updateString(&trackLengthValueFontString,"unknown");
+        fontEngine->updateString(&trackLengthValueFontString,"unknown",statusTextWidthLimit);
       }
       if (navigationInfo->getLocationSpeed()!=NavigationInfo::getUnknownSpeed()) {
-        unitConverter->formatMetersPerSecond(navigationInfo->getLocationSpeed(),value,unit,1);
+        unitConverter->formatMetersPerSecond(navigationInfo->getLocationSpeed(),value,unit,isWatch ? 0 : 1);
         infos.str("");
         infos << value << " " << unit;
-        fontEngine->updateString(&speedValueFontString,infos.str());
+        fontEngine->updateString(&speedValueFontString,infos.str(),statusTextWidthLimit);
         activateWidget=true;
       } else {
-        fontEngine->updateString(&speedValueFontString,"unknown");
+        fontEngine->updateString(&speedValueFontString,"unknown",statusTextWidthLimit);
       }
       fontEngine->unlockFont();
       if (textColumnCount==2) {
@@ -380,15 +429,24 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
       }
       if (distance!=-1) {
-        unitConverter->formatMeters(distance,value,unit);
+        unitConverter->formatMeters(distance,value,unit,isWatch ? 0 : 2);
         infos.str("");
         infos << value << " " << unit;
-        fontEngine->updateString(&distanceValueFontString,infos.str());
+        fontEngine->updateString(&distanceValueFontString,infos.str(),statusTextWidthLimit);
         activateWidget=true;
       } else {
-        fontEngine->updateString(&distanceValueFontString,"unknown");
+        fontEngine->updateString(&distanceValueFontString,"unknown",statusTextWidthLimit);
       }
       fontEngine->unlockFont();
+      if (isWatch) {
+        for (Int i=0;i<4;i++) {
+          FontString *s=getQuadrantFontString(i);
+          circularStrip[i]->setWidth(s->getWidth());
+          circularStrip[i]->setHeight(s->getHeight());
+          circularStrip[i]->setIconWidth(s->getIconWidth());
+          circularStrip[i]->setIconHeight(s->getIconHeight());
+        }
+      }
     }
     changed=true;
 
@@ -549,8 +607,35 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   // Let the directionIcon work
   changed |= compassObject.work(t);
 
+  // Update the circular strips
+  if (isWatch) {
+    for (Int i=0;i<4;i++)
+      changed |= circularStrip[i]->work(t);
+    changed |= clockCircularStrip.work(t);
+  }
+
   // Return result
   return changed;
+}
+
+// Returns the font string to show in the given quadrant
+FontString* WidgetNavigation::getQuadrantFontString(Int i) {
+  FontString *s=NULL;
+  switch (i) {
+  case 0:
+    s = durationValueFontString;
+    break;
+  case 1:
+    s = distanceValueFontString;
+    break;
+  case 2:
+    s = altitudeValueFontString;
+    break;
+  case 3:
+    s = trackLengthValueFontString;
+    break;
+  }
+  return s;
 }
 
 // Executed every time the graphic engine needs to draw
@@ -567,6 +652,16 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     c.setAlpha(color.getAlpha());
     blindIcon.setColor(c);
     blindIcon.draw(t);
+  }
+
+  // Draw the clock
+  if ((isWatch)&&(clockFontString)) {
+    c=clockCircularStrip.getColor();
+    c.setAlpha(color.getAlpha());
+    clockCircularStrip.setColor(c);
+    clockFontString->updateTexture();
+    clockCircularStrip.setTexture(clockFontString->getTexture());
+    clockCircularStrip.draw(t);
   }
 
   // Draw the compass
@@ -593,6 +688,28 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
       c.setAlpha(color.getAlpha());
       orientationLabelFontStrings[i]->setColor(c);
       orientationLabelFontStrings[i]->draw(t);
+    }
+    screen->endObject();
+  }
+
+  // Draw the status if necessary
+  if (isWatch) {
+    c=statusIcon.getColor();
+    c.setAlpha(color.getAlpha());
+    statusIcon.setColor(c);
+    statusIcon.draw(t);
+    screen->startObject();
+    screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
+    for (Int i=0;i<4;i++) {
+      FontString *s=getQuadrantFontString(i);
+      if ((s)&&(circularStrip[i])) {
+        c=circularStrip[i]->getColor();
+        c.setAlpha(color.getAlpha());
+        circularStrip[i]->setColor(c);
+        s->updateTexture();
+        circularStrip[i]->setTexture(s->getTexture());
+        circularStrip[i]->draw(t);
+      }
     }
     screen->endObject();
   }

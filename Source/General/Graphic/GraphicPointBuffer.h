@@ -61,7 +61,7 @@ public:
   void drawAsTriangles();
 
   // Uses the stored points to draw textured triangles
-  void drawAsTexturedTriangles(GraphicTextureInfo textureInfo, GraphicPointBuffer *textureCoordinates);
+  void drawAsTexturedTriangles(GraphicTextureInfo textureInfo, GraphicPointBuffer *textureCoordinates, boolean normalizeTextureCoordinates=false);
 
   // Updates the buffer contents
   void updateBuffer();

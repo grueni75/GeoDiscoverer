@@ -61,12 +61,12 @@ public:
       return width;
   }
 
-  void setHeight(Int height)
+  virtual void setHeight(Int height)
   {
       this->height = height;
   }
 
-  void setWidth(Int width)
+  virtual void setWidth(Int width)
   {
       this->width = width;
   }
@@ -91,12 +91,12 @@ public:
       return iconWidth;
   }
 
-  void setIconHeight(Int iconHeight)
+  virtual void setIconHeight(Int iconHeight)
   {
       this->iconHeight = iconHeight;
   }
 
-  void setIconWidth(Int iconWidth)
+  virtual void setIconWidth(Int iconWidth)
   {
       this->iconWidth = iconWidth;
   }

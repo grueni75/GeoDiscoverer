@@ -54,6 +54,10 @@ public:
   // Converts a time in seconds to the selected unit system and formats it for displaying purposes
   void formatTime(double timeInSeconds, std::string &value, std::string &unit, Int precision=2);
 
+  // Getters and setters
+  UnitSystem getUnitSystem() const {
+    return unitSystem;
+  }
 };
 
 }

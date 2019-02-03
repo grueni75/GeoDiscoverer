@@ -37,7 +37,7 @@ std::string Storage::computeMD5(std::string filepath) {
   // Open the file
   FILE *inFile = fopen(filepath.c_str(), "rb");
   if (!inFile) {
-    ERROR("can not open <%s> for reading",filepath.c_str());
+    DEBUG("can not open <%s> for reading",filepath.c_str());
     return "";
   }
 

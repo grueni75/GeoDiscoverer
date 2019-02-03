@@ -419,6 +419,7 @@ extern Core *core;
 #include <GraphicPointBuffer.h>
 #include <GraphicLine.h>
 #include <GraphicRectangle.h>
+#include <GraphicCircularStrip.h>
 #include <GraphicRectangleListSegment.h>
 #include <GraphicRectangleList.h>
 #include <GraphicObject.h>

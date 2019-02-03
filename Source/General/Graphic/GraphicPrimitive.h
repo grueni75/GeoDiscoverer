@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum {GraphicTypePrimitive=0, GraphicTypeRectangle=1, GraphicTypeRectangleList=2, GraphicTypeText=3, GraphicTypeWidget=4, GraphicTypeLine=5, GraphicTypeObject=6 } GraphicType;
+typedef enum {GraphicTypePrimitive=0, GraphicTypeRectangle=1, GraphicTypeRectangleList=2, GraphicTypeText=3, GraphicTypeWidget=4, GraphicTypeLine=5, GraphicTypeObject=6, GraphicTypeCircularStrip=7 } GraphicType;
 
 class GraphicPrimitive {
 

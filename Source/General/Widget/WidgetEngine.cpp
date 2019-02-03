@@ -1114,14 +1114,19 @@ void WidgetEngine::createGraphic() {
       config.setParameter("directionIconFilename","navigationWatchDirection");
       config.setParameter("arrowIconFilename","navigationWatchArrow");
       config.setParameter("blindIconFilename","navigationWatchBlind");
+      config.setParameter("statusIconFilename","navigationWatchStatus");
       config.setParameter("orientationLabelRadius","88.5");
       config.setParameter("targetRadius","90.0");
-      config.setParameter("textColumnCount","2");
+      config.setParameter("textColumnCount","1");
       config.setParameter("textRowFirstOffsetY","75");
       config.setParameter("textRowSecondOffsetY","60");
       config.setParameter("textRowThirdOffsetY","42");
       config.setParameter("textRowFourthOffsetY","31");
       config.setParameter("clockOffsetY","16");
+      config.setParameter("statusTextRadius","45.5");
+      config.setParameter("statusTextWidthLimit","22.5");
+      config.setParameter("statusTextAngleOffset","4.0");
+      config.setParameter("clockRadius","35.0");
     } else {
       position=WidgetPosition();
       position.setRefScreenDiagonal(0.0);
@@ -1271,7 +1276,9 @@ void WidgetEngine::createGraphic() {
           navigation->getBlindIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"blindIconFilename",__FILE__, __LINE__));
           navigation->getBlindIcon()->setX(-navigation->getBlindIcon()->getIconWidth()/2);
           navigation->getBlindIcon()->setY(-navigation->getBlindIcon()->getIconHeight()/2);
-        }
+          navigation->getStatusIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"statusIconFilename",__FILE__, __LINE__));
+          navigation->getStatusIcon()->setX(-navigation->getStatusIcon()->getIconWidth()/2);
+          navigation->getStatusIcon()->setY(-navigation->getStatusIcon()->getIconHeight()/2);        }
       }
 
       // Set type-dependent properties
@@ -1340,7 +1347,13 @@ void WidgetEngine::createGraphic() {
         navigation->setTurnColor(c->getGraphicColorValue(widgetPath+"/TurnColor",__FILE__, __LINE__));
         navigation->setMinPanDetectionRadius(c->getDoubleValue(widgetPath,"minPanDetectionRadius",__FILE__, __LINE__)*navigation->getIconHeight()/2/100.0);
         navigation->setPanSpeed(c->getDoubleValue(widgetPath,"panSpeed",__FILE__, __LINE__));
-        navigation->setBusyColor(c->getGraphicColorValue(widgetPath + "/BusyColor",__FILE__, __LINE__));
+        if (device->getIsWatch()) {
+          navigation->setBusyColor(c->getGraphicColorValue(widgetPath + "/BusyColor",__FILE__, __LINE__));
+          navigation->setStatusTextWidthLimit(c->getDoubleValue(widgetPath,"statusTextWidthLimit",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);
+          navigation->setStatusTextRadius(c->getDoubleValue(widgetPath,"statusTextRadius",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);
+          navigation->setStatusTextAngleOffset(c->getDoubleValue(widgetPath,"statusTextAngleOffset",__FILE__, __LINE__));
+          navigation->setClockRadius(c->getDoubleValue(widgetPath,"clockRadius",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);
+        }
       }
       if (widgetType=="pathInfo") {
         pathInfo->setPathNameOffsetX(c->getDoubleValue(widgetPath,"pathNameOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);

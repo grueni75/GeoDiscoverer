@@ -45,8 +45,8 @@ FontString::~FontString() {
   if (textureBitmap) free(textureBitmap);
 }
 
-// Called when the font must be drawn
-void FontString::draw(TimestampInMicroseconds t) {
+// Called to update the texture of the font
+void FontString::updateTexture() {
 
   // Update the texture
   FontString *s=this;
@@ -61,6 +61,13 @@ void FontString::draw(TimestampInMicroseconds t) {
   if (getTexture()==Screen::getTextureNotDefined()) {
     setTexture(s->getTexture());
   }
+}
+
+// Called when the font must be drawn
+void FontString::draw(TimestampInMicroseconds t) {
+
+  // Update the texture
+  updateTexture();
 
   // Call parent function
   GraphicRectangle::draw(t);

@@ -57,11 +57,26 @@ protected:
   // Graphic showing the blind background
   GraphicRectangle blindIcon;
 
+  // Graphic showing the status background
+  GraphicRectangle statusIcon;
+
   // Container that represents the target (displacement)
   GraphicObject targetObject;
 
   // Container that represents the direction plus target
   GraphicObject compassObject;
+
+  // Width limit for the status texts on watch
+  Int statusTextWidthLimit;
+
+  // Radius of the status texts on watch
+  Int statusTextRadius;
+
+  // Angle offset of the status texts on watch
+  double statusTextAngleOffset;
+
+  // Radius of the clock on watch
+  Int clockRadius;
 
   // Decides if the compass is shown
   bool hideCompass;
@@ -124,6 +139,10 @@ protected:
   FontString *speedValueFontString;
   FontString *orientationLabelFontStrings[4];
 
+  // Circular strips for drawing on watches
+  GraphicCircularStrip *circularStrip[4];
+  GraphicCircularStrip clockCircularStrip;
+
   // Holds the points of the arrow
   GraphicPointBuffer turnArrowPointBuffer;
 
@@ -166,6 +185,9 @@ protected:
 
   // Updates various flags
   virtual void updateFlags(Int x, Int y);
+
+  // Returns the font string to show in the given quadrant
+  FontString *getQuadrantFontString(Int i);
 
 public:
 
@@ -213,6 +235,10 @@ public:
 
   GraphicRectangle *getBlindIcon() {
     return &blindIcon;
+  }
+
+  GraphicRectangle *getStatusIcon() {
+    return &statusIcon;
   }
 
   void setDirectionChangeDuration(double directionChangeDuration) {
@@ -304,6 +330,21 @@ public:
     this->busyColor = busyColor;
   }
 
+  void setStatusTextWidthLimit(Int statusTextWidthLimit) {
+    this->statusTextWidthLimit = statusTextWidthLimit;
+  }
+
+  void setStatusTextAngleOffset(double statusTextAngleOffset) {
+    this->statusTextAngleOffset = statusTextAngleOffset;
+  }
+
+  void setStatusTextRadius(Int statusTextRadius) {
+    this->statusTextRadius = statusTextRadius;
+  }
+
+  void setClockRadius(Int clockRadius) {
+    this->clockRadius = clockRadius;
+  }
 };
 
 }

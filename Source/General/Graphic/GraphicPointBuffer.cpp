@@ -32,16 +32,23 @@ GraphicPointBuffer::GraphicPointBuffer(Screen *screen, Int numberOfPoints) {
   insertPos=0;
   buffer=Screen::getBufferNotDefined();
   bufferOutdated=true;
-  if (!(points=(Short*)malloc(sizeof(*points)*2*numberOfPoints))) {
-    FATAL("can not create point array",NULL);
-    return;
+  if (numberOfPoints>0) {
+    if (!(points=(Short*)malloc(sizeof(*points)*2*numberOfPoints))) {
+      FATAL("can not create point array",NULL);
+      return;
+    }
+  } else {
+    points=NULL;
   }
 }
 
 // Destructor
 GraphicPointBuffer::~GraphicPointBuffer() {
   invalidate();
-  free(points);
+  if (points) {
+    free(points);
+    points=NULL;
+  }
 }
 
 // Adds one point to the internal array
@@ -71,17 +78,17 @@ void GraphicPointBuffer::drawAsTriangles() {
 }
 
 // Uses the stored points to draw textured triangles
-void GraphicPointBuffer::drawAsTexturedTriangles(GraphicTextureInfo textureInfo, GraphicPointBuffer *textureCoordinates) {
+void GraphicPointBuffer::drawAsTexturedTriangles(GraphicTextureInfo textureInfo, GraphicPointBuffer *textureCoordinates, boolean normalizeTextureCoordinates) {
   if (insertPos==0)
     return;
   updateBuffer();
   textureCoordinates->updateBuffer();
-  screen->drawTriangles(insertPos/3,buffer,textureInfo,textureCoordinates->getBuffer());
+  screen->drawTriangles(insertPos/3,buffer,textureInfo,textureCoordinates->getBuffer(),normalizeTextureCoordinates);
 }
 
 // Updates the buffer contents
 void GraphicPointBuffer::updateBuffer() {
-  if (bufferOutdated) {
+  if ((points!=NULL)&&(bufferOutdated)) {
     if (buffer==screen->getBufferNotDefined()) {
       buffer=screen->createBufferInfo();
     }

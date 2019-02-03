@@ -508,7 +508,8 @@ bool MapSourceRemote::addOverlayArchive(std::string path, std::string hash) {
   std::ifstream ifs;
   ifs.open(path.c_str(),std::ios::binary);
   if (ifs.fail()) {
-    FATAL("can not open <%s> for reading",path.c_str());
+    DEBUG("can not open <%s> for reading",path.c_str());
+    remove(path.c_str());
     return false;
   }
 

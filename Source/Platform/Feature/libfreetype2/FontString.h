@@ -52,6 +52,9 @@ public:
   // Called when the widget must be drawn
   virtual void draw(TimestampInMicroseconds t);
 
+  // Called to update the texture of the font
+  void updateTexture();
+
   // Getters and setters
   TimestampInSeconds getLastAccess() const
   {

@@ -802,6 +802,11 @@
 			                                    <xsd:documentation>Filename of the image showing the background if below content shall be defocused.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+			                                <xsd:element name="statusIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Filename of the image showing the status fields.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
 			                                <xsd:element name="directionChangeDuration" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Duration in microseconds of a direction change.</xsd:documentation>
@@ -857,6 +862,26 @@
 			                                    <xsd:documentation>Min radius in percent of the widget height a touch has to have from the center to be registered as a pan command.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+			                                <xsd:element name="statusTextWidthLimit" type="xsd:double" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Maximum width in percent of the widget width a status text on a watch shall have.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>			                                
+			                                <xsd:element name="statusTextRadius" type="xsd:double" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Radius in percent of the widget width a status text on a watch shall have.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>	
+			                                <xsd:element name="clockRadius" type="xsd:double" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Radius in percent of the widget width the clock on a watch shall have.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>	
+			                                <xsd:element name="statusTextAngleOffset" type="xsd:double" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Angle offset in degrees a status text on a watch shall have.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>	
 			                                <xsd:element name="panSpeed" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Speed of the map panning in pixels per microseconds.</xsd:documentation>

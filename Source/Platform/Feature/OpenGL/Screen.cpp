@@ -462,11 +462,11 @@ void Screen::drawRectangle(Int x1, Int y1, Int x2, Int y2, GraphicTextureInfo te
 }
 
 // Draws multiple triangles
-void Screen::drawTriangles(Int numberOfTriangles, GraphicBufferInfo pointCoordinatesBuffer, GraphicTextureInfo textureInfo, GraphicBufferInfo textureCoordinatesBuffer) {
+void Screen::drawTriangles(Int numberOfTriangles, GraphicBufferInfo pointCoordinatesBuffer, GraphicTextureInfo textureInfo, GraphicBufferInfo textureCoordinatesBuffer, boolean normalizeTextureCoordinates)  {
 
   if (textureInfo!=textureNotDefined) {
     glBindBuffer(GL_ARRAY_BUFFER, textureCoordinatesBuffer);
-    glVertexAttribPointer(textureCoordinateInHandle, 2, GL_SHORT, false, 0, 0);
+    glVertexAttribPointer(textureCoordinateInHandle, 2, GL_SHORT, normalizeTextureCoordinates, 0, 0);
     glBindTexture( GL_TEXTURE_2D, textureInfo );
   } else {
     glDisableVertexAttribArray(textureCoordinateInHandle);
