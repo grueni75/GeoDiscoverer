@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: ch.acra:acra-mail:5.2.1@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/acra-mail-5.2.1.aar/ad2dd35f29f22e83345436efe1f9a5ba/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/acra-mail-5.2.1.aar/ad2dd35f29f22e83345436efe1f9a5ba/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.acra/acra-mail/5.2.1/b99271d956e7f2bf13aeaff1ccbe9809347c1b80/acra-mail-5.2.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

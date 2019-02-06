@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: ch.acra:acra-notification:5.2.1@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/acra-notification-5.2.1.aar/a02df9220874658e7a4fa808c679862d/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/acra-notification-5.2.1.aar/a02df9220874658e7a4fa808c679862d/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.acra/acra-notification/5.2.1/2e853cbedd62eb63bf1eff29b4189762e5c8228c/acra-notification-5.2.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

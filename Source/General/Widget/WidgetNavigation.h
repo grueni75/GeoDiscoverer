@@ -102,6 +102,9 @@ protected:
   // Current navigation metrics
   double locationBearingNominal,locationBearingActual;
 
+  // Indicates that the button in the north of the widget is hit
+  bool northButtonHit;
+
   // Vertical positions of the different texts
   Int textColumnCount;
   Int textRowFirstOffsetY;
@@ -170,6 +173,9 @@ protected:
   // Min radius a touch has to have from the center to register as touch command
   double minTouchDetectionRadius;
 
+  // Opening angle in the south of the widget that is detected as a widget activation
+  double circularButtonAngle;
+
   // Speed at which the panning shall be performed
   double panSpeed;
 
@@ -178,6 +184,9 @@ protected:
 
   // Indicates if the widget has been touched the first time after beeing inactive
   bool firstTouchAfterInactive;
+
+  // Indicates if the status text shall be drawn above or below the target and arrow
+  bool statusTextAbove;
 
   // Updates various flags
   virtual void updateFlags(Int x, Int y);
@@ -207,6 +216,9 @@ public:
 
   // Called when the widget has changed his position
   virtual void updatePosition(Int x, Int y, Int z);
+
+  // Draws the status texts on a watch
+  void drawStatus(TimestampInMicroseconds t);
 
   // Getters and setters
   void setUpdateInterval(TimestampInMicroseconds updateInterval) {
@@ -336,6 +348,10 @@ public:
 
   void setClockRadius(Int clockRadius) {
     this->clockRadius = clockRadius;
+  }
+
+  void setCircularButtonAngle(double circularButtonAngle) {
+    this->circularButtonAngle = circularButtonAngle;
   }
 };
 

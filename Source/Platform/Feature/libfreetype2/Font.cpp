@@ -539,7 +539,7 @@ void Font::destroyString(FontString *fontString) {
     }
 
   } else {
-    FATAL("can not erase font string that is not in the used string map",NULL);
+    FATAL("can not erase font string <%s> that is not in the used string map",fontString->getContents().c_str());
     return;
   }
 

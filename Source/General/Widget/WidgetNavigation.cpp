@@ -59,6 +59,9 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   locationBearingActual=0;
   directionChangeDuration=0;
   textColumnCount=1;
+  northButtonHit=false;
+  statusTextAbove=false;
+  isWatch=widgetPage->getWidgetEngine()->getDevice()->getIsWatch();
   FontEngine *fontEngine=widgetPage->getFontEngine();
   if (!isWatch) {
     fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
@@ -89,7 +92,6 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   firstRun=true;
   lastClockUpdate=0;
   secondRowState=0;
-  isWatch=widgetPage->getWidgetEngine()->getDevice()->getIsWatch();
   firstTouchAfterInactive=true;
   remoteServerActive=false;
   statusTextWidthLimit=-1;
@@ -624,6 +626,28 @@ FontString* WidgetNavigation::getQuadrantFontString(Int i) {
   return s;
 }
 
+// Draws the status texts on a watch
+void WidgetNavigation::drawStatus(TimestampInMicroseconds t) {
+  GraphicColor c = statusIcon.getColor();
+  c.setAlpha(color.getAlpha());
+  statusIcon.setColor(c);
+  statusIcon.draw(t);
+  screen->startObject();
+  screen->translate(getX() + getIconWidth() / 2, getY() + getIconHeight() / 2, getZ());
+  for (Int i = 0; i < 4; i++) {
+    FontString* s = getQuadrantFontString(i);
+    if ((s) && (circularStrip[i])) {
+      c = circularStrip[i]->getColor();
+      c.setAlpha(color.getAlpha());
+      circularStrip[i]->setColor(c);
+      s->updateTexture();
+      circularStrip[i]->setTexture(s->getTexture());
+      circularStrip[i]->draw(t);
+    }
+  }
+  screen->endObject();
+}
+
 // Executed every time the graphic engine needs to draw
 void WidgetNavigation::draw(TimestampInMicroseconds t) {
 
@@ -678,26 +702,9 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     screen->endObject();
   }
 
-  // Draw the status if necessary
-  if (isWatch) {
-    c=statusIcon.getColor();
-    c.setAlpha(color.getAlpha());
-    statusIcon.setColor(c);
-    statusIcon.draw(t);
-    screen->startObject();
-    screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
-    for (Int i=0;i<4;i++) {
-      FontString *s=getQuadrantFontString(i);
-      if ((s)&&(circularStrip[i])) {
-        c=circularStrip[i]->getColor();
-        c.setAlpha(color.getAlpha());
-        circularStrip[i]->setColor(c);
-        s->updateTexture();
-        circularStrip[i]->setTexture(s->getTexture());
-        circularStrip[i]->draw(t);
-      }
-    }
-    screen->endObject();
+  // Draw the status below the arrow and the target if widget is not active
+  if ((isWatch)&&(!statusTextAbove)) {
+    drawStatus(t);
   }
 
   // Draw the arrow
@@ -727,6 +734,11 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
       targetIcon.draw(t);
       screen->endObject();
     }
+  }
+
+  // Draw the status above the arrow and the target if widget is active
+  if ((isWatch)&&(statusTextAbove)) {
+    drawStatus(t);
   }
 
   // Is a turn coming?
@@ -850,6 +862,8 @@ void WidgetNavigation::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 // Executed if the widget has been untouched
 void WidgetNavigation::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
   WidgetPrimitive::onTouchUp(t,x,y,cancel);
+
+  // Are we hit?
   if (getIsHit()) {
 
     // Turn currently active?
@@ -863,11 +877,18 @@ void WidgetNavigation::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool c
       // On a watch?
       if (isWatch) {
 
-        // Deactivate widgets after second touch up
-        if (!firstTouchAfterInactive) {
+        // Deactivate swipe if north button is hit
+        if (northButtonHit) {
+          core->getCommander()->dispatch("deactivateSwipes()");
           widgetPage->setWidgetsActive(t,false);
         } else {
-          firstTouchAfterInactive=false;
+
+          // Deactivate widgets after second touch up
+          if (!firstTouchAfterInactive) {
+            widgetPage->setWidgetsActive(t,false);
+          } else {
+            firstTouchAfterInactive=false;
+          }
         }
 
       } else {
@@ -897,6 +918,18 @@ void WidgetNavigation::updateFlags(Int x, Int y) {
       isHit=false;
       if (showTurn) {
         skipTurn=true;
+      }
+    } else {
+      double angle = FloatingPoint::rad2degree(FloatingPoint::computeAngle(dx,dy));
+      DEBUG("angle=%f",angle);
+      if ((angle >= 90.0-circularButtonAngle/2)&&(angle <= 90.0+circularButtonAngle/2)) {
+        northButtonHit=true;
+      } else {
+        northButtonHit=false;
+        if ((angle <= 270.0-circularButtonAngle/2)||(angle >= 270.0+circularButtonAngle/2)) {
+          isHit=false;
+          statusTextAbove=!statusTextAbove;
+        }
       }
     }
   }

@@ -56,6 +56,11 @@
                   <xsd:documentation>Screen backlight is kept on if ticked.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="watchDisplayTimeout" type="xsd:integer" default="5000">
+                <xsd:annotation>
+                  <xsd:documentation>Timeout in milliseconds for the display if executed on a watch.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="backButtonTurnsScreenOff" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Turns off the screen if the back button is pressed (to save energy). This requires that the app acts as a device admin. The device admin permission has to be granted manually in the device settings.</xsd:documentation>
@@ -860,6 +865,11 @@
 			                               	<xsd:element name="minTouchDetectionRadius" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Min radius in percent of the widget height a touch has to have from the center to be registered as a hit on the widget.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
+			                               	<xsd:element name="circularButtonAngle" type="xsd:double" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Opening angle in degress which a touch is detected as a hit of a button within the widget.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
 			                                <xsd:element name="statusTextWidthLimit" type="xsd:double" default="0" minOccurs="0">

@@ -50,6 +50,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.wearable.watchface.Gles2WatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
@@ -70,8 +71,11 @@ import android.widget.TextView;
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppInterface;
 
 import java.lang.ref.WeakReference;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 public class WatchFace extends Gles2WatchFaceService {
@@ -84,6 +88,7 @@ public class WatchFace extends Gles2WatchFaceService {
   WindowManager windowManager = null;
   LayoutInflater inflater = null;
   SensorManager sensorManager = null;
+  Vibrator vibrator = null;
 
   // Indicates that the compass provides readings
   boolean compassWatchStarted = false;
@@ -96,8 +101,15 @@ public class WatchFace extends Gles2WatchFaceService {
   WindowManager.LayoutParams touchHandlerLayoutParams = null;
   boolean touchHandlerActive = false;
 
-  // Wake lock
-  PowerManager.WakeLock wakeLock = null;
+  // Used for keeping the display on
+  View keepDisplayOnView = null;
+  WindowManager.LayoutParams keepDisplayOnLayoutParams = null;
+  boolean keepDisplayOnActive = false;
+  Timer displayTimer = null;
+  long displayTimeout = 0;
+
+  // Wake locks
+  PowerManager.WakeLock wakeLockCore = null;
 
   // Types of dialogs
   static final int FATAL_DIALOG = 0;
@@ -164,30 +176,60 @@ public class WatchFace extends Gles2WatchFaceService {
     String state=coreObject.executeCoreCommand("getWakeLock()");
     if (state.equals("true")) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","wake lock enabled");
-      if (!wakeLock.isHeld())
-        wakeLock.acquire();
+      if (!wakeLockCore.isHeld())
+        wakeLockCore.acquire();
     } else {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","wake lock disabled");
-      if (wakeLock.isHeld())
-        wakeLock.release();
+      if (wakeLockCore.isHeld())
+        wakeLockCore.release();
     }
   }
 
   // Enables or disable the touch handler
   void setTouchHandlerEnabled(boolean enable) {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","setTouchHandlerEnabled called");
     if (touchHandlerView!=null) {
       if (enable) {
         if (!touchHandlerActive) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","activating touch handler");
           windowManager.addView(touchHandlerView, touchHandlerLayoutParams);
           touchHandlerActive = true;
         }
       } else {
         if (touchHandlerActive) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","deactivating touch handler");
           windowManager.removeView(touchHandlerView);
           touchHandlerActive = false;
         }
       }
     }
+  }
+
+  // Keeps the screen on for more than the default time
+  synchronized void updateDisplayTimeout() {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "display timeout update");
+    if (displayTimer!=null) {
+      displayTimer.cancel();
+    }
+    if (!keepDisplayOnActive) {
+      windowManager.addView(keepDisplayOnView, keepDisplayOnLayoutParams);
+    }
+    keepDisplayOnActive = true;
+    displayTimer = new Timer();
+    displayTimer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "display timeout expired");
+        windowManager.removeView(keepDisplayOnView);
+        keepDisplayOnActive=false;
+      }
+    }, displayTimeout);
+  }
+
+  // Short vibration to give feedback to user
+  public void vibrate() {
+    long[] pattern = { 0, 100 };
+    vibrator.vibrate(pattern, -1);
   }
 
   // Communication with the native core
@@ -249,6 +291,7 @@ public class WatchFace extends Gles2WatchFaceService {
               }
             }
           }
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","command received: " + command);
 
           // Execute command
           boolean commandExecuted=false;
@@ -301,7 +344,7 @@ public class WatchFace extends Gles2WatchFaceService {
             commandExecuted=true;
           }
           if (commandFunction.equals("coreInitialized")) {
-            // Nothing to do as of now
+            watchFace.displayTimeout=Long.valueOf(watchFace.coreObject.configStoreGetStringValue("General","watchDisplayTimeout"));
             commandExecuted=true;
           }
           if (commandFunction.equals("lateInitComplete")) {
@@ -338,6 +381,11 @@ public class WatchFace extends Gles2WatchFaceService {
           if (commandFunction.equals("exitActivity")) {
             commandExecuted=true;
           }
+          if (commandFunction.equals("deactivateSwipes")) {
+            watchFace.setTouchHandlerEnabled(false);
+            watchFace.vibrate();
+            commandExecuted=true;
+          }
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
           }
@@ -355,15 +403,24 @@ public class WatchFace extends Gles2WatchFaceService {
     powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
     windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
     inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
+    sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+    vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
     // Get a wake lock
-    if (wakeLock!=null)
-      wakeLock.release();
-    wakeLock=powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActiveCPU");
-    if (wakeLock==null) {
-      fatalDialog("Can not obtain wake lock!");
+    if (wakeLockCore!=null)
+      wakeLockCore.release();
+    wakeLockCore=powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActiveCPU");
+    if (wakeLockCore==null) {
+      fatalDialog("Can not obtain core wake lock!");
     }
+
+    // Create the views for keeping screen on
+    keepDisplayOnView = new View(getApplicationContext());
+    keepDisplayOnLayoutParams = new WindowManager.LayoutParams(
+        WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
+        WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+        PixelFormat.RGBA_8888);
 
     // Check for OpenGL ES 2.00
     final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -413,8 +470,16 @@ public class WatchFace extends Gles2WatchFaceService {
   public void onDestroy() {
     super.onDestroy();
     ((GDApplication)getApplication()).setMessageHandler(null);
-    if ((wakeLock!=null)&&(wakeLock.isHeld()))
-      wakeLock.release();
+    if ((wakeLockCore!=null)&&(wakeLockCore.isHeld()))
+      wakeLockCore.release();
+    if (touchHandlerActive) {
+      windowManager.removeView(touchHandlerView);
+      touchHandlerActive=false;
+    }
+    if (keepDisplayOnActive) {
+      windowManager.removeView(keepDisplayOnView);
+      keepDisplayOnActive=false;
+    }
   }
 
   private class Engine extends Gles2WatchFaceService.Engine {
@@ -473,28 +538,13 @@ public class WatchFace extends Gles2WatchFaceService {
 
         // Create the touch handler
         touchHandlerView = new View(getApplicationContext());
-        /*touchHandlerView = new ImageView(getApplicationContext());
-        Display display = windowManager.getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
-        int height = size.y;
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmap.eraseColor(Color.TRANSPARENT);
-        Paint paint = new Paint();
-        Canvas canvas = new Canvas(bitmap);
-        int lineWidth=8;
-        paint.setColor(0x80FF0000);
-        paint.setStrokeWidth(lineWidth);
-        paint.setStyle(Paint.Style.STROKE);
-        canvas.drawCircle(width/2,height/2, width/2, paint);
-        touchHandlerView.setImageBitmap(bitmap);*/
         touchHandlerLayoutParams = new WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.TYPE_SYSTEM_ALERT, 0, PixelFormat.RGBA_8888);
         touchHandlerView.setOnTouchListener(new View.OnTouchListener() {
           @Override
           public boolean onTouch(View v, MotionEvent event) {
+            updateDisplayTimeout();
             return coreObject.onTouchEvent(event);
           }
         });
@@ -530,12 +580,10 @@ public class WatchFace extends Gles2WatchFaceService {
       coreObject.onSurfaceChanged(null,width,height);
     }
 
-    @Override
-    public void onAmbientModeChanged(boolean inAmbientMode) {
-      super.onAmbientModeChanged(inAmbientMode);
-      invalidate();
+    // Handles visibility changes
+    private void visibilityChanged(boolean visible) {
       if (coreObject==null) return;
-      if (inAmbientMode) {
+      if (!visible) {
         coreObject.executeAppCommand("setWearDeviceSleeping(1)");
         setTouchHandlerEnabled(false);
         if (compassWatchStarted) {
@@ -543,8 +591,9 @@ public class WatchFace extends Gles2WatchFaceService {
           compassWatchStarted=false;
         }
       } else {
+        updateDisplayTimeout();
         if (!compassWatchStarted) {
-          sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),SensorManager.SENSOR_DELAY_NORMAL);
+          sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
           sensorManager.registerListener(coreObject,sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
           compassWatchStarted=true;
         }
@@ -553,12 +602,21 @@ public class WatchFace extends Gles2WatchFaceService {
     }
 
     @Override
+    public void onAmbientModeChanged(boolean inAmbientMode) {
+      super.onAmbientModeChanged(inAmbientMode);
+      invalidate();
+      visibilityChanged(!inAmbientMode);
+    }
+
+    @Override
     public void onVisibilityChanged(boolean visible) {
       super.onVisibilityChanged(visible);
       if (visible) {
         invalidate();
       }
+      visibilityChanged(visible);
     }
+
     @Override
     public void onTimeTick() {
       super.onTimeTick();
@@ -618,6 +676,7 @@ public class WatchFace extends Gles2WatchFaceService {
           super.onTapCommand(tapType, x, y, eventTime);
           break;
       }
+      updateDisplayTimeout();
     }
   }
 }

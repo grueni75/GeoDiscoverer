@@ -1168,6 +1168,7 @@ void WidgetEngine::createGraphic() {
     config.setParameter("TurnColor/blue","0");
     config.setParameter("TurnColor/alpha","255");
     config.setParameter("minTouchDetectionRadius","75.0");
+    config.setParameter("circularButtonAngle","20.0");
     addWidgetToPage(config);
   }
 
@@ -1270,6 +1271,7 @@ void WidgetEngine::createGraphic() {
           navigation->getSeparatorIcon()->setY(0);
         } else {
           navigation->setMinTouchDetectionRadius(c->getDoubleValue(widgetPath,"minTouchDetectionRadius",__FILE__, __LINE__)*navigation->getIconHeight()/2/100.0);
+          navigation->setCircularButtonAngle(c->getDoubleValue(widgetPath,"circularButtonAngle",__FILE__, __LINE__));
           navigation->getArrowIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"arrowIconFilename",__FILE__, __LINE__));
           navigation->getArrowIcon()->setX(-navigation->getDirectionIcon()->getIconWidth()/2);
           navigation->getArrowIcon()->setY(-navigation->getDirectionIcon()->getIconHeight()/2);
