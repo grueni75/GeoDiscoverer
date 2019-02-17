@@ -44,6 +44,7 @@ void NavigationPoint::writeToConfig(std::string path, TimestampInSeconds timesta
   ConfigStore *configStore = core->getConfigStore();
   path=path + "[@name='" + getName() + "']";
   configStore->setStringValue(path,"address",address,__FILE__,__LINE__);
+  configStore->setStringValue(path,"group",group,__FILE__,__LINE__);
   configStore->setDoubleValue(path,"lat",lat,__FILE__,__LINE__);
   configStore->setDoubleValue(path,"lng",lng,__FILE__,__LINE__);
   if (timestamp==0)
@@ -58,6 +59,7 @@ bool NavigationPoint::readFromConfig(std::string path) {
   path=path + "[@name='" + getName() + "']";
   if (configStore->pathExists(path,__FILE__,__LINE__)) {
     address=configStore->getStringValue(path,"address",__FILE__,__LINE__);
+    group=configStore->getStringValue(path,"group",__FILE__,__LINE__);
     lat=configStore->getDoubleValue(path,"lat",__FILE__,__LINE__);
     lng=configStore->getDoubleValue(path,"lng",__FILE__,__LINE__);
     timestamp=configStore->getLongValue(path,"timestamp",__FILE__,__LINE__);

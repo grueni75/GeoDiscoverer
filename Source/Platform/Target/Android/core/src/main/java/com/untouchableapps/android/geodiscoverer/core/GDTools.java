@@ -22,6 +22,11 @@
 
 package com.untouchableapps.android.geodiscoverer.core;
 
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -73,5 +78,4 @@ public class GDTools {
       }
     }
   }
-
 }

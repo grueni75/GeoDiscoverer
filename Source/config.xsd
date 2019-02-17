@@ -1958,6 +1958,11 @@
                         <xsd:documentation>Timestamp in seconds that the entry was last updated.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>                    
+                    <xsd:element name="group" type="xsd:string" default="Default" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Name of the group the address belongs to.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>                    
                   </xsd:sequence>
                   <xsd:attribute name="name">
                     <xsd:annotation>
@@ -1966,6 +1971,11 @@
                   </xsd:attribute>
                 </xsd:complexType>
               </xsd:element>
+              <xsd:element name="selectedAddressPointGroup" type="xsd:string" default="Default" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Name of the address point group that is currently displayed.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>                                     
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>

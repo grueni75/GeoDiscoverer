@@ -33,6 +33,9 @@ class NavigationPoint {
   // Full address
   std::string address;
 
+  // Address group
+  std::string group;
+
   // Longitude in degress
   double lng;
 
@@ -122,6 +125,10 @@ public:
 
   void setY(double y) {
     this->y = y;
+  }
+
+  const std::string& getGroup() const {
+    return group;
   }
 };
 

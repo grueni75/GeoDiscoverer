@@ -1670,13 +1670,16 @@ void NavigationEngine::initAddressPoints() {
     }
   }
   addressPoints.clear();
+  std::string selectedAddressPointGroup = core->getConfigStore()->getStringValue("Navigation","selectedAddressPointGroup",__FILE__,__LINE__);
   for (std::list<std::string>::iterator j=names.begin();j!=names.end();j++) {
     NavigationPoint addressPoint;
     addressPoint.setName(*j);
     addressPoint.readFromConfig(path);
-    addressPoints.push_back(addressPoint);
-    NavigationPointVisualization pointVis(&navigationPointsGraphicObject, addressPoint.getLat(),addressPoint.getLng(), NavigationPointVisualizationTypePoint, addressPoint.getName(),NULL);
-    navigationPointsVisualization.push_back(pointVis);
+    if (addressPoint.getGroup()==selectedAddressPointGroup) {
+      addressPoints.push_back(addressPoint);
+      NavigationPointVisualization pointVis(&navigationPointsGraphicObject, addressPoint.getLat(),addressPoint.getLng(), NavigationPointVisualizationTypePoint, addressPoint.getName(),NULL);
+      navigationPointsVisualization.push_back(pointVis);
+    }
   }
   resetOverlayGraphicHash();
   core->getThread()->unlockMutex(navigationPointsMutex);
@@ -1828,6 +1831,11 @@ void NavigationEngine::triggerNavigationInfoUpdate() {
   core->getCommander()->dispatch("forceRemoteMapUpdate()");
 }
 
+// Updates the address point group that is displayed on screen
+void NavigationEngine::addressPointGroupChanged() {
+  initAddressPoints();
+  core->onDataChange();
+}
 
 }
 

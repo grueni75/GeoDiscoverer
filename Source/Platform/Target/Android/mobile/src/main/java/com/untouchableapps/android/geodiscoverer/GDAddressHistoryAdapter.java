@@ -30,40 +30,101 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.core.GDTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 
 public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
+
   private final ViewMap viewMap;
   private final MaterialDialog dialog;
   private GDCore coreObject;
   private ColorStateList itemIconTint;
+  private ListView listView;
+  public LinkedList<String> groupNames;
+  public ArrayAdapter<String> groupNamesAdapter;
+  public String selectedGroupName;
 
   static class ViewHolder {
+    public LinearLayout row;
     public TextView text;
     public EditText editText;
+    public LinearLayout editor;
+    public Spinner group;
     public ImageButton removeButton;
-    public ImageButton renameButton;
+    public ImageButton editButton;
     public ImageButton clearButton;
     public ImageButton confirmButton;
   }
 
-  public GDAddressHistoryAdapter(ViewMap viewMap, MaterialDialog dialog) {
+  private void closeRowEditor(ViewHolder holder) {
+    holder.editor.setVisibility(View.GONE);
+    holder.confirmButton.setVisibility(View.GONE);
+    holder.clearButton.setVisibility(View.GONE);
+    holder.text.setVisibility(View.VISIBLE);
+    holder.removeButton.setVisibility(View.VISIBLE);
+    holder.editButton.setVisibility(View.VISIBLE);
+    updateListViewSize(holder);
+    updateAddresses();
+  }
+
+  private void updateListViewSize(ViewHolder holder) {
+    int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
+    holder.row.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+    int diff = holder.row.getMeasuredHeight()-holder.row.getHeight();
+    ViewGroup.LayoutParams params = listView.getLayoutParams();
+    if (listView.getHeight()<holder.row.getMeasuredHeight()) {
+      params.height = listView.getHeight() + diff;
+    } else {
+      params.height = -1;
+    }
+    listView.setLayoutParams(params);
+    listView.requestLayout();
+  }
+
+  public GDAddressHistoryAdapter(ViewMap viewMap, MaterialDialog dialog, ListView listView) {
     super(viewMap, R.layout.dialog_address_history_entry);
 
+    // Remember variables
     coreObject=GDApplication.coreObject;
+    this.viewMap = viewMap;
+    this.dialog = dialog;
+    this.itemIconTint = viewMap.navDrawerList.getItemIconTintList();
+    this.listView = listView;
+    groupNames = new LinkedList<String>();
+    groupNamesAdapter = new ArrayAdapter<String>(getContext(), R.layout.dialog_address_history_group_entry);
+
+    // Get the address list and sort it according to time
+    updateAddresses();
+
+    // Create the group names adapter
+    if (!groupNames.contains("Default")) {
+      addGroupName("Default");
+    }
+  }
+
+  public void updateAddresses() {
+    selectedGroupName = coreObject.configStoreGetStringValue("Navigation","selectedAddressPointGroup");
+    clear();
     String temp[] = coreObject.configStoreGetAttributeValues("Navigation/AddressPoint","name");
     LinkedList<String> unsortedNames = new LinkedList<String>(Arrays.asList(temp));
-    GDApplication.addMessage(GDApplication.WARNING_MSG,"GDApp","sort array according to timestamp");
     while (unsortedNames.size()>0) {
       String newestName="";
       long newestTimestamp = 0;
@@ -75,12 +136,56 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
           newestName = name;
         }
       }
-      add(newestName);
+      String groupName = coreObject.configStoreGetStringValue("Navigation/AddressPoint[@name='" + newestName + "']","group");
+      if (!groupNames.contains(groupName)) {
+        addGroupName(groupName);
+      }
+      if (groupName.equals(selectedGroupName))
+        add(newestName);
       unsortedNames.remove(newestName);
     }
-    this.viewMap = viewMap;
-    this.dialog = dialog;
-    this.itemIconTint = viewMap.navDrawerList.getItemIconTintList();
+    notifyDataSetChanged();
+  }
+
+  public void addGroupName(String groupName) {
+    if ((groupName!="")&&(!groupNames.contains(groupName))) {
+      groupNames.add(groupName);
+      Collections.sort(groupNames);
+      groupNamesAdapter.clear();
+      groupNamesAdapter.addAll(groupNames);
+      groupNamesAdapter.notifyDataSetChanged();
+    }
+  }
+
+  public void removeGroupName(String groupName) {
+    if ((groupName!="")&&(groupNames.contains(groupName))&&(!groupName.equals("Default"))) {
+
+      // Remove the group name from the list
+      groupNames.remove(groupName);
+      groupNamesAdapter.remove(groupName);
+
+      // Go through all addresses that use this group name and reset them to default
+      for (int i=0;i<getCount();i++) {
+        String address = getItem(i);
+        String path = "Navigation/AddressPoint[@name='"+address+"']";
+        String addressGroupName = coreObject.configStoreGetStringValue(path,"group");
+        if (addressGroupName.equals(groupName)) {
+          coreObject.configStoreSetStringValue(path,"group","Default");
+        }
+      }
+
+      // Close all rows that are in edit mode
+      final int firstListItemPosition = listView.getFirstVisiblePosition();
+      final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
+      for (int i=0;i<listView.getChildCount();i++) {
+        View rowView = listView.getChildAt(i);
+        ViewHolder holder = (ViewHolder)rowView.getTag();
+        closeRowEditor(holder);
+      }
+
+      // Inform all spinners that data set has changed
+      groupNamesAdapter.notifyDataSetChanged();
+    }
   }
 
   @Override
@@ -92,17 +197,21 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
       LayoutInflater inflater = viewMap.getLayoutInflater();
       rowView = inflater.inflate(R.layout.dialog_address_history_entry, null);
       ViewHolder viewHolder = new ViewHolder();
+      viewHolder.row = (LinearLayout) rowView;
       viewHolder.text = (TextView) rowView.findViewById(R.id.dialog_address_history_entry_text);
       viewHolder.editText = (EditText) rowView.findViewById(R.id.dialog_address_history_entry_edit_text);
       viewHolder.editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
       viewHolder.removeButton = (ImageButton) rowView.findViewById(R.id.dialog_address_history_entry_remove_button);
-      DrawableCompat.setTintList(viewHolder.removeButton.getDrawable(),itemIconTint);
-      viewHolder.renameButton = (ImageButton) rowView.findViewById(R.id.dialog_address_history_entry_rename_button);
-      DrawableCompat.setTintList(viewHolder.renameButton.getDrawable(),itemIconTint);
+      DrawableCompat.setTintList(viewHolder.removeButton.getDrawable(), itemIconTint);
+      viewHolder.editButton = (ImageButton) rowView.findViewById(R.id.dialog_address_history_entry_edit_button);
+      DrawableCompat.setTintList(viewHolder.editButton.getDrawable(), itemIconTint);
       viewHolder.confirmButton = (ImageButton) rowView.findViewById(R.id.dialog_address_history_entry_confirm_button);
-      DrawableCompat.setTintList(viewHolder.confirmButton.getDrawable(),itemIconTint);
+      DrawableCompat.setTintList(viewHolder.confirmButton.getDrawable(), itemIconTint);
       viewHolder.clearButton = (ImageButton) rowView.findViewById(R.id.dialog_address_history_entry_clear_button);
-      DrawableCompat.setTintList(viewHolder.clearButton.getDrawable(),itemIconTint);
+      DrawableCompat.setTintList(viewHolder.clearButton.getDrawable(), itemIconTint);
+      viewHolder.editor = (LinearLayout) rowView.findViewById(R.id.dialog_address_history_entry_editor);
+      DrawableCompat.setTintList(((ImageView)rowView.findViewById(R.id.dialog_address_history_entry_group_image)).getDrawable(), itemIconTint);
+      viewHolder.group = (Spinner) rowView.findViewById(R.id.dialog_address_history_entry_group_spinner);
       rowView.setTag(viewHolder);
     }
 
@@ -124,16 +233,20 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         dialog.dismiss();
       }
     });
-    holder.renameButton.setOnClickListener(new View.OnClickListener() {
+    holder.editButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        holder.editText.setVisibility(View.VISIBLE);
+        holder.group.setAdapter(groupNamesAdapter);
+        String groupName = coreObject.configStoreGetStringValue("Navigation/AddressPoint[@name='"+holder.text.getText().toString()+"']","group");
+        holder.group.setSelection(groupNamesAdapter.getPosition(groupName));
+        holder.editor.setVisibility(View.VISIBLE);
         holder.confirmButton.setVisibility(View.VISIBLE);
         holder.clearButton.setVisibility(View.VISIBLE);
         holder.text.setVisibility(View.GONE);
         holder.removeButton.setVisibility(View.GONE);
-        holder.renameButton.setVisibility(View.GONE);
+        holder.editButton.setVisibility(View.GONE);
         holder.editText.setText(name);
+        updateListViewSize(holder);
       }
     });
     holder.clearButton.setOnClickListener(new View.OnClickListener() {
@@ -148,7 +261,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
 
         // Skip if edit text is empty
         String newName = holder.editText.getText().toString();
-        if ((!newName.equals(""))&&(!newName.equals(name))) {
+        if ((!newName.equals("")) && (!newName.equals(name))) {
 
           // Rename the entry
           newName = coreObject.executeCoreCommand("renameAddressPoint(\"" + name + "\"," +
@@ -171,12 +284,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         }
 
         // Make the original views visible again
-        holder.editText.setVisibility(View.GONE);
-        holder.confirmButton.setVisibility(View.GONE);
-        holder.clearButton.setVisibility(View.GONE);
-        holder.text.setVisibility(View.VISIBLE);
-        holder.removeButton.setVisibility(View.VISIBLE);
-        holder.renameButton.setVisibility(View.VISIBLE);
+        closeRowEditor(holder);
       }
     };
     holder.confirmButton.setOnClickListener(confirmOnClickListener);
@@ -190,8 +298,19 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         return false;
       }
     });
+    holder.group.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        String group = groupNamesAdapter.getItem(position);
+        String address = holder.text.getText().toString();
+        String path = "Navigation/AddressPoint[@name='"+address+"']";
+        coreObject.configStoreSetStringValue(path,"group",group);
+      }
 
-
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+      }
+    });
     return rowView;
   }
 }

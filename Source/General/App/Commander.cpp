@@ -650,6 +650,10 @@ std::string Commander::execute(std::string cmd) {
     core->getNavigationEngine()->removeAddressPoint(args[0]);
     cmdExecuted=true;
   }
+  if (cmdName=="addressPointGroupChanged") {
+    core->getNavigationEngine()->addressPointGroupChanged();
+    cmdExecuted=true;
+  }
   if (cmdName=="setTargetAtAddressPoint") {
     NavigationPoint point;
     point.setName(args[0]);

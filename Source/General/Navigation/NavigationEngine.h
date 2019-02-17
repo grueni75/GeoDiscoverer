@@ -312,6 +312,9 @@ public:
   // Recreates the navigation points from a binary file
   void retrieveOverlayGraphics(std::string filefolder, std::string filename);
 
+  // Updates the address point group that is displayed on screen
+  void addressPointGroupChanged();
+
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)
   {

@@ -41,7 +41,6 @@
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:theme="@style/GDStyle.NoTitleBar">
-            >
             <!-- Launcher icon -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

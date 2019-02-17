@@ -69,10 +69,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -487,11 +490,12 @@ public class ViewMap extends GDActivity {
 
   /** Asks the user for confirmation of the address */
   void askForAddress(final String subject, final String text) {
+
+    // Create the base dialog
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
     builder.title(R.string.dialog_address_title);
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
     builder.positiveText(R.string.finished);
-    //builder.negativeText(R.string.cancel);
     builder.cancelable(true);
     builder.customView(R.layout.dialog_address, false);
     final String address = new String();
@@ -500,9 +504,13 @@ public class ViewMap extends GDActivity {
     //builder.formatEditText(editText);
     editText.setText(text);
     editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+
+    // Configure the list view
     final ListView listView = (ListView) dialog.getCustomView().findViewById(R.id.dialog_address_history_list);
-    GDAddressHistoryAdapter adapter = new GDAddressHistoryAdapter(this,dialog);
-    listView.setAdapter(adapter);
+    GDAddressHistoryAdapter addressAdapter = new GDAddressHistoryAdapter(this,dialog,listView);
+    listView.setAdapter(addressAdapter);
+
+    // Configure the views for editing a new address
     final ImageButton addAddressButton = (ImageButton) dialog.getCustomView().findViewById(R.id.dialog_address_history_entry_add_button);
     final OnClickListener addAddressOnClickListener = new OnClickListener() {
       @Override
@@ -537,6 +545,88 @@ public class ViewMap extends GDActivity {
       @Override
       public void onClick(View v) {
         editText.setText("");
+      }
+    });
+
+    // Configure the views for handling group names
+    final ImageView groupImage = (ImageView) dialog.getCustomView().findViewById(R.id.dialog_address_history_group_selector_image);
+    DrawableCompat.setTintList(groupImage.getDrawable(),navDrawerList.getItemIconTintList());
+    final LinearLayout groupSelector = (LinearLayout) dialog.getCustomView().findViewById(R.id.dialog_address_history_group_selector);
+    final EditText groupNameEditText = (EditText) dialog.getCustomView().findViewById(R.id.dialog_address_history_group_name_edit_text);
+    final ImageButton removeGroupButton = (ImageButton) dialog.getCustomView().findViewById(R.id.dialog_address_history_group_selector_remove_button);
+    final ImageButton addGroupButton = (ImageButton) dialog.getCustomView().findViewById(R.id.dialog_address_history_group_selector_add_button);
+    final ImageButton confirmGroupNameButton = (ImageButton) dialog.getCustomView().findViewById(R.id.dialog_address_history_group_name_confirm_button);
+    final ImageButton clearGroupNameButton = (ImageButton) dialog.getCustomView().findViewById(R.id.dialog_address_history_group_name_clear_button);
+    final Spinner groupSelectorSpinner = (Spinner) dialog.getCustomView().findViewById(R.id.dialog_address_history_group_selector_spinner);
+    groupSelectorSpinner.setAdapter(addressAdapter.groupNamesAdapter);
+    groupSelectorSpinner.setSelection(addressAdapter.groupNamesAdapter.getPosition(addressAdapter.selectedGroupName));
+    groupSelectorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        String group = addressAdapter.groupNamesAdapter.getItem(position);
+        coreObject.configStoreSetStringValue("Navigation","selectedAddressPointGroup",group);
+        coreObject.executeCoreCommand("addressPointGroupChanged()");
+        addressAdapter.updateAddresses();
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+      }
+    });
+    DrawableCompat.setTintList(removeGroupButton.getDrawable(),navDrawerList.getItemIconTintList());
+    removeGroupButton.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        String selectedGroupName = (String)groupSelectorSpinner.getSelectedItem();
+        addressAdapter.removeGroupName(selectedGroupName);
+      }
+    });
+    DrawableCompat.setTintList(addGroupButton.getDrawable(),navDrawerList.getItemIconTintList());
+    addGroupButton.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        groupSelector.setVisibility(View.GONE);
+        removeGroupButton.setVisibility(View.GONE);
+        addGroupButton.setVisibility(View.GONE);
+        groupNameEditText.setVisibility(View.VISIBLE);
+        confirmGroupNameButton.setVisibility(View.VISIBLE);
+        clearGroupNameButton.setVisibility(View.VISIBLE);
+      }
+    });
+    DrawableCompat.setTintList(confirmGroupNameButton.getDrawable(),navDrawerList.getItemIconTintList());
+    OnClickListener confirmGroupNameButtonOnClickListener = new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+
+        // Add the new group
+        String newGroupName = groupNameEditText.getText().toString();
+        addressAdapter.addGroupName(newGroupName);
+
+        // Make the spinner visible again
+        groupSelector.setVisibility(View.VISIBLE);
+        removeGroupButton.setVisibility(View.VISIBLE);
+        addGroupButton.setVisibility(View.VISIBLE);
+        groupNameEditText.setVisibility(View.GONE);
+        confirmGroupNameButton.setVisibility(View.GONE);
+        clearGroupNameButton.setVisibility(View.GONE);
+      }
+    };
+    confirmGroupNameButton.setOnClickListener(confirmGroupNameButtonOnClickListener);
+    DrawableCompat.setTintList(clearGroupNameButton.getDrawable(),navDrawerList.getItemIconTintList());
+    clearGroupNameButton.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        groupNameEditText.setText("");
+      }
+    });
+    groupNameEditText.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+      @Override
+      public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+          confirmGroupNameButtonOnClickListener.onClick(null);
+          return true;
+        }
+        return false;
       }
     });
     dialog.show();
@@ -1270,8 +1360,8 @@ public class ViewMap extends GDActivity {
       if (!locationFound) {
         warningDialog(String.format(getString(R.string.location_not_found),text));
       } else {
-        GDAddressHistoryAdapter adapter = new GDAddressHistoryAdapter(viewMap, dialog);
-        listView.setAdapter(adapter);
+        GDAddressHistoryAdapter adapter=(GDAddressHistoryAdapter)listView.getAdapter();
+        adapter.updateAddresses();
       }
     }
   }
