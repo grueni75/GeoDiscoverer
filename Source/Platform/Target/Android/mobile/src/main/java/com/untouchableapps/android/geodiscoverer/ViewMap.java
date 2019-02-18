@@ -522,6 +522,7 @@ public class ViewMap extends GDActivity {
           task.viewMap = ViewMap.this;
           task.dialog = dialog;
           task.listView = listView;
+          task.adapter = addressAdapter;
           task.text = editText.getText().toString();
           task.execute();
         }
@@ -601,6 +602,7 @@ public class ViewMap extends GDActivity {
         // Add the new group
         String newGroupName = groupNameEditText.getText().toString();
         addressAdapter.addGroupName(newGroupName);
+        groupSelectorSpinner.setSelection(addressAdapter.groupNamesAdapter.getPosition(newGroupName));
 
         // Make the spinner visible again
         groupSelector.setVisibility(View.VISIBLE);
@@ -1322,6 +1324,7 @@ public class ViewMap extends GDActivity {
     ListView listView;
     ViewMap viewMap;
     MaterialDialog dialog;
+    GDAddressHistoryAdapter adapter;
     boolean locationFound=false;
     ArrayList<String> validAddressLines = new ArrayList<String>();
 
@@ -1341,7 +1344,8 @@ public class ViewMap extends GDActivity {
             Address address = addresses.get(0);
             locationFound=true;
             String cmd = "addAddressPoint(\"" + addressLine + "\",\"" + addressLine +
-                "\","+ address.getLongitude()+","+address.getLatitude() + ")";
+                "\","+ address.getLongitude()+","+address.getLatitude()+","+
+                adapter.selectedGroupName+")";
             GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",cmd);
             coreObject.scheduleCoreCommand(cmd);
             coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate(" +

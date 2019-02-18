@@ -639,6 +639,7 @@ std::string Commander::execute(std::string cmd) {
     point.setAddress(args[1]);
     point.setLng(atof(args[2].c_str()));
     point.setLat(atof(args[3].c_str()));
+    point.setGroup(args[4]);
     core->getNavigationEngine()->addAddressPoint(point);
     cmdExecuted=true;
   }

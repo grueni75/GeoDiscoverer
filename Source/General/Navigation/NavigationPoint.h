@@ -130,6 +130,10 @@ public:
   const std::string& getGroup() const {
     return group;
   }
+
+  void setGroup(const std::string& group) {
+    this->group = group;
+  }
 };
 
 } /* namespace GEODISCOVERER */
