@@ -175,5 +175,7 @@
     <orderEntry type="module" module-name="core" />
     <orderEntry type="module" module-name="colorPickerPreference" />
     <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="colorPickerPreference" />
+    <orderEntry type="module" module-name="core" />
   </component>
 </module>

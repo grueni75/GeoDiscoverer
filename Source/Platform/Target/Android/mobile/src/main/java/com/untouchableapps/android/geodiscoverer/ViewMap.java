@@ -1787,7 +1787,7 @@ public class ViewMap extends GDActivity {
       }
       if (Intent.ACTION_VIEW.equals(intent.getAction())) {
         uri = intent.getData();
-        if (uri.getScheme().equals("file")&&(uri.getLastPathSegment().endsWith(".gda"))) {
+        if (uri.getLastPathSegment().endsWith(".gda")) {
           isGDA=true;
         } else if (uri.getScheme().equals("http") || uri.getScheme().equals("https")) {
           isGPXFromWeb=true;
@@ -1815,8 +1815,21 @@ public class ViewMap extends GDActivity {
     }
     if (isGDA) {
 
-      // Ask the user if the file should be copied to the route directory
-      final File srcFile = new File(uri.getPath());
+      // Receive the file path
+      String filePath = null;
+      if (uri.getScheme().equals("file")) {
+        filePath = uri.getPath();
+      } else {
+        if (uri.getScheme().equals("content")) {
+          filePath = uri.getPath();
+        } else {
+          GDApplication.addMessage(GDApplication.ERROR_MSG,"GDApp","scheme " + uri.getScheme() + " not supported!");
+        }
+      }
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","filePath=" + filePath);
+
+      // Ask the user if the file should be linked to the map directory
+      final File srcFile = new File(filePath);
       if (srcFile.exists()) {
 
         // Map archive?
