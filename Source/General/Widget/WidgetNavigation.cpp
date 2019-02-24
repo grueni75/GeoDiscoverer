@@ -72,12 +72,18 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     fontEngine->unlockFont();
   }
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
-  for(int i=0;i<4;i++)
+  for(int i=0;i<8;i++)
     orientationLabelFontStrings[i]=NULL;
   fontEngine->updateString(&orientationLabelFontStrings[0],"N");
   fontEngine->updateString(&orientationLabelFontStrings[1],"E");
   fontEngine->updateString(&orientationLabelFontStrings[2],"S");
   fontEngine->updateString(&orientationLabelFontStrings[3],"W");
+  if (isWatch) {
+    fontEngine->updateString(&orientationLabelFontStrings[4],"NE");
+    fontEngine->updateString(&orientationLabelFontStrings[5],"SE");
+    fontEngine->updateString(&orientationLabelFontStrings[6],"SW");
+    fontEngine->updateString(&orientationLabelFontStrings[7],"NW");
+  }
   fontEngine->unlockFont();
   targetIcon.setRotateAnimation(0,0,360,true,core->getNavigationEngine()->getTargetRotateDuration(),GraphicRotateAnimationTypeLinear);
   targetObject.addPrimitive(&targetIcon);
@@ -145,7 +151,7 @@ WidgetNavigation::~WidgetNavigation() {
   if (speedValueFontString) fontEngine->destroyString(speedValueFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
-  for(int i=0;i<4;i++) {
+  for(int i=0;i<8;i++) {
     if (orientationLabelFontStrings[i]) fontEngine->destroyString(orientationLabelFontStrings[i]);
   }
   fontEngine->unlockFont();
@@ -648,6 +654,19 @@ void WidgetNavigation::drawStatus(TimestampInMicroseconds t) {
   screen->endObject();
 }
 
+// Draws a compass marker
+void WidgetNavigation::drawCompassMarker(TimestampInMicroseconds t, FontString *marker, double x, double y) {
+  x-=((double)marker->getIconWidth())/2;
+  y-=((double)marker->getIconHeight())/2;
+  y-=marker->getBaselineOffsetY();
+  marker->setX(round(x));
+  marker->setY(round(y));
+  GraphicColor c=marker->getColor();
+  c.setAlpha(color.getAlpha());
+  marker->setColor(c);
+  marker->draw(t);
+}
+
 // Executed every time the graphic engine needs to draw
 void WidgetNavigation::draw(TimestampInMicroseconds t) {
 
@@ -689,15 +708,14 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     for (Int i=0;i<4;i++) {
       double x=orientationLabelRadius*sin((i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
       double y=orientationLabelRadius*cos((i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
-      x-=((double)orientationLabelFontStrings[i]->getIconWidth())/2;
-      y-=((double)orientationLabelFontStrings[i]->getIconHeight())/2;
-      y-=orientationLabelFontStrings[i]->getBaselineOffsetY();
-      orientationLabelFontStrings[i]->setX(round(x));
-      orientationLabelFontStrings[i]->setY(round(y));
-      c=orientationLabelFontStrings[i]->getColor();
-      c.setAlpha(color.getAlpha());
-      orientationLabelFontStrings[i]->setColor(c);
-      orientationLabelFontStrings[i]->draw(t);
+      drawCompassMarker(t,orientationLabelFontStrings[i],x,y);
+    }
+    if (isWatch) {
+      for (Int i=0;i<4;i++) {
+        double x=orientationLabelRadius*sin(M_PI/4+(i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
+        double y=orientationLabelRadius*cos(M_PI/4+(i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
+        drawCompassMarker(t,orientationLabelFontStrings[i+4],x,y);
+      }
     }
     screen->endObject();
   }

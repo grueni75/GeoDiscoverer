@@ -140,7 +140,7 @@ protected:
   FontString *trackLengthValueFontString;
   FontString *speedLabelFontString;
   FontString *speedValueFontString;
-  FontString *orientationLabelFontStrings[4];
+  FontString *orientationLabelFontStrings[8];
 
   // Circular strips for drawing on watches
   GraphicCircularStrip *circularStrip[4];
@@ -193,6 +193,9 @@ protected:
 
   // Returns the font string to show in the given quadrant
   FontString *getQuadrantFontString(Int i);
+
+  // Draws a compass marker
+  void drawCompassMarker(TimestampInMicroseconds t, FontString *marker, double x, double y);
 
 public:
 
