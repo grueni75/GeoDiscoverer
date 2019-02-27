@@ -561,6 +561,9 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
   // Informs the application about the wear sleep state
   public void setWearDeviceSleeping(boolean state) {
+    if (wearDeviceSleeping&&!state) {
+      sendWearCommand("setRemoteBattery(" + coreObject.batteryStatus + ")");
+    }
     wearDeviceSleeping=state;
     if ((wearDeviceAlive)&&(!wearLastCommand.equals(""))) {
       sendWearCommand(wearLastCommand);
@@ -572,6 +575,8 @@ public class GDApplication extends Application implements GDAppInterface, Google
     wearDeviceAlive=state;
     if (wearDeviceAlive) {
       coreObject.executeCoreCommand("remoteMapInit()");
+    } else {
+      wearDeviceSleeping=true;
     }
   }
 

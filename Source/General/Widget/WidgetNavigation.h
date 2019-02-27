@@ -60,6 +60,11 @@ protected:
   // Graphic showing the status background
   GraphicRectangle statusIcon;
 
+  // Graphic showing the battery state
+  GraphicRectangle batteryIconEmpty;
+  GraphicRectangle batteryIconFull;
+  GraphicRectangle batteryIconCharging;
+
   // Container that represents the target (displacement)
   GraphicObject targetObject;
 
@@ -158,6 +163,9 @@ protected:
   // Radius of the orientation labels
   double orientationLabelRadius;
 
+  // Radius of the battery icons
+  double batteryIconRadius;
+
   // Last navigation infos
   NavigationInfo prevNavigationInfo;
 
@@ -187,6 +195,12 @@ protected:
 
   // Indicates if the status text shall be drawn above or below the target and arrow
   bool statusTextAbove;
+
+  // Number of battery dots to show
+  int batteryDotCount;
+
+  // Opening angle for the battery indicator
+  int batteryTotalAngle;
 
   // Updates various flags
   virtual void updateFlags(Int x, Int y);
@@ -250,6 +264,18 @@ public:
 
   GraphicRectangle *getStatusIcon() {
     return &statusIcon;
+  }
+
+  GraphicRectangle *getBatteryIconFull() {
+    return &batteryIconFull;
+  }
+
+  GraphicRectangle *getBatteryIconEmpty() {
+    return &batteryIconEmpty;
+  }
+
+  GraphicRectangle *getBatteryIconCharging() {
+    return &batteryIconCharging;
   }
 
   void setDirectionChangeDuration(double directionChangeDuration) {
@@ -355,6 +381,10 @@ public:
 
   void setCircularButtonAngle(double circularButtonAngle) {
     this->circularButtonAngle = circularButtonAngle;
+  }
+
+  void setBatteryIconRadius(double batteryIconRadius) {
+    this->batteryIconRadius = batteryIconRadius;
   }
 };
 

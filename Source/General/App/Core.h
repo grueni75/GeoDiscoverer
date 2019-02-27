@@ -197,6 +197,12 @@ protected:
   NavigationEngine *navigationEngine;
   Commander *commander;
 
+  // Battery info
+  Int batteryLevel;
+  Int batteryCharging;
+  Int remoteBatteryLevel;
+  Int remoteBatteryCharging;
+
   // Inits cURL
   void initCURL();
 
@@ -383,6 +389,38 @@ public:
 
   void setRemoteServerActive(boolean remoteServerActive) {
     this->remoteServerActive = remoteServerActive;
+  }
+
+  Int getBatteryCharging() const {
+    return batteryCharging;
+  }
+
+  void setBatteryCharging(Int batteryCharging) {
+    this->batteryCharging = batteryCharging;
+  }
+
+  Int getBatteryLevel() const {
+    return batteryLevel;
+  }
+
+  void setBatteryLevel(Int batteryLevel) {
+    this->batteryLevel = batteryLevel;
+  }
+
+  Int getRemoteBatteryCharging() const {
+    return remoteBatteryCharging;
+  }
+
+  void setRemoteBatteryCharging(Int remoteBatteryCharging) {
+    this->remoteBatteryCharging = remoteBatteryCharging;
+  }
+
+  Int getRemoteBatteryLevel() const {
+    return remoteBatteryLevel;
+  }
+
+  void setRemoteBatteryLevel(Int remoteBatteryLevel) {
+    this->remoteBatteryLevel = remoteBatteryLevel;
   }
 };
 

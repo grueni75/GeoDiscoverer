@@ -122,10 +122,12 @@ public class GDMessageListenerService extends WearableListenerService {
       return;
     if (messageEvent.getPath().equals("/com.untouchableapps.android.geodiscoverer")) {
       String cmd = new String(messageEvent.getData());
+      boolean cmdExecuted=false;
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", cmd.substring(0,cmd.indexOf(")")+1));
       if (cmd.equals("forceRemoteMapUpdate()")) {
         //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","map update requested by remote server");
         coreObject.executeCoreCommand("forceMapUpdate()");
+        cmdExecuted=true;
       }
       if (cmd.startsWith("setAllNavigationInfo")) {
         String args1 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
@@ -140,9 +142,11 @@ public class GDMessageListenerService extends WearableListenerService {
         String args4 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
         coreObject.executeCoreCommand("setTargetPos" + args4);
         ((GDApplication) getApplication()).executeAppCommand("updateScreen()");
+        cmdExecuted=true;
       }
       if (cmd.equals("getWearDeviceAlive()")) {
         coreObject.executeAppCommand("setWearDeviceAlive(1)");
+        cmdExecuted=true;
       }
       if (cmd.startsWith("setNewRemoteMap")) {
 
@@ -193,6 +197,12 @@ public class GDMessageListenerService extends WearableListenerService {
         } else {
           coreObject.executeCoreCommand("forceMapUpdate()");
         }
+        cmdExecuted=true;
+      }
+
+      // Forward all other commands
+      if (!cmdExecuted) {
+        coreObject.executeCoreCommand(cmd);
       }
     }
   }

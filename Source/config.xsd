@@ -812,6 +812,21 @@
 			                                    <xsd:documentation>Filename of the image showing the status fields.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+			                                <xsd:element name="batteryIconChargingFilename" type="xsd:string" default="unknown" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Filename of the image showing the a battery dot that is charging.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
+			                                <xsd:element name="batteryIconFullFilename" type="xsd:string" default="unknown" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Filename of the image showing the a battery dot that is full.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
+			                                <xsd:element name="batteryIconEmptyFilename" type="xsd:string" default="unknown" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Filename of the image showing the a battery dot that is empty.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
 			                                <xsd:element name="directionChangeDuration" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Duration in microseconds of a direction change.</xsd:documentation>
@@ -825,6 +840,11 @@
 			                                <xsd:element name="orientationLabelRadius" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Radius of the orientation labels in percent.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>
+			                                <xsd:element name="batteryIconRadius" type="xsd:double" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Radius of the battery icons in percent.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
 			                                <xsd:element name="turnLineWidth" type="xsd:double" default="0" minOccurs="0">

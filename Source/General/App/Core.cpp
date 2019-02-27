@@ -96,6 +96,10 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   fileAccessWaitTime = 100;
   quitUpdateDashboardScreensThread = false;
   remoteServerActive=false;
+  batteryCharging=false;
+  batteryLevel=0;
+  remoteBatteryCharging=false;
+  remoteBatteryLevel=0;
 
   // Create core objects that are required early
   if (!(thread=new Thread())) {

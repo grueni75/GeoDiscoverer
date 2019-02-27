@@ -24,8 +24,10 @@ package com.untouchableapps.android.geodiscoverer.core;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
@@ -39,6 +41,7 @@ import android.location.LocationListener;
 import android.media.MediaPlayer;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -181,6 +184,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Previous distance between first and second pointer */
   float prevDistance=0;
 
+  // Items for receiving battery changes
+  BroadcastReceiver batteryStatusReceiver;
+  public String batteryStatus;
+
   //
   // Constructor and destructor
   //
@@ -224,7 +231,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     // Start the thread that handles the starting and stopping
     thread = new Thread(this);
     thread.start(); 
-    
+
     // Wait until the thread is initialized
     coreLock.lock();
     try {
@@ -236,12 +243,33 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       e.printStackTrace();
     } finally {
       coreLock.unlock();
-    }    
+    }
+
+    // Register for battery updates
+    IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+    batteryStatusReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+        boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
+        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        int percentage = 100*level/scale;
+        String args = String.valueOf(percentage) + "," + (isCharging ? "1" : "0");
+        executeCoreCommand("setBattery(" + args + ")");
+        batteryStatus=args;
+      }
+    };
+    appIf.getContext().registerReceiver(batteryStatusReceiver, ifilter);
+
   }
   
   /** Destructor */
   protected void finalize() throws Throwable
   {
+    // Unregister the battery receiver
+    appIf.getContext().unregisterReceiver(batteryStatusReceiver);
+
     // Clean up the C++ part
     stop();
     

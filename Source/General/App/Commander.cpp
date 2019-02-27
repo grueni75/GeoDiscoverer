@@ -745,6 +745,16 @@ std::string Commander::execute(std::string cmd) {
     core->getNavigationEngine()->unlockNavigationInfo();
     cmdExecuted=true;
   }
+  if (cmdName=="setBattery") {
+    core->setBatteryLevel(atoi(args[0].c_str()));
+    core->setBatteryCharging(atoi(args[1].c_str()));
+    cmdExecuted=true;
+  }
+  if (cmdName=="setRemoteBattery") {
+    core->setRemoteBatteryLevel(atoi(args[0].c_str()));
+    core->setRemoteBatteryCharging(atoi(args[1].c_str()));
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

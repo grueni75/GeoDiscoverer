@@ -35,6 +35,9 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     separatorIcon(widgetPage->getScreen()),
     blindIcon(widgetPage->getScreen()),
     statusIcon(widgetPage->getScreen()),
+    batteryIconCharging(widgetPage->getScreen()),
+    batteryIconEmpty(widgetPage->getScreen()),
+    batteryIconFull(widgetPage->getScreen()),
     targetObject(widgetPage->getScreen()),
     compassObject(widgetPage->getScreen()),
     clockCircularStrip(widgetPage->getScreen()),
@@ -61,6 +64,8 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   textColumnCount=1;
   northButtonHit=false;
   statusTextAbove=false;
+  orientationLabelRadius=0;
+  batteryIconRadius=0;
   isWatch=widgetPage->getWidgetEngine()->getDevice()->getIsWatch();
   FontEngine *fontEngine=widgetPage->getFontEngine();
   if (!isWatch) {
@@ -103,12 +108,17 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   statusTextWidthLimit=-1;
   statusTextAngleOffset=0;
   statusTextRadius=0;
+  batteryDotCount=6;
+  batteryTotalAngle=30;
   directionIcon.setColor(GraphicColor(255,255,255,255));
   targetIcon.setColor(GraphicColor(255,255,255,255));
   arrowIcon.setColor(GraphicColor(255,255,255,0));
   separatorIcon.setColor(GraphicColor(255,255,255,255));
   blindIcon.setColor(GraphicColor(255,255,255,255));
   statusIcon.setColor(GraphicColor(255,255,255,255));
+  batteryIconCharging.setColor(GraphicColor(255,255,255,255));
+  batteryIconEmpty.setColor(GraphicColor(255,255,255,255));
+  batteryIconFull.setColor(GraphicColor(255,255,255,255));
   targetObject.setColor(GraphicColor(255,255,255,255));
   compassObject.setColor(GraphicColor(255,255,255,255));
   for (int i=0;i<4;i++) {
@@ -674,6 +684,48 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
 
   // Let the primitive draw the background
   WidgetPrimitive::draw(t);
+
+  // Draw the battery status
+  if (isWatch) {
+    screen->startObject();
+    screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
+    for (Int kind=0;kind<2;kind++) {
+      Int batteryLevel;
+      bool batteryCharging;
+      if (kind==0) {
+        batteryLevel=core->getBatteryLevel();
+        batteryCharging=core->getBatteryCharging();
+      } else {
+        batteryLevel=core->getRemoteBatteryLevel();
+        batteryCharging=core->getRemoteBatteryCharging();
+      }
+      for (Int i=0;i<batteryDotCount;i++) {
+        double angle;
+        if (kind==0)
+          angle=FloatingPoint::degree2rad(270-batteryTotalAngle/2+i*batteryTotalAngle/(batteryDotCount-1));
+        else
+          angle=FloatingPoint::degree2rad(90+batteryTotalAngle/2-i*batteryTotalAngle/(batteryDotCount-1));
+        double x=batteryIconRadius*sin(angle);
+        double y=batteryIconRadius*cos(angle);
+        GraphicRectangle *dot;
+        if (batteryLevel>=100*i/batteryDotCount) {
+          if (batteryCharging)
+            dot=&batteryIconCharging;
+          else
+            dot=&batteryIconFull;
+        } else {
+          dot=&batteryIconEmpty;
+        }
+        GraphicColor c=dot->getColor();
+        c.setAlpha(color.getAlpha());
+        dot->setColor(c);
+        dot->setX(round(x-dot->getIconWidth()/2));
+        dot->setY(round(y-dot->getIconHeight()/2));
+        dot->draw(t);
+      }
+    }
+    screen->endObject();
+  }
 
   // Draw the blind if necessary
   if ((isWatch)&&(showTurn)&&(!skipTurn)) {

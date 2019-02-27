@@ -1127,6 +1127,10 @@ void WidgetEngine::createGraphic() {
       config.setParameter("statusTextWidthLimit","22.5");
       config.setParameter("statusTextAngleOffset","4.0");
       config.setParameter("clockRadius","35.0");
+      config.setParameter("batteryIconRadius","90.5");
+      config.setParameter("batteryIconFullFilename","batteryDotFull");
+      config.setParameter("batteryIconEmptyFilename","batteryDotEmpty");
+      config.setParameter("batteryIconChargingFilename","batteryDotCharging");
     } else {
       position=WidgetPosition();
       position.setRefScreenDiagonal(0.0);
@@ -1280,7 +1284,11 @@ void WidgetEngine::createGraphic() {
           navigation->getBlindIcon()->setY(-navigation->getBlindIcon()->getIconHeight()/2);
           navigation->getStatusIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"statusIconFilename",__FILE__, __LINE__));
           navigation->getStatusIcon()->setX(-navigation->getStatusIcon()->getIconWidth()/2);
-          navigation->getStatusIcon()->setY(-navigation->getStatusIcon()->getIconHeight()/2);        }
+          navigation->getStatusIcon()->setY(-navigation->getStatusIcon()->getIconHeight()/2);
+          navigation->getBatteryIconCharging()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"batteryIconChargingFilename",__FILE__, __LINE__));
+          navigation->getBatteryIconFull()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"batteryIconFullFilename",__FILE__, __LINE__));
+          navigation->getBatteryIconEmpty()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"batteryIconEmptyFilename",__FILE__, __LINE__));
+        }
       }
 
       // Set type-dependent properties
@@ -1339,6 +1347,7 @@ void WidgetEngine::createGraphic() {
         navigation->setDirectionChangeDuration(c->getDoubleValue(widgetPath,"directionChangeDuration",__FILE__, __LINE__));
         navigation->setTargetRadius(c->getDoubleValue(widgetPath,"targetRadius",__FILE__, __LINE__)*navigation->getIconHeight()/200.0);
         navigation->setOrientationLabelRadius(c->getDoubleValue(widgetPath,"orientationLabelRadius",__FILE__, __LINE__)*navigation->getIconHeight()/200.0);
+        navigation->setBatteryIconRadius(c->getDoubleValue(widgetPath,"batteryIconRadius",__FILE__, __LINE__)*navigation->getIconHeight()/200.0);
         navigation->setTurnLineWidth(c->getDoubleValue(widgetPath,"turnLineWidth",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTurnLineArrowOverhang(c->getDoubleValue(widgetPath,"turnLineArrowOverhang",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTurnLineArrowHeight(c->getDoubleValue(widgetPath,"turnLineArrowHeight",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
