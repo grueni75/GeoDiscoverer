@@ -736,129 +736,138 @@ void MapEngine::updateMap() {
         Int zoomedScreenWidth=zoomedScreenHeight;
         //DEBUG("zoomedScreenHeight=%d zoomedScreenWidth=%d",zoomedScreenHeight,zoomedScreenWidth);
 
-        // Compute the current boundaries that must be filled with tiles
-        // Use the scale from the found map container
-        MapArea newDisplayArea;
-        MapPosition refPos=newMapPos;
-        refPos.setX(visPos->getX());
-        refPos.setY(visPos->getY());
-        //DEBUG("refPos.getX()=%d refPos.getY()=%d",refPos.getX(),refPos.getY());
-        refPos.setLngScale(bestMapTile->getLngScale());
-        refPos.setLatScale(bestMapTile->getLatScale());
-        newDisplayArea.setRefPos(refPos);
-        newDisplayArea.setZoomLevel(bestMapTile->getParentMapContainer()->getZoomLevelMap());
-        newDisplayArea.setYNorth(refPos.getY()+zoomedScreenHeight/2);
-        newDisplayArea.setYSouth(refPos.getY()-zoomedScreenHeight/2);
-        newDisplayArea.setXWest(refPos.getX()-zoomedScreenWidth/2);
-        newDisplayArea.setXEast(refPos.getX()+zoomedScreenWidth/2);
+        // Abort if the screen width is unreasonable
+        if (zoomedScreenWidth<=1) {
 
-        // Compute the geographic boundaries
-        MapPosition t=newMapPos;
-        double latNorth,latSouth,lngWest,lngEast;
-        t.setX(newMapPos.getX()-zoomedScreenWidth/2);
-        t.setY(newMapPos.getY()-zoomedScreenHeight/2);
-        calibrator->setGeographicCoordinates(t);
-        latNorth=t.getLat();
-        lngWest=t.getLng();
-        t.setY(newMapPos.getY()+zoomedScreenHeight/2);
-        calibrator->setGeographicCoordinates(t);
-        latSouth=t.getLat();
-        if (t.getLng()<lngWest) lngWest=t.getLng();
-        t.setX(newMapPos.getX()+zoomedScreenWidth/2);
-        calibrator->setGeographicCoordinates(t);
-        if (t.getLat()<latSouth) latSouth=t.getLat();
-        lngEast=t.getLng();
-        t.setY(newMapPos.getY()-zoomedScreenHeight/2);
-        calibrator->setGeographicCoordinates(t);
-        if (t.getLat()>latNorth) latNorth=t.getLat();
-        if (t.getLng()>lngEast) lngEast=t.getLng();
-        newDisplayArea.setLatNorth(latNorth);
-        newDisplayArea.setLatSouth(latSouth);
-        newDisplayArea.setLngEast(lngEast);
-        newDisplayArea.setLngWest(lngWest);
-        /*DEBUG("latNorth=%f latSouth=%f lngEast=%f lngWest=%f",
-              newDisplayArea.getLatNorth(),newDisplayArea.getLatSouth(),
-              newDisplayArea.getLngEast(),newDisplayArea.getLngWest());*/
+          *visPos=this->visPos;
+          core->getDefaultGraphicEngine()->unlockPos();
 
-        // Remember the current visual position
-        this->visPos=*visPos;
-        core->getDefaultGraphicEngine()->unlockPos();
-        lockMapPos(__FILE__, __LINE__);
-        mapPos=newMapPos;
-        unlockMapPos();
+        } else {
 
-        // Set the new display area
-        MapArea oldDisplayArea=displayArea;
-        lockDisplayArea(__FILE__, __LINE__);
-        //DEBUG("newDisplayArea.getZoomLevel()=%d",newDisplayArea.getZoomLevel());
-        this->displayArea=newDisplayArea;
-        unlockDisplayArea();
+          // Compute the current boundaries that must be filled with tiles
+          // Use the scale from the found map container
+          MapArea newDisplayArea;
+          MapPosition refPos=newMapPos;
+          refPos.setX(visPos->getX());
+          refPos.setY(visPos->getY());
+          //DEBUG("refPos.getX()=%d refPos.getY()=%d",refPos.getX(),refPos.getY());
+          refPos.setLngScale(bestMapTile->getLngScale());
+          refPos.setLatScale(bestMapTile->getLatScale());
+          newDisplayArea.setRefPos(refPos);
+          newDisplayArea.setZoomLevel(bestMapTile->getParentMapContainer()->getZoomLevelMap());
+          newDisplayArea.setYNorth(refPos.getY()+zoomedScreenHeight/2);
+          newDisplayArea.setYSouth(refPos.getY()-zoomedScreenHeight/2);
+          newDisplayArea.setXWest(refPos.getX()-zoomedScreenWidth/2);
+          newDisplayArea.setXEast(refPos.getX()+zoomedScreenWidth/2);
 
-        //PROFILE_ADD("display area computation");
+          // Compute the geographic boundaries
+          MapPosition t=newMapPos;
+          double latNorth,latSouth,lngWest,lngEast;
+          t.setX(newMapPos.getX()-zoomedScreenWidth/2);
+          t.setY(newMapPos.getY()-zoomedScreenHeight/2);
+          calibrator->setGeographicCoordinates(t);
+          latNorth=t.getLat();
+          lngWest=t.getLng();
+          t.setY(newMapPos.getY()+zoomedScreenHeight/2);
+          calibrator->setGeographicCoordinates(t);
+          latSouth=t.getLat();
+          if (t.getLng()<lngWest) lngWest=t.getLng();
+          t.setX(newMapPos.getX()+zoomedScreenWidth/2);
+          calibrator->setGeographicCoordinates(t);
+          if (t.getLat()<latSouth) latSouth=t.getLat();
+          lngEast=t.getLng();
+          t.setY(newMapPos.getY()-zoomedScreenHeight/2);
+          calibrator->setGeographicCoordinates(t);
+          if (t.getLat()>latNorth) latNorth=t.getLat();
+          if (t.getLng()>lngEast) lngEast=t.getLng();
+          newDisplayArea.setLatNorth(latNorth);
+          newDisplayArea.setLatSouth(latSouth);
+          newDisplayArea.setLngEast(lngEast);
+          newDisplayArea.setLngWest(lngWest);
+          /*DEBUG("latNorth=%f latSouth=%f lngEast=%f lngWest=%f",
+                newDisplayArea.getLatNorth(),newDisplayArea.getLatSouth(),
+                newDisplayArea.getLngEast(),newDisplayArea.getLngWest());*/
 
-        // Update the overlaying graphic
-        //DEBUG("before updateOverlays",NULL);
-        core->getNavigationEngine()->updateScreenGraphic(scaleHasChanged);
-        //PROFILE_ADD("overlay graphic update");
+          // Remember the current visual position
+          this->visPos=*visPos;
+          core->getDefaultGraphicEngine()->unlockPos();
+          lockMapPos(__FILE__, __LINE__);
+          mapPos=newMapPos;
+          unlockMapPos();
 
-        // Remove all tiles that are not visible anymore in the new display area
-        std::list<MapTile*> visibleTiles=tiles;
-        for (std::list<MapTile*>::const_iterator i=visibleTiles.begin();i!=visibleTiles.end();i++) {
-          MapTile *t=*i;
-          t->setIsProcessed(false);
-          if ((removeAllTiles)||(t->getVisX(0)>newDisplayArea.getXEast())||(t->getVisX(1)<newDisplayArea.getXWest())||
-          (t->getVisY(1)<newDisplayArea.getYSouth())||(t->getVisY(0)>newDisplayArea.getYNorth())) {
-            //DEBUG("removing tile <%s> because it is out side the new display area",t->getVisName().c_str());
-            tiles.remove(t);
-            deinitTile(t, __FILE__, __LINE__);
-          }
-        }
-        //PROFILE_ADD("invisible tile remove");
+          // Set the new display area
+          MapArea oldDisplayArea=displayArea;
+          lockDisplayArea(__FILE__, __LINE__);
+          //DEBUG("newDisplayArea.getZoomLevel()=%d",newDisplayArea.getZoomLevel());
+          this->displayArea=newDisplayArea;
+          unlockDisplayArea();
 
-        // Fill the complete area
-        //DEBUG("starting area fill",NULL);
-        MapArea searchArea=newDisplayArea;
-        lockCenterMapTiles(__FILE__,__LINE__);
-        centerMapTiles.clear();
-        unlockCenterMapTiles();
-        core->interruptAllowedHere(__FILE__, __LINE__);
-        fillGeographicAreaWithTiles(searchArea,NULL,(tiles.size()==0) ? true : false);
-        //PROFILE_ADD("tile fill");
+          //PROFILE_ADD("display area computation");
 
-        // Update the access time of the tile and copy the visual position
-        TimestampInSeconds currentTime=core->getClock()->getSecondsSinceEpoch();
-        for (std::list<MapTile*>::const_iterator i=tiles.begin();i!=tiles.end();i++) {
-          MapTile *t=*i;
+          // Update the overlaying graphic
+          //DEBUG("before updateOverlays",NULL);
+          core->getNavigationEngine()->updateScreenGraphic(scaleHasChanged);
+          //PROFILE_ADD("overlay graphic update");
 
-          // Update last access time
-          t->setLastAccess(currentTime);
-
-          // Handle the tile position and visibility only if the process was not aborted
-          if (!abortUpdate) {
-
-            // Activate the new position
-            core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            t->activateVisPos();
-            core->getDefaultGraphicEngine()->unlockDrawing();
-
-            // If the tile is hidden: make it visible
-            if (t->getIsHidden()) {
-              t->setIsHidden(false,__FILE__, __LINE__);
+          // Remove all tiles that are not visible anymore in the new display area
+          std::list<MapTile*> visibleTiles=tiles;
+          for (std::list<MapTile*>::const_iterator i=visibleTiles.begin();i!=visibleTiles.end();i++) {
+            MapTile *t=*i;
+            t->setIsProcessed(false);
+            if ((removeAllTiles)||(t->getVisX(0)>newDisplayArea.getXEast())||(t->getVisX(1)<newDisplayArea.getXWest())||
+            (t->getVisY(1)<newDisplayArea.getYSouth())||(t->getVisY(0)>newDisplayArea.getYNorth())) {
+              //DEBUG("removing tile <%s> because it is out side the new display area",t->getVisName().c_str());
+              tiles.remove(t);
+              deinitTile(t, __FILE__, __LINE__);
             }
           }
-        }
-        //PROFILE_ADD("tile list update");
+          //PROFILE_ADD("invisible tile remove");
 
-        // If no tile has been found for whatever reason, reset the map
-        //DEBUG("tiles.size()=%d zoomedScreenWidth=%d",tiles.size(),zoomedScreenWidth);
-        if ((!abortUpdate)&&((tiles.size()==0)||(zoomedScreenWidth<=1))) {
-        	DEBUG("resetting map",NULL);
-          core->getConfigStore()->setStringValue("Map/LastPosition","folder","*unknown*",__FILE__, __LINE__);
-          initMap();
-        }
+          // Fill the complete area
+          //DEBUG("starting area fill",NULL);
+          MapArea searchArea=newDisplayArea;
+          lockCenterMapTiles(__FILE__,__LINE__);
+          centerMapTiles.clear();
+          unlockCenterMapTiles();
+          core->interruptAllowedHere(__FILE__, __LINE__);
+          fillGeographicAreaWithTiles(searchArea,NULL,(tiles.size()==0) ? true : false);
+          //PROFILE_ADD("tile fill");
 
-        // Request cache and map tile overlay graphic update
-        mapChanged=true;
+          // Update the access time of the tile and copy the visual position
+          TimestampInSeconds currentTime=core->getClock()->getSecondsSinceEpoch();
+          for (std::list<MapTile*>::const_iterator i=tiles.begin();i!=tiles.end();i++) {
+            MapTile *t=*i;
+
+            // Update last access time
+            t->setLastAccess(currentTime);
+
+            // Handle the tile position and visibility only if the process was not aborted
+            if (!abortUpdate) {
+
+              // Activate the new position
+              core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+              t->activateVisPos();
+              core->getDefaultGraphicEngine()->unlockDrawing();
+
+              // If the tile is hidden: make it visible
+              if (t->getIsHidden()) {
+                t->setIsHidden(false,__FILE__, __LINE__);
+              }
+            }
+          }
+          //PROFILE_ADD("tile list update");
+
+          // If no tile has been found for whatever reason, reset the map
+          //DEBUG("tiles.size()=%d zoomedScreenWidth=%d",tiles.size(),zoomedScreenWidth);
+          if ((!abortUpdate)&&(tiles.size()==0)) {
+            DEBUG("resetting map",NULL);
+            core->getConfigStore()->setStringValue("Map/LastPosition","folder","*unknown*",__FILE__, __LINE__);
+            initMap();
+          }
+
+          // Request cache and map tile overlay graphic update
+          mapChanged=true;
+        }
       }
 
     } else {

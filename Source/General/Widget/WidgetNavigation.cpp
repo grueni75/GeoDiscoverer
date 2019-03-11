@@ -991,7 +991,7 @@ void WidgetNavigation::updateFlags(Int x, Int y) {
       }
     } else {
       double angle = FloatingPoint::rad2degree(FloatingPoint::computeAngle(dx,dy));
-      DEBUG("angle=%f",angle);
+      //DEBUG("angle=%f",angle);
       if ((angle >= 90.0-circularButtonAngle/2)&&(angle <= 90.0+circularButtonAngle/2)) {
         northButtonHit=true;
       } else {
