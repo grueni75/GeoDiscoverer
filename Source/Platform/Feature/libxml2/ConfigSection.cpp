@@ -155,10 +155,30 @@ std::list<XMLNode> ConfigSection::findConfigNodes(std::string path) {
 
   // Add the correct namespace to the path
   i=0;
-  while((j=path.find("/",i))!=std::string::npos) {
-    path=path.replace(j,1,"/gd:");
-    i=j+1;
+  bool predicateActive=false;
+  bool charConsumed;
+  std::string newPath="";
+  for (j=0;j<path.length();j++) {
+    charConsumed=false;
+    switch (path[j]) {
+    case '[':
+      predicateActive=true;
+      break;
+    case ']':
+      predicateActive=false;
+      break;
+    case '/':
+      if (!predicateActive) {
+        newPath+="/gd:";
+        charConsumed=true;
+      }
+      break;
+    }
+    if (!charConsumed)
+      newPath+=path[j];
   }
+  path=newPath;
+  //DEBUG("path=%s",path.c_str());
 
   // Execute the xpath expression
   xpathObj = xmlXPathEvalExpression(BAD_CAST path.c_str(), xpathConfigCtx);

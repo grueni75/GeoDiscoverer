@@ -51,6 +51,9 @@ class NavigationPoint {
   // Distance to a reference point
   double distance;
 
+  // Checks if the namespace of the given xml node is a valid gpx namespace
+  bool isGPXNameSpace(XMLNode node);
+
 public:
 
   // Constructor
@@ -64,6 +67,9 @@ public:
 
   // Reads the point from the config
   bool readFromConfig(std::string path);
+
+  // Extracts the point from the gpx xml node list
+  bool readGPX(XMLNode wptNode, std::string group, std::string defaultName, std::string &error);
 
   // Setters and getters
   const std::string& getAddress() const {
@@ -95,7 +101,7 @@ public:
   }
 
   void setName(std::string name) {
-    name.erase(std::remove(name.begin(), name.end(), '/'), name.end());
+    //name.erase(std::remove(name.begin(), name.end(), '/'), name.end());
     this->name = core->getConfigStore()->encodeString(name);
   }
 

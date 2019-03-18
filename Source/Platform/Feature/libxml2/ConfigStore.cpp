@@ -402,7 +402,24 @@ XMLNode ConfigStore::createNodeWithPath(XMLNode parentNode, std::string path, st
   } else {
 
     // Extract the name of the first element in the path and the remaining path
-    Int pos=path.find_first_of('/');
+    size_t pos=std::string::npos;
+    bool predicateActive=false;
+    for (int i=0;i<path.length();i++) {
+      switch (path[i]) {
+      case '[':
+        predicateActive=true;
+        break;
+      case ']':
+        predicateActive=false;
+        break;
+      case '/':
+        if (!predicateActive) {
+          pos=i;
+          i=path.length();
+        }
+        break;
+      }
+    }
     std::string firstPathElement;
     std::string remainingPath;
     if (pos!=std::string::npos) {

@@ -33,9 +33,6 @@ protected:
   // Indicates if the engine is initialized
   bool isInitialized;
 
-  // Maximum number of address entries
-  Int maxAddressPointCount;
-
   // Current location
   MapPosition locationPos;
 

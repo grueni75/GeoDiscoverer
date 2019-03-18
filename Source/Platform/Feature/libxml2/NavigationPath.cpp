@@ -303,6 +303,7 @@ bool NavigationPath::readGPXFile() {
   Int processedPercentage, prevProcessedPercentage=-1;
   std::list<XMLNode> trackNodes;
   std::list<XMLNode> routeNodes;
+  std::list<XMLNode> waypointNodes;
   bool loadTrack=false;
   bool loadRoute=false;
   MapPosition pos;
@@ -539,6 +540,36 @@ bool NavigationPath::readGPXFile() {
           addEndPosition(NavigationPath::getPathInterruptedPos());
         }
       }
+    }
+
+    // Load wayoints if gpx contains them
+    waypointNodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:wpt");
+    totalNumberOfPoints=waypointNodes.size();
+    processedPoints=0;
+    for(std::list<XMLNode>::iterator i=waypointNodes.begin();i!=waypointNodes.end();i++) {
+      XMLNode node=*i;
+      std::string error;
+      std::stringstream defaultName;
+      defaultName << "Waypoint " << processedPoints+1;
+      NavigationPoint point;
+      if (point.readGPX(node,getGpxFilename(),defaultName.str(),error)) {
+        core->getNavigationEngine()->addAddressPoint(point);
+      } else {
+        error="file <%s> " + error;
+        WARNING(error.c_str(),gpxFilename.c_str());
+      }
+      processedPoints++;
+      processedPercentage=processedPoints*100/totalNumberOfPoints;
+      if (processedPercentage>prevProcessedPercentage) {
+        progress.str(""); progress << "Loading wpts (" << processedPercentage << "%):";
+        status.pop_front();
+        status.push_front(progress.str());
+        core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+      }
+      prevProcessedPercentage=processedPercentage;
+      if (core->getQuitCore())
+        break;
+      //core->getThread()->reschedule();
     }
 
     // Write the cache

@@ -84,7 +84,6 @@ NavigationEngine::NavigationEngine() :
   forceNavigationInfoUpdate=false;
   computeNavigationInfoThreadInfo=NULL;
   computeNavigationInfoSignal=core->getThread()->createSignal();
-  maxAddressPointCount=core->getConfigStore()->getIntValue("Navigation","maxAddressPointCount", __FILE__, __LINE__);
   overlayGraphicHash="";
 
   // Create the track directory if it does not exist
@@ -1586,28 +1585,6 @@ void NavigationEngine::computeNavigationInfo() {
 void NavigationEngine::addAddressPoint(NavigationPoint point) {
 
   ConfigStore *configStore = core->getConfigStore();
-
-  // Check if the address point already exists
-  std::string path = "Navigation/AddressPoint[@name='" + point.getName() + "']";
-  if (!configStore->pathExists(path,__FILE__,__LINE__)) {
-
-    // Check if new entry would exceed maximum list size
-    std::list<std::string> values = configStore->getAttributeValues("Navigation/AddressPoint","name",__FILE__,__LINE__);
-    if (values.size()>=maxAddressPointCount) {
-
-      // Delete the oldest one
-      TimestampInSeconds oldestTimestamp=std::numeric_limits<TimestampInSeconds>::max();
-      std::string oldestName;
-      for (std::list<std::string>::iterator i=values.begin();i!=values.end();i++) {
-        TimestampInSeconds timestamp = configStore->getLongValue("Navigation/AddressPoint[@name='" + *i + "']","timestamp",__FILE__,__LINE__);
-        if (timestamp < oldestTimestamp) {
-          oldestTimestamp=timestamp;
-          oldestName=*i;
-        }
-      }
-      configStore->removePath("Navigation/AddressPoint[@name='" + oldestName + "']");
-    }
-  }
 
   // Remember the new address point value
   point.writeToConfig("Navigation/AddressPoint");

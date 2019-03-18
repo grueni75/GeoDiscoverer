@@ -1947,11 +1947,6 @@
                   <xsd:documentation>Minimum change of altitude required to update altitude meters.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="maxAddressPointCount" type="xsd:integer" default="30">
-                <xsd:annotation>
-                  <xsd:documentation>Maximum number of addresses to remember.</xsd:documentation>
-                </xsd:annotation>
-              </xsd:element>
               <xsd:element name="AddressPoint" maxOccurs="unbounded">
                 <xsd:annotation>
                   <xsd:documentation>Defines an address.</xsd:documentation>
