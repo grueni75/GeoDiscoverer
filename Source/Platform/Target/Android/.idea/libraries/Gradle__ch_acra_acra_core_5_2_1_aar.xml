@@ -5,8 +5,6 @@
       <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/acra-core-5.2.1.aar/7b7d44407b9bd5fae48bcac7de539f51/res" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.acra/acra-core/5.2.1/65808fb53dc4beb6fc9a7e3ffe3c2f9d0cfdf010/acra-core-5.2.1-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

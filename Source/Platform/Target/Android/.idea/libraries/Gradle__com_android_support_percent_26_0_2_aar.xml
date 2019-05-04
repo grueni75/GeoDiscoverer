@@ -5,8 +5,6 @@
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/percent-26.0.2.aar/ec509e1cf84f338183ef24cc5cc85652/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.android.support/percent/26.0.2/49be7004641dba5713686628a7657d8bb90a8c9d/percent-26.0.2-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

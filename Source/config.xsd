@@ -120,22 +120,22 @@
                   <xsd:documentation>Address of the bluetooth low energy device that transmits heart rate information.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="maxHeartRate" type="xsd:integer" default="180" gd:upgrade="restore">
+              <xsd:element name="maxHeartRate" type="xsd:integer" default="190" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Maximum heart rate above which an alarm sound is played.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
-              <xsd:element name="startHeartRateZoneTwo" type="xsd:integer" default="131" gd:upgrade="restore">
+              <xsd:element name="startHeartRateZoneTwo" type="xsd:integer" default="118" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Heart rate at which zone two starts.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
-              <xsd:element name="startHeartRateZoneThree" type="xsd:integer" default="152" gd:upgrade="restore">
+              <xsd:element name="startHeartRateZoneThree" type="xsd:integer" default="135" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Heart rate at which zone three starts.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
-              <xsd:element name="startHeartRateZoneFour" type="xsd:integer" default="172" gd:upgrade="restore">
+              <xsd:element name="startHeartRateZoneFour" type="xsd:integer" default="152" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Heart rate at which zone four starts.</xsd:documentation>
                 </xsd:annotation>
