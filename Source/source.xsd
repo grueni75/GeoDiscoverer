@@ -199,6 +199,13 @@
 			                </xsd:documentation>
 			              </xsd:annotation>
 			            </xsd:element>
+			            <xsd:element name="httpHeader" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Line to add to the http header when downloading tiles from this server.
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>
                 </xsd:sequence>
               </xsd:complexType>
             </xsd:element>

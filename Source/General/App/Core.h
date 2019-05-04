@@ -261,7 +261,7 @@ public:
   void continueMapUpdate();
 
   // Downloads a URL
-  UByte *downloadURL(std::string url, DownloadResult &result, UInt &size, bool generateMessages, bool ignoreFileNotFoundErrors);
+  UByte *downloadURL(std::string url, DownloadResult &result, UInt &size, bool generateMessages, bool ignoreFileNotFoundErrors, std::list<std::string> *httpHeader = NULL);
 
   // Get file attributes inclusive waiting until the file is available
   Int statFile(std::string path, struct stat *buffer);

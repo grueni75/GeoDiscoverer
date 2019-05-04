@@ -40,6 +40,7 @@ protected:
   Int maxZoomLevelServer;               // Maximum usable zoom level of this server
   Int minZoomLevelMap;                  // Minimum zoom level in map
   Int maxZoomLevelMap;                  // Maximum zoom level in map
+  std::list<std::string> httpHeader;    // HTTP header to use
 
   // Replaces a variable in a string
   bool replaceVariableInServerURL(std::string &url, std::string variableName, std::string variableValue);
@@ -47,7 +48,7 @@ protected:
 public:
 
   // Constructor
-  MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel, UInt threadCount);
+  MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel, std::list<std::string> httpHeader, UInt threadCount);
 
   // Destructor
   virtual ~MapTileServer();

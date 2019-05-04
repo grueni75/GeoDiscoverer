@@ -139,6 +139,9 @@ public:
     return setNodeText(n,nodeText);
   }
 
+  // Returns the contents of a list of nodes as a list of string
+  bool getAllNodesText(XMLNode parent, std::string nodeName, std::list<std::string> &nodeTexts);
+
   // Getters and setters
   XMLDocument getConfig() const {
     return config;

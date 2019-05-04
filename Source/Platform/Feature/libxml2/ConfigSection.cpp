@@ -294,4 +294,18 @@ XMLNode ConfigSection::findNode(XMLNode parent, std::string nodeName) {
   return NULL;
 }
 
+// Returns the contents of a list of nodes as a list of string
+bool ConfigSection::getAllNodesText(XMLNode parent, std::string nodeName, std::list<std::string> &nodeTexts) {
+  bool result=false;
+  for (XMLNode n=parent->children;n!=NULL;n=n->next) {
+    if ((n->type==XML_ELEMENT_NODE)&&(strcmp((char*)n->name,nodeName.c_str())==0)) {
+      std::string nodeText;
+      getNodeText(n,nodeText);
+      nodeTexts.push_back(nodeText);
+      result=true;
+    }
+  }
+  return result;
+}
+
 } /* namespace GEODISCOVERER */

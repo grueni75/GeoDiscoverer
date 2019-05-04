@@ -82,7 +82,7 @@ public:
   void updateDownloadStatus();
 
   // Adds a server url to the list of URLs a tile consists  of
-  bool addTileServer(std::string serverURL, double overlayAlpha, ImageType imageType, std::string layerGroupName, Int minZoomLevel, Int maxZoomLevel);
+  bool addTileServer(std::string serverURL, double overlayAlpha, ImageType imageType, std::string layerGroupName, Int minZoomLevel, Int maxZoomLevel, std::list<std::string> httpHeader);
 
   // Adds a map container to the download queue
   void queueMapContainerDownload(MapContainer *mapContainer);

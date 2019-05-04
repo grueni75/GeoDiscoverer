@@ -24,7 +24,7 @@
 
 namespace GEODISCOVERER {
 
-MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel, UInt threadCount) {
+MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, std::string layerGroupName, UInt orderNr, std::string serverURL, double overlayAlpha, ImageType imageType, Int minZoomLevel, Int maxZoomLevel, std::list<std::string> httpHeader, UInt threadCount) {
   this->mapSource = mapSource;
   this->layerGroupName = layerGroupName;
   this->serverURL = serverURL;
@@ -46,6 +46,7 @@ MapTileServer::MapTileServer(MapSourceMercatorTiles *mapSource, std::string laye
   this->maxZoomLevelServer=maxZoomLevel;
   this->minZoomLevelMap=-1;
   this->maxZoomLevelMap=-1;
+  this->httpHeader=httpHeader;
 }
 
 MapTileServer::~MapTileServer() {
@@ -92,7 +93,7 @@ DownloadResult MapTileServer::downloadTileImage(MapContainer *mapContainer, Int 
   if (images[threadNr]->data!=NULL)
     FATAL("previous image has not been freed",NULL);
   UInt size;
-  images[threadNr]->data = core->downloadURL(url,result,images[threadNr]->size,!mapSource->getDownloadWarningOccured(),true);
+  images[threadNr]->data = core->downloadURL(url,result,images[threadNr]->size,!mapSource->getDownloadWarningOccured(),true,&httpHeader);
   switch (result) {
     case DownloadResultSuccess:
 

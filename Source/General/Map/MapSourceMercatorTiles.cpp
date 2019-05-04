@@ -662,19 +662,22 @@ bool MapSourceMercatorTiles::parseGDSInfo() {
   std::list<XMLNode> tileServers=resolvedGDSInfo->findConfigNodes("/GDS/TileServer");
   for (std::list<XMLNode>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
     std::string serverURL;
+    XMLNode n=*i;
     bool serverURLFound=false;
-    serverURLFound=resolvedGDSInfo->getNodeText(*i,"serverURL",serverURL);
+    serverURLFound=resolvedGDSInfo->getNodeText(n,"serverURL",serverURL);
     double overlayAlpha;
     bool overlayAlphaFound=false;
-    overlayAlphaFound=resolvedGDSInfo->getNodeText(*i,"overlayAlpha",overlayAlpha);
+    overlayAlphaFound=resolvedGDSInfo->getNodeText(n,"overlayAlpha",overlayAlpha);
     Int minZoomLevel;
-    resolvedGDSInfo->getNodeText(*i,"minZoomLevel",minZoomLevel);
+    resolvedGDSInfo->getNodeText(n,"minZoomLevel",minZoomLevel);
     Int maxZoomLevel;
-    resolvedGDSInfo->getNodeText(*i,"maxZoomLevel",maxZoomLevel);
+    resolvedGDSInfo->getNodeText(n,"maxZoomLevel",maxZoomLevel);
     std::string imageFormat="";
-    resolvedGDSInfo->getNodeText(*i,"imageFormat",imageFormat);
+    resolvedGDSInfo->getNodeText(n,"imageFormat",imageFormat);
     std::string layerGroupName="";
-    resolvedGDSInfo->getNodeText(*i,"layerGroupName",layerGroupName);
+    resolvedGDSInfo->getNodeText(n,"layerGroupName",layerGroupName);
+    std::list<std::string> httpHeader;
+    resolvedGDSInfo->getAllNodesText(n,"httpHeader",httpHeader);
     if (!serverURLFound) {
       ERROR("one TileServer element has no serverURL element in <%s>",infoFilePath.c_str());
       goto cleanup;
@@ -688,7 +691,7 @@ bool MapSourceMercatorTiles::parseGDSInfo() {
       imageType = ImageTypeJPEG;
     if (imageFormat=="png")
       imageType = ImageTypePNG;
-    mapDownloader->addTileServer(serverURL,overlayAlpha,imageType,layerGroupName,minZoomLevel,maxZoomLevel);
+    mapDownloader->addTileServer(serverURL,overlayAlpha,imageType,layerGroupName,minZoomLevel,maxZoomLevel,httpHeader);
   }
   if (tileServers.size()==0) {
     ERROR("no tileServer element found in <%s>",infoFilePath.c_str());

@@ -53,16 +53,24 @@ void Core::initCURL() {
 }
 
 // Downloads a URL
-UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bool generateMessages, bool ignoreFileNotFoundErrors) {
+UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bool generateMessages, bool ignoreFileNotFoundErrors, std::list<std::string> *httpHeader) {
 
   char curlErrorBuffer[CURL_ERROR_SIZE];
   result = DownloadResultOtherFail;
   long curlResponseCode = 0;
   struct curlMemoryStruct out;
+  struct curl_slist *header = NULL;
 
   // Reserve initial memory for download
   out.memory = (UByte*)malloc(1);
   out.size = 0;
+
+  // Prepare header
+  if (httpHeader) {
+    for (std::list<std::string>::iterator i=httpHeader->begin();i!=httpHeader->end();i++) {
+      header = curl_slist_append(header, (*i).c_str());
+    }
+  }
 
   // Download it with curl
   CURL *curl;
@@ -74,16 +82,19 @@ UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bo
   }
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "Geo Discoverer (build on "  __DATE__  ")");
+  if (header) curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &out);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlMemoryCallback);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,curlErrorBuffer);
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+
   //curl_easy_setopt(curl, CURLOPT_CAINFO, (core->getHomePath() + "/Misc/ca-certificates.crt").c_str());
-  //DEBUG("downloading url %s",url.c_str());
+  DEBUG("downloading url %s",url.c_str());
   CURLcode curlResult = curl_easy_perform(curl);
   curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE, &curlResponseCode);
   curl_easy_cleanup(curl);
+  if (header) curl_slist_free_all(header);
 
   // Handle errors
   size=0;

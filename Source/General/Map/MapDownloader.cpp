@@ -226,7 +226,7 @@ void MapDownloader::clearDownloadQueue()
 }
 
 // Adds a server url to the list of URLs a tile consists of
-bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, ImageType imageType, std::string layerGroupName, Int minZoomLevel, Int maxZoomLevel) {
+bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, ImageType imageType, std::string layerGroupName, Int minZoomLevel, Int maxZoomLevel, std::list<std::string> httpHeader) {
   MapTileServer *mapTileServer;
 
   // Check if the image is supported
@@ -251,7 +251,7 @@ bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, Im
   }
 
   // Remember the map tile server
-  if (!(mapTileServer=new MapTileServer(mapSource,layerGroupName,tileServers.size(),serverURL,overlayAlpha,imageType,minZoomLevel,maxZoomLevel,numberOfDownloadThreads))) {
+  if (!(mapTileServer=new MapTileServer(mapSource,layerGroupName,tileServers.size(),serverURL,overlayAlpha,imageType,minZoomLevel,maxZoomLevel,httpHeader,numberOfDownloadThreads))) {
     FATAL("can not create map tile server object",NULL);
     return false;
   }
