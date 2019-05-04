@@ -106,6 +106,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 public class ViewMap extends GDActivity {
 
   // Request codes for calling other activities

@@ -148,51 +148,17 @@
     <orderEntry type="library" name="Gradle: com.android.support:support-compat:27.1.1@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.android.support:support-fragment:27.1.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-base:11.8.0@aar" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.commons:commons-lang3:3.8.1@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-base-license:11.8.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: android.arch.core:common:1.1.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.afollestad.material-dialogs:core:0.9.6.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-wearable:11.8.0@aar" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.commons:commons-text:1.6@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-basement:11.8.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.afollestad.material-dialogs:commons:0.9.6.0@aar" level="project" />
     <orderEntry type="module" module-name="colorPickerPreference" />
     <orderEntry type="module" module-name="core" />
     <orderEntry type="library" name="Gradle: org.apache.http.legacy-android-27" level="project" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="colorPickerPreference" />
-    <orderEntry type="module" module-name="core" />
     <orderEntry type="module" module-name="colorPickerPreference" />
     <orderEntry type="module" module-name="core" />
     <orderEntry type="module" module-name="colorPickerPreference" />
