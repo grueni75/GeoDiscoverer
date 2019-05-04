@@ -1293,7 +1293,9 @@ public class ViewMap extends GDActivity {
       // Copy all selected tracks to the route directory
       Integer progress = 0;
       for (String routeName : routeNames) {
-        File route = new File(coreObject.homePath + "/Route/" + routeName);
+        File route = new File(coreObject.homePath + "/Route/" + routeName + ".bin");
+        route.delete(); // Don't care if .bin does not exist
+        route = new File(coreObject.homePath + "/Route/" + routeName);
         if (!route.delete()) {
           GDApplication.showMessageBar(ViewMap.this, String.format(getString(R.string.cannot_remove_file), route.getPath()), GDApplication.MESSAGE_BAR_DURATION_LONG);
         }
