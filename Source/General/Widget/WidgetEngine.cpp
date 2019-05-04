@@ -786,13 +786,13 @@ void WidgetEngine::createGraphic() {
         config.setParameter("pathNameOffsetY","85.5");
         config.setParameter("pathNameWidth","94.0");
         config.setParameter("pathValuesWidth","22.5");
-        config.setParameter("pathLengthOffsetX","75.5");
+        config.setParameter("pathLengthOffsetX","77.0");
         config.setParameter("pathLengthOffsetY","65.5");
-        config.setParameter("pathAltitudeUpOffsetX","75.5");
+        config.setParameter("pathAltitudeUpOffsetX","77.0");
         config.setParameter("pathAltitudeUpOffsetY","45.5");
-        config.setParameter("pathAltitudeDownOffsetX","75.5");
+        config.setParameter("pathAltitudeDownOffsetX","77.0");
         config.setParameter("pathAltitudeDownOffsetY","26.0");
-        config.setParameter("pathDurationOffsetX","75.5");
+        config.setParameter("pathDurationOffsetX","77.0");
         config.setParameter("pathDurationOffsetY","6.5");
         config.setParameter("altitudeProfileWidth","55.0");
         config.setParameter("altitudeProfileHeightWithNavigationPoints","47.5");
