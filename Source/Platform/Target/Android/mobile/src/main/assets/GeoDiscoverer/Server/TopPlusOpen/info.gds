@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GDS 
+  xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
+  version="1.0">
+  <name>Top Plus Open</name>
+  <isMarkup>false</isMarkup>
+  <TileServer>
+    <serverURL>http://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web/default/WEBMERCATOR/${z}/${y}/${x}.png</serverURL>
+    <overlayAlpha>1.0</overlayAlpha>
+  </TileServer>
+  <minZoomLevel>0</minZoomLevel>
+  <maxZoomLevel>18</maxZoomLevel>
+</GDS>

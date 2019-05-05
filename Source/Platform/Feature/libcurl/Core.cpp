@@ -90,7 +90,7 @@ UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bo
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 
   //curl_easy_setopt(curl, CURLOPT_CAINFO, (core->getHomePath() + "/Misc/ca-certificates.crt").c_str());
-  DEBUG("downloading url %s",url.c_str());
+  //DEBUG("downloading url %s",url.c_str());
   CURLcode curlResult = curl_easy_perform(curl);
   curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE, &curlResponseCode);
   curl_easy_cleanup(curl);

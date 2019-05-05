@@ -1260,7 +1260,7 @@
                   <xsd:documentation>Duration in microseconds to show the highlight color.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="mapReferenceDotsPerInch" type="xsd:integer" default="160">
+              <xsd:element name="mapReferenceDotsPerInch" type="xsd:integer" default="240">
                 <xsd:annotation>
                   <xsd:documentation>Reference DPI the map tiles have been created for.</xsd:documentation>
                 </xsd:annotation>

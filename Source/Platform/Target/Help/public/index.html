@@ -517,7 +517,7 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 </div></div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201806150639" changecount="155">
+<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="201905050720" changecount="157">
 <pre>! Copyright (C) Matthias Grünewald - All Rights Reserved
 Geo Discoverer has been developed by Matthias Grünewald. He owns the copyright for the application, this help and all the media used. The app uses also many libraries and media from others. See [[Acknowledgements|About##Acknowledgements]]. 
 ! License
@@ -544,6 +544,8 @@ The bundled map source &quot;4UMaps&quot; uses tile servers from http://www.4uma
 The bundled map sources &quot;Default&quot; and &quot;Outdoors&quot; use tile servers from http://www.thunderforest.com/maps/outdoors. Data, imagery and map information is copyright by Thunderforest and [[OpenStreetMap|http://www.openstreetmap.org/copyright]] contributors.
 !! ~ÖPNVKarte
 The bundled map source &quot;~ÖPNVKarte&quot; uses tile servers from http://öpnvkarte.de/. It is licensed under the [[Creative Commons Attribution-ShareAlike 2.0 Generic|http://creativecommons.org/licenses/by-sa/2.0/]] license. No changes were made.
+!! ~TopPlusOpen
+The bundled map source &quot;~TopPlusOpen&quot; uses tile servers from [[http://www.geodatenzentrum.de/|http://www.geodatenzentrum.de/geodaten/gdz_rahmen.gdz_div?gdz_spr=deu&amp;gdz_akt_zeile=5&amp;gdz_anz_zeile=1&amp;gdz_unt_zeile=41&amp;gdz_user_id=0]]. It is licensed under the [[Open Data Datenlizenz Deutschland – Namensnennung – Version 2.0|http://www.govdata.de/dl-de/by-2-0]] license. No changes were made. © [[Bundesamt für Kartographie und Geodäsie|http://www.bkg.bund.de/]] 2019, [[Datenquellen|http://sg.geodatenzentrum.de/web_public/Datenquellen_TopPlus_Open.pdf]] 
 !! Help
 !!! Tiddly Wiki Classic
 This help has been created within the wonderful ~TiddlyWikiClassic (TWC). TWC has been created by Jeremy Ruston and the ~UnaMesa Association. See License-TiddlyWikiClassic for more information.
@@ -1412,17 +1414,15 @@ RevisionHistory
 &lt;!--}}}--&gt;
 </pre>
 </div>
-<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201705291724" changecount="44">
+<div title="GettingStarted" creator="Matthias" modifier="Matthias" created="201210220640" modified="201905050650" changecount="45">
 <pre>! Introduction
-Geo Discoverer is an navigation app for hikers and bikers. It can be downloaded in the [[Google Play Store|https://play.google.com/store/apps/details?id=com.untouchableapps.android.geodiscoverer]]. After its first start, it displays an online map. The map consists of many small tiles (pictures) that are downloaded from the internet. It will take a few seconds before the contents of the map is displayed. Once the tiles are downloaded, they are stored on the device for fast retrieval. If you want to understand the map view and its interacting possibilities, the MapView tiddler explains all the details.
+Geo Discoverer is an navigation app for hikers and bikers. After its first start, it displays an online map. The map consists of many small tiles (pictures) that are downloaded from the internet. It will take a few seconds before the contents of the map is displayed. Once the tiles are downloaded, they are stored on the device for fast retrieval. If you want to understand the map view and its interacting possibilities, the MapView tiddler explains all the details.
 ! Privacy Policy
 This app does not read out any privacy related data. But it has to use the following permissions:
 * android.permission.~BIND_DEVICE_ADMIN: If enabled in the AppPreferences, the back key can be used to switch off the display. This feature is offered to save energy. It requires that Geo Discoverer acts as a device admin. In order to use this feature, you have to grant Geo Discoverer the device admin permission manually in the settings of your device. 
 * android.permission.~GET_ACCOUNTS: This permission is required for the usage of the Google Play Services. The Google Play Services provides functionality to communicate with Android Wear devices. This functionality is used to implement a Watchface that display the navigation widget. The app itself does not read out any info about your accounts. Please check the privacy policy of the [[Google Play Services|https://play.google.com/intl/en_us/about/play-terms.html]] to find out how this service uses your account data.
 ! Acknowledgements
 Geo Discoverer is using many contributios from others. See the [[About]] tiddler for a full list of all the related projects. Without those contributions, Geo Discover would not have been possible. So a big @@''&quot;Thank You!&quot;''@@ to the people behind those projects!
-! News
-Please check [[the Geo Discoverer Google+ page|https://plus.google.com/u/1/116970120177270246182/posts]] for news about the app and related projects.
 ! Other information in this Wiki
 &lt;&lt;tiddler MainMenu&gt;&gt;</pre>
 </div>
@@ -5028,8 +5028,9 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201806150644" changecount="51">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="201905050648" changecount="52">
 <pre>|!Date |!Changes |
+|2019-05-05|Added copyright notices for new map sources to [[About]]|
 |2018-06-15|Added copyright notices related to the sounds of the heart rate monitor to [[About]]|
 |2018-06-13|Described export route feature in menu of MapView|
 |2017-05-29|Improved privacy policy by explaining ~BIND_DEVICE_ADMIN permission|
