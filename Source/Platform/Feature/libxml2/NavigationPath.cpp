@@ -351,8 +351,10 @@ bool NavigationPath::readGPXFile() {
         char *cacheData2=cacheData;
         bool success = NavigationPath::retrieve(this,cacheData2,cacheSize);
         if ((cacheSize!=0)||(!success)) {
-          remove(cacheFilepath.c_str());
-          WARNING("falling back to full gpx file read because cache is corrupted",NULL);
+          if (!core->getQuitCore()) {
+            remove(cacheFilepath.c_str());
+            WARNING("falling back to full gpx file read because cache is corrupted",NULL);
+          }
         } else {
           cacheRetrieved=true;
         }
@@ -362,7 +364,7 @@ bool NavigationPath::readGPXFile() {
   }
 
   // Load the gpx file if cache can not be used
-  if (!cacheRetrieved) {
+  if ((!cacheRetrieved)&&(!core->getQuitCore())) {
 
     // Read the document
     status.push_back("Loading path (Init):");
@@ -488,7 +490,7 @@ bool NavigationPath::readGPXFile() {
             }
             prevProcessedPercentage=processedPercentage;
             if (core->getQuitCore())
-              break;
+              goto cleanup;
             //core->getThread()->reschedule();
           }
           if (i!=numberOfSegments) {

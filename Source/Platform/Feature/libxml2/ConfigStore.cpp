@@ -894,6 +894,13 @@ std::string ConfigStore::encodeString(std::string name) {
   xmlChar *valueEncoded = xmlEncodeSpecialChars(doc,(const xmlChar *)name.c_str());
   std::string result = std::string((char*)valueEncoded);
   xmlFree(valueEncoded);
+  size_t pos = 0;
+  std::string search="'";
+  std::string replace="&apos;";
+  while ((pos = result.find(search, pos)) != std::string::npos) {
+    result.replace(pos, search.length(), replace);
+    pos += replace.length();
+  }
   //DEBUG("name before encoding: %s",result.c_str());
   return result;
 }

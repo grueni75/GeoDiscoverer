@@ -1158,7 +1158,7 @@ bool NavigationPath::retrieve(NavigationPath *navigationPath, char *&cacheData, 
 
     // Retrieve the map container
     MapPosition *p=MapPosition::retrieve(cacheData,cacheSize);
-    if (p==NULL) {
+    if ((p==NULL)||(core->getQuitCore())) {
       navigationPath->mapPositions.resize(i);
       success=false;
       goto cleanup;

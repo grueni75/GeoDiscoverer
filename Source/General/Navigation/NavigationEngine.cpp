@@ -122,6 +122,7 @@ NavigationEngine::~NavigationEngine() {
   deinit();
 
   // Delete mutexes
+  DEBUG("ping",NULL);
   core->getThread()->destroyMutex(recordedTrackMutex);
   core->getThread()->destroyMutex(routesMutex);
   core->getThread()->destroyMutex(locationPosMutex);
@@ -133,6 +134,7 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(navigationInfosMutex);
   core->getThread()->destroyMutex(navigationPointsMutex);
   core->getThread()->destroyMutex(activeRouteMutex);
+  DEBUG("ping",NULL);
 }
 
 // Initializes the engine
@@ -311,6 +313,7 @@ void NavigationEngine::deletePath(NavigationPath *path) {
 void NavigationEngine::deinit() {
 
   // Finish the navigation info calculator thread
+  DEBUG("ping",NULL);
   if (computeNavigationInfoThreadInfo) {
     core->getThread()->lockMutex(activeRouteMutex, __FILE__, __LINE__);
     core->getThread()->cancelThread(computeNavigationInfoThreadInfo);
@@ -321,6 +324,7 @@ void NavigationEngine::deinit() {
   }
 
   // Finish the background thread
+  DEBUG("ping",NULL);
   if (backgroundLoaderThreadInfo) {
     core->getThread()->lockMutex(backgroundLoaderFinishedMutex, __FILE__, __LINE__);
     if (!backgroundLoaderFinished) {
@@ -332,11 +336,13 @@ void NavigationEngine::deinit() {
   }
 
   // Reset the address points graphic object
+  DEBUG("ping",NULL);
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   core->getDefaultGraphicEngine()->setNavigationPoints(NULL);
   core->getDefaultGraphicEngine()->unlockDrawing();
 
   // Save the track first
+  DEBUG("ping",NULL);
   if (recordedTrack) {
     recordedTrack->writeGPXFile(); // locking is handled within writeGPXFile()
     NavigationPath *path=recordedTrack;
@@ -347,6 +353,7 @@ void NavigationEngine::deinit() {
   }
 
   // Free all routes
+  DEBUG("ping",NULL);
   lockRoutes(__FILE__, __LINE__);
   for (std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
     deletePath(*i);
@@ -355,6 +362,7 @@ void NavigationEngine::deinit() {
   unlockRoutes();
 
   // Object is not initialized
+  DEBUG("ping",NULL);
   isInitialized=false;
 }
 
@@ -1140,7 +1148,7 @@ void NavigationEngine::backgroundLoader() {
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
 
-  // This thread can be cancelled
+  // Thread can be cancelled
   core->getThread()->setThreadCancable();
 
   // Load the recorded track
@@ -1148,8 +1156,8 @@ void NavigationEngine::backgroundLoader() {
     if (core->getQuitCore()) {
       goto exitThread;
     }
-    recordedTrack->readGPXFile(); // locking is handled within method
-    recordedTrack->setIsInit(true);
+    if (recordedTrack->readGPXFile())
+      recordedTrack->setIsInit(true);
   }
 
   // Load all routes
