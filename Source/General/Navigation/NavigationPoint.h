@@ -101,8 +101,7 @@ public:
   }
 
   void setName(std::string name) {
-    //name.erase(std::remove(name.begin(), name.end(), '/'), name.end());
-    this->name = core->getConfigStore()->encodeString(name);
+    this->name = name;
   }
 
   TimestampInSeconds getTimestamp() const {

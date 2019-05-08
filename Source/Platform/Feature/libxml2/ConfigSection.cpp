@@ -262,9 +262,7 @@ bool ConfigSection::setNodeText(XMLNode node, std::string nodeText) {
   xmlNodePtr n;
   for (n = node->children; n; n = n->next) {
     if ((n->name)&&(strcmp((char*)n->name,"text")==0)) {
-      xmlChar *valueEncoded = xmlEncodeSpecialChars(config,(const xmlChar *)nodeText.c_str());
-      xmlNodeSetContent(n,valueEncoded);
-      xmlFree(valueEncoded);
+      xmlNodeSetContent(n,(const xmlChar *)nodeText.c_str());
       return true;
     }
   }

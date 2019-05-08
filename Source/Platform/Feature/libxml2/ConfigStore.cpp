@@ -646,9 +646,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
       core->getThread()->unlockMutex(accessMutex);
       return;
     }
-    xmlChar *valueEncoded = xmlEncodeSpecialChars(doc,(const xmlChar *)value.c_str());
-    xmlNodeSetContent(node->children,valueEncoded);
-    xmlFree(valueEncoded);
+    xmlNodeSetContent(node->children,(const xmlChar *)value.c_str());
   }
   hasChanged=true;
   core->getThread()->issueSignal(writeConfigSignal);
@@ -890,7 +888,7 @@ std::string ConfigStore::encodeString(std::string name) {
   XMLDocument doc=configSection->getConfig();
   if (doc==NULL)
     FATAL("no config available",NULL);
-  //DEBUG("name before encoding: %s",name.c_str());
+  DEBUG("name before encoding: %s",name.c_str());
   xmlChar *valueEncoded = xmlEncodeSpecialChars(doc,(const xmlChar *)name.c_str());
   std::string result = std::string((char*)valueEncoded);
   xmlFree(valueEncoded);
@@ -901,7 +899,7 @@ std::string ConfigStore::encodeString(std::string name) {
     result.replace(pos, search.length(), replace);
     pos += replace.length();
   }
-  //DEBUG("name before encoding: %s",result.c_str());
+  DEBUG("name after encoding: %s",result.c_str());
   return result;
 }
 

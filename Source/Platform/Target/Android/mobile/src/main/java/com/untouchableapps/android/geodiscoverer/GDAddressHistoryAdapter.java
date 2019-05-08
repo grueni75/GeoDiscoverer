@@ -50,6 +50,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
 public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
@@ -223,14 +225,14 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     holder.removeButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        coreObject.scheduleCoreCommand("removeAddressPoint(\"" + name + "\")");
+        coreObject.scheduleCoreCommand("removeAddressPoint(\"" + StringEscapeUtils.escapeXml11(name) + "\")");
         remove(name);
       }
     });
     holder.text.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        coreObject.scheduleCoreCommand("setTargetAtAddressPoint(\"" + name + "\")");
+        coreObject.scheduleCoreCommand("setTargetAtAddressPoint(\"" + StringEscapeUtils.escapeXml11(name) + "\")");
         dialog.dismiss();
       }
     });
@@ -265,8 +267,8 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         if ((!newName.equals("")) && (!newName.equals(name))) {
 
           // Rename the entry
-          newName = coreObject.executeCoreCommand("renameAddressPoint(\"" + name + "\"," +
-              "\"" + newName + "\")");
+          newName = coreObject.executeCoreCommand("renameAddressPoint(\"" + StringEscapeUtils.escapeXml11(name) + "\"," +
+              "\"" + StringEscapeUtils.escapeXml11(newName) + "\")");
           remove(name);
           insert(newName, position);
           holder.text.setText(newName);
@@ -305,7 +307,8 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         String group = groupNamesAdapter.getItem(position);
         String address = holder.text.getText().toString();
         String path = "Navigation/AddressPoint[@name='"+StringEscapeUtils.escapeXml11(address)+"']";
-        coreObject.configStoreSetStringValue(path,"group",group);
+        coreObject.configStoreSetStringValue(path,"group",StringEscapeUtils.escapeXml11(group));
+        coreObject.executeCoreCommand("addressPointGroupChanged()");
       }
 
       @Override
