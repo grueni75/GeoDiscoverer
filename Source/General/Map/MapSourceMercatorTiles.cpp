@@ -1011,9 +1011,10 @@ void MapSourceMercatorTiles::processDownloadJobs() {
             // Tile not yet downloaded?
             std::stringstream fileFolder, fileBase;
             createTilePath(zMap, x, y, fileFolder, fileBase);
-            std::string filePath =  getFolderPath() + "/" + fileFolder.str() + "/" + fileBase.str();
+            std::string filePath =  fileFolder.str() + "/" + fileBase.str();
             if (access((filePath + ".gda").c_str(),F_OK)==-1) {
               allTilesDownloaded=false;
+              //DEBUG("adding <%s.gda> to download queue",filePath.c_str());
 
               // Check if disk space is exceeded
               estimatedJobStorageSpace+=averageMercatorTileSize;
