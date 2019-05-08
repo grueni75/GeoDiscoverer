@@ -41,12 +41,12 @@ Commander::~Commander() {
 bool Commander::splitCommand(std::string cmdString, std::string& cmd, std::vector<std::string>& args) {
 
   // Extract the command to execute
-  Int argStart=cmdString.find('(');
+  Int argStart=cmdString.find_first_of('(');
   if (argStart==std::string::npos) {
     ERROR("can not extract start of arguments from command <%s>",cmdString.c_str());
     return false;
   }
-  Int argEnd=cmdString.find(')');
+  Int argEnd=cmdString.find_last_of(')');
   if (argEnd==std::string::npos) {
     ERROR("can not extract end of arguments from command <%s>",cmdString.c_str());
     return false;
@@ -425,14 +425,6 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="updateRoutes") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->updateRoutes();
-    }
-    cmdExecuted=true;
-  }
-  if (cmdName=="newPointOfInterest") {
-    if (core->getIsInitialized()) {
-      core->getNavigationEngine()->newPointOfInterest("unknown","unknown",atof(args[0].c_str()),atof(args[1].c_str()));
-    } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }

@@ -1221,15 +1221,17 @@ exitThread:
   core->getThread()->unlockMutex(backgroundLoaderFinishedMutex);
 }
 
-// Adds a new point of interest
-void NavigationEngine::newPointOfInterest(std::string name, std::string description, double lng, double lat) {
-  //DEBUG("name=%s description=%s lng=%f lat=%f",name.c_str(),description.c_str(),lng,lat);
-  setTargetAtGeographicCoordinate(lng,lat,true);
-}
-
 // Sets the target to the center of the map
 void NavigationEngine::setTargetAtMapCenter() {
   MapPosition *pos = core->getMapEngine()->lockMapPos(__FILE__, __LINE__);
+  NavigationPoint point;
+  std::stringstream name;
+  name << "(" << pos->getLat() << "," << pos->getLng() << ")";
+  point.setName(name.str());
+  point.setAddress(name.str());
+  point.setLng(pos->getLng());
+  point.setLat(pos->getLat());
+  core->getNavigationEngine()->addAddressPoint(point);
   setTargetAtGeographicCoordinate(pos->getLng(),pos->getLat(),false);
   core->getMapEngine()->unlockMapPos();
 }

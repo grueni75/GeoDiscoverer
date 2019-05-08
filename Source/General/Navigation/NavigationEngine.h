@@ -207,9 +207,6 @@ public:
   // Updates the compass
   void newCompassBearing(double bearing);
 
-  // Adds a new point of interest
-  void newPointOfInterest(std::string name, std::string description, double lng, double lat);
-
   // Sets the target to the center of the map
   void setTargetAtMapCenter();
 
