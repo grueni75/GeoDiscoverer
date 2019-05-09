@@ -154,10 +154,14 @@ public class GDMessageListenerService extends WearableListenerService {
         boolean configChanged=false;
         while (cmd.length()>0) {
           String args = cmd.substring(cmd.indexOf("("), cmd.indexOf(")") + 1);
+          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "args=" + args);
           String path = args.substring(1,args.indexOf(","));
           args = args.substring(args.indexOf(",")+1);
           String name = args.substring(0,args.indexOf(","));
-          String value = args.substring(args.indexOf(",")+1,args.indexOf(")"));
+          args = args.substring(args.indexOf(",")+1);
+          String value = args.substring(0,args.indexOf(","));
+          boolean testForConfigChange = Integer.valueOf(args.substring(args.indexOf(",")+1,args.indexOf(")"))) > 0 ? true : false;
+          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "path=" + path + " name=" + name + " value=" + value + " testForConfigChange=" + Boolean.toString(testForConfigChange));
           String oldValue = coreObject.configStoreGetStringValue(path,name);
           Bundle info = coreObject.configStoreGetNodeInfo(path + "/" + name);
           if (info.getString("type").equals("integer")) {
@@ -165,7 +169,9 @@ public class GDMessageListenerService extends WearableListenerService {
             int t2 = Integer.valueOf(oldValue);
             if (t1!=t2) {
               coreObject.configStoreSetStringValue(path, name, value);
-              configChanged = true;
+              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "name=" + name + " value=" + value);
+              if (testForConfigChange)
+                configChanged = true;
             }
           }
           if (info.getString("type").equals("double")) {
@@ -173,13 +179,17 @@ public class GDMessageListenerService extends WearableListenerService {
             double t2 = Double.valueOf(oldValue);
             if (t1!=t2) {
               coreObject.configStoreSetStringValue(path, name, value);
-              configChanged=true;
+              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "name=" + name + " value=" + value);
+              if (testForConfigChange)
+                configChanged=true;
             }
           }
           if (info.getString("type").equals("string")) {
             if (!value.equals(oldValue)) {
               coreObject.configStoreSetStringValue(path, name, value);
-              configChanged=true;
+              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "name=" + name + " value=" + value);
+              if (testForConfigChange)
+                configChanged=true;
             }
           }
           cmd = cmd.substring(cmd.indexOf(")") + 1);
