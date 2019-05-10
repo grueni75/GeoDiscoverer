@@ -85,7 +85,18 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     holder.removeButton.setVisibility(View.VISIBLE);
     holder.editButton.setVisibility(View.VISIBLE);
     updateListViewSize(holder);
-    updateAddresses();
+  }
+
+  private void closeAllRowEditors() {
+    final int firstListItemPosition = listView.getFirstVisiblePosition();
+    final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
+    for (int i=0;i<listView.getChildCount();i++) {
+      View rowView = listView.getChildAt(i);
+      if (rowView!=null) {
+        ViewHolder holder = (ViewHolder) rowView.getTag();
+        closeRowEditor(holder);
+      }
+    }
   }
 
   private void updateListViewSize(ViewHolder holder) {
@@ -123,7 +134,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     }
   }
 
-  public void updateAddresses() {
+  private void updateAddressesInternal() {
     selectedGroupName = StringEscapeUtils.unescapeXml(coreObject.configStoreGetStringValue("Navigation","selectedAddressPointGroup"));
     clear();
     String temp[] = coreObject.configStoreGetAttributeValues("Navigation/AddressPoint","name");
@@ -150,8 +161,14 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     notifyDataSetChanged();
   }
 
+  public void updateAddresses() {
+    closeAllRowEditors();
+    updateAddressesInternal();
+  }
+
   public void addGroupName(String groupName) {
     if ((groupName!="")&&(!groupNames.contains(groupName))) {
+      closeAllRowEditors();
       groupNames.add(groupName);
       Collections.sort(groupNames);
       groupNamesAdapter.clear();
@@ -178,13 +195,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
       }
 
       // Close all rows that are in edit mode
-      final int firstListItemPosition = listView.getFirstVisiblePosition();
-      final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
-      for (int i=0;i<listView.getChildCount();i++) {
-        View rowView = listView.getChildAt(i);
-        ViewHolder holder = (ViewHolder)rowView.getTag();
-        closeRowEditor(holder);
-      }
+      closeAllRowEditors();
 
       // Inform all spinners that data set has changed
       groupNamesAdapter.notifyDataSetChanged();
@@ -262,7 +273,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
       @Override
       public void onClick(View v) {
 
-        // Skip if edit text is empty
+        // Skip if edit text is empty or equal
         String newName = holder.editText.getText().toString();
         if ((!newName.equals("")) && (!newName.equals(name))) {
 
@@ -286,8 +297,18 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
 
         }
 
+        // Change the group if another one is selected
+        String group = groupNamesAdapter.getItem(holder.group.getSelectedItemPosition());
+        if (!group.equals(selectedGroupName)) {
+          String path = "Navigation/AddressPoint[@name='"+StringEscapeUtils.escapeXml11(newName)+"']";
+          coreObject.configStoreSetStringValue(path,"group",StringEscapeUtils.escapeXml11(group));
+          coreObject.executeCoreCommand("addressPointGroupChanged()");
+          remove(newName);
+        }
+
         // Make the original views visible again
         closeRowEditor(holder);
+        updateAddressesInternal();
       }
     };
     holder.confirmButton.setOnClickListener(confirmOnClickListener);
@@ -299,20 +320,6 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
           return true;
         }
         return false;
-      }
-    });
-    holder.group.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      @Override
-      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String group = groupNamesAdapter.getItem(position);
-        String address = holder.text.getText().toString();
-        String path = "Navigation/AddressPoint[@name='"+StringEscapeUtils.escapeXml11(address)+"']";
-        coreObject.configStoreSetStringValue(path,"group",StringEscapeUtils.escapeXml11(group));
-        coreObject.executeCoreCommand("addressPointGroupChanged()");
-      }
-
-      @Override
-      public void onNothingSelected(AdapterView<?> parent) {
       }
     });
     return rowView;

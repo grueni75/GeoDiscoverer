@@ -604,7 +604,6 @@ public class ViewMap extends GDActivity {
         // Add the new group
         String newGroupName = groupNameEditText.getText().toString();
         addressAdapter.addGroupName(newGroupName);
-        groupSelectorSpinner.setSelection(addressAdapter.groupNamesAdapter.getPosition(newGroupName));
 
         // Make the spinner visible again
         groupSelector.setVisibility(View.VISIBLE);
