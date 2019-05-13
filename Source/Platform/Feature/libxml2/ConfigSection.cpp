@@ -81,7 +81,7 @@ bool ConfigSection::readConfig(std::string configFilepath) {
   if (config) {
 
     // Read the doc
-    XMLDocument doc =  xmlReadFile(configFilepath.c_str(), NULL, 0);
+    XMLDocument doc = xmlReadFile(configFilepath.c_str(), NULL, 0);
     if (!doc) {
       ERROR("read of config file <%s> failed",configFilepath.c_str());
       return false;
@@ -152,6 +152,9 @@ std::list<XMLNode> ConfigSection::findConfigNodes(std::string path) {
   Int size;
   bool found;
   size_t i,j;
+
+  // Replace any quotes
+  path=makeXPathCompatible(path);
 
   // Add the correct namespace to the path
   i=0;
@@ -262,7 +265,7 @@ bool ConfigSection::setNodeText(XMLNode node, std::string nodeText) {
   xmlNodePtr n;
   for (n = node->children; n; n = n->next) {
     if ((n->name)&&(strcmp((char*)n->name,"text")==0)) {
-      xmlNodeSetContent(n,(const xmlChar *)nodeText.c_str());
+      n->content=xmlStrdup((const xmlChar *)ConfigSection::escapeChars(nodeText).c_str());
       return true;
     }
   }
@@ -275,7 +278,7 @@ bool ConfigSection::getNodeText(XMLNode node, std::string &nodeText) {
   for (n = node->children; n; n = n->next) {
     if ((n->name)&&(strcmp((char*)n->name,"text")==0)
     &&(n->content)&&(strcmp((char*)n->content,"")!=0)) {
-      nodeText=std::string((char*)node->children->content);
+      nodeText=ConfigSection::unescapeChars(((const char *)node->children->content));
       return true;
     }
   }
@@ -304,6 +307,95 @@ bool ConfigSection::getAllNodesText(XMLNode parent, std::string nodeName, std::l
     }
   }
   return result;
+}
+
+// Changes a path such that it can be used in xpath expressions
+std::string ConfigSection::makeXPathCompatible(std::string path) {
+  enum { normal, bracketOpen, escapeSpecialChars, } state = normal;
+  std::string newPath="";
+  std::string value;
+  for (Int i=0;i<path.size();i++) {
+    switch (state) {
+    case normal:
+      switch (path[i]) {
+      case '[':
+        state=bracketOpen;
+        break;
+      }
+      newPath+=path[i];
+      break;
+    case bracketOpen:
+      switch (path[i]) {
+      case '\'':
+        state=escapeSpecialChars;
+        value="";
+        break;
+      }
+      newPath+=path[i];
+      break;
+    case escapeSpecialChars:
+      if (path[i]=='\'') {
+        if (i+1<path.size()) {
+          if (path[i+1]==']') {
+            state=normal;
+            i--;
+            newPath+=ConfigSection::escapeChars(value);
+            break;
+          }
+        }
+      }
+      value+=path[i];
+      break;
+    }
+  }
+  /*if (value!="") {
+    DEBUG("path=%s newPath=%s",path.c_str(),newPath.c_str());
+  }*/
+  return newPath;
+}
+
+// Unescapes all special characters in a string
+std::string ConfigSection::unescapeChars(std::string value) {
+
+  const char* const specialCharsSearch[] = { "&amp;", "&lt;", "&gt;", "&quot;", "&apos;", NULL };
+  const char* const specialCharsReplace[] = { "&", "<", ">", "\"", "'", NULL };
+  for (Int i=0;specialCharsSearch[i]!=NULL;i++) {
+    std::string search = specialCharsSearch[i];
+    std::string replace = specialCharsReplace[i];
+    for( size_t pos = 0; ; pos += replace.length() ) {
+      pos = value.find( search, pos );
+      if( pos == std::string::npos ) break;
+      value.erase( pos, search.length() );
+      value.insert( pos, replace );
+    }
+  }
+  return value;
+}
+
+// Escapes all special characters in a string
+std::string ConfigSection::escapeChars(std::string value) {
+
+  const char specialCharsSearch[] = { '&', '<', '>', '"', '\'', 0 };
+  const char* const specialCharsReplace[] = { "&amp;", "&lt;", "&gt;", "&quot;", "&apos;", NULL };
+  std::string newValue = "";
+  bool debug=false;
+  for (Int i=0;i<value.size();i++) {
+    bool found=false;
+    for (Int j=0;specialCharsSearch[j]!=0;j++) {
+      if (value[i]==specialCharsSearch[j]) {
+        newValue+=specialCharsReplace[j];
+        found=true;
+        //debug=true;
+        break;
+      }
+    }
+    if (!found)
+      newValue+=value[i];
+  }
+  /*if (debug) {
+    DEBUG("value=%s newValue=%s",value.c_str(),newValue.c_str());
+  }*/
+  return newValue;
 }
 
 } /* namespace GEODISCOVERER */

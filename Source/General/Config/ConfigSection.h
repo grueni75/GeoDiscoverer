@@ -142,6 +142,15 @@ public:
   // Returns the contents of a list of nodes as a list of string
   bool getAllNodesText(XMLNode parent, std::string nodeName, std::list<std::string> &nodeTexts);
 
+  // Changes a path such that it can be used in xpath expressions
+  static std::string makeXPathCompatible(std::string path);
+
+  // Unescapes all special characters in a string
+  static std::string unescapeChars(std::string value);
+
+  // Escapes all special characters in a string
+  static std::string escapeChars(std::string value);
+
   // Getters and setters
   XMLDocument getConfig() const {
     return config;

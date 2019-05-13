@@ -135,7 +135,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
   }
 
   private void updateAddressesInternal() {
-    selectedGroupName = StringEscapeUtils.unescapeXml(coreObject.configStoreGetStringValue("Navigation","selectedAddressPointGroup"));
+    selectedGroupName = coreObject.configStoreGetStringValue("Navigation","selectedAddressPointGroup");
     clear();
     String temp[] = coreObject.configStoreGetAttributeValues("Navigation/AddressPoint","name");
     LinkedList<String> unsortedNames = new LinkedList<String>(Arrays.asList(temp));
@@ -150,12 +150,12 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
           newestName = name;
         }
       }
-      String groupName = StringEscapeUtils.unescapeXml(coreObject.configStoreGetStringValue("Navigation/AddressPoint[@name='" + newestName + "']","group"));
+      String groupName = coreObject.configStoreGetStringValue("Navigation/AddressPoint[@name='" + newestName + "']","group");
       if (!groupNames.contains(groupName)) {
         addGroupName(groupName);
       }
       if (groupName.equals(selectedGroupName))
-        add(StringEscapeUtils.unescapeXml(newestName));
+        add(newestName);
       unsortedNames.remove(newestName);
     }
     notifyDataSetChanged();
@@ -187,8 +187,8 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
       // Go through all addresses that use this group name and reset them to default
       for (int i=0;i<getCount();i++) {
         String address = getItem(i);
-        String path = "Navigation/AddressPoint[@name='"+StringEscapeUtils.escapeXml11(address)+"']";
-        String addressGroupName = StringEscapeUtils.unescapeXml(coreObject.configStoreGetStringValue(path,"group"));
+        String path = "Navigation/AddressPoint[@name='"+address+"']";
+        String addressGroupName = coreObject.configStoreGetStringValue(path,"group");
         if (addressGroupName.equals(groupName)) {
           coreObject.configStoreSetStringValue(path,"group","Default");
         }
@@ -236,14 +236,14 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     holder.removeButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        coreObject.scheduleCoreCommand("removeAddressPoint(\"" + StringEscapeUtils.escapeXml11(name) + "\")");
+        coreObject.scheduleCoreCommand("removeAddressPoint(\"" + name + "\")");
         remove(name);
       }
     });
     holder.text.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        coreObject.scheduleCoreCommand("setTargetAtAddressPoint(\"" + StringEscapeUtils.escapeXml11(name) + "\")");
+        coreObject.scheduleCoreCommand("setTargetAtAddressPoint(\"" + name + "\")");
         dialog.dismiss();
       }
     });
@@ -251,7 +251,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
       @Override
       public void onClick(View v) {
         holder.group.setAdapter(groupNamesAdapter);
-        String groupName = StringEscapeUtils.unescapeXml(coreObject.configStoreGetStringValue("Navigation/AddressPoint[@name='"+StringEscapeUtils.escapeXml11(holder.text.getText().toString())+"']","group"));
+        String groupName = coreObject.configStoreGetStringValue("Navigation/AddressPoint[@name='"+holder.text.getText().toString()+"']","group");
         holder.group.setSelection(groupNamesAdapter.getPosition(groupName));
         holder.editor.setVisibility(View.VISIBLE);
         holder.confirmButton.setVisibility(View.VISIBLE);
@@ -278,8 +278,8 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         if ((!newName.equals("")) && (!newName.equals(name))) {
 
           // Rename the entry
-          newName = coreObject.executeCoreCommand("renameAddressPoint(\"" + StringEscapeUtils.escapeXml11(name) + "\"," +
-              "\"" + StringEscapeUtils.escapeXml11(newName) + "\")");
+          newName = coreObject.executeCoreCommand("renameAddressPoint(\"" + name + "\"," +
+              "\"" + newName + "\")");
           remove(name);
           insert(newName, position);
           holder.text.setText(newName);
@@ -300,8 +300,8 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         // Change the group if another one is selected
         String group = groupNamesAdapter.getItem(holder.group.getSelectedItemPosition());
         if (!group.equals(selectedGroupName)) {
-          String path = "Navigation/AddressPoint[@name='"+StringEscapeUtils.escapeXml11(newName)+"']";
-          coreObject.configStoreSetStringValue(path,"group",StringEscapeUtils.escapeXml11(group));
+          String path = "Navigation/AddressPoint[@name='"+newName+"']";
+          coreObject.configStoreSetStringValue(path,"group",group);
           coreObject.executeCoreCommand("addressPointGroupChanged()");
           remove(newName);
         }

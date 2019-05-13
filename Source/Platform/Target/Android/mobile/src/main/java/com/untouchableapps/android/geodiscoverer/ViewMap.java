@@ -567,7 +567,7 @@ public class ViewMap extends GDActivity {
       @Override
       public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String group = addressAdapter.groupNamesAdapter.getItem(position);
-        coreObject.configStoreSetStringValue("Navigation","selectedAddressPointGroup",StringEscapeUtils.escapeXml11(group));
+        coreObject.configStoreSetStringValue("Navigation","selectedAddressPointGroup",group);
         coreObject.executeCoreCommand("addressPointGroupChanged()");
         addressAdapter.updateAddresses();
       }
@@ -1346,10 +1346,10 @@ public class ViewMap extends GDActivity {
           if (addresses.size()>0) {
             Address address = addresses.get(0);
             locationFound=true;
-            String cmd = "addAddressPoint(\"" + StringEscapeUtils.escapeXml11(addressLine) +
-                "\",\"" + StringEscapeUtils.escapeXml11(addressLine) +
+            String cmd = "addAddressPoint(\"" + addressLine +
+                "\",\"" + addressLine +
                 "\","+ address.getLongitude()+","+address.getLatitude()+","+
-                StringEscapeUtils.escapeXml11(adapter.selectedGroupName)+")";
+                adapter.selectedGroupName+")";
             GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",cmd);
             coreObject.scheduleCoreCommand(cmd);
             coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate(" +

@@ -433,18 +433,16 @@ XMLNode ConfigStore::createNodeWithPath(XMLNode parentNode, std::string path, st
     // Extract the attribute name if given
     std::string attributeName="";
     std::string attributeValue;
-    pos=firstPathElement.find_first_of("[@");
+    pos=firstPathElement.find("[@");
     if (pos!=std::string::npos) {
       std::string t=firstPathElement.substr(pos+2);
       //DEBUG("t=%s",t.c_str());
       firstPathElement=firstPathElement.substr(0,pos);
-      //DEBUG("firstPathElement=%s",firstPathElement.c_str());
-      t=t.substr(0,t.find_first_of("]"));
+      t=t.substr(0, t.find("']"));
       //DEBUG("t=%s",t.c_str());
       pos=t.find_first_of("='");
       attributeName=t.substr(0,pos);
       attributeValue=t.substr(pos+2);
-      attributeValue=attributeValue.substr(0,attributeValue.find_first_of("'"));
       //DEBUG("attributeName=%s attributeValue=%s",attributeName.c_str(),attributeValue.c_str());
     }
 
@@ -547,7 +545,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, cons
     std::string defaultValue="";
     for (attr=schemaNodes.front()->properties;attr!=NULL;attr=attr->next) {
       if ((attr->type==XML_ATTRIBUTE_NODE)&&(strcmp((const char*)attr->name,"default")==0)) {
-        defaultValue=(char *)attr->children->content;
+        defaultValue=ConfigSection::unescapeChars((char *)attr->children->content);
         defaultValueFound=true;
       }
     }
@@ -588,7 +586,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, cons
     core->getThread()->unlockMutex(accessMutex);
     return "";
   }
-  value=std::string((char*)node->children->content);
+  value=ConfigSection::unescapeChars((const char *)node->children->content);
   core->getThread()->unlockMutex(accessMutex);
   return value;
 }
@@ -603,7 +601,6 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
     xpath="/GDC/" + name;
   else
     xpath="/GDC/" + path + "/" + name;
-  //DEBUG("xpath=%s",xpath.c_str());
 
   // Only one thread may enter setStringValue
   core->getThread()->lockMutex(accessMutex, file, line);
@@ -628,7 +625,8 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
       core->getThread()->unlockMutex(accessMutex);
       return;
     }
-    createNodeWithPath(rootNode,path,name,value);
+    path=ConfigSection::makeXPathCompatible(path);
+    createNodeWithPath(rootNode,path,name,ConfigSection::escapeChars(value));
 
   } else {
 
@@ -646,7 +644,7 @@ void ConfigStore::setStringValue(std::string path, std::string name, std::string
       core->getThread()->unlockMutex(accessMutex);
       return;
     }
-    xmlNodeSetContent(node->children,(const xmlChar *)value.c_str());
+    node->children->content=xmlStrdup((const xmlChar *)ConfigSection::escapeChars(value).c_str());
   }
   hasChanged=true;
   core->getThread()->issueSignal(writeConfigSignal);
@@ -659,6 +657,8 @@ std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::st
   std::list<XMLNode> nodes;
   std::list<std::string> values;
   xmlNodePtr n;
+  std::string search="&apos;";
+  std::string replace = "'";
 
   core->getThread()->lockMutex(accessMutex, file, line);
   nodes=findConfigNodes("/GDC/" + path);
@@ -668,7 +668,9 @@ std::list<std::string> ConfigStore::getAttributeValues(std::string path, std::st
     xmlAttr *p;
     for (p = n->properties; p; p = p->next) {
       if ((p->type==XML_ATTRIBUTE_NODE)&&(attributeName==(char*)p->name)) {
-        values.push_back(std::string((char*)p->children->content));
+        std::string value = std::string((char*)p->children->content);
+        value = ConfigSection::unescapeChars(value);
+        values.push_back(value);
       }
     }
   }
@@ -810,7 +812,7 @@ StringMap ConfigStore::getNodeInfo(std::string path) {
               if (attr->type==XML_ATTRIBUTE_NODE) {
                 if (strcmp((const char *)attr->name,"value")==0) {
                   std::stringstream s; s << enumerationNumber;
-                  info.insert(StringPair(s.str(),(char*)attr->children->content));
+                  info.insert(StringPair(s.str(),ConfigSection::unescapeChars((char*)attr->children->content)));
                 }
               }
             }
@@ -856,7 +858,7 @@ StringMap ConfigStore::getNodeInfo(std::string path) {
   if (nodes.size()!=1) {
     FATAL("element <%s> has no or more than one documentation",path.c_str());
   }
-  info.insert(StringPair("documentation",(char*)nodes.front()->children->content));
+  info.insert(StringPair("documentation",ConfigSection::unescapeChars((char*)nodes.front()->children->content)));
 
   // That's it
   return info;
@@ -879,28 +881,6 @@ void ConfigStore::removePath(std::string path) {
     xmlUnlinkNode(n);
     xmlFreeNode(n);
   }
-}
-
-// Encodes a string into a representation that can be stored in the config
-std::string ConfigStore::encodeString(std::string name) {
-  if (configSection==NULL)
-    FATAL("no config available",NULL);
-  XMLDocument doc=configSection->getConfig();
-  if (doc==NULL)
-    FATAL("no config available",NULL);
-  DEBUG("name before encoding: %s",name.c_str());
-  xmlChar *valueEncoded = xmlEncodeSpecialChars(doc,(const xmlChar *)name.c_str());
-  std::string result = std::string((char*)valueEncoded);
-  xmlFree(valueEncoded);
-  size_t pos = 0;
-  std::string search="'";
-  std::string replace="&apos;";
-  while ((pos = result.find(search, pos)) != std::string::npos) {
-    result.replace(pos, search.length(), replace);
-    pos += replace.length();
-  }
-  DEBUG("name after encoding: %s",result.c_str());
-  return result;
 }
 
 }
