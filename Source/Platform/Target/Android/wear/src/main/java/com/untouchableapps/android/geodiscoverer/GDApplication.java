@@ -129,7 +129,7 @@ public class GDApplication extends Application implements GDAppInterface {
     }
     if (coreObject!=null) {
       if (!tag.equals("GDCore")) {
-        coreObject.executeCoreCommand("log(" + severityString + "," + tag + "," + message + ")");
+        coreObject.executeCoreCommand("log",severityString,tag,message);
       }
     }
   }

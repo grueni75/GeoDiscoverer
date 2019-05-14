@@ -220,7 +220,7 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
         /*GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("distanceOriginal=%f "+
             "speed=%f distanceTravelled=%f angle(degree)=%f angle(rad)=%f distanceNew=%f",
             distanceOriginal,speed,distanceTravelled,angleDegree,angle,distanceNew));*/
-        distance = cockpitEngine.app.coreObject.executeCoreCommand(String.format("formatMeters(%f)", distanceNew));
+        distance = cockpitEngine.app.coreObject.executeCoreCommand("formatMeters", String.valueOf(distanceNew));
         //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",distance);
       }
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("distance=%s",distance));

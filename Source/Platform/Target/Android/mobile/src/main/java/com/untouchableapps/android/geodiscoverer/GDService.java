@@ -169,11 +169,11 @@ public class GDService extends Service {
 
       // Stop watching location if track recording is disabled
       boolean recordingPosition = true;
-      String state=coreObject.executeCoreCommand("getRecordTrack()");
+      String state=coreObject.executeCoreCommand("getRecordTrack");
       if (state.equals("false")||state.equals(""))
           recordingPosition = false;
       boolean downloadingMaps = true;
-      state=coreObject.executeCoreCommand("getMapDownloadActive()");
+      state=coreObject.executeCoreCommand("getMapDownloadActive");
       if (state.equals("false")||state.equals(""))
         downloadingMaps = false;
       if ((!((GDApplication)getApplication()).cockpitEngineIsActive())&&(!recordingPosition)&&(!downloadingMaps)) {
@@ -208,7 +208,7 @@ public class GDService extends Service {
       if (replayLog.exists()) {
         new Thread() {
           public void run() {
-            coreObject.executeCoreCommand("replayTrace(" + coreObject.homePath + "/replay.log" + ")");
+            coreObject.executeCoreCommand("replayTrace",coreObject.homePath + "/replay.log");
           }
         }.start();
       }
@@ -255,7 +255,7 @@ public class GDService extends Service {
     // Handle stop download request
     if (intent.getAction().equals("stopDownload")) {
       if (coreObject!=null) {
-        coreObject.executeCoreCommand("stopDownload()");
+        coreObject.executeCoreCommand("stopDownload");
       }
     }
 

@@ -237,7 +237,7 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
                     Matcher m = p.matcher(line);
                     if (m.find()) {
                       String ip = m.group(1);
-                      app.coreObject.executeCoreCommand(String.format("addDashboardDevice(%s,%d)",ip,port));
+                      app.coreObject.executeCoreCommand("addDashboardDevice",ip,String.valueOf(port));
                     }
                     line = br.readLine();
                   }

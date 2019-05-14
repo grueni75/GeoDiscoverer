@@ -77,7 +77,7 @@ public class GDMessageListenerService extends WearableListenerService {
     params.putString("hash",hash);
     coreObject.channelPathToFilePath.put(new String(channel.getPath()), params);
     channel.receiveFile(coreObject.googleApiClient, Uri.fromFile(f), false);
-    coreObject.executeCoreCommand("setRemoteServerActive(1)");
+    coreObject.executeCoreCommand("setRemoteServerActive","1");
   }
 
   /** Called when a channel is closed */
@@ -91,10 +91,10 @@ public class GDMessageListenerService extends WearableListenerService {
     if (params != null) {
       if (closeReason == ChannelApi.ChannelListener.CLOSE_REASON_REMOTE_CLOSE) {
         if (channel.getPath().startsWith("/com.untouchableapps.android.geodiscoverer/mapArchive/")) {
-          coreObject.executeCoreCommand("addMapArchive(" + params.getString("path") + "," + params.getString("hash") + ")");
+          coreObject.executeCoreCommand("addMapArchive",params.getString("path"),params.getString("hash"));
         }
         if (channel.getPath().startsWith("/com.untouchableapps.android.geodiscoverer/overlayArchive/")) {
-          coreObject.executeCoreCommand("addOverlayArchive(" + params.getString("path") + "," + params.getString("hash") + ")");
+          coreObject.executeCoreCommand("addOverlayArchive",params.getString("path"), params.getString("hash"));
         }
       } else {
         File f = new File(params.getString("path"));
@@ -102,7 +102,7 @@ public class GDMessageListenerService extends WearableListenerService {
       }
       coreObject.channelPathToFilePath.remove(channel.getPath());
       if (coreObject.channelPathToFilePath.size()==0) {
-        coreObject.executeCoreCommand("setRemoteServerActive(0)");
+        coreObject.executeCoreCommand("setRemoteServerActive","0");
       }
     }
   }
@@ -126,7 +126,7 @@ public class GDMessageListenerService extends WearableListenerService {
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", cmd.substring(0,cmd.indexOf(")")+1));
       if (cmd.equals("forceRemoteMapUpdate()")) {
         //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","map update requested by remote server");
-        coreObject.executeCoreCommand("forceMapUpdate()");
+        coreObject.executeCoreCommand("forceMapUpdate");
         cmdExecuted=true;
       }
       if (cmd.startsWith("setAllNavigationInfo")) {
@@ -134,13 +134,13 @@ public class GDMessageListenerService extends WearableListenerService {
         coreObject.executeAppCommand("setFormattedNavigationInfo" + args1);
         cmd = cmd.substring(cmd.indexOf(")") + 1);
         String args2 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
-        coreObject.executeCoreCommand("setPlainNavigationInfo" + args2);
+        coreObject.executeCoreCommandRaw("setPlainNavigationInfo" + args2);
         cmd = cmd.substring(cmd.indexOf(")") + 1);
         String args3 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
-        coreObject.executeCoreCommand("setLocationPos" + args3);
+        coreObject.executeCoreCommandRaw("setLocationPos" + args3);
         cmd = cmd.substring(cmd.indexOf(")") + 1);
         String args4 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
-        coreObject.executeCoreCommand("setTargetPos" + args4);
+        coreObject.executeCoreCommandRaw("setTargetPos" + args4);
         ((GDApplication) getApplication()).executeAppCommand("updateScreen()");
         cmdExecuted=true;
       }
@@ -205,14 +205,14 @@ public class GDMessageListenerService extends WearableListenerService {
           m.setData(b);
           coreObject.messageHandler.sendMessage(m);
         } else {
-          coreObject.executeCoreCommand("forceMapUpdate()");
+          coreObject.executeCoreCommand("forceMapUpdate");
         }
         cmdExecuted=true;
       }
 
       // Forward all other commands
       if (!cmdExecuted) {
-        coreObject.executeCoreCommand(cmd);
+        coreObject.executeCoreCommandRaw(cmd);
       }
     }
   }

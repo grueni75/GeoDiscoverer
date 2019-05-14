@@ -134,7 +134,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   boolean splashIsVisible = false;
   
   /** Command to execute for changing the screen */
-  String changeScreenCommand = "";
+  String [] changeScreenCommandArgs = null;
   
   /** Queued commands to execute if core is initialized */
   LinkedList<String> queuedCoreCommands = new LinkedList<String>();
@@ -256,8 +256,8 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         int percentage = 100*level/scale;
         String args = String.valueOf(percentage) + "," + (isCharging ? "1" : "0");
-        executeCoreCommand("setBattery(" + args + ")");
         batteryStatus=args;
+        executeCoreCommand("setBattery",String.valueOf(percentage), (isCharging ? "1" : "0"));
       }
     };
     appIf.getContext().registerReceiver(batteryStatusReceiver, ifilter);
@@ -500,7 +500,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       executeAppCommand("coreInitialized()");
       executeAppCommand("updateWakeLock()");
       coreStopped=false;
-      if (!changeScreenCommand.equals("")) {        
+      if (changeScreenCommandArgs!=null) {
         changeScreen=true;
       }
       createGraphic=true;
@@ -600,30 +600,55 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   /** Returns information about the given node in the config */
   public native Bundle configStoreGetNodeInfo(String path);
-  
+
+  /** Constructs a command from the given arguments */
+  private String constructCoreCommand(String cmd, String [] args) {
+    String cmdInt = cmd + "(";
+    boolean firstArg=true;
+    for (String arg : args) {
+      arg=arg.replace("\\", "\\\\");
+      arg=arg.replace("\"", "\\\"");
+      if (firstArg) {
+        firstArg=false;
+      } else {
+        cmdInt+=",";
+      }
+      cmdInt+='"' + arg + '"';
+    }
+    cmdInt+=")";
+    return cmdInt;
+  }
+
   /** Sends an command to the core after checking if it it is ready */
-  public String executeCoreCommand(String cmd)
+  public String executeCoreCommandRaw(String cmdRaw)
   {
     String result;
     if (coreInitialized) {
-      if (cmd.startsWith("replayTrace(")) {
+      if (cmdRaw.startsWith("replayTrace(")) {
         replayTraceActive=true;
       }
-      result = executeCoreCommandInt(cmd);
+      result = executeCoreCommandInt(cmdRaw);
     } else {
       result = "";
     }
     return result;
   }
+  /** Sends an command to the core after checking if it it is ready */
+  public String executeCoreCommand(String cmd, String ... args)
+  {
+    String cmdRaw = constructCoreCommand(cmd, args);
+    return executeCoreCommandRaw(cmdRaw);
+  }
 
   /** Sends an command to the core if it is initialized or remembers them for execution after core is initialized */
-  public void scheduleCoreCommand(String cmd)
+  public void scheduleCoreCommand(String cmd, String ... args)
   {
+    String cmdInt = constructCoreCommand(cmd, args);
     if (coreInitialized) {
-      executeCoreCommandInt(cmd);
+      executeCoreCommandInt(cmdInt);
     } else {
       coreLock.lock();
-      queuedCoreCommands.add(cmd);
+      queuedCoreCommands.add(cmdInt);
       coreLock.unlock();
     }
   }
@@ -819,17 +844,17 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       if (!coreStopped) {
         if (!suspendCore) {
           if (changeScreen) {
-            executeCoreCommand(changeScreenCommand);
+            executeCoreCommand("screenChanged", changeScreenCommandArgs);
             changeScreen=false;
             forceRedraw=true;
           }
           if (graphicInvalidated) {        
-            executeCoreCommand("graphicInvalidated()");
+            executeCoreCommand("graphicInvalidated");
             graphicInvalidated=false;
             createGraphic=false;
           }
           if (createGraphic) {        
-            executeCoreCommand("createGraphic()");
+            executeCoreCommand("createGraphic");
             createGraphic=false;
           }
           updateScreen(forceRedraw);
@@ -873,7 +898,12 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       String orientationString="portrait";
       if (orientationValue==Configuration.ORIENTATION_LANDSCAPE)
         orientationString="landscape";
-      changeScreenCommand="screenChanged(" + orientationString + "," + width + "," + height + ")";
+      if (changeScreenCommandArgs==null) {
+        changeScreenCommandArgs=new String[3];
+      }
+      changeScreenCommandArgs[0]=orientationString;
+      changeScreenCommandArgs[1]=String.valueOf(width);
+      changeScreenCommandArgs[2]=String.valueOf(height);
       changeScreen=true;
     }
     coreLock.unlock();
@@ -895,30 +925,37 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     if (replayTraceActive)
       return;
     if (location!=null) {
-      String cmd = "locationChanged(" + location.getProvider() + "," + location.getTime();
-      cmd += "," + location.getLongitude() + "," + location.getLatitude();
+      String[] args = new String[13];
+      args[0]=location.getProvider();
+      args[1]=String.valueOf(location.getTime());
+      args[2]=String.valueOf(location.getLongitude());
+      args[3]=String.valueOf(location.getLatitude());
       int t=0;
       if (location.hasAltitude()) {
         t=1;
-      } 
-      cmd += "," + t + "," + location.getAltitude() + ",1";
+      }
+      args[4]=String.valueOf(t);
+      args[5]=String.valueOf(location.getAltitude());
+      args[6]=String.valueOf(1);
       t=0;
       if (location.hasBearing()) {
         t=1;
       }
-      cmd += "," + t + "," + location.getBearing();
+      args[7]=String.valueOf(t);
+      args[8]=String.valueOf(location.getBearing());
       t=0;
       if (location.hasSpeed()) {
         t=1;
       }
-      cmd += "," + t + "," + location.getSpeed();
+      args[9]=String.valueOf(t);
+      args[10]=String.valueOf(location.getSpeed());
       t=0;
       if (location.hasAccuracy()) {
         t=1;
       }
-      cmd += "," + t + "," + location.getAccuracy();
-      cmd += ")";
-      executeCoreCommand(cmd);
+      args[11]=String.valueOf(t);
+      args[12]=String.valueOf(location.getAccuracy());
+      executeCoreCommand("locationChanged",args);
     }
   }
 
@@ -960,7 +997,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       orientation[0]=(float) (orientation[0]*180.0/Math.PI);
       if (orientation[0]<0)
         orientation[0]=360+orientation[0];
-      executeCoreCommand("compassBearingChanged(" + orientation[0] + ")");
+      executeCoreCommand("compassBearingChanged",String.valueOf(orientation[0]));
     }
     
   }
@@ -1041,9 +1078,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         int x = Math.round(event.getX(pointerIndex));
         int y = Math.round(event.getY(pointerIndex));
         if (moveAction) {
-          executeCoreCommand("touchMove(" + x + "," + y + ")");
+          executeCoreCommand("touchMove", String.valueOf(x), String.valueOf(y));
         } else {
-          executeCoreCommand("touchDown(" + x + "," + y + ")");
+          executeCoreCommand("touchDown", String.valueOf(x), String.valueOf(y));
         }
 
       } else {
@@ -1095,13 +1132,13 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           //coreObject.executeCoreCommand("touchMove(" + x + "," + y + ")");
 
           // Set new position
-          executeCoreCommand("twoFingerGesture(" + x + "," + y + "," + angleDiff + "," + scaleDiff + ")");
+          executeCoreCommand("twoFingerGesture", String.valueOf(x), String.valueOf(y), String.valueOf(angleDiff), String.valueOf(scaleDiff));
 
 
         } else {
 
           // Set new position
-          executeCoreCommand("touchDown(" + x + "," + y + ")");
+          executeCoreCommand("touchDown", String.valueOf(x), String.valueOf(y));
 
         }
 
@@ -1130,15 +1167,15 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       switch(action) {
 
         case MotionEvent.ACTION_DOWN:
-          executeCoreCommand("touchDown(" + x + "," + y + ")");
+          executeCoreCommand("touchDown", String.valueOf(x), String.valueOf(y));
           break;
 
         case MotionEvent.ACTION_MOVE:
-          executeCoreCommand("touchMove(" + x + "," + y + ")");
+          executeCoreCommand("touchMove", String.valueOf(x), String.valueOf(y));
           break;
 
         case MotionEvent.ACTION_UP:
-          executeCoreCommand("touchUp(" + x + "," + y + ")");
+          executeCoreCommand("touchUp", String.valueOf(x), String.valueOf(y));
           break;
       }
 
@@ -1157,7 +1194,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         if (pointerIndex!=-1) {
           x = Math.round(event.getX(pointerIndex));
           y = Math.round(event.getY(pointerIndex));
-          executeCoreCommand("touchDown(" + x + "," + y + ")");
+          executeCoreCommand("touchDown",String.valueOf(x), String.valueOf(y));
         }
       }
 
@@ -1172,7 +1209,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         if (pointerIndex!=-1) {
           x = Math.round(event.getX(pointerIndex));
           y = Math.round(event.getY(pointerIndex));
-          executeCoreCommand("touchUp(" + x + "," + y + ")");
+          executeCoreCommand("touchUp", String.valueOf(x), String.valueOf(y));
           firstPointerID=-1;
           secondPointerID=-1;
         }

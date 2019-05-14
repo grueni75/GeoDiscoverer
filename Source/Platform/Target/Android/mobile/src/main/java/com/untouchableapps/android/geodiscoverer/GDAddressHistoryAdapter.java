@@ -236,14 +236,14 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     holder.removeButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        coreObject.scheduleCoreCommand("removeAddressPoint(\"" + name + "\")");
+        coreObject.scheduleCoreCommand("removeAddressPoint",name);
         remove(name);
       }
     });
     holder.text.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        coreObject.scheduleCoreCommand("setTargetAtAddressPoint(\"" + name + "\")");
+        coreObject.scheduleCoreCommand("setTargetAtAddressPoint",name);
         dialog.dismiss();
       }
     });
@@ -278,8 +278,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         if ((!newName.equals("")) && (!newName.equals(name))) {
 
           // Rename the entry
-          newName = coreObject.executeCoreCommand("renameAddressPoint(\"" + name + "\"," +
-              "\"" + newName + "\")");
+          newName = coreObject.executeCoreCommand("renameAddressPoint",name, newName);
           remove(name);
           insert(newName, position);
           holder.text.setText(newName);
@@ -302,7 +301,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         if (!group.equals(selectedGroupName)) {
           String path = "Navigation/AddressPoint[@name='"+newName+"']";
           coreObject.configStoreSetStringValue(path,"group",group);
-          coreObject.executeCoreCommand("addressPointGroupChanged()");
+          coreObject.executeCoreCommand("addressPointGroupChanged");
           remove(newName);
         }
 

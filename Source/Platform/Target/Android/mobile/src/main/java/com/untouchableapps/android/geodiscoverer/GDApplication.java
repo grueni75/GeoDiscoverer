@@ -285,7 +285,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
             // Get the file to sent
             String postfix="unknown";
-            String acknowledgeCommand="";
+            String acknowledgeID="";
             String path="";
             if (command.startsWith("serveRemoteMapArchive")) {
               path = command.substring(command.indexOf("(")+1, command.indexOf(","));
@@ -293,7 +293,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
               postfix = "mapArchive";
               command=command.substring(command.indexOf(",")+1);
               String id = command.substring(0, command.indexOf(","));
-              acknowledgeCommand="remoteMapArchiveServed(" + id + ")";
+              acknowledgeID=id;
             }
             if (command.startsWith("serveRemoteOverlayArchive")) {
               path = command.substring(command.indexOf("(")+1, command.indexOf(","));
@@ -301,7 +301,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
               postfix = "overlayArchive";
               command=command.substring(command.indexOf(",")+1);
               String id = command.substring(0, command.indexOf(","));
-              acknowledgeCommand="remoteOverlayArchiveServed(" + id + ")";
+              acknowledgeID=id;
             }
             String hash = command.substring(command.indexOf(",")+1, command.indexOf(")"));
             postfix = postfix + "/" + hash;
@@ -327,11 +327,11 @@ public class GDApplication extends Application implements GDAppInterface, Google
             }
 
             // Inform core that transfer is over after some delay
-            final String delayedCommand = acknowledgeCommand;
+            final String delayedAcknowledgeID = acknowledgeID;
             new Timer().schedule(new TimerTask() {
               @Override
               public void run() {
-                coreObject.executeCoreCommand(delayedCommand);
+                coreObject.executeCoreCommand("remoteMapArchiveServed", delayedAcknowledgeID);
               }
             }, 1000);
           }
@@ -372,7 +372,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
     }
     if (coreObject!=null) {
       if (!tag.equals("GDCore")) {
-        coreObject.executeCoreCommand("log(" + severityString + "," + tag + "," + message + ")");
+        coreObject.executeCoreCommand("log", severityString, tag, message);
       }
       coreObject.executeAppCommand("updateMessages()");
     }
@@ -574,7 +574,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
   public void setWearDeviceAlive(boolean state) {
     wearDeviceAlive=state;
     if (wearDeviceAlive) {
-      coreObject.executeCoreCommand("remoteMapInit()");
+      coreObject.executeCoreCommand("remoteMapInit");
     } else {
       wearDeviceSleeping=true;
     }

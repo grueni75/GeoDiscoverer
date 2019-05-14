@@ -439,7 +439,7 @@ public class ViewMap extends GDActivity {
   @SuppressLint("Wakelock")
   void updateWakeLock() {
     if (mapSurfaceView!=null) {
-      String state=coreObject.executeCoreCommand("getWakeLock()");
+      String state=coreObject.executeCoreCommand("getWakeLock");
       if (state.equals("true")) {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","wake lock enabled");
         if (!wakeLock.isHeld())
@@ -526,6 +526,7 @@ public class ViewMap extends GDActivity {
           task.listView = listView;
           task.adapter = addressAdapter;
           task.text = editText.getText().toString();
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "text=" + task.text);
           task.execute();
         }
       }
@@ -568,7 +569,7 @@ public class ViewMap extends GDActivity {
       public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String group = addressAdapter.groupNamesAdapter.getItem(position);
         coreObject.configStoreSetStringValue("Navigation","selectedAddressPointGroup",group);
-        coreObject.executeCoreCommand("addressPointGroupChanged()");
+        coreObject.executeCoreCommand("addressPointGroupChanged");
         addressAdapter.updateAddresses();
       }
 
@@ -714,14 +715,14 @@ public class ViewMap extends GDActivity {
     builder.onPositive(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-        coreObject.executeCoreCommand("forceMapRedownload(1)");
+        coreObject.executeCoreCommand("forceMapRedownload","1");
       }
     });
     builder.negativeText(R.string.map_cleanup_current_zoom_level);
     builder.onNegative(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-        coreObject.executeCoreCommand("forceMapRedownload(0)");
+        coreObject.executeCoreCommand("forceMapRedownload","0");
       }
     });
     builder.icon(getDrawable(android.R.drawable.ic_dialog_alert));
@@ -746,7 +747,7 @@ public class ViewMap extends GDActivity {
     builder.onNegative(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-        coreObject.executeCoreCommand("downloadActiveRoute()");
+        coreObject.executeCoreCommand("downloadActiveRoute");
       }
     });
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_alert));
@@ -771,8 +772,13 @@ public class ViewMap extends GDActivity {
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
         mapDownloadDialog = null;
         if (selectedMapLayers.size() > 0) {
-          String args = TextUtils.join(",", selectedMapLayers);
-          coreObject.executeCoreCommand("addDownloadJob(0,\"" + routeName + "\"," + args + ")");
+          String [] args = new String[selectedMapLayers.size()+2];
+          args[0]="0";
+          args[1]=routeName;
+          for (int i=0; i<selectedMapLayers.size(); i++){
+            args[i+2]=selectedMapLayers.get(i);
+          }
+          coreObject.executeCoreCommand("addDownloadJob", args);
         }
       }
     });
@@ -793,8 +799,13 @@ public class ViewMap extends GDActivity {
           selectedMapLayers.add(mapLayers[i]);
         }
         if (selectedMapLayers.size() > 0) {
-          String args = TextUtils.join(",", selectedMapLayers);
-          coreObject.executeCoreCommand("addDownloadJob(1,\"" + routeName + "\"," + args + ")");
+          String [] args = new String[selectedMapLayers.size()+2];
+          args[0]="1";
+          args[1]=routeName;
+          for (int i=0; i<selectedMapLayers.size(); i++){
+            args[i+2]=selectedMapLayers.get(i);
+          }
+          coreObject.executeCoreCommand("addDownloadJob", args);
           mapDownloadDialog.setContent(R.string.download_job_estimating_size_message);
         } else {
           mapDownloadDialog.setContent(R.string.download_job_no_level_selected_message);
@@ -831,10 +842,10 @@ public class ViewMap extends GDActivity {
 
   /** Shows the legend with the given name */
   void showMapLegend(String name) {
-    String legendPath = coreObject.executeCoreCommand("getMapLegendPath(" + name + ")");
+    String legendPath = coreObject.executeCoreCommand("getMapLegendPath", name);
     File legendPathFile = new File(legendPath);
     if (!legendPathFile.exists()) {
-      errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder()"),legendPath));
+      errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder"),legendPath));
     } else {
       Intent intent = new Intent();
       intent.setAction(Intent.ACTION_VIEW);
@@ -853,15 +864,15 @@ public class ViewMap extends GDActivity {
     builder.onPositive(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-        coreObject.executeCoreCommand("setRecordTrack(1)");
-        coreObject.executeCoreCommand("createNewTrack()");
+        coreObject.executeCoreCommand("setRecordTrack","1");
+        coreObject.executeCoreCommand("createNewTrack");
       }
     });
     builder.negativeText(R.string.contine_track);
     builder.onNegative(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-        coreObject.executeCoreCommand("setRecordTrack(1)");
+        coreObject.executeCoreCommand("setRecordTrack","1");
       }
     });
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
@@ -871,8 +882,8 @@ public class ViewMap extends GDActivity {
 
   /** Asks the user if which map layer shall be selected */
   void changeMapLayer() {
-    String layers=coreObject.executeCoreCommand("getMapLayers()");
-    String selectedLayer=coreObject.executeCoreCommand("getSelectedMapLayer()");
+    String layers=coreObject.executeCoreCommand("getMapLayers");
+    String selectedLayer=coreObject.executeCoreCommand("getSelectedMapLayer");
     final String[] mapLayers=layers.split(",");
     int index=-1;
     for (int i=0;i<mapLayers.length;i++) {
@@ -887,7 +898,7 @@ public class ViewMap extends GDActivity {
     builder.itemsCallbackSingleChoice(index, new MaterialDialog.ListCallbackSingleChoice() {
       @Override
       public boolean onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
-        coreObject.executeCoreCommand("selectMapLayer(" + mapLayers[which]  + ")");
+        coreObject.executeCoreCommand("selectMapLayer",mapLayers[which]);
         dialog.dismiss();
         return true;
       }
@@ -1346,14 +1357,14 @@ public class ViewMap extends GDActivity {
           if (addresses.size()>0) {
             Address address = addresses.get(0);
             locationFound=true;
-            String cmd = "addAddressPoint(\"" + addressLine +
-                "\",\"" + addressLine +
-                "\","+ address.getLongitude()+","+address.getLatitude()+","+
-                adapter.selectedGroupName+")";
-            GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",cmd);
-            coreObject.scheduleCoreCommand(cmd);
-            coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate(" +
-                address.getLongitude() + "," + address.getLatitude() + ")");
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "addressLine=" + addressLine);
+            coreObject.scheduleCoreCommand("addAddressPoint",
+                addressLine, addressLine,
+                String.valueOf(address.getLongitude()), String.valueOf(address.getLatitude()),
+                adapter.selectedGroupName);
+            coreObject.scheduleCoreCommand("setTargetAtGeographicCoordinate",
+                String.valueOf(address.getLongitude()),
+                String.valueOf(address.getLatitude()));
             validAddressLines.add(addressLine);
           }
         }
@@ -1632,7 +1643,7 @@ public class ViewMap extends GDActivity {
             removeRoutes();
             break;
           case R.id.nav_show_legend:
-            String namesString = coreObject.executeCoreCommand("getMapLegendNames()");
+            String namesString = coreObject.executeCoreCommand("getMapLegendNames");
             String names[] = namesString.split(",");
             if (names.length!=1) {
               askForMapLegend(names);
@@ -1661,7 +1672,7 @@ public class ViewMap extends GDActivity {
             }
             break;
           case R.id.nav_export_selected_route:
-            coreObject.executeCoreCommand("exportActiveRoute()");
+            coreObject.executeCoreCommand("exportActiveRoute");
             break;
         }
         viewMapRootLayout.closeDrawers();
@@ -1712,7 +1723,7 @@ public class ViewMap extends GDActivity {
       mapSurfaceView.onPause();
     stopWatchingCompass();
     if (coreObject!=null)
-      coreObject.executeCoreCommand("maintenance()");
+      coreObject.executeCoreCommand("maintenance");
     if ((!exitRequested)&&(!restartRequested)) {
       Intent intent = new Intent(this, GDService.class);
       intent.setAction("activityPaused");

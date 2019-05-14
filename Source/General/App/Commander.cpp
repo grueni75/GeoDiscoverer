@@ -52,14 +52,13 @@ bool Commander::splitCommand(std::string cmdString, std::string& cmd, std::vecto
     return false;
   }
   cmd=cmdString.substr(0,argStart);
-  //DEBUG("cmdName=%s",cmdName.c_str());
   std::string cmdArgs=cmdString.substr(argStart+1,argEnd-argStart-1);
   std::string unparsedCmdArgs=cmdArgs;
-  //DEBUG("cmdArgs=%s",cmdArgs.c_str());
   enum { normal, ignoreCommas, } state = normal;
   std::string currentArg="";
   for (Int i=0;i<cmdArgs.size();i++) {
     bool endFound=false;
+    bool processCharacter=false;
     switch (state) {
     case normal:
       switch (cmdArgs[i]) {
@@ -70,7 +69,7 @@ bool Commander::splitCommand(std::string cmdString, std::string& cmd, std::vecto
         endFound=true;
         break;
       default:
-        currentArg+=cmdArgs[i];
+        processCharacter=true;
       }
       break;
     case ignoreCommas:
@@ -79,17 +78,34 @@ bool Commander::splitCommand(std::string cmdString, std::string& cmd, std::vecto
         state=normal;
         break;
       default:
-        currentArg+=cmdArgs[i];
+        processCharacter=true;
       }
       break;
     }
+    if (processCharacter) {
+      if ((cmdArgs[i]=='\\')&&(i+1<cmdArgs.length())) {
+        switch(cmdArgs[i+1]) {
+        case '\\':
+          currentArg+='\\';
+          i++;
+          processCharacter=false;
+          break;
+        case '"':
+          currentArg+='"';
+          i++;
+          processCharacter=false;
+          break;
+        }
+      }
+      if (processCharacter) {
+        currentArg+=cmdArgs[i];
+      }
+    }
     if (endFound) {
-      //DEBUG("currentArg=%s",currentArg.c_str());
       args.push_back(currentArg);
       currentArg="";
     }
   }
-  //DEBUG("currentArg=%s",currentArg.c_str());
   args.push_back(currentArg);
   currentArg="";
   return true;

@@ -173,7 +173,7 @@ public class WatchFace extends Gles2WatchFaceService {
   /** Sets the screen time out */
   @SuppressLint("Wakelock")
   void updateWakeLock() {
-    String state=coreObject.executeCoreCommand("getWakeLock()");
+    String state=coreObject.executeCoreCommand("getWakeLock");
     if (state.equals("true")) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp","wake lock enabled");
       if (!wakeLockCore.isHeld())
@@ -660,16 +660,16 @@ public class WatchFace extends Gles2WatchFaceService {
       //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("%d %d %d",tapType,x,y));
       switch (tapType) {
         case WatchFaceService.TAP_TYPE_TAP:
-          coreObject.executeCoreCommand("touchUp(" + x + "," + y + ")");
+          coreObject.executeCoreCommand("touchUp", String.valueOf(x), String.valueOf(y));
           setTouchHandlerEnabled(true);
           break;
 
         case WatchFaceService.TAP_TYPE_TOUCH:
-          coreObject.executeCoreCommand("touchDown(" + x + "," + y + ")");
+          coreObject.executeCoreCommand("touchDown(", String.valueOf(x), String.valueOf(y));
           break;
 
         case WatchFaceService.TAP_TYPE_TOUCH_CANCEL:
-          coreObject.executeCoreCommand("touchCancel(" + x + "," + y + ")");
+          coreObject.executeCoreCommand("touchCancel(", String.valueOf(x), String.valueOf(y));
           break;
 
         default:

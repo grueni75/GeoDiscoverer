@@ -55,10 +55,10 @@ public class GDMessageListenerService extends WearableListenerService {
         ((GDApplication)getApplication()).setWearDeviceAlive(false);
       }
       if (cmd.startsWith("findRemoteMapTileByGeographicCoordinate(")) {
-        ((GDApplication)getApplication()).coreObject.executeCoreCommand(cmd);
+        ((GDApplication)getApplication()).coreObject.executeCoreCommandRaw(cmd);
       }
       if (cmd.startsWith("fillGeographicAreaWithRemoteTiles(")) {
-        ((GDApplication)getApplication()).coreObject.executeCoreCommand(cmd);
+        ((GDApplication)getApplication()).coreObject.executeCoreCommandRaw(cmd);
       }
     }
   }
