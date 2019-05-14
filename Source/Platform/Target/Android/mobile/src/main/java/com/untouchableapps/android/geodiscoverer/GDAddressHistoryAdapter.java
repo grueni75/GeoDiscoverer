@@ -321,6 +321,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         return false;
       }
     });
+    updateListViewSize(holder);
     return rowView;
   }
 }
