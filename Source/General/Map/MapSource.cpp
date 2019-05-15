@@ -1276,12 +1276,14 @@ void MapSource::remoteServer() {
       // Was a remote map served?
       if (cmdName=="remoteMapArchiveServed") {
         servedMapContainers.remove(args[0]);
+        DEBUG("servedMapContainers.size()=%d",servedMapContainers.size());
         commandProcessed=true;
       }
 
       // Was a remote overlay served?
       if (cmdName=="remoteOverlayArchiveServed") {
         servedOverlays.remove(args[0]);
+        DEBUG("servedOverlays.size()=%d",servedOverlays.size());
         commandProcessed=true;
       }
 

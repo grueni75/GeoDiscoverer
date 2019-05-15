@@ -285,6 +285,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
             // Get the file to sent
             String postfix="unknown";
+            String acknowledgeCmd="";
             String acknowledgeID="";
             String path="";
             if (command.startsWith("serveRemoteMapArchive")) {
@@ -293,6 +294,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
               postfix = "mapArchive";
               command=command.substring(command.indexOf(",")+1);
               String id = command.substring(0, command.indexOf(","));
+              acknowledgeCmd="remoteMapArchiveServed";
               acknowledgeID=id;
             }
             if (command.startsWith("serveRemoteOverlayArchive")) {
@@ -301,6 +303,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
               postfix = "overlayArchive";
               command=command.substring(command.indexOf(",")+1);
               String id = command.substring(0, command.indexOf(","));
+              acknowledgeCmd="remoteOverlayArchiveServed";
               acknowledgeID=id;
             }
             String hash = command.substring(command.indexOf(",")+1, command.indexOf(")"));
@@ -328,10 +331,11 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
             // Inform core that transfer is over after some delay
             final String delayedAcknowledgeID = acknowledgeID;
+            final String delayedAcknowledgeCmd = acknowledgeCmd;
             new Timer().schedule(new TimerTask() {
               @Override
               public void run() {
-                coreObject.executeCoreCommand("remoteMapArchiveServed", delayedAcknowledgeID);
+                coreObject.executeCoreCommand(delayedAcknowledgeCmd,delayedAcknowledgeID);
               }
             }, 1000);
           }

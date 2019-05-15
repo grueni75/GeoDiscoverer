@@ -125,7 +125,7 @@ public class GDMessageListenerService extends WearableListenerService {
       boolean cmdExecuted=false;
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", cmd.substring(0,cmd.indexOf(")")+1));
       if (cmd.equals("forceRemoteMapUpdate()")) {
-        //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","map update requested by remote server");
+        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","map update requested by remote server");
         coreObject.executeCoreCommand("forceMapUpdate");
         cmdExecuted=true;
       }

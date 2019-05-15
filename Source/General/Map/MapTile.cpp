@@ -557,7 +557,6 @@ GraphicPrimitive *MapTile::retrieveAnimator(char *&data, Int &size) {
       FATAL("can not create graphic primitive object",NULL);
       return NULL;
     }
-    animator->setFadeAnimation(0,startColor,endColor,infinite,duration);
     std::list<std::string> names;
     names.push_back(name);
     animator->setName(names);
@@ -568,6 +567,9 @@ GraphicPrimitive *MapTile::retrieveAnimator(char *&data, Int &size) {
   } else {
     //DEBUG("reusing already known animator for %s",name);
   }
+  core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
+  animator->setFadeAnimation(0,startColor,endColor,infinite,duration);
+  core->getDefaultGraphicEngine()->unlockPathAnimators();
   return animator;
 }
 
