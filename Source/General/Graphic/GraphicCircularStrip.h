@@ -115,6 +115,11 @@ public:
       this->inverse = inverse;
     }
   }
+
+  bool isInverse() const {
+    return inverse;
+  }
+
 };
 
 }

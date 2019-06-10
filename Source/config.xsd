@@ -56,7 +56,7 @@
                   <xsd:documentation>Screen backlight is kept on if ticked.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="watchDisplayTimeout" type="xsd:integer" default="5000">
+              <xsd:element name="watchDisplayTimeout" type="xsd:integer" default="10000">
                 <xsd:annotation>
                   <xsd:documentation>Timeout in milliseconds for the display if executed on a watch.</xsd:documentation>
                 </xsd:annotation>

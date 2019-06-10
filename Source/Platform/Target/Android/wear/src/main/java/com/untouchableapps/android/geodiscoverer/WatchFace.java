@@ -110,6 +110,7 @@ public class WatchFace extends Gles2WatchFaceService {
 
   // Wake locks
   PowerManager.WakeLock wakeLockCore = null;
+  PowerManager.WakeLock wakeLockApp = null;
 
   // Types of dialogs
   static final int FATAL_DIALOG = 0;
@@ -137,6 +138,7 @@ public class WatchFace extends Gles2WatchFaceService {
       GDApplication.showMessageBar(getApplicationContext(), message, GDApplication.MESSAGE_BAR_DURATION_LONG);
     } else {
       Intent intent = new Intent(this, Dialog.class);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       intent.putExtra(Dialog.EXTRA_TEXT, message);
       intent.putExtra(Dialog.EXTRA_KIND, kind);
       startActivity(intent);
@@ -213,6 +215,7 @@ public class WatchFace extends Gles2WatchFaceService {
     }
     if (!keepDisplayOnActive) {
       windowManager.addView(keepDisplayOnView, keepDisplayOnLayoutParams);
+      wakeLockApp.acquire();
     }
     keepDisplayOnActive = true;
     displayTimer = new Timer();
@@ -221,6 +224,7 @@ public class WatchFace extends Gles2WatchFaceService {
       public void run() {
         GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "display timeout expired");
         windowManager.removeView(keepDisplayOnView);
+        wakeLockApp.release();
         keepDisplayOnActive=false;
       }
     }, displayTimeout);
@@ -316,6 +320,7 @@ public class WatchFace extends Gles2WatchFaceService {
             // Create a new dialog if it does not yet exist
             if (!watchFace.dialogVisible) {
               Intent intent = new Intent(watchFace, Dialog.class);
+              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
               intent.putExtra(Dialog.EXTRA_TEXT, commandArgs.get(0));
               int max = Integer.parseInt(commandArgs.get(1));
               intent.putExtra(Dialog.EXTRA_MAX, max);
@@ -329,6 +334,7 @@ public class WatchFace extends Gles2WatchFaceService {
           if (commandFunction.equals("updateProgressDialog")) {
             if (watchFace.dialogVisible) {
               Intent intent = new Intent(watchFace, Dialog.class);
+              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
               intent.putExtra(Dialog.EXTRA_PROGRESS, Integer.parseInt(commandArgs.get(1)));
               watchFace.startActivity(intent);
             }
@@ -337,6 +343,7 @@ public class WatchFace extends Gles2WatchFaceService {
           if (commandFunction.equals("closeProgressDialog")) {
             if (watchFace.dialogVisible) {
               Intent intent = new Intent(watchFace, Dialog.class);
+              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
               intent.putExtra(Dialog.EXTRA_CLOSE, true);
               watchFace.startActivity(intent);
               watchFace.dialogVisible=false;
@@ -409,8 +416,14 @@ public class WatchFace extends Gles2WatchFaceService {
     // Get a wake lock
     if (wakeLockCore!=null)
       wakeLockCore.release();
-    wakeLockCore=powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActiveCPU");
+    wakeLockCore=powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "GDApp: ActiveCore");
     if (wakeLockCore==null) {
+      fatalDialog("Can not obtain core wake lock!");
+    }
+    if (wakeLockApp!=null)
+      wakeLockApp.release();
+    wakeLockApp=powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "GDApp: ActiveApp");
+    if (wakeLockApp==null) {
       fatalDialog("Can not obtain core wake lock!");
     }
 
@@ -472,6 +485,8 @@ public class WatchFace extends Gles2WatchFaceService {
     ((GDApplication)getApplication()).setMessageHandler(null);
     if ((wakeLockCore!=null)&&(wakeLockCore.isHeld()))
       wakeLockCore.release();
+    if ((wakeLockApp!=null)&&(wakeLockApp.isHeld()))
+      wakeLockApp.release();
     if (touchHandlerActive) {
       windowManager.removeView(touchHandlerView);
       touchHandlerActive=false;
@@ -529,6 +544,7 @@ public class WatchFace extends Gles2WatchFaceService {
       // Inform the user that permissions must be granted
       if (coreObject==null) {
         Intent intent = new Intent(getApplication(), Dialog.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Dialog.EXTRA_TEXT, getResources().getString(R.string.permission_instructions));
         intent.putExtra(Dialog.EXTRA_KIND, ERROR_DIALOG);
         intent.putExtra(Dialog.EXTRA_GET_PERMISSIONS, true);

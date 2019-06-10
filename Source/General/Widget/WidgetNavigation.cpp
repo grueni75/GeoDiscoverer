@@ -220,11 +220,11 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       }
       circularStrip[i]->setAngle(45.0+offset+i*90.0);
       offset=-offset;
-      circularStrip[i]->setRadius(statusTextRadius);
       circularStrip[i]->setColor(GraphicColor(255,255,255,255));
       circularStrip[i]->setDestroyTexture(false);
-      if (i>=2)
+      if (i>=2) {
         circularStrip[i]->setInverse(true);
+      }
     }
     clockCircularStrip.setAngle(270.0);
     clockCircularStrip.setRadius(clockRadius);
@@ -392,7 +392,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       } else if (std::isinf(navigationInfo->getTargetDuration())) {
         fontEngine->updateString(&durationValueFontString,"move!",statusTextWidthLimit);
       } else {
-        unitConverter->formatTime(navigationInfo->getTargetDuration(),value,unit,isWatch ? 0 : 2);
+        unitConverter->formatTime(navigationInfo->getTargetDuration(),value,unit,isWatch ? 1 : 2);
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&durationValueFontString,infos.str(),statusTextWidthLimit);
@@ -400,7 +400,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       }
       if (navigationInfo->getAltitude()!=NavigationInfo::getUnknownDistance()) {
         std::string lockedUnit = unitConverter->getUnitSystem()==ImperialSystem ? "mi" : "m";
-        unitConverter->formatMeters(navigationInfo->getAltitude(),value,unit,isWatch ? 0 : 2,lockedUnit);
+        unitConverter->formatMeters(navigationInfo->getAltitude(),value,unit,isWatch ? 1 : 2,lockedUnit);
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&altitudeValueFontString,infos.str(),statusTextWidthLimit);
@@ -409,7 +409,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         fontEngine->updateString(&altitudeValueFontString,"unknown",statusTextWidthLimit);
       }
       if (navigationInfo->getTrackLength()!=NavigationInfo::getUnknownDistance()) {
-        unitConverter->formatMeters(navigationInfo->getTrackLength(),value,unit,isWatch ? 0 : 2);
+        unitConverter->formatMeters(navigationInfo->getTrackLength(),value,unit,isWatch ? 1 : 2);
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&trackLengthValueFontString,infos.str(),statusTextWidthLimit);
@@ -418,7 +418,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         fontEngine->updateString(&trackLengthValueFontString,"unknown",statusTextWidthLimit);
       }
       if (navigationInfo->getLocationSpeed()!=NavigationInfo::getUnknownSpeed()) {
-        unitConverter->formatMetersPerSecond(navigationInfo->getLocationSpeed(),value,unit,isWatch ? 0 : 1);
+        unitConverter->formatMetersPerSecond(navigationInfo->getLocationSpeed(),value,unit,isWatch ? 1 : 1);
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&speedValueFontString,infos.str(),statusTextWidthLimit);
@@ -433,7 +433,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
       }
       if (distance!=-1) {
-        unitConverter->formatMeters(distance,value,unit,isWatch ? 0 : 2);
+        unitConverter->formatMeters(distance,value,unit,isWatch ? 1 : 2);
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&distanceValueFontString,infos.str(),statusTextWidthLimit);
@@ -656,6 +656,10 @@ void WidgetNavigation::drawStatus(TimestampInMicroseconds t) {
       c = circularStrip[i]->getColor();
       c.setAlpha(color.getAlpha());
       circularStrip[i]->setColor(c);
+      if (circularStrip[i]->isInverse())
+        circularStrip[i]->setRadius(statusTextRadius+s->getIconHeight()/2-s->getBaselineOffsetY());
+      else
+        circularStrip[i]->setRadius(statusTextRadius+s->getIconHeight()/2-s->getBaselineOffsetY());
       s->updateTexture();
       circularStrip[i]->setTexture(s->getTexture());
       circularStrip[i]->draw(t);

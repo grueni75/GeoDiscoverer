@@ -72,6 +72,7 @@ void GraphicRectangle::setTextureFromIcon(Screen *screen, std::string iconFilena
   height=dpiScale*(double)textureHeight;
   iconWidth=dpiScale*(double)imageWidth;
   iconHeight=dpiScale*(double)imageHeight;
+  //DEBUG("iconWidth=%d iconHeight=%d",iconWidth,iconHeight);
 
   // Convert the image depending on the supported format
   setTexture(screen->createTextureInfo());
