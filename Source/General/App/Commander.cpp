@@ -326,7 +326,6 @@ std::string Commander::execute(std::string cmd) {
 
     // Inform the location manager
     core->getNavigationEngine()->setLocationPos(pos,false,__FILE__,__LINE__);
-
     cmdExecuted=true;
   }
   if (cmdName=="setTargetPos") {

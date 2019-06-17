@@ -570,6 +570,7 @@ void MapEngine::updateMap() {
     // Use the offset to compute the new position in the map
     lockMapPos(__FILE__, __LINE__);
     MapPosition newMapPos;
+    newMapPos=mapPos;
     if (requestedMapPos.isValid()) {
 
       // First check if the new position lies within the previous display area
@@ -591,6 +592,7 @@ void MapEngine::updateMap() {
             forceMapRecreation=true;
           if (newY<displayArea.getYSouth())
             forceMapRecreation=true;
+          //DEBUG("forceMapCreation=%d",forceMapRecreation);
         } else {
           forceMapRecreation=true;
         }
@@ -599,9 +601,9 @@ void MapEngine::updateMap() {
         forceMapRecreation=true;
       }
       if (forceMapRecreation) {
-        mapPos.setLng(requestedMapPos.getLng());
-        mapPos.setLat(requestedMapPos.getLat());
-        mapPos.setMapTile(NULL);
+        newMapPos.setLng(requestedMapPos.getLng());
+        newMapPos.setLat(requestedMapPos.getLat());
+        newMapPos.setMapTile(NULL);
         diffVisX=0;
         diffVisY=0;
       } else {
@@ -610,7 +612,6 @@ void MapEngine::updateMap() {
       //DEBUG("diffVisX=%d diffVisY=%d lng=%f lat=%f forceMapRecreation=%d",diffVisX,diffVisY,mapPos.getLng(),mapPos.getLat(),forceMapRecreation);
       requestedMapPos.invalidate();
     }
-    newMapPos=mapPos;
     unlockMapPos();
     newMapPos.setLngScale(newMapPos.getLngScale()*diffZoom);
     newMapPos.setLatScale(newMapPos.getLatScale()*diffZoom);
