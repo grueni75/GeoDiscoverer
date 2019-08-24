@@ -783,6 +783,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         appIf.sendWearCommand(cmd);
       cmdExecuted=true;
     }
+    if (cmd.startsWith("playNewNearestAddressPointAlarm()")) {
+      playSound("nearAddressPointAlarm.wav",3, 100);
+      cmdExecuted=true;
+    }
 
     if (!cmdExecuted) {
       appIf.executeAppCommand(cmd);
@@ -1257,4 +1261,53 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
     return true;
   }
+
+  /** Plays a sound from the asset directory */
+  public void playSound(String filename, int repeat, int volume) {
+    Thread playThread = new Thread(new Runnable() {
+      int remainingRepeats=repeat;
+      @Override
+      public void run() {
+        audioWakeup();
+        try {
+          final AssetFileDescriptor afd = appIf.getContext().getAssets().openFd("Sound/" + filename);
+          MediaPlayer player = new MediaPlayer();
+          player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+          player.prepare();
+          appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("volume=%d",volume));
+          float log1=1.0f-(float)(Math.log(100-volume)/Math.log(100));
+          player.setVolume(log1,log1);
+          player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+              remainingRepeats--;
+              if (remainingRepeats>0) {
+                player.reset();
+                try {
+                  player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                  player.prepare();
+                } catch (IOException e) {
+                  appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", e.getMessage());
+                }
+                player.start();
+              } else {
+                player.release();
+                try {
+                  afd.close();
+                } catch (IOException e) {
+                  appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", e.getMessage());
+                }
+              }
+            }
+          });
+          player.start();
+        }
+        catch (IOException e) {
+          appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", e.getMessage());
+        }
+      }
+    });
+    playThread.start();
+  }
+
 }

@@ -72,6 +72,7 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
     case WidgetTypeNavigation: widgetTypeString="navigation"; break;
     case WidgetTypePathInfo: widgetTypeString="pathInfo"; break;
     case WidgetTypeCursorInfo: widgetTypeString="cursorInfo"; break;
+    case WidgetTypeAddressPoint: widgetTypeString="addressPoint"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
   c->setStringValue(path,"type",widgetTypeString,__FILE__, __LINE__);
@@ -370,6 +371,42 @@ void WidgetEngine::createGraphic() {
       addWidgetToPage(config);
       // ---------------------------------------------------------
     }
+    if ((deviceName!="Watch")) {
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Address Point");
+      config.setType(WidgetTypeAddressPoint);
+      position=WidgetPosition();
+      if (deviceName!="Default") {
+        position.setRefScreenDiagonal(0.0);
+        position.setPortraitX(0.0);
+        position.setPortraitY(0.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(62.0);
+        position.setLandscapeY(67.0);
+        position.setLandscapeZ(0);
+        config.setInactiveColor(GraphicColor(255,255,255,255));
+      } else {
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(50.0);
+        position.setPortraitY(70.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(50.0);
+        position.setLandscapeY(32.5);
+        position.setLandscapeZ(0);
+        config.setInactiveColor(GraphicColor(255,255,255,0));
+      }
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setParameter("iconFilename","addressPointBackground");
+      addWidgetToPage(config);
+      position.setLandscapeY(87.5);
+      config.clearPositions();
+      config.addPosition(position);
+      config.setPageName("Path Tools");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+    }
     if ((deviceName=="Default")||(deviceName=="Watch")) {
       config=WidgetConfig();
       config.setPageName("Default");
@@ -539,7 +576,7 @@ void WidgetEngine::createGraphic() {
         position.setPortraitY(0.0);
         position.setPortraitZ(0);
         position.setLandscapeX(40.5);
-        position.setLandscapeY(80.0);
+        position.setLandscapeY(85.0);
         position.setLandscapeZ(0);
         config.addPosition(position);
         config.setInactiveColor(GraphicColor(255,255,255,255));
@@ -585,7 +622,7 @@ void WidgetEngine::createGraphic() {
         position.setPortraitY(0.0);
         position.setPortraitZ(0);
         position.setLandscapeX(64.0);
-        position.setLandscapeY(80.0);
+        position.setLandscapeY(85.0);
         position.setLandscapeZ(0);
         config.addPosition(position);
         config.setInactiveColor(GraphicColor(255,255,255,255));
@@ -631,7 +668,7 @@ void WidgetEngine::createGraphic() {
         position.setPortraitY(0.0);
         position.setPortraitZ(0);
         position.setLandscapeX(87.5);
-        position.setLandscapeY(80.0);
+        position.setLandscapeY(85.0);
         position.setLandscapeZ(0);
         config.addPosition(position);
         config.setInactiveColor(GraphicColor(255,255,255,255));
@@ -650,23 +687,35 @@ void WidgetEngine::createGraphic() {
       config.setName("Status");
       config.setType(WidgetTypeStatus);
       position=WidgetPosition();
-      position.setRefScreenDiagonal(4.0);
-      position.setPortraitX(70.0);
-      position.setPortraitY(92.0);
-      position.setPortraitZ(1);
-      position.setLandscapeX(50.0);
-      position.setLandscapeY(88.0);
-      position.setLandscapeZ(1);
+      if (deviceName!="Default") {
+        position.setRefScreenDiagonal(0.0);
+        position.setPortraitX(0.0);
+        position.setPortraitY(0.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(50.0);
+        position.setLandscapeY(23.0);
+        position.setLandscapeZ(0);
+      } else {
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(70.0);
+        position.setPortraitY(92.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(50.0);
+        position.setLandscapeY(88.0);
+        position.setLandscapeZ(1);
+      }
       config.addPosition(position);
-      position=WidgetPosition();
-      position.setRefScreenDiagonal(7.0);
-      position.setPortraitX(tabletPortraitButtonGridX[1]);
-      position.setPortraitY(tabletPortraitButtonGridY[3]);
-      position.setPortraitZ(1);
-      position.setLandscapeX(tabletLandscapeButtonGridX[1]);
-      position.setLandscapeY(tabletLandscapeButtonGridY[2]);
-      position.setLandscapeZ(1);
-      config.addPosition(position);
+      if (deviceName=="Default") {
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(7.0);
+        position.setPortraitX(tabletPortraitButtonGridX[1]);
+        position.setPortraitY(tabletPortraitButtonGridY[3]);
+        position.setPortraitZ(1);
+        position.setLandscapeX(tabletLandscapeButtonGridX[1]);
+        position.setLandscapeY(tabletLandscapeButtonGridY[2]);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+      }
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setParameter("iconFilename","statusBackground");
@@ -1210,6 +1259,7 @@ void WidgetEngine::createGraphic() {
       WidgetNavigation *navigation;
       WidgetPathInfo *pathInfo;
       WidgetCursorInfo *cursorInfo;
+      WidgetAddressPoint *addressPoint;
       if (widgetType=="button") {
         button=new WidgetButton(page);
         primitive=button;
@@ -1242,6 +1292,10 @@ void WidgetEngine::createGraphic() {
         cursorInfo=new WidgetCursorInfo(page);
         primitive=cursorInfo;
       }
+      if (widgetType=="addressPoint") {
+        addressPoint=new WidgetAddressPoint(page);
+        primitive=addressPoint;
+      }
 
       // Set type-independent properties
       std::list<std::string> name;
@@ -1252,7 +1306,7 @@ void WidgetEngine::createGraphic() {
       primitive->setColor(primitive->getInactiveColor());
 
       // Load the image of the widget
-      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")) {
+      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")||(widgetType=="addressPoint")) {
         primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {

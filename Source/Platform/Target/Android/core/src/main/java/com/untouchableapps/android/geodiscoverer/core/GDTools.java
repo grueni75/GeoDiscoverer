@@ -22,6 +22,8 @@
 
 package com.untouchableapps.android.geodiscoverer.core;
 
+import android.content.res.AssetFileDescriptor;
+import android.media.MediaPlayer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;

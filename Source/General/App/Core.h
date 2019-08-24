@@ -476,6 +476,7 @@ extern Core *core;
 #include <WidgetNavigation.h>
 #include <WidgetPathInfo.h>
 #include <WidgetStatus.h>
+#include <WidgetAddressPoint.h>
 #include <WidgetCursorInfo.h>
 #include <WidgetPage.h>
 #include <WidgetPosition.h>

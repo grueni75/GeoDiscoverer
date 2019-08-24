@@ -79,12 +79,18 @@ NavigationEngine::NavigationEngine() :
   targetScaleNormalFactor=core->getConfigStore()->getDoubleValue("Graphic","targetScaleNormalFactor", __FILE__, __LINE__);
   backgroundLoaderFinished=false;
   navigationInfosMutex=core->getThread()->createMutex("navigation engine navigation infos mutex");
-  navigationPointsMutex=core->getThread()->createMutex("navigation engine navigation points mutex");
+  addressPointsMutex=core->getThread()->createMutex("navigation engine navigation points mutex");
+  nearestAddressPointValid=false;
+  nearestAddressPointMutex=core->getThread()->createMutex("navigation engine nearest navigation points mutex");
+  nearestAddressPointDistance=std::numeric_limits<double>::max();
   minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate", __FILE__, __LINE__);
   forceNavigationInfoUpdate=false;
   computeNavigationInfoThreadInfo=NULL;
   computeNavigationInfoSignal=core->getThread()->createSignal();
   overlayGraphicHash="";
+  maxAddressPointAlarmDistance=core->getConfigStore()->getDoubleValue("Navigation","maxAddressPointAlarmDistance",__FILE__,__LINE__);
+  nearestAddressPointName="";
+  nearestAddressPointNameUpdate=0;
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -132,7 +138,8 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(targetPosMutex);
   core->getThread()->destroyMutex(backgroundLoaderFinishedMutex);
   core->getThread()->destroyMutex(navigationInfosMutex);
-  core->getThread()->destroyMutex(navigationPointsMutex);
+  core->getThread()->destroyMutex(addressPointsMutex);
+  core->getThread()->destroyMutex(nearestAddressPointMutex);
   core->getThread()->destroyMutex(activeRouteMutex);
   DEBUG("ping",NULL);
 }
@@ -477,9 +484,6 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
 
     // Store the new fix
     setLocationPos(newLocationPos, true, __FILE__, __LINE__);
-
-    //PROFILE_ADD("position update init");
-
 
   } else {
     //DEBUG("location pos has not been used",NULL);
@@ -996,12 +1000,12 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   core->getDefaultGraphicEngine()->unlockArrowIcon();
 
   // Update the visualization of the points
-  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
   TimestampInMicroseconds t = core->getClock()->getMicrosecondsSinceStart();
   for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
     (*i).updateVisualization(t,mapPos,displayArea);
   }
-  core->getThread()->unlockMutex(navigationPointsMutex);
+  core->getThread()->unlockMutex(addressPointsMutex);
 
   // Unlock the drawing mutex
   core->getThread()->unlockMutex(updateGraphicsMutex);
@@ -1060,11 +1064,11 @@ void NavigationEngine::destroyGraphic() {
     recordedTrack->destroyGraphic();
     recordedTrack->unlockAccess();
   }
-  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
   for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
     (*i).destroyGraphic();
   }
-  core->getThread()->unlockMutex(navigationPointsMutex);
+  core->getThread()->unlockMutex(addressPointsMutex);
 }
 
 // Creates all graphics
@@ -1086,11 +1090,11 @@ void NavigationEngine::createGraphic() {
     recordedTrack->createGraphic();
     recordedTrack->unlockAccess();
   }
-  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
   for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
     (*i).createGraphic();
   }
-  core->getThread()->unlockMutex(navigationPointsMutex);
+  core->getThread()->unlockMutex(addressPointsMutex);
 }
 
 // Recreate the objects to reduce the number of graphic point buffers
@@ -1284,7 +1288,7 @@ void NavigationEngine::setTargetPos(double lng, double lat) {
 
 // Updates the flags of a route
 void NavigationEngine::updateFlagVisualization(NavigationPath *path) {
-  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
   std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
   MapPosition startFlagPos=path->getStartFlagPos();
   MapPosition endFlagPos=path->getEndFlagPos();
@@ -1330,7 +1334,7 @@ void NavigationEngine::updateFlagVisualization(NavigationPath *path) {
     navigationPointsVisualization.push_back(endFlagVis);
   }
   resetOverlayGraphicHash();
-  core->getThread()->unlockMutex(navigationPointsMutex);
+  core->getThread()->unlockMutex(addressPointsMutex);
   if ((replaceStartFlag)||(replaceEndFlag))
     updateScreenGraphic(false);
 }
@@ -1503,6 +1507,48 @@ void NavigationEngine::computeNavigationInfo() {
     targetPos=this->targetPos;
     unlockTargetPos();
 
+    // Update the nearest address point
+    bool pointValid=false;
+    NavigationPoint point;
+    double distance=std::numeric_limits<double>::max();
+    if (locationPos.isValid()) {
+      core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
+      for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
+        MapPosition pos;
+        pos.setLat((*i).getLat());
+        pos.setLng((*i).getLng());
+        double t=locationPos.computeDistance(pos);
+        if (t<distance) {
+          distance=t;
+          point=*i;
+          pointValid=true;
+        }
+      }
+      core->getThread()->unlockMutex(addressPointsMutex);
+    }
+    core->getThread()->lockMutex(nearestAddressPointMutex,__FILE__,__LINE__);
+    this->nearestAddressPoint=point;
+    this->nearestAddressPointValid=pointValid;
+    this->nearestAddressPointDistance=distance;
+
+    // Play alert if new address point is found
+    if ((pointValid)&&(distance<=maxAddressPointAlarmDistance)) {
+      if (nearestAddressPointName!=point.getName()) {
+        core->getCommander()->dispatch("playNewNearestAddressPointAlarm()");
+        nearestAddressPointName=point.getName();
+        nearestAddressPointNameUpdate=core->getClock()->getMicrosecondsSinceStart();
+      }
+    } else {
+      if (nearestAddressPointName!="") {
+        nearestAddressPointNameUpdate=core->getClock()->getMicrosecondsSinceStart();
+      }
+      nearestAddressPointName="";
+    }
+    core->getThread()->unlockMutex(nearestAddressPointMutex);
+    core->onDataChange();
+
+    //PROFILE_ADD("position update init");
+
     // Update the parent app
     infos.str("");
     std::string value,unit;
@@ -1644,7 +1690,7 @@ void NavigationEngine::removeAddressPoint(std::string name) {
 void NavigationEngine::initAddressPoints() {
   std::string path = "Navigation/AddressPoint";
   std::list<std::string> names = core->getConfigStore()->getAttributeValues(path,"name",__FILE__,__LINE__);
-  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
   std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
   while (i!=navigationPointsVisualization.end()) {
     if ((*i).getVisualizationType()==NavigationPointVisualizationTypePoint) {
@@ -1669,7 +1715,8 @@ void NavigationEngine::initAddressPoints() {
     }
   }
   resetOverlayGraphicHash();
-  core->getThread()->unlockMutex(navigationPointsMutex);
+  core->getThread()->unlockMutex(addressPointsMutex);
+  triggerNavigationInfoUpdate();
   core->getCommander()->dispatch("forceRemoteMapUpdate()");
 }
 
@@ -1739,11 +1786,11 @@ void NavigationEngine::storeOverlayGraphics(std::string filefolder, std::string 
   Storage::storeByte(&ofs,OverlayArchiveTypeNavigationEngine);
 
   // Store all navigation points
-  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
   for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
     (*i).store(&ofs);
   }
-  core->getThread()->unlockMutex(navigationPointsMutex);
+  core->getThread()->unlockMutex(addressPointsMutex);
 
   // Close the overlay file
   ofs.close();
@@ -1784,7 +1831,7 @@ void NavigationEngine::retrieveOverlayGraphics(std::string filefolder, std::stri
   Storage::retrieveByte(data,size,t);
 
   // Clear the navigation points
-  core->getThread()->lockMutex(navigationPointsMutex,__FILE__,__LINE__);
+  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
   std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
   while (i!=navigationPointsVisualization.end()) {
     core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
@@ -1799,7 +1846,7 @@ void NavigationEngine::retrieveOverlayGraphics(std::string filefolder, std::stri
     navigationPointVisualization.retrieve(data,size);
     navigationPointsVisualization.push_back(navigationPointVisualization);
   }
-  core->getThread()->unlockMutex(navigationPointsMutex);
+  core->getThread()->unlockMutex(addressPointsMutex);
 
   // That's it!
   if (size!=0) {
@@ -1822,6 +1869,19 @@ void NavigationEngine::triggerNavigationInfoUpdate() {
 void NavigationEngine::addressPointGroupChanged() {
   initAddressPoints();
   core->onDataChange();
+}
+
+// Returns the address point that is the nearest to the current position
+bool NavigationEngine::getNearestAddressPoint(NavigationPoint &navigationPoint, double &distance, TimestampInMicroseconds &updateTimestamp) {
+  core->getThread()->lockMutex(nearestAddressPointMutex,__FILE__,__LINE__);
+  bool found=nearestAddressPointValid;
+  if (found) {
+    navigationPoint=nearestAddressPoint;
+    distance=nearestAddressPointDistance;
+  }
+  updateTimestamp=nearestAddressPointNameUpdate;
+  core->getThread()->unlockMutex(nearestAddressPointMutex);
+  return found;
 }
 
 }

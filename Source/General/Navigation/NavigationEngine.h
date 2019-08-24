@@ -152,8 +152,29 @@ protected:
   // List of address points
   std::list<NavigationPoint> addressPoints;
 
-  // Mutex for accessing the navigation points
-  ThreadMutexInfo *navigationPointsMutex;
+  // Mutex for accessing the address points
+  ThreadMutexInfo *addressPointsMutex;
+
+  // Stores the nearest address point
+  NavigationPoint nearestAddressPoint;
+
+  // Indicates if the nearest address point is valid
+  bool nearestAddressPointValid;
+
+  // Double distance to the nearest address point
+  double nearestAddressPointDistance;
+
+  // Name of the last found nearby address point
+  std::string nearestAddressPointName;
+
+  // Timestamp when the last nearby address point was found
+  TimestampInMicroseconds nearestAddressPointNameUpdate;
+
+  // Mutex for accessing the nearest navigation point
+  ThreadMutexInfo *nearestAddressPointMutex;
+
+  // Maximum distance for which the widget shows infos about an address point
+  double maxAddressPointAlarmDistance;
 
   // Graphic object that represents the address points
   GraphicObject navigationPointsGraphicObject;
@@ -297,6 +318,9 @@ public:
   // Returns the name of the address point at the given position
   std::string getAddressPointName(GraphicPosition visPos);
 
+  // Returns the address point that is the nearest to the current position
+  bool getNearestAddressPoint(NavigationPoint &navigationPoint, double &distance, TimestampInMicroseconds &updateTimestamp);
+
   // Sets a location pos directly (e.g., on the watch)
   void setLocationPos(MapPosition newLocationPos, bool computeNavigationInfos, const char *file, int line);
 
@@ -412,12 +436,12 @@ public:
 
   std::list<NavigationPoint>  *lockAddressPoints(const char *file, int line)
   {
-    core->getThread()->lockMutex(navigationPointsMutex, file, line);
+    core->getThread()->lockMutex(addressPointsMutex, file, line);
     return &addressPoints;
   }
   void unlockAddressPoints()
   {
-    core->getThread()->unlockMutex(navigationPointsMutex);
+    core->getThread()->unlockMutex(addressPointsMutex);
   }
 
   void getArrowInfo(bool &visible, double &angle) {
@@ -426,9 +450,9 @@ public:
   }
 
   const std::string getOverlayGraphicHash() const {
-    core->getThread()->lockMutex(navigationPointsMutex, __FILE__, __LINE__);
+    core->getThread()->lockMutex(addressPointsMutex, __FILE__, __LINE__);
     std::string hash=overlayGraphicHash;
-    core->getThread()->unlockMutex(navigationPointsMutex);
+    core->getThread()->unlockMutex(addressPointsMutex);
     return hash;
   }
 };

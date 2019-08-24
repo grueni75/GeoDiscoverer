@@ -96,54 +96,6 @@ public class GDHeartRateService {
   // List of known bluetooth devices
   private LinkedList<String> knownDeviceAddresses = new LinkedList<String>();
 
-  /** Plays a sound from the asset directory */
-  private void playSound(String filename, int repeat, int volume) {
-    Thread playThread = new Thread(new Runnable() {
-      int remainingRepeats=repeat;
-      @Override
-      public void run() {
-        GDApplication.coreObject.audioWakeup();
-        try {
-          final AssetFileDescriptor afd = context.getAssets().openFd("Sound/" + filename);
-          MediaPlayer player = new MediaPlayer();
-          player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-          player.prepare();
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("volume=%d",volume));
-          float log1=1.0f-(float)(Math.log(100-volume)/Math.log(100));
-          player.setVolume(log1,log1);
-          player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-              remainingRepeats--;
-              if (remainingRepeats>0) {
-                player.reset();
-                try {
-                  player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                  player.prepare();
-                } catch (IOException e) {
-                  GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-                }
-                player.start();
-              } else {
-                player.release();
-                try {
-                  afd.close();
-                } catch (IOException e) {
-                  GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-                }
-              }
-            }
-          });
-          player.start();
-        }
-        catch (IOException e) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-        }
-      }
-    });
-    playThread.start();
-  }
-
   /** Extracts the heart rate from a characteristics */
   @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
   private void updateHeartRate(BluetoothGattCharacteristic characteristic) {
@@ -176,7 +128,7 @@ public class GDHeartRateService {
       } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","connection to bluetooth gatt service dropped");
         state = CONNECTING;
-        playSound("disconnect.ogg", 1, 100);
+        coreObject.playSound("disconnect.ogg", 1, 100);
       }
     }
 
@@ -209,7 +161,7 @@ public class GDHeartRateService {
               }
             }
           }
-          playSound("connect.ogg",1, 100);
+          coreObject.playSound("connect.ogg",1, 100);
         }
       }
     }
@@ -416,7 +368,7 @@ public class GDHeartRateService {
               heartRateZoneChangeTimestamp=t;
             }
             if (t-heartRateZoneChangeTimestamp>=minHeartRateZoneChangeTime) {
-              playSound("heartRateZoneChange.ogg", nextHeartRateZone, volumeHeartRateZoneChange);
+              coreObject.playSound("heartRateZoneChange.ogg", nextHeartRateZone, volumeHeartRateZoneChange);
               currentHeartRateZone = nextHeartRateZone;
               heartRateZoneChangeTimestamp = 0;
             }

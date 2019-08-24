@@ -1990,7 +1990,12 @@
                 <xsd:annotation>
                   <xsd:documentation>Name of the address point group that is currently displayed.</xsd:documentation>
                 </xsd:annotation>
-              </xsd:element>                                     
+              </xsd:element>     
+              <xsd:element name="maxAddressPointAlarmDistance" type="xsd:double" default="1000">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum distance in meters to an address point at which a user notification shall be generated.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>     
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
