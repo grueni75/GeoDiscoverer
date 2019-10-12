@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <style name="GDStyle" parent="Theme.AppCompat">
+  <style name="Base.V7.Theme.GDStyle" parent="Theme.AppCompat">
     <item name="colorAccent">@color/gd_orange</item>
     <item name="android:windowContentOverlay">@drawable/actionbar_shadow</item>
-  </style> 
-  <style name="GDStyle.NoTitleBar" parent="Theme.AppCompat.NoActionBar">
+  </style>
+  <style name="GDStyle" parent="Base.V7.Theme.GDStyle">
+  </style>
+
+  <style name="Base.V7.Theme.GDStyle.NoTitleBar" parent="Theme.AppCompat.NoActionBar">
     <item name="colorAccent">@color/gd_orange</item>
-  </style> 
-  <style name="GDStyle.NoTitleBar.Fullscreen" parent="@style/Theme.AppCompat.NoActionBar">
-    <item name="colorAccent">@color/gd_orange</item>
+  </style>
+  <style name="GDStyle.NoTitleBar" parent="Base.V7.Theme.GDStyle.NoTitleBar">
+  </style>
+  <style name="GDStyle.NoTitleBar.Fullscreen" parent="GDStyle.NoTitleBar">
     <item name="android:windowFullscreen">true</item>
     <item name="android:windowContentOverlay">@null</item>
-    </style> 
-  <style name="GDStyle.Dialog" parent="Theme.AppCompat.Dialog">
+  </style>
+
+  <style name="Base.V7.Theme.GDStyle.Dialog" parent="Theme.AppCompat.Dialog">
     <item name="colorAccent">@color/gd_orange</item>
-  </style> 
+  </style>
+  <style name="GDStyle.Dialog" parent="Base.V7.Theme.GDStyle.Dialog">
+  </style>
+
   <style name="GDStyle.TextViewMonospace">
     <item name="android:typeface">monospace</item>
   </style> 

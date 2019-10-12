@@ -1545,12 +1545,24 @@ void WidgetEngine::updateWidgetPositions() {
       std::list<std::string> refScreenDiagonals = c->getAttributeValues(path,"refScreenDiagonal",__FILE__,__LINE__);
       double nearestValue = std::numeric_limits<double>::max();
       std::string nearestString;
+      double smallestDiagonal = std::numeric_limits<double>::max();
+      std::string smallestString;
       for (std::list<std::string>::iterator k=refScreenDiagonals.begin();k!=refScreenDiagonals.end();k++) {
-        double value = fabs(diagonal - atof(k->c_str()));
-        if (value<nearestValue) {
-          nearestValue=value;
-          nearestString=*k;
+        double currentDiagonal = atof(k->c_str());
+        if (diagonal>currentDiagonal) {
+          double value = fabs(diagonal - currentDiagonal);
+          if (value<nearestValue) {
+            nearestValue=value;
+            nearestString=*k;
+          }
         }
+        if (currentDiagonal<smallestDiagonal) {
+          smallestDiagonal=currentDiagonal;
+          smallestString=*k;
+        }
+      }
+      if (nearestValue==std::numeric_limits<double>::max()) {
+        nearestString=smallestString;
       }
       path=path + "[@refScreenDiagonal='" + nearestString + "']/" + orientation;
 

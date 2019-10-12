@@ -2,6 +2,7 @@
 <resources>
  
  	<item name="gd_orange" type="color">#ff7f00</item>
- 
+	<item name="gd_navbar_color" type="color">#010101</item>
+
 </resources> 
 
