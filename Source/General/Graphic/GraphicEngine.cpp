@@ -172,15 +172,17 @@ bool GraphicEngine::draw(bool forceRedraw) {
   // Get the time
   currentTime=core->getClock()->getMicrosecondsSinceStart();
 
-  //PROFILE_START;
+  PROFILE_START;
 
   // Copy the current position
   lockPos(__FILE__,__LINE__);
   pos=this->pos;
   unlockPos();
+  //PROFILE_ADD("position copy");
 
   // Drawing starts
   lockDrawing(__FILE__,__LINE__);
+  PROFILE_ADD("drawing lock");
 
   // Start measuring of drawing time and utilization
 #ifdef PROFILING_ENABLED
@@ -311,7 +313,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
     device->setNoChangeFrameCount(0);
   }
 
-  //PROFILE_ADD("drawing work and update check");
+  PROFILE_ADD("drawing work and update check");
 
   // Redraw required?
   if (redrawScene) {
@@ -659,6 +661,8 @@ bool GraphicEngine::draw(bool forceRedraw) {
       screen->drawRectangle(x1,y1,x2,y2,centerIcon.getTexture(),true);
       screen->endObject();
       //PROFILE_ADD("cursor drawing");
+
+      //PROFILE_ADD("overlay drawing");
     }
 
     // Draw all widgets
@@ -722,7 +726,8 @@ bool GraphicEngine::draw(bool forceRedraw) {
   unlockDrawing();
 
   //PROFILE_ADD("cleanup");
-  //PROFILE_END;
+  PROFILE_ADD("drawing itself");
+  PROFILE_END;
 
   return result;
 }
