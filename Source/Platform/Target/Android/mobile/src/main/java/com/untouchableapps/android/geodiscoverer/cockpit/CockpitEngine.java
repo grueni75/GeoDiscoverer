@@ -22,8 +22,11 @@
 
 package com.untouchableapps.android.geodiscoverer.cockpit;
 
+import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
 
 import com.untouchableapps.android.geodiscoverer.GDApplication;
@@ -161,12 +164,14 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
     }
   }
 
-  // References for jmDNS
+  // References for mDNS
   WifiManager wifiManager;
+  NsdManager nsdManager;
 
-  // References for the network discovery via ARP lookup
-  Thread lookupARPCacheThread = null;
-  boolean quitLookupARPCacheThread = false;
+
+  // References for the network discovery via mDNS
+  NsdManager.DiscoveryListener dashboardServiceDiscoveryListener=null;
+  String DASHBOARD_SERVICE_TYPE = "_geodashboard._tcp.";
 
   /**
    * Returns the IP4 address of the wlan interface
@@ -198,6 +203,7 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
 
     // Get services
     wifiManager = (WifiManager) app.getApplicationContext().getSystemService(android.content.Context.WIFI_SERVICE);
+    nsdManager = (NsdManager) app.getApplicationContext().getSystemService(Context.NSD_SERVICE);
 
     // Add all activated apps
     if (Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/MetaWatch", "active"))>0) {
@@ -214,55 +220,59 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
     // Search for geo dashboard devices if configured
     if (Integer.valueOf(app.coreObject.configStoreGetStringValue("Cockpit/App/Dashboard", "active"))>0) {
 
-      // Use ARP cache lookups to discover devices if configured
-      if (Integer.valueOf(app.coreObject.configStoreGetStringValue("Cockpit/App/Dashboard", "useAddressCacheLookup"))!=0) {
-        quitLookupARPCacheThread = false;
-        app.addMessage(app.DEBUG_MSG, "GDApp", "starting ARP cache lookup thread");
-        lookupARPCacheThread = new Thread(new Runnable() {
+      // Start the service discovery
+      // Instantiate a new DiscoveryListener
+      dashboardServiceDiscoveryListener = new NsdManager.DiscoveryListener() {
 
-          @Override
-          public void run() {
+        @Override
+        public void onDiscoveryStarted(String regType) {
+          app.addMessage(app.DEBUG_MSG, "GDApp", "service discovery for dashboard devices started");
+        }
 
-            int sleepTime = Integer.valueOf(app.coreObject.configStoreGetStringValue("Cockpit/App/Dashboard", "addressCacheSleepTime"))*1000;
-            int port = Integer.valueOf(app.coreObject.configStoreGetStringValue("Cockpit/App/Dashboard", "port"));
-            while (!quitLookupARPCacheThread) {
-
-              // Go through the ARP cache
-              try {
-                BufferedReader br = new BufferedReader(new FileReader("/proc/net/arp"));
-                try {
-                  String line = br.readLine();
-                  Pattern p = Pattern.compile("^\\s*(\\d+\\.\\d+\\.\\d+\\.\\d+)\\s*");
-                  while ((line != null)&&(!quitLookupARPCacheThread)) {
-                    Matcher m = p.matcher(line);
-                    if (m.find()) {
-                      String ip = m.group(1);
-                      app.coreObject.executeCoreCommand("addDashboardDevice",ip,String.valueOf(port));
-                    }
-                    line = br.readLine();
-                  }
-                } finally {
-                  br.close();
-                }
-              }
-              catch (IOException e) {
-                app.addMessage(app.ERROR_MSG, "GDApp", e.toString());
-                app.executeAppCommand("errorDialog(\"Could not lookup address cache!\")");
+        @Override
+        public void onServiceFound(NsdServiceInfo service) {
+          // A service was found! Do something with it.
+          app.addMessage(app.DEBUG_MSG, "GDApp", "service discovery success: " + service);
+          if (!service.getServiceType().equals(DASHBOARD_SERVICE_TYPE)) {
+            app.addMessage(app.DEBUG_MSG, "GDApp", "unknown service type: " + service.getServiceType());
+          } else if (service.getServiceName().contains("GeoDashboard")){
+            nsdManager.resolveService(service, new NsdManager.ResolveListener() {
+              @Override
+              public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                app.addMessage(app.DEBUG_MSG, "GDApp", "service resolve failed with error code: " + errorCode);
               }
 
-              // Sleep for the defined time
-              if (!quitLookupARPCacheThread) {
-                try {
-                  Thread.sleep(sleepTime);
-                }
-                catch (InterruptedException e) {
-                }
+              @Override
+              public void onServiceResolved(NsdServiceInfo serviceInfo) {
+                app.coreObject.executeCoreCommand("addDashboardDevice",serviceInfo.getHost().getHostAddress(),String.valueOf(serviceInfo.getPort()));
               }
-            }
+            });
           }
-        });
-        lookupARPCacheThread.start();
-      }
+        }
+
+        @Override
+        public void onServiceLost(NsdServiceInfo service) {
+          app.addMessage(app.DEBUG_MSG, "GDApp", "service lost: " + service);
+        }
+
+        @Override
+        public void onDiscoveryStopped(String serviceType) {
+          app.addMessage(app.DEBUG_MSG, "GDApp", "discovery stopped: " + serviceType);
+        }
+
+        @Override
+        public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+          app.addMessage(app.DEBUG_MSG, "GDApp", "discovery start failed with error code: " + errorCode);
+          nsdManager.stopServiceDiscovery(this);
+        }
+
+        @Override
+        public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+          app.addMessage(app.DEBUG_MSG, "GDApp", "discovery start failed with error code: " + errorCode);
+          nsdManager.stopServiceDiscovery(this);
+        }
+      };
+      nsdManager.discoverServices(DASHBOARD_SERVICE_TYPE,NsdManager.PROTOCOL_DNS_SD,dashboardServiceDiscoveryListener);
     }
 
     // Start the network thread
@@ -279,25 +289,9 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
     stopNetworkService();
 
     // Stop ARP cache lookup
-    if (lookupARPCacheThread!=null) {
-      app.addMessage(app.DEBUG_MSG, "GDApp", "stopping ARP cache lookup thread");
-      quitLookupARPCacheThread = true;
-      boolean repeat = true;
-      while (repeat) {
-        repeat=false;
-        lookupARPCacheThread.interrupt();
-        try {
-          lookupARPCacheThread.join(100);
-        }
-        catch (InterruptedException e) {
-          repeat=true;
-        }
-        if (lookupARPCacheThread.isAlive())
-          repeat=true;
-        else
-          repeat=false;
-      }
-      lookupARPCacheThread = null;
+    if (dashboardServiceDiscoveryListener!=null) {
+      app.addMessage(app.DEBUG_MSG, "GDApp", "stopping service discovery for dashboard devices");
+      nsdManager.stopServiceDiscovery(dashboardServiceDiscoveryListener);
     }
 
     // Do the inherited stuff
