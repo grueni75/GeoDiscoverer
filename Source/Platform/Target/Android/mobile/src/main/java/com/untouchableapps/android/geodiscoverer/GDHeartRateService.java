@@ -91,7 +91,7 @@ public class GDHeartRateService {
   private final int CONNECTING = 1;
   private final int DISCOVERING_SERVICES = 2;
   private final int OPERATING = 3;
-  private int state = 0;
+  private int state = SCANNING;
 
   // List of known bluetooth devices
   private LinkedList<String> knownDeviceAddresses = new LinkedList<String>();
@@ -251,10 +251,10 @@ public class GDHeartRateService {
     bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
     bluetoothAdapter = bluetoothManager.getAdapter();
     final UUID[] uuids = {UUID_HEART_RATE_MEASUREMENT};
-    //bluetoothAdapter.startLeScan(scanCallback);
-    BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
+    bluetoothAdapter.startLeScan(scanCallback);
+    /*BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
     bluetoothGatt = device.connectGatt(context, true, gattCallback);
-    state=CONNECTING;
+    state=CONNECTING;*/
 
     // Start alarm thread
     alarmThread = new Thread(new Runnable() {
