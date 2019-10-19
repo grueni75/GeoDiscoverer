@@ -292,6 +292,8 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
     // Is a turn coming?
     bool activateWidget = false;
+    /*navigationInfo->setTurnDistance(100.0);
+    navigationInfo->setTurnAngle(90.0);*/
     if (navigationInfo->getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
 
       // Get distance to turn
@@ -731,13 +733,13 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     screen->endObject();
   }
 
-  // Draw the blind if necessary
+  /* Draw the blind if necessary
   if ((isWatch)&&(showTurn)&&(!skipTurn)) {
     c=blindIcon.getColor();
     c.setAlpha(color.getAlpha());
     blindIcon.setColor(c);
     blindIcon.draw(t);
-  }
+  }*/
 
   // Draw the clock
   if ((isWatch)&&(clockFontString)&&(!((showTurn)&&(!skipTurn)))) {
@@ -821,7 +823,7 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     // Draw the turn
     screen->startObject();
     screen->translate(getX(),getY(),getZ());
-    screen->setColor(turnColor.getRed(),turnColor.getGreen(),turnColor.getBlue(),color.getAlpha());
+    screen->setColor(turnColor.getRed(),turnColor.getGreen(),turnColor.getBlue(),255*turnColor.getAlpha()/color.getAlpha());
     turnArrowPointBuffer.drawAsTriangles();
     screen->endObject();
     if (turnFontString) {

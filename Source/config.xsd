@@ -872,6 +872,11 @@
 			                                    <xsd:documentation>Start y position of the turn arrow.</xsd:documentation>
 			                                  </xsd:annotation>
 			                                </xsd:element>
+			                                <xsd:element name="turnWatchAlpha" type="xsd:integer" default="0" minOccurs="0">
+			                                  <xsd:annotation>
+			                                    <xsd:documentation>Color alpha value to apply when displayed on a watch.</xsd:documentation>
+			                                  </xsd:annotation>
+			                                </xsd:element>			                                
 			                               	<xsd:element name="minTouchDetectionRadius" type="xsd:double" default="0" minOccurs="0">
 			                                  <xsd:annotation>
 			                                    <xsd:documentation>Min radius in percent of the widget height a touch has to have from the center to be registered as a hit on the widget.</xsd:documentation>

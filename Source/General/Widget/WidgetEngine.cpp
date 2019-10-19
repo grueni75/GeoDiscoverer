@@ -1220,6 +1220,7 @@ void WidgetEngine::createGraphic() {
     config.setParameter("TurnColor/green","0");
     config.setParameter("TurnColor/blue","0");
     config.setParameter("TurnColor/alpha","255");
+    config.setParameter("turnWatchAlpha","64");
     config.setParameter("minTouchDetectionRadius","75.0");
     config.setParameter("circularButtonAngle","20.0");
     addWidgetToPage(config);
@@ -1409,8 +1410,11 @@ void WidgetEngine::createGraphic() {
         navigation->setTurnLineMiddleHeight(c->getDoubleValue(widgetPath,"turnLineMiddleHeight",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTurnLineStartX(c->getDoubleValue(widgetPath,"turnLineStartX",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
         navigation->setTurnLineStartY(c->getDoubleValue(widgetPath,"turnLineStartY",__FILE__, __LINE__)*navigation->getIconHeight()/100.0);
-        navigation->setTurnColor(c->getGraphicColorValue(widgetPath+"/TurnColor",__FILE__, __LINE__));
+        GraphicColor turnColor=c->getGraphicColorValue(widgetPath+"/TurnColor",__FILE__, __LINE__);
+        navigation->setTurnColor(turnColor);
         if (device->getIsWatch()) {
+          turnColor.setAlpha(c->getIntValue(widgetPath,"turnWatchAlpha",__FILE__,__LINE__));
+          navigation->setTurnColor(turnColor);
           navigation->setBusyColor(c->getGraphicColorValue(widgetPath + "/BusyColor",__FILE__, __LINE__));
           navigation->setStatusTextWidthLimit(c->getDoubleValue(widgetPath,"statusTextWidthLimit",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);
           navigation->setStatusTextRadius(c->getDoubleValue(widgetPath,"statusTextRadius",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);
