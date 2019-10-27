@@ -213,6 +213,7 @@ public class GDHeartRateService {
         if (state==SCANNING) {
           bluetoothGatt = device.connectGatt(context, true, gattCallback);
           state=CONNECTING;
+          bluetoothAdapter.stopLeScan(scanCallback);
         }
       }
     }
@@ -250,8 +251,8 @@ public class GDHeartRateService {
     // Setup bluetooth low energy
     bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
     bluetoothAdapter = bluetoothManager.getAdapter();
-    final UUID[] uuids = {UUID_HEART_RATE_MEASUREMENT};
-    bluetoothAdapter.startLeScan(scanCallback);
+    final UUID[] uuids = {UUID_HEART_RATE_SERVICE};
+    bluetoothAdapter.startLeScan(uuids,scanCallback);
     /*BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
     bluetoothGatt = device.connectGatt(context, true, gattCallback);
     state=CONNECTING;*/
