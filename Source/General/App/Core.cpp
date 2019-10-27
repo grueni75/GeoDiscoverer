@@ -560,6 +560,7 @@ void Core::updateDashboardScreens() {
         if (d->draw()) {
           deviceAvailable=true;
         }
+        deviceAvailable=true; // Never remove the device, as the device discovery does not work in case of timeouts
       }
 
       // Remove the device if it is not available anymore
