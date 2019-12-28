@@ -150,6 +150,11 @@
                   <xsd:documentation>Volume to use for the heart rate zone change sound. Valid range is 0 to 100.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
+              <xsd:element name="connectionWarningPeriod" type="xsd:integer" default="360">
+                <xsd:annotation>
+                  <xsd:documentation>Time in seconds between two missing heart rate connection warnings.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>

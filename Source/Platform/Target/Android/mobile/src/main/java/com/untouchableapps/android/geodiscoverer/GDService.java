@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
@@ -62,9 +63,16 @@ public class GDService extends Service {
   // Actions for notifications
   NotificationCompat.Action exitAction = null;
   NotificationCompat.Action stopDownloadAction = null;
+  NotificationCompat.Action stopHeartRateUnavailableSoundAction = null;
 
   // Heart rate monitor
   GDHeartRateService heartRateService = null;
+
+  // Download status
+  int tilesLeft;
+  int tilesDone;
+  int tilesTotal;
+  String timeLeft;
 
   /** Called when the service is created the first time */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -97,6 +105,12 @@ public class GDService extends Service {
     stopDownloadAction = new NotificationCompat.Action.Builder(
         R.drawable.stop, "Stop Download", pendingStopDownloadIntent
     ).build();
+    Intent stopHeartRateUnavailableSoundIntent = new Intent(this, GDService.class);
+    stopHeartRateUnavailableSoundIntent.setAction("stopHeartRateUnavailableSound");
+    PendingIntent pendingStopHeartRateUnavailableSoundIntent = PendingIntent.getService(this, 0, stopHeartRateUnavailableSoundIntent, 0);
+    stopHeartRateUnavailableSoundAction = new NotificationCompat.Action.Builder(
+        R.drawable.mute, "No Heartrate", pendingStopHeartRateUnavailableSoundIntent
+    ).build();
   }
   
   /** No binding supported */
@@ -107,15 +121,36 @@ public class GDService extends Service {
   }
 
   /** Create the default notification */
-  private Notification createDefaultNotification() {
-    return new NotificationCompat.Builder(this)
-        .setContentTitle(getText(R.string.notification_title))
-        .setContentText(getText(R.string.notification_service_in_foreground_message))
-        .setSmallIcon(R.drawable.notification_running)
-        .setContentIntent(pendingIntent)
-        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-        .addAction(exitAction)
-        .build();
+  private Notification updateNotification() {
+
+    // Handle download status updates
+    NotificationCompat.Builder builder;
+    if (tilesLeft==0) {
+      builder = new NotificationCompat.Builder(this)
+          .setContentTitle(getText(R.string.notification_title))
+          .setContentText(getText(R.string.notification_service_in_foreground_message))
+          .setSmallIcon(R.drawable.notification_running)
+          .setContentIntent(pendingIntent)
+          .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+          .addAction(exitAction);
+    } else {
+      /*Drawable notificationDownloadingDrawble= ResourcesCompat.getDrawable(getResources(),
+          R.drawable.notification_downloading,null);
+      DrawableCompat.setTint(notificationDownloadingDrawble,Color.WHITE);*/
+      builder = new NotificationCompat.Builder(this)
+          .setContentTitle(getText(R.string.notification_title))
+          .setContentText(getString(R.string.notification_map_download_ongoing_message, tilesLeft, timeLeft))
+          .setSmallIcon(R.drawable.notification_downloading)
+          .setContentIntent(pendingIntent)
+          .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+          .setProgress(tilesTotal, tilesDone, false)
+          .addAction(exitAction)
+          .addAction(stopDownloadAction);
+    }
+    if ((heartRateService==null)||(heartRateService.heartRateUnavailableSound))
+      builder.addAction(stopHeartRateUnavailableSoundAction);
+    notification=builder.build();
+    return notification;
   }
 
   /** Called when the service is started */
@@ -160,7 +195,7 @@ public class GDService extends Service {
             
       // Set the service to foreground
       if (!serviceInForeground) {
-        notification=createDefaultNotification();
+        notification=updateNotification();
         startForeground(R.string.notification_title, notification);
         serviceInForeground=true;
       }
@@ -216,26 +251,11 @@ public class GDService extends Service {
 
     // Handle download status updates
     if (intent.getAction().equals("mapDownloadStatusUpdated")) {
-      if (intent.getIntExtra("tilesLeft",0)==0) {
-        notification = createDefaultNotification();
-      } else {
-        int tilesDone = intent.getIntExtra("tilesDone", 0);
-        int tilesTotal = intent.getIntExtra("tilesLeft", 0) + tilesDone;
-        /*Drawable notificationDownloadingDrawble= ResourcesCompat.getDrawable(getResources(),
-            R.drawable.notification_downloading,null);
-        DrawableCompat.setTint(notificationDownloadingDrawble,Color.WHITE);*/
-        notification = new NotificationCompat.Builder(this)
-            .setContentTitle(getText(R.string.notification_title))
-            .setContentText(getString(R.string.notification_map_download_ongoing_message,
-                intent.getIntExtra("tilesLeft", 0), intent.getStringExtra("timeLeft")))
-            .setSmallIcon(R.drawable.notification_downloading)
-            .setContentIntent(pendingIntent)
-            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-            .setProgress(tilesTotal, tilesDone, false)
-            .addAction(exitAction)
-            .addAction(stopDownloadAction)
-            .build();
-      }
+      tilesLeft=intent.getIntExtra("tilesLeft",0);
+      tilesDone = intent.getIntExtra("tilesDone", 0);
+      tilesTotal = intent.getIntExtra("tilesLeft", 0) + tilesDone;
+      timeLeft = intent.getStringExtra("timeLeft");
+      notification = updateNotification();
       notificationManager.notify(R.string.notification_title, notification);
     }
 
@@ -249,6 +269,15 @@ public class GDService extends Service {
         Message m=Message.obtain(coreObject.messageHandler);
         m.what = GDCore.STOP_CORE;
         coreObject.messageHandler.sendMessage(m);
+      }
+    }
+
+    // Handle stop heart rate unavailable sound request
+    if (intent.getAction().equals("stopHeartRateUnavailableSound")) {
+      if (heartRateService!=null) {
+        heartRateService.heartRateUnavailableSound=false;
+        notification = updateNotification();
+        notificationManager.notify(R.string.notification_title, notification);
       }
     }
 

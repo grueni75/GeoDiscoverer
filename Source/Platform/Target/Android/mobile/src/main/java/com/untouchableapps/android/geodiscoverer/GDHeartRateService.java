@@ -81,6 +81,9 @@ public class GDHeartRateService {
   int minHeartRateZoneChangeTime = 0;
   long heartRateZoneChangeTimestamp = 0;
   int volumeHeartRateZoneChange = 100;
+  long connectionWarningPeriod = 0;
+  long connectionWarningTimestamp = 0;
+  boolean heartRateUnavailableSound = true;
 
   // Thread playing audio if heart rate limit is reached
   Thread alarmThread = null;
@@ -247,6 +250,8 @@ public class GDHeartRateService {
     startHeartRateZoneFour = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneFour"));
     minHeartRateZoneChangeTime = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "minHeartRateZoneChangeTime"));
     volumeHeartRateZoneChange = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "volumeHeartRateZoneChange"));
+    connectionWarningPeriod = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "connectionWarningPeriod"));
+    connectionWarningTimestamp = System.currentTimeMillis() / 1000;
 
     // Setup bluetooth low energy
     bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -268,115 +273,128 @@ public class GDHeartRateService {
       public void run() {
         while (!quitAlarmThread) {
 
-          // Handle the heart rate alarm
-          try {
+          // If heart rate is not available, issue an alarm from time to time
+          if (state!=OPERATING) {
 
-            // Alarm already playing?
-            if (player!=null) {
+            if (heartRateUnavailableSound) {
+              long t = System.currentTimeMillis() / 1000;
+              if (t >= connectionWarningTimestamp + connectionWarningPeriod) {
+                coreObject.playSound("heartRateUnavailable.ogg", 1, 100);
+                connectionWarningTimestamp = t;
+              }
+            }
 
-              // Stop if heart rate is below maximum
-              if (currentHeartRate<=maxHeartRate) {
-                playerLock.lock();
-                player.stop();
-                player2.stop();
-                alarmPlaying=false;
-                playerLock.unlock();
+          } else {
+
+
+            // Handle the heart rate alarm
+            try {
+
+              // Alarm already playing?
+              if (player != null) {
+
+                // Stop if heart rate is below maximum
+                if (currentHeartRate <= maxHeartRate) {
+                  playerLock.lock();
+                  player.stop();
+                  player2.stop();
+                  alarmPlaying = false;
+                  playerLock.unlock();
+                }
+
+                // Clean up if player is stopped
+                if ((!player.isPlaying()) && (!player2.isPlaying())) {
+                  player.release();
+                  player2.release();
+                  afd.close();
+                  player = null;
+                  player2 = null;
+                }
+
+              } else {
+
+                // Start playing if heart rate is above maximum
+                if (currentHeartRate > maxHeartRate) {
+                  afd = context.getAssets().openFd("Sound/heartRateAlarm.ogg");
+                  player = new MediaPlayer();
+                  player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                  player.prepare();
+                  player2 = new MediaPlayer();
+                  player2.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                  player2.prepare();
+                  player.setNextMediaPlayer(player2);
+                  player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                      playerLock.lock();
+                      if (alarmPlaying) {
+                        player.reset();
+                        try {
+                          player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                          player.prepare();
+                        } catch (IOException e) {
+                          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                        }
+                        player2.setNextMediaPlayer(player);
+                        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player done, handing over to player2");
+                      }
+                      playerLock.unlock();
+                    }
+                  });
+                  player2.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                      playerLock.lock();
+                      if (alarmPlaying) {
+                        player2.reset();
+                        try {
+                          player2.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                          player2.prepare();
+                        } catch (IOException e) {
+                          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                        }
+                        player.setNextMediaPlayer(player2);
+                        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player2 done, handing over to player");
+                      }
+                      playerLock.unlock();
+                    }
+                  });
+                  alarmPlaying = true;
+                  player.start();
+
+                }
               }
 
-              // Clean up if player is stopped
-              if ((!player.isPlaying())&&(!player2.isPlaying())) {
-                player.release();
-                player2.release();
-                afd.close();
-                player=null;
-                player2=null;
-              }
+              // Wait for next round
+              Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            } catch (IOException e) {
+              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+            }
 
+            // Find out the zone the heart rate is in
+            long t = System.currentTimeMillis() / 1000;
+            int nextHeartRateZone = 4;
+            if (currentHeartRate < startHeartRateZoneTwo)
+              nextHeartRateZone = 1;
+            else if (currentHeartRate < startHeartRateZoneThree)
+              nextHeartRateZone = 2;
+            else if (currentHeartRate < startHeartRateZoneFour)
+              nextHeartRateZone = 3;
+            if (currentHeartRateZone != nextHeartRateZone) {
+              if (heartRateZoneChangeTimestamp == 0) {
+                heartRateZoneChangeTimestamp = t;
+              }
+              if (t - heartRateZoneChangeTimestamp >= minHeartRateZoneChangeTime) {
+                coreObject.playSound("heartRateZoneChange.ogg", nextHeartRateZone, volumeHeartRateZoneChange);
+                currentHeartRateZone = nextHeartRateZone;
+                heartRateZoneChangeTimestamp = 0;
+              }
             } else {
-
-              // Start playing if heart rate is above maximum
-              if (currentHeartRate>maxHeartRate) {
-                afd = context.getAssets().openFd("Sound/heartRateAlarm.ogg");
-                player = new MediaPlayer();
-                player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                player.prepare();
-                player2 = new MediaPlayer();
-                player2.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                player2.prepare();
-                player.setNextMediaPlayer(player2);
-                player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                  @Override
-                  public void onCompletion(MediaPlayer mp) {
-                    playerLock.lock();
-                    if (alarmPlaying) {
-                      player.reset();
-                      try {
-                        player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                        player.prepare();
-                      } catch (IOException e) {
-                        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-                      }
-                      player2.setNextMediaPlayer(player);
-                      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player done, handing over to player2");
-                    }
-                    playerLock.unlock();
-                  }
-                });
-                player2.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                  @Override
-                  public void onCompletion(MediaPlayer mp) {
-                    playerLock.lock();
-                    if (alarmPlaying) {
-                      player2.reset();
-                      try {
-                        player2.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                        player2.prepare();
-                      } catch (IOException e) {
-                        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-                      }
-                      player.setNextMediaPlayer(player2);
-                      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player2 done, handing over to player");
-                    }
-                    playerLock.unlock();
-                  }
-                });
-                alarmPlaying=true;
-                player.start();
-
-              }
-            }
-
-            // Wait for next round
-            Thread.sleep(1000);
-          }
-          catch(InterruptedException e) {
-          }
-          catch(IOException e) {
-            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
-          }
-
-          // Find out the zone the heart rate is in
-          long t=System.currentTimeMillis()/1000;
-          int nextHeartRateZone=4;
-          if (currentHeartRate<startHeartRateZoneTwo)
-            nextHeartRateZone=1;
-          else if (currentHeartRate<startHeartRateZoneThree)
-            nextHeartRateZone=2;
-          else if (currentHeartRate<startHeartRateZoneFour)
-            nextHeartRateZone=3;
-          if (currentHeartRateZone!=nextHeartRateZone) {
-            if (heartRateZoneChangeTimestamp==0) {
-              heartRateZoneChangeTimestamp=t;
-            }
-            if (t-heartRateZoneChangeTimestamp>=minHeartRateZoneChangeTime) {
-              coreObject.playSound("heartRateZoneChange.ogg", nextHeartRateZone, volumeHeartRateZoneChange);
-              currentHeartRateZone = nextHeartRateZone;
               heartRateZoneChangeTimestamp = 0;
             }
-          } else {
-              heartRateZoneChangeTimestamp=0;
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("current heart rate zone: %d",currentHeartRateZone));
           }
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("current heart rate zone: %d",currentHeartRateZone));
         }
 
         // Stop the player if it's still running

@@ -146,4 +146,5 @@
     <string name="download_map">Download map</string>
     <string name="download_job_no_level_selected_message">You have to choose at least one layer.</string>
     <string name="download_job_estimating_size_message">Estimating storage usage of download job...</string>
+    <string name="heart_rate_unavailable_sound_muted">Muting hear rate sensor unavailable sound!</string>
 </resources>
