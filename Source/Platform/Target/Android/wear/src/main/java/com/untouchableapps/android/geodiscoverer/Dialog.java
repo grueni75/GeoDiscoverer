@@ -37,6 +37,7 @@ public class Dialog extends WearableActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_dialog);
+    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     // Get references
     progressDialogText = (TextView) findViewById(R.id.progress_dialog_text);

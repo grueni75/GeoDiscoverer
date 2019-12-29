@@ -113,6 +113,7 @@ bool MapSourceRemote::init()
   }
 
   // Cleanup the map folder if requested
+  dialog=core->getDialog()->createProgress("Reading cached map tiles",3);
   bool resetArchives=false;;
   if (core->getConfigStore()->getIntValue("Map/Remote","reset",__FILE__,__LINE__)) {
     resetArchives=true;
@@ -147,6 +148,7 @@ bool MapSourceRemote::init()
   dfd=core->openDir(getFolderPath());
   if (dfd==NULL) {
     FATAL("can not read directory <%s>",getFolderPath().c_str());
+    core->getDialog()->closeProgress(dialog);
     return false;
   }
   while ((dp = readdir(dfd)) != NULL)
@@ -180,6 +182,7 @@ bool MapSourceRemote::init()
   }
 
   // Open the zip archive that contains the maps
+  core->getDialog()->updateProgress(dialog, "Reading cached map tiles",1);
   progress=0;
   lockMapArchives(__FILE__, __LINE__);
   for(std::list<std::string>::iterator i=mapArchivePaths.begin();i!=mapArchivePaths.end();i++) {
@@ -191,6 +194,7 @@ bool MapSourceRemote::init()
     free(mapArchivePathCStr);
     if (!(mapArchive=new ZipArchive(mapArchiveDir,mapArchiveFile))) {
       FATAL("can not create zip archive object",NULL);
+      core->getDialog()->closeProgress(dialog);
       return false;
     }
     bool useMapArchive=true;
@@ -217,10 +221,12 @@ bool MapSourceRemote::init()
 
   // Go through all calibration files in the map directory
   if (!collectMapTiles(getFolderPath(),mapFilebases)) {
+    core->getDialog()->closeProgress(dialog);
     return false;
   }
 
   // Remove duplicates
+  core->getDialog()->updateProgress(dialog, "Reading cached map tiles",2);
   mapFilebases.sort();
   mapFilebases.unique();
 
@@ -240,17 +246,20 @@ bool MapSourceRemote::init()
     mapContainer=new MapContainer();
     if (!mapContainer) {
       FATAL("can not create map container",NULL);
+      core->getDialog()->closeProgress(dialog);
       return false;
     }
     mapContainer->setArchiveFileFolder((*i)[0]);
     mapContainer->setArchiveFileName((*i)[1]);
     if (!(mapContainer->readCalibrationFile(std::string(dirname((char*)filebase.c_str())),std::string(basename((char*)filebase.c_str())),extension))) {
+      core->getDialog()->closeProgress(dialog);
       return false;
     }
     mapContainers.push_back(mapContainer);
     if ((mapContainer->getZoomLevelMap()>maxZoomLevel)||(mapContainer->getZoomLevelMap()<minZoomLevel)) {
       DEBUG("zoom level bounds reported by remote server are not correct, requesting reset of map the next time and aborting this time",NULL);
       core->getConfigStore()->setIntValue("Map/Remote","reset",1,__FILE__,__LINE__);
+      core->getDialog()->closeProgress(dialog);
       return false;
     }
 
@@ -266,12 +275,14 @@ bool MapSourceRemote::init()
   }
 
   // Init the zoom levels
+  core->getDialog()->updateProgress(dialog, "Reading cached map tiles",3);
   for (int z=0;z<(maxZoomLevel-minZoomLevel)+2;z++) {
     zoomLevelSearchTrees.push_back(NULL);
   }
 
   // Update the search structures
   createSearchDataStructures(false);
+  core->getDialog()->closeProgress(dialog);
 
   // Finished
   isInitialized=true;
