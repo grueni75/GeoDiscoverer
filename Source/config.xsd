@@ -164,26 +164,26 @@
           </xsd:annotation>
           <xsd:complexType>
             <xsd:sequence>
-			        <xsd:element name="App">
-			          <xsd:annotation>
-			            <xsd:documentation>List of supported cockpit apps.</xsd:documentation>
-			          </xsd:annotation>
-			          <xsd:complexType>
-			            <xsd:sequence>
-			              <xsd:element name="MetaWatch">
-			                <xsd:annotation>
-			                  <xsd:documentation>Shows cockpit infos on a meta watch.</xsd:documentation>
-			                </xsd:annotation>
-			                <xsd:complexType>
-			                  <xsd:sequence>
-			                    <xsd:element name="active" type="xsd:boolean" default="0" gd:upgrade="restore">
-			                      <xsd:annotation>
-			                        <xsd:documentation>Enables the meta watch cockpit app.</xsd:documentation>
-			                      </xsd:annotation>
-			                    </xsd:element>
-			                  </xsd:sequence>
-			                </xsd:complexType>
-			              </xsd:element>
+              <xsd:element name="App">
+                <xsd:annotation>
+                  <xsd:documentation>List of supported cockpit apps.</xsd:documentation>
+                </xsd:annotation>
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="MetaWatch">
+                      <xsd:annotation>
+                        <xsd:documentation>Shows cockpit infos on a meta watch.</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="active" type="xsd:boolean" default="0" gd:upgrade="restore">
+                            <xsd:annotation>
+                              <xsd:documentation>Enables the meta watch cockpit app.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
                     <xsd:element name="Vibration">
                       <xsd:annotation>
                         <xsd:documentation>Vibrates if important navigation events occur (turns, off route).</xsd:documentation>
@@ -438,325 +438,325 @@
                       </xsd:annotation>
                       <xsd:complexType>
                         <xsd:sequence>                        
-			                    <xsd:element name="selectedPage" type="xsd:string" default="Default" gd:upgrade="restore">
-			                      <xsd:annotation>
-			                        <xsd:documentation>Name of the currently selected widget page.</xsd:documentation>
-			                      </xsd:annotation>
-			                    </xsd:element>
-			                    <xsd:element name="Page" maxOccurs="unbounded">
-			                      <xsd:annotation>
-			                        <xsd:documentation>Collection of widgets that are displayed together.</xsd:documentation>
-			                      </xsd:annotation>
-			                      <xsd:complexType>
-			                        <xsd:sequence>
-			                          <xsd:element name="Primitive" maxOccurs="unbounded">
-			                            <xsd:annotation>
-			                              <xsd:documentation>Defines a widget.</xsd:documentation>
-			                            </xsd:annotation>
-			                            <xsd:complexType>
-			                              <xsd:sequence>
-			                                <xsd:element name="type" default="button">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Kind of widget.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:simpleType>
-			                                    <xsd:restriction base="xsd:string">
-			                                      <xsd:enumeration value="button"/>
-			                                      <xsd:enumeration value="checkbox"/>
-			                                      <xsd:enumeration value="meter"/>
-			                                      <xsd:enumeration value="scale"/>
-			                                      <xsd:enumeration value="status"/>
-			                                      <xsd:enumeration value="navigation"/>
-			                                      <xsd:enumeration value="pathInfo"/>                                      
-			                                    </xsd:restriction>
-			                                  </xsd:simpleType>
-			                                </xsd:element>
-			                                <xsd:element name="Position" maxOccurs="unbounded">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Defines the position of the widget for a given screen diagonal.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:complexType>
-			                                    <xsd:sequence>
-			                                      <xsd:element name="Portrait">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Position of the widget in portrait orientation.</xsd:documentation>
-			                                        </xsd:annotation>
-			                                        <xsd:complexType>
-			                                          <xsd:sequence>
-			                                            <xsd:element name="x" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>X coordinate in percent.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>
-			                                            <xsd:element name="y" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>Y coordinate in percent.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>
-			                                            <xsd:element name="xHidden" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>X coordinate in percent when widget is outside screen.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>
-			                                            <xsd:element name="yHidden" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>Y coordinate in percent when widget is outside screen.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>			                                            
-			                                            <xsd:element name="z" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>Z coordinate in percent.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>
-			                                          </xsd:sequence>
-			                                        </xsd:complexType>
-			                                      </xsd:element>
-			                                      <xsd:element name="Landscape">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Position of the widget in landscape orientation.</xsd:documentation>
-			                                        </xsd:annotation>
-			                                        <xsd:complexType>
-			                                          <xsd:sequence>
-			                                            <xsd:element name="x" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>X coordinate in percent.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>
-			                                            <xsd:element name="y" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>Y coordinate in percent.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>
-			                                            <xsd:element name="xHidden" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>X coordinate in percent when widget is outside screen.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>
-			                                            <xsd:element name="yHidden" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>Y coordinate in percent when widget is outside screen.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>	
-			                                            <xsd:element name="z" type="xsd:double" default="0">
-			                                              <xsd:annotation>
-			                                                <xsd:documentation>Z coordinate in percent.</xsd:documentation>
-			                                              </xsd:annotation>
-			                                            </xsd:element>
-			                                          </xsd:sequence>
-			                                        </xsd:complexType>
-			                                      </xsd:element>
-			                                    </xsd:sequence>
-			                                    <xsd:attribute name="refScreenDiagonal">
-			                                      <xsd:annotation>
-			                                        <xsd:documentation>Screen diagonal in inch this widget position was designed for.</xsd:documentation>
-			                                      </xsd:annotation>
-			                                    </xsd:attribute>
-			                                  </xsd:complexType>
-			                                </xsd:element>
-			                                <xsd:element name="ActiveColor">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Color of the widget if it is activated.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:complexType>
-			                                    <xsd:sequence>
-			                                      <xsd:element name="red" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Red component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="green" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Green component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="blue" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Blue component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="alpha" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Alpha component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                    </xsd:sequence>
-			                                  </xsd:complexType>
-			                                </xsd:element>
-			                                <xsd:element name="InactiveColor">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Color of the widdget if it is not activated.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:complexType>
-			                                    <xsd:sequence>
-			                                      <xsd:element name="red" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Red component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="green" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Green component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="blue" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Blue component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="alpha" type="xsd:integer" default="100">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Alpha component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                    </xsd:sequence>
-			                                  </xsd:complexType>
-			                                </xsd:element>
-			                                <xsd:element name="BusyColor">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Color of the widget if it is busy.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:complexType>
-			                                    <xsd:sequence>
-			                                      <xsd:element name="red" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Red component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="green" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Green component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="blue" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Blue component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="alpha" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Alpha component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                    </xsd:sequence>
-			                                  </xsd:complexType>
-			                                </xsd:element>
-			                                <xsd:element name="iconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the background image.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="command" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Command to execute if widget is clicked.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="repeat" type="xsd:integer" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Executes command repeatedly if set.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="checkedIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the background image showing the checked state.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="checkedCommand" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Command to execute if widget is checked.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="uncheckedIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the background image showing the unchecked state.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="uncheckedCommand" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Command to execute if widget is unchecked.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="stateConfigPath" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Path to the config entry that holds the check state.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="stateConfigName" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Name of the config entry that holds the check state.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="meterType" default="altitude" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Kind of meter to display.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:simpleType>
-			                                    <xsd:restriction base="xsd:string">
-			                                      <xsd:enumeration value="altitude"/>
-			                                      <xsd:enumeration value="speed"/>
-			                                      <xsd:enumeration value="trackLength"/>
-			                                    </xsd:restriction>
-			                                  </xsd:simpleType>
-			                                </xsd:element>
-			                                <xsd:element name="updateInterval" type="xsd:integer" default="1000000" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Time in microseconds to elapse before updating the widget.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="labelY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical position of the label in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="valueY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical position of the value in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="unitY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical position of the unit in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="tickLabelOffsetX" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Horizontal offset for the scale values in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="mapLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the map label in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
+                          <xsd:element name="selectedPage" type="xsd:string" default="Default" gd:upgrade="restore">
+                            <xsd:annotation>
+                              <xsd:documentation>Name of the currently selected widget page.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="Page" maxOccurs="unbounded">
+                            <xsd:annotation>
+                              <xsd:documentation>Collection of widgets that are displayed together.</xsd:documentation>
+                            </xsd:annotation>
+                            <xsd:complexType>
+                              <xsd:sequence>
+                                <xsd:element name="Primitive" maxOccurs="unbounded">
+                                  <xsd:annotation>
+                                    <xsd:documentation>Defines a widget.</xsd:documentation>
+                                  </xsd:annotation>
+                                  <xsd:complexType>
+                                    <xsd:sequence>
+                                      <xsd:element name="type" default="button">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Kind of widget.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                            <xsd:enumeration value="button"/>
+                                            <xsd:enumeration value="checkbox"/>
+                                            <xsd:enumeration value="meter"/>
+                                            <xsd:enumeration value="scale"/>
+                                            <xsd:enumeration value="status"/>
+                                            <xsd:enumeration value="navigation"/>
+                                            <xsd:enumeration value="pathInfo"/>                                      
+                                          </xsd:restriction>
+                                        </xsd:simpleType>
+                                      </xsd:element>
+                                      <xsd:element name="Position" maxOccurs="unbounded">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Defines the position of the widget for a given screen diagonal.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="Portrait">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Position of the widget in portrait orientation.</xsd:documentation>
+                                              </xsd:annotation>
+                                              <xsd:complexType>
+                                                <xsd:sequence>
+                                                  <xsd:element name="x" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>X coordinate in percent.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>
+                                                  <xsd:element name="y" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>Y coordinate in percent.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>
+                                                  <xsd:element name="xHidden" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>X coordinate in percent when widget is outside screen.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>
+                                                  <xsd:element name="yHidden" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>Y coordinate in percent when widget is outside screen.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>			                                            
+                                                  <xsd:element name="z" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>Z coordinate in percent.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>
+                                                </xsd:sequence>
+                                              </xsd:complexType>
+                                            </xsd:element>
+                                            <xsd:element name="Landscape">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Position of the widget in landscape orientation.</xsd:documentation>
+                                              </xsd:annotation>
+                                              <xsd:complexType>
+                                                <xsd:sequence>
+                                                  <xsd:element name="x" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>X coordinate in percent.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>
+                                                  <xsd:element name="y" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>Y coordinate in percent.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>
+                                                  <xsd:element name="xHidden" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>X coordinate in percent when widget is outside screen.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>
+                                                  <xsd:element name="yHidden" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>Y coordinate in percent when widget is outside screen.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>	
+                                                  <xsd:element name="z" type="xsd:double" default="0">
+                                                    <xsd:annotation>
+                                                      <xsd:documentation>Z coordinate in percent.</xsd:documentation>
+                                                    </xsd:annotation>
+                                                  </xsd:element>
+                                                </xsd:sequence>
+                                              </xsd:complexType>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                          <xsd:attribute name="refScreenDiagonal">
+                                            <xsd:annotation>
+                                              <xsd:documentation>Screen diagonal in inch this widget position was designed for.</xsd:documentation>
+                                            </xsd:annotation>
+                                          </xsd:attribute>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="ActiveColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the widget if it is activated.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="InactiveColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the widdget if it is not activated.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="100">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="BusyColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the widget if it is busy.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="iconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the background image.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="command" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Command to execute if widget is clicked.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="repeat" type="xsd:integer" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Executes command repeatedly if set.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="checkedIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the background image showing the checked state.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="checkedCommand" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Command to execute if widget is checked.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="uncheckedIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the background image showing the unchecked state.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="uncheckedCommand" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Command to execute if widget is unchecked.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="stateConfigPath" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Path to the config entry that holds the check state.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="stateConfigName" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Name of the config entry that holds the check state.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="meterType" default="altitude" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Kind of meter to display.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:simpleType>
+                                          <xsd:restriction base="xsd:string">
+                                            <xsd:enumeration value="altitude"/>
+                                            <xsd:enumeration value="speed"/>
+                                            <xsd:enumeration value="trackLength"/>
+                                          </xsd:restriction>
+                                        </xsd:simpleType>
+                                      </xsd:element>
+                                      <xsd:element name="updateInterval" type="xsd:integer" default="1000000" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Time in microseconds to elapse before updating the widget.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="labelY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical position of the label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="valueY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical position of the value in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="unitY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical position of the unit in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="tickLabelOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset for the scale values in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="mapLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the map label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
                                       <xsd:element name="layerLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Vertical offset for the layer label in percent of the widget height.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
-			                                <xsd:element name="labelWidth" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Width of the text in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="textRowFirstOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the first row in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>                                
-			                                <xsd:element name="textRowSecondOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the second row in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>   
-			                                <xsd:element name="textRowThirdOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the third row in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>                                
-			                                <xsd:element name="textRowFourthOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the fourth row in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>   
+                                      <xsd:element name="labelWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the text in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="textRowFirstOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the first row in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>                                
+                                      <xsd:element name="textRowSecondOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the second row in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>   
+                                      <xsd:element name="textRowThirdOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the third row in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>                                
+                                      <xsd:element name="textRowFourthOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the fourth row in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>   
                                       <xsd:element name="textColumnOffsetX" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Horizontal offset for each column in percent of the widget width.</xsd:documentation>
@@ -772,428 +772,428 @@
                                           <xsd:documentation>Vertical offset for the clock text in percent of the widget height.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>   
-			                                <xsd:element name="turnDistanceValueOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset for the turn distance value in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>   
-			                                <xsd:element name="directionIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the direction of travel.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="arrowIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the arrow.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="targetIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the target.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="separatorIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the separator.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="blindIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the background if below content shall be defocused.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="statusIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the status fields.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="batteryIconChargingFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the a battery dot that is charging.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="batteryIconFullFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the a battery dot that is full.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="batteryIconEmptyFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the a battery dot that is empty.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="directionChangeDuration" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Duration in microseconds of a direction change.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="targetRadius" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Radius of the target in percent.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="orientationLabelRadius" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Radius of the orientation labels in percent.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="batteryIconRadius" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Radius of the battery icons in percent.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="turnLineWidth" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Line width of the turn indicator.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="turnLineArrowOverhang" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Arrow overhang of the turn indicator.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="turnLineArrowHeight" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Arrow height of the turn indicator.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="turnLineStartHeight" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Start height of the turn indicator.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="turnLineMiddleHeight" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Middle height of the turn indicator.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="turnLineStartX" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Start x position of the turn arrow.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="turnLineStartY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Start y position of the turn arrow.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="turnWatchAlpha" type="xsd:integer" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Color alpha value to apply when displayed on a watch.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>			                                
-			                               	<xsd:element name="minTouchDetectionRadius" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Min radius in percent of the widget height a touch has to have from the center to be registered as a hit on the widget.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                               	<xsd:element name="circularButtonAngle" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Opening angle in degress which a touch is detected as a hit of a button within the widget.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="statusTextWidthLimit" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Maximum width in percent of the widget width a status text on a watch shall have.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>			                                
-			                                <xsd:element name="statusTextRadius" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Radius in percent of the widget width a status text on a watch shall have.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>	
-			                                <xsd:element name="clockRadius" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Radius in percent of the widget width the clock on a watch shall have.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>	
-			                                <xsd:element name="statusTextAngleOffset" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Angle offset in degrees a status text on a watch shall have.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>	
-			                                <xsd:element name="pathNameOffsetX" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Horizontal offset of the path name in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="pathNameOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset of the path name in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="pathNameWidth" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Width of the path name in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="pathValuesWidth" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Width of the path info values in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
+                                      <xsd:element name="turnDistanceValueOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the turn distance value in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>   
+                                      <xsd:element name="directionIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the direction of travel.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="arrowIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the arrow.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="targetIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the target.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="separatorIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the separator.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="blindIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the background if below content shall be defocused.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="statusIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the status fields.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryIconChargingFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the a battery dot that is charging.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryIconFullFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the a battery dot that is full.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryIconEmptyFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the a battery dot that is empty.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="directionChangeDuration" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Duration in microseconds of a direction change.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="targetRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius of the target in percent.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="orientationLabelRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius of the orientation labels in percent.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryIconRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius of the battery icons in percent.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="turnLineWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Line width of the turn indicator.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="turnLineArrowOverhang" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Arrow overhang of the turn indicator.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="turnLineArrowHeight" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Arrow height of the turn indicator.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="turnLineStartHeight" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Start height of the turn indicator.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="turnLineMiddleHeight" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Middle height of the turn indicator.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="turnLineStartX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Start x position of the turn arrow.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="turnLineStartY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Start y position of the turn arrow.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="turnWatchAlpha" type="xsd:integer" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color alpha value to apply when displayed on a watch.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>			                                
+                                      <xsd:element name="minTouchDetectionRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Min radius in percent of the widget height a touch has to have from the center to be registered as a hit on the widget.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="circularButtonAngle" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Opening angle in degress which a touch is detected as a hit of a button within the widget.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="statusTextWidthLimit" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Maximum width in percent of the widget width a status text on a watch shall have.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>			                                
+                                      <xsd:element name="statusTextRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius in percent of the widget width a status text on a watch shall have.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>	
+                                      <xsd:element name="clockRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius in percent of the widget width the clock on a watch shall have.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>	
+                                      <xsd:element name="statusTextAngleOffset" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Angle offset in degrees a status text on a watch shall have.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>	
+                                      <xsd:element name="pathNameOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the path name in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="pathNameOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the path name in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="pathNameWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the path name in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="pathValuesWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the path info values in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
                                       <xsd:element name="pathLengthOffsetX" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Horizontal offset of the path length value in percent of the widget width.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
-			                                <xsd:element name="pathLengthOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset of the path length value in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
+                                      <xsd:element name="pathLengthOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the path length value in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
                                       <xsd:element name="pathAltitudeUpOffsetX" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Horizontal offset of the altitude up value in percent of the widget width.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
-			                                <xsd:element name="pathAltitudeUpOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset of the altitude up value in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
+                                      <xsd:element name="pathAltitudeUpOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the altitude up value in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
                                       <xsd:element name="pathAltitudeDownOffsetX" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Horizontal offset of the altitude down value in percent of the widget width.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
-			                                <xsd:element name="pathAltitudeDownOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset of the altitude down value in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
+                                      <xsd:element name="pathAltitudeDownOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the altitude down value in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
                                       <xsd:element name="pathDurationOffsetX" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Horizontal offset of the duration value in percent of the widget width.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
-			                                <xsd:element name="pathDurationOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset of the duration value in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileWidth" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Width of the altitude profile in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileHeightWithNavigationPoints" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Height of the altitude profile in percent of the widget height if navigation points are present.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileHeightWithoutNavigationPoints" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Height of the altitude profile in percent of the widget height if no navigation points are present.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileOffsetX" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Horizontal offset of the altitude profile in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset of the altitude profile in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileAxisLineWidth" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Width of lines drawn in the altitude profile axis on a 160 dpi screen.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileLineWidth" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Width of lines drawn in the altitude profile on a 160 dpi screen.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="noAltitudeProfileOffsetX" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Horizontal offset of the no altitude profile label in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="noAltitudeProfileOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Vertical offset of the no altitude profile label in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileMinAltitudeDiff" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Minimum altitude difference in meters to use when drawing an altitude profile.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileXTickCount" type="xsd:integer" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Number of ticks on the x axis in the altitude profile.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileYTickCount" type="xsd:integer" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Number of ticks on the x axis in the altitude profile.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileXTickLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Verticall offset of the altitude profile X tick labels in percent of the widget height.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileYTickLabelOffsetX" type="xsd:double" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Horizontal offset of the altitude profile Y tick labels in percent of the widget width.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileXTickLabelWidth" type="xsd:integer" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Width of the altitude profile X tick labels in number of characters.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="altitudeProfileYTickLabelWidth" type="xsd:integer" default="0" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Width of the altitude profile Y tick labels in number of characters.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="locationIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the current location.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="navigationPointIconFilename" type="xsd:string" default="unknown" minOccurs="0">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Filename of the image showing the navigation point.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                </xsd:element>
-			                                <xsd:element name="TurnColor">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Color of the turn arrow.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:complexType>
-			                                    <xsd:sequence>
-			                                      <xsd:element name="red" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Red component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="green" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Green component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="blue" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Blue component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="alpha" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Alpha component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                    </xsd:sequence>
-			                                  </xsd:complexType>
-			                                </xsd:element>
-			                                <xsd:element name="AltitudeProfileFillColor">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Color of the turn arrow.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:complexType>
-			                                    <xsd:sequence>
-			                                      <xsd:element name="red" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Red component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="green" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Green component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="blue" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Blue component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="alpha" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Alpha component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                    </xsd:sequence>
-			                                  </xsd:complexType>
-			                                </xsd:element>
-			                                <xsd:element name="AltitudeProfileLineColor">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Color of the turn arrow.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:complexType>
-			                                    <xsd:sequence>
-			                                      <xsd:element name="red" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Red component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="green" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Green component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="blue" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Blue component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="alpha" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Alpha component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                    </xsd:sequence>
-			                                  </xsd:complexType>
-			                                </xsd:element>
-			                                <xsd:element name="AltitudeProfileAxisColor">
-			                                  <xsd:annotation>
-			                                    <xsd:documentation>Color of the turn arrow.</xsd:documentation>
-			                                  </xsd:annotation>
-			                                  <xsd:complexType>
-			                                    <xsd:sequence>
-			                                      <xsd:element name="red" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Red component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="green" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Green component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="blue" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Blue component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                      <xsd:element name="alpha" type="xsd:integer" default="255">
-			                                        <xsd:annotation>
-			                                          <xsd:documentation>Alpha component [0-255]</xsd:documentation>
-			                                        </xsd:annotation>
-			                                      </xsd:element>
-			                                    </xsd:sequence>
-			                                  </xsd:complexType>
-			                                </xsd:element>
-			                              </xsd:sequence>
-			                              <xsd:attribute name="name">
-			                                <xsd:annotation>
-			                                  <xsd:documentation>Name of the widget primitive.</xsd:documentation>
-			                                </xsd:annotation>
-			                              </xsd:attribute>
-			                            </xsd:complexType>
-			                          </xsd:element>
-			                        </xsd:sequence>
-			                        <xsd:attribute name="name">
-			                          <xsd:annotation>
-			                            <xsd:documentation>Name of the page.</xsd:documentation>
-			                          </xsd:annotation>
-			                        </xsd:attribute>
-			                      </xsd:complexType>
-			                    </xsd:element>                        
+                                      <xsd:element name="pathDurationOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the duration value in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the altitude profile in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileHeightWithNavigationPoints" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Height of the altitude profile in percent of the widget height if navigation points are present.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileHeightWithoutNavigationPoints" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Height of the altitude profile in percent of the widget height if no navigation points are present.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the altitude profile in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the altitude profile in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileAxisLineWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of lines drawn in the altitude profile axis on a 160 dpi screen.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileLineWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of lines drawn in the altitude profile on a 160 dpi screen.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="noAltitudeProfileOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the no altitude profile label in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="noAltitudeProfileOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the no altitude profile label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileMinAltitudeDiff" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Minimum altitude difference in meters to use when drawing an altitude profile.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileXTickCount" type="xsd:integer" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Number of ticks on the x axis in the altitude profile.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileYTickCount" type="xsd:integer" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Number of ticks on the x axis in the altitude profile.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileXTickLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Verticall offset of the altitude profile X tick labels in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileYTickLabelOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the altitude profile Y tick labels in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileXTickLabelWidth" type="xsd:integer" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the altitude profile X tick labels in number of characters.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="altitudeProfileYTickLabelWidth" type="xsd:integer" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the altitude profile Y tick labels in number of characters.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="locationIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the current location.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="navigationPointIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image showing the navigation point.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="TurnColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the turn arrow.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="AltitudeProfileFillColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the turn arrow.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="AltitudeProfileLineColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the turn arrow.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="AltitudeProfileAxisColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the turn arrow.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                    </xsd:sequence>
+                                    <xsd:attribute name="name">
+                                      <xsd:annotation>
+                                        <xsd:documentation>Name of the widget primitive.</xsd:documentation>
+                                      </xsd:annotation>
+                                    </xsd:attribute>
+                                  </xsd:complexType>
+                                </xsd:element>
+                              </xsd:sequence>
+                              <xsd:attribute name="name">
+                                <xsd:annotation>
+                                  <xsd:documentation>Name of the page.</xsd:documentation>
+                                </xsd:annotation>
+                              </xsd:attribute>
+                            </xsd:complexType>
+                          </xsd:element>                        
                         </xsd:sequence>
                         <xsd:attribute name="name">
                           <xsd:annotation>
@@ -1204,6 +1204,11 @@
                     </xsd:element>
                   </xsd:sequence>
                 </xsd:complexType>
+              </xsd:element>
+              <xsd:element name="refreshRate" type="xsd:integer" default="60">
+                <xsd:annotation>
+                  <xsd:documentation>Rate in Herz that the drawing should be refreshed at.</xsd:documentation>
+                </xsd:annotation>
               </xsd:element>
               <xsd:element name="fadeDuration" type="xsd:integer" default="250000">
                 <xsd:annotation>
@@ -1665,16 +1670,16 @@
                 </xsd:annotation>
                 <xsd:complexType>
                   <xsd:sequence>
-			              <xsd:element name="reset" type="xsd:integer" default="0" gd:upgrade="restore">
-			                <xsd:annotation>
-			                  <xsd:documentation>Indicates that the cached tiles need to be reset.</xsd:documentation>
-			                </xsd:annotation>
-			              </xsd:element>
-			              <xsd:element name="folder" type="xsd:string" default="Default" gd:upgrade="restore">
-			                <xsd:annotation>
-			                  <xsd:documentation>Remote folder that contains map images.</xsd:documentation>
-			                </xsd:annotation>
-			              </xsd:element>
+                    <xsd:element name="reset" type="xsd:integer" default="0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Indicates that the cached tiles need to be reset.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="folder" type="xsd:string" default="Default" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Remote folder that contains map images.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
                     <xsd:element name="minZoomLevel" type="xsd:integer" default="0" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Min zoom level of the remote map.</xsd:documentation>
@@ -2000,11 +2005,11 @@
           </xsd:complexType>
         </xsd:element>
       </xsd:sequence>
-		  <xsd:attribute name="version">
-		    <xsd:annotation>
-		      <xsd:documentation>Config version.</xsd:documentation>
-		    </xsd:annotation>
-		  </xsd:attribute>
+      <xsd:attribute name="version">
+        <xsd:annotation>
+          <xsd:documentation>Config version.</xsd:documentation>
+        </xsd:annotation>
+      </xsd:attribute>
     </xsd:complexType>
   </xsd:element>
 </xsd:schema>

@@ -48,6 +48,14 @@ void ProfileBlockResult::updateDuration(TimestampInMicroseconds duration) {
     maxDuration=duration;
 }
 
+// Clears the result
+void ProfileBlockResult::clearResult() {
+  totalDuration=0;
+  totalCount=0;
+  minDuration=std::numeric_limits<TimestampInMicroseconds>::max();
+  maxDuration=0;
+}
+
 // Outputs the result
 void ProfileBlockResult::outputResult(TimestampInMicroseconds totalMinDuration, TimestampInMicroseconds totalAvgDuration, TimestampInMicroseconds totalMaxDuration, TimestampInMicroseconds totalTotalDuration, bool clear) {
   DEBUG("%-40s: min=%8.2fms (%3.0f%%) * avg=%8.2fms (%3.0f%%) * max=%8.2fms (%3.0f%%) * total=%10.2fms (%3.0f%%)",name.c_str(),
@@ -55,12 +63,7 @@ void ProfileBlockResult::outputResult(TimestampInMicroseconds totalMinDuration, 
         (double)getAvgDuration()/1000.0,(double)getAvgDuration()/(double)totalAvgDuration*100,
         (double)maxDuration/1000.0,(double)maxDuration/(double)totalMaxDuration*100,
         (double)totalDuration/1000.0,(double)totalDuration/(double)totalTotalDuration*100);
-  if (clear) {
-    totalDuration=0;
-    totalCount=0;
-    minDuration=std::numeric_limits<TimestampInMicroseconds>::max();
-    maxDuration=0;
-  }
+  clearResult();
 }
 
 // Returns the average duration

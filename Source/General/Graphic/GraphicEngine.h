@@ -132,6 +132,8 @@ protected:
   double maxIdleTime;
   double totalIdleTime;
   Int frameCount;
+  TimestampInMicroseconds targetDrawingTime;
+  bool drawingTooSlow;
 
 public:
 
@@ -316,6 +318,10 @@ public:
 
   GraphicRectangle *getNavigationPointIcon() {
     return &navigationPointIcon;
+  }
+
+  bool getDrawingTooSlow() const {
+    return drawingTooSlow;
   }
 };
 

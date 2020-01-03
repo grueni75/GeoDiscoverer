@@ -57,6 +57,9 @@ public:
   // Outputs the result
   void outputResult(bool clear);
 
+  // Clears the result
+  void clearResult();
+
   // Getters and setters
   TimestampInMicroseconds getLastTimestamp() const
   {

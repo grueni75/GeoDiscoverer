@@ -71,6 +71,13 @@ void ProfileMethodResult::outputResult(bool clear) {
   }
 }
 
+// Clears the result
+void ProfileMethodResult::clearResult() {
+  for(ProfileBlockResultMap::iterator i=blockResultMap.begin();i!=blockResultMap.end();i++) {
+    i->second->clearResult();
+  }
+}
+
 // Returns the result of the block with the given name
 ProfileBlockResult *ProfileMethodResult::getBlockResult(std::string name) {
 

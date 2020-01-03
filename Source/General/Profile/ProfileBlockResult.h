@@ -50,6 +50,9 @@ public:
   // Outputs the result
   void outputResult(TimestampInMicroseconds totalMinDuration, TimestampInMicroseconds totalAvgDuration, TimestampInMicroseconds totalMaxDuration, TimestampInMicroseconds totalTotalDuration, bool clear);
 
+  // Clears the result
+  void clearResult();
+
   // Getters and setters
   void setName(std::string name)
   {

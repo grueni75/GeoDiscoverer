@@ -141,4 +141,19 @@ void ProfileEngine::outputResult(std::string method, bool clear) {
   core->getThread()->unlockMutex(accessMutex);
 }
 
+// Clears the time measurement record
+void ProfileEngine::clearResult(std::string method) {
+
+  // Ensure that only one instance is executing this code
+  core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+
+  // Clear all records
+  for(ProfileMethodResultMap::iterator i=methodResultMap.begin();i!=methodResultMap.end();i++) {
+    i->second->clearResult();
+  }
+
+  // Release mutex
+  core->getThread()->unlockMutex(accessMutex);
+}
+
 }

@@ -367,6 +367,9 @@ void Core::updateScreen(bool forceRedraw) {
 
   bool wakeupMapUpdateThread=false;
 
+#ifdef PROFILING_ENABLED
+  core->getProfileEngine()->clearResult(__PRETTY_FUNCTION__);
+#endif
   PROFILE_START;
 
   // Allow texture allocation
@@ -452,7 +455,10 @@ void Core::updateScreen(bool forceRedraw) {
   // Disallow texture allocation
   getDefaultDevice()->getScreen()->setAllowAllocation(false);
   PROFILE_ADD("post draw");
-  PROFILE_END;
+  //PROFILE_END;
+  if (getDefaultGraphicEngine()->getDrawingTooSlow()) {
+    core->getProfileEngine()->outputResult(__PRETTY_FUNCTION__,true);
+  }
 }
 
 // Adds a new dashboard device

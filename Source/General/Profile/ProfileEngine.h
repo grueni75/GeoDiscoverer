@@ -69,6 +69,9 @@ public:
   // Outputs the collected time measurements
   void outputResult(std::string method, bool clear);
 
+  // Clears the time measurement record
+  void clearResult(std::string method);
+
 };
 
 }

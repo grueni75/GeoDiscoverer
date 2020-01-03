@@ -77,6 +77,8 @@ GraphicEngine::GraphicEngine(Device *device) :
   fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration",__FILE__, __LINE__);
   blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration",__FILE__, __LINE__);
   mapReferenceDPI=core->getConfigStore()->getIntValue("Graphic","mapReferenceDotsPerInch",__FILE__,__LINE__);
+  targetDrawingTime=(TimestampInMicroseconds) 1.0/((double)core->getConfigStore()->getIntValue("Graphic","refreshRate",__FILE__,__LINE__))*1.0e6; 
+  drawingTooSlow=false;
 
   // Init the dynamic data
   init();
@@ -172,6 +174,9 @@ bool GraphicEngine::draw(bool forceRedraw) {
   // Get the time
   currentTime=core->getClock()->getMicrosecondsSinceStart();
 
+#ifdef PROFILING_ENABLED
+  core->getProfileEngine()->clearResult(__PRETTY_FUNCTION__);
+#endif
   PROFILE_START;
 
   // Copy the current position
@@ -717,6 +722,11 @@ bool GraphicEngine::draw(bool forceRedraw) {
   }
   totalDrawingTime+=drawingTime;
   frameCount++;
+  if (drawingTime>targetDrawingTime) {
+    drawingTooSlow=true;
+  } else {
+    drawingTooSlow=false;
+  }
 #endif
 
   // Everything done
@@ -727,8 +737,19 @@ bool GraphicEngine::draw(bool forceRedraw) {
 
   //PROFILE_ADD("cleanup");
   PROFILE_ADD("drawing itself");
-  PROFILE_END;
+  //PROFILE_END;
+#ifdef PROFILING_ENABLED
+  if (drawingTooSlow) {
+    core->getProfileEngine()->outputResult(__PRETTY_FUNCTION__,true);
+  }
+#endif
 
+  // Enforce a frame rate by waiting the rest of the time
+  TimestampInMicroseconds currentDrawingTime = core->getClock()->getMicrosecondsSinceStart() - currentTime;
+  if (targetDrawingTime>currentDrawingTime) {
+    usleep(targetDrawingTime-currentDrawingTime);
+  }
+  
   return result;
 }
 
