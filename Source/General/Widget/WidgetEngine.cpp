@@ -33,6 +33,7 @@ WidgetEngine::WidgetEngine(Device *device) : visiblePages(device->getScreen()){
   this->device=device;
   selectedWidgetColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/SelectedColor",__FILE__, __LINE__);
   buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay",__FILE__, __LINE__);
+  buttonLongPressDelay=c->getIntValue("Graphic/Widget","buttonLongPressDelay",__FILE__, __LINE__);
   buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod",__FILE__, __LINE__);
   contextMenuDelay=c->getIntValue("Graphic/Widget","contextMenuDelay",__FILE__, __LINE__);
   contextMenuAllowedPixelJitter=c->getIntValue("Graphic/Widget","contextMenuAllowedPixelJitter",__FILE__, __LINE__);
@@ -177,6 +178,7 @@ void WidgetEngine::createGraphic() {
       config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setParameter("iconFilename","pageLeft");
       config.setParameter("command","setPage(Path Tools,+1)");
+      config.setParameter("longPressCommand","showMenu()");
       config.setParameter("repeat","0");
       addWidgetToPage(config);
       config.setPageName("Path Tools");
@@ -200,6 +202,7 @@ void WidgetEngine::createGraphic() {
       config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setParameter("iconFilename","pageRight");
       config.setParameter("command","setPage(Path Tools,-1)");
+      config.setParameter("longPressCommand","showMenu()");
       config.setParameter("repeat","0");
       addWidgetToPage(config);
       config.setPageName("Path Tools");
@@ -1349,6 +1352,9 @@ void WidgetEngine::createGraphic() {
       // Set type-dependent properties
       if (widgetType=="button") {
         button->setCommand(c->getStringValue(widgetPath,"command",__FILE__, __LINE__));
+        std::string longPressCommand=c->getStringValue(widgetPath,"longPressCommand",__FILE__, __LINE__);
+        if (longPressCommand!="unknown")
+          button->setLongPressCommand(longPressCommand);
         button->setRepeat(c->getIntValue(widgetPath,"repeat",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {

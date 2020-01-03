@@ -31,8 +31,11 @@ class WidgetButton : public WidgetPrimitive {
 protected:
 
   std::string command;                        // Command to execute when clicked
+  std::string longPressCommand;               // Command to execute when long pressed
   TimestampInMicroseconds nextDispatchTime;   // Time when to execute the next command
+  TimestampInMicroseconds longPressTime;      // Time when to execute the long press command
   bool repeat;                                // Decides if commands are repeatedly executed
+  bool skipCommand;                           // Decides if the command shall be executed when widget is untouched
 
 public:
 
@@ -53,6 +56,11 @@ public:
   void setCommand(std::string command)
   {
       this->command = command;
+  }
+
+  void setLongPressCommand(std::string longPressCommand)
+  {
+      this->longPressCommand = longPressCommand;
   }
 
   void setRepeat(bool repeat) {

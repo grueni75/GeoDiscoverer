@@ -39,6 +39,7 @@ protected:
   WidgetPage *currentPage;                              // The currently selected page
   GraphicColor selectedWidgetColor;                     // Color of selected widgets
   TimestampInMicroseconds buttonRepeatDelay;            // Time to wait before dispatching repeating commands
+  TimestampInMicroseconds buttonLongPressDelay;         // Time to wait before dispatching long press command
   TimestampInMicroseconds buttonRepeatPeriod;           // Time distance between command dispatching
   TimestampInMicroseconds firstStableTouchDownTime;     // Time of the first touch down
   Int lastTouchDownX, lastTouchDownY;                   // Coordinates of the last touch down
@@ -127,10 +128,15 @@ public:
   {
       return buttonRepeatDelay;
   }
-
+  
   TimestampInMicroseconds getButtonRepeatPeriod() const
   {
       return buttonRepeatPeriod;
+  }
+
+  TimestampInMicroseconds getButtonLongPressDelay() const
+  {
+      return buttonLongPressDelay;
   }
 
   bool getWidgetsActive() const {

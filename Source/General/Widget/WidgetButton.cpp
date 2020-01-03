@@ -28,7 +28,10 @@ namespace GEODISCOVERER {
 // Constructor
 WidgetButton::WidgetButton(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
   widgetType=WidgetTypeButton;
+  longPressCommand="";
+  longPressTime=0;
   repeat=true;
+  skipCommand=false;
 }
 
 // Destructor
@@ -43,6 +46,8 @@ void WidgetButton::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     // Compute the next command dispatch time if the button is pressed the first time
     if (getIsFirstTimeSelected()) {
       nextDispatchTime=t+widgetPage->getWidgetEngine()->getButtonRepeatDelay();
+      if (longPressCommand!="")
+        longPressTime=t+widgetPage->getWidgetEngine()->getButtonLongPressDelay();
     }
 
   }
@@ -63,6 +68,12 @@ bool WidgetButton::work(TimestampInMicroseconds t) {
       nextDispatchTime=t+widgetPage->getWidgetEngine()->getButtonRepeatPeriod();
     }
 
+    // Execute the long press command if delay is long enough
+    if ((longPressTime!=0)&&(t>=longPressTime)) {
+      core->getCommander()->execute(longPressCommand);
+      skipCommand=true;
+    }
+    
   }
   return changed;
 }
@@ -73,9 +84,10 @@ void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cance
   if (getIsHit()) {
 
     // Execute the command only if the repeating dispatching has not yet started
-    if ((!repeat)||(t<nextDispatchTime)) {
+    if ((!skipCommand)&&((!repeat)||(t<nextDispatchTime))) {
       core->getCommander()->execute(command);
     }
+    skipCommand=false;
   }
 }
 

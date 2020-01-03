@@ -397,6 +397,11 @@
                         <xsd:documentation>Time in microseconds to wait before dispatching repeating commands.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
+                    <xsd:element name="buttonLongPressDelay" type="xsd:integer" default="500000">
+                      <xsd:annotation>
+                        <xsd:documentation>Time in microseconds to wait before dispatching long press command.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
                     <xsd:element name="buttonRepeatPeriod" type="xsd:integer" default="10000">
                       <xsd:annotation>
                         <xsd:documentation>Time distance in microseconds between command dispatching.</xsd:documentation>
@@ -648,6 +653,11 @@
                                       <xsd:element name="command" type="xsd:string" default="unknown" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Command to execute if widget is clicked.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="longPressCommand" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Command to execute if widget is pressed for some time.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
                                       <xsd:element name="repeat" type="xsd:integer" default="0" minOccurs="0">

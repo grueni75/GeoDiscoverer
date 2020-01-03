@@ -405,6 +405,10 @@ public class ViewMap extends GDActivity {
             viewMap.askForMapDownloadDetails(commandArgs.get(0));
             commandExecuted=true;
           }
+          if (commandFunction.equals("showMenu")) {
+            viewMap.viewMapRootLayout.openDrawer(GravityCompat.START);
+            commandExecuted=true;
+          }
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
           }

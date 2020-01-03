@@ -762,6 +762,10 @@ std::string Commander::execute(std::string cmd) {
     core->setRemoteBatteryCharging(atoi(args[1].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="showMenu") {
+    dispatch(cmd);
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {
