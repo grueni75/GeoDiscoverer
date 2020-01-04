@@ -1215,7 +1215,7 @@
                   </xsd:sequence>
                 </xsd:complexType>
               </xsd:element>
-              <xsd:element name="refreshRate" type="xsd:integer" default="60">
+              <xsd:element name="refreshRate" type="xsd:integer" default="61">
                 <xsd:annotation>
                   <xsd:documentation>Rate in Herz that the drawing should be refreshed at.</xsd:documentation>
                 </xsd:annotation>
