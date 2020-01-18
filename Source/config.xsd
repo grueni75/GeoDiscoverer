@@ -1501,6 +1501,11 @@
                   <xsd:documentation>Distance in pixel to the max/min values of integer that triggers a initialization of the map to avoid overflows.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="tileOffScreenFactor" type="xsd:double" default="2">
+                <xsd:annotation>
+                  <xsd:documentation>Factor to scale the screen length for rendering additional tiles outside the screen .</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="visibleTileLimit" type="xsd:integer" default="3">
                 <xsd:annotation>
                   <xsd:documentation>Determines the maximum number of visible Tiles. The screen length in pixels is divided by the tile length. The result is multiplied by this factor.</xsd:documentation>

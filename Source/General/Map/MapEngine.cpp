@@ -27,6 +27,7 @@ namespace GEODISCOVERER {
 // Constructor
 MapEngine::MapEngine() {
   initDistance=core->getConfigStore()->getIntValue("Map","initDistance", __FILE__, __LINE__);
+  tileOffScreenFactor=core->getConfigStore()->getIntValue("Map","tileOffScreenFactor", __FILE__, __LINE__);
   maxTiles=0;
   returnToLocationTimeout=core->getConfigStore()->getIntValue("Map","returnToLocationTimeout", __FILE__, __LINE__);
   returnToLocationOneTime=false;
@@ -728,7 +729,7 @@ void MapEngine::updateMap() {
         // Compute the required display length
         //DEBUG("screenHeight=%d screenWidth=%d",core->getScreen()->getHeight(),core->getScreen()->getWidth());
         double alpha=atan((double)core->getDefaultScreen()->getHeight()/(double)core->getDefaultScreen()->getWidth());
-        double screenLength=ceil(core->getDefaultScreen()->getHeight()/sin(alpha));
+        double screenLength=ceil(core->getDefaultScreen()->getHeight()/sin(alpha))*tileOffScreenFactor;
         //DEBUG("screenWidth=%d screenHeight=%d screenLength=%f",core->getDefaultScreen()->getWidth(),core->getDefaultScreen()->getHeight(),screenLength);
 
         // Compute the height and width to fill

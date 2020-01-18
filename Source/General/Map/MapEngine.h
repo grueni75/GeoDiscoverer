@@ -48,6 +48,7 @@ protected:
   MapArea displayArea;                            // Current display area
   ThreadMutexInfo *displayAreaMutex;              // Mutex for accessing the display area
   Int initDistance;                               // Minimum distance that trigger initialization of the map to avoid overflows
+  double tileOffScreenFactor;                     // Factor to scale the screen length for rendering additional tiles outside the screen 
   Int maxTiles;                                   // Maximum number of tiles to show
   bool abortUpdate;                               // Indicates that the current update shall be stopped
   bool updateInProgress;                          // Indicates if the map is currently being updated

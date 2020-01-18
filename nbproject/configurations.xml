@@ -1700,26 +1700,6 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-          <incDir>
-            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include/bits</pElem>
-            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include/bits</pElem>
-            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include</pElem>
-            <pElem>../android/android-ndk-r16b/sysroot/usr/include/KHR</pElem>
-            <pElem>../android/android-ndk-r16b/sysroot/usr/include/GLES2</pElem>
-            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include/ext</pElem>
-            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include/debug</pElem>
-            <pElem>../android/android-ndk-r16b/sysroot/usr/include/bits</pElem>
-            <pElem>../android/android-ndk-r16b/sysroot/usr/include</pElem>
-            <pElem>../android/android-ndk-r16b/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/5.0.300080/include</pElem>
-            <pElem>../android/android-ndk-r16b/sysroot/usr/include/asm-generic</pElem>
-            <pElem>../android/android-ndk-r16b/sysroot/usr/include/sys</pElem>
-            <pElem>../android/android-ndk-r16b/sysroot/usr/include/android</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
-            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
-          </incDir>
-        </ccTool>
       </item>
       <item path="Source/General/Graphic/GraphicFadeAnimationParameter.cpp"
             ex="false"
@@ -2565,7 +2545,7 @@
             flavor2="11">
         <ccTool flags="1">
           <incDir>
-            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi/include/bits</pElem>
+            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include/bits</pElem>
             <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include/bits</pElem>
             <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include</pElem>
             <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include/debug</pElem>
@@ -2576,7 +2556,7 @@
             <pElem>../android/android-ndk-r16b/sysroot/usr/include/sys</pElem>
             <pElem>../android/android-ndk-r16b/sysroot/usr/include/android</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
-            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi/include</pElem>
+            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main</pElem>
           </incDir>
         </ccTool>
@@ -2749,6 +2729,24 @@
             ex="false"
             tool="1"
             flavor2="11">
+        <ccTool flags="1">
+          <incDir>
+            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86/include/bits</pElem>
+            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include/bits</pElem>
+            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include</pElem>
+            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include/debug</pElem>
+            <pElem>../android/android-ndk-r16b/sysroot/usr/include/bits</pElem>
+            <pElem>../android/android-ndk-r16b/sysroot/usr/include</pElem>
+            <pElem>../android/android-ndk-r16b/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/5.0.300080/include</pElem>
+            <pElem>../android/android-ndk-r16b/sysroot/usr/include/asm-generic</pElem>
+            <pElem>../android/android-ndk-r16b/sysroot/usr/include/sys</pElem>
+            <pElem>../android/android-ndk-r16b/sysroot/usr/include/android</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/include/ext</pElem>
+            <pElem>../android/android-ndk-r16b/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86/include</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
+          </incDir>
+        </ccTool>
       </item>
       <item path="Source/General/Widget/WidgetCheckbox.cpp"
             ex="false"
@@ -7978,8 +7976,8 @@
         <cTool flags="2">
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libzip-0.10.1/lib</pElem>
-            <pElem>../android/android-ndk-r16b/sysroot/usr/include</pElem>
             <pElem>../android/android-ndk-r16b/sysroot/usr/include/bits</pElem>
+            <pElem>../android/android-ndk-r16b/sysroot/usr/include</pElem>
             <pElem>../android/android-ndk-r16b/sysroot/usr/include/asm-generic</pElem>
             <pElem>../android/android-ndk-r16b/sysroot/usr/include/sys</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main</pElem>
