@@ -133,9 +133,9 @@ UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bo
       if ((ignoreFileNotFoundErrors)&&(result=DownloadResultFileNotFound))
         outputWarning=false;
       if (outputWarning) {
-        WARNING("can not download url <%s>: %s",url.c_str(),curlErrorBuffer);
+        WARNING("can not download url: %s (url=%s)",curlErrorBuffer,url.c_str());
       } else {
-        DEBUG("can not download url <%s>: %s",url.c_str(),curlErrorBuffer);
+        DEBUG("can not download url: %s (url=%s)",curlErrorBuffer,url.c_str());
       }
     }
   }

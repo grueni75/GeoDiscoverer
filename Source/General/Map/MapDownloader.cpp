@@ -384,6 +384,7 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       // Download all images
       bool downloadSuccess=true;
       bool oneTileFound=false;
+      int fileNotFoundCount=0;
       std::vector<std::string> urls;
       for (std::list<MapTileServer*>::iterator i=tileServers.begin();i!=tileServers.end();i++) {
         MapTileServer *tileServer=*i;
@@ -391,6 +392,8 @@ void MapDownloader::downloadMapImages(Int threadNr) {
           std::string url;
           DownloadResult result = tileServer->downloadTileImage(mapContainer,threadNr,url);
           urls.push_back(url);
+          if (result==DownloadResultFileNotFound) 
+            fileNotFoundCount++;
           if (result==DownloadResultOtherFail) {
             DEBUG("other fail occured while downloading %s",url.c_str());
             downloadSuccess=false;
@@ -402,9 +405,13 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       }
       if (!oneTileFound)
         downloadSuccess=false;
-
+      
       // Process the image
       bool maxRetriesReached=(mapContainer->getDownloadRetries()>=maxDownloadRetries);
+      if (fileNotFoundCount==tileServers.size()) {
+        DEBUG("no tile server has a tile at this position, skipping retry",NULL);
+        maxRetriesReached=true;
+      }
       if (downloadSuccess) {
 
         // Create one tile image out of the downloaded ones
