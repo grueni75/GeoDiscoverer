@@ -1223,7 +1223,7 @@ void WidgetEngine::createGraphic() {
     config.setParameter("TurnColor/green","0");
     config.setParameter("TurnColor/blue","0");
     config.setParameter("TurnColor/alpha","255");
-    config.setParameter("turnWatchAlpha","64");
+    config.setParameter("turnWatchAlpha","96");
     config.setParameter("minTouchDetectionRadius","75.0");
     config.setParameter("circularButtonAngle","20.0");
     addWidgetToPage(config);
