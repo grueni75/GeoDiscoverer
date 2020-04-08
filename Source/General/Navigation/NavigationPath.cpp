@@ -45,6 +45,7 @@ NavigationPath::NavigationPath() : animator(core->getDefaultScreen()) {
   isInit=false;
   reverse=false;
   lastValidAltiudeMetersPoint=NavigationPath::getPathInterruptedPos();
+  importWaypoints=NavigationPathImportWaypointsUndecided;
 
   // Do the dynamic initialization
   init();

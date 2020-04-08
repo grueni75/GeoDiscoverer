@@ -205,6 +205,7 @@ void NavigationEngine::init() {
       route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor",__FILE__,__LINE__), __FILE__, __LINE__);
       route->setBlinkMode(false, __FILE__, __LINE__);
       route->setReverse(c->getIntValue(routePath,"reverse",__FILE__, __LINE__));
+      route->setImportWaypoints((NavigationPatImportWaypointsType)c->getIntValue(routePath,"importWaypoints",__FILE__, __LINE__));
       route->setName(*i);
       route->setDescription("route number " + *i);
       route->setGpxFilefolder(getRoutePath());

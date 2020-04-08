@@ -151,6 +151,7 @@ public class ViewMap extends GDActivity {
   boolean compassWatchStarted = false;
   boolean exitRequested = false;
   boolean restartRequested = false;
+  int nestedImportWaypointsDecisions = 0;
 
   // Handles finished queued downloads
   LinkedList<Bundle> downloads = new LinkedList<Bundle>();
@@ -407,6 +408,38 @@ public class ViewMap extends GDActivity {
           }
           if (commandFunction.equals("showMenu")) {
             viewMap.viewMapRootLayout.openDrawer(GravityCompat.START);
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("decideWaypointImport")) {
+            viewMap.nestedImportWaypointsDecisions++;
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(viewMap);
+            builder.title(R.string.waypoint_import_title);
+            builder.content(viewMap.getResources().getString(R.string.waypoint_import_message,commandArgs.get(1),commandArgs.get(0)));
+            builder.cancelable(true);
+            builder.positiveText(R.string.yes);
+            builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+              @Override
+              public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                String path = "Navigation/Route[@name='"+commandArgs.get(0)+"']";
+                viewMap.coreObject.configStoreSetStringValue(path,"importWaypoints","1");
+                viewMap.nestedImportWaypointsDecisions--;
+                if (viewMap.nestedImportWaypointsDecisions==0) {
+                  viewMap.restartCore(false);
+                }
+              }
+            });
+            builder.negativeText(R.string.no);
+            builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+              @Override
+              public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                String path = "Navigation/Route[@name='"+commandArgs.get(0)+"']";
+                viewMap.coreObject.configStoreSetStringValue(path,"importWaypoints","2");
+                viewMap.nestedImportWaypointsDecisions--;
+              }
+            });
+            builder.icon(viewMap.getResources().getDrawable(android.R.drawable.ic_dialog_info));
+            Dialog alert = builder.build();
+            alert.show();
             commandExecuted=true;
           }
           if (!commandExecuted) {

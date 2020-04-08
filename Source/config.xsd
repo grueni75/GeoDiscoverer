@@ -1899,6 +1899,11 @@
                         <xsd:documentation>Route is reversed if ticked.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
+                    <xsd:element name="importWaypoints" type="xsd:boolean" default="0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Decides if waypoints from a route are imported (0=not decided yet, 1=yes, 2=no).</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
                     <xsd:element name="visible" type="xsd:boolean" default="1" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Route is drawn on map if ticked.</xsd:documentation>

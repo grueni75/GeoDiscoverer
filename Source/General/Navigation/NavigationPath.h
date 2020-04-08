@@ -28,6 +28,8 @@ namespace GEODISCOVERER {
 
 typedef enum {NavigationPathVisualizationTypeStartFlag, NavigationPathVisualizationTypeEndFlag } NavigationPathVisualizationType;
 
+typedef enum {NavigationPathImportWaypointsUndecided=0, NavigationPathImportWaypointsYes=1, NavigationPathImportWaypointsNo=2 } NavigationPatImportWaypointsType;
+
 class NavigationPath {
 
 protected:
@@ -67,6 +69,7 @@ protected:
   double minDistanceToBeOffRoute;                 // Minimum distance from nearest route point such that navigation considers location to be off route
   double averageTravelSpeed;                      // Speed in meters per second to use for calculating the duration of a route
   double minAltitudeChange;                       // Minimum change of altitude required to update altitude meters
+  NavigationPatImportWaypointsType importWaypoints; // Decides if the waypoints contained in the route shall be imported
 
   // Information about the path
   double length;                                  // Current length of the track in meters
@@ -297,6 +300,10 @@ public:
 
   void setReverse(bool reverse) {
     this->reverse = reverse;
+  }
+
+  void setImportWaypoints(NavigationPatImportWaypointsType importWaypoints) {
+    this->importWaypoints = importWaypoints;
   }
 
   MapPosition getPoint(Int index) {

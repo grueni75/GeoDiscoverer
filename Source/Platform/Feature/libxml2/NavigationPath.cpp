@@ -547,38 +547,55 @@ bool NavigationPath::readGPXFile() {
     // Load wayoints if gpx contains them
     waypointNodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:wpt");
     totalNumberOfPoints=waypointNodes.size();
-    processedPoints=0;
-    for(std::list<XMLNode>::iterator i=waypointNodes.begin();i!=waypointNodes.end();i++) {
-      XMLNode node=*i;
-      std::string error;
-      std::stringstream defaultName;
-      defaultName << "Waypoint " << processedPoints+1;
-      NavigationPoint point;
-      if (point.readGPX(node,getGpxFilename(),defaultName.str(),error)) {
-        core->getNavigationEngine()->addAddressPoint(point);
+    std::string configPath="Navigation/Route[@name='" + getGpxFilename() + "']";
+    importWaypoints=(NavigationPatImportWaypointsType)core->getConfigStore()->getIntValue(configPath,"importWaypoints",__FILE__,__LINE__);
+    if (importWaypoints==NavigationPathImportWaypointsUndecided) {
+      if (totalNumberOfPoints==0) {
+        importWaypoints=NavigationPathImportWaypointsNo;
+        core->getConfigStore()->setIntValue(configPath,"importWaypoints",(Int)importWaypoints,__FILE__,__LINE__);
       } else {
-        error="file <%s> " + error;
-        WARNING(error.c_str(),gpxFilename.c_str());
+        std::stringstream cmd;
+        cmd << "decideWaypointImport(" << getGpxFilename() << "," << totalNumberOfPoints << ")";
+        core->getCommander()->dispatch(cmd.str());
       }
-      processedPoints++;
-      processedPercentage=processedPoints*100/totalNumberOfPoints;
-      if (processedPercentage>prevProcessedPercentage) {
-        progress.str(""); progress << "Loading wpts (" << processedPercentage << "%):";
-        status.pop_front();
-        status.push_front(progress.str());
-        core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+    } else {
+      if (importWaypoints==NavigationPathImportWaypointsYes) {
+        processedPoints=0;
+        for(std::list<XMLNode>::iterator i=waypointNodes.begin();i!=waypointNodes.end();i++) {
+          XMLNode node=*i;
+          std::string error;
+          std::stringstream defaultName;
+          defaultName << "Waypoint " << processedPoints+1;
+          NavigationPoint point;
+          if (point.readGPX(node,getGpxFilename(),defaultName.str(),error)) {
+            core->getNavigationEngine()->addAddressPoint(point);
+          } else {
+            error="file <%s> " + error;
+            WARNING(error.c_str(),gpxFilename.c_str());
+          }
+          processedPoints++;
+          processedPercentage=processedPoints*100/totalNumberOfPoints;
+          if (processedPercentage>prevProcessedPercentage) {
+            progress.str(""); progress << "Loading wpts (" << processedPercentage << "%):";
+            status.pop_front();
+            status.push_front(progress.str());
+            core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+          }
+          prevProcessedPercentage=processedPercentage;
+          if (core->getQuitCore())
+            break;
+          //core->getThread()->reschedule();
+        }
       }
-      prevProcessedPercentage=processedPercentage;
-      if (core->getQuitCore())
-        break;
-      //core->getThread()->reschedule();
     }
 
     // Write the cache
-    status.pop_front();
-    status.push_front("Writing cache");
-    core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
-    writeCache();
+    if ((!core->getQuitCore())&&(importWaypoints!=NavigationPathImportWaypointsUndecided)) {
+      status.pop_front();
+      status.push_front("Writing cache");
+      core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
+      writeCache();
+    }
   }
 
   // Cleanup
