@@ -1209,6 +1209,7 @@ void WidgetEngine::createGraphic() {
     config.setBusyColor(GraphicColor(255,0,255,255));
     config.setParameter("textColumnOffsetX","5");
     config.setParameter("targetIconFilename","navigationTarget");
+    config.setParameter("navigationPointIconFilename","navigationNavigationPoint");
     config.setParameter("updateInterval","1000000");
     config.setParameter("turnDistanceValueOffsetY","25");
     config.setParameter("directionChangeDuration","500000");
@@ -1327,6 +1328,9 @@ void WidgetEngine::createGraphic() {
         navigation->getTargetIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"targetIconFilename",__FILE__, __LINE__));
         navigation->getTargetIcon()->setX(-navigation->getTargetIcon()->getIconWidth()/2);
         navigation->getTargetIcon()->setY(-navigation->getTargetIcon()->getIconHeight()/2);
+        navigation->getNavigationPointIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"navigationPointIconFilename",__FILE__, __LINE__));        
+        navigation->getNavigationPointIcon()->setX(-navigation->getNavigationPointIcon()->getIconWidth()/2);
+        navigation->getNavigationPointIcon()->setY(-navigation->getNavigationPointIcon()->getIconHeight()/2-navigation->getNavigationPointIcon()->getIconHeight()/4);
         if (deviceName!="Watch") {
           navigation->getSeparatorIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
           navigation->getSeparatorIcon()->setX(0);
@@ -1347,6 +1351,10 @@ void WidgetEngine::createGraphic() {
           navigation->getBatteryIconFull()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"batteryIconFullFilename",__FILE__, __LINE__));
           navigation->getBatteryIconEmpty()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"batteryIconEmptyFilename",__FILE__, __LINE__));
         }
+      }
+      if (widgetType=="pathInfo") {
+        pathInfo->getLocationIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
+        pathInfo->getNavigationPointIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"navigationPointIconFilename",__FILE__, __LINE__));        
       }
 
       // Set type-dependent properties
@@ -1462,8 +1470,6 @@ void WidgetEngine::createGraphic() {
         pathInfo->setAltitudeProfileYTickLabelOffsetX(c->getDoubleValue(widgetPath,"altitudeProfileYTickLabelOffsetX",__FILE__, __LINE__)*pathInfo->getIconWidth()/100.0);
         pathInfo->setAltitudeProfileXTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileXTickLabelWidth",__FILE__, __LINE__));
         pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth",__FILE__, __LINE__));
-        pathInfo->getLocationIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"locationIconFilename",__FILE__, __LINE__));
-        pathInfo->getNavigationPointIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"navigationPointIconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="cursorInfo") {
         cursorInfo->setLabelWidth(c->getDoubleValue(widgetPath,"labelWidth",__FILE__, __LINE__));

@@ -48,6 +48,9 @@ protected:
   // Graphic showing the target
   GraphicRectangle targetIcon;
 
+  // Graphic showing the target
+  GraphicRectangle navigationPointIcon;
+
   // Graphic showing the arrow
   GraphicRectangle arrowIcon;
 
@@ -67,6 +70,9 @@ protected:
 
   // Container that represents the target (displacement)
   GraphicObject targetObject;
+
+  // Container that represents the navigation point
+  GraphicObject navigationPointObject;
 
   // Container that represents the direction plus target
   GraphicObject compassObject;
@@ -88,6 +94,9 @@ protected:
 
   // Decides if the target is shown
   bool hideTarget;
+
+  // Decides if the navigation point is shown
+  bool hideNavigationPoint;
 
   // Decides if the arrow is shown
   bool hideArrow;
@@ -159,7 +168,7 @@ protected:
 
   // Radius of the target icon
   double targetRadius;
-
+  
   // Radius of the orientation labels
   double orientationLabelRadius;
 
@@ -248,6 +257,10 @@ public:
 
   GraphicRectangle *getTargetIcon() {
     return &targetIcon;
+  }
+
+  GraphicRectangle *getNavigationPointIcon() {
+    return &navigationPointIcon;
   }
 
   GraphicRectangle *getArrowIcon() {

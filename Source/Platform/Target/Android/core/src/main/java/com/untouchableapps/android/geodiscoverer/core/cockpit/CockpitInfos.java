@@ -53,4 +53,10 @@ public class CockpitInfos {
   /** Remaining distance to route */
   public String routeDistance;
 
+  /** Bearing towards the nearest navigation point */
+  public String nearestNavigationPointBearing;
+
+  /** Remaining distance to nearest navigation point */
+  public String nearestNavigationPointDistance;
+
 }

@@ -69,6 +69,12 @@ protected:
 
   // Angle by which the turn will change the direction
   double turnAngle;
+  
+  // Bearing towards the nearest navigation point
+  double nearestNavigationPointBearing;
+
+  // Remaining distance to the nearest navigation point
+  double nearestNavigationPointDistance;
 
   // Indicates if location is off route
   bool offRoute;
@@ -138,6 +144,22 @@ public:
 
   void setTurnDistance(double turnDistance) {
     this->turnDistance = turnDistance;
+  }
+
+  double getNearestNavigationPointBearing() const {
+    return nearestNavigationPointBearing;
+  }
+
+  void setNearestNavigationPointBearing(double nearestNavigationPointBearing) {
+    this->nearestNavigationPointBearing = nearestNavigationPointBearing;
+  }
+
+  double getNearestNavigationPointDistance() const {
+    return nearestNavigationPointDistance;
+  }
+
+  void setNearestNavigationPointDistance(double nearestNavigationPointDistance) {
+    this->nearestNavigationPointDistance = nearestNavigationPointDistance;
   }
 
   static const double getUnknownAngle() {

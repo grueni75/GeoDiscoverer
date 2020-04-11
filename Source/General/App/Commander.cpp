@@ -735,6 +735,8 @@ std::string Commander::execute(std::string cmd) {
     navigationInfo->setRouteDistance(atof(args[9].c_str()));
     navigationInfo->setTurnAngle(atof(args[10].c_str()));
     navigationInfo->setTurnDistance(atof(args[11].c_str()));
+    navigationInfo->setNearestNavigationPointBearing(atof(args[12].c_str()));
+    navigationInfo->setNearestNavigationPointDistance(atof(args[13].c_str()));
     /*DEBUG("navigationInfos: %d %f %f %f %f %f %f %f %d %f %f %f",
         navigationInfo->getType(),
         navigationInfo->getAltitude(),

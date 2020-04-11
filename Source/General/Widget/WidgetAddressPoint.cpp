@@ -36,7 +36,6 @@ WidgetAddressPoint::WidgetAddressPoint(WidgetPage *widgetPage) : WidgetPrimitive
   active=false;
   hideIfNoAddressPointNear=(widgetPage->getWidgetEngine()->getDevice()->getName()=="Default");
   setIsHidden(hideIfNoAddressPointNear);
-  maxAddressPointAlarmDistance=core->getConfigStore()->getDoubleValue("Navigation","maxAddressPointAlarmDistance",__FILE__,__LINE__);
 }
 
 // Destructor
@@ -65,8 +64,9 @@ bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
     double distance;
     TimestampInMicroseconds updateTimestamp;
     NavigationPoint navigationPoint;
-    bool found=core->getNavigationEngine()->getNearestAddressPoint(navigationPoint,distance,updateTimestamp);
-    if ((found)&&(distance<=maxAddressPointAlarmDistance)) {
+    bool alarm;
+    bool found=core->getNavigationEngine()->getNearestAddressPoint(navigationPoint,distance,updateTimestamp,alarm);
+    if ((found)&&(alarm)) {
       std::stringstream status;
       std::string value,unit;
       core->getUnitConverter()->formatMeters(distance,value,unit);

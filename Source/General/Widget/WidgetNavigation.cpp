@@ -31,6 +31,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     turnArrowPointBuffer(widgetPage->getScreen(),24),
     directionIcon(widgetPage->getScreen()),
     targetIcon(widgetPage->getScreen()),
+    navigationPointIcon(widgetPage->getScreen()),
     arrowIcon(widgetPage->getScreen()),
     separatorIcon(widgetPage->getScreen()),
     blindIcon(widgetPage->getScreen()),
@@ -39,8 +40,9 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     batteryIconEmpty(widgetPage->getScreen()),
     batteryIconFull(widgetPage->getScreen()),
     targetObject(widgetPage->getScreen()),
+    navigationPointObject(widgetPage->getScreen()),
     compassObject(widgetPage->getScreen()),
-    clockCircularStrip(widgetPage->getScreen()),
+    clockCircularStrip(widgetPage->getScreen()),  
     busyColor(),
     normalColor()
 {
@@ -92,10 +94,13 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   fontEngine->unlockFont();
   targetIcon.setRotateAnimation(0,0,360,true,core->getNavigationEngine()->getTargetRotateDuration(),GraphicRotateAnimationTypeLinear);
   targetObject.addPrimitive(&targetIcon);
+  navigationPointObject.addPrimitive(&navigationPointIcon);
   compassObject.addPrimitive(&directionIcon);
   compassObject.addPrimitive(&targetObject);
+  compassObject.addPrimitive(&navigationPointObject);
   hideCompass=true;
   hideTarget=true;
+  hideNavigationPoint=true;
   hideArrow=true;
   showTurn=false;
   skipTurn=false;
@@ -112,6 +117,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   batteryTotalAngle=30;
   directionIcon.setColor(GraphicColor(255,255,255,255));
   targetIcon.setColor(GraphicColor(255,255,255,255));
+  navigationPointIcon.setColor(GraphicColor(255,255,255,255));
   arrowIcon.setColor(GraphicColor(255,255,255,0));
   separatorIcon.setColor(GraphicColor(255,255,255,255));
   blindIcon.setColor(GraphicColor(255,255,255,255));
@@ -120,6 +126,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   batteryIconEmpty.setColor(GraphicColor(255,255,255,255));
   batteryIconFull.setColor(GraphicColor(255,255,255,255));
   targetObject.setColor(GraphicColor(255,255,255,255));
+  navigationPointObject.setColor(GraphicColor(255,255,255,255));
   compassObject.setColor(GraphicColor(255,255,255,255));
   for (int i=0;i<4;i++) {
     circularStrip[i]=NULL;
@@ -564,10 +571,34 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
           std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = targetObject.getRotateAnimationSequence();
           rotateAnimationSequence.push_back(rotateParameter);
           targetObject.setRotateAnimationSequence(rotateAnimationSequence);
+          DEBUG("target: angle start=%f angle end=%f",targetObject.getAngle(),navigationInfo->getTargetBearing());
         } else {
           targetObject.setAngle(navigationInfo->getTargetBearing());
         }
         hideTarget=false;
+        activateWidget=true;
+      }
+    }
+    if (prevNavigationInfo.getNearestNavigationPointBearing()!=navigationInfo->getNearestNavigationPointBearing()) {
+      if (navigationInfo->getNearestNavigationPointBearing()==NavigationInfo::getUnknownAngle()) {
+        hideNavigationPoint=true;
+      } else {
+        if (widgetPage->getWidgetEngine()->getDevice()->isAnimationFriendly()) {
+          GraphicRotateAnimationParameter rotateParameter;
+          rotateParameter.setStartTime(t);
+          rotateParameter.setStartAngle(navigationPointObject.getAngle());
+          rotateParameter.setEndAngle(navigationInfo->getNearestNavigationPointBearing());
+          rotateParameter.setDuration(directionChangeDuration);
+          rotateParameter.setInfinite(false);
+          rotateParameter.setAnimationType(GraphicRotateAnimationTypeAccelerated);
+          std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = navigationPointObject.getRotateAnimationSequence();
+          rotateAnimationSequence.push_back(rotateParameter);
+          navigationPointObject.setRotateAnimationSequence(rotateAnimationSequence);
+          DEBUG("navigation point: angle start=%f angle end=%f",navigationPointObject.getAngle(),navigationInfo->getNearestNavigationPointBearing());
+        } else {
+          navigationPointObject.setAngle(navigationInfo->getNearestNavigationPointBearing());
+        }
+        hideNavigationPoint=false;
         activateWidget=true;
       }
     }
@@ -796,7 +827,7 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     screen->endObject();
   }
 
-  // Draw the target
+  // Draw the target and the navigation point
   if (!hideCompass) {
     if (!hideTarget) {
       screen->startObject();
@@ -810,8 +841,20 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
       targetIcon.draw(t);
       screen->endObject();
     }
+    if (!hideNavigationPoint) {
+      screen->startObject();
+      screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
+      screen->rotate(compassObject.getAngle(),0,0,1);
+      screen->translate(targetRadius*sin(FloatingPoint::degree2rad(navigationPointObject.getAngle())),targetRadius*cos(FloatingPoint::degree2rad(navigationPointObject.getAngle())),getZ());
+      c=navigationPointIcon.getColor();
+      c.setAlpha(color.getAlpha());
+      navigationPointIcon.setColor(c);
+      screen->rotate(-navigationPointObject.getAngle(),0,0,1);
+      navigationPointIcon.draw(t);
+      screen->endObject();
+    }
   }
-
+  
   // Draw the status above the arrow and the target if widget is active
   if ((isWatch)&&(statusTextAbove)) {
     drawStatus(t);

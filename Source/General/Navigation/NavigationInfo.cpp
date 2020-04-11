@@ -42,6 +42,8 @@ NavigationInfo::NavigationInfo() {
   offRoute=false;
   trackLength=unknownDistance;
   altitude=unknownDistance;
+  nearestNavigationPointBearing=unknownAngle;
+  nearestNavigationPointDistance=unknownDistance;
 }
 
 bool NavigationInfo::operator==(const NavigationInfo &rhs)
@@ -52,6 +54,8 @@ bool NavigationInfo::operator==(const NavigationInfo &rhs)
       (targetBearing==rhs.getTargetBearing()) &&
       (targetDistance==rhs.getTargetDistance()) &&
       (targetDuration==rhs.getTargetDuration()) &&
+      (nearestNavigationPointBearing==rhs.getNearestNavigationPointBearing()) &&
+      (nearestNavigationPointDistance==rhs.getNearestNavigationPointDistance()) &&
       (turnDistance==rhs.getTurnDistance()) &&
       (routeDistance==rhs.getRouteDistance()) &&
       (turnAngle==rhs.getTurnAngle()) &&

@@ -161,6 +161,9 @@ protected:
   // Indicates if the nearest address point is valid
   bool nearestAddressPointValid;
 
+  // Indicates if the nearest address point is near enough
+  bool nearestAddressPointAlarm;
+
   // Double distance to the nearest address point
   double nearestAddressPointDistance;
 
@@ -318,8 +321,8 @@ public:
   // Returns the name of the address point at the given position
   std::string getAddressPointName(GraphicPosition visPos);
 
-  // Returns the address point that is the nearest to the current position
-  bool getNearestAddressPoint(NavigationPoint &navigationPoint, double &distance, TimestampInMicroseconds &updateTimestamp);
+  // Returns information about the address point that is the nearest to the current position
+  bool getNearestAddressPoint(NavigationPoint &navigationPoint, double &distance, TimestampInMicroseconds &updateTimestamp, bool &alarm);
 
   // Sets a location pos directly (e.g., on the watch)
   void setLocationPos(MapPosition newLocationPos, bool computeNavigationInfos, const char *file, int line);

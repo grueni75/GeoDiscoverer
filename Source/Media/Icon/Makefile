@@ -11,7 +11,7 @@ ANDROID_WEAR = $(ROOT)/Source/Platform/Target/Android/wear/src/main/assets/GeoDi
 
 SVGS = $(shell find -name '*.svg' -printf '%P\n')
 DPIS = 120 160 240 320 480 640
-PNGS = $(foreach dpi,$(DPIS),$(foreach svg,$(SVGS),$(dpi)dpi/$(patsubst %.svg,%.png,$(svg))) $(dpi)dpi/navigationTarget.png $(dpi)dpi/pathInfoNavigationPoint.png)
+PNGS = $(foreach dpi,$(DPIS),$(foreach svg,$(SVGS),$(dpi)dpi/$(patsubst %.svg,%.png,$(svg))) $(dpi)dpi/navigationTarget.png $(dpi)dpi/pathInfoNavigationPoint.png  $(dpi)dpi/navigationNavigationPoint.png)
 
 # Macros:
 
@@ -24,6 +24,8 @@ $(1)dpi/$(2): $(3)
 	elif [ "$(2)" = "navigationTarget.png" ]; then \
 		inkscape --export-png=$$@ --export-dpi=`echo $(1)*96/240/12 | bc` $$<; \
 	elif [ "$(2)" = "pathInfoNavigationPoint.png" ]; then \
+		inkscape --export-png=$$@ --export-dpi=`echo $(1)*96/240/2 | bc` $$<; \
+	elif [ "$(2)" = "navigationNavigationPoint.png" ]; then \
 		inkscape --export-png=$$@ --export-dpi=`echo $(1)*96/240/2 | bc` $$<; \
 	else \
 		inkscape --export-png=$$@ --export-dpi=`echo $(1)*96/240 | bc` $$<; \
@@ -51,6 +53,7 @@ $(foreach dpi,$(DPIS),$(eval $(call SVG2PNG,$(dpi),navigationTarget.png,target.s
 
 # Convert navigationPoint.svg into pathInfoNavigationPoint.png
 $(foreach dpi,$(DPIS),$(eval $(call SVG2PNG,$(dpi),pathInfoNavigationPoint.png,navigationPoint.svg)))
+$(foreach dpi,$(DPIS),$(eval $(call SVG2PNG,$(dpi),navigationNavigationPoint.png,navigationPoint.svg)))
 
 # Install icons into linux target
 $(LINUX): $(PNGS)

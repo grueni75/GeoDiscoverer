@@ -81,6 +81,7 @@ NavigationEngine::NavigationEngine() :
   navigationInfosMutex=core->getThread()->createMutex("navigation engine navigation infos mutex");
   addressPointsMutex=core->getThread()->createMutex("navigation engine navigation points mutex");
   nearestAddressPointValid=false;
+  nearestAddressPointAlarm=false;
   nearestAddressPointMutex=core->getThread()->createMutex("navigation engine nearest navigation points mutex");
   nearestAddressPointDistance=std::numeric_limits<double>::max();
   minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate", __FILE__, __LINE__);
@@ -1435,6 +1436,30 @@ void NavigationEngine::computeNavigationInfo() {
     MapPosition targetPos=this->targetPos;
     unlockTargetPos();
 
+    // Update the nearest address point
+    bool pointValid=false;
+    NavigationPoint point;
+    double distance=std::numeric_limits<double>::max();
+    if (locationPos.isValid()) {
+      core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
+      for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
+        MapPosition pos;
+        pos.setLat((*i).getLat());
+        pos.setLng((*i).getLng());
+        double t=locationPos.computeDistance(pos);
+        if (t<distance) {
+          distance=t;
+          point=*i;
+          pointValid=true;
+        }
+      }
+      core->getThread()->unlockMutex(addressPointsMutex);
+    }
+    core->getThread()->lockMutex(nearestAddressPointMutex,__FILE__,__LINE__);
+    this->nearestAddressPoint=point;
+    this->nearestAddressPointValid=pointValid;
+    this->nearestAddressPointDistance=distance;
+    
     // If a route is active, compute the details for the given route
     NavigationInfo navigationInfo=NavigationInfo();
     if (locationPos.isValid()) {
@@ -1484,6 +1509,15 @@ void NavigationEngine::computeNavigationInfo() {
 
         }
       }
+      if ((nearestAddressPointValid)&&(nearestAddressPointDistance<=maxAddressPointAlarmDistance)) {
+        navigationInfo.setNearestNavigationPointDistance(nearestAddressPointDistance);
+        if (navigationInfo.getLocationBearing()!=NavigationInfo::getUnknownAngle()) {
+          MapPosition nearestAddressPointPos;
+          nearestAddressPointPos.setLat(nearestAddressPoint.getLat());
+          nearestAddressPointPos.setLng(nearestAddressPoint.getLng());    
+          navigationInfo.setNearestNavigationPointBearing(locationPos.computeBearing(nearestAddressPointPos));
+        }
+      }
     }
     if (navigationInfo.getLocationSpeed()!=NavigationInfo::getUnknownSpeed()) {
       if (navigationInfo.getTargetDistance()!=NavigationInfo::getUnknownDistance())
@@ -1508,42 +1542,20 @@ void NavigationEngine::computeNavigationInfo() {
     targetPos=this->targetPos;
     unlockTargetPos();
 
-    // Update the nearest address point
-    bool pointValid=false;
-    NavigationPoint point;
-    double distance=std::numeric_limits<double>::max();
-    if (locationPos.isValid()) {
-      core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
-      for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
-        MapPosition pos;
-        pos.setLat((*i).getLat());
-        pos.setLng((*i).getLng());
-        double t=locationPos.computeDistance(pos);
-        if (t<distance) {
-          distance=t;
-          point=*i;
-          pointValid=true;
-        }
-      }
-      core->getThread()->unlockMutex(addressPointsMutex);
-    }
-    core->getThread()->lockMutex(nearestAddressPointMutex,__FILE__,__LINE__);
-    this->nearestAddressPoint=point;
-    this->nearestAddressPointValid=pointValid;
-    this->nearestAddressPointDistance=distance;
-
     // Play alert if new address point is found
-    if ((pointValid)&&(distance<=maxAddressPointAlarmDistance)) {
+    if ((pointValid)&&(nearestAddressPointDistance<=maxAddressPointAlarmDistance)) {
       if (nearestAddressPointName!=point.getName()) {
         core->getCommander()->dispatch("playNewNearestAddressPointAlarm()");
         nearestAddressPointName=point.getName();
         nearestAddressPointNameUpdate=core->getClock()->getMicrosecondsSinceStart();
       }
+      nearestAddressPointAlarm=true;
     } else {
       if (nearestAddressPointName!="") {
         nearestAddressPointNameUpdate=core->getClock()->getMicrosecondsSinceStart();
       }
       nearestAddressPointName="";
+      nearestAddressPointAlarm=false;
     }
     core->getThread()->unlockMutex(nearestAddressPointMutex);
     core->onDataChange();
@@ -1598,6 +1610,18 @@ void NavigationEngine::computeNavigationInfo() {
     } else {
       infos << ";no route;-";
     }
+    infos << ";";
+    if (navigationInfo.getNearestNavigationPointBearing()!=NavigationInfo::getUnknownAngle())
+      infos << navigationInfo.getNearestNavigationPointBearing();
+    else
+      infos << "-";
+    infos << ";";
+    if (navigationInfo.getNearestNavigationPointDistance()!=NavigationInfo::getUnknownDistance()) {
+      core->getUnitConverter()->formatMeters(navigationInfo.getNearestNavigationPointDistance(),value,unit);
+      infos << value << " " << unit;
+    } else {
+      infos << "infinite";
+    }
     core->getCommander()->dispatch("setFormattedNavigationInfo(" + infos.str() + ")");
     std::string cmd="setAllNavigationInfo(" + infos.str() + ")";
     infos.str("");
@@ -1612,7 +1636,9 @@ void NavigationEngine::computeNavigationInfo() {
     infos << navigationInfo.getOffRoute() << ",";
     infos << navigationInfo.getRouteDistance() << ",";
     infos << navigationInfo.getTurnAngle() << ",";
-    infos << navigationInfo.getTurnDistance();
+    infos << navigationInfo.getTurnDistance() << ",";
+    infos << navigationInfo.getNearestNavigationPointBearing() << ",";
+    infos << navigationInfo.getNearestNavigationPointDistance();
     cmd += "(" + infos.str() + ")";
     infos.str("");
     infos << locationPos.getSource() << ",";
@@ -1873,7 +1899,7 @@ void NavigationEngine::addressPointGroupChanged() {
 }
 
 // Returns the address point that is the nearest to the current position
-bool NavigationEngine::getNearestAddressPoint(NavigationPoint &navigationPoint, double &distance, TimestampInMicroseconds &updateTimestamp) {
+bool NavigationEngine::getNearestAddressPoint(NavigationPoint &navigationPoint, double &distance, TimestampInMicroseconds &updateTimestamp, bool &alarm) {
   core->getThread()->lockMutex(nearestAddressPointMutex,__FILE__,__LINE__);
   bool found=nearestAddressPointValid;
   if (found) {
@@ -1881,6 +1907,7 @@ bool NavigationEngine::getNearestAddressPoint(NavigationPoint &navigationPoint, 
     distance=nearestAddressPointDistance;
   }
   updateTimestamp=nearestAddressPointNameUpdate;
+  alarm=nearestAddressPointAlarm;
   core->getThread()->unlockMutex(nearestAddressPointMutex);
   return found;
 }

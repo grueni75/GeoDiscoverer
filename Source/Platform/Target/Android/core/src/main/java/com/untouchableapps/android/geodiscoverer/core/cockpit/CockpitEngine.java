@@ -219,6 +219,8 @@ public class CockpitEngine {
     cockpitInfos.turnDistance = infosAsArray[6];
     cockpitInfos.offRoute = infosAsArray[7].equals("off route");
     cockpitInfos.routeDistance = infosAsArray[8];
+    cockpitInfos.nearestNavigationPointBearing = infosAsArray[9];
+    cockpitInfos.nearestNavigationPointDistance = infosAsArray[10];
     return cockpitInfos;
   }
 

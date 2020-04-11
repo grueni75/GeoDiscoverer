@@ -47,9 +47,6 @@ protected:
   // Last update of the clock
   TimestampInSeconds lastClockUpdate;
 
-  // Maximum distance for which the widget shows infos about an address point
-  double maxAddressPointAlarmDistance;
-
   // Indicates if widget is active
   bool active;
 
