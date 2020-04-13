@@ -53,6 +53,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -1928,7 +1929,20 @@ public class ViewMap extends GDActivity {
     if (isGPXFromFile) {
 
       // Get the name of the GPX file
-      gpxName = uri.getLastPathSegment();
+      gpxName=null;
+      if (uri.getScheme().equals("content")) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        try {
+          if (cursor != null && cursor.moveToFirst()) {
+            gpxName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+          }
+        } finally {
+          cursor.close();
+        }
+      }
+      if (gpxName == null) {
+        gpxName = uri.getLastPathSegment();
+      }
       if (!gpxName.endsWith(".gpx")) {
         gpxName = gpxName + ".gpx";
       }
