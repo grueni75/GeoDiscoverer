@@ -110,7 +110,7 @@ public class GDHeartRateService {
       format = BluetoothGattCharacteristic.FORMAT_UINT8;
     }
     currentHeartRate = characteristic.getIntValue(format, 1);
-    GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp", String.format("received heart rate: %d", currentHeartRate));
+    //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp", String.format("received heart rate: %d", currentHeartRate));
   }
 
   /** Callback for gatt service updates */

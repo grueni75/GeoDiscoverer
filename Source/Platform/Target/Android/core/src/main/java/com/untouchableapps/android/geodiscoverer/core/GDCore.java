@@ -1274,7 +1274,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
           MediaPlayer player = new MediaPlayer();
           player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
           player.prepare();
-          appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("volume=%d",volume));
+          //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("volume=%d",volume));
           float log1=1.0f-(float)(Math.log(100-volume)/Math.log(100));
           player.setVolume(log1,log1);
           player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {

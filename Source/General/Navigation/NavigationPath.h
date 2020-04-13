@@ -46,7 +46,7 @@ protected:
   bool hasLastPoint;                              // Indicates if the path already has its last point
   MapPosition secondLastPoint;                    // The point added before the last point
   bool hasSecondLastPoint;                        // Indicates if the path already has its second last point
-  MapPosition lastValidAltiudeMetersPoint;        // The last point that was used for altitude meter computation
+  double lastValidAltiudeMeters;                  // The last (filtered) altitude that was used for altitude meter computation
   bool blinkMode;                                 // Indicates if the path shall blink
   GraphicColor normalColor;                       // Normal color of the path
   GraphicColor highlightColor;                    // Highlight color of the path
@@ -69,6 +69,7 @@ protected:
   double minDistanceToBeOffRoute;                 // Minimum distance from nearest route point such that navigation considers location to be off route
   double averageTravelSpeed;                      // Speed in meters per second to use for calculating the duration of a route
   double minAltitudeChange;                       // Minimum change of altitude required to update altitude meters
+  double maxAltitudeFilterDistance;               // Maximum distance in meters to still include a previous path point into altitude averaging
   NavigationPatImportWaypointsType importWaypoints; // Decides if the waypoints contained in the route shall be imported
 
   // Information about the path
@@ -80,6 +81,9 @@ protected:
 
   // Visualization of the path for each zoom level
   std::vector<NavigationPathVisualization*> zoomLevelVisualizations;
+  
+  // Filter to smooth altitude values
+  std::list<MapPosition> altitudeFilter;
 
   // Finds nodes in a xml tree
   std::list<XMLNode> findNodes(XMLDocument document, XMLXPathContext xpathCtx, std::string path);
@@ -107,6 +111,9 @@ protected:
 
   // Writes the cache to a file
   void writeCache();
+
+  // Adds an elementt to the altitude filter while keeping it's sortinng
+  void addToAltitudeFilter(MapPosition);
 
 public:
 

@@ -1967,7 +1967,12 @@
                   <xsd:documentation>Minimum distance from nearest route point such that navigation considers location to be off route.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="minAltitudeChange" type="xsd:double" default="20">
+              <xsd:element name="maxAltitudeFilterDistance" type="xsd:double" default="150">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum distance in meters to still include a previous path point into altitude averaging.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="minAltitudeChange" type="xsd:double" default="5">
                 <xsd:annotation>
                   <xsd:documentation>Minimum change of altitude required to update altitude meters.</xsd:documentation>
                 </xsd:annotation>
