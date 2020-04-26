@@ -70,6 +70,7 @@ protected:
   double averageTravelSpeed;                      // Speed in meters per second to use for calculating the duration of a route
   double minAltitudeChange;                       // Minimum change of altitude required to update altitude meters
   double maxAltitudeFilterDistance;               // Maximum distance in meters to still include a previous path point into altitude averaging
+  double trackRecordingMinDistance;               // Required minimum navigationDistance in meter to the last track point such that the point is added to the track
   NavigationPatImportWaypointsType importWaypoints; // Decides if the waypoints contained in the route shall be imported
 
   // Information about the path

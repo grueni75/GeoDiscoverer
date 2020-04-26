@@ -44,6 +44,7 @@ NavigationPath::NavigationPath() : animator(core->getDefaultScreen()) {
   minAltitudeChange=core->getConfigStore()->getDoubleValue("Navigation","minAltitudeChange", __FILE__, __LINE__);
   maxAltitudeFilterDistance=core->getConfigStore()->getDoubleValue("Navigation","maxAltitudeFilterDistance", __FILE__, __LINE__);
   averageTravelSpeed=core->getConfigStore()->getDoubleValue("Navigation","averageTravelSpeed", __FILE__, __LINE__);
+  trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance", __FILE__, __LINE__);
   isInit=false;
   reverse=false;
   lastValidAltiudeMeters=std::numeric_limits<double>::min();
@@ -936,26 +937,28 @@ void NavigationPath::updateMetrics(MapPosition prevPoint, MapPosition curPoint) 
         
       // Calculate the median
       addToAltitudeFilter(curPoint);
-      std::list<MapPosition>::iterator i=altitudeFilter.begin();
-      std::advance(i,altitudeFilter.size()/2);
-      double altitudeFiltered=i->getAltitude();
-      //DEBUG("filter: size=%d average=%f",altitudeFilter.size(),altitudeFiltered);
+      if (altitudeFilter.size()>=maxAltitudeFilterDistance/trackRecordingMinDistance) {
+        std::list<MapPosition>::iterator i=altitudeFilter.begin();
+        std::advance(i,altitudeFilter.size()/2);
+        double altitudeFiltered=i->getAltitude();
+        //DEBUG("filter: size=%d average=%f",altitudeFilter.size(),altitudeFiltered);
 
-      // In case we have no previous altitude, set it now
-      if (lastValidAltiudeMeters==std::numeric_limits<double>::min())
-        lastValidAltiudeMeters=altitudeFiltered;
+        // In case we have no previous altitude, set it now
+        if (lastValidAltiudeMeters==std::numeric_limits<double>::min())
+          lastValidAltiudeMeters=altitudeFiltered;
 
-      // Check if the altitude difference is sane
-      double altitudeDiff = altitudeFiltered - lastValidAltiudeMeters;
-      if (fabs(altitudeDiff)>=minAltitudeChange) {
+        // Check if the altitude difference is sane
+        double altitudeDiff = altitudeFiltered - lastValidAltiudeMeters;
+        if (fabs(altitudeDiff)>=minAltitudeChange) {
 
-        // Update the altitude meters
-        if (altitudeDiff>0) {
-          altitudeUp+=altitudeDiff;
-        } else {
-          altitudeDown+=-altitudeDiff;
+          // Update the altitude meters
+          if (altitudeDiff>0) {
+            altitudeUp+=altitudeDiff;
+          } else {
+            altitudeDown+=-altitudeDiff;
+          }
+          lastValidAltiudeMeters=altitudeFiltered;
         }
-        lastValidAltiudeMeters=altitudeFiltered;
       }
     }
   }
