@@ -1059,7 +1059,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdpng
 MY_PNG_PATH := libpng-1.6.26
-LOCAL_CFLAGS :=  -DHAVE_CONFIG_H -Ijni/$(MY_PNG_PATH) 
+LOCAL_CFLAGS :=  -DHAVE_CONFIG_H -DPNG_ARM_NEON_OPT=0 -Ijni/$(MY_PNG_PATH) 
 LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,png.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_PNG_PATH)/,pngerror.c)

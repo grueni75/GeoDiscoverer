@@ -21,6 +21,7 @@ allprojects {
 android {
     compileSdkVersion 27
     buildToolsVersion "28.0.3"
+    ndkVersion "21.1.6352462"
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
@@ -37,7 +38,7 @@ android {
             project.ext.set('releaseAppABI', 'all32')
         }
         debug {
-            project.ext.set('debugAppABI', 'armeabi-v7a')
+            project.ext.set('debugAppABI', 'arm64-v8a')
         }
     }
 
@@ -50,6 +51,15 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    splits {
+        abi {
+            enable gradle.startParameter.taskNames.any { it.contains("Debug") }
+            reset()
+            include 'armeabi-v7a'
+            universalApk false
+        }
     }
 }
 

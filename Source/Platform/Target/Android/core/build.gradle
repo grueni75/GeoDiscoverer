@@ -12,6 +12,7 @@ ext {
 android {
     compileSdkVersion 27
     buildToolsVersion "28.0.3"
+    ndkVersion "21.1.6352462"
 
     defaultConfig {
         minSdkVersion 14

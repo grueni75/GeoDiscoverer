@@ -1696,7 +1696,7 @@ __inline
 __attribute__ ((__gnu_inline__))
 #endif
 #endif
-const struct alias *
+static const struct alias *
 aliases_lookup (register const char *str, register unsigned int len)
 {
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)

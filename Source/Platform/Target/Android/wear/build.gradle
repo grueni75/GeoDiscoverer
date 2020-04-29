@@ -8,6 +8,7 @@ def computeVersionName() {
 android {
     compileSdkVersion 27
     buildToolsVersion "28.0.3"
+    ndkVersion "21.1.6352462"
 
     defaultConfig {
         applicationId "com.untouchableapps.android.geodiscoverer"
@@ -32,6 +33,15 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    splits {
+        abi {
+            enable gradle.startParameter.taskNames.any { it.contains("Debug") }
+            reset()
+            include 'armeabi-v7a'
+            universalApk false
+        }
     }
 }
 
