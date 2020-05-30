@@ -101,6 +101,7 @@ android.buildTypes.all { buildType ->
             standardOutput = new FileOutputStream("core/src/main/mode.txt");
         }
     }
+
     tasks.whenTaskAdded { task ->
         if (task.name == "check${buildType.name.capitalize()}Manifest") {
             task.dependsOn setNativeCodeConfigTask
@@ -111,4 +112,25 @@ android.buildTypes.all { buildType ->
     }
 }
 
-
+android.applicationVariants.all { variant ->
+    if (variant.buildType.name == 'debug') {
+        variant.outputs.each { output ->
+            def taskSuffix = variant.name.capitalize()
+            def assembleTaskName = "assemble${taskSuffix}"
+            if (tasks.findByName(assembleTaskName)) {
+                def copyAPKTask = tasks.create(name: "publish${taskSuffix}", type: Copy) {
+                    from "${rootDir}/mobile/build/outputs/apk/debug/${output.outputFile.name}"
+                    into "${rootDir}/export/debug"
+                    onlyIf {
+                        if (inputs.sourceFiles.empty) {
+                            ant.fail("Cannot find APK ${output.outputFile.name} to publish!")
+                            return false;
+                        } else
+                            return true;
+                    }
+                }
+                tasks[assembleTaskName].finalizedBy = [copyAPKTask]
+            }
+        }
+    }
+}
