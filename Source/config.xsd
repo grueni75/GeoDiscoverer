@@ -158,6 +158,55 @@
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
+        <xsd:element name="EBikeMonitor">
+          <xsd:annotation>
+            <xsd:documentation>Preferences related to the E-Bike status monitor.</xsd:documentation>
+          </xsd:annotation>
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="bluetoothAddress" type="xsd:string" default="D8:A9:8B:B2:E8:83" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Address of the bluetooth low energy device that transmits E-Bike status information.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="connected" type="xsd:integer" default="0" minOccurs="0">
+                <xsd:annotation>
+                  <xsd:documentation>Indicates if an E-bike is connected.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="batteryLevel" type="xsd:string" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Battery level in percent.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="powerLevel" type="xsd:string" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Power level in steps.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="engineTemperature" type="xsd:string" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Temperature within engine in degress of celcius.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="distanceElectric" type="xsd:string" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Distance in km the engine was on and supported the drive.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="distanceTotal" type="xsd:string" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Distance in km the engine was either on or in standby.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="speed" type="xsd:string" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Speed in km/h the bike has currently.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
         <xsd:element name="Cockpit">
           <xsd:annotation>
             <xsd:documentation>Preferences related to cockpit apps.</xsd:documentation>
@@ -1072,6 +1121,76 @@
                                           <xsd:documentation>Filename of the image showing the navigation point.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
+                                      <xsd:element name="powerLevelOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset for the power level label in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="powerLevelOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the power level label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="engineTemperatureOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset for the engine temperature label in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="engineTemperatureOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the engine temperature label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="engineTemperatureBackgroundRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius of the outer circle to draw around the engine temperature label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="engineTemperatureForegroundRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius of the inner circle to draw around the engine temperature label in percent of the outer radius.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="engineTemperatureMaxHeight" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Maximum height of the temperature gauge in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="engineTemperatureBackgroundWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the outer temperature gauge in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="engineTemperatureForegroundWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the inner temperature gauge in percent of the outer width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="distanceElectricOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset for the electric distance label in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="distanceElectricOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the electric distance label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryLevelRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius of the battery level gauge to draw around the power level label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryLevelBackgroundWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the outer battery level gauge in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryLevelForegroundWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the inner battery level gauge in percent of the outer width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
                                       <xsd:element name="TurnColor">
                                         <xsd:annotation>
                                           <xsd:documentation>Color of the turn arrow.</xsd:documentation>
@@ -1162,6 +1281,64 @@
                                       <xsd:element name="AltitudeProfileAxisColor">
                                         <xsd:annotation>
                                           <xsd:documentation>Color of the turn arrow.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="GaugeBackgroundColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Background color of any gauge.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="GaugeForegroundColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Foreground color of any gauge.</xsd:documentation>
                                         </xsd:annotation>
                                         <xsd:complexType>
                                           <xsd:sequence>

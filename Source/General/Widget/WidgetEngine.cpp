@@ -74,6 +74,7 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
     case WidgetTypePathInfo: widgetTypeString="pathInfo"; break;
     case WidgetTypeCursorInfo: widgetTypeString="cursorInfo"; break;
     case WidgetTypeAddressPoint: widgetTypeString="addressPoint"; break;
+    case WidgetTypeEBike: widgetTypeString="eBike"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
   c->setStringValue(path,"type",widgetTypeString,__FILE__, __LINE__);
@@ -95,6 +96,10 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
   c->setGraphicColorValue(path + "/InactiveColor",GraphicColor(config.getInactiveColor().getRed(),config.getInactiveColor().getGreen(),config.getInactiveColor().getBlue(),config.getInactiveColor().getAlpha()),__FILE__, __LINE__);
   if (config.getType()==WidgetTypeNavigation)
     c->setGraphicColorValue(path + "/BusyColor",GraphicColor(config.getBusyColor().getRed(),config.getBusyColor().getGreen(),config.getBusyColor().getBlue(),config.getBusyColor().getAlpha()),__FILE__, __LINE__);
+  if (config.getType()==WidgetTypeEBike) {
+    c->setGraphicColorValue(path + "/GaugeBackgroundColor",GraphicColor(config.getGaugeBackgroundColor().getRed(),config.getGaugeBackgroundColor().getGreen(),config.getGaugeBackgroundColor().getBlue(),config.getGaugeBackgroundColor().getAlpha()),__FILE__, __LINE__);
+    c->setGraphicColorValue(path + "/GaugeForegroundColor",GraphicColor(config.getGaugeForegroundColor().getRed(),config.getGaugeForegroundColor().getGreen(),config.getGaugeForegroundColor().getBlue(),config.getGaugeForegroundColor().getAlpha()),__FILE__, __LINE__);
+  }
   ParameterMap::iterator i;
   for (i=config.getParameters()->begin();i!=config.getParameters()->end();i++) {
     std::string innerPath = path;
@@ -637,6 +642,62 @@ void WidgetEngine::createGraphic() {
       config.setParameter("labelY","78.0");
       config.setParameter("valueY","40.0");
       config.setParameter("unitY","10.0");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("EBike");
+      config.setType(WidgetTypeEBike);
+      if (deviceName=="Default") {
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(50.0);
+        position.setPortraitY(9.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(50.0);
+        position.setLandscapeY(14.0);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(7.0);
+        position.setPortraitX(tabletPortraitMeterGridX[2]);
+        position.setPortraitY(tabletPortraitMeterGridY);
+        position.setPortraitZ(1);
+        position.setLandscapeX(tabletLandscapeMeterGridX[2]);
+        position.setLandscapeY(tabletLandscapeMeterGridY);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+      }
+      if (deviceName!="Default") {
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(0.0);
+        position.setPortraitX(0.0);
+        position.setPortraitY(0.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(64.0);
+        position.setLandscapeY(85.0);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+      }
+      config.setInactiveColor(GraphicColor(255,255,255,255));
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setGaugeBackgroundColor(GraphicColor(255,127,0,255));
+      config.setGaugeForegroundColor(GraphicColor(255,190,127,255));
+      config.setParameter("iconFilename", "eBikeBackground");
+      config.setParameter("powerLevelOffsetX","35");
+      config.setParameter("powerLevelOffsetY","50");
+      config.setParameter("engineTemperatureOffsetX","80");
+      config.setParameter("engineTemperatureOffsetY","25");
+      config.setParameter("engineTemperatureBackgroundRadius","13");
+      config.setParameter("engineTemperatureBackgroundWidth","15");
+      config.setParameter("engineTemperatureForegroundRadius","80");
+      config.setParameter("engineTemperatureForegroundWidth","60");
+      config.setParameter("engineTemperatureMaxHeight","50");
+      config.setParameter("distanceElectricOffsetX","35");
+      config.setParameter("distanceElectricOffsetY","25");
+      config.setParameter("batteryLevelRadius","25");
+      config.setParameter("batteryLevelBackgroundWidth","15");
+      config.setParameter("batteryLevelForegroundWidth","60");
       addWidgetToPage(config);
       // ---------------------------------------------------------
       config=WidgetConfig();
@@ -1265,6 +1326,7 @@ void WidgetEngine::createGraphic() {
       WidgetPathInfo *pathInfo;
       WidgetCursorInfo *cursorInfo;
       WidgetAddressPoint *addressPoint;
+      WidgetEBike *eBike;
       if (widgetType=="button") {
         button=new WidgetButton(page);
         primitive=button;
@@ -1301,6 +1363,10 @@ void WidgetEngine::createGraphic() {
         addressPoint=new WidgetAddressPoint(page);
         primitive=addressPoint;
       }
+      if (widgetType=="eBike") {
+        eBike=new WidgetEBike(page);
+        primitive=eBike;
+      }
 
       // Set type-independent properties
       std::list<std::string> name;
@@ -1311,7 +1377,7 @@ void WidgetEngine::createGraphic() {
       primitive->setColor(primitive->getInactiveColor());
 
       // Load the image of the widget
-      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")||(widgetType=="addressPoint")) {
+      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")||(widgetType=="addressPoint")||(widgetType=="eBike")) {
         primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {
@@ -1476,6 +1542,24 @@ void WidgetEngine::createGraphic() {
         GraphicColor c=cursorInfo->getColor();
         c.setAlpha(0);
         cursorInfo->setColor(c);
+      }
+      if (widgetType=="eBike") {
+        eBike->setGaugeBackgroundColor(c->getGraphicColorValue(widgetPath + "/GaugeBackgroundColor",__FILE__, __LINE__));        
+        eBike->setGaugeForegroundColor(c->getGraphicColorValue(widgetPath + "/GaugeForegroundColor",__FILE__, __LINE__));        
+        eBike->setPowerLevelOffsetX(c->getDoubleValue(widgetPath,"powerLevelOffsetX",__FILE__, __LINE__)*eBike->getIconWidth()/100.0);
+        eBike->setPowerLevelOffsetY(c->getDoubleValue(widgetPath,"powerLevelOffsetY",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
+        eBike->setEngineTemperatureOffsetX(c->getDoubleValue(widgetPath,"engineTemperatureOffsetX",__FILE__, __LINE__)*eBike->getIconWidth()/100.0);
+        eBike->setEngineTemperatureOffsetY(c->getDoubleValue(widgetPath,"engineTemperatureOffsetY",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
+        eBike->setEngineTemperatureBackgroundRadius(c->getDoubleValue(widgetPath,"engineTemperatureBackgroundRadius",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
+        eBike->setEngineTemperatureForegroundRadius(c->getDoubleValue(widgetPath,"engineTemperatureForegroundRadius",__FILE__, __LINE__)*eBike->getEngineTemperatureBackgroundRadius()/100.0);
+        eBike->setEngineTemperatureMaxHeight(c->getDoubleValue(widgetPath,"engineTemperatureMaxHeight",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
+        eBike->setEngineTemperatureBackgroundWidth(c->getDoubleValue(widgetPath,"engineTemperatureBackgroundWidth",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
+        eBike->setEngineTemperatureForegroundWidth(c->getDoubleValue(widgetPath,"engineTemperatureForegroundWidth",__FILE__, __LINE__)*eBike->getEngineTemperatureBackgroundWidth()/100.0);
+        eBike->setDistanceElectricOffsetX(c->getDoubleValue(widgetPath,"distanceElectricOffsetX",__FILE__, __LINE__)*eBike->getIconWidth()/100.0);
+        eBike->setDistanceElectricOffsetY(c->getDoubleValue(widgetPath,"distanceElectricOffsetY",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
+        eBike->setBatteryLevelRadius(c->getDoubleValue(widgetPath,"batteryLevelRadius",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
+        eBike->setBatteryLevelBackgroundWidth(c->getDoubleValue(widgetPath,"batteryLevelBackgroundWidth",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
+        eBike->setBatteryLevelForegroundWidth(c->getDoubleValue(widgetPath,"batteryLevelForegroundWidth",__FILE__, __LINE__)*eBike->getBatteryLevelBackgroundWidth()/100.0);        
       }
 
       // Add the widget to the page

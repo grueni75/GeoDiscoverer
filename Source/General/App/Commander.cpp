@@ -768,6 +768,10 @@ std::string Commander::execute(std::string cmd) {
     dispatch(cmd);
     cmdExecuted=true;
   }
+  if (cmdName=="dataChanged") {
+    core->onDataChange();
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

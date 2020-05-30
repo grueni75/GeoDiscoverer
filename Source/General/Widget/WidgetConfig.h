@@ -51,6 +51,10 @@ class WidgetConfig {
   // Busy color
   GraphicColor busyColor;
 
+  // Gauge colors
+  GraphicColor gaugeBackgroundColor;
+  GraphicColor gaugeForegroundColor;
+
   // Additional parameters
   ParameterMap parameters;
 
@@ -128,6 +132,22 @@ public:
 
   void setType(WidgetType type) {
     this->type = type;
+  }
+
+  const GraphicColor& getGaugeBackgroundColor() const {
+    return gaugeBackgroundColor;
+  }
+
+  void setGaugeBackgroundColor(const GraphicColor& gaugeBackgroundColor) {
+    this->gaugeBackgroundColor = gaugeBackgroundColor;
+  }
+
+  const GraphicColor& getGaugeForegroundColor() const {
+    return gaugeForegroundColor;
+  }
+
+  void setGaugeForegroundColor(const GraphicColor& gaugeForegroundColor) {
+    this->gaugeForegroundColor = gaugeForegroundColor;
   }
 };
 

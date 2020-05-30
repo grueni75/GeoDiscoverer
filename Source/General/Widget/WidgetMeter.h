@@ -21,8 +21,8 @@
 //============================================================================
 
 
-#ifndef WIDGETINFO_H_
-#define WIDGETINFO_H_
+#ifndef WIDGETMETER_H_
+#define WIDGETMETER_H_
 
 #include <Core.h>
 
@@ -104,4 +104,4 @@ public:
 
 }
 
-#endif /* WIDGETINFO_H_ */
+#endif /* WIDGETMETER_H_ */

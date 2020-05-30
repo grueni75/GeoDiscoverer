@@ -23,7 +23,6 @@ package com.untouchableapps.android.geodiscoverer;
 
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -38,19 +37,15 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.os.Build;
-import android.os.ParcelUuid;
-import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -65,8 +60,8 @@ public class GDHeartRateService {
 
   // Constants for finding heart rate services and measurements
   private final static UUID UUID_HEART_RATE_SERVICE = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
-  private final static UUID UUID_HEART_RATE_MEASUREMENT = UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb");
-  private final static UUID UUID_CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+  private final static UUID UUID_HEART_RATE_MEASUREMENT_VALUE = UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb");
+  private final static UUID UUID_HEART_RATE_MEASUREMENT_DESCRIPTOR = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
   /** Address of the bluetooth device to monitor */
   String deviceAddress;
@@ -131,7 +126,7 @@ public class GDHeartRateService {
       } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","connection to bluetooth gatt service dropped");
         state = CONNECTING;
-        coreObject.playSound("disconnect.ogg", 1, 100);
+        coreObject.playSound("heartRateDisconnect.ogg", 1, 100);
       }
     }
 
@@ -153,18 +148,18 @@ public class GDHeartRateService {
               if (gattCharacteristics == null) return;
               for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
                 //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",String.format("heart rate service supports characteristics %s",gattCharacteristic.getUuid().toString()));
-                if (gattCharacteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT)) {
+                if (gattCharacteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT_VALUE)) {
                   GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",String.format("requesting read of characteristic",gattCharacteristic.getUuid().toString()));
                   gatt.readCharacteristic(gattCharacteristic);
                   gatt.setCharacteristicNotification(gattCharacteristic,true);
-                  BluetoothGattDescriptor descriptor = gattCharacteristic.getDescriptor(UUID_CLIENT_CHARACTERISTIC_CONFIG);
+                  BluetoothGattDescriptor descriptor = gattCharacteristic.getDescriptor(UUID_HEART_RATE_MEASUREMENT_DESCRIPTOR);
                   descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                   gatt.writeDescriptor(descriptor);
                 }
               }
             }
           }
-          coreObject.playSound("connect.ogg",1, 100);
+          coreObject.playSound("heartRateConnect.ogg",1, 100);
         }
       }
     }
@@ -176,7 +171,7 @@ public class GDHeartRateService {
                                      int status) {
       super.onCharacteristicRead(gatt, characteristic, status);
       if (status == BluetoothGatt.GATT_SUCCESS) {
-        if (characteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT)) {
+        if (characteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT_VALUE)) {
           updateHeartRate(characteristic);
         }
       }
@@ -187,7 +182,7 @@ public class GDHeartRateService {
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
       super.onCharacteristicChanged(gatt, characteristic);
-      if (characteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT)) {
+      if (characteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT_VALUE)) {
         updateHeartRate(characteristic);
       }
     }

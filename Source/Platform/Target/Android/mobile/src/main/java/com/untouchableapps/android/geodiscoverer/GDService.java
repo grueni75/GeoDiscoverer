@@ -68,6 +68,9 @@ public class GDService extends Service {
   // Heart rate monitor
   GDHeartRateService heartRateService = null;
 
+  // E-Bike monitor
+  GDEBikeService eBikeService = null;
+
   // Download status
   int tilesLeft;
   int tilesDone;
@@ -230,13 +233,24 @@ public class GDService extends Service {
       // Service restart is complete
       serviceRestarted=false;
 
-      // Start the heart rate monitor (if supported)
+      // Stop all bluetooth services
+      if (heartRateService != null) {
+        heartRateService.deinit();
+      }
+      if (eBikeService != null) {
+        eBikeService.deinit();
+      }
+
+      // Start all bluetooth services
       if (GDHeartRateService.isSupported(this)) {
-        if (heartRateService!=null) {
-          heartRateService.deinit();
-        }
         heartRateService = new GDHeartRateService(this,coreObject);
       }
+
+      // Start the ebike monitor (if supported)
+      if (GDEBikeService.isSupported(this)) {
+        eBikeService = new GDEBikeService(this,coreObject);
+      }
+
 
       // Replay the trace if it exists
       File replayLog = new File(coreObject.homePath + "/replay.log");
@@ -295,10 +309,14 @@ public class GDService extends Service {
   @Override
   public void onDestroy() {
 
-    // Stop the heart rate monitor
+    // Stop the bluetooth services
     if (heartRateService!=null) {
       heartRateService.deinit();
       heartRateService=null;
+    }
+    if (eBikeService!=null) {
+      eBikeService.deinit();
+      eBikeService=null;
     }
 
     // Hide the notification

@@ -54,7 +54,10 @@ void GraphicCircularStrip::draw(TimestampInMicroseconds t) {
   screen->setColor(getColor().getRed(),getColor().getGreen(),getColor().getBlue(),getColor().getAlpha());
 
   // Draw the strip
+  screen->startObject();
+  screen->translate(x,y,0);
   triangleCoordinates->drawAsTexturedTriangles(texture,textureCoordinates,true);
+  screen->endObject();
 }
 
 // Recreates any textures or buffers

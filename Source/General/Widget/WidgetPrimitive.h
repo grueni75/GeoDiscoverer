@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale, WidgetTypeStatus, WidgetTypeCursorInfo, WidgetTypeNavigation, WidgetTypePathInfo, WidgetTypeAddressPoint} WidgetType;
+typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale, WidgetTypeStatus, WidgetTypeCursorInfo, WidgetTypeNavigation, WidgetTypePathInfo, WidgetTypeAddressPoint, WidgetTypeEBike} WidgetType;
 
 class WidgetPage;
 

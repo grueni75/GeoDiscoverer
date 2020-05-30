@@ -472,6 +472,7 @@ extern Core *core;
 #include <WidgetButton.h>
 #include <WidgetCheckbox.h>
 #include <WidgetMeter.h>
+#include <WidgetEBike.h>
 #include <WidgetScale.h>
 #include <WidgetNavigation.h>
 #include <WidgetPathInfo.h>
