@@ -86,6 +86,7 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
       setFadeAnimation(t,getColor(),targetColor,false,widgetPage->getGraphicEngine()->getFadeDuration());
     }
     if (firstRun) {
+      setIsHidden(true);
       targetColor.setAlpha(0);
       setColor(targetColor);
       firstRun=false;
@@ -258,6 +259,7 @@ void WidgetEBike::updatePosition(Int x, Int y, Int z) {
 
 // Called when some data has changed
 void WidgetEBike::onDataChange() {
+  //DEBUG("data has changed",NULL);
   updateRequired=true;
 }
 
