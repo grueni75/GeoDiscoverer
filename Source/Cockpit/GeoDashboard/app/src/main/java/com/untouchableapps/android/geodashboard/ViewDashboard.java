@@ -63,6 +63,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -543,6 +544,7 @@ public class ViewDashboard extends Activity {
     registerReceiver(new BroadcastReceiver() {
       @Override
       public void onReceive(Context context, Intent intent) {
+        //Log.d("GeoDashboard","WLAN state has changed!");
         boolean connectionEstablished = intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false);
         if (connectionEstablished) {
           wlanActive = true;
@@ -560,20 +562,15 @@ public class ViewDashboard extends Activity {
       @Override
       public void run() {
 
-        // Set the correct WLAN state
-        InetAddress address = getWifiInetAddress();
-        if (address!=null) {
-          wlanActive=true;
-        } else {
-          wlanActive=false;
-        }
-
         // Endless loop
         while (true) {
-          if ((appActive)&&(wlanActive)) {
+          //Log.d("GeoDashboard",String.format("appActive=%s wlanActive=%s",Boolean.toString(appActive),Boolean.toString(wlanActive)));
+          if (appActive) {
             if (!serviceActive) {
+              InetAddress address = getWifiInetAddress();
               address = getWifiInetAddress();
               if (address!=null) {
+                wlanActive=true;
                 startService(true);
               }
             }
