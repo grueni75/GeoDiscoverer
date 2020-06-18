@@ -73,10 +73,11 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
     // Is ebike connected?
     boolean prevConnected=connected;
     connected=configStore->getIntValue("EBikeMonitor","connected",__FILE__,__LINE__);
+    DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
     
     // Update the widget visibility
-    GraphicColor targetColor=getActiveColor();
     if (connected!=prevConnected) {
+      GraphicColor targetColor=getActiveColor();
       if (!connected) {
         setIsHidden(true);
         targetColor.setAlpha(0);
@@ -87,8 +88,8 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
     }
     if (firstRun) {
       setIsHidden(true);
-      targetColor.setAlpha(0);
-      setColor(targetColor);
+      //targetColor.setAlpha(0);
+      //setColor(targetColor);
       firstRun=false;
     }
   
@@ -183,7 +184,7 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
 // Executed every time the graphic engine needs to draw
 void WidgetEBike::draw(TimestampInMicroseconds t) {
 
-  if (getColor().getAlpha()==0)
+  if (getIsHidden())
     return;
   
   // Let the primitive draw the background
