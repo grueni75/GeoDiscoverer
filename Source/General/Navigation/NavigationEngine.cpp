@@ -120,6 +120,51 @@ NavigationEngine::NavigationEngine() :
       return;
     }
   }
+  
+  // Cleanup the path caches
+  cleanupNavigationPathCache(getRoutePath());
+  cleanupNavigationPathCache(getTrackPath());  
+}
+
+// Remove cache files that do not have their original gpx files anymore
+void NavigationEngine::cleanupNavigationPathCache(std::string filepath) {
+
+  // Set the directories
+  std::string cachepath=filepath + "/.cache";
+
+  // Check if cache exists
+  struct stat st;
+  if (core->statFile(cachepath, &st) != 0) {
+    DEBUG("skipping <%s> since it does not exist",cachepath.c_str());
+    return;
+  }
+
+  // Clean up the route cache
+  DIR *dp = core->openDir(cachepath.c_str());
+  if (dp == NULL){
+    FATAL("can not open directory <%s> for reading available paths",cachepath.c_str());
+    return;
+  }
+  struct dirent *dirp;
+  struct stat filestat;
+  while ((dirp = readdir( dp )))
+  {
+    std::string filename = std::string(dirp->d_name);
+    std::string originalFilepath = filepath + "/" + dirp->d_name;
+    std::string cacheFilepath = cachepath + "/" + dirp->d_name;
+
+    // If the file is a directory (or is in some way invalid) we'll skip it
+    if (core->statFile( cacheFilepath, &filestat )) continue;
+    if (S_ISDIR( filestat.st_mode ))                continue;
+
+    // Process the file
+    //DEBUG("checking if original gpx <%s> exists",originalFilepath.c_str());
+    if (core->statFile(originalFilepath, &st) != 0) {
+      DEBUG("removing cache <%s> since original does not exist anymore",cacheFilepath.c_str());
+      remove(cacheFilepath.c_str());      
+    }
+  }
+  closedir(dp);  
 }
 
 // Destructor
@@ -288,7 +333,7 @@ void NavigationEngine::updateRoutes() {
     routes.push_back(filename);
   }
   closedir(dp);
-
+   
   // Go through all routes in the config and remove the ones that do not exist anymore
   std::list<std::string> routeNames = core->getConfigStore()->getAttributeValues("Navigation/Route", "name", __FILE__, __LINE__);
   for(std::list<std::string>::iterator i=routeNames.begin(); i!=routeNames.end(); i++) {

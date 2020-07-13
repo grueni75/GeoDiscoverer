@@ -31,7 +31,7 @@ NavigationPath::NavigationPath() : animator(core->getDefaultScreen()) {
 
   // Init variables
   accessMutex=core->getThread()->createMutex("navigation path access mutex");
-  gpxFilefolder=core->getNavigationEngine()->getTrackPath();
+  setGpxFilefolder(core->getNavigationEngine()->getTrackPath());
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength", __FILE__, __LINE__);
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance", __FILE__, __LINE__);
   pathWidth=core->getConfigStore()->getIntValue("Graphic","pathWidth", __FILE__, __LINE__);
@@ -1188,7 +1188,7 @@ bool NavigationPath::retrieve(NavigationPath *navigationPath, char *&cacheData, 
   // Check if the class has changed
   Int size=sizeof(NavigationPath);
 #ifdef TARGET_LINUX
-  if (size!=1296) {
+  if (size!=1336) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return false;
   }
@@ -1277,6 +1277,19 @@ void NavigationPath::setGpxFilename(std::string gpxFilename)
   name.push_back(gpxFilename);
   animator.setName(name);
   core->getDefaultGraphicEngine()->unlockPathAnimators();
+}
+
+// Sets the folder for the gpx file
+void NavigationPath::setGpxFilefolder(std::string gpxFilefolder) {
+  this->gpxFilefolder = gpxFilefolder;
+  this->gpxCacheFilefolder = gpxFilefolder + "/.cache";
+  struct stat st;
+  if (core->statFile(gpxCacheFilefolder, &st) != 0) {
+    if (mkdir(gpxCacheFilefolder.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
+      FATAL("can not create cache directory <%s>!",gpxCacheFilefolder.c_str());
+      return;
+    }
+  }
 }
 
 }

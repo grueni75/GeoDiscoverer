@@ -205,6 +205,9 @@ protected:
     overlayGraphicHash="";
   }
 
+  // Remove cache files that do not have their original gpx files anymore
+  void cleanupNavigationPathCache(std::string filepath);
+
 public:
 
   // Constructor
@@ -335,7 +338,7 @@ public:
 
   // Updates the address point group that is displayed on screen
   void addressPointGroupChanged();
-
+  
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)
   {

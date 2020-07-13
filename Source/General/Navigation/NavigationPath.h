@@ -40,8 +40,9 @@ protected:
   ThreadMutexInfo *accessMutex;                   // Mutex for accessing the path
   std::string name;                               // The name of the path
   std::string description;                        // The description of this path
-  std::string gpxFilefolder;                      // Filename of the gpx file that stores this path
-  std::string gpxFilename;                        // Folder where the gpx file is stored
+  std::string gpxFilefolder;                      // Folder where the gpx file is stored
+  std::string gpxCacheFilefolder;                 // Folder where the gpx file cache is stored
+  std::string gpxFilename;                        // Filename of the gpx file that stores this path
   MapPosition lastPoint;                          // The last point added
   bool hasLastPoint;                              // Indicates if the path already has its last point
   MapPosition secondLastPoint;                    // The point added before the last point
@@ -176,10 +177,7 @@ public:
   void setGpxFilename(std::string gpxFilename);
 
   // Getters and setters
-  void setGpxFilefolder(std::string gpxFilefolder)
-  {
-      this->gpxFilefolder = gpxFilefolder;
-  }
+  void setGpxFilefolder(std::string gpxFilefolder);
 
   std::string getGpxFilefolder() const
   {

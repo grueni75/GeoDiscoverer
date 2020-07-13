@@ -270,7 +270,8 @@ void NavigationPath::extractInformation(std::list<XMLNode> nodes) {
 // Writes the cache to a file
 void NavigationPath::writeCache() {
   std::string filepath=gpxFilefolder + "/" + gpxFilename;
-  std::string cacheFilepath = filepath + ".bin";
+  std::string cacheFilepath=gpxCacheFilefolder + "/" + gpxFilename;
+  //DEBUG("cacheFilepath=%s",cacheFilepath.c_str());
   std::ofstream ofs;
   ofs.open(cacheFilepath.c_str(), std::ios::binary);
   if (ofs.fail()) {
@@ -290,7 +291,8 @@ void NavigationPath::writeCache() {
 bool NavigationPath::readGPXFile() {
 
   std::string filepath=gpxFilefolder + "/" + gpxFilename;
-  std::string cacheFilepath = filepath + ".bin";
+  std::string cacheFilepath = gpxCacheFilefolder + "/" + gpxFilename;
+  //DEBUG("cacheFilepath=%s",cacheFilepath.c_str());
   XMLNode node;
   XMLDocument doc=NULL;
   XMLXPathContext xpathCtx=NULL;
