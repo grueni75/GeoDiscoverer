@@ -73,7 +73,7 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
     // Is ebike connected?
     boolean prevConnected=connected;
     connected=configStore->getIntValue("EBikeMonitor","connected",__FILE__,__LINE__);
-    DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
+    //DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
     
     // Update the widget visibility
     if (connected!=prevConnected) {
