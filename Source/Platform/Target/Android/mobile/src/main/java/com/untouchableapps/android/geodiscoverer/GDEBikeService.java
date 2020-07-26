@@ -91,7 +91,7 @@ public class GDEBikeService {
       rawStatus+=value;
     }
     if (value.endsWith("\r\n")) {
-      //GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "ADD-E status received: " + rawStatus);
+      //GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppEB", "ADD-E status received: " + rawStatus);
       String[] fields=rawStatus.split("\\|");
       if (fields.length>=21) {
         coreObject.configStoreSetStringValue("EBikeMonitor","batteryLevel",fields[2]);
@@ -117,12 +117,12 @@ public class GDEBikeService {
       String intentAction;
       if (newState == BluetoothProfile.STATE_CONNECTED) {
         if (state==CONNECTING) {
-          GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "connection to bluetooth gatt service established, requesting service discovery");
+          GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppEB", "connection to bluetooth gatt service established, requesting service discovery");
           gatt.discoverServices();
           state = DISCOVERING_SERVICES;
         }
       } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","connection to bluetooth gatt service dropped");
+        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppEB","connection to bluetooth gatt service dropped");
         state = CONNECTING;
         coreObject.playSound("eBikeDisconnect.wav", 1, 100);
         coreObject.configStoreSetStringValue("EBikeMonitor","connected","0");
@@ -138,18 +138,18 @@ public class GDEBikeService {
       if (status == BluetoothGatt.GATT_SUCCESS) {
         if (state == DISCOVERING_SERVICES) {
           state = OPERATING;
-          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","bluetooth gatt service discovery completed");
+          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppEB","bluetooth gatt service discovery completed");
           List<BluetoothGattService> gattServices = gatt.getServices();
           if (gattServices == null) return;
           for (BluetoothGattService gattService : gattServices) {
-            GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",String.format("device supports service %s",gattService.getUuid().toString()));
+            GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppEB",String.format("device supports service %s",gattService.getUuid().toString()));
             if (gattService.getUuid().equals(UUID_ADDE_SERVICE)) {
               List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
               if (gattCharacteristics == null) return;
               for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
-                GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",String.format("device service supports characteristics %s",gattCharacteristic.getUuid().toString()));
+                GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppEB",String.format("device service supports characteristics %s",gattCharacteristic.getUuid().toString()));
                 if (gattCharacteristic.getUuid().equals(UUID_ADDE_STATUS_VALUE)) {
-                  GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",String.format("requesting read of characteristic",gattCharacteristic.getUuid().toString()));
+                  GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppEB",String.format("requesting read of characteristic",gattCharacteristic.getUuid().toString()));
                   gatt.readCharacteristic(gattCharacteristic);
                   gatt.setCharacteristicNotification(gattCharacteristic,true);
                   BluetoothGattDescriptor descriptor = gattCharacteristic.getDescriptor(UUID_ADDE_STATUS_DESCRIPTOR);
@@ -202,7 +202,7 @@ public class GDEBikeService {
           }
         }
         if (!found) {
-          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp", String.format("new bluetooth le device <%s> discovered!",device.getAddress()));
+          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppEB", String.format("new bluetooth le device <%s> discovered!",device.getAddress()));
           knownDeviceAddresses.add(device.getAddress());
           Preferences.knownBluetoothDevicesAddressArray = knownDeviceAddresses.toArray(new String[knownDeviceAddresses.size()]);
         }

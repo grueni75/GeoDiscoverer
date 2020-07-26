@@ -105,7 +105,7 @@ public class GDHeartRateService {
       format = BluetoothGattCharacteristic.FORMAT_UINT8;
     }
     currentHeartRate = characteristic.getIntValue(format, 1);
-    //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp", String.format("received heart rate: %d", currentHeartRate));
+    //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR", String.format("received heart rate: %d", currentHeartRate));
   }
 
   /** Callback for gatt service updates */
@@ -119,12 +119,12 @@ public class GDHeartRateService {
       String intentAction;
       if (newState == BluetoothProfile.STATE_CONNECTED) {
         if (state==CONNECTING) {
-          GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "connection to bluetooth gatt service established, requesting service discovery");
+          GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", "connection to bluetooth gatt service established, requesting service discovery");
           gatt.discoverServices();
           state = DISCOVERING_SERVICES;
         }
       } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","connection to bluetooth gatt service dropped");
+        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR","connection to bluetooth gatt service dropped");
         state = CONNECTING;
         coreObject.playSound("heartRateDisconnect.ogg", 1, 100);
       }
@@ -138,18 +138,18 @@ public class GDHeartRateService {
       if (status == BluetoothGatt.GATT_SUCCESS) {
         if (state == DISCOVERING_SERVICES) {
           state = OPERATING;
-          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","bluetooth gatt service discovery completed");
+          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR","bluetooth gatt service discovery completed");
           List<BluetoothGattService> gattServices = gatt.getServices();
           if (gattServices == null) return;
           for (BluetoothGattService gattService : gattServices) {
-            //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",String.format("device supports service %s",gattService.getUuid().toString()));
+            //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("device supports service %s",gattService.getUuid().toString()));
             if (gattService.getUuid().equals(UUID_HEART_RATE_SERVICE)) {
               List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
               if (gattCharacteristics == null) return;
               for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
-                //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",String.format("heart rate service supports characteristics %s",gattCharacteristic.getUuid().toString()));
+                //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("heart rate service supports characteristics %s",gattCharacteristic.getUuid().toString()));
                 if (gattCharacteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT_VALUE)) {
-                  GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",String.format("requesting read of characteristic",gattCharacteristic.getUuid().toString()));
+                  GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("requesting read of characteristic",gattCharacteristic.getUuid().toString()));
                   gatt.readCharacteristic(gattCharacteristic);
                   gatt.setCharacteristicNotification(gattCharacteristic,true);
                   BluetoothGattDescriptor descriptor = gattCharacteristic.getDescriptor(UUID_HEART_RATE_MEASUREMENT_DESCRIPTOR);
@@ -202,7 +202,7 @@ public class GDHeartRateService {
           }
         }
         if (!found) {
-          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp", String.format("new bluetooth le device <%s> discovered!",device.getAddress()));
+          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR", String.format("new bluetooth le device <%s> discovered!",device.getAddress()));
           knownDeviceAddresses.add(device.getAddress());
           Preferences.knownBluetoothDevicesAddressArray = knownDeviceAddresses.toArray(new String[knownDeviceAddresses.size()]);
         }
@@ -328,10 +328,10 @@ public class GDHeartRateService {
                           player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                           player.prepare();
                         } catch (IOException e) {
-                          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDAppHR", e.getMessage());
                         }
                         player2.setNextMediaPlayer(player);
-                        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player done, handing over to player2");
+                        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR","player done, handing over to player2");
                       }
                       playerLock.unlock();
                     }
@@ -346,10 +346,10 @@ public class GDHeartRateService {
                           player2.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                           player2.prepare();
                         } catch (IOException e) {
-                          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+                          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDAppHR", e.getMessage());
                         }
                         player.setNextMediaPlayer(player2);
-                        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","player2 done, handing over to player");
+                        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR","player2 done, handing over to player");
                       }
                       playerLock.unlock();
                     }
@@ -364,7 +364,7 @@ public class GDHeartRateService {
               Thread.sleep(1000);
             } catch (InterruptedException e) {
             } catch (IOException e) {
-              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDAppHR", e.getMessage());
             }
 
             // Find out the zone the heart rate is in
@@ -388,12 +388,12 @@ public class GDHeartRateService {
             } else {
               heartRateZoneChangeTimestamp = 0;
             }
-            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("current heart rate zone: %d",currentHeartRateZone));
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR",String.format("current heart rate zone: %d",currentHeartRateZone));
           }
         }
 
         // Stop the player if it's still running
-        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","shutting down media player");
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR","shutting down media player");
         playerLock.lock();
         alarmPlaying=false;
         if (player!=null) {
@@ -411,16 +411,16 @@ public class GDHeartRateService {
             afd.close();
           }
           catch(IOException e) {
-            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
+            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDAppHR", e.getMessage());
           }
           afd=null;
         }
         playerLock.unlock();
-        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","exiting alarm thread");
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR","exiting alarm thread");
       }
     });
     alarmThread.start();
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","alarm thread started");
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR","alarm thread started");
 
   }
 
