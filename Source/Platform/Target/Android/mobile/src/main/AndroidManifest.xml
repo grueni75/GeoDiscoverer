@@ -50,6 +50,7 @@
             <!-- GPX files via file extension -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
                 <action android:name="android.intent.action.VIEW"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -57,10 +58,13 @@
 
                 <data android:mimeType="*/*" android:scheme="file" android:host="*" android:pathPattern=".*\\.gpx"/>
                 <data android:mimeType="*/*" android:scheme="content" android:host="*" android:pathPattern=".*\\.gpx"/>
+                <data android:mimeType="*/*" android:scheme="file" android:host="*" android:pathPattern=".*\\.GPX"/>
+                <data android:mimeType="*/*" android:scheme="content" android:host="*" android:pathPattern=".*\\.GPX"/>
             </intent-filter>
             <!-- GPX files via http scheme -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
                 <action android:name="android.intent.action.VIEW"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -68,13 +72,25 @@
 
                 <data android:mimeType="*/*" android:scheme="http" android:host="*" android:pathPattern=".*\\.gpx"/>
                 <data android:mimeType="*/*" android:scheme="https" android:host="*" android:pathPattern=".*\\.gpx"/>
+                <data android:mimeType="*/*" android:scheme="http" android:host="*" android:pathPattern=".*\\.GPX"/>
+                <data android:mimeType="*/*" android:scheme="https" android:host="*" android:pathPattern=".*\\.GPX"/>
             </intent-filter>
             <!-- GPX files via mime types -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:host="*" android:mimeType="text/xml" android:scheme="file"/>
+                <data android:host="*" android:mimeType="text/xml" android:scheme="content"/>
+                <data android:host="*" android:mimeType="text/plain" android:scheme="file"/>
+                <data android:host="*" android:mimeType="text/plain" android:scheme="content"/>
+                <data android:host="*" android:mimeType="text/plain" android:scheme="file"/>
+                <data android:host="*" android:mimeType="application/octet-stream" android:scheme="file"/>
+                <data android:host="*" android:mimeType="application/octet-stream" android:scheme="content"/>
+                <data android:host="*" android:mimeType="application/gpx" android:scheme="content"/>
                 <data android:host="*" android:mimeType="application/gpx" android:scheme="file"/>
                 <data android:host="*" android:mimeType="application/gpx" android:scheme="content"/>
                 <data android:host="*" android:mimeType="application/gpx+xml" android:scheme="file"/>
@@ -83,6 +99,8 @@
                 <data android:host="*" android:mimeType="application/x-gpx" android:scheme="content"/>
                 <data android:host="*" android:mimeType="application/x-gpx+xml" android:scheme="file"/>
                 <data android:host="*" android:mimeType="application/x-gpx+xml" android:scheme="content"/>
+                <data android:host="*" android:mimeType="application/xml" android:scheme="file"/>
+                <data android:host="*" android:mimeType="application/xml" android:scheme="content"/>
                 <data android:host="*" android:mimeType="x-cache/gpx" android:scheme="file"/>
                 <data android:host="*" android:mimeType="x-cache/gpx" android:scheme="content"/>
                 <data android:host="*" android:mimeType="x-cache/gpx+xml" android:scheme="file"/>
