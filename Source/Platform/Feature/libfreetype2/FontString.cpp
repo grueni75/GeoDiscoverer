@@ -37,6 +37,7 @@ FontString::FontString(Screen *screen, Font *font, FontString *fontStringReferen
   color.setAlpha(255);
   useCount=0;
   widthLimit=-1;
+  keepEndCharCount=-1;
   textureBitmap=NULL;
 }
 

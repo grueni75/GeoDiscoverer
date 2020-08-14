@@ -53,7 +53,7 @@ protected:
 
   // Vertical offset to use for the layer label
   Int layerLabelOffsetY;
-
+  
   // Font string objects for drawing
   std::vector<FontString*> scaledNumberFontString;
   FontString *mapNameFontString;

@@ -117,7 +117,7 @@ protected:
   UTF32** targetStart, UTF32* targetEnd, ConversionFlags flags);
 
   // Copies the characters to the bitmap
-  void copyCharacters(FontString *fontString, std::list<FontCharacterPosition> *drawingList, bool useStrokeBitmap, UShort *textureBitmap, Int textureWidth, Int textureHeight, Int top, Int left, Int width, Int height, Int fadeOutOffset);
+  void copyCharacters(FontString *fontString, std::list<FontCharacterPosition> *drawingList, bool useStrokeBitmap, UShort *textureBitmap, Int textureWidth, Int textureHeight, Int top, Int left, Int width, Int maxWidth, Int height, Int fadeOutOffset);
 
 public:
 
@@ -137,7 +137,7 @@ public:
   void deinit();
 
   // Creates a string
-  FontString *createString(std::string contents, Int widthLimit=-1);
+  FontString *createString(std::string contents, Int widthLimit=-1, Int keepEndWidth=-1);
 
   // Creates the bitmap for the font string
   void createStringBitmap(FontString *fontString);

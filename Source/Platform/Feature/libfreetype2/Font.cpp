@@ -148,10 +148,35 @@ void Font::setTexture(FontString *fontString) {
 }
 
 // Copies the characters to the bitmap
-void Font::copyCharacters(FontString *fontString, std::list<FontCharacterPosition> *drawingList, bool useStrokeBitmap, UShort *textureBitmap, Int textureWidth, Int textureHeight, Int top, Int left, Int width, Int height, Int fadeOutOffset) {
+void Font::copyCharacters(FontString *fontString, std::list<FontCharacterPosition> *drawingList, bool useStrokeBitmap, UShort *textureBitmap, Int textureWidth, Int textureHeight, Int top, Int left, Int width, Int maxWidth, Int height, Int fadeOutOffset) {
+  Int firstFadeStartX=-1;
+  Int firstFadeEndX=-1;
+  Int secondFadeStartX=-1;
+  Int secondFadeEndX=-1;
+  Int secondFadeOffsetXAdj=0;
+  if (fontString->getKeepEndCharCount()!=-1) {
+    Int keepEndWidth=0;
+    std::list<FontCharacterPosition>::iterator start=drawingList->end();
+    for (int i=0;i<fontString->getKeepEndCharCount();i++) {
+      if (start!=drawingList->begin())
+        start--;
+    }
+    for(std::list<FontCharacterPosition>::iterator i=start;i!=drawingList->end();i++) {
+      FontCharacterPosition pos=*i;
+      keepEndWidth+=pos.getCharacter()->getPenAdvanceX();
+      //DEBUG("keepEndWidth=%d",keepEndWidth); 
+    }
+    firstFadeStartX=width-keepEndWidth-fadeOutOffset;
+    firstFadeEndX=firstFadeStartX+fadeOutOffset-1;
+    secondFadeStartX=maxWidth-keepEndWidth;
+    secondFadeEndX=secondFadeStartX-1;
+    secondFadeOffsetXAdj=secondFadeStartX-firstFadeEndX-1;
+    //DEBUG("firstFadeStartX=%d firstFadeEndX=%d secondFadeStartX=%d secondFadeEndX=%d",firstFadeStartX,firstFadeEndX,secondFadeStartX,secondFadeEndX);
+  }
   for(std::list<FontCharacterPosition>::iterator i=drawingList->begin();i!=drawingList->end();i++) {
     FontCharacterPosition pos=*i;
     Int offsetX=pos.getX()-left;
+    Int offsetXAdj=0;
     Int offsetY=top-pos.getY();
     offsetY+=(textureHeight-height);
     FontCharacter *c=pos.getCharacter();
@@ -167,17 +192,41 @@ void Font::copyCharacters(FontString *fontString, std::list<FontCharacterPositio
         if ((value&0xF)!=0) {
           Int absX=offsetX+x;
           bool copyValue=true;
+          Int fadeScale=-1;
           if ((fontString->getWidthLimit()!=-1)&&(width==fontString->getWidthLimit())) {
-            if (absX>=width)
-              copyValue=false;
-            else if (absX>=width-fadeOutOffset) {
-              Int t=width-1-absX;
-              Int alpha=(value&0xF)*t/fadeOutOffset;
-              value=(value&0xFFF0)|alpha;
+            if (firstFadeStartX!=-1) {
+              if (absX>=firstFadeStartX) {
+                if (absX<=firstFadeEndX) {
+                  //DEBUG("first fade: offsetX=%d absX=%d",offsetX,absX);
+                  fadeScale=firstFadeEndX-absX;
+                } else {
+                  if (absX>=secondFadeStartX) {
+                    if (absX<=secondFadeEndX) {
+                      //DEBUG("second fade: offsetX=%d absX=%d",offsetX,absX);
+                      fadeScale=absX-secondFadeStartX;  
+                    }
+                    offsetXAdj=secondFadeOffsetXAdj;
+                  } else {
+                    copyValue=false;
+                  }
+                }
+              }              
+            } else {
+              if (absX>=width)
+                copyValue=false;
+              else {
+                if (absX>=width-fadeOutOffset) {
+                  fadeScale=width-1-absX;
+                }
+              }          
+            }
+            if (fadeScale!=-1) {
+              Int alpha=(value&0xF)*fadeScale/fadeOutOffset;
+              value=(value&0xFFF0)|alpha;              
             }
           }
           if (copyValue)
-            textureBitmap[(offsetY+y)*textureWidth+offsetX+x]=value;
+            textureBitmap[(offsetY+y)*textureWidth+offsetX-offsetXAdj+x]=value;
         }
       }
     }
@@ -201,7 +250,7 @@ void Font::createStringBitmap(FontString *fontString) {
   FT_Glyph normalGlyph=NULL;
   std::list<FontCharacterPosition> drawingList;
   UShort *textureBitmap=NULL;
-  Int top,left,bottom,right,width,height;
+  Int top,left,bottom,right,width,maxWidth,height;
   Int textureWidth,textureHeight;
   Int fadeOutOffset=fontEngine->getFadeOutOffset();
 	
@@ -211,6 +260,7 @@ void Font::createStringBitmap(FontString *fontString) {
   bottom=std::numeric_limits<Int>::max();
   right=std::numeric_limits<Int>::min();
   width=0;
+  maxWidth=0;
   height=0;
 
   // Convert the UTF8 string to UTF32
@@ -375,6 +425,7 @@ void Font::createStringBitmap(FontString *fontString) {
     pos.setX(x1);
     pos.setY(y2);
     drawingList.push_back(pos);
+    //DEBUG("c=%x width=%d",c,pos.getCharacter()->getWidth());
 
     // Update the dimensions
     if (y2>top) {
@@ -394,10 +445,13 @@ void Font::createStringBitmap(FontString *fontString) {
     penX+=fontCharacter->getPenAdvanceX();
 
     // Abort if the current width is above the limit
-    width=right-left;
+    maxWidth=right-left;
     if ((fontString->getWidthLimit()>-1)&&(width>=fontString->getWidthLimit())) {
       width=fontString->getWidthLimit();
-      break;
+      if (fontString->getKeepEndCharCount()==-1) 
+        break;
+    } else {
+      width=maxWidth;
     }
 
   }
@@ -424,8 +478,8 @@ void Font::createStringBitmap(FontString *fontString) {
   memset(textureBitmap,0,sizeof(*textureBitmap)*textureWidth*textureHeight);
 
   // Copy the characters to the bitmap
-  copyCharacters(fontString,&drawingList,true,textureBitmap,textureWidth,textureHeight,top,left,width,height,fadeOutOffset);
-  copyCharacters(fontString,&drawingList,false,textureBitmap,textureWidth,textureHeight,top,left,width,height,fadeOutOffset);
+  copyCharacters(fontString,&drawingList,true,textureBitmap,textureWidth,textureHeight,top,left,width,maxWidth,height,fadeOutOffset);
+  copyCharacters(fontString,&drawingList,false,textureBitmap,textureWidth,textureHeight,top,left,width,maxWidth,height,fadeOutOffset);
 
   // Update the font string object (you also need to update the cache code in createString if you change this)
   fontString->setTextureBitmap(textureBitmap);
@@ -448,15 +502,16 @@ cleanup:
 }
 
 // Creates a new string
-FontString *Font::createString(std::string contents, Int widthLimit) {
+FontString *Font::createString(std::string contents, Int widthLimit, Int keepEndCharCount) {
 
   FontString *fontString;
 
   // First check if the string is available in the used string map or the cached string map
   FontStringMap::iterator k;
   std::stringstream key;
-  key << contents  << "[" << widthLimit << "]";
+  key << contents  << "[" << widthLimit << "," << keepEndCharCount <<"]";
   k=usedStringMap.find(key.str());
+  //DEBUG("key=%s",key.str().c_str());
   if (k!=usedStringMap.end()) {
 
     // Increase the use count
@@ -474,6 +529,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
     fontString->setHeight(k->second->getHeight());
     fontString->setBaselineOffsetY(k->second->getBaselineOffsetY());
     fontString->setWidthLimit(k->second->getWidthLimit());
+    fontString->setKeepEndCharCount(keepEndCharCount);
     //DEBUG("using string from used cache",NULL);
     return fontString;
 
@@ -500,6 +556,7 @@ FontString *Font::createString(std::string contents, Int widthLimit) {
   }
   fontString->setContents(contents);
   fontString->setWidthLimit(widthLimit);
+  fontString->setKeepEndCharCount(keepEndCharCount);
   fontString->increaseUseCount();
   FontStringPair p=FontStringPair(key.str(),fontString);
   usedStringMap.insert(p);
@@ -518,7 +575,8 @@ void Font::destroyString(FontString *fontString) {
   // Delete the string from the used string map if its use count is 0
   FontStringMap::iterator k;
   std::stringstream key;
-  key << fontString->getContents()  << "[" << fontString->getWidthLimit() << "]";
+  key << fontString->getContents()  << "[" << fontString->getWidthLimit() << "," << fontString->getKeepEndCharCount() << "]";
+  //DEBUG("key=%s",key.str().c_str());
   k=usedStringMap.find(key.str());
   //DEBUG("usedStringMap.size=%d",usedStringMap.size());
   if (k!=usedStringMap.end()) {
@@ -555,7 +613,7 @@ void Font::destroyString(FontString *fontString) {
       }
     }
     std::stringstream key;
-    key << oldestFontString->getContents()  << "[" << oldestFontString->getWidthLimit() << "]";
+    key << oldestFontString->getContents()  << "[" << oldestFontString->getWidthLimit() << "," << oldestFontString->getKeepEndCharCount() << "]";
     if (cachedStringMap.erase(key.str())!=1) {
       FATAL("can not erase font string in cached string map",NULL);
       return;

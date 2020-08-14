@@ -88,10 +88,10 @@ public:
   Int getLineHeight();
 
   // Creates a text with the current font type
-  FontString *createString(std::string contents, Int widthLimit=-1);
+  FontString *createString(std::string contents, Int widthLimit=-1, Int keepEndCharCount=-1);
 
   // Creates or updates a text with the current font type
-  void updateString(FontString **fontString, std::string contents, Int widthLimit=-1);
+  void updateString(FontString **fontString, std::string contents, Int widthLimit=-1, Int keepEndCharCount=-1);
 
   // Destroys a drawn text of the current font type
   void destroyString(FontString *fontString);

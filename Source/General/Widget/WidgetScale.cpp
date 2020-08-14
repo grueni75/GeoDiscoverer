@@ -121,7 +121,8 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     }
 
     // Compute the map name
-    fontEngine->updateString(&mapNameFontString,mapName + " (" + unit + ")",getIconWidth());
+    std::string mapNamePostfix=" (" + unit + ")";
+    fontEngine->updateString(&mapNameFontString,mapName + mapNamePostfix,getIconWidth(),mapNamePostfix.length());
     textY=y+iconHeight+mapLabelOffsetY;
     textX=x+(iconWidth-mapNameFontString->getIconWidth())/2;
     mapNameFontString->setX(textX);
@@ -130,7 +131,14 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
 
     // Compute the layer name
     fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
-    fontEngine->updateString(&layerNameFontString,layerName,getIconWidth());
+    std::size_t t=layerName.find_last_of(" ");
+    Int keepEndCharCount=-1;
+    if (t!=std::string::npos) {
+      std::string layerNamePostfix=layerName.substr(t);
+      //DEBUG("layerNamePostfix=%s",layerNamePostfix.c_str());
+      keepEndCharCount=layerNamePostfix.length();
+    }
+    fontEngine->updateString(&layerNameFontString,layerName,getIconWidth(),keepEndCharCount);
     textY=y+iconHeight+layerLabelOffsetY;
     textX=x+(iconWidth-layerNameFontString->getIconWidth())/2;
     layerNameFontString->setX(textX);

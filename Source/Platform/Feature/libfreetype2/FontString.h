@@ -37,6 +37,7 @@ protected:
   TimestampInSeconds lastAccess;   // Timestamp of the last access to the string
   std::string contents;            // String to display
   Int widthLimit;                  // Maximum allowed width
+  Int keepEndCharCount;            // Number of pixels to keep at the end if the string exceeds the width limit
   Int baselineOffsetY;             // Vertical offset to the baseline
   Int useCount;                    // Number of objects that use the string bitmap
   UShort *textureBitmap;           // Pointer to the texture bitmap
@@ -110,6 +111,14 @@ public:
 
   void setWidthLimit(Int widthLimit) {
     this->widthLimit = widthLimit;
+  }
+
+  Int getKeepEndCharCount() const {
+    return keepEndCharCount;
+  }
+
+  void setKeepEndCharCount(Int keepEndCharCount) {
+    this->keepEndCharCount = keepEndCharCount;
   }
 
   void setTextureBitmap(UShort* textureBitmap) {

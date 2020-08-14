@@ -129,19 +129,19 @@ Int FontEngine::getLineHeight() {
 }
 
 // Creates a text with the current font type
-FontString *FontEngine::createString(std::string contents, Int widthLimit) {
-  return currentFont->createString(contents);
+FontString *FontEngine::createString(std::string contents, Int widthLimit, Int keepEndCharCount) {
+  return currentFont->createString(contents,widthLimit,keepEndCharCount);
 }
 
 // Creates or updates a text with the current font type
-void FontEngine::updateString(FontString **fontString, std::string contents, Int widthLimit) {
+void FontEngine::updateString(FontString **fontString, std::string contents, Int widthLimit, Int keepEndCharCount) {
   if (*fontString) {
-    if (((*fontString)->getContents()!=contents)||((*fontString)->getWidthLimit()!=widthLimit)) {
+    if (((*fontString)->getContents()!=contents)||((*fontString)->getWidthLimit()!=widthLimit)||((*fontString)->getKeepEndCharCount()!=keepEndCharCount)) {
       currentFont->destroyString(*fontString);
-      *fontString=currentFont->createString(contents,widthLimit);
+      *fontString=currentFont->createString(contents,widthLimit,keepEndCharCount);
     }
   } else {
-    *fontString=currentFont->createString(contents,widthLimit);
+    *fontString=currentFont->createString(contents,widthLimit,keepEndCharCount);
   }
 }
 
