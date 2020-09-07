@@ -1501,11 +1501,19 @@
         </preBuild>
       </makefileType>
       <item path="Source/General/App/Commander.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
+            <pElem>Source/General/Navigation</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/Widget</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/jpeg-8b</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1520,11 +1528,19 @@
         </ccTool>
       </item>
       <item path="Source/General/App/Core.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/jpeg-8b</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/Image</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1539,10 +1555,15 @@
         </ccTool>
       </item>
       <item path="Source/General/App/Debug.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/Navigation</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1557,10 +1578,14 @@
         </ccTool>
       </item>
       <item path="Source/General/App/Device.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1575,10 +1600,13 @@
         </ccTool>
       </item>
       <item path="Source/General/App/Storage.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -1596,8 +1624,10 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
@@ -1617,15 +1647,18 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/General/Graphic/GraphicAnimationParameter.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1643,8 +1676,14 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1662,8 +1701,13 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1681,8 +1725,16 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
+            <pElem>Source/Platform/Feature/libfreetype2</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/KHR</pElem>
@@ -1702,8 +1754,12 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1721,8 +1777,13 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1740,8 +1801,14 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1759,8 +1826,13 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1778,8 +1850,14 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/jpeg-8b</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -1799,8 +1877,14 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1818,8 +1902,15 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1838,8 +1929,16 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/Image</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -1859,8 +1958,13 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1878,8 +1982,14 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1898,8 +2008,12 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1917,8 +2031,12 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1936,8 +2054,13 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1956,8 +2079,12 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1972,15 +2099,15 @@
         </ccTool>
       </item>
       <item path="Source/General/Image/Image.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/General/Map/MapArea.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -1995,11 +2122,17 @@
         </ccTool>
       </item>
       <item path="Source/General/Map/MapCache.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>..</pElem>
+            <pElem>Source/General/Map</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/Image</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -2018,11 +2151,14 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Map</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2040,8 +2176,9 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Map</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
@@ -2062,8 +2199,9 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Map</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
@@ -2084,11 +2222,15 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2106,11 +2248,12 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Map</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2128,11 +2271,15 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Image</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2147,11 +2294,17 @@
         </ccTool>
       </item>
       <item path="Source/General/Map/MapEngine.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>Source/Platform/Feature/Android</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -2170,12 +2323,17 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
+            <pElem>Source/Platform/Feature/libxml2</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Navigation</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -2191,13 +2349,20 @@
         </ccTool>
       </item>
       <item path="Source/General/Map/MapSource.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Map</pElem>
             <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>Source/Platform/Feature/Android</pElem>
+            <pElem>Source/General/Config</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
+            <pElem>Source/Platform/Feature/libxml2</pElem>
+            <pElem>Source/General/Navigation</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2216,11 +2381,14 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/libzip</pElem>
             <pElem>Source/Platform/Feature/Android</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -2239,8 +2407,10 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
@@ -2261,12 +2431,18 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Map</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Config</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
+            <pElem>Source/Platform/Feature/libxml2</pElem>
+            <pElem>Source/General/Navigation</pElem>
             <pElem>Source/Platform/Feature/Android</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
@@ -2286,11 +2462,15 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/libzip</pElem>
+            <pElem>Source/General/Navigation</pElem>
             <pElem>Source/Platform/Feature/Android</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -2306,9 +2486,14 @@
         </ccTool>
       </item>
       <item path="Source/General/Map/MapTile.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Map</pElem>
             <pElem>..</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
@@ -2329,9 +2514,12 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
+            <pElem>Source/General/Image</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
@@ -2351,19 +2539,61 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
+          <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Math</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
+          </incDir>
         </ccTool>
       </item>
       <item path="Source/General/Math/Integer.cpp" ex="false" tool="1" flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
+          <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Math</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
+          </incDir>
         </ccTool>
       </item>
       <item path="Source/General/Navigation/NavigationEngine.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -2381,8 +2611,12 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2400,9 +2634,19 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
+            <pElem>Source/Platform/Feature/libxml2</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -2422,8 +2666,13 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2441,8 +2690,14 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2460,8 +2715,16 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2480,9 +2743,17 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/Map</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
+            <pElem>Source/Platform/Feature/libxml2</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
@@ -2501,8 +2772,17 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2521,32 +2801,92 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
+          <incDir>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Profile</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
+          </incDir>
         </ccTool>
       </item>
       <item path="Source/General/Profile/ProfileEngine.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
+          <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Profile</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
+          </incDir>
         </ccTool>
       </item>
       <item path="Source/General/Profile/ProfileMethodResult.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
+          <incDir>
+            <pElem>..</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Profile</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
+          </incDir>
         </ccTool>
       </item>
       <item path="Source/General/Widget/WidgetAddressPoint.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Widget</pElem>
             <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/libfreetype2</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/jpeg-8b</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -2565,11 +2905,15 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Widget</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2587,11 +2931,16 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Widget</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2610,8 +2959,9 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Widget</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
@@ -2632,11 +2982,16 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Widget</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/Platform/Feature/libfreetype2</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2654,11 +3009,16 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Widget</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/Platform/Feature/libfreetype2</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/jpeg-8b</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -2677,11 +3037,18 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Widget</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/Map</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2700,11 +3067,18 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Widget</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/Platform/Feature/libfreetype2</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/Graphic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2722,12 +3096,19 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Widget</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/General/Navigation</pElem>
             <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/libfreetype2</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/jpeg-8b</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
@@ -2746,11 +3127,15 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Widget</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2768,11 +3153,19 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Widget</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/Platform/Feature/libfreetype2</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2791,11 +3184,13 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/General/Widget</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2813,11 +3208,15 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/Widget</pElem>
+            <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2835,16 +3234,46 @@
             ex="false"
             tool="1"
             flavor2="11">
+        <ccTool>
+          <incDir>
+            <pElem>Source/General/Widget</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/libfreetype2</pElem>
+            <pElem>Source/General/Map</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
+          </incDir>
+        </ccTool>
       </item>
       <item path="Source/General/Widget/WidgetStatus.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
+            <pElem>Source/General/Widget</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>Source/Platform/Feature/libfreetype2</pElem>
+            <pElem>Source/General/Graphic</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/General/Map</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
@@ -2862,7 +3291,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
@@ -2886,7 +3315,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
@@ -2910,7 +3339,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
@@ -2934,7 +3363,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
@@ -2959,7 +3388,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>..</pElem>
@@ -2983,7 +3412,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
@@ -3015,6 +3444,7 @@
             <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
             <pElem>/usr/include/libxml2</pElem>
+            <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
       </item>
@@ -3030,6 +3460,7 @@
             <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
             <pElem>/usr/include/libxml2</pElem>
+            <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
       </item>
@@ -3045,6 +3476,7 @@
             <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
             <pElem>/usr/include/libxml2</pElem>
+            <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
       </item>
@@ -3060,6 +3492,7 @@
             <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
             <pElem>/usr/include/libxml2</pElem>
+            <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
       </item>
@@ -3076,6 +3509,7 @@
             <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
             <pElem>/usr/include/libxml2</pElem>
+            <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
       </item>
@@ -3091,6 +3525,7 @@
             <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
             <pElem>/usr/include/libxml2</pElem>
+            <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
       </item>
@@ -3098,7 +3533,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Feature/OpenGL</pElem>
@@ -3114,7 +3549,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>..</pElem>
@@ -3144,7 +3579,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
@@ -3169,7 +3604,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/General/App</pElem>
             <pElem>Source/Platform/Feature/OpenGL</pElem>
@@ -3195,7 +3630,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Feature/POSIX</pElem>
@@ -3221,8 +3656,6 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/Platform/Feature/libfreetype2/Font.cpp"
             ex="false"
@@ -3230,41 +3663,35 @@
             flavor2="11">
         <ccTool>
           <incDir>
-            <pElem>Source/Platform/Feature/POSIX</pElem>
-            <pElem>Source/Platform/Feature/OpenGL</pElem>
-            <pElem>Source/Platform/Feature/libxml2</pElem>
             <pElem>Source/Platform/Feature/libfreetype2</pElem>
-            <pElem>Source/Platform/Feature/libcurl</pElem>
-            <pElem>Source/Platform/Feature/libzip</pElem>
-            <pElem>Source/Platform/Feature/libproj4</pElem>
-            <pElem>Source/Platform/Feature/openssl</pElem>
-            <pElem>Source/Platform/Feature/Linux</pElem>
             <pElem>Source/General/App</pElem>
-            <pElem>Source/General/Map</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/freetype-2.4.2/include/freetype</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>Source/General/Graphic</pElem>
-            <pElem>Source/General/Image</pElem>
-            <pElem>Source/General/Widget</pElem>
-            <pElem>Source/General/Navigation</pElem>
-            <pElem>Source/General/Math</pElem>
-            <pElem>Source/General/Config</pElem>
-            <pElem>Source/General/Profile</pElem>
-            <pElem>/usr/include/freetype2</pElem>
-            <pElem>/usr/include/libxml2</pElem>
-            <pElem>Source/Platform/Target/Linux</pElem>
+            <pElem>Source/Platform/Feature/OpenGL</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/GLES2</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>SRC_ROOT="/home/grueni/Apps/GeoDiscoverer/Source"</Elem>
-            <Elem>TARGET_LINUX</Elem>
-          </preprocessorList>
         </ccTool>
       </item>
       <item path="Source/Platform/Feature/libfreetype2/FontCharacter.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
-            <pElem>Source/Platform/Target/Linux</pElem>
             <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
@@ -3287,9 +3714,8 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
-            <pElem>Source/Platform/Target/Linux</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
@@ -3312,9 +3738,8 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
-            <pElem>Source/Platform/Target/Linux</pElem>
             <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
@@ -3339,9 +3764,8 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
-            <pElem>Source/Platform/Target/Linux</pElem>
             <pElem>Source/Platform/Feature/OpenGL</pElem>
             <pElem>Source/General/App</pElem>
             <pElem>..</pElem>
@@ -3368,28 +3792,22 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/Platform/Feature/libpng/Image.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/Platform/Feature/libproj4/MapCalibratorProj4.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/Platform/Feature/libxml2/ConfigSection.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/General/App</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
@@ -3416,7 +3834,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/General/App</pElem>
@@ -3444,7 +3862,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
             <pElem>Source/General/App</pElem>
@@ -3472,7 +3890,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
             <pElem>Source/General/App</pElem>
@@ -3499,7 +3917,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/General/Config</pElem>
@@ -3527,7 +3945,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Feature/libxml2</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
@@ -3555,7 +3973,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
             <pElem>Source/General/App</pElem>
@@ -3582,21 +4000,17 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/Platform/Feature/openssl/Storage.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/Platform/Target/Android/core/src/main/jni/GDCore.cpp"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni</pElem>
@@ -5635,14 +6049,12 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/client/linux/dump_writer_common/thread_info.cc"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
@@ -5654,7 +6066,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/arm-linux-androideabi</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
@@ -5668,7 +6080,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/client/linux/dump_writer_common</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/client/linux/minidump_writer</pElem>
@@ -5694,7 +6106,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/google_breakpad/common</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/common/linux</pElem>
@@ -5716,21 +6128,17 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/client/linux/microdump_writer/microdump_writer.cc"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
-        </ccTool>
       </item>
       <item path="Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/client/linux/minidump_writer/linux_dumper.cc"
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/client/linux/minidump_writer</pElem>
@@ -5758,7 +6166,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/client/linux/minidump_writer</pElem>
             <pElem>..</pElem>
@@ -5785,7 +6193,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/google_breakpad/common</pElem>
@@ -5818,7 +6226,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>..</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/google_breakpad/common</pElem>
@@ -5850,7 +6258,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/common</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/third_party/lss</pElem>
@@ -5872,7 +6280,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/common</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/common/android/include</pElem>
@@ -5896,7 +6304,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/google_breakpad/common</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src</pElem>
@@ -5916,7 +6324,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
@@ -5929,7 +6337,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/common</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/third_party/lss</pElem>
@@ -5947,7 +6355,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/third_party/lss</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src</pElem>
@@ -5978,7 +6386,7 @@
             ex="false"
             tool="1"
             flavor2="11">
-        <ccTool flags="1">
+        <ccTool>
           <incDir>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/google-breakpad-20180304/src/common</pElem>
             <pElem>..</pElem>
@@ -19962,13 +20370,6 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="0/Source/General/App">
-        <ccTool>
-          <incDir>
-            <pElem>..</pElem>
-          </incDir>
-        </ccTool>
-      </folder>
       <folder path="0/Source/General/Config">
         <ccTool>
           <incDir>
@@ -19990,15 +20391,6 @@
           </incDir>
         </ccTool>
       </folder>
-      <folder path="0/Source/General/Graphic">
-        <ccTool>
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
-          </incDir>
-        </ccTool>
-      </folder>
       <folder path="0/Source/General/Image">
         <ccTool>
           <incDir>
@@ -20006,53 +20398,6 @@
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libpng-1.6.26</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
-          </incDir>
-        </ccTool>
-      </folder>
-      <folder path="0/Source/General/Math">
-        <ccTool>
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
-            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
-          </incDir>
-        </ccTool>
-      </folder>
-      <folder path="0/Source/General/Navigation">
-        <ccTool>
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
-          </incDir>
-        </ccTool>
-      </folder>
-      <folder path="0/Source/General/Profile">
-        <ccTool>
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
-            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
