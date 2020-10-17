@@ -1274,6 +1274,7 @@ void NavigationEngine::setTargetAtMapCenter() {
   point.setAddress(name.str());
   point.setLng(pos->getLng());
   point.setLat(pos->getLat());
+  point.setGroup(core->getConfigStore()->getStringValue("Navigation","selectedAddressPointGroup",__FILE__,__LINE__));
   core->getNavigationEngine()->addAddressPoint(point);
   setTargetAtGeographicCoordinate(pos->getLng(),pos->getLat(),false);
   core->getMapEngine()->unlockMapPos();
