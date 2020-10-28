@@ -44,7 +44,6 @@
             <!-- Launcher icon -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <!-- GPX files via file extension -->
@@ -139,6 +138,11 @@
             android:name=".ShowHelp"
             android:label="@string/button_label_help"
             android:theme="@style/GDStyle.NoTitleBar.Fullscreen"/>
+        <activity
+            android:name=".AuthenticateGoogleBookmarks"
+            android:label="@string/authenticate_google_bookmarks"
+            android:theme="@style/GDStyle">
+        </activity>
 
         <service android:name=".GDService"/>
 

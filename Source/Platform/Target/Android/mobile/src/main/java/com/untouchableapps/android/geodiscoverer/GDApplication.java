@@ -516,6 +516,12 @@ public class GDApplication extends Application implements GDAppInterface, Google
       // Ask wear device for current power status
       sendWearCommand("getWearDeviceAlive()");
     }
+    if (cmd.equals("authenticateGoogleBookmarks()")) {
+      Intent intent = new Intent(this, AuthenticateGoogleBookmarks.class);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      startActivity(intent);
+      return;
+    }
     if (activity != null) {
       Message m = Message.obtain(activity.coreMessageHandler);
       m.what = ViewMap.EXECUTE_COMMAND;

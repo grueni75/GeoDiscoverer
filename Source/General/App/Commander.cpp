@@ -772,6 +772,15 @@ std::string Commander::execute(std::string cmd) {
     core->onDataChange();
     cmdExecuted=true;
   }
+  if (cmdName=="setGoogleBookmarksCookie") {
+    core->getConfigStore()->setStringValue("GoogleBookmarksSync","cookies",args[0],__FILE__,__LINE__);
+    core->getNavigationEngine()->triggerGoogleBookmarksSynchronization();
+    cmdExecuted=true;
+  }
+  if (cmdName=="updateGoogleBookmarks") {
+    core->getNavigationEngine()->triggerGoogleBookmarksSynchronization();
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

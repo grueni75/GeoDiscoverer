@@ -149,6 +149,15 @@ protected:
   // Signal to wakeup the navigation compute thread
   ThreadSignalInfo *computeNavigationInfoSignal;
 
+  // Information about the google maps bookmarks synchronization thread
+  ThreadInfo *synchronizeGoogleBookmarksThreadInfo;
+
+  // Signal to wakeup the google maps bookmarks synchronization thread
+  ThreadSignalInfo *synchronizeGoogleBookmarksSignal;
+  
+  // Indicates that the google maps bookmarks synchronization thread shall quit
+  bool quitSynchronizeGoogleBookmarksThread;
+
   // List of address points
   std::list<NavigationPoint> addressPoints;
 
@@ -208,6 +217,9 @@ protected:
   // Remove cache files that do not have their original gpx files anymore
   void cleanupNavigationPathCache(std::string filepath);
 
+    // Searches for a node with the given name in the given list of nodes
+  XMLNode findNode(XMLNode node, const char *name);
+
 public:
 
   // Constructor
@@ -218,6 +230,12 @@ public:
 
   // Calculates navigation infos such as bearing, distance, ...
   void computeNavigationInfo();
+
+  // Synchronizes Google Bookmarks
+  void synchronizeGoogleBookmarks();
+
+  // Forces an update of the google bookmarks
+  void triggerGoogleBookmarksSynchronization();
 
   // Initializes the engine
   void init();

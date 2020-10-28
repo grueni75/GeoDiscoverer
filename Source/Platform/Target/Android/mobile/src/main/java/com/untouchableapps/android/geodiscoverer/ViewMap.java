@@ -443,6 +443,12 @@ public class ViewMap extends GDActivity {
             alert.show();
             commandExecuted=true;
           }
+          if (commandFunction.equals("authenticateGoogleBookmarks")) {
+            Intent intent = new Intent(viewMap, AuthenticateGoogleBookmarks.class);
+            //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            viewMap.startActivity(intent);
+            commandExecuted=true;
+          }
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
           }
@@ -1712,6 +1718,9 @@ public class ViewMap extends GDActivity {
           case R.id.nav_export_selected_route:
             coreObject.executeCoreCommand("exportActiveRoute");
             break;
+          case R.id.nav_sync_google_bookmarks:
+            coreObject.executeCoreCommand("updateGoogleBookmarks");
+            break;
         }
         viewMapRootLayout.closeDrawers();
         return true;
@@ -1800,6 +1809,9 @@ public class ViewMap extends GDActivity {
       m.what = GDCore.START_CORE;
       coreObject.messageHandler.sendMessage(m);
     }
+
+    // Synchronize google bookmarks
+    GDApplication.coreObject.executeCoreCommand("updateGoogleBookmarks");
 
     // Process intent only if geo discoverer is initialized
     if (coreObject.coreLateInitComplete)

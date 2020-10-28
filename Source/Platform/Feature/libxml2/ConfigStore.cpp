@@ -582,7 +582,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, cons
 
   // Return result
   if ((!node->children)||(std::string((char*)node->children->name)!="text")) {
-    FATAL("node has no text child",NULL);
+    //FATAL("node has no text child",NULL);
     core->getThread()->unlockMutex(accessMutex);
     return "";
   }

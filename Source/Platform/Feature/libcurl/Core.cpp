@@ -53,7 +53,7 @@ void Core::initCURL() {
 }
 
 // Downloads a URL
-UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bool generateMessages, bool ignoreFileNotFoundErrors, std::list<std::string> *httpHeader) {
+UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bool generateMessages, bool ignoreFileNotFoundErrors, std::list<std::string> *httpHeader, std::string *cookies) {
 
   char curlErrorBuffer[CURL_ERROR_SIZE];
   result = DownloadResultOtherFail;
@@ -83,6 +83,7 @@ UByte *Core::downloadURL(std::string url, DownloadResult &result, UInt &size, bo
   curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "Geo Discoverer (build on "  __DATE__  ")");
   if (header) curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+  if (cookies) curl_easy_setopt(curl, CURLOPT_COOKIE, cookies->c_str());
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &out);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlMemoryCallback);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER,curlErrorBuffer);

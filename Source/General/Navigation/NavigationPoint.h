@@ -45,6 +45,9 @@ class NavigationPoint {
   // Last update
   TimestampInSeconds timestamp;
 
+  // Last update in foreign database
+  std::string foreignTimestamp;
+  
   // Position on the screen
   double x,y;
 
@@ -53,7 +56,7 @@ class NavigationPoint {
 
   // Checks if the namespace of the given xml node is a valid gpx namespace
   bool isGPXNameSpace(XMLNode node);
-
+  
 public:
 
   // Constructor
@@ -139,6 +142,15 @@ public:
   void setGroup(const std::string& group) {
     this->group = group;
   }
+
+  const std::string& getForeignTimestamp() const {
+    return foreignTimestamp;
+  }
+
+  void setForeignTimestamp(const std::string& foreignTimestamp) {
+    this->foreignTimestamp = foreignTimestamp;
+  }
+
 };
 
 } /* namespace GEODISCOVERER */

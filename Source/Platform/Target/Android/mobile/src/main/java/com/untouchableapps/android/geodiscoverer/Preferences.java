@@ -486,18 +486,6 @@ public class Preferences extends PreferenceActivity implements
       addPreference(generalCategory, generalCategory, "General", "wakeLock");
       addPreference(generalCategory, generalCategory, "General", "backButtonTurnsScreenOff");
       addPreference(generalCategory, generalCategory, "", "expertMode");
-      PreferenceCategory heartRateMonitorCategory = new PreferenceCategory(this);
-      heartRateMonitorCategory.setTitle("Heart Rate Monitor");
-      rootScreen.addPreference(heartRateMonitorCategory);
-      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "bluetoothAddress");
-      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "maxHeartRate");
-      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "startHeartRateZoneTwo");
-      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "startHeartRateZoneThree");
-      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "startHeartRateZoneFour");
-      PreferenceCategory eBikeMonitorCategory = new PreferenceCategory(this);
-      eBikeMonitorCategory.setTitle("E-Bike Monitor");
-      rootScreen.addPreference(eBikeMonitorCategory);
-      addPreference(eBikeMonitorCategory, eBikeMonitorCategory, "EBikeMonitor", "bluetoothAddress");
       PreferenceCategory mapCategory = new PreferenceCategory(this);
       mapCategory.setTitle("Map");
       rootScreen.addPreference(mapCategory);
@@ -523,6 +511,23 @@ public class Preferences extends PreferenceActivity implements
       for (String app : apps) {
         addPreference(cockpitAppCategory, cockpitAppCategory, "Cockpit/App", app);
       }
+      PreferenceCategory heartRateMonitorCategory = new PreferenceCategory(this);
+      heartRateMonitorCategory.setTitle("Heart Rate Monitor");
+      rootScreen.addPreference(heartRateMonitorCategory);
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "bluetoothAddress");
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "maxHeartRate");
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "startHeartRateZoneTwo");
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "startHeartRateZoneThree");
+      addPreference(heartRateMonitorCategory, heartRateMonitorCategory, "HeartRateMonitor", "startHeartRateZoneFour");
+      PreferenceCategory eBikeMonitorCategory = new PreferenceCategory(this);
+      eBikeMonitorCategory.setTitle("E-Bike Monitor");
+      rootScreen.addPreference(eBikeMonitorCategory);
+      addPreference(eBikeMonitorCategory, eBikeMonitorCategory, "EBikeMonitor", "bluetoothAddress");
+      PreferenceCategory googleBookmarksSyncCategory = new PreferenceCategory(this);
+      googleBookmarksSyncCategory.setTitle("Google Bookmarks Synchronization");
+      rootScreen.addPreference(googleBookmarksSyncCategory);
+      addPreference(googleBookmarksSyncCategory, googleBookmarksSyncCategory, "GoogleBookmarksSync", "active");
+      addPreference(googleBookmarksSyncCategory, googleBookmarksSyncCategory, "GoogleBookmarksSync", "placesApiKey");
       PreferenceCategory debugCategory = new PreferenceCategory(this);
       debugCategory.setTitle("Debug");
       rootScreen.addPreference(debugCategory);

@@ -207,6 +207,35 @@
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
+        <xsd:element name="GoogleBookmarksSync">
+          <xsd:annotation>
+            <xsd:documentation>Preferences related to the Google Maps bookmark synchronizer.</xsd:documentation>
+          </xsd:annotation>
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="active" type="xsd:boolean" default="0" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Enables the synchronization of Google Maps bookmarks.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
+              <xsd:element name="cookies" type="xsd:string" default="invalid" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Cookies used for authentication.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="placesApiKey" type="xsd:string" default="Please set your API key obtained via Google Developers Console" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>API key to use when communicating with Google's places API.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="group" type="xsd:string" default="Google Maps" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Name of the group to use for Google Maps Bookmarks.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>                    
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
         <xsd:element name="Cockpit">
           <xsd:annotation>
             <xsd:documentation>Preferences related to cockpit apps.</xsd:documentation>
@@ -2179,7 +2208,12 @@
                       <xsd:annotation>
                         <xsd:documentation>Timestamp in seconds that the entry was last updated.</xsd:documentation>
                       </xsd:annotation>
-                    </xsd:element>                    
+                    </xsd:element>              
+                    <xsd:element name="foreignTimestamp" type="xsd:long" default="0" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Timestamp in seconds used in the system this entry was synchronized with.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>              
                     <xsd:element name="group" type="xsd:string" default="Default" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Name of the group the address belongs to.</xsd:documentation>

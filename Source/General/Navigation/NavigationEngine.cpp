@@ -22,6 +22,7 @@
 
 
 #include <Core.h>
+#include <cstring>
 
 namespace GEODISCOVERER {
 
@@ -34,6 +35,12 @@ void *navigationEngineBackgroundLoaderThread(void *args) {
 // Compute navigation info thread
 void *navigationEngineComputeNavigationInfoThread(void *args) {
   ((NavigationEngine*)args)->computeNavigationInfo();
+  return NULL;
+}
+
+// Google Maps bookmark synchronization thread
+void *navigationEngineSynchronizeGoogleBookmarksThread(void *args) {
+  ((NavigationEngine*)args)->synchronizeGoogleBookmarks();
   return NULL;
 }
 
@@ -88,6 +95,9 @@ NavigationEngine::NavigationEngine() :
   forceNavigationInfoUpdate=false;
   computeNavigationInfoThreadInfo=NULL;
   computeNavigationInfoSignal=core->getThread()->createSignal();
+  synchronizeGoogleBookmarksThreadInfo=NULL;
+  quitSynchronizeGoogleBookmarksThread=false;
+  synchronizeGoogleBookmarksSignal=core->getThread()->createSignal();
   overlayGraphicHash="";
   maxAddressPointAlarmDistance=core->getConfigStore()->getDoubleValue("Navigation","maxAddressPointAlarmDistance",__FILE__,__LINE__);
   nearestAddressPointName="";
@@ -290,6 +300,12 @@ void NavigationEngine::init() {
   if (!(computeNavigationInfoThreadInfo=core->getThread()->createThread("navigation engine compute navigation info thread",navigationEngineComputeNavigationInfoThread,this)))
     FATAL("can not start compute navigation info thread",NULL);
 
+  // Start the google maps bookmark synchronizer
+  if (core->getConfigStore()->getIntValue("GoogleBookmarksSync","active",__FILE__,__LINE__)) {    
+    if (!(synchronizeGoogleBookmarksThreadInfo=core->getThread()->createThread("navigation engine synchronize google maps bookmarks thread",navigationEngineSynchronizeGoogleBookmarksThread,this)))
+      FATAL("can not start synchronize google maps bookmarks thread",NULL);
+  }
+  
   // Inform the remote map
   core->getCommander()->dispatch("forceRemoteMapUpdate()");
 
@@ -385,6 +401,15 @@ void NavigationEngine::deinit() {
     core->getThread()->destroyThread(backgroundLoaderThreadInfo);
   }
 
+  // Finish the google maps bookmark synchronization thread
+  if (synchronizeGoogleBookmarksThreadInfo) {
+    quitSynchronizeGoogleBookmarksThread=true;
+    core->getThread()->issueSignal(synchronizeGoogleBookmarksSignal);
+    core->getThread()->waitForThread(synchronizeGoogleBookmarksThreadInfo);
+    core->getThread()->destroyThread(synchronizeGoogleBookmarksThreadInfo);
+    core->getThread()->destroySignal(synchronizeGoogleBookmarksSignal);
+  }
+  
   // Reset the address points graphic object
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
   core->getDefaultGraphicEngine()->setNavigationPoints(NULL);
@@ -1948,6 +1973,11 @@ bool NavigationEngine::getNearestAddressPoint(NavigationPoint &navigationPoint, 
   alarm=nearestAddressPointAlarm;
   core->getThread()->unlockMutex(nearestAddressPointMutex);
   return found;
+}
+
+// Forces an update of the google bookmarks
+void NavigationEngine::triggerGoogleBookmarksSynchronization() {
+  core->getThread()->issueSignal(synchronizeGoogleBookmarksSignal);
 }
 
 }

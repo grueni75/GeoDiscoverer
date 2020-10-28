@@ -29,6 +29,7 @@ NavigationPoint::NavigationPoint() {
   lng = undefPos.getLng();
   lat = undefPos.getLat();
   timestamp=0;
+  foreignTimestamp="";
   distance=0;
   x=0;
   y=0;
@@ -51,6 +52,7 @@ void NavigationPoint::writeToConfig(std::string path, TimestampInSeconds timesta
   if (timestamp==0)
     timestamp=core->getClock()->getSecondsSinceEpoch();
   configStore->setLongValue(path,"timestamp",timestamp,__FILE__,__LINE__);
+  configStore->setStringValue(path,"foreignTimestamp",foreignTimestamp,__FILE__,__LINE__);
 }
 
 // Reads the point from the config
@@ -64,6 +66,7 @@ bool NavigationPoint::readFromConfig(std::string path) {
     lat=configStore->getDoubleValue(path,"lat",__FILE__,__LINE__);
     lng=configStore->getDoubleValue(path,"lng",__FILE__,__LINE__);
     timestamp=configStore->getLongValue(path,"timestamp",__FILE__,__LINE__);
+    foreignTimestamp=configStore->getStringValue(path,"foreignTimestamp",__FILE__,__LINE__);
     return true;
   } else {
     return false;

@@ -129,6 +129,7 @@
               <in>MapContainer.cpp</in>
               <in>MapPosition.cpp</in>
               <in>MapSource.cpp</in>
+              <in>NavigationEngine.cpp</in>
               <in>NavigationPath.cpp</in>
               <in>NavigationPoint.cpp</in>
             </df>
@@ -2592,12 +2593,15 @@
             <pElem>Source/Platform/Feature/POSIX</pElem>
             <pElem>Source/General/Map</pElem>
             <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
+            <pElem>Source/Platform/Feature/libxml2</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
@@ -3438,12 +3442,8 @@
             flavor2="11">
         <ccTool flags="0">
           <incDir>
-            <pElem>Source/General/Map</pElem>
             <pElem>/usr/include/unicode</pElem>
-            <pElem>/usr/include/libxml2/libxml</pElem>
-            <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
-            <pElem>/usr/include/libxml2</pElem>
             <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
@@ -3454,12 +3454,8 @@
             flavor2="11">
         <ccTool flags="0">
           <incDir>
-            <pElem>Source/General/Map</pElem>
             <pElem>/usr/include/unicode</pElem>
-            <pElem>/usr/include/libxml2/libxml</pElem>
-            <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
-            <pElem>/usr/include/libxml2</pElem>
             <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
@@ -3470,12 +3466,8 @@
             flavor2="11">
         <ccTool flags="0">
           <incDir>
-            <pElem>Source/General/Map</pElem>
             <pElem>/usr/include/unicode</pElem>
-            <pElem>/usr/include/libxml2/libxml</pElem>
-            <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
-            <pElem>/usr/include/libxml2</pElem>
             <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
@@ -3486,12 +3478,8 @@
             flavor2="11">
         <ccTool flags="0">
           <incDir>
-            <pElem>Source/General/Map</pElem>
             <pElem>/usr/include/unicode</pElem>
-            <pElem>/usr/include/libxml2/libxml</pElem>
-            <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
-            <pElem>/usr/include/libxml2</pElem>
             <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
@@ -3503,12 +3491,8 @@
         <ccTool flags="0">
           <incDir>
             <pElem>Source/Platform/Feature/POSIX</pElem>
-            <pElem>Source/General/Map</pElem>
             <pElem>/usr/include/unicode</pElem>
-            <pElem>/usr/include/libxml2/libxml</pElem>
-            <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
-            <pElem>/usr/include/libxml2</pElem>
             <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
@@ -3519,12 +3503,8 @@
             flavor2="11">
         <ccTool flags="0">
           <incDir>
-            <pElem>Source/General/Map</pElem>
             <pElem>/usr/include/unicode</pElem>
-            <pElem>/usr/include/libxml2/libxml</pElem>
-            <pElem>/usr/include/GL</pElem>
             <pElem>/usr/include/glm/detail</pElem>
-            <pElem>/usr/include/libxml2</pElem>
             <pElem>Source/Platform/Target/Linux</pElem>
           </incDir>
         </ccTool>
@@ -3937,6 +3917,34 @@
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
             <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main</pElem>
+          </incDir>
+        </ccTool>
+      </item>
+      <item path="Source/Platform/Feature/libxml2/NavigationEngine.cpp"
+            ex="false"
+            tool="1"
+            flavor2="11">
+        <ccTool>
+          <incDir>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include/libxml</pElem>
+            <pElem>Source/Platform/Feature/POSIX</pElem>
+            <pElem>Source/General/App</pElem>
+            <pElem>..</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm/detail</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/glm-0.9.6.3/glm</pElem>
+            <pElem>Source/Platform/Feature/libxml2</pElem>
+            <pElem>Source/General/Navigation</pElem>
+            <pElem>Source/Platform/Target/Android/core/src/main/jni/libxml2-2.9.2/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/9.0.8/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/android</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/local/include</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/bits/fortify</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/asm-generic</pElem>
+            <pElem>../android/android-sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/sys</pElem>
             <pElem>Source/Platform/Target/Android/core/src/main</pElem>
           </incDir>
         </ccTool>
@@ -20853,13 +20861,9 @@
           <incDir>
             <pElem>Source/General/App</pElem>
             <pElem>Source/Platform/Target/Linux</pElem>
-            <pElem>/usr/include/GL</pElem>
             <pElem>Source/Platform/Feature/POSIX</pElem>
-            <pElem>Source/General/Map</pElem>
             <pElem>/usr/include/unicode</pElem>
-            <pElem>/usr/include/libxml2/libxml</pElem>
             <pElem>/usr/include/glm/detail</pElem>
-            <pElem>/usr/include/libxml2</pElem>
           </incDir>
         </ccTool>
       </folder>
