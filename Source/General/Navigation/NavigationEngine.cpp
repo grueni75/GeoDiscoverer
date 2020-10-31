@@ -92,6 +92,7 @@ NavigationEngine::NavigationEngine() :
   nearestAddressPointMutex=core->getThread()->createMutex("navigation engine nearest navigation points mutex");
   nearestAddressPointDistance=std::numeric_limits<double>::max();
   minDistanceToNavigationUpdate=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToNavigationUpdate", __FILE__, __LINE__);
+  minSpeedToSignalOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minSpeedToSignalOffRoute", __FILE__, __LINE__);
   forceNavigationInfoUpdate=false;
   computeNavigationInfoThreadInfo=NULL;
   computeNavigationInfoSignal=core->getThread()->createSignal();
@@ -1458,7 +1459,7 @@ void NavigationEngine::computeNavigationInfo() {
 
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
-
+  
   // This thread can be cancelled
   core->getThread()->setThreadCancable();
 
@@ -1569,7 +1570,15 @@ void NavigationEngine::computeNavigationInfo() {
             }
           }*/
           //prevTurnPos=turnPos;
-
+          
+          // If we are not moving, don't indicate that we are off route
+          double speed=0;
+          if (locationPos.getHasSpeed()) {
+            speed=locationPos.getSpeed();
+          }
+          DEBUG("speed=%f",speed);
+          if (speed<minSpeedToSignalOffRoute) 
+            navigationInfo.setOffRoute(false);          
         }
       }
       if ((nearestAddressPointValid)&&(nearestAddressPointDistance<=maxAddressPointAlarmDistance)) {

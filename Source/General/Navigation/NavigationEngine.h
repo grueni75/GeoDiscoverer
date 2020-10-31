@@ -132,6 +132,7 @@ protected:
   // Parameters when to update the navigation information
   MapPosition lastNavigationLocationPos;
   double minDistanceToNavigationUpdate;
+  double minSpeedToSignalOffRoute;
   bool forceNavigationInfoUpdate;
 
   // Mutex for accessing the active route
