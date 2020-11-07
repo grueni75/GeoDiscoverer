@@ -57,7 +57,7 @@ public class AuthenticateGoogleBookmarks extends GDActivity {
     webview.setWebViewClient(new WebViewClient() {
       public void onPageFinished(WebView view, String url) {
         String cookies = CookieManager.getInstance().getCookie(url);
-        if (cookies.contains("SID=")) {
+        if ((cookies.contains("SID="))&&(!cookies.contains("ACCOUNT_CHOOSER="))) {
           GDApplication.coreObject.executeCoreCommand("setGoogleBookmarksCookie",cookies);
           finish();
         }
