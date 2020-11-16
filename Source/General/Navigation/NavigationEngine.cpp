@@ -1576,7 +1576,7 @@ void NavigationEngine::computeNavigationInfo() {
           if (locationPos.getHasSpeed()) {
             speed=locationPos.getSpeed();
           }
-          DEBUG("speed=%f",speed);
+          //DEBUG("speed=%f",speed);
           if (speed<minSpeedToSignalOffRoute) 
             navigationInfo.setOffRoute(false);          
         }
