@@ -30,6 +30,7 @@ WidgetCursorInfo::WidgetCursorInfo(WidgetPage *widgetPage) : WidgetPrimitive(wid
   labelWidth=0;
   infoFontString=NULL;
   info="";
+  updateInfo=true;
   isHidden=true; // By intention set to hidden to prevent fade out after timeout
 }
 
@@ -62,12 +63,14 @@ bool WidgetCursorInfo::work(TimestampInMicroseconds t) {
   // Do the inherited stuff
   bool changed=WidgetPrimitive::work(t);
 
+  // Shall we update the text?
+  if (updateInfo) {
+    updateInfoFontString();
+    updateInfo=false;
+  }
+  
   // Shall we fade in the information?
   if (fadeIn) {
-
-    // Update the text
-    //DEBUG("setting text to <%s>", info.c_str());
-    updateInfoFontString();
 
     // Is a fade anim already ongoing?
     if (fadeStartTime!=fadeEndTime) {
@@ -165,15 +168,22 @@ void WidgetCursorInfo::onDataChange() {
   GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
   core->getDefaultGraphicEngine()->unlockPos();
   std::string name = core->getNavigationEngine()->getAddressPointName(visPos);
+  DEBUG("name=%s",name.c_str());
   if ((info=="")&&(name!="")) {
     info=name;
     fadeIn=true;
     fadeOut=false;
+    updateInfo=true;
   }
   if ((info!="")&&(name=="")) {
     info="";
     fadeOut=true;
     fadeIn=false;
+    updateInfo=true;
+  }
+  if (info!=name) {
+    info=name;
+    updateInfo=true;
   }
 }
 

@@ -115,7 +115,7 @@ void NavigationEngine::synchronizeGoogleBookmarks() {
         std::string title="";
         std::string url="";        
         std::string timestamp="";      
-        std::string cid="";
+        std::string address="";
         std::string lat="";
         std::string lng="";
         while (field!=NULL) {
@@ -126,17 +126,28 @@ void NavigationEngine::synchronizeGoogleBookmarks() {
               url=(const char *)field->children->content;
               
               // Check if the url contains already coordinates
-              //DEBUG("url=%s",url.c_str());
-              size_t pos=url.find("q=");
-              if (pos!=std::string::npos) {
-                url=url.substr(pos+2);
-                pos=url.find(",");
-                lat=url.substr(0,pos);
-                lng=url.substr(pos+1);
-                //DEBUG("lat=%s lng=%s",lat.c_str(),lng.c_str());
-              } else {              
-                cid=url.substr(url.find("cid=")+4);
-                //DEBUG("cid=%s",cid.c_str());
+              DEBUG("url=%s",url.c_str());
+              size_t pos;
+              if ((url.find("ftid=")==std::string::npos)&&(url.find("cid=")==std::string::npos)) {
+                pos=url.find("q=");
+                if (pos!=std::string::npos) {
+                  url=url.substr(pos+2);
+                  pos=url.find(",");
+                  lat=url.substr(0,pos);
+                  lng=url.substr(pos+1);
+                  //DEBUG("lat=%s lng=%s",lat.c_str(),lng.c_str());
+                }
+              } else {
+                pos=url.find("cid=");                
+                if (pos!=std::string::npos) {
+                  address=url.substr(pos);
+                } else {
+                  pos=url.find("q=");
+                  if (pos!=std::string::npos) {
+                    address=url.substr(pos);
+                  }
+                }
+                DEBUG("address: %s",address.c_str());
               }
             }
             if (strcmp((const char *)field->name,"timestamp")==0) 
@@ -144,9 +155,13 @@ void NavigationEngine::synchronizeGoogleBookmarks() {
           }
           field=field->next;
         }
-        if ((title=="")||((cid=="")&&((lng=="")||(lat=="")))||(timestamp=="")) {
+        if ((title=="")||((address=="")&&((lng=="")||(lat=="")))||(timestamp=="")) {
           DEBUG("title=%s url=%s",title.c_str(),url.c_str());
-          WARNING("skipping google bookmark as one of the fields is not defined",NULL);
+          if (title=="") {
+            WARNING("can not import Google Bookmark with unkown title",NULL);
+          } else {
+            WARNING("can not import Google Bookmark <%s>",title.c_str());
+          }
         } else {
         
           // Remember the title for deleting not existing googlemarks later
@@ -168,16 +183,16 @@ void NavigationEngine::synchronizeGoogleBookmarks() {
             
             // If we have the coordinates already, finish this point
             p.setForeignTimestamp(timestamp);
-            if (cid=="") {
+            if (address=="") {
               DEBUG("adding/updating google bookmark <%s>",p.getName().c_str());
               p.setLat(atof(lat.c_str()));
               p.setLng(atof(lng.c_str()));
               p.writeToConfig("Navigation/AddressPoint",0); 
             } else {
-              p.setAddress(cid);
+              p.setAddress(address);
               newNavigationPoints.push_back(p);
             }            
-            //DEBUG("adding <%s> for processing",p.getName().c_str());
+            DEBUG("adding <%s> for processing",p.getName().c_str());
           } else {
             DEBUG("skipping google bookmark <%s> (already known and up-to-date)",p.getName().c_str());
           }
@@ -191,11 +206,20 @@ void NavigationEngine::synchronizeGoogleBookmarks() {
     // Get more information from each bookmark
     bool addressPointsChanged=false;
     for (std::list<NavigationPoint>::iterator i=newNavigationPoints.begin();i!=newNavigationPoints.end();i++) {
-
-      // Ask Google's Places API for more info
+      
+      // Find out what type of address it is and set the service to use
+      //DEBUG("address=%s",(*i).getAddress().c_str());
       std::string url="";
-      url+="https://maps.googleapis.com/maps/api/place/details/xml?";
-      url+="cid="+(*i).getAddress();
+      if ((*i).getAddress().rfind("q=",0)==0) {
+        url+="https://maps.googleapis.com/maps/api/geocode/xml?";
+        url+="address="+(*i).getAddress().substr(2);                
+      }
+      if ((*i).getAddress().rfind("cid=",0)==0) {
+        url+="https://maps.googleapis.com/maps/api/place/details/xml?";
+        url+=(*i).getAddress();        
+      }
+      
+      // Get the result of the service
       url+="&key="+apiKey;      
       //DEBUG("url=%s",url.c_str());
       UByte *data=core->downloadURL(url,result,size,true,false);

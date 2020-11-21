@@ -39,6 +39,9 @@ class WidgetCursorInfo: public GEODISCOVERER::WidgetPrimitive {
   // Request to fade out the info
   bool fadeOut;
 
+  // Request to update the info
+  bool updateInfo;
+  
   // Graphical representation of the info string
   FontString *infoFontString;
 
