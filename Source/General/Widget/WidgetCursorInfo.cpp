@@ -168,7 +168,7 @@ void WidgetCursorInfo::onDataChange() {
   GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
   core->getDefaultGraphicEngine()->unlockPos();
   std::string name = core->getNavigationEngine()->getAddressPointName(visPos);
-  DEBUG("name=%s",name.c_str());
+  //DEBUG("name=%s",name.c_str());
   if ((info=="")&&(name!="")) {
     info=name;
     fadeIn=true;
