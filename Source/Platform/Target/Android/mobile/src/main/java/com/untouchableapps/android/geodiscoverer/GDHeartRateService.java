@@ -23,6 +23,7 @@ package com.untouchableapps.android.geodiscoverer;
 
 
 import android.annotation.TargetApi;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -33,11 +34,13 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
@@ -94,6 +97,11 @@ public class GDHeartRateService {
   // List of known bluetooth devices
   private LinkedList<String> knownDeviceAddresses = new LinkedList<String>();
 
+  // Thread for handling deferred connection change indications
+  private final long CONNECTION_RECOVERY_TIME = 10*1000;
+  private Thread connectionNotificationThread = null;
+  private final Lock connectionNotificationLock = new ReentrantLock();
+
   /** Extracts the heart rate from a characteristics */
   @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
   private void updateHeartRate(BluetoothGattCharacteristic characteristic) {
@@ -126,7 +134,7 @@ public class GDHeartRateService {
       } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR","connection to bluetooth gatt service dropped");
         state = CONNECTING;
-        coreObject.playSound("heartRateDisconnect.ogg", 1, 100);
+        setConnectionState(false);
       }
     }
 
@@ -137,7 +145,6 @@ public class GDHeartRateService {
       super.onServicesDiscovered(gatt,status);
       if (status == BluetoothGatt.GATT_SUCCESS) {
         if (state == DISCOVERING_SERVICES) {
-          state = OPERATING;
           GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR","bluetooth gatt service discovery completed");
           List<BluetoothGattService> gattServices = gatt.getServices();
           if (gattServices == null) return;
@@ -155,11 +162,12 @@ public class GDHeartRateService {
                   BluetoothGattDescriptor descriptor = gattCharacteristic.getDescriptor(UUID_HEART_RATE_MEASUREMENT_DESCRIPTOR);
                   descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                   gatt.writeDescriptor(descriptor);
+                  state = OPERATING;
+                  setConnectionState(true);
                 }
               }
             }
           }
-          coreObject.playSound("heartRateConnect.ogg",1, 100);
         }
       }
     }
@@ -271,7 +279,7 @@ public class GDHeartRateService {
           // If heart rate is not available, issue an alarm from time to time
           if (state!=OPERATING) {
 
-            if (heartRateUnavailableSound) {
+            if ((heartRateUnavailableSound)&&(connectionNotificationThread==null)) {
               long t = System.currentTimeMillis() / 1000;
               if (t >= connectionWarningTimestamp + connectionWarningPeriod) {
                 coreObject.playSound("heartRateUnavailable.ogg", 1, 100);
@@ -422,6 +430,55 @@ public class GDHeartRateService {
     alarmThread.start();
     GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR","alarm thread started");
 
+  }
+
+  private void signalConnectionChange(String soundFile) {
+    coreObject.playSound(soundFile, 1, 100);
+  }
+
+  private void setConnectionState(boolean connected) {
+
+    // Stop last notification thread (if running)
+    connectionNotificationLock.lock();
+    if (connectionNotificationThread != null) {
+      connectionNotificationThread.interrupt();
+      connectionNotificationThread=null;
+      if (connected) {
+        connectionNotificationLock.unlock();
+        return;
+      }
+    }
+    connectionNotificationLock.unlock();
+
+    // Define what state change it is
+    final String soundFile;
+    if (connected) {
+      soundFile="heartRateConnect.ogg";
+    } else {
+      soundFile="heartRateDisconnect.ogg";
+    }
+
+    // Defer the state change in case it changes soon again
+    if (!connected) {
+      connectionNotificationThread = new Thread() {
+        public void run() {
+          try {
+            Thread.sleep(CONNECTION_RECOVERY_TIME);
+          } catch (InterruptedException e) {
+            return;
+          }
+          connectionNotificationLock.lock();
+          signalConnectionChange(soundFile);
+          connectionNotificationThread=null;
+          connectionNotificationLock.unlock();
+        }
+      };
+      connectionNotificationThread.start();
+    } else {
+      connectionNotificationLock.lock();
+      signalConnectionChange(soundFile);
+      connectionNotificationLock.unlock();
+    }
   }
 
   /** Stops all services */
