@@ -100,15 +100,16 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
   }
 
   private void updateListViewSize(ViewHolder holder) {
-    int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
-    holder.row.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-    int diff = holder.row.getMeasuredHeight()-holder.row.getHeight();
-    ViewGroup.LayoutParams params = listView.getLayoutParams();
-    if (listView.getHeight()<holder.row.getMeasuredHeight()) {
-      params.height = listView.getHeight() + diff;
-    } else {
-      params.height = -1;
+    int height=-1;
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "count=" + getCount());
+    if (getCount()==1) {
+      int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
+      holder.row.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "height=" + holder.row.getMeasuredHeight());
+      height=holder.row.getMeasuredHeight();
     }
+    ViewGroup.LayoutParams params = listView.getLayoutParams();
+    params.height = height;
     listView.setLayoutParams(params);
     listView.requestLayout();
   }

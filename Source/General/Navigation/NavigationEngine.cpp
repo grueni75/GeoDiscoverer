@@ -1804,6 +1804,7 @@ void NavigationEngine::initAddressPoints() {
   addressPoints.clear();
   std::string selectedAddressPointGroup = core->getConfigStore()->getStringValue("Navigation","selectedAddressPointGroup",__FILE__,__LINE__);
   for (std::list<std::string>::iterator j=names.begin();j!=names.end();j++) {
+    //DEBUG("name=%s",(*j).c_str());
     NavigationPoint addressPoint;
     addressPoint.setName(*j);
     addressPoint.readFromConfig(path);
