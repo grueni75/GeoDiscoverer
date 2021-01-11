@@ -101,17 +101,30 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
 
   private void updateListViewSize(ViewHolder holder) {
     int height=-1;
+    boolean requestLayout=false;
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "count=" + getCount());
+    ViewGroup.LayoutParams params = listView.getLayoutParams();
     if (getCount()==1) {
       int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
       holder.row.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "height=" + holder.row.getMeasuredHeight());
       height=holder.row.getMeasuredHeight();
+      if (listView.getHeight()!=height) {
+        params.height = height;
+        requestLayout=true;
+      }
+    } else {
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("params.height=%d",params.height));
+      if (params.height!=-1) {
+        params.height=-1;
+        requestLayout=true;
+      }
     }
-    ViewGroup.LayoutParams params = listView.getLayoutParams();
-    params.height = height;
-    listView.setLayoutParams(params);
-    listView.requestLayout();
+    if (requestLayout) {
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("requesting layout (height=%d)",params.height));
+      listView.setLayoutParams(params);
+      listView.requestLayout();
+    }
   }
 
   public GDAddressHistoryAdapter(ViewMap viewMap, MaterialDialog dialog, ListView listView) {
@@ -159,6 +172,10 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
         add(newestName);
       unsortedNames.remove(newestName);
     }
+    ViewGroup.LayoutParams params = listView.getLayoutParams();
+    params.height=-1;
+    listView.setLayoutParams(params);
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",String.format("count=%d",getCount()));
     notifyDataSetChanged();
   }
 
@@ -239,6 +256,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
       public void onClick(View v) {
         coreObject.scheduleCoreCommand("removeAddressPoint",name);
         remove(name);
+        updateAddressesInternal();
       }
     });
     holder.text.setOnClickListener(new View.OnClickListener() {
