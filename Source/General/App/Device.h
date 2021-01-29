@@ -68,6 +68,9 @@ protected:
   // The currently visible pages
   GraphicObject *visibleWidgetPages;
 
+  // The finger menu
+  GraphicObject *fingerMenu;
+
   // Properties of the screen
   GraphicScreenOrientation orientation;
   Int width;
@@ -152,6 +155,14 @@ public:
 
   void setVisibleWidgetPages(GraphicObject *visiblePages) {
     this->visibleWidgetPages = visiblePages;
+  }
+
+  GraphicObject *getFingerMenu() {
+    return fingerMenu;
+  }
+
+  void setFingerMenu(GraphicObject *fingerMenu) {
+    this->fingerMenu = fingerMenu;
   }
 
   void setHeight(Int height) {

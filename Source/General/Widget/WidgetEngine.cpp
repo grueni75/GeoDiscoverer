@@ -26,7 +26,9 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetEngine::WidgetEngine(Device *device) : visiblePages(device->getScreen()){
+WidgetEngine::WidgetEngine(Device *device) : 
+  visiblePages(device->getScreen())
+{
 
   // Get global config
   ConfigStore *c=core->getConfigStore();
@@ -37,8 +39,12 @@ WidgetEngine::WidgetEngine(Device *device) : visiblePages(device->getScreen()){
   buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod",__FILE__, __LINE__);
   contextMenuDelay=c->getIntValue("Graphic/Widget","contextMenuDelay",__FILE__, __LINE__);
   contextMenuAllowedPixelJitter=c->getIntValue("Graphic/Widget","contextMenuAllowedPixelJitter",__FILE__, __LINE__);
+  maxPathDistance=c->getDoubleValue("Graphic/Widget","maxPathDistance",__FILE__, __LINE__)*device->getDPI();
+  enableFingerMenu=c->getIntValue("Graphic/Widget/FingerMenu","enable",__FILE__, __LINE__);
+  if (device->getName()!="Default")
+    enableFingerMenu=false;
   isTouched=false;
-  contextMenuIsShown=false;
+  touchOpenedFingerMenu=false;
   currentPage=NULL;
   changePageDuration=c->getIntValue("Graphic/Widget","changePageDuration",__FILE__, __LINE__);
   ignoreTouchesEnd=0;
@@ -46,6 +52,12 @@ WidgetEngine::WidgetEngine(Device *device) : visiblePages(device->getScreen()){
   nearestPath=NULL;
   nearestPathIndex=-1;
   accessMutex=core->getThread()->createMutex("widget engine access mutex");
+  fingerMenu=NULL;
+  if (enableFingerMenu) {
+    if (!(fingerMenu=new WidgetFingerMenu(this))) {
+      FATAL("can not create finger menu object",NULL);
+    }
+  }
 
   // Init the rest
   init();
@@ -348,6 +360,8 @@ void WidgetEngine::createGraphic() {
       config.setParameter("stateConfigName","recordTrack");
       config.setParameter("updateInterval","250000");
       addWidgetToPage(config);
+      config.setPageName("Finger Menu");
+      addWidgetToPage(config);
       // ---------------------------------------------------------
       config=WidgetConfig();
       config.setPageName("Default");
@@ -377,6 +391,8 @@ void WidgetEngine::createGraphic() {
       config.setParameter("command","changeMapLayer()");
       config.setParameter("repeat","0");
       addWidgetToPage(config);
+      config.setPageName("Finger Menu");
+      addWidgetToPage(config);
       // ---------------------------------------------------------
     }
     if ((deviceName!="Watch")) {
@@ -389,30 +405,38 @@ void WidgetEngine::createGraphic() {
         position.setRefScreenDiagonal(0.0);
         position.setPortraitX(0.0);
         position.setPortraitY(0.0);
-        position.setPortraitZ(0);
+        position.setPortraitZ(1);
         position.setLandscapeX(62.0);
         position.setLandscapeY(67.0);
-        position.setLandscapeZ(0);
+        position.setLandscapeZ(1);
         config.setInactiveColor(GraphicColor(255,255,255,255));
       } else {
         position.setRefScreenDiagonal(4.0);
         position.setPortraitX(50.0);
         position.setPortraitY(70.0);
-        position.setPortraitZ(0);
+        position.setPortraitZ(1);
         position.setLandscapeX(50.0);
         position.setLandscapeY(32.5);
-        position.setLandscapeZ(0);
+        position.setLandscapeZ(1);
         config.setInactiveColor(GraphicColor(255,255,255,0));
       }
       config.addPosition(position);
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setParameter("iconFilename","addressPointBackground");
       addWidgetToPage(config);
-      position.setLandscapeY(87.5);
       config.clearPositions();
+      position.setLandscapeY(87.5);
       config.addPosition(position);
       config.setPageName("Path Tools");
       addWidgetToPage(config);
+      if (deviceName=="Default") {
+        config.setPageName("Finger Menu");
+        config.clearPositions();
+        position.setPortraitY(75.0);
+        position.setLandscapeY(93.0);
+        config.addPosition(position);
+        addWidgetToPage(config);
+      }
       // ---------------------------------------------------------
     }
     if ((deviceName=="Default")||(deviceName=="Watch")) {
@@ -473,6 +497,10 @@ void WidgetEngine::createGraphic() {
       config.setParameter("stateConfigName","returnToLocation");
       config.setParameter("updateInterval","250000");
       addWidgetToPage(config);
+      if (deviceName=="Default") {
+        config.setPageName("Finger Menu");
+        addWidgetToPage(config);
+      }
       // ---------------------------------------------------------
       config=WidgetConfig();
       config.setPageName("Default");
@@ -547,6 +575,8 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeY(tabletLandscapeButtonGridY[1]);
         position.setLandscapeZ(0);
         config.addPosition(position);
+        addWidgetToPage(config);
+        config.setPageName("Finger Menu");
         addWidgetToPage(config);
       }
     }
@@ -699,6 +729,20 @@ void WidgetEngine::createGraphic() {
       config.setParameter("batteryLevelBackgroundWidth","15");
       config.setParameter("batteryLevelForegroundWidth","60");
       addWidgetToPage(config);
+      if (deviceName=="Default") {
+        config.clearPositions();
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(22.0);
+        position.setPortraitY(75.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(10.0);
+        position.setLandscapeY(46.0);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+        config.setPageName("Finger Menu");
+        addWidgetToPage(config);
+      }
       // ---------------------------------------------------------
       config=WidgetConfig();
       config.setPageName("Default");
@@ -755,18 +799,18 @@ void WidgetEngine::createGraphic() {
         position.setRefScreenDiagonal(0.0);
         position.setPortraitX(0.0);
         position.setPortraitY(0.0);
-        position.setPortraitZ(0);
+        position.setPortraitZ(2);
         position.setLandscapeX(50.0);
         position.setLandscapeY(23.0);
-        position.setLandscapeZ(0);
+        position.setLandscapeZ(2);
       } else {
         position.setRefScreenDiagonal(4.0);
         position.setPortraitX(70.0);
         position.setPortraitY(92.0);
-        position.setPortraitZ(1);
+        position.setPortraitZ(2);
         position.setLandscapeX(50.0);
         position.setLandscapeY(88.0);
-        position.setLandscapeZ(1);
+        position.setLandscapeZ(2);
       }
       config.addPosition(position);
       if (deviceName=="Default") {
@@ -774,10 +818,10 @@ void WidgetEngine::createGraphic() {
         position.setRefScreenDiagonal(7.0);
         position.setPortraitX(tabletPortraitButtonGridX[1]);
         position.setPortraitY(tabletPortraitButtonGridY[3]);
-        position.setPortraitZ(1);
+        position.setPortraitZ(2);
         position.setLandscapeX(tabletLandscapeButtonGridX[1]);
         position.setLandscapeY(tabletLandscapeButtonGridY[2]);
-        position.setLandscapeZ(1);
+        position.setLandscapeZ(2);
         config.addPosition(position);
       }
       config.setActiveColor(GraphicColor(255,255,255,255));
@@ -792,26 +836,39 @@ void WidgetEngine::createGraphic() {
       position.setRefScreenDiagonal(4.0);
       position.setPortraitX(50.0);
       position.setPortraitY(35.0);
-      position.setPortraitZ(1);
+      position.setPortraitZ(2);
       position.setLandscapeX(50.0);
       position.setLandscapeY(88.0);
-      position.setLandscapeZ(1);
+      position.setLandscapeZ(2);
       config.addPosition(position);
       position=WidgetPosition();
       position.setRefScreenDiagonal(7.0);
       position.setPortraitX((tabletPortraitButtonGridX[2]+tabletPortraitButtonGridX[1])/2);
       position.setPortraitY(tabletPortraitButtonGridY[4]);
-      position.setPortraitZ(1);
+      position.setPortraitZ(2);
       position.setLandscapeX((tabletLandscapeButtonGridX[2]+tabletLandscapeButtonGridX[1])/2);
       position.setLandscapeY(tabletLandscapeButtonGridY[2]);
-      position.setLandscapeZ(1);
+      position.setLandscapeZ(2);
       config.addPosition(position);
       addWidgetToPage(config);
+      if (deviceName=="Default") {
+        config.setPageName("Finger Menu");
+        config.clearPositions();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(50.0);
+        position.setPortraitY(75.0);
+        position.setPortraitZ(2);
+        position.setLandscapeX(50.0);
+        position.setLandscapeY(93.0);
+        position.setLandscapeZ(2);
+        config.addPosition(position);
+        addWidgetToPage(config);
+      }
       // ---------------------------------------------------------
       if (deviceName=="Default") {
         config=WidgetConfig();
         config.setPageName("Default");
-        config.setName("Map scale");
+        config.setName("Map Scale");
         config.setType(WidgetTypeScale);
         position=WidgetPosition();
         position.setRefScreenDiagonal(4.0);
@@ -820,7 +877,7 @@ void WidgetEngine::createGraphic() {
         position.setPortraitZ(0);
         position.setLandscapeX(50.0);
         position.setLandscapeY(84.0);
-        position.setLandscapeZ(0);
+        position.setLandscapeZ(0);      
         config.addPosition(position);
         position=WidgetPosition();
         position.setRefScreenDiagonal(7.0);
@@ -836,13 +893,25 @@ void WidgetEngine::createGraphic() {
         config.setParameter("iconFilename","scale");
         config.setParameter("updateInterval","1000000");
         config.setParameter("tickLabelOffsetX","0");
-        config.setParameter("mapLabelOffsetY","27.0");
-        config.setParameter("layerLabelOffsetY","8.0");
+        config.setParameter("mapLabelOffsetY","125.0");
+        config.setParameter("layerLabelOffsetY","40.0");
+        addWidgetToPage(config);
+        config.setPageName("Finger Menu");
+        config.clearPositions();
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(76.0);
+        position.setPortraitY(89.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(88.5);
+        position.setLandscapeY(78.0);
+        position.setLandscapeZ(0);      
+        config.addPosition(position);
         addWidgetToPage(config);
         // ---------------------------------------------------------
         config=WidgetConfig();
         config.setPageName("Default");
-        config.setName("CursorInfo");
+        config.setName("Cursor Info");
         config.setType(WidgetTypeCursorInfo);
         position=WidgetPosition();
         position.setRefScreenDiagonal(4.0);
@@ -863,10 +932,13 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeZ(1);
         config.addPosition(position);
         config.setActiveColor(GraphicColor(255,255,255,255));
-        config.setInactiveColor(GraphicColor(255,255,255,100));
-        config.setParameter("labelWidth","70.0");
+        config.setInactiveColor(GraphicColor(255,255,255,150));
+        config.setParameter("width","2.0");
+        config.setParameter("height","0.2");
         addWidgetToPage(config);
         config.setPageName("Path Tools");
+        addWidgetToPage(config);
+        config.setPageName("Finger Menu");
         addWidgetToPage(config);
       }
       // ---------------------------------------------------------
@@ -975,6 +1047,10 @@ void WidgetEngine::createGraphic() {
       config.setParameter("locationIconFilename","pathInfoLocation");
       config.setParameter("navigationPointIconFilename","pathInfoNavigationPoint");
       addWidgetToPage(config);
+      if (deviceName=="Default") {
+        config.setPageName("Finger Menu");
+        addWidgetToPage(config);
+      }
       // ---------------------------------------------------------
       if (deviceName=="Default") {
         config=WidgetConfig();
@@ -1008,6 +1084,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("stateConfigName","visible");
         config.setParameter("updateInterval","250000");
         addWidgetToPage(config);
+        config.setPageName("Finger Menu");
+        addWidgetToPage(config);
         // ---------------------------------------------------------
         config=WidgetConfig();
         config.setPageName("Path Tools");
@@ -1036,6 +1114,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("iconFilename","setTargetAtAddress");
         config.setParameter("command","setTargetAtAddress()");
         addWidgetToPage(config);
+        config.setPageName("Finger Menu");
+        addWidgetToPage(config);
         // ---------------------------------------------------------
         config=WidgetConfig();
         config.setPageName("Path Tools");
@@ -1063,6 +1143,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("iconFilename","setTargetAtMapCenter");
         config.setParameter("command","setTargetAtMapCenter()");
         config.setParameter("repeat","0");
+        addWidgetToPage(config);
+        config.setPageName("Finger Menu");
         addWidgetToPage(config);
         // ---------------------------------------------------------
         config=WidgetConfig();
@@ -1093,6 +1175,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("command","setPathEndFlag()");
         config.setParameter("repeat","0");
         addWidgetToPage(config);
+        config.setPageName("Finger Menu");
+        addWidgetToPage(config);
         // ---------------------------------------------------------
         config=WidgetConfig();
         config.setPageName("Path Tools");
@@ -1122,6 +1206,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("command","setPathStartFlag()");
         config.setParameter("repeat","0");
         addWidgetToPage(config);
+        config.setPageName("Finger Menu");
+        addWidgetToPage(config);
         // ---------------------------------------------------------
         config=WidgetConfig();
         config.setPageName("Path Tools");
@@ -1150,6 +1236,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("iconFilename","setActiveRoute");
         config.setParameter("command","setActiveRoute()");
         config.setParameter("repeat","0");
+        addWidgetToPage(config);
+        config.setPageName("Finger Menu");
         addWidgetToPage(config);
         // ---------------------------------------------------------
         config=WidgetConfig();
@@ -1184,6 +1272,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("stateConfigName","pathInfoLocked");
         config.setParameter("updateInterval","250000");
         addWidgetToPage(config);
+        config.setPageName("Finger Menu");
+        addWidgetToPage(config);
       }
     }
     // ---------------------------------------------------------
@@ -1195,9 +1285,9 @@ void WidgetEngine::createGraphic() {
       position=WidgetPosition();
       position.setRefScreenDiagonal(4.0);
       position.setPortraitX(22.0);
-      position.setPortraitY(87.0);
+      position.setPortraitY(89.0);
       position.setPortraitZ(0);
-      position.setLandscapeX(14.5);
+      position.setLandscapeX(10.0);
       position.setLandscapeY(78.0);
       position.setLandscapeZ(0);
       config.addPosition(position);
@@ -1289,11 +1379,65 @@ void WidgetEngine::createGraphic() {
     config.setParameter("minTouchDetectionRadius","75.0");
     config.setParameter("circularButtonAngle","20.0");
     addWidgetToPage(config);
+    if (deviceName=="Default") {
+      config.setPageName("Finger Menu");
+      config.clearPositions();
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(22.0);
+      position.setPortraitY(89.0);
+      position.setPortraitZ(0);
+      position.setLandscapeX(10.0);
+      position.setLandscapeY(78.0);
+      position.setLandscapeZ(0);
+      config.addPosition(position);
+      addWidgetToPage(config);
+    }
+    // ---------------------------------------------------------
+    if (deviceName=="Default") {
+      config=WidgetConfig();
+      config.setPageName("Finger Menu");
+      config.setName("Menu Right");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(93.0);
+      position.setPortraitY(5.0);
+      position.setPortraitZ(1);
+      position.setLandscapeX(95.0);
+      position.setLandscapeY(5.0);
+      position.setLandscapeZ(1);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,100));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","menu");
+      config.setParameter("command","toggleFingerMenu()");
+      config.setParameter("longPressCommand","showMenu()");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      config.setName("Menu Left");
+      config.clearPositions();
+      position.setPortraitX(7.0);
+      position.setLandscapeX(5.0);
+      config.addPosition(position);
+      addWidgetToPage(config);
+    }
+  }
+  if (enableFingerMenu) {
+    if (c->getStringValue("Graphic/Widget/Device[@name='" + deviceName + "']","selectedPage",__FILE__, __LINE__)!="Finger Menu")
+      c->setStringValue("Graphic/Widget/Device[@name='" + deviceName + "']","selectedPage","Finger Menu",__FILE__, __LINE__);
+  } else {
+    if (c->getStringValue("Graphic/Widget/Device[@name='" + deviceName + "']","selectedPage",__FILE__, __LINE__)=="Finger Menu")
+      c->setStringValue("Graphic/Widget/Device[@name='" + deviceName + "']","selectedPage","Default",__FILE__, __LINE__);
   }
 
   // Create the widgets from the config
   pageNames=c->getAttributeValues("Graphic/Widget/Device[@name='" + deviceName + "']/Page","name",__FILE__, __LINE__);
   std::list<std::string>::iterator i;
+  std::vector<WidgetPrimitive*> fingerMenuFirstCircleEntries;
+  fingerMenuFirstCircleEntries.resize(7);
+  std::vector<WidgetPrimitive*> fingerMenuSecondCircleEntries;
+  fingerMenuSecondCircleEntries.resize(4);
   for(i=pageNames.begin();i!=pageNames.end();i++) {
     //DEBUG("found a widget page with name %s",(*i).c_str());
 
@@ -1306,6 +1450,16 @@ void WidgetEngine::createGraphic() {
     }
     WidgetPagePair pair=WidgetPagePair(*i,page);
     pageMap.insert(pair);
+    bool isFingerMenuPage=false;
+    if (page->getName()=="Finger Menu") 
+      isFingerMenuPage=true;
+    if (enableFingerMenu) {
+      if (!isFingerMenuPage)
+        continue;
+    } else {
+      if (isFingerMenuPage)
+        continue;
+    }
 
     // Go through all widgets of this page
     std::string path="Graphic/Widget/Device[@name='" + deviceName + "']/Page[@name='" + *i + "']/Primitive";
@@ -1328,11 +1482,21 @@ void WidgetEngine::createGraphic() {
       WidgetAddressPoint *addressPoint;
       WidgetEBike *eBike;
       if (widgetType=="button") {
-        button=new WidgetButton(page);
+        WidgetContainer *container;
+        if (isFingerMenuPage)
+          container=fingerMenu;
+        else
+          container=page;
+        button=new WidgetButton(container);
         primitive=button;
       }
       if (widgetType=="checkbox") {
-        checkbox=new WidgetCheckbox(page);
+        WidgetContainer *container;
+        if (isFingerMenuPage)
+          container=fingerMenu;
+        else
+          container=page;
+        checkbox=new WidgetCheckbox(container);
         primitive=checkbox;
       }
       if (widgetType=="meter") {
@@ -1356,7 +1520,10 @@ void WidgetEngine::createGraphic() {
         primitive=pathInfo;
       }
       if (widgetType=="cursorInfo") {
-        cursorInfo=new WidgetCursorInfo(page);
+        if (isFingerMenuPage)
+          cursorInfo=new WidgetCursorInfo(fingerMenu);
+        else
+          cursorInfo=new WidgetCursorInfo(page);
         primitive=cursorInfo;
       }
       if (widgetType=="addressPoint") {
@@ -1458,9 +1625,9 @@ void WidgetEngine::createGraphic() {
       }
       if (widgetType=="scale") {
         scale->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
-        scale->setTickLabelOffsetX(c->getDoubleValue(widgetPath,"tickLabelOffsetX",__FILE__, __LINE__)*meter->getIconWidth()/100.0);
-        scale->setMapLabelOffsetY(c->getDoubleValue(widgetPath,"mapLabelOffsetY",__FILE__, __LINE__)*meter->getIconHeight()/100.0);
-        scale->setLayerLabelOffsetY(c->getDoubleValue(widgetPath,"layerLabelOffsetY",__FILE__, __LINE__)*meter->getIconHeight()/100.0);
+        scale->setTickLabelOffsetX(c->getDoubleValue(widgetPath,"tickLabelOffsetX",__FILE__, __LINE__)*scale->getIconWidth()/100.0);
+        scale->setMapLabelOffsetY(c->getDoubleValue(widgetPath,"mapLabelOffsetY",__FILE__, __LINE__)*scale->getIconHeight()/100.0);
+        scale->setLayerLabelOffsetY(c->getDoubleValue(widgetPath,"layerLabelOffsetY",__FILE__, __LINE__)*scale->getIconHeight()/100.0);
       }
       if (widgetType=="status") {
         status->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
@@ -1538,7 +1705,8 @@ void WidgetEngine::createGraphic() {
         pathInfo->setAltitudeProfileYTickLabelWidth(c->getIntValue(widgetPath,"altitudeProfileYTickLabelWidth",__FILE__, __LINE__));
       }
       if (widgetType=="cursorInfo") {
-        cursorInfo->setLabelWidth(c->getDoubleValue(widgetPath,"labelWidth",__FILE__, __LINE__));
+        cursorInfo->setWidth(c->getDoubleValue(widgetPath,"width",__FILE__, __LINE__)*device->getDPI());
+        cursorInfo->setHeight(c->getDoubleValue(widgetPath,"height",__FILE__, __LINE__)*device->getDPI());
         GraphicColor c=cursorInfo->getColor();
         c.setAlpha(0);
         cursorInfo->setColor(c);
@@ -1563,7 +1731,39 @@ void WidgetEngine::createGraphic() {
       }
 
       // Add the widget to the page
-      page->addWidget(primitive);
+      bool skipPageAdd=false;
+      if (isFingerMenuPage) {
+        if (*j=="Track Recording")     { fingerMenuFirstCircleEntries[2]=primitive; skipPageAdd=true; }
+        if (*j=="Change Map Layer")    { fingerMenuFirstCircleEntries[1]=primitive; skipPageAdd=true;  }
+        if (*j=="Return To Location")  { fingerMenuFirstCircleEntries[3]=primitive; skipPageAdd=true;  }
+        if (*j=="Zoom Level Lock")     { fingerMenuFirstCircleEntries[0]=primitive; skipPageAdd=true;  }
+        if (*j=="Target Visibility")   { fingerMenuFirstCircleEntries[4]=primitive; skipPageAdd=true;  }
+        if (*j=="Target At Address")   { fingerMenuFirstCircleEntries[5]=primitive; skipPageAdd=true;  }
+        if (*j=="Target At Center")    { fingerMenuFirstCircleEntries[6]=primitive; skipPageAdd=true;  }
+        if (*j=="Set Path End Flag")   { fingerMenuSecondCircleEntries[0]=primitive; skipPageAdd=true;  }
+        if (*j=="Set Path Start Flag") { fingerMenuSecondCircleEntries[1]=primitive; skipPageAdd=true;  }
+        if (*j=="Set Active Route")    { fingerMenuSecondCircleEntries[2]=primitive; skipPageAdd=true;  }
+        if (*j=="Path Info Lock")      { fingerMenuSecondCircleEntries[3]=primitive; skipPageAdd=true;  }
+        if (*j=="Cursor Info")         { fingerMenu->setCursorInfoWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
+      }
+      if (!skipPageAdd) {
+        page->addWidget(primitive);
+      }
+      /*if ((((widgetType=="checkbox")||(widgetType=="button")))&&(primitive->getName().front().find("Page")==std::string::npos)&&(device==core->getDefaultDevice())) {
+        fingerMenu->addWidget(primitive);
+      } else {
+        page->addWidget(primitive);
+      }*/
+    }
+  }
+
+  // Add all the finger menu entries
+  if (enableFingerMenu) {
+    for (int i=fingerMenuFirstCircleEntries.size()-1;i>=0;i--) {
+      fingerMenu->addWidgetToCircle(fingerMenuFirstCircleEntries[i]);
+    }
+    for (int i=fingerMenuSecondCircleEntries.size()-1;i>=0;i--) {
+      fingerMenu->addWidgetToRow(fingerMenuSecondCircleEntries[i]);
     }
   }
 
@@ -1579,6 +1779,13 @@ void WidgetEngine::createGraphic() {
     visiblePages.addPrimitive(currentPage->getGraphicObject());
     getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
     device->setVisibleWidgetPages(&visiblePages);
+    getGraphicEngine()->unlockDrawing();
+  }
+
+  // Set the finger menu on the graphic engine
+  if ((enableFingerMenu)&&(device==core->getDefaultDevice())) {
+    getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+    device->setFingerMenu(fingerMenu->getGraphicObject());
     getGraphicEngine()->unlockDrawing();
   }
 
@@ -1609,6 +1816,9 @@ void WidgetEngine::updateWidgetPositions() {
 
   // Only one thread please
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+
+  // CLose the finger menu
+  closeFingerMenu();
 
   // Find out the orientation for which we need to update the positioning
   std::string orientation="Unknown";
@@ -1714,6 +1924,14 @@ void WidgetEngine::deinit() {
   }
   pageMap.clear();
 
+  // RE-create the finger menu
+  if (fingerMenu) {
+    delete fingerMenu;
+    if (!(fingerMenu=new WidgetFingerMenu(this))) {
+      FATAL("can not create finger menu object",NULL);
+    }
+  }
+
   // Allow access by the next thread
   core->getThread()->unlockMutex(accessMutex);
 }
@@ -1736,20 +1954,33 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     return false;
   }
 
-  // First check if a widget on the page was touched
-  if (currentPage->onTouchDown(t,x,y)) {
+  // First check if a widget in the finger menu was touched
+  if ((fingerMenu)&&(fingerMenu->onTouchDown(t,x,y))) {
     isTouched=false;
     core->getThread()->unlockMutex(accessMutex);
+    GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
+    visPos->updateLastUserModification();
+    core->getDefaultGraphicEngine()->unlockPos();
     return true;
   } else {
+
+    // Then check if widget on page is touched
+    if (currentPage->onTouchDown(t,x,y)) {
+      isTouched=false;
+      core->getThread()->unlockMutex(accessMutex);
+      return true;
+    }
 
     // Check if we should show the context menu
     if (isTouched) {
       if ((abs(lastTouchDownX-x)<=contextMenuAllowedPixelJitter)&&(abs(lastTouchDownY-y)<=contextMenuAllowedPixelJitter)) {
         if (t-firstStableTouchDownTime >= contextMenuDelay) {
-          if (!contextMenuIsShown) {
+          if (!touchOpenedFingerMenu) {
+            lastTouchDownX=x;
+            lastTouchDownY=y;
             //showContextMenu();
-            contextMenuIsShown=true;
+            //openFingerMenu();
+            touchOpenedFingerMenu=true;
           }
         }
       } else {
@@ -1783,6 +2014,7 @@ bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cance
   }
   deselectPage();
   currentPage->onTouchUp(t,x,y,cancel);
+  if (fingerMenu) fingerMenu->onTouchUp(t,x,y,cancel);
   core->getThread()->unlockMutex(accessMutex);
   return true;
 }
@@ -1820,7 +2052,7 @@ bool WidgetEngine::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY,
 // Deselects the currently selected page
 void WidgetEngine::deselectPage() {
   isTouched=false;
-  contextMenuIsShown=false;
+  touchOpenedFingerMenu=false;
 }
 
 // Sets a new page
@@ -1911,9 +2143,17 @@ void WidgetEngine::setPage(std::string name, Int direction) {
 // Informs the engine that the map has changed
 void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMapTiles) {
 
+  // Compute the overlap in meters for the given map state
+  double overlapInMeters;
+  if (!core->getMapEngine()->calculateMaxDistanceInMeters(maxPathDistance,overlapInMeters)) {
+    overlapInMeters=0;
+  }
+  //DEBUG("mapPos=(%f,%f)",mapPos.getLat(),mapPos.getLng());
+
   // Find the nearest path in the currently visible map tile
   NavigationPath *nearestPath=NULL;
   Int nearestPathIndex=0;
+  MapPosition nearestPathMapPos;
   double minDistance=std::numeric_limits<double>::max();
   for(std::list<MapTile*>::iterator j=centerMapTiles->begin();j!=centerMapTiles->end();j++) {
     std::list<NavigationPathSegment*> nearbyPathSegments;
@@ -1921,16 +2161,28 @@ void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMa
     for(std::list<NavigationPathSegment*>::iterator i=nearbyPathSegments.begin();i!=nearbyPathSegments.end();i++) {
       NavigationPathSegment *s=*i;
       s->getPath()->lockAccess(__FILE__, __LINE__);
-      for(Int j=s->getStartIndex();j<=s->getEndIndex();j++) {
+      MapPosition prevVisPos=NavigationPath::getPathInterruptedPos();
+      Int startIndex=s->getStartIndex();
+      if (startIndex>0) startIndex--;
+      Int endIndex=s->getEndIndex();
+      if (endIndex<s->getVisualization()->getPointsSize()-1) endIndex++;
+      //DEBUG("startIndex=%d endIndex=%d pointsSize=%d",startIndex,endIndex,s->getVisualization()->getPointsSize());
+      for(Int j=startIndex;j<=endIndex;j++) {
         MapPosition visPos=s->getVisualization()->getPoint(j);
-        if (visPos!=NavigationPath::getPathInterruptedPos()) {
-          double d=mapPos.computeDistance(visPos);
-          if (d<minDistance) {
+        if ((visPos!=NavigationPath::getPathInterruptedPos())&&(prevVisPos!=NavigationPath::getPathInterruptedPos())) {
+          //DEBUG("j=%d",j);
+          MapPosition normalPos;
+          double d=visPos.computeNormalDistance(prevVisPos,mapPos,overlapInMeters,true,false,&normalPos);            
+          if ((d!=std::numeric_limits<double>::max())&&(d<minDistance)) {
+            /*d=visPos.computeNormalDistance(prevVisPos,mapPos,overlapInMeters,true,true,&normalPos);           
+            DEBUG("d=%f",d); */
             minDistance=d;
             nearestPath=s->getPath();
+            nearestPathMapPos=normalPos;
             nearestPathIndex=visPos.getIndex();
           }
         }
+        prevVisPos=visPos;
       }
       s->getPath()->unlockAccess();
     }
@@ -1938,12 +2190,15 @@ void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMa
 
   // Inform the widget
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  //DEBUG("nearestPath=%08x nearestPathIndex=%d",nearestPath,nearestPathIndex);
   this->nearestPath=nearestPath;
   this->nearestPathIndex=nearestPathIndex;
+  this->nearestPathMapPos=nearestPathMapPos;
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onMapChange(currentPage==i->second ? true : false, mapPos);
   }
+  if (fingerMenu) fingerMenu->onMapChange(currentPage==i->second ? true : false, mapPos);
   core->getThread()->unlockMutex(accessMutex);
 }
 
@@ -1954,6 +2209,7 @@ void WidgetEngine::onLocationChange(MapPosition mapPos) {
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onLocationChange(currentPage==i->second ? true : false, mapPos);
   }
+  if (fingerMenu) fingerMenu->onLocationChange(currentPage==i->second ? true : false, mapPos);
   core->getThread()->unlockMutex(accessMutex);
 }
 
@@ -1968,6 +2224,7 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onPathChange(currentPage==i->second ? true : false, path, changeType);
   }
+  if (fingerMenu) fingerMenu->onPathChange(currentPage==i->second ? true : false, path, changeType);
   core->getThread()->unlockMutex(accessMutex);
 }
 
@@ -1978,6 +2235,7 @@ void WidgetEngine::onDataChange() {
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onDataChange();
   }
+  if (fingerMenu) fingerMenu->onDataChange();
   core->getThread()->unlockMutex(accessMutex);
 }
 
@@ -1992,10 +2250,13 @@ void WidgetEngine::setWidgetsActive(bool widgetsActive) {
 
 // Let the engine work
 bool WidgetEngine::work(TimestampInMicroseconds t) {
+  bool result=false;
+  if (fingerMenu) 
+    result=fingerMenu->work(t);
   if (currentPage) {
-    return currentPage->work(t);
+    return result | currentPage->work(t);
   } else {
-    return false;
+    return result;
   }
 }
 
@@ -2017,6 +2278,40 @@ Screen *WidgetEngine::getScreen() {
 // Returns the device
 Device *WidgetEngine::getDevice() {
   return device;
+}
+
+// Opens the finger menu
+void WidgetEngine::openFingerMenu() {
+  if (!enableFingerMenu)
+    return;
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  setWidgetsActive(false);
+  fingerMenu->open(lastTouchDownX,lastTouchDownY);
+  core->getThread()->unlockMutex(accessMutex);
+  GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
+  visPos->updateLastUserModification();
+  core->getDefaultGraphicEngine()->unlockPos();
+}
+
+// Closes the finger menu
+void WidgetEngine::closeFingerMenu() {
+  if (!enableFingerMenu)
+    return;
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  fingerMenu->close();
+  core->getThread()->unlockMutex(accessMutex);
+}
+
+// Open or close the finger menu
+void WidgetEngine::toggleFingerMenu() {
+  if (!enableFingerMenu)
+    return;
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  if (fingerMenu->isOpen())
+    closeFingerMenu();
+  else
+    openFingerMenu();
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 }

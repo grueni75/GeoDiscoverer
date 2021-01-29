@@ -62,7 +62,7 @@ protected:
 public:
 
   // Constructor
-  WidgetScale(WidgetPage *widgetPage);
+  WidgetScale(WidgetContainer *widgetContainer);
 
   // Destructor
   virtual ~WidgetScale();

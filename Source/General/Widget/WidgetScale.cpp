@@ -26,7 +26,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetScale::WidgetScale(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
+WidgetScale::WidgetScale(WidgetContainer *widgetContainer) : WidgetPrimitive(widgetContainer) {
   widgetType=WidgetTypeScale;
   updateInterval=1000000;
   nextUpdateTime=0;
@@ -43,15 +43,15 @@ WidgetScale::WidgetScale(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
 
 // Destructor
 WidgetScale::~WidgetScale() {
-  widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
-  if (mapNameFontString) widgetPage->getFontEngine()->destroyString(mapNameFontString);
+  widgetContainer->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
+  if (mapNameFontString) widgetContainer->getFontEngine()->destroyString(mapNameFontString);
   for(Int i=0;i<4;i++) {
-    if (scaledNumberFontString[i]) widgetPage->getFontEngine()->destroyString(scaledNumberFontString[i]);
+    if (scaledNumberFontString[i]) widgetContainer->getFontEngine()->destroyString(scaledNumberFontString[i]);
   }
-  widgetPage->getFontEngine()->unlockFont();
-  widgetPage->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
-  if (layerNameFontString) widgetPage->getFontEngine()->destroyString(layerNameFontString);
-  widgetPage->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
+  if (layerNameFontString) widgetContainer->getFontEngine()->destroyString(layerNameFontString);
+  widgetContainer->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
@@ -59,7 +59,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
 
   bool update;
   Int textX,textY;
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
   double meters;
   std::string value,unit,lockedUnit;
 
@@ -74,15 +74,16 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     layerName=core->getMapSource()->getMapLayerName(core->getMapEngine()->getZoomLevel());
 
     // Compute the scale in meters
-    GraphicPosition *visPos=widgetPage->getGraphicEngine()->lockPos(__FILE__, __LINE__);
+    GraphicPosition *visPos=widgetContainer->getGraphicEngine()->lockPos(__FILE__, __LINE__);
     double angle=visPos->getAngleRad();
     double zoom=visPos->getZoom();
-    widgetPage->getGraphicEngine()->unlockPos();
-    MapPosition *pos=core->getMapEngine()->lockMapPos(__FILE__, __LINE__);
+    widgetContainer->getGraphicEngine()->unlockPos();
+    MapPosition pos=*(core->getMapEngine()->lockMapPos(__FILE__, __LINE__));
+    core->getMapEngine()->unlockMapPos();
     MapCalibrator *calibrator=NULL;
-    if ((pos->getLngScale()>0)&&(pos->getMapTile())&&(pos->getMapTile()->getParentMapContainer())&&((calibrator=pos->getMapTile()->getParentMapContainer()->getMapCalibrator())!=NULL)) {
+    if ((pos.getLngScale()>0)&&(pos.getMapTile())&&(pos.getMapTile()->getParentMapContainer())&&((calibrator=pos.getMapTile()->getParentMapContainer()->getMapCalibrator())!=NULL)) {
       //DEBUG("angle=%f zoom=%f",angle,zoom);
-      MapPosition pos2=*pos;
+      MapPosition pos2=pos;
       pos2.setX(iconWidth/zoom*cos(angle));
       pos2.setY(-iconWidth/zoom*sin(angle));
       //DEBUG("x=%d y=%d",pos2.getX(),pos2.getY());
@@ -96,7 +97,6 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     } else {
       metersPerTick=0;
     }
-    core->getMapEngine()->unlockMapPos();
     changed=true;
 
     // Lock the used font

@@ -26,7 +26,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetButton::WidgetButton(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
+WidgetButton::WidgetButton(WidgetContainer *widgetContainer) : WidgetPrimitive(widgetContainer) {
   widgetType=WidgetTypeButton;
   longPressCommand="";
   longPressTime=0;
@@ -45,9 +45,9 @@ void WidgetButton::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
     // Compute the next command dispatch time if the button is pressed the first time
     if (getIsFirstTimeSelected()) {
-      nextDispatchTime=t+widgetPage->getWidgetEngine()->getButtonRepeatDelay();
+      nextDispatchTime=t+widgetContainer->getWidgetEngine()->getButtonRepeatDelay();
       if (longPressCommand!="")
-        longPressTime=t+widgetPage->getWidgetEngine()->getButtonLongPressDelay();
+        longPressTime=t+widgetContainer->getWidgetEngine()->getButtonLongPressDelay();
     }
 
   }
@@ -65,7 +65,7 @@ bool WidgetButton::work(TimestampInMicroseconds t) {
     // Repeat the command if the initial delay is over
     if ((repeat)&&(t>=nextDispatchTime)) {
       core->getCommander()->execute(command);
-      nextDispatchTime=t+widgetPage->getWidgetEngine()->getButtonRepeatPeriod();
+      nextDispatchTime=t+widgetContainer->getWidgetEngine()->getButtonRepeatPeriod();
     }
 
     // Execute the long press command if delay is long enough

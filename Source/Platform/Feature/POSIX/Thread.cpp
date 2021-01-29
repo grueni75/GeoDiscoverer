@@ -222,7 +222,10 @@ void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line, bool 
     for(std::list<std::string*>::iterator i=waitQueue->begin();i!=waitQueue->end();i++) {
       std::string *entry = *i;
       if (entry->find("locked")!=std::string::npos) {
-        FATAL("mutex locked twice!",NULL);
+        ERROR("mutex <%s> locked twice",mutexNameMap[mutex]->c_str());
+        waitQueue->push_back(threadNameLocked);
+        pthread_mutex_unlock(&accessMutex);
+        while (true) sleep(1);
         return;
       }
     }
@@ -234,7 +237,11 @@ void Thread::lockMutex(ThreadMutexInfo *mutex, const char *file, int line, bool 
 }
 
 // Unlocks a mutex
-void Thread::unlockMutex(ThreadMutexInfo *mutex) {
+void Thread::unlockMutex(ThreadMutexInfo *mutex, bool debugMsgs) {
+  if (mutex->lockedCount==0) {
+    ERROR("mutex unlocked too often",NULL);
+    while (true) sleep(1);
+  }
   mutex->lockedCount--;
   if (mutex->lockedCount!=0)
     return;
@@ -256,6 +263,8 @@ void Thread::unlockMutex(ThreadMutexInfo *mutex) {
             break;
           }
         }
+        if (debugMsgs)
+          DEBUG("released lock: %s",threadName->c_str());
         //DEBUG("mutex %s unlocked by %s",mutexNameMap[mutex]->c_str(),threadName->c_str());
       }
     }

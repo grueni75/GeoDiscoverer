@@ -1292,18 +1292,18 @@ exitThread:
 
 // Sets the target to the center of the map
 void NavigationEngine::setTargetAtMapCenter() {
-  MapPosition *pos = core->getMapEngine()->lockMapPos(__FILE__, __LINE__);
+  MapPosition pos = *(core->getMapEngine()->lockMapPos(__FILE__, __LINE__));
+  core->getMapEngine()->unlockMapPos();
   NavigationPoint point;
   std::stringstream name;
-  name << "(" << pos->getLat() << "," << pos->getLng() << ")";
+  name << "(" << pos.getLat() << "," << pos.getLng() << ")";
   point.setName(name.str());
   point.setAddress(name.str());
-  point.setLng(pos->getLng());
-  point.setLat(pos->getLat());
+  point.setLng(pos.getLng());
+  point.setLat(pos.getLat());
   point.setGroup(core->getConfigStore()->getStringValue("Navigation","selectedAddressPointGroup",__FILE__,__LINE__));
   core->getNavigationEngine()->addAddressPoint(point);
-  setTargetAtGeographicCoordinate(pos->getLng(),pos->getLat(),false);
-  core->getMapEngine()->unlockMapPos();
+  setTargetAtGeographicCoordinate(pos.getLng(),pos.getLat(),false);
 }
 
 // Makes the target invisible

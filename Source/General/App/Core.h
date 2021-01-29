@@ -479,7 +479,9 @@ extern Core *core;
 #include <WidgetStatus.h>
 #include <WidgetAddressPoint.h>
 #include <WidgetCursorInfo.h>
+#include <WidgetContainer.h>
 #include <WidgetPage.h>
+#include <WidgetFingerMenu.h>
 #include <WidgetPosition.h>
 #include <WidgetConfig.h>
 #include <GraphicEngine.h>

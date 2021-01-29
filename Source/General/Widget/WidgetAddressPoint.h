@@ -59,7 +59,7 @@ protected:
 public:
 
   // Constructor
-  WidgetAddressPoint(WidgetPage *widgetPage);
+  WidgetAddressPoint(WidgetContainer *widgetContainer);
 
   // Destructor
   virtual ~WidgetAddressPoint();

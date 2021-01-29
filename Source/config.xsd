@@ -515,6 +515,65 @@
                         <xsd:documentation>Time duration in microseconds of the translate animation if a widget is outside the screen.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>                    
+                    <xsd:element name="maxPathDistance" type="xsd:double" default="0.07">
+                      <xsd:annotation>
+                        <xsd:documentation>Distance in inches on the screen a nearby path can be away max to show it to the user.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="FingerMenu">
+                      <xsd:annotation>
+                        <xsd:documentation>Color of the accuracy circle background around the location indicator.</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="enable" type="xsd:boolean" default="1" gd:upgrade="restore">
+                            <xsd:annotation>
+                              <xsd:documentation>Indicates if finger menu is enabled.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="radiusCircle" type="xsd:double" default="0.5">
+                            <xsd:annotation>
+                              <xsd:documentation>Radius in inch of the buttons around the finger in the circle.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="distanceRow" type="xsd:double" default="0.4">
+                            <xsd:annotation>
+                              <xsd:documentation>Distance in inch between the buttons in the row.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="angleOffset" type="xsd:double" default="45">
+                            <xsd:annotation>
+                              <xsd:documentation>Angle in degree to start placing widgets from the south of the menu.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="rowOffsetY" type="xsd:double" default="-0.94">
+                            <xsd:annotation>
+                              <xsd:documentation>Vertical offset of the button row.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="cursorInfoClosedOffsetY" type="xsd:double" default="-0.2">
+                            <xsd:annotation>
+                              <xsd:documentation>Vertical offset of the cursor info if finger menu is closed.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="cursorInfoOpenedOffsetY" type="xsd:double" default="-0.67">
+                            <xsd:annotation>
+                              <xsd:documentation>Vertical offset of the cursor info if finger menu is opened.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="animationDuration" type="xsd:integer" default="250000">
+                            <xsd:annotation>
+                              <xsd:documentation>Time in microseconds that a finger menu change animation lasts.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="closeTimeout" type="xsd:integer" default="10000000">
+                            <xsd:annotation>
+                              <xsd:documentation>Timeout in microseconds after the finger menu closes if not touched.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>                          
                     <xsd:element name="Device" maxOccurs="unbounded">
                       <xsd:annotation>
                         <xsd:documentation>Collection of pages that are displayed on the given device.</xsd:documentation>
@@ -823,6 +882,16 @@
                                       <xsd:element name="labelWidth" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Width of the text in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="width" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the widget in inches.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="height" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Height of the widget in inches.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
                                       <xsd:element name="textRowFirstOffsetY" type="xsd:double" default="0" minOccurs="0">

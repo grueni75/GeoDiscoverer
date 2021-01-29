@@ -35,8 +35,8 @@ void *widgetPathInfoThread(void *args) {
 }
 
 // Constructor
-WidgetPathInfo::WidgetPathInfo(WidgetPage *widgetPage) :
-  WidgetPrimitive(widgetPage),
+WidgetPathInfo::WidgetPathInfo(WidgetContainer *widgetContainer) :
+  WidgetPrimitive(widgetContainer),
   locationIcon(screen),
   navigationPointIcon(screen)
 {
@@ -102,35 +102,35 @@ WidgetPathInfo::~WidgetPathInfo() {
   core->getThread()->destroySignal(updateVisualizationSignal);
   core->getThread()->destroyMutex(visualizationMutex);
   core->getThread()->destroyMutex(widgetPathInfoThreadWorkingMutex);
-  widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
-  if (pathNameFontString) widgetPage->getFontEngine()->destroyString(pathNameFontString);
-  if (pathLengthFontString) widgetPage->getFontEngine()->destroyString(pathLengthFontString);
-  if (pathAltitudeUpFontString) widgetPage->getFontEngine()->destroyString(pathAltitudeUpFontString);
-  if (pathAltitudeDownFontString) widgetPage->getFontEngine()->destroyString(pathAltitudeDownFontString);
-  if (pathDurationFontString) widgetPage->getFontEngine()->destroyString(pathDurationFontString);
-  widgetPage->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
+  if (pathNameFontString) widgetContainer->getFontEngine()->destroyString(pathNameFontString);
+  if (pathLengthFontString) widgetContainer->getFontEngine()->destroyString(pathLengthFontString);
+  if (pathAltitudeUpFontString) widgetContainer->getFontEngine()->destroyString(pathAltitudeUpFontString);
+  if (pathAltitudeDownFontString) widgetContainer->getFontEngine()->destroyString(pathAltitudeDownFontString);
+  if (pathDurationFontString) widgetContainer->getFontEngine()->destroyString(pathDurationFontString);
+  widgetContainer->getFontEngine()->unlockFont();
   if (altitudeProfileFillPointBuffer) delete altitudeProfileFillPointBuffer;
   if (altitudeProfileLinePointBuffer) delete altitudeProfileLinePointBuffer;
   if (altitudeProfileAxisPointBuffer) delete altitudeProfileAxisPointBuffer;
   if (altitudeProfileNavigationPoints) delete altitudeProfileNavigationPoints;
-  widgetPage->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
+  widgetContainer->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
   if (altitudeProfileXTickFontStrings) {
     for (Int i=0;i<altitudeProfileXTickCount;i++)
-      if (altitudeProfileXTickFontStrings[i]) widgetPage->getFontEngine()->destroyString(altitudeProfileXTickFontStrings[i]);
+      if (altitudeProfileXTickFontStrings[i]) widgetContainer->getFontEngine()->destroyString(altitudeProfileXTickFontStrings[i]);
     free(altitudeProfileXTickFontStrings);
   }
   if (altitudeProfileYTickFontStrings) {
     for (Int i=0;i<altitudeProfileYTickCount;i++)
-      if (altitudeProfileYTickFontStrings[i]) widgetPage->getFontEngine()->destroyString(altitudeProfileYTickFontStrings[i]);
+      if (altitudeProfileYTickFontStrings[i]) widgetContainer->getFontEngine()->destroyString(altitudeProfileYTickFontStrings[i]);
     free(altitudeProfileYTickFontStrings);
   }
-  widgetPage->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetPathInfo::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
   Int textX, textY;
   std::list<std::string> status;
 
@@ -367,8 +367,7 @@ void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
   //PROFILE_START;
 
   // Visualize the nearest path if it has changed  PROFILE_END;
-
-  NavigationPath* nearestPath = widgetPage->getWidgetEngine()->getNearestPath();
+  NavigationPath* nearestPath = widgetContainer->getWidgetEngine()->getNearestPath(NULL,NULL);
   if ((nearestPath)&&(nearestPath!=currentPath)) {
 
     // Remember the selected path
@@ -377,7 +376,7 @@ void WidgetPathInfo::onMapChange(bool widgetVisible, MapPosition pos) {
     resetPathVisibility(widgetVisible);
     //PROFILE_ADD("reset path visibility");
     if (widgetVisible) {
-      widgetPage->getWidgetEngine()->setWidgetsActive(true);
+      widgetContainer->getWidgetEngine()->setWidgetsActive(true);
     }
     //PROFILE_ADD("set widgets active");
 

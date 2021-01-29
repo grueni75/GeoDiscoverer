@@ -88,6 +88,16 @@ $(OBJDIR)/%.o: $(ROOT)/%.cpp $(HEADERS)
 	@-mkdir -p `dirname $@`
 	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) $< -o $@
 
+# Compile rules based on header dependencies
+
+#depend: .depend
+
+#.depend: $(PLATFORM_SRCS) $(GENERAL_SRCS)
+#	rm -f ./.depend
+#	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -MM $^ -MF  ./.depend;
+
+#include .depend
+
 # The main program:
 
 $(PRGNAME): $(OBJS)

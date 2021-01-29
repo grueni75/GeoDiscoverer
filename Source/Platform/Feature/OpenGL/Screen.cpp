@@ -63,6 +63,9 @@ void keyboardFunc(GLubyte key, GLint x, GLint y)
   case 's':
     GEODISCOVERER::core->getCommander()->execute("rotate(+1)");
     break;
+  case 'f':
+    GEODISCOVERER::core->getCommander()->execute("toggleFingerMenu()");
+    break;
   case 'q':
     glutLeaveMainLoop();
     break;
@@ -168,6 +171,7 @@ Screen::Screen(Device *device) {
   this->orientation=GraphicScreenOrientationProtrait;
   this->wakeLock=core->getConfigStore()->getIntValue("General","wakeLock",__FILE__, __LINE__);
   this->ellipseCoordinatesBuffer=bufferNotDefined;
+  this->halfEllipseCoordinatesBuffer=bufferNotDefined;
   this->separateFramebuffer=(device!=core->getDefaultDevice());
   this->testTextureInfo=getTextureNotDefined();
   framebuffer=0;
@@ -496,7 +500,7 @@ void Screen::drawEllipse(bool filled) {
       return;
     }
     Int index=0;
-    for(double t = 0; t <= 2*M_PI; t += 2*M_PI/ellipseSegments) {
+    for(double t = 0; t <= 2*M_PI; t += 2*M_PI/(ellipseSegments-1)) {
       ellipseSegmentPoints[index++]=cos(t);
       ellipseSegmentPoints[index++]=sin(t);
     }
@@ -513,6 +517,44 @@ void Screen::drawEllipse(bool filled) {
     glDrawArrays(GL_TRIANGLE_FAN,0,ellipseSegments);
   } else {
     glDrawArrays(GL_LINE_LOOP,0,ellipseSegments);
+  }
+  glUniform1i(textureEnabledHandle,1);
+  glEnableVertexAttribArray(textureCoordinateInHandle);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+// Draws a half ellipse
+void Screen::drawHalfEllipse(bool filled) {
+
+  // Points prepared?
+  if (halfEllipseCoordinatesBuffer==bufferNotDefined) {
+
+    // No, create them
+    halfEllipseCoordinatesBuffer=createBufferInfo();
+    float *ellipseSegmentPoints=NULL;
+    if (!(ellipseSegmentPoints=(float*)malloc(2*sizeof(*ellipseSegmentPoints)*ellipseSegments/2))) {
+      FATAL("can not create ellipse segment points array",NULL);
+      return;
+    }
+    Int index=0;
+    for(double t = 0; t <= M_PI; t += M_PI/(ellipseSegments/2-1)) {
+      ellipseSegmentPoints[index++]=cos(t);
+      ellipseSegmentPoints[index++]=sin(t);
+      //DEBUG("t=%f index=%d size=%d",FloatingPoint::rad2degree(t),index*sizeof(*ellipseSegmentPoints),sizeof(*ellipseSegmentPoints)*ellipseSegments);
+    }
+    setArrayBufferData(halfEllipseCoordinatesBuffer,(Byte*)ellipseSegmentPoints,sizeof(*ellipseSegmentPoints)*ellipseSegments);
+    free(ellipseSegmentPoints);
+  }
+
+  // Draw the ellipse
+  glDisableVertexAttribArray(textureCoordinateInHandle);
+  glUniform1i(textureEnabledHandle,0);
+  glBindBuffer(GL_ARRAY_BUFFER, halfEllipseCoordinatesBuffer);
+  glVertexAttribPointer(positionInHandle, 2, GL_FLOAT, false, 0, 0);
+  if (filled) {
+    glDrawArrays(GL_TRIANGLE_FAN,0,ellipseSegments/2);
+  } else {
+    glDrawArrays(GL_LINE_LOOP,0,ellipseSegments/2);
   }
   glUniform1i(textureEnabledHandle,1);
   glEnableVertexAttribArray(textureCoordinateInHandle);
@@ -868,6 +910,10 @@ void Screen::destroyGraphic() {
   if (ellipseCoordinatesBuffer!=bufferNotDefined) {
     destroyBufferInfo(ellipseCoordinatesBuffer);
     ellipseCoordinatesBuffer=bufferNotDefined;
+  }
+  if (halfEllipseCoordinatesBuffer!=bufferNotDefined) {
+    destroyBufferInfo(halfEllipseCoordinatesBuffer);
+    halfEllipseCoordinatesBuffer=bufferNotDefined;
   }
   if (testTextureInfo!=getTextureNotDefined())
     destroyTextureInfo(testTextureInfo,"Screen::destroyGraphic");

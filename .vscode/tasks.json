@@ -38,6 +38,18 @@
             "dependsOn": [
                 "build"
             ]
-       }
-    ]
+       },
+       {
+        "label": "clean+run",
+        "type": "shell",
+        "command": "rm config.xml && ./GeoDiscoverer",
+        "problemMatcher": [],
+        "options": {
+            "cwd": "${workspaceFolder}/Source/Platform/Target/Linux"
+        },
+        "dependsOn": [
+            "build"
+        ]
+   }
+]
 }

@@ -26,15 +26,15 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetEBike::WidgetEBike(WidgetPage *widgetPage) : 
-  WidgetPrimitive(widgetPage),
-  batteryLevelBackground(widgetPage->getScreen()),
-  batteryLevelForeground(widgetPage->getScreen())
+WidgetEBike::WidgetEBike(WidgetContainer *widgetContainer) : 
+  WidgetPrimitive(widgetContainer),
+  batteryLevelBackground(widgetContainer->getScreen()),
+  batteryLevelForeground(widgetContainer->getScreen())
 {
   powerLevelFontString=NULL;
   engineTemperatureFontString=NULL;
   distanceElectricFontString=NULL;
-  core->getConfigStore()->setIntValue("EBikeMonitor","connected",0,__FILE__,__LINE__);
+  core->getConfigStore()->setIntValue("EBikeMonitor","connected",1,__FILE__,__LINE__);
   /*core->getConfigStore()->setStringValue("EBikeMonitor","powerLevel","5",__FILE__,__LINE__);
   core->getConfigStore()->setStringValue("EBikeMonitor","batteryLevel","70",__FILE__,__LINE__);
   core->getConfigStore()->setStringValue("EBikeMonitor","engineTemperature","10",__FILE__,__LINE__);
@@ -46,19 +46,19 @@ WidgetEBike::WidgetEBike(WidgetPage *widgetPage) :
 
 // Destructor
 WidgetEBike::~WidgetEBike() {
-  widgetPage->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
-  if (distanceElectricFontString) widgetPage->getFontEngine()->destroyString(distanceElectricFontString);
-  if (engineTemperatureFontString) widgetPage->getFontEngine()->destroyString(engineTemperatureFontString);
-  widgetPage->getFontEngine()->unlockFont();
-  widgetPage->getFontEngine()->lockFont("sansLarge",__FILE__, __LINE__);
-  if (powerLevelFontString) widgetPage->getFontEngine()->destroyString(powerLevelFontString);
-  widgetPage->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
+  if (distanceElectricFontString) widgetContainer->getFontEngine()->destroyString(distanceElectricFontString);
+  if (engineTemperatureFontString) widgetContainer->getFontEngine()->destroyString(engineTemperatureFontString);
+  widgetContainer->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->lockFont("sansLarge",__FILE__, __LINE__);
+  if (powerLevelFontString) widgetContainer->getFontEngine()->destroyString(powerLevelFontString);
+  widgetContainer->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetEBike::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
   ConfigStore *configStore=core->getConfigStore();
   std::string value;
   std::string unit;
@@ -76,21 +76,18 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
     //DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
     
     // Update the widget visibility
+    if (firstRun) {
+      color.setAlpha(0);
+      firstRun=false;
+    }
     if (connected!=prevConnected) {
       GraphicColor targetColor=getActiveColor();
       if (!connected) {
-        setIsHidden(true);
         targetColor.setAlpha(0);
       } else {
-        setIsHidden(false);        
+        setIsHidden(false);                
       }
-      setFadeAnimation(t,getColor(),targetColor,false,widgetPage->getGraphicEngine()->getFadeDuration());
-    }
-    if (firstRun) {
-      setIsHidden(true);
-      //targetColor.setAlpha(0);
-      //setColor(targetColor);
-      firstRun=false;
+      setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getFadeDuration());
     }
   
     // Update the content
@@ -167,9 +164,11 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
       batteryLevelForeground.setIconHeight(batteryLevelForeground.getHeight());      
       changed |= batteryLevelForeground.work(t);
       
-    } else {
-      setIsHidden(true);
     }
+
+    // Disable widget if not visible anymore
+    if ((getColor().getAlpha()==0)&&(!getIsHidden()))
+      setIsHidden(true);
 
     // Update the flags
     changed=true;
@@ -183,7 +182,8 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
 
 // Executed every time the graphic engine needs to draw
 void WidgetEBike::draw(TimestampInMicroseconds t) {
-
+  
+  // Do not draw if primitive is hidden
   if (getIsHidden())
     return;
   

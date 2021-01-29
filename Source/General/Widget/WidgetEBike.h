@@ -84,7 +84,7 @@ protected:
 public:
 
   // Constructor
-  WidgetEBike(WidgetPage *widgetPage);
+  WidgetEBike(WidgetContainer *widgetContainer);
 
   // Destructor
   virtual ~WidgetEBike();

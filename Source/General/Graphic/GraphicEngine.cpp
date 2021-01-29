@@ -141,6 +141,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
   bool isDefaultScreen = core->getDefaultScreen() == screen;
   double scale,backScale;
   GraphicObject *widgetGraphicObject = device->getVisibleWidgetPages();
+  GraphicObject *widgetFingerMenu = device->getFingerMenu();
 
   /* Activate the screen
   screen->startScene();
@@ -303,6 +304,10 @@ bool GraphicEngine::draw(bool forceRedraw) {
   // Let the widget primitives work
   if ((widgetGraphicObject)&&(widgetGraphicObject->work(currentTime))) {
     //DEBUG("requesting scene redraw due to widget page work result",NULL);
+    redrawScene=true;
+  }
+  if ((widgetFingerMenu)&&(widgetFingerMenu->work(currentTime))) {
+    //DEBUG("requesting scene redraw due to widget finger menu work result",NULL);
     redrawScene=true;
   }
   device->getWidgetEngine()->work(currentTime);
@@ -690,6 +695,16 @@ bool GraphicEngine::draw(bool forceRedraw) {
     }
     //PROFILE_ADD("widget drawing");
 
+    // Draw the finger menu
+    if (widgetFingerMenu) {
+      std::list<GraphicPrimitive*> *fingerMenuDrawList=widgetFingerMenu->getDrawList();
+      for(std::list<GraphicPrimitive *>::const_iterator i=fingerMenuDrawList->begin(); i != fingerMenuDrawList->end(); i++) {
+        WidgetPrimitive *widget;
+        widget=(WidgetPrimitive*)*i;
+        widget->draw(currentTime);
+      }
+    }
+
     // Finish the drawing
     screen->endScene();
 
@@ -697,8 +712,6 @@ bool GraphicEngine::draw(bool forceRedraw) {
     if (!isDefaultScreen) {
       result = screen->createScreenShot();
     }
-
-
   }
 
   // Remember the last position

@@ -26,19 +26,12 @@
 
 namespace GEODISCOVERER {
 
-class WidgetPage {
+class WidgetPage: public GEODISCOVERER::WidgetContainer {
 
 protected:
 
-  WidgetEngine *widgetEngine;                           // Widget engine this page belongs to
-  std::string name;                                     // Name of the page
-  GraphicObject graphicObject;                          // Contains the widgets of this page
-  bool widgetsActive;                                   // Indicates if the widgets are active
-  bool touchStartedOutside;                             // Indicates that the widgets were not touched directly at the beginning
-  bool firstTouch;                                      // Indicates that no touch was done before
-  WidgetPrimitive *selectedWidget;                      // The currently selected widget
-  TimestampInMicroseconds touchEndTime;                 // Last time no widget was touched
-  bool lastTouchStartedOutside;                         // Indicates if the last touch was not hitting any widgets
+  std::string name;    
+  bool widgetsActive;                                   // Indicates if the widgets are active                                 // Name of the page
   TimestampInMicroseconds hiddenAnimationDuration;      // Time duration in microseconds of the translate animation if a widget is outside the screen
 
 public:
@@ -47,63 +40,23 @@ public:
   WidgetPage(WidgetEngine *widgetEngine, std::string name);
   virtual ~WidgetPage();
 
-  // Adds a widget to the page
-  void addWidget(WidgetPrimitive *primitive);
-
-  // Removes all widgets
-  void deinit(bool deleteWidgets=true);
-
-  // Called when the screen is touched
-  bool onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff);
-
   // Called when the widget is touched
-  bool onTouchDown(TimestampInMicroseconds t, Int x, Int y);
-
-  // Called when the widget is not touched anymore
-  void onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel);
-
-  // Called when the map has changed
-  void onMapChange(bool pageVisible, MapPosition pos);
-
-  // Called when the location has changed
-  void onLocationChange(bool pageVisible, MapPosition pos);
-
-  // Called when a path has changed
-  void onPathChange(bool pageVisible, NavigationPath *path, NavigationPathChangeType changeType);
-
-  // Called when some data has changed
-  void onDataChange();
+  virtual bool onTouchDown(TimestampInMicroseconds t, Int x, Int y);
 
   // Let the page work
   bool work(TimestampInMicroseconds t);
-
-  // Deselects currently selected widget
-  void deselectWidget(TimestampInMicroseconds t);
 
   // Sets the active state of the widgets
   void setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive);
 
   // Getters and setters
-  GraphicObject *getGraphicObject()
-  {
-      return &graphicObject;
-  }
   std::string getName() const
   {
       return name;
   }
-
   bool getWidgetsActive() const {
     return widgetsActive;
   }
-
-  FontEngine *getFontEngine();
-
-  WidgetEngine *getWidgetEngine();
-
-  GraphicEngine *getGraphicEngine();
-
-  Screen *getScreen();
 };
 
 }

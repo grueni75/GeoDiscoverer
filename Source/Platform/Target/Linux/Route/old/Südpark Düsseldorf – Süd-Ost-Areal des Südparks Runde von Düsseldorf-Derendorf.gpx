@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<gpx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd http://www.garmin.com/xmlschemas/WaypointExtension/v1 http://www.garmin.com/xmlschemas/WaypointExtensionv1.xsd http://www.qlandkarte.org/xmlschemas/v1.1 http://www.qlandkarte.org/xmlschemas/v1.1/ql-extensions.xsd http://www.cluetrust.com/XML/GPXDATA/1/0 http://www.cluetrust.com/Schemas/gpxdata10.xsd" xmlns:tp1="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" creator="QMapShack 1.15.0 http://www.qlandkarte.org/" xmlns:gpxdata="http://www.cluetrust.com/XML/GPXDATA/1/0" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:wptx1="http://www.garmin.com/xmlschemas/WaypointExtension/v1" xmlns:rmc="urn:net:trekbuddy:1.0:nmea:rmc" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" version="1.1" xmlns:ql="http://www.qlandkarte.org/xmlschemas/v1.1">
+ <metadata>
+  <name>Südpark Düsseldorf – Süd-Ost-Areal des Südparks Runde von Düsseldorf-Derendorf</name>
+  <author>
+   <name>Südpark Düsseldorf – Süd-Ost-Areal des Südparks Runde von Düsseldorf-Derendorf</name>
+   <link href="https://www.komoot.de">
+    <text>komoot</text>
+    <type>text/html</type>
+   </link>
+  </author>
+  <time>2021-01-27T06:42:30.487Z</time>
+ </metadata>
+ <trk>
+  <name>Südpark Düsseldorf – Süd-Ost-Areal des Südparks Runde von Düsseldorf-Derendorf (692 - 1086) (0 - 7)</name>
+  <extensions>
+   <ql:key>d27d8d187a6190d6208d75a71150a0c9</ql:key>
+   <ql:flags>1</ql:flags>
+   <gpxx:TrackExtension>
+    <gpxx:DisplayColor>DarkBlue</gpxx:DisplayColor>
+   </gpxx:TrackExtension>
+  </extensions>
+  <trkseg>
+   <trkpt lon="6.78126000" lat="51.20372000">
+    <ele>41</ele>
+    <time>2021-01-16T07:35:51.985Z</time>
+    <extensions>
+     <ql:flags>16</ql:flags>
+     <ql:activity>0</ql:activity>
+    </extensions>
+   </trkpt>
+   <trkpt lon="6.78122500" lat="51.20378200">
+    <ele>41</ele>
+    <time>2021-01-16T07:35:53.969Z</time>
+    <extensions>
+     <ql:flags>0</ql:flags>
+     <ql:activity>0</ql:activity>
+    </extensions>
+   </trkpt>
+   <trkpt lon="6.78046000" lat="51.20412400">
+    <ele>41</ele>
+    <time>2021-01-16T07:36:10.368Z</time>
+    <extensions>
+     <ql:flags>0</ql:flags>
+     <ql:activity>0</ql:activity>
+    </extensions>
+   </trkpt>
+   <trkpt lon="6.78045800" lat="51.20416300">
+    <ele>41</ele>
+    <time>2021-01-16T07:36:11.342Z</time>
+    <extensions>
+     <ql:flags>0</ql:flags>
+     <ql:activity>0</ql:activity>
+    </extensions>
+   </trkpt>
+   <trkpt lon="6.78048000" lat="51.20422900">
+    <ele>42</ele>
+    <time>2021-01-16T07:36:12.975Z</time>
+    <extensions>
+     <ql:flags>0</ql:flags>
+     <ql:activity>0</ql:activity>
+    </extensions>
+   </trkpt>
+   <trkpt lon="6.78048900" lat="51.20428300">
+    <ele>42</ele>
+    <time>2021-01-16T07:36:14.310Z</time>
+    <extensions>
+     <ql:flags>0</ql:flags>
+     <ql:activity>0</ql:activity>
+    </extensions>
+   </trkpt>
+   <trkpt lon="6.78049000" lat="51.20433300">
+    <ele>42</ele>
+    <time>2021-01-16T07:36:15.503Z</time>
+    <extensions>
+     <ql:flags>0</ql:flags>
+     <ql:activity>0</ql:activity>
+    </extensions>
+   </trkpt>
+   <trkpt lon="6.78048900" lat="51.20433600">
+    <ele>42</ele>
+    <time>2021-01-16T07:36:15.568Z</time>
+    <extensions>
+     <ql:flags>16</ql:flags>
+     <ql:activity>0</ql:activity>
+    </extensions>
+   </trkpt>
+  </trkseg>
+ </trk>
+ <extensions>
+  <ql:key>6cf128581300a76740194a75a8646841</ql:key>
+  <ql:sortingRoadbook>0</ql:sortingRoadbook>
+  <ql:sortingFolder>0</ql:sortingFolder>
+  <ql:correlation>1</ql:correlation>
+  <ql:invalidDataOk>0</ql:invalidDataOk>
+ </extensions>
+</gpx>

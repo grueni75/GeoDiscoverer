@@ -28,21 +28,21 @@ namespace GEODISCOVERER {
 // Constructor
 WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     WidgetPrimitive(widgetPage),
-    turnArrowPointBuffer(widgetPage->getScreen(),24),
-    directionIcon(widgetPage->getScreen()),
-    targetIcon(widgetPage->getScreen()),
-    navigationPointIcon(widgetPage->getScreen()),
-    arrowIcon(widgetPage->getScreen()),
-    separatorIcon(widgetPage->getScreen()),
-    blindIcon(widgetPage->getScreen()),
-    statusIcon(widgetPage->getScreen()),
-    batteryIconCharging(widgetPage->getScreen()),
-    batteryIconEmpty(widgetPage->getScreen()),
-    batteryIconFull(widgetPage->getScreen()),
-    targetObject(widgetPage->getScreen()),
-    navigationPointObject(widgetPage->getScreen()),
-    compassObject(widgetPage->getScreen()),
-    clockCircularStrip(widgetPage->getScreen()),  
+    turnArrowPointBuffer(widgetContainer->getScreen(),24),
+    directionIcon(widgetContainer->getScreen()),
+    targetIcon(widgetContainer->getScreen()),
+    navigationPointIcon(widgetContainer->getScreen()),
+    arrowIcon(widgetContainer->getScreen()),
+    separatorIcon(widgetContainer->getScreen()),
+    blindIcon(widgetContainer->getScreen()),
+    statusIcon(widgetContainer->getScreen()),
+    batteryIconCharging(widgetContainer->getScreen()),
+    batteryIconEmpty(widgetContainer->getScreen()),
+    batteryIconFull(widgetContainer->getScreen()),
+    targetObject(widgetContainer->getScreen()),
+    navigationPointObject(widgetContainer->getScreen()),
+    compassObject(widgetContainer->getScreen()),
+    clockCircularStrip(widgetContainer->getScreen()),  
     busyColor(),
     normalColor()
 {
@@ -68,8 +68,8 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   statusTextAbove=false;
   orientationLabelRadius=0;
   batteryIconRadius=0;
-  isWatch=widgetPage->getWidgetEngine()->getDevice()->getIsWatch();
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  isWatch=widgetContainer->getWidgetEngine()->getDevice()->getIsWatch();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
   if (!isWatch) {
     fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
     fontEngine->updateString(&durationLabelFontString,"Duration");
@@ -135,7 +135,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
 
 // Destructor
 WidgetNavigation::~WidgetNavigation() {
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
   if (textColumnCount==2)
     fontEngine->lockFont("sansBoldSmall",__FILE__, __LINE__);
   else
@@ -187,7 +187,7 @@ WidgetNavigation::~WidgetNavigation() {
 bool WidgetNavigation::work(TimestampInMicroseconds t) {
 
   bool update;
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
   NavigationEngine *navigationEngine=core->getNavigationEngine();
   UnitConverter *unitConverter=core->getUnitConverter();
   std::string value, unit;
@@ -197,7 +197,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   bool changed=WidgetPrimitive::work(t);
 
   // If the widgets are not active anymore, reset the first touch indicator
-  if (!widgetPage->getWidgetsActive()) {
+  if (!((WidgetPage*)widgetContainer)->getWidgetsActive()) {
     firstTouchAfterInactive=true;
   }
 
@@ -211,7 +211,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       activeColor=normalColor;
       inactiveColor=inactiveColorBackup;
     }
-    setFadeAnimation(t,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
+    setFadeAnimation(t,getColor(),getActiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
     remoteServerActive=core->getRemoteServerActive();
     //DEBUG("remoteServerActive=%d",remoteServerActive);
   }
@@ -220,7 +220,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   if ((isWatch)&&(circularStrip[0]==NULL)) {
     double offset=-statusTextAngleOffset;
     for (int i=0;i<4;i++) {
-      circularStrip[i]=new GraphicCircularStrip(widgetPage->getScreen());
+      circularStrip[i]=new GraphicCircularStrip(widgetContainer->getScreen());
       if (!circularStrip[i]) {
         FATAL("can not create graphic circular strip object",NULL);
         return false;
@@ -538,7 +538,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       if (navigationInfo->getLocationBearing()==NavigationInfo::getUnknownAngle()) {
         hideCompass=true;
       } else {
-        if (widgetPage->getWidgetEngine()->getDevice()->isAnimationFriendly()) {
+        if (widgetContainer->getWidgetEngine()->getDevice()->isAnimationFriendly()) {
           GraphicRotateAnimationParameter rotateParameter;
           rotateParameter.setStartTime(t);
           rotateParameter.setStartAngle(compassObject.getAngle());
@@ -560,7 +560,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       if (navigationInfo->getTargetBearing()==NavigationInfo::getUnknownAngle()) {
         hideTarget=true;
       } else {
-        if (widgetPage->getWidgetEngine()->getDevice()->isAnimationFriendly()) {
+        if (widgetContainer->getWidgetEngine()->getDevice()->isAnimationFriendly()) {
           GraphicRotateAnimationParameter rotateParameter;
           rotateParameter.setStartTime(t);
           rotateParameter.setStartAngle(targetObject.getAngle());
@@ -571,7 +571,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
           std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = targetObject.getRotateAnimationSequence();
           rotateAnimationSequence.push_back(rotateParameter);
           targetObject.setRotateAnimationSequence(rotateAnimationSequence);
-          DEBUG("target: angle start=%f angle end=%f",targetObject.getAngle(),navigationInfo->getTargetBearing());
         } else {
           targetObject.setAngle(navigationInfo->getTargetBearing());
         }
@@ -583,7 +582,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       if (navigationInfo->getNearestNavigationPointBearing()==NavigationInfo::getUnknownAngle()) {
         hideNavigationPoint=true;
       } else {
-        if (widgetPage->getWidgetEngine()->getDevice()->isAnimationFriendly()) {
+        if (widgetContainer->getWidgetEngine()->getDevice()->isAnimationFriendly()) {
           GraphicRotateAnimationParameter rotateParameter;
           rotateParameter.setStartTime(t);
           rotateParameter.setStartAngle(navigationPointObject.getAngle());
@@ -623,12 +622,12 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     }
 
     // Activate widget if not already
-    if (!widgetPage->getWidgetEngine()->getWidgetsActive()) {
+    if (!widgetContainer->getWidgetEngine()->getWidgetsActive()) {
       if (activateWidget!=active) {
         if (activateWidget) {
-          setFadeAnimation(t,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,getColor(),getActiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
         } else {
-          setFadeAnimation(t,getColor(),getInactiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,getColor(),getInactiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
         }
         active=activateWidget;
       }
@@ -999,12 +998,12 @@ void WidgetNavigation::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool c
         // Deactivate swipe if north button is hit
         if (northButtonHit) {
           core->getCommander()->dispatch("deactivateSwipes()");
-          widgetPage->setWidgetsActive(t,false);
+          ((WidgetPage*)widgetContainer)->setWidgetsActive(t,false);
         } else {
 
           // Deactivate widgets after second touch up
           if (!firstTouchAfterInactive) {
-            widgetPage->setWidgetsActive(t,false);
+            ((WidgetPage*)widgetContainer)->setWidgetsActive(t,false);
           } else {
             firstTouchAfterInactive=false;
           }

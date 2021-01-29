@@ -1002,4 +1002,54 @@ void MapEngine::setZoomLevel(Int zoomLevel) {
   setForceMapRecreation();
 }
 
+// Convert the distance in meters to pixels for the given map state
+bool MapEngine::calculateDistanceInScreenPixels(MapPosition src, MapPosition dst, double &distance) {  
+  GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
+  double zoom=visPos->getZoom();
+  core->getDefaultGraphicEngine()->unlockPos();
+  MapPosition pos=*(core->getMapEngine()->lockMapPos(__FILE__, __LINE__));
+  core->getMapEngine()->unlockMapPos();
+  MapCalibrator *calibrator=NULL;
+  bool result=false;
+  if ((pos.getLngScale()>0)&&(pos.getMapTile())&&(pos.getMapTile()->getParentMapContainer())&&((calibrator=pos.getMapTile()->getParentMapContainer()->getMapCalibrator())!=NULL)) {    
+    calibrator->setPictureCoordinates(src);
+    calibrator->setPictureCoordinates(dst);
+    Int xDist=dst.getX()-src.getX();
+    Int yDist=dst.getY()-src.getY();
+    distance=sqrt(xDist*xDist+yDist*yDist)*zoom;
+    //DEBUG("src=(%f,%f) dst=(%f,%f) xDist=%d yDist=%d zoom=%f distance=%f",src.getLat(),src.getLng(),dst.getLat(),dst.getLng(),xDist,yDist,zoom,distance);
+    result=true;
+  }
+  return result;
+}
+
+// Convert the distance in pixels to max possible meters for the given map state
+bool MapEngine::calculateMaxDistanceInMeters(Int distanceInPixels, double &distanceInMeters) {  
+  GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
+  double zoom=visPos->getZoom();
+  core->getDefaultGraphicEngine()->unlockPos();
+  MapPosition pos=*(core->getMapEngine()->lockMapPos(__FILE__, __LINE__));
+  core->getMapEngine()->unlockMapPos();
+  MapCalibrator *calibrator=NULL;
+  bool result=false;
+  if ((pos.getLngScale()>0)&&(pos.getMapTile())&&(pos.getMapTile()->getParentMapContainer())&&((calibrator=pos.getMapTile()->getParentMapContainer()->getMapCalibrator())!=NULL)) {    
+    //DEBUG("distanceInPixels=%d zoom=%f",distanceInPixels,zoom);
+    double t=((double)distanceInPixels)/zoom;
+    distanceInPixels=round(t);
+    //DEBUG("distanceInPixels=%d",distanceInPixels);
+    MapPosition src;
+    src.setX(0);
+    src.setY(0);
+    MapPosition dst;
+    dst.setX(distanceInPixels);
+    dst.setY(distanceInPixels);
+    calibrator->setGeographicCoordinates(src);
+    calibrator->setGeographicCoordinates(dst);
+    distanceInMeters=src.computeDistance(dst);
+    //DEBUG("distanceInMeters=%f",distanceInMeters);
+    result=true;
+  }
+  return result;
+}
+
 }

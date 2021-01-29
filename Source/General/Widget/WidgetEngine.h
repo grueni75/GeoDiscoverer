@@ -37,6 +37,7 @@ protected:
   Device *device;                                       // Device that shall be used for this widget engine
   WidgetPageMap pageMap;                                // Holds all available widget pages
   WidgetPage *currentPage;                              // The currently selected page
+  WidgetFingerMenu *fingerMenu;                         // Contains the widgets that appear in the finger menu
   GraphicColor selectedWidgetColor;                     // Color of selected widgets
   TimestampInMicroseconds buttonRepeatDelay;            // Time to wait before dispatching repeating commands
   TimestampInMicroseconds buttonLongPressDelay;         // Time to wait before dispatching long press command
@@ -44,7 +45,7 @@ protected:
   TimestampInMicroseconds firstStableTouchDownTime;     // Time of the first touch down
   Int lastTouchDownX, lastTouchDownY;                   // Coordinates of the last touch down
   bool isTouched;                                       // Indicates that the screen is currently touched
-  bool contextMenuIsShown;                              // Indicates that the context menu is currently shown
+  bool touchOpenedFingerMenu;                           // Indicates that the finger menu was opened during this touch down event
   TimestampInMicroseconds contextMenuDelay;             // Time that must passed before the context menu is displayed
   Int contextMenuAllowedPixelJitter;                    // Allowed pixel jitter when checking if a context menu shall be displayed
   GraphicObject visiblePages;                           // The currently visible pages
@@ -54,6 +55,9 @@ protected:
   TimestampInMicroseconds widgetsActiveTimeout;         // Time to show the widgets after last interaction
   NavigationPath *nearestPath;                          // Path that is currently the nearest to the map center
   Int nearestPathIndex;                                 // Index of the nearest point on the nearest path
+  MapPosition nearestPathMapPos;                        // Position of the nearest point on the nearest path
+  bool enableFingerMenu;                                // Indicates if finger menu is enabled
+  Int maxPathDistance;                                  // Maximum distance in pixels to a path to show it to the user
 
   // Adds a widget to a page
   void addWidgetToPage(WidgetConfig config);
@@ -109,6 +113,15 @@ public:
   // Shows the context menu
   void showContextMenu();
 
+  // Opens the finger menu
+  void openFingerMenu();
+
+  // Closes the finger menu
+  void closeFingerMenu();
+
+  // Closes or opens the finger menu
+  void toggleFingerMenu();
+
   // Sets the target at an address
   void setTargetAtAddress();
 
@@ -147,12 +160,18 @@ public:
     return widgetsActiveTimeout;
   }
 
-  NavigationPath* getNearestPath() const {
+  NavigationPath* getNearestPath(Int *index,MapPosition *mapPos) const {
+    NavigationPath *nearestPath;
+    core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+    nearestPath=this->nearestPath;
+    if (index) *index=this->nearestPathIndex;
+    if (mapPos) *mapPos=this->nearestPathMapPos;
+    core->getThread()->unlockMutex(accessMutex);
     return nearestPath;
   }
 
-  Int getNearestPathIndex() const {
-    return nearestPathIndex;
+  bool getFingerMenuEnabled() const {
+    return enableFingerMenu;
   }
 
   FontEngine *getFontEngine();

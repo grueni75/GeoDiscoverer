@@ -26,9 +26,9 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetPrimitive::WidgetPrimitive(WidgetPage *widgetPage) : GraphicRectangle(widgetPage->getScreen()) {
+WidgetPrimitive::WidgetPrimitive(WidgetContainer *widgetContainer) : GraphicRectangle(widgetContainer->getScreen()) {
   type=GraphicTypeWidget;
-  this->widgetPage=widgetPage;
+  this->widgetContainer=widgetContainer;
   widgetType=WidgetTypePrimitive;
   isHit=false;
   isSelected=false;
@@ -108,6 +108,32 @@ void WidgetPrimitive::updatePosition(Int x, Int y, Int z) {
   setX(x);
   setY(y);
   setZ(z);
+}
+
+// Called when the rectangle must be drawn
+void WidgetPrimitive::draw(TimestampInMicroseconds t) {
+
+  // Do not draw if primitive is hidden
+  if (getIsHidden())
+    return;
+
+  // Don't draw if scale factor is 0
+  if (scale==0)
+    return;
+
+  // Set color
+  screen->setColor(getColor().getRed(),getColor().getGreen(),getColor().getBlue(),getColor().getAlpha());
+
+  // Draw widget
+  screen->startObject();
+  screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,0);
+  screen->scale(scale,scale,1.0);
+  Int x1=-getIconWidth()/2;
+  Int y1=-getIconHeight()/2;
+  Int x2=x1+getWidth();
+  Int y2=y1+getHeight();
+  screen->drawRectangle(x1,y1,x2,y2,getTexture(),getFilled());
+  screen->endObject();
 }
 
 }

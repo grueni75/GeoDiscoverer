@@ -489,6 +489,18 @@ std::string Commander::execute(std::string cmd) {
     core->getDefaultWidgetEngine()->showContextMenu();
     cmdExecuted=true;
   }
+  if (cmdName=="openFingerMenu") {
+    core->getDefaultWidgetEngine()->openFingerMenu();
+    cmdExecuted=true;
+  }
+  if (cmdName=="closeFingerMenu") {
+    core->getDefaultWidgetEngine()->closeFingerMenu();
+    cmdExecuted=true;
+  }
+  if (cmdName=="toggleFingerMenu") {
+    core->getDefaultWidgetEngine()->toggleFingerMenu();
+    cmdExecuted=true;
+  }
   if (cmdName=="setTargetAtAddress") {
     core->getDefaultWidgetEngine()->setTargetAtAddress();
     cmdExecuted=true;
@@ -510,8 +522,8 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setPathStartFlag") {
-    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath();
-    Int nearestPathIndex = core->getDefaultWidgetEngine()->getNearestPathIndex();
+    Int nearestPathIndex;
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(&nearestPathIndex,NULL);
     if (nearestPath==NULL) {
       WARNING("cannot set start flag: no path near to the current map center found",NULL);
     } else {
@@ -520,8 +532,8 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setPathEndFlag") {
-    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath();
-    Int nearestPathIndex = core->getDefaultWidgetEngine()->getNearestPathIndex();
+    Int nearestPathIndex;
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(&nearestPathIndex,NULL);
     if (nearestPath==NULL) {
       WARNING("cannot set end flag: no path near to the current map center found",NULL);
     } else {
@@ -530,7 +542,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setActiveRoute") {
-    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath();
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(NULL,NULL);
     if (nearestPath==NULL) {
       WARNING("no path near to the current map center found: disabling active route",NULL);
     }

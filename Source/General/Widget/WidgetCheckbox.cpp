@@ -25,7 +25,7 @@
 
 namespace GEODISCOVERER {
 
-WidgetCheckbox::WidgetCheckbox(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
+WidgetCheckbox::WidgetCheckbox(WidgetContainer *widgetContainer) : WidgetPrimitive(widgetContainer) {
   widgetType=WidgetTypeCheckbox;
   checkedTexture=Screen::getTextureNotDefined();
   uncheckedTexture=Screen::getTextureNotDefined();

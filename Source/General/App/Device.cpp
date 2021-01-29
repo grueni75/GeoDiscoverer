@@ -40,6 +40,7 @@ Device::Device(std::string name, bool whiteBackround, bool animationFriendly) {
   this->graphicEngine=NULL;
   this->socketTimeout=core->getConfigStore()->getIntValue("Cockpit/App/Dashboard","socketTimeout",__FILE__,__LINE__);
   visibleWidgetPages=NULL;
+  fingerMenu=NULL;
   width=0;
   height=0;
   port=0;

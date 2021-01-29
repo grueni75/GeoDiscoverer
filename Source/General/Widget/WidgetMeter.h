@@ -67,7 +67,7 @@ protected:
 public:
 
   // Constructor
-  WidgetMeter(WidgetPage *widgetPage);
+  WidgetMeter(WidgetContainer *widgetContainer);
 
   // Destructor
   virtual ~WidgetMeter();

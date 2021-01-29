@@ -46,7 +46,7 @@ protected:
 public:
 
   // Constructor
-  WidgetCheckbox(WidgetPage *widgetPage);
+  WidgetCheckbox(WidgetContainer *widgetContainer);
 
   // Destructor
   virtual ~WidgetCheckbox();

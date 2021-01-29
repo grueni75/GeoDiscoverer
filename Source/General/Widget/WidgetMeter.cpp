@@ -26,7 +26,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetMeter::WidgetMeter(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
+WidgetMeter::WidgetMeter(WidgetContainer *widgetContainer) : WidgetPrimitive(widgetContainer) {
   widgetType=WidgetTypeMeter;
   valueFontString=NULL;
   unitFontString=NULL;
@@ -39,21 +39,21 @@ WidgetMeter::WidgetMeter(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
 
 // Destructor
 WidgetMeter::~WidgetMeter() {
-  widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
-  if (unitFontString) widgetPage->getFontEngine()->destroyString(unitFontString);
-  widgetPage->getFontEngine()->unlockFont();
-  widgetPage->getFontEngine()->lockFont("sansBoldNormal",__FILE__, __LINE__);
-  if (labelFontString) widgetPage->getFontEngine()->destroyString(labelFontString);
-  widgetPage->getFontEngine()->unlockFont();
-  widgetPage->getFontEngine()->lockFont("sansLarge",__FILE__, __LINE__);
-  if (valueFontString) widgetPage->getFontEngine()->destroyString(valueFontString);
-  widgetPage->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
+  if (unitFontString) widgetContainer->getFontEngine()->destroyString(unitFontString);
+  widgetContainer->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->lockFont("sansBoldNormal",__FILE__, __LINE__);
+  if (labelFontString) widgetContainer->getFontEngine()->destroyString(labelFontString);
+  widgetContainer->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->lockFont("sansLarge",__FILE__, __LINE__);
+  if (valueFontString) widgetContainer->getFontEngine()->destroyString(valueFontString);
+  widgetContainer->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetMeter::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
   std::string value;
   std::string unit;
   bool update;
@@ -158,7 +158,7 @@ void WidgetMeter::draw(TimestampInMicroseconds t) {
 // Sets the type of meter
 void WidgetMeter::setMeterType(WidgetMeterType meterType)
 {
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
 
   // Set the type
   this->meterType=meterType;

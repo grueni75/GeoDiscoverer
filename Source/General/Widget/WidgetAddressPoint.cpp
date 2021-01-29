@@ -26,7 +26,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetAddressPoint::WidgetAddressPoint(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
+WidgetAddressPoint::WidgetAddressPoint(WidgetContainer *widgetContainer) : WidgetPrimitive(widgetContainer) {
   widgetType=WidgetTypeAddressPoint;
   statusFontString=NULL;
   nextUpdateTime=0;
@@ -34,21 +34,26 @@ WidgetAddressPoint::WidgetAddressPoint(WidgetPage *widgetPage) : WidgetPrimitive
   firstRun=true;
   lastClockUpdate=0;
   active=false;
-  hideIfNoAddressPointNear=(widgetPage->getWidgetEngine()->getDevice()->getName()=="Default");
-  setIsHidden(hideIfNoAddressPointNear);
+  hideIfNoAddressPointNear=(widgetContainer->getWidgetEngine()->getDevice()->getName()=="Default");
+  if (hideIfNoAddressPointNear) {
+    GraphicColor c=color;
+    c.setAlpha(0);
+    setColor(c);
+    setIsHidden(true);
+  }
 }
 
 // Destructor
 WidgetAddressPoint::~WidgetAddressPoint() {
-  widgetPage->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
-  if (statusFontString) widgetPage->getFontEngine()->destroyString(statusFontString);
-  widgetPage->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
+  if (statusFontString) widgetContainer->getFontEngine()->destroyString(statusFontString);
+  widgetContainer->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
   std::string value;
   std::string unit;
   bool update;
@@ -95,15 +100,17 @@ bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
     }
 
     // Activate widget if not already
-    if ((hideIfNoAddressPointNear)||(!widgetPage->getWidgetEngine()->getWidgetsActive())) {
+    if ((hideIfNoAddressPointNear)||(!widgetContainer->getWidgetEngine()->getWidgetsActive())) {
       //DEBUG("activateWidget=%d active=%d",activateWidget,active);
       if (activateWidget!=active) {
         if (activateWidget) {
           //DEBUG("activating widget",NULL);
-          setFadeAnimation(updateTimestamp,getColor(),getActiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
+          setIsHidden(false);
+          setFadeAnimation(updateTimestamp,getColor(),getActiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
         } else {
           //DEBUG("de-activating widget",NULL);
-          setFadeAnimation(updateTimestamp,getColor(),getInactiveColor(),false,widgetPage->getGraphicEngine()->getFadeDuration());
+          setIsHidden(true);
+          setFadeAnimation(updateTimestamp,getColor(),getInactiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
         }
         active=activateWidget;
       }

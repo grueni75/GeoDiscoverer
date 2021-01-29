@@ -353,24 +353,43 @@ void MapPosition::invalidate() {
 }
 
 // Compute the normal distance from the locationPos to the vector spanned from the prevPos and this pos
-double MapPosition::computeNormalDistance(MapPosition prevPos, MapPosition locationPos, bool insideOnly, bool debugMsgs) {
+double MapPosition::computeNormalDistance(MapPosition prevPos, MapPosition locationPos, double overlapInMeters, bool insideOnly, bool debugMsgs, MapPosition *normalPos) {
   double distance = std::numeric_limits<double>::max();
   if (*this!=NavigationPath::getPathInterruptedPos()) {
     if (prevPos!=NavigationPath::getPathInterruptedPos()) {
-      double a = prevPos.computeDistance(*this);
+      MapPosition pos=*this;
+      /*if (overlapInMeters>0) {
+        //DEBUG("before: prevPos=\"N%f E%f\" pos=\"N%f E%f\"",prevPos.getLat(),prevPos.getLng(),pos.getLat(),pos.getLng());
+        double bearing=pos.computeBearing(prevPos);
+        double distance=prevPos.computeDistance(pos);
+        prevPos=pos.computeTarget(bearing,distance+overlapInMeters);
+        pos=prevPos.computeTarget(bearing-180,distance+2*overlapInMeters);
+        //DEBUG("after: prevPos=\"N%f E%f\" pos=\"N%f E%f\"",prevPos.getLat(),prevPos.getLng(),pos.getLat(),pos.getLng());
+      }*/
+      double a = prevPos.computeDistance(pos);
       double b = locationPos.computeDistance(prevPos);
-      double c = locationPos.computeDistance(*this);
+      double c = locationPos.computeDistance(pos);
       if ((a!=0.0)&&(b!=0.0)&&(c!=0.0)) {
         double t = 2*a*c;
         t = (a*a+c*c-b*b)/t;
-        double alpha = acos(t);
+        double alpha;
+        if (t>=1) 
+          alpha=0;
+        else
+          alpha=acos(t);
         distance = sin(alpha)*c;
         t = 2*a*b;
         t = (a*a+b*b-c*c)/t;
-        double beta = acos(t);
+        double beta;
+        if (t>=1) 
+          beta=0;
+        else
+          beta=acos(t);
         if (debugMsgs)
-          DEBUG("a=%.2f b=%.2f c=%.2f alpha=%e beta=%e distance=%.2f",a,b,c,alpha,beta,distance);
+          DEBUG("a=%.2f b=%.2f c=%.2f alpha=%f beta=%f distance=%.2f",a,b,c,FloatingPoint::rad2degree(alpha),FloatingPoint::rad2degree(beta),distance);
         if (insideOnly) {
+
+          // Check if the normal lies around the line
           if (fabs(alpha)>M_PI_2) {
             //DEBUG("alpha=%f",alpha);
             distance=std::numeric_limits<double>::max();
@@ -379,7 +398,43 @@ double MapPosition::computeNormalDistance(MapPosition prevPos, MapPosition locat
             //DEBUG("beta=%f",beta);
             distance=std::numeric_limits<double>::max();
           }
-        }
+
+          // In case an overlap is given and the normal is not inside the line
+          // check if the end points are within the overlap
+          bool normalPosSet=false;
+          if (overlapInMeters>0) {
+            if (distance==std::numeric_limits<double>::max()) {
+              double t=prevPos.computeDistance(locationPos);
+              distance=pos.computeDistance(locationPos);
+              if (t<distance) {
+                distance=t;
+                if (normalPos) *normalPos=prevPos;              
+              } else {
+                if (normalPos) *normalPos=pos;
+              }
+              normalPosSet=true;
+            }
+            if (distance>overlapInMeters) 
+              distance=std::numeric_limits<double>::max();
+          }
+
+          // Now compute the normal pos (only if not yet set from previous step)
+          if ((distance!=std::numeric_limits<double>::max())&&(normalPos!=NULL)&&(!normalPosSet)) {
+            double normalBearing, locationBearing;
+            double bearingDiff=prevPos.computeBearing(pos)-prevPos.computeBearing(locationPos);
+            //DEBUG("pathBearing=%f locationBearing=%f bearingDiff=%f",prevPos.computeBearing(pos),prevPos.computeBearing(locationPos),bearingDiff);
+            if (bearingDiff>180) bearingDiff=bearingDiff-360;
+            if (bearingDiff<-180) bearingDiff=bearingDiff+360;
+            locationBearing=locationPos.computeBearing(pos);
+            if (bearingDiff>=0)
+              normalBearing=locationBearing+FloatingPoint::rad2degree(M_PI_2-alpha);
+            else
+              normalBearing=locationBearing-FloatingPoint::rad2degree(M_PI_2-alpha);
+            //DEBUG("a=%.2f b=%.2f c=%.2f alpha=%f beta=%f distance=%.2f",a,b,c,FloatingPoint::rad2degree(alpha),FloatingPoint::rad2degree(beta),distance);
+            //DEBUG("bearingDiff=%f bearingToPathPoint=%f alpha=%f beta=%f bearing=%f distance=%f",bearingDiff,locationBearing,FloatingPoint::rad2degree(alpha),FloatingPoint::rad2degree(beta),normalBearing,distance);
+            *normalPos=locationPos.computeTarget(normalBearing,distance);
+          }
+        }        
       }
     }
   }

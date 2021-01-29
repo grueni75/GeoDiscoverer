@@ -99,7 +99,7 @@ public:
   void lockMutex(ThreadMutexInfo *mutex, const char *file, int line, bool debugMsgs=false);
 
   // Unlocks a mutex
-  void unlockMutex(ThreadMutexInfo *mutex);
+  void unlockMutex(ThreadMutexInfo *mutex, bool debugMsgs=false);
 
   // Creates a signal (if oneTimeOnly is set to true, signal can only be issued one time)
   // Please note that if oneTimeOnly is false, the created signal can only be consumed by one thread only

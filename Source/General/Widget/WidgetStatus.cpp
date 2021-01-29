@@ -25,7 +25,7 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetStatus::WidgetStatus(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage) {
+WidgetStatus::WidgetStatus(WidgetContainer *widgetContainer) : WidgetPrimitive(widgetContainer) {
   widgetType=WidgetTypeStatus;
   updateInterval=100000;
   labelWidth=0;
@@ -37,16 +37,16 @@ WidgetStatus::WidgetStatus(WidgetPage *widgetPage) : WidgetPrimitive(widgetPage)
 
 // Destructor
 WidgetStatus::~WidgetStatus() {
-  widgetPage->getFontEngine()->lockFont("sansSmall",__FILE__, __LINE__);
-  if (firstStatusFontString) widgetPage->getFontEngine()->destroyString(firstStatusFontString);
-  if (secondStatusFontString) widgetPage->getFontEngine()->destroyString(secondStatusFontString);
-  widgetPage->getFontEngine()->unlockFont();
+  widgetContainer->getFontEngine()->lockFont("sansSmall",__FILE__, __LINE__);
+  if (firstStatusFontString) widgetContainer->getFontEngine()->destroyString(firstStatusFontString);
+  if (secondStatusFontString) widgetContainer->getFontEngine()->destroyString(secondStatusFontString);
+  widgetContainer->getFontEngine()->unlockFont();
 }
 
 // Executed every time the graphic engine checks if drawing is required
 bool WidgetStatus::work(TimestampInMicroseconds t) {
 
-  FontEngine *fontEngine=widgetPage->getFontEngine();
+  FontEngine *fontEngine=widgetContainer->getFontEngine();
   Int textX, textY;
   std::list<std::string> status;
 
@@ -62,8 +62,15 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
     // Then check if the map source is doing something
     if (status.size()==0)
       status=core->getMapSource()->getStatus(__FILE__, __LINE__);
-
-    // Only display if a status is given
+    
+    /* Debug
+    if (status.size()==0)
+    {
+      status.push_back("Test 1");
+      status.push_back("Test 2");
+    }*/
+    
+    // Only display if a status is given    
     if (status.size()!=0) {
 
       // Compute the graphical representation of the status
@@ -78,30 +85,34 @@ bool WidgetStatus::work(TimestampInMicroseconds t) {
       textX=x+(iconWidth/2)-(secondStatusFontString->getIconWidth())/2;
       secondStatusFontString->setX(textX);
       secondStatusFontString->setY(textY);
-      widgetPage->getFontEngine()->unlockFont();
+      widgetContainer->getFontEngine()->unlockFont();
 
       // Start fade animation if the status was not displayed before
       if ((color.getAlpha()==0)&&(fadeStartTime==fadeEndTime)) {
-        if (widgetPage->getWidgetEngine()->getWidgetsActive())
-          setFadeAnimation(t,color,this->activeColor,false,widgetPage->getGraphicEngine()->getFadeDuration());
+        if (widgetContainer->getWidgetEngine()->getWidgetsActive())
+          setFadeAnimation(t,color,this->activeColor,false,widgetContainer->getGraphicEngine()->getFadeDuration());
         else
-          setFadeAnimation(t,color,this->inactiveColor,false,widgetPage->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,color,this->inactiveColor,false,widgetContainer->getGraphicEngine()->getFadeDuration());
       }
-      isHidden=false;
 
     } else {
 
       // Start fade animation if the status was not displayed before
       if ((color.getAlpha()!=0)&&(fadeStartTime==fadeEndTime)) {
-        setFadeAnimation(t,color,GraphicColor(255,255,255,0),false,widgetPage->getGraphicEngine()->getFadeDuration());
+        setFadeAnimation(t,color,GraphicColor(255,255,255,0),false,widgetContainer->getGraphicEngine()->getFadeDuration());
       }
-      isHidden=true;
     }
 
     // Set the next update time
     nextUpdateTime=t+updateInterval;
 
   }
+
+  // Hide the widget if not visible anymore
+  if (color.getAlpha()==0)
+    isHidden=true;
+  else
+    isHidden=false;
 
   // Return result
   return changed;

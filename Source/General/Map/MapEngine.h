@@ -101,6 +101,12 @@ public:
   // Saves the current position
   void backup();
 
+  // Convert the distance in meters to pixels for the given map state
+  bool calculateDistanceInScreenPixels(MapPosition src, MapPosition dst, double &distance);
+
+  // Convert the distance in pixels to max possible meters for the given map state
+  bool calculateMaxDistanceInMeters(Int distanceInPixels, double &distanceInMeters);
+
   // Getters and setters
   bool getUpdateInProgress() const
   {

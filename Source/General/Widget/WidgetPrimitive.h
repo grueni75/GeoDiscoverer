@@ -28,24 +28,25 @@ namespace GEODISCOVERER {
 
 typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale, WidgetTypeStatus, WidgetTypeCursorInfo, WidgetTypeNavigation, WidgetTypePathInfo, WidgetTypeAddressPoint, WidgetTypeEBike} WidgetType;
 
+class WidgetContainer;
 class WidgetPage;
 
 class WidgetPrimitive : public GraphicRectangle {
 
 protected:
 
-  WidgetType widgetType;        // Type of widget
-  WidgetPage *widgetPage;       // Parent widget page
-  GraphicColor activeColor;     // Color if the widget is active
-  GraphicColor inactiveColor;   // Color if the widget is inactive
-  bool isFirstTimeSelected;     // Indicates that the widget has just been selected
-  bool isHit;                   // Indicates that the widget is hit by the pointer
-  bool isSelected;              // Indicates that the widget is selected
-  bool isHidden;                // Indicates that the widget shall not be activated
-  Int xHidden;                  // X coordinate when widget is outside screen
-  Int yHidden;                  // Y coordinate when widget is outside screen
-  Int xOriginal;                // Original x coordinate of the widget when it was on screen
-  Int yOriginal;                // Original y coordinate of the widget when it was on screen
+  WidgetType widgetType;              // Type of widget
+  WidgetContainer *widgetContainer;   // Parent widget page
+  GraphicColor activeColor;           // Color if the widget is active
+  GraphicColor inactiveColor;         // Color if the widget is inactive
+  bool isFirstTimeSelected;           // Indicates that the widget has just been selected
+  bool isHit;                         // Indicates that the widget is hit by the pointer
+  bool isSelected;                    // Indicates that the widget is selected
+  bool isHidden;                      // Indicates that the widget shall not be activated
+  Int xHidden;                        // X coordinate when widget is outside screen
+  Int yHidden;                        // Y coordinate when widget is outside screen
+  Int xOriginal;                      // Original x coordinate of the widget when it was on screen
+  Int yOriginal;                      // Original y coordinate of the widget when it was on screen
 
   // Updates various flags
   virtual void updateFlags(Int x, Int y);
@@ -53,7 +54,7 @@ protected:
 public:
 
   // Constructors and destructor
-  WidgetPrimitive(WidgetPage *widgetPage);
+  WidgetPrimitive(WidgetContainer *widgetContainer);
   virtual ~WidgetPrimitive();
 
   // Called when a two fingure gesture is done on the widget
@@ -79,6 +80,9 @@ public:
 
   // Called when the widget has changed his position
   virtual void updatePosition(Int x, Int y, Int z);
+
+  // Called when the widget must be drawn
+  virtual void draw(TimestampInMicroseconds t);
 
   // Getters and setters
   bool getIsHit() const

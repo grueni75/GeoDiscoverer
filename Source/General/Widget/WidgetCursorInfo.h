@@ -27,9 +27,6 @@ namespace GEODISCOVERER {
 
 class WidgetCursorInfo: public GEODISCOVERER::WidgetPrimitive {
 
-  // Width of the info label
-  Int labelWidth;
-
   // Current info string
   std::string info;
 
@@ -41,7 +38,19 @@ class WidgetCursorInfo: public GEODISCOVERER::WidgetPrimitive {
 
   // Request to update the info
   bool updateInfo;
+
+  // Indicates if the widget is permanent visible
+  bool permanentVisible;
+
+  // Maximum distance in pixels to a path to show it in the info string
+  Int maxPathDistance;
   
+  // Indicates if a path is nearby
+  bool pathNearby;
+
+  // Number of characters to keep at the end of the info string
+  int infoKeepEndCharCount;
+
   // Graphical representation of the info string
   FontString *infoFontString;
 
@@ -51,7 +60,7 @@ class WidgetCursorInfo: public GEODISCOVERER::WidgetPrimitive {
 public:
 
   // Constructors and destructor
-  WidgetCursorInfo(WidgetPage *widgetPage);
+  WidgetCursorInfo(WidgetContainer *widgetContainer);
   virtual ~WidgetCursorInfo();
 
   // Let the widget work
@@ -69,9 +78,12 @@ public:
   // Called when some data has changed
   virtual void onDataChange();
 
+  // Changes the state of the widget
+  void changeState(Int y, bool permanentVisible, TimestampInMicroseconds animationDuration);
+
   // Getters and setters
-  void setLabelWidth(Int labelWidth) {
-    this->labelWidth = labelWidth;
+  bool getPathNearby() {
+      return pathNearby;
   }
 };
 

@@ -74,6 +74,9 @@ protected:
   // Holds the coordinates for drawing the ellipse
   GraphicBufferInfo ellipseCoordinatesBuffer;
 
+  // Holds the coordinates for drawing the half ellipse
+  GraphicBufferInfo halfEllipseCoordinatesBuffer;
+
   // List of cached texture infos
   std::list<TextureDebugInfo> unusedTextureInfos;
 
@@ -231,6 +234,9 @@ public:
 
   // Draws a ellipse
   void drawEllipse(bool filled);
+
+  // Draws an half ellipse
+  void drawHalfEllipse(bool filled);
 
   // Finished the drawing of the scene
   void endScene();

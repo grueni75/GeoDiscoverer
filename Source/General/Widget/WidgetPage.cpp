@@ -26,31 +26,17 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetPage::WidgetPage(WidgetEngine *widgetEngine, std::string name) : graphicObject(widgetEngine->getScreen()){
+WidgetPage::WidgetPage(WidgetEngine *widgetEngine, std::string name) : 
+  WidgetContainer(widgetEngine)
+{
   this->name=name;
   widgetsActive=false;
-  touchStartedOutside=false;
-  firstTouch=true;
-  selectedWidget=NULL;
-  touchEndTime=0;
-  lastTouchStartedOutside=true;
-  this->widgetEngine=widgetEngine;
   hiddenAnimationDuration=core->getConfigStore()->getIntValue("Graphic/Widget","hiddenAnimationDuration",__FILE__, __LINE__);
 }
 
 // Destructor
 WidgetPage::~WidgetPage() {
   deinit();
-}
-
-// Removes all widgets
-void WidgetPage::deinit(bool deleteWidgets) {
-  graphicObject.deinit(deleteWidgets);
-}
-
-// Adds a widget to the page
-void WidgetPage::addWidget(WidgetPrimitive *primitive) {
-  graphicObject.addPrimitive(primitive);
 }
 
 // Sets the active state of the widgets
@@ -97,144 +83,19 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
   }
 }
 
-// Called when a two finger gesture is done on the page
-bool WidgetPage::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff) {
-
-  // Two the two fingure gesture on the selected widget
-  if (selectedWidget) {
-    selectedWidget->onTwoFingerGesture(t,dX,dY,angleDiff,scaleDiff);
-    return true;
-  } else {
-    return false;
-  }
-}
-
 // Called when the page is touched
 bool WidgetPage::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
-  // Skip the check if it started outside
-  touchEndTime=t;
-  if (touchStartedOutside)
+  // Call the inhertied function
+  if (!WidgetContainer::onTouchDown(t,x,y))
     return false;
-
-  // Check all widgets
-  WidgetPrimitive *previousSelectedWidget=selectedWidget;
-  selectedWidget=NULL;
-  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
-  for(std::list<GraphicPrimitive*>::reverse_iterator i = drawList->rbegin(); i!=drawList->rend(); i++) {
-    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-    primitive->onTouchDown(t,x,y);
-    if (primitive->getIsSelected()) {
-      selectedWidget=primitive;
-      break;
-    }
-  }
-  if (previousSelectedWidget!=selectedWidget) {
-    if (previousSelectedWidget) {
-      widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      previousSelectedWidget->setFadeAnimation(t,previousSelectedWidget->getColor(),previousSelectedWidget->getActiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
-      widgetEngine->getGraphicEngine()->unlockDrawing();
-    }
-    if (selectedWidget) {
-      widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),getWidgetEngine()->getSelectedWidgetColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
-      widgetEngine->getGraphicEngine()->unlockDrawing();
-    }
-  }
-
-  // If this is the first touch and no widget was hit, do not activate any widgets later
-  // This allows smooth scrolling of the map
-  if ((firstTouch)&&(!selectedWidget)) {
-    //setWidgetsActive(t,false);
-    touchStartedOutside=true;
-    lastTouchStartedOutside=true;
-    return false;
-  } else {
-    lastTouchStartedOutside=false;
-  }
 
   // Do the fade in animation
   if ((selectedWidget)&&(!widgetsActive)) {
     setWidgetsActive(t,true);
   }
 
-  // Next touch is not the first one
-  firstTouch=false;
-
   return true;
-}
-
-// Called when the page is not touched anymore
-void WidgetPage::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
-
-  // Check all widgets
-  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
-  if (!touchStartedOutside) {
-    for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
-      WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-      primitive->onTouchUp(t,x,y,cancel);
-    }
-  }
-  deselectWidget(t);
-  touchEndTime=t;
-}
-
-// Called when the map has changed
-void WidgetPage::onMapChange(bool pageVisible, MapPosition pos) {
-
-  // Check all widgets
-  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
-  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
-    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-    primitive->onMapChange(pageVisible, pos);
-  }
-}
-
-// Called when the location has changed
-void WidgetPage::onLocationChange(bool pageVisible, MapPosition pos) {
-
-  // Check all widgets
-  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
-  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
-    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-    primitive->onLocationChange(pageVisible, pos);
-  }
-}
-
-// Called when a path has changed
-void WidgetPage::onPathChange(bool pageVisible, NavigationPath *path, NavigationPathChangeType changeType) {
-
-  // Check all widgets
-  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
-  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
-    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-    primitive->onPathChange(pageVisible, path, changeType);
-  }
-}
-
-// Called when some data has changed
-void WidgetPage::onDataChange() {
-
-  // Check all widgets
-  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
-  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
-    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
-    primitive->onDataChange();
-  }
-}
-
-// Deselects currently selected widget
-void WidgetPage::deselectWidget(TimestampInMicroseconds t) {
-  if (!touchStartedOutside) {
-    if (selectedWidget) {
-      widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),selectedWidget->getActiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
-      widgetEngine->getGraphicEngine()->unlockDrawing();
-    }
-    selectedWidget=NULL;
-  }
-  firstTouch=true;
-  touchStartedOutside=false;
 }
 
 // Let the page work
@@ -244,22 +105,6 @@ bool WidgetPage::work(TimestampInMicroseconds t) {
     return true;
   }
   return false;
-}
-
-FontEngine *WidgetPage::getFontEngine() {
-  return widgetEngine->getFontEngine();
-}
-
-WidgetEngine *WidgetPage::getWidgetEngine() {
-  return widgetEngine;
-}
-
-GraphicEngine *WidgetPage::getGraphicEngine() {
-  return widgetEngine->getGraphicEngine();
-}
-
-Screen *WidgetPage::getScreen() {
-  return widgetEngine->getScreen();
 }
 
 }

@@ -282,6 +282,7 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
       double factor=(double)elapsedTime/(double)scaleDuration;
       double scaleDiff=scaleEndFactor-scaleStartFactor;
       scale=scaleDiff*factor+scaleStartFactor;
+      //DEBUG("scaleDiff=%f factor=%f, scaleStartFactor=%f",scaleDiff,factor,scaleStartFactor);
     } else {
       scale=scaleEndFactor;
       scaleStartTime=scaleEndTime;

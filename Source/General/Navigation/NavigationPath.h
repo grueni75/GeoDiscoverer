@@ -176,6 +176,9 @@ public:
   // Sets the gpx file name of the path
   void setGpxFilename(std::string gpxFilename);
 
+  // Computes the distance from the start flag to the given point
+  double computeDistance(MapPosition pos, double overlapInMeters, MapPosition &selectedPos);
+
   // Getters and setters
   void setGpxFilefolder(std::string gpxFilefolder);
 

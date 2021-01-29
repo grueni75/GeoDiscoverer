@@ -650,7 +650,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
       // If the route point is around the nearest found point,
       // remember the one that is closest to the location bearing
-      double distance=(*iterator).computeNormalDistance(*prevIterator,locationPos,true);
+      double distance=(*iterator).computeNormalDistance(*prevIterator,locationPos,0,true);
       if (distance<minDistanceToBeOffRoute) {
         offRoute=false; // in case the nearest point is too far away due to route with minimized points
         double bearingDiff;
@@ -1290,6 +1290,40 @@ void NavigationPath::setGpxFilefolder(std::string gpxFilefolder) {
       return;
     }
   }
+}
+
+// Computes the distance from the start flag to the given point
+double NavigationPath::computeDistance(MapPosition targetPos, double overlapInMeters, MapPosition &selectedPos) {
+
+  // Find the nearest pos on the route to the given one
+  std::vector<MapPosition> points=getSelectedPoints();
+  double nearestDistance=std::numeric_limits<double>::max();
+  double selectedDistance=0;
+  double distance=0;
+  double bearing;
+  MapPosition pos;
+  MapPosition prevPathPos=NavigationPath::getPathInterruptedPos();
+  for (int i=0; i<points.size(); i++) {
+    if ((prevPathPos!=NavigationPath::getPathInterruptedPos())&&(points[i]!=NavigationPath::getPathInterruptedPos())) {
+      distance+=prevPathPos.computeDistance(points[i]);
+      double d=points[i].computeDistance(targetPos);
+      if ((points[i].computeNormalDistance(prevPathPos,targetPos,overlapInMeters,true,false,&pos)!=std::numeric_limits<double>::max())) {
+        if (d<nearestDistance) {
+          //bearing=fabs(prevPathPos.computeBearing(points[i])-points[i].computeBearing(pos));
+          nearestDistance=d;          
+          /*if (bearing>90) 
+            selectedDistance=distance-points[i].computeDistance(pos);
+          else
+            selectedDistance=distance-points[i].computeDistance(pos);*/
+          selectedDistance=distance-points[i].computeDistance(targetPos);
+          selectedPos=pos;
+          //DEBUG("i=%d d=%f bearing=%f selectedDistance=%f",i,d,bearing,selectedDistance);
+        }
+      } 
+    }
+    prevPathPos=points[i];
+  }
+  return selectedDistance;
 }
 
 }
