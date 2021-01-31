@@ -23,6 +23,12 @@
 
 #include <Core.h>
 #include <limits>
+#include <NavigationPath.h>
+#include <MapArea.h>
+#include <NavigationEngine.h>
+#include <Commander.h>
+#include <NavigationPathSegment.h>
+#include <Storage.h>
 
 namespace GEODISCOVERER {
 

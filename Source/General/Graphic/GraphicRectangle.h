@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <GraphicPrimitive.h>
 
 #ifndef GRAPHICRECTANGLE_H_
 #define GRAPHICRECTANGLE_H_

@@ -24,6 +24,8 @@
 #include <GL/gl.h>
 #include <GL/glut.h>
 #include <Core.h>
+#include <Commander.h>
+#include <Screen.h>
 
 // Indicates if the main thread as exited
 bool mainThreadHasExited=false;

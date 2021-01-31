@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <GraphicAnimationParameter.h>
+
 #ifndef GRAPHICFADEANIMATIONPARAMETER_H_
 #define GRAPHICFADEANIMATIONPARAMETER_H_
 

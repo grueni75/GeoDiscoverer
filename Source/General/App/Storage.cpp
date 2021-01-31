@@ -20,8 +20,8 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <Storage.h>
 
 namespace GEODISCOVERER {
 

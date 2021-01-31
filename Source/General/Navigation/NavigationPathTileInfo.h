@@ -20,6 +20,10 @@
 //
 //============================================================================
 
+#include <GraphicLine.h>
+#include <GraphicPrimitive.h>
+#include <GraphicRectangleList.h>
+#include <GraphicObject.h>
 
 #ifndef NAVIGATIONPATHTILEINFO_H_
 #define NAVIGATIONPATHTILEINFO_H_

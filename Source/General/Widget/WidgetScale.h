@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <WidgetPrimitive.h>
+#include <FontString.h>
 
 #ifndef WIDGETSCALE_H_
 #define WIDGETSCALE_H_

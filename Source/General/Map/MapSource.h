@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <Dialog.h>
+#include <MapDownloader.h>
+#include <MapContainer.h>
 
 #ifndef MAPSOURCE_H_
 #define MAPSOURCE_H_

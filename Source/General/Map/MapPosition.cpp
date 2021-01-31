@@ -20,8 +20,10 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <MapPosition.h>
+#include <Storage.h>
+#include <NavigationPath.h>
 
 namespace GEODISCOVERER {
 

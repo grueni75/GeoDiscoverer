@@ -20,6 +20,10 @@
 //
 //============================================================================
 
+#include <GraphicColor.h>
+#include <ConfigSection.h>
+#include <Thread.h>
+
 #ifndef CONFIGSTORE_H_
 #define CONFIGSTORE_H_
 

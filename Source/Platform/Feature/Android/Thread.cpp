@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <Thread.h>
 
 // Sets the thread priority on the java side
 void GDApp_setThreadPriority(int priority);

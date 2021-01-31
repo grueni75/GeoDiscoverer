@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <WidgetPrimitive.h>
+#include <GraphicCircularStrip.h>
+#include <FontString.h>
 
 #ifndef WIDGETEBIKE_H_
 #define WIDGETEBIKE_H_

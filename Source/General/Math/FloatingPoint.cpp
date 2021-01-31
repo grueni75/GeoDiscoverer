@@ -20,8 +20,8 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <FloatingPoint.h>
 
 namespace GEODISCOVERER {
 

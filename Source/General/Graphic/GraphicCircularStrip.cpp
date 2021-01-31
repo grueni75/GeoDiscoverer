@@ -20,8 +20,9 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <GraphicCircularStrip.h>
+#include <FloatingPoint.h>
 
 namespace GEODISCOVERER {
 

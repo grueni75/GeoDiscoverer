@@ -20,6 +20,10 @@
 //
 //============================================================================
 
+#include <Image.h>
+#include <MapContainerTreeNode.h>
+#include <MapContainer.h>
+
 #ifndef MAPTILESERVER_H_
 #define MAPTILESERVER_H_
 

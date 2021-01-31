@@ -20,6 +20,13 @@
 //
 //============================================================================
 
+#include <MapPosition.h>
+#include <GraphicPrimitive.h>
+#include <GraphicObject.h>
+#include <NavigationPathVisualization.h>
+#include <MapContainer.h>
+#include <NavigationInfo.h>
+#include <GraphicEngine.h>
 
 #ifndef NAVIGATIONPATH_H_
 #define NAVIGATIONPATH_H_

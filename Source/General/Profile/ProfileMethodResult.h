@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <ProfileBlockResult.h>
 
 #ifndef PROFILEMETHODRESULT_H_
 #define PROFILEMETHODRESULT_H_

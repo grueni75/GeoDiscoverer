@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <FloatingPoint.h>
 
 #ifndef MAPPOSITION_H_
 #define MAPPOSITION_H_

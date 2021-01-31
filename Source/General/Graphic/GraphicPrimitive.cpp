@@ -20,8 +20,8 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <GraphicPrimitive.h>
 
 namespace GEODISCOVERER {
 

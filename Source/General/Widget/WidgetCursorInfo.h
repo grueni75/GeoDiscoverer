@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <FontString.h>
+#include <WidgetPrimitive.h>
+
 #ifndef WIDGETCURSORINFO_H_
 #define WIDGETCURSORINFO_H_
 

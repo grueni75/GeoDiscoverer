@@ -22,6 +22,7 @@
 
 
 #include <Core.h>
+#include <Clock.h>
 
 namespace GEODISCOVERER {
 

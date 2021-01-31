@@ -20,8 +20,13 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <MapCalibrator.h>
+#include <MapPosition.h>
+#include <Storage.h>
+#include <MapCalibratorLinear.h>
+#include <MapCalibratorProj4.h>
+#include <MapCalibratorSphericalNormalMercator.h>
 
 namespace GEODISCOVERER {
 

@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <Commander.h>
 
 namespace GEODISCOVERER {
 

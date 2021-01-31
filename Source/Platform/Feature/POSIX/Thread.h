@@ -24,6 +24,7 @@
 #define THREAD_H_
 
 #include <pthread.h>
+#include <Clock.h>
 
 namespace GEODISCOVERER {
 

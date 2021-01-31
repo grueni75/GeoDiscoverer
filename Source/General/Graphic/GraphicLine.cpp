@@ -20,8 +20,11 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <GraphicLine.h>
+#include <Screen.h>
+#include <GraphicPrimitive.h>
+#include <FloatingPoint.h>
 
 namespace GEODISCOVERER {
 

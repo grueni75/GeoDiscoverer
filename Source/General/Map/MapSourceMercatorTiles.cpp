@@ -18,9 +18,17 @@
 // You should have received a copy of the GNU General Public License
 // along with GeoDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
 //
-//============================getLayerGroupZoomLevelBounds================================================
+//============================================================================
 
 #include <Core.h>
+#include <MapSourceMercatorTiles.h>
+#include <MapPosition.h>
+#include <MapCache.h>
+#include <NavigationEngine.h>
+#include <MapEngine.h>
+#include <NavigationPath.h>
+#include <UnitConverter.h>
+#include <Commander.h>
 
 // Executes an command on the java side
 std::string GDApp_executeAppCommand(std::string command);

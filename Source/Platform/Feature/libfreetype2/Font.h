@@ -43,7 +43,10 @@
  * remains attached.
  */
 
-
+#include <FontCharacter.h>
+#include <FontString.h>
+#include <Screen.h>
+#include <FontCharacterPosition.h>
 
 #ifndef FONT_H_
 #define FONT_H_

@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <NavigationInfo.h>
 
 namespace GEODISCOVERER {
 

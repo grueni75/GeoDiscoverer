@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <WidgetPrimitive.h>
 
 #ifndef WIDGETBUTTON_H_
 #define WIDGETBUTTON_H_

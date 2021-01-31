@@ -20,6 +20,12 @@
 //
 //============================================================================
 
+#include <WidgetPrimitive.h>
+#include <GraphicObject.h>
+#include <FontString.h>
+#include <GraphicPointBuffer.h>
+#include <GraphicCircularStrip.h>
+#include <NavigationInfo.h>
 
 #ifndef WIDGETNAVIGATION_H_
 #define WIDGETNAVIGATION_H_

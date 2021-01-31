@@ -20,9 +20,9 @@
 //
 //============================================================================
 
-
 #include <Core.h>
 #include <openssl/md5.h>
+#include <Storage.h>
 
 namespace GEODISCOVERER {
 

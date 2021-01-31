@@ -20,8 +20,8 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <NavigationPathTileInfo.h>
 
 namespace GEODISCOVERER {
 

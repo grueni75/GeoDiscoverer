@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <NavigationPathVisualization.h>
+
 #ifndef NAVIGATIONPATHSEGMENT_H_
 #define NAVIGATIONPATHSEGMENT_H_
 

@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <ProfileMethodResult.h>
 
 #ifndef PROFILEENGINE_H_
 #define PROFILEENGINE_H_

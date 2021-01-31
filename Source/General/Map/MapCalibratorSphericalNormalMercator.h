@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <MapCalibrator.h>
+
 #ifndef MAPCALIBRATORSPHERICALNORMALMERCATOR_H_
 #define MAPCALIBRATORSPHERICALNORMALMERCATOR_H_
 

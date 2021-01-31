@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <GraphicTextureAnimationParameter.h>
 
 namespace GEODISCOVERER {
 

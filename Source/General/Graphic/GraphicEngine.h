@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <GraphicPosition.h>
+#include <GraphicRectangle.h>
+#include <GraphicObject.h>
 
 #ifndef GRAPHICENGINE_H_
 #define GRAPHICENGINE_H_

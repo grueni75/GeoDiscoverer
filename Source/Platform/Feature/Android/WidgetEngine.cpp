@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <WidgetEngine.h>
 
 // Executes an command on the java side
 std::string GDApp_executeAppCommand(std::string command);

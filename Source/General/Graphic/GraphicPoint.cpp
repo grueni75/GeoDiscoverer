@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <GraphicPoint.h>
 
 namespace GEODISCOVERER {
 

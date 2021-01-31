@@ -20,8 +20,8 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <GraphicPointBuffer.h>
 
 namespace GEODISCOVERER {
 

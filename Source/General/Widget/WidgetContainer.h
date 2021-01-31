@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <GraphicObject.h>
+#include <WidgetPrimitive.h>
 
 #ifndef WIDGETCONTAINER_H_
 #define WIDGETCONTAINER_H_

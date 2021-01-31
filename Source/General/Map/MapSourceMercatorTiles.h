@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <MapSource.h>
+
 #ifndef MAPSOURCEMERCATORTILES_H_
 #define MAPSOURCEMERCATORTILES_H_
 

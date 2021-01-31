@@ -66,9 +66,8 @@
 
 // Mandatory application includes for the core class
 #include <Types.h>
-#include <Clock.h>
-#include <Thread.h>
-#include <GraphicColor.h>
+#include <Debug.h>
+#include <ConfigStore.h>
 
 namespace GEODISCOVERER {
 
@@ -428,88 +427,5 @@ public:
 extern Core *core;
 
 }
-
-// Application includes
-#include <FloatingPoint.h>
-#include <Integer.h>
-#include <Debug.h>
-#include <ProfileBlockResult.h>
-#include <ProfileMethodResult.h>
-#include <ProfileEngine.h>
-#include <ConfigSection.h>
-#include <ConfigStore.h>
-#include <UnitConverter.h>
-#include <ZipArchive.h>
-#include <Image.h>
-#include <Storage.h>
-#include <Dialog.h>
-#include <Screen.h>
-#include <NavigationInfo.h>
-#include <GraphicPosition.h>
-#include <GraphicAnimationParameter.h>
-#include <GraphicScaleAnimationParameter.h>
-#include <GraphicTranslateAnimationParameter.h>
-#include <GraphicRotateAnimationParameter.h>
-#include <GraphicFadeAnimationParameter.h>
-#include <GraphicTextureAnimationParameter.h>
-#include <GraphicPrimitive.h>
-#include <GraphicPoint.h>
-#include <GraphicPointBuffer.h>
-#include <GraphicLine.h>
-#include <GraphicRectangle.h>
-#include <GraphicCircularStrip.h>
-#include <GraphicRectangleListSegment.h>
-#include <GraphicRectangleList.h>
-#include <GraphicObject.h>
-#include <FontCharacter.h>
-#include <FontCharacterPosition.h>
-#include <FontString.h>
-#include <Font.h>
-#include <FontEngine.h>
-#include <MapTile.h>
-#include <MapPosition.h>
-#include <WidgetPrimitive.h>
-#include <WidgetButton.h>
-#include <WidgetCheckbox.h>
-#include <WidgetMeter.h>
-#include <WidgetEBike.h>
-#include <WidgetScale.h>
-#include <WidgetNavigation.h>
-#include <WidgetPathInfo.h>
-#include <WidgetStatus.h>
-#include <WidgetAddressPoint.h>
-#include <WidgetCursorInfo.h>
-#include <WidgetContainer.h>
-#include <WidgetPage.h>
-#include <WidgetFingerMenu.h>
-#include <WidgetPosition.h>
-#include <WidgetConfig.h>
-#include <GraphicEngine.h>
-#include <WidgetEngine.h>
-#include <MapArea.h>
-#include <MapCalibrator.h>
-#include <MapCalibratorLinear.h>
-#include <MapCalibratorSphericalNormalMercator.h>
-#include <MapCalibratorProj4.h>
-#include <MapContainer.h>
-#include <MapContainerTreeNode.h>
-#include <MapCache.h>
-#include <MapEngine.h>
-#include <MapTileServer.h>
-#include <MapDownloader.h>
-#include <MapSource.h>
-#include <MapSourceEmpty.h>
-#include <MapSourceCalibratedPictures.h>
-#include <MapSourceMercatorTiles.h>
-#include <MapSourceRemote.h>
-#include <NavigationPathTileInfo.h>
-#include <NavigationPathVisualization.h>
-#include <NavigationPath.h>
-#include <NavigationPathSegment.h>
-#include <NavigationPoint.h>
-#include <NavigationPointVisualization.h>
-#include <NavigationEngine.h>
-#include <Commander.h>
-#include <Device.h>
 
 #endif /* MAIN_H_ */

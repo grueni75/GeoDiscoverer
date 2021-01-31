@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <ZipArchive.h>
 
 namespace GEODISCOVERER {
 

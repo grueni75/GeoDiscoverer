@@ -20,8 +20,10 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <WidgetPage.h>
+#include <WidgetEngine.h>
+#include <GraphicEngine.h>
 
 namespace GEODISCOVERER {
 

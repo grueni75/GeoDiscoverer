@@ -20,6 +20,11 @@
 //
 //============================================================================
 
+#include <GraphicObject.h>
+#include <MapPosition.h>
+#include <GraphicPosition.h>
+#include <MapArea.h>
+#include <MapCache.h>
 
 #ifndef MAPENGINE_H_
 #define MAPENGINE_H_

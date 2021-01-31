@@ -20,8 +20,8 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <GraphicRectangleList.h>
 
 namespace GEODISCOVERER {
 

@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <WidgetPrimitive.h>
+#include <FontString.h>
+
 #ifndef WIDGETSTATUS_H_
 #define WIDGETSTATUS_H_
 

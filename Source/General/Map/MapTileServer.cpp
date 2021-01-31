@@ -21,6 +21,8 @@
 //============================================================================
 
 #include <Core.h>
+#include <MapTileServer.h>
+#include <MapSourceMercatorTiles.h>
 
 namespace GEODISCOVERER {
 

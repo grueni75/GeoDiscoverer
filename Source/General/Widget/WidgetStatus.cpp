@@ -21,6 +21,12 @@
 //============================================================================
 
 #include <Core.h>
+#include <WidgetStatus.h>
+#include <FontEngine.h>
+#include <WidgetContainer.h>
+#include <NavigationEngine.h>
+#include <WidgetEngine.h>
+#include <GraphicEngine.h>
 
 namespace GEODISCOVERER {
 

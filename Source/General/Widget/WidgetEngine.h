@@ -20,6 +20,11 @@
 //
 //============================================================================
 
+#include <WidgetPage.h>
+#include <WidgetFingerMenu.h>
+#include <MapPosition.h>
+#include <WidgetContainer.h>
+#include <WidgetConfig.h>
 
 #ifndef WIDGETENGINE_H_
 #define WIDGETENGINE_H_

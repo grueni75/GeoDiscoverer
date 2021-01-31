@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <MapSource.h>
 
 #ifndef MAPSOURCEREMOTE_H_
 #define MAPSOURCEREMOTE_H_

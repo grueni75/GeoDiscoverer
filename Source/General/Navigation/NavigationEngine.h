@@ -20,6 +20,12 @@
 //
 //============================================================================
 
+#include <NavigationPointVisualization.h>
+#include <NavigationPoint.h>
+#include <MapSource.h>
+#include <GraphicPosition.h>
+#include <NavigationInfo.h>
+#include <MapPosition.h>
 
 #ifndef NAVIGATIONENGINE_H_
 #define NAVIGATIONENGINE_H_

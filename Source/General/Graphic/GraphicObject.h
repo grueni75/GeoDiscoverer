@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <GraphicPrimitive.h>
 
 #ifndef GRAPHICOBJECT_H_
 #define GRAPHICOBJECT_H_

@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <GraphicRectangle.h>
+#include <GraphicPointBuffer.h>
 
 #ifndef GRAPHICCIRCULARSTRIP_H_
 #define GRAPHICCIRCULARSTRIP_H_

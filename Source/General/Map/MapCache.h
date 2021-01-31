@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <Image.h>
+#include <Screen.h>
 
 #ifndef MAPCACHE_H_
 #define MAPCACHE_H_

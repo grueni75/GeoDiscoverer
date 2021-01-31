@@ -43,8 +43,11 @@
  * remains attached.
  */
 
-
 #include <Core.h>
+#include <Font.h>
+#include <FontCharacter.h>
+#include <FontString.h>
+#include <FontEngine.h>
 
 namespace GEODISCOVERER {
 

@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <MapSource.h>
 
 #ifndef MAPSOURCECALIBRATEDPICTURES_H_
 #define MAPSOURCECALIBRATEDPICTURES_H_

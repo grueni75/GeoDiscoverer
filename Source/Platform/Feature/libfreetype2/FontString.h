@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <GraphicRectangle.h>
 
 #ifndef FONTSTRING_H_
 #define FONTSTRING_H_

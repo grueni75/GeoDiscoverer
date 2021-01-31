@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <MapCalibrator.h>
+#include <MapTile.h>
+#include <ZipArchive.h>
 
 #ifndef MAPCONTAINER_H_
 #define MAPCONTAINER_H_

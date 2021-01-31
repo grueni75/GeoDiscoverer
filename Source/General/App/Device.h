@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <GraphicObject.h>
+#include <Screen.h>
+
 #ifndef DEVICE_H_
 #define DEVICE_H_
 

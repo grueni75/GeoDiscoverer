@@ -20,8 +20,8 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <MapArea.h>
 
 namespace GEODISCOVERER {
 

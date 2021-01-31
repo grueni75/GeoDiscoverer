@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <MapCalibrator.h>
+
 #ifndef MAPCALIBRATORLINEAR_H_
 #define MAPCALIBRATORLINEAR_H_
 

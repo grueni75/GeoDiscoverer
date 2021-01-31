@@ -20,10 +20,11 @@
 //
 //============================================================================
 
+#include <GraphicAnimationParameter.h>
+#include <Screen.h>
+
 #ifndef GRAPHICTEXTUREANIMATIONPARAMETER_H_
 #define GRAPHICTEXTUREANIMATIONPARAMETER_H_
-
-#include <Core.h>
 
 namespace GEODISCOVERER {
 

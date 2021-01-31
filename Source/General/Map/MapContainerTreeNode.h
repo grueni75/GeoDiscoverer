@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <MapContainer.h>
 
 #ifndef MAPCONTAINERTREE_H_
 #define MAPCONTAINERTREE_H_

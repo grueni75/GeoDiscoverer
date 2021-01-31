@@ -20,6 +20,10 @@
 //
 //============================================================================
 
+#include <Screen.h>
+#include <GraphicPrimitive.h>
+#include <GraphicRectangle.h>
+#include <GraphicObject.h>
 
 #ifndef MAP_TILE_H_
 #define MAP_TILE_H_

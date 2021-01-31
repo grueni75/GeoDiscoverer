@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <WidgetPosition.h>
+#include <WidgetPrimitive.h>
+
 #ifndef WIDGETCONFIG_H_
 #define WIDGETCONFIG_H_
 

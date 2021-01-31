@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <GraphicAnimationParameter.h>
+
 #ifndef GRAPHICROTATEANIMATIONPARAMETER_H_
 #define GRAPHICROTATEANIMATIONPARAMETER_H_
 

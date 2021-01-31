@@ -20,8 +20,9 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <WidgetCheckbox.h>
+#include <Commander.h>
 
 namespace GEODISCOVERER {
 

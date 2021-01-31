@@ -20,6 +20,12 @@
 //
 //============================================================================
 
+#include <WidgetPrimitive.h>
+#include <GraphicPointBuffer.h>
+#include <GraphicRectangleList.h>
+#include <FontString.h>
+#include <MapPosition.h>
+
 #ifndef WIDGETPATHINFO_H_
 #define WIDGETPATHINFO_H_
 

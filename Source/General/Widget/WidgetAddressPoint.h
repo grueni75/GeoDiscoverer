@@ -20,11 +20,11 @@
 //
 //============================================================================
 
+#include <WidgetPrimitive.h>
+#include <FontString.h>
 
 #ifndef WIDGETADDRESSPOINT_H_
 #define WIDGETADDRESSPOINT_H_
-
-#include <Core.h>
 
 namespace GEODISCOVERER {
 

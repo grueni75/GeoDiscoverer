@@ -21,6 +21,12 @@
 //============================================================================
 
 #include <Core.h>
+#include <Screen.h>
+#include <Commander.h>
+#include <MapEngine.h>
+#include <Device.h>
+#include <Image.h>
+#include <FloatingPoint.h>
 
 #ifdef TARGET_LINUX
 

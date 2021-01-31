@@ -21,6 +21,12 @@
 //============================================================================
 
 #include <Core.h>
+#include <MapSourceRemote.h>
+#include <MapPosition.h>
+#include <NavigationEngine.h>
+#include <Commander.h>
+#include <Storage.h>
+#include <MapEngine.h>
 
 namespace GEODISCOVERER {
 

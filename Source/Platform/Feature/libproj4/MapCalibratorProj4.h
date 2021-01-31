@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <MapCalibrator.h>
+
 #ifndef MAPCALIBRATORPROJ4_H_
 #define MAPCALIBRATORPROJ4_H_
 

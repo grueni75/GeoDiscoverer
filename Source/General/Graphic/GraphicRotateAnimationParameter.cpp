@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <GraphicRotateAnimationParameter.h>
 
 namespace GEODISCOVERER {
 

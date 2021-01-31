@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <WidgetCursorInfo.h>
+#include <FontString.h>
+#include <WidgetContainer.h>
 
 #ifndef WIDGETFINGERMENU_H_
 #define WIDGETFINGERMENU_H_

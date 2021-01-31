@@ -21,6 +21,8 @@
 //============================================================================
 
 #include <Core.h>
+#include <MapCalibratorLinear.h>
+#include <MapPosition.h>
 
 namespace GEODISCOVERER {
 

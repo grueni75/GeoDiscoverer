@@ -20,8 +20,9 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <FontString.h>
+#include <Font.h>
 
 namespace GEODISCOVERER {
 

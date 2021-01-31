@@ -20,11 +20,11 @@
 //
 //============================================================================
 
+#include <WidgetPrimitive.h>
+#include <FontString.h>
 
 #ifndef WIDGETMETER_H_
 #define WIDGETMETER_H_
-
-#include <Core.h>
 
 namespace GEODISCOVERER {
 

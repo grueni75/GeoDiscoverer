@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <WidgetContainer.h>
 
 #ifndef WIDGETPAGE_H_
 #define WIDGETPAGE_H_

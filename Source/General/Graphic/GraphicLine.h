@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <GraphicPointBuffer.h>
+#include <GraphicPrimitive.h>
 
 #ifndef GRAPHICLINE_H_
 #define GRAPHICLINE_H_

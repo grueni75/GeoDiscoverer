@@ -63,7 +63,8 @@ INCLUDES += -I/usr/include/libxml2
 
 LIBS += -lstdc++ -lglut -lpthread -lGLU -ljpeg -lxml2 -lfreetype -lpng -lcurl -lzip -lproj -lGL -lm -lcrypto
 
-CXXFLAGS += -DSRC_ROOT='"$(ROOT)/Source"' -DTARGET_LINUX -Wnon-virtual-dtor
+DEFINES = -DSRC_ROOT='"$(ROOT)/Source"' -DTARGET_LINUX
+CXXFLAGS += -Wnon-virtual-dtor
 # normal debug
 debug: CXXFLAGS += -g -O0 
 # Use this to get more warnings on the source code
@@ -84,19 +85,20 @@ all:    release
 
 # Implicit rules:
 
-$(OBJDIR)/%.o: $(ROOT)/%.cpp $(HEADERS)
+$(OBJDIR)/%.o: $(ROOT)/%.cpp 
 	@-mkdir -p `dirname $@`
 	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) $< -o $@
 
 # Compile rules based on header dependencies
 
-#depend: .depend
+depend: $(OBJDIR)/.depend
 
-#.depend: $(PLATFORM_SRCS) $(GENERAL_SRCS)
-#	rm -f ./.depend
-#	$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -MM $^ -MF  ./.depend;
+$(OBJDIR)/.depend: $(PLATFORM_SRCS) $(GENERAL_SRCS)
+	@cd $(ROOT); makedepend -f- $(DEFINES) $(INCLUDES) -pBuild/ $(CPP_SRCS) >.depend 2>/dev/null
+	@grep -v /usr/ $(ROOT)/.depend >$(OBJDIR)/.depend
+	@rm $(ROOT)/.depend
 
-#include .depend
+include $(OBJDIR)/.depend
 
 # The main program:
 

@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <MapSource.h>
 
 #ifndef MAPSOURCEMPTY_H_
 #define MAPSOURCEMPTY_H_

@@ -28,6 +28,7 @@
 #include <android/log.h>
 #include <client/linux/handler/exception_handler.h>
 #include <string.h>
+#include <Commander.h>
 
 // Prototypes
 std::string GDApp_executeAppCommand(std::string command);

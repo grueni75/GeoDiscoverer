@@ -19,6 +19,10 @@
 // along with GeoDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
 //============================================================================
 
+#include <GraphicObject.h>
+#include <MapPosition.h>
+#include <MapArea.h>
+
 #ifndef NAVIGATIONPOINTVISUALIZATION_H_
 #define NAVIGATIONPOINTVISUALIZATION_H_
 

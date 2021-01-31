@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <MapPosition.h>
 
 #ifndef MAPAREA_H_
 #define MAPAREA_H_

@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <GraphicFadeAnimationParameter.h>
 
 namespace GEODISCOVERER {
 

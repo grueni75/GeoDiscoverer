@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <FontCharacter.h>
 
 #ifndef FONTCHARACTERPOSITION_H_
 #define FONTCHARACTERPOSITION_H_

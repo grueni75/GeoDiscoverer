@@ -21,6 +21,9 @@
 //============================================================================
 
 #include <Core.h>
+#include <MapPosition.h>
+#include <NavigationEngine.h>
+#include <Commander.h>
 
 // Path to the message log if used
 std::string messageLogPath = "";

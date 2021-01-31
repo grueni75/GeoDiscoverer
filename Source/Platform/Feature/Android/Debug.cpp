@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <Debug.h>
 #include <android/log.h>
 
 // Executes an command on the java side

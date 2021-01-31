@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <GraphicRectangleListSegment.h>
+#include <GraphicPrimitive.h>
 
 #ifndef GRAPHICRECTANGLELIST_H_
 #define GRAPHICRECTANGLELIST_H_

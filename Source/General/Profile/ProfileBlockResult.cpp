@@ -20,8 +20,8 @@
 //
 //============================================================================
 
-
 #include <Core.h>
+#include <ProfileBlockResult.h>
 
 namespace GEODISCOVERER {
 

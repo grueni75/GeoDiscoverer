@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <GraphicPointBuffer.h>
 
 #ifndef GRAPHICRECTANGLELISTSEGMENT_H_
 #define GRAPHICRECTANGLELISTSEGMENT_H_

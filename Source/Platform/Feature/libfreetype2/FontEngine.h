@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <Font.h>
+#include <FontString.h>
 
 #ifndef FONTENGINE_H_
 #define FONTENGINE_H_

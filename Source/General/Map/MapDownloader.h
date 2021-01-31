@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <MapTileServer.h>
+
 #ifndef MAPDOWNLOADER_H_
 #define MAPDOWNLOADER_H_
 

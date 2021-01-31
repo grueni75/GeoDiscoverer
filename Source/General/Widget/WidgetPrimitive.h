@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <GraphicRectangle.h>
 
 #ifndef WIDGETPRIMITIVE_H_
 #define WIDGETPRIMITIVE_H_

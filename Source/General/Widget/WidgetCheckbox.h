@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <WidgetPrimitive.h>
 
 #ifndef WIDGETCHECKBOX_H_
 #define WIDGETCHECKBOX_H_

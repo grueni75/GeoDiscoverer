@@ -21,6 +21,8 @@
 //============================================================================
 
 #include <Core.h>
+#include <MapCalibratorSphericalNormalMercator.h>
+#include <MapPosition.h>
 
 namespace GEODISCOVERER {
 

@@ -20,6 +20,13 @@
 //
 //============================================================================
 
+#include <Screen.h>
+#include <GraphicColor.h>
+#include <GraphicTextureAnimationParameter.h>
+#include <GraphicRotateAnimationParameter.h>
+#include <GraphicScaleAnimationParameter.h>
+#include <GraphicTranslateAnimationParameter.h>
+#include <GraphicFadeAnimationParameter.h>
 
 #ifndef GRAPHICPRIMITIVE_H_
 #define GRAPHICPRIMITIVE_H_

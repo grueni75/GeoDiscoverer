@@ -20,8 +20,11 @@
 //
 //============================================================================
 
-
-#include "Core.h"
+#include <Core.h>
+#include <MapContainer.h>
+#include <MapContainerTreeNode.h>
+#include <MapPosition.h>
+#include <MapSource.h>
 
 namespace GEODISCOVERER {
 

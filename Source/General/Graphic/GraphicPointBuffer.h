@@ -20,6 +20,8 @@
 //
 //============================================================================
 
+#include <GraphicPoint.h>
+#include <Screen.h>
 
 #ifndef GRAPHICPOINTBUFFER_H_
 #define GRAPHICPOINTBUFFER_H_

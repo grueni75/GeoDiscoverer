@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <Device.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>

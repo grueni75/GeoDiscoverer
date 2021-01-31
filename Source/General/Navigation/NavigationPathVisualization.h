@@ -20,6 +20,9 @@
 //
 //============================================================================
 
+#include <NavigationPathTileInfo.h>
+#include <MapCalibrator.h>
+#include <MapPosition.h>
 
 #ifndef NAVIGATIONPATHVISUALIZATION_H_
 #define NAVIGATIONPATHVISUALIZATION_H_
