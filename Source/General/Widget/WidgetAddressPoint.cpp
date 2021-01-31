@@ -41,14 +41,8 @@ WidgetAddressPoint::WidgetAddressPoint(WidgetContainer *widgetContainer) : Widge
   updateInterval=1*1000*1000;
   firstRun=true;
   lastClockUpdate=0;
-  active=false;
+  active=true;
   hideIfNoAddressPointNear=(widgetContainer->getWidgetEngine()->getDevice()->getName()=="Default");
-  if (hideIfNoAddressPointNear) {
-    GraphicColor c=color;
-    c.setAlpha(0);
-    setColor(c);
-    setIsHidden(true);
-  }
 }
 
 // Destructor
@@ -70,7 +64,12 @@ bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
   bool changed=WidgetPrimitive::work(t);
 
   // Only update the info at given update interval
-  if (t>=nextUpdateTime) {
+  if ((firstRun)||(t>=nextUpdateTime)) {
+
+    // Hide the widget on the first run
+    if ((hideIfNoAddressPointNear)&&(firstRun)) {
+      color.setAlpha(0);
+    }
 
     // Are we near enough to an address point?
     boolean activateWidget=false;
@@ -108,17 +107,18 @@ bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
     }
 
     // Activate widget if not already
-    if ((hideIfNoAddressPointNear)||(!widgetContainer->getWidgetEngine()->getWidgetsActive())) {
-      //DEBUG("activateWidget=%d active=%d",activateWidget,active);
+    if (hideIfNoAddressPointNear) {
       if (activateWidget!=active) {
+        DEBUG("activateWidget=%d active=%d",activateWidget,active);
+        GraphicColor c=getActiveColor();
         if (activateWidget) {
           //DEBUG("activating widget",NULL);
-          setIsHidden(false);
-          setFadeAnimation(updateTimestamp,getColor(),getActiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
+          c.setAlpha(255);
+          setFadeAnimation(updateTimestamp,getColor(),c,false,widgetContainer->getGraphicEngine()->getFadeDuration());
         } else {
           //DEBUG("de-activating widget",NULL);
-          setIsHidden(true);
-          setFadeAnimation(updateTimestamp,getColor(),getInactiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
+          c.setAlpha(0);
+          setFadeAnimation(updateTimestamp,getColor(),c,false,widgetContainer->getGraphicEngine()->getFadeDuration());
         }
         active=activateWidget;
       }
@@ -129,6 +129,13 @@ bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
     // Set the next update time
     firstRun=false;
     nextUpdateTime=t+updateInterval;
+  }
+
+  // Hide the widget if not visible
+  if (color.getAlpha()==0) {
+    if (!getIsHidden()) setIsHidden(true);
+  } else {
+    if (getIsHidden()) setIsHidden(false);
   }
 
   // Return result

@@ -117,7 +117,7 @@ void WidgetPrimitive::updatePosition(Int x, Int y, Int z) {
 void WidgetPrimitive::draw(TimestampInMicroseconds t) {
 
   // Do not draw if primitive is hidden
-  if (getIsHidden())
+  if (getIsHidden()) 
     return;
 
   // Don't draw if scale factor is 0

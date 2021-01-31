@@ -427,7 +427,6 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeX(62.0);
         position.setLandscapeY(67.0);
         position.setLandscapeZ(1);
-        config.setInactiveColor(GraphicColor(255,255,255,255));
       } else {
         position.setRefScreenDiagonal(4.0);
         position.setPortraitX(50.0);
@@ -436,9 +435,9 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeX(50.0);
         position.setLandscapeY(32.5);
         position.setLandscapeZ(1);
-        config.setInactiveColor(GraphicColor(255,255,255,0));
       }
       config.addPosition(position);
+      config.setInactiveColor(GraphicColor(255,255,255,255));
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setParameter("iconFilename","addressPointBackground");
       addWidgetToPage(config);
