@@ -49,8 +49,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.support.v4.view.ScaleGestureDetectorCompat;
 import android.util.DisplayMetrics;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Wearable;
@@ -74,7 +77,14 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /** Interfaces with the C++ part */
-public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorEventListener, Runnable {
+public class GDCore implements
+    GLSurfaceView.Renderer,
+    LocationListener,
+    SensorEventListener,
+    Runnable,
+    GestureDetector.OnGestureListener,
+    GestureDetector.OnDoubleTapListener
+{
 
   //
   // Variables
@@ -188,6 +198,27 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   BroadcastReceiver batteryStatusReceiver;
   public String batteryStatus;
 
+  /** Gesture detectors */
+  GestureDetector gestureDetector;
+  ScaleGestureDetector scaleGestureDetector;
+  private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+    @Override
+    public boolean onScaleBegin(ScaleGestureDetector detector) {
+      appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale begins");
+      return true;
+    }
+
+    @Override
+    public boolean onScale(ScaleGestureDetector detector) {
+      //if (detector.getScaleFactor()!=1.0) appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("scale=%f",detector.getScaleFactor()));
+      executeCoreCommand("zoom(" + String.valueOf(detector.getScaleFactor() + ")"));
+      return true;
+    }
+  }
+  boolean zoomMode=false;
+  /*float zoomStartX;
+  float zoomStartY;*/
+
   //
   // Constructor and destructor
   //
@@ -262,6 +293,9 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     };
     appIf.getContext().registerReceiver(batteryStatusReceiver, ifilter);
 
+    // Install gesture detectors
+    gestureDetector = new GestureDetector(appIf.getContext(),this);
+    scaleGestureDetector = new ScaleGestureDetector(appIf.getContext(), new ScaleListener());
   }
   
   /** Destructor */
@@ -275,7 +309,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     
     // Clean up the JNI part
     deinitJNI();
-  } 
+  }
 
   //
   // Thread that handles the starting and stopping of the core
@@ -1069,6 +1103,8 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
 
   /** Calculates the chage in angle and zoom if the pinch-to-zoom gesture is used */
   void updateTwoFingerGesture(MotionEvent event, boolean moveAction) {
+    if (zoomMode)
+      return;
     if (firstPointerID==-1)
       return;
     try {
@@ -1160,6 +1196,26 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
   /** Called if the map is touched */
   public boolean onTouchEvent(final MotionEvent event) {
 
+    // Call the gesture detectors
+    gestureDetector.onTouchEvent(event);
+    scaleGestureDetector.onTouchEvent(event);
+    //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("zoomMode=%d",zoomMode ? 1 : 0));
+
+    /* If a zoom is detected, then handle it exclusively until finger is removed
+    if (zoomMode) {
+      float distY=event.getY()-zoomStartY;
+      double scaleDiff;
+      appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("distY=%f",distY));
+      if (prevDistance!=0) {
+        if (distY>0)
+          scaleDiff=distY/prevDistance;
+        else
+          scaleDiff=-prevDistance/distY;
+        executeCoreCommand("zoom(" + String.valueOf(scaleDiff) + ")");
+      }
+      prevDistance=distY;
+    }*/
+
     // What happened?
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ECLAIR) {
 
@@ -1171,15 +1227,16 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
       switch(action) {
 
         case MotionEvent.ACTION_DOWN:
-          executeCoreCommand("touchDown", String.valueOf(x), String.valueOf(y));
+          if (!zoomMode) executeCoreCommand("touchDown", String.valueOf(x), String.valueOf(y));
           break;
 
         case MotionEvent.ACTION_MOVE:
-          executeCoreCommand("touchMove", String.valueOf(x), String.valueOf(y));
+          if (!zoomMode) executeCoreCommand("touchMove", String.valueOf(x), String.valueOf(y));
           break;
 
         case MotionEvent.ACTION_UP:
-          executeCoreCommand("touchUp", String.valueOf(x), String.valueOf(y));
+          if (!zoomMode) executeCoreCommand("touchUp", String.valueOf(x), String.valueOf(y));
+          zoomMode=false;
           break;
       }
 
@@ -1198,7 +1255,7 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         if (pointerIndex!=-1) {
           x = Math.round(event.getX(pointerIndex));
           y = Math.round(event.getY(pointerIndex));
-          executeCoreCommand("touchDown",String.valueOf(x), String.valueOf(y));
+          if (!zoomMode) executeCoreCommand("touchDown",String.valueOf(x), String.valueOf(y));
         }
       }
 
@@ -1213,9 +1270,10 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
         if (pointerIndex!=-1) {
           x = Math.round(event.getX(pointerIndex));
           y = Math.round(event.getY(pointerIndex));
-          executeCoreCommand("touchUp", String.valueOf(x), String.valueOf(y));
+          if (!zoomMode) executeCoreCommand("touchUp", String.valueOf(x), String.valueOf(y));
           firstPointerID=-1;
           secondPointerID=-1;
+          zoomMode=false;
         }
       }
 
@@ -1310,4 +1368,57 @@ public class GDCore implements GLSurfaceView.Renderer, LocationListener, SensorE
     playThread.start();
   }
 
+  //
+  // Various callbacks for detected gestures
+  //
+
+  @Override
+  public boolean onSingleTapConfirmed(MotionEvent e) {
+    return false;
+  }
+
+  @Override
+  public boolean onDoubleTap(MotionEvent e) {
+    //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("double tap!"));
+    zoomMode=true;
+    /*zoomStartX=e.getX();
+    zoomStartY=e.getY();
+    prevDistance=0;*/
+    return false;
+  }
+
+  @Override
+  public boolean onDoubleTapEvent(MotionEvent e) {
+    return false;
+  }
+
+  @Override
+  public boolean onDown(MotionEvent e) {
+    return false;
+  }
+
+  @Override
+  public void onShowPress(MotionEvent e) {
+
+  }
+
+  @Override
+  public boolean onSingleTapUp(MotionEvent e) {
+    return false;
+  }
+
+  @Override
+  public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+    return false;
+  }
+
+  @Override
+  public void onLongPress(MotionEvent e) {
+
+  }
+
+  @Override
+  public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+    return false;
+  }
 }

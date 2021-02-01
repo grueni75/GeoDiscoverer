@@ -55,7 +55,7 @@ void GraphicPosition::zoom(double scale) {
   //std::cout << "stepZoom=" << stepZoom.toDouble() << std::endl;
   //valueZoom+=FixedPoint(offset)*stepZoom;
   valueZoom*=scale;
-  //std::cout << "valueZoom=" << valueZoom.toString() << std::endl;
+  //DEBUG("valueZoom=%f",valueZoom);
   changed=true;
 }
 

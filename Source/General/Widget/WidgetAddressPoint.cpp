@@ -109,7 +109,7 @@ bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
     // Activate widget if not already
     if (hideIfNoAddressPointNear) {
       if (activateWidget!=active) {
-        DEBUG("activateWidget=%d active=%d",activateWidget,active);
+        //DEBUG("activateWidget=%d active=%d",activateWidget,active);
         GraphicColor c=getActiveColor();
         if (activateWidget) {
           //DEBUG("activating widget",NULL);
