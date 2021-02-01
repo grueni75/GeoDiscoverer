@@ -94,6 +94,7 @@ $(OBJDIR)/%.o: $(ROOT)/%.cpp
 depend: $(OBJDIR)/.depend
 
 $(OBJDIR)/.depend: $(PLATFORM_SRCS) $(GENERAL_SRCS)
+	@-mkdir -p Build
 	@cd $(ROOT); makedepend -f- $(DEFINES) $(INCLUDES) -pBuild/ $(CPP_SRCS) >.depend 2>/dev/null
 	@grep -v /usr/ $(ROOT)/.depend >$(OBJDIR)/.depend
 	@rm $(ROOT)/.depend

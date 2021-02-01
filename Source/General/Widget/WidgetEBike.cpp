@@ -38,11 +38,12 @@ WidgetEBike::WidgetEBike(WidgetContainer *widgetContainer) :
   powerLevelFontString=NULL;
   engineTemperatureFontString=NULL;
   distanceElectricFontString=NULL;
-  core->getConfigStore()->setIntValue("EBikeMonitor","connected",1,__FILE__,__LINE__);
+  core->getConfigStore()->setIntValue("EBikeMonitor","connected",0,__FILE__,__LINE__);
   /*core->getConfigStore()->setStringValue("EBikeMonitor","powerLevel","5",__FILE__,__LINE__);
   core->getConfigStore()->setStringValue("EBikeMonitor","batteryLevel","70",__FILE__,__LINE__);
   core->getConfigStore()->setStringValue("EBikeMonitor","engineTemperature","10",__FILE__,__LINE__);
-  core->getConfigStore()->setStringValue("EBikeMonitor","distanceElectric","1200",__FILE__,__LINE__);*/
+  core->getConfigStore()->setStringValue("EBikeMonitor","distanceElectric","1200",__FILE__,__LINE__);
+  core->getConfigStore()->setIntValue("EBikeMonitor","connected",1,__FILE__,__LINE__);*/
   connected=false;
   firstRun=true;  
   updateRequired=true;  
@@ -88,8 +89,6 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
       GraphicColor targetColor=getActiveColor();
       if (!connected) {
         targetColor.setAlpha(0);
-      } else {
-        setIsHidden(false);                
       }
       setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getFadeDuration());
     }
@@ -170,14 +169,19 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
       
     }
 
-    // Disable widget if not visible anymore
-    if ((getColor().getAlpha()==0)&&(!getIsHidden()))
-      setIsHidden(true);
-
     // Update the flags
     changed=true;
     updateRequired=false;
 
+  }
+
+  // Handle visibility
+  if (getColor().getAlpha()==0) {
+    if (!getIsHidden())
+      setIsHidden(true);
+  } else {
+    if (getIsHidden())
+      setIsHidden(false);
   }
 
   // Return result

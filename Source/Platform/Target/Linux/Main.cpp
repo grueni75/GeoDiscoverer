@@ -122,7 +122,7 @@ void *debugThread(void *args) {
 int main(int argc, char **argv)
 {
   // Create the application
-  if (!(GEODISCOVERER::core=new GEODISCOVERER::Core(".",400,5))) {
+  if (!(GEODISCOVERER::core=new GEODISCOVERER::Core(".",350,5))) {
     puts("FATAL: can not create geo discoverer core object!");
     exit(1);
   }

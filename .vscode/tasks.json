@@ -40,7 +40,7 @@
             ]
        },
        {
-        "label": "clean+run",
+        "label": "reset+run",
         "type": "shell",
         "command": "rm config.xml && ./GeoDiscoverer",
         "problemMatcher": [],

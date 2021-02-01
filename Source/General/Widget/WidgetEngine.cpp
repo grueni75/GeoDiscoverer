@@ -1065,6 +1065,16 @@ void WidgetEngine::createGraphic() {
       config.setParameter("navigationPointIconFilename","pathInfoNavigationPoint");
       addWidgetToPage(config);
       if (deviceName=="Default") {
+        config.clearPositions();
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(50.0);
+        position.setPortraitY(14.0);
+        position.setPortraitZ(0);
+        position.setLandscapeX(50.0);
+        position.setLandscapeY(23.0);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
         config.setPageName("Finger Menu");
         addWidgetToPage(config);
       }
