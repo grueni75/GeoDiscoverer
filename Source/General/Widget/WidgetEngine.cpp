@@ -2167,8 +2167,8 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   core->getThread()->unlockMutex(accessMutex);
 }
 
-// Informs the engine that the map has changed
-void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMapTiles) {
+// Updates the nearest path
+void WidgetEngine::updateNearestPath(MapPosition mapPos, std::list<MapTile*> *centerMapTiles) {
 
   // Compute the overlap in meters for the given map state
   double overlapInMeters;
@@ -2215,12 +2215,23 @@ void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMa
     }
   }
 
-  // Inform the widget
+  // Store the result
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   //DEBUG("nearestPath=%08x nearestPathIndex=%d",nearestPath,nearestPathIndex);
   this->nearestPath=nearestPath;
   this->nearestPathIndex=nearestPathIndex;
   this->nearestPathMapPos=nearestPathMapPos;
+  core->getThread()->unlockMutex(accessMutex);
+}
+
+// Informs the engine that the map has changed
+void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMapTiles) {
+
+  // Update the nearest path
+  updateNearestPath(mapPos,centerMapTiles);
+
+  // Inform the widget
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onMapChange(currentPage==i->second ? true : false, mapPos);
@@ -2242,6 +2253,8 @@ void WidgetEngine::onLocationChange(MapPosition mapPos) {
 
 // Informs the engine that a path has changed
 void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType changeType) {
+
+  // First inform all widgets
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   if (changeType==NavigationPathChangeTypeWillBeRemoved) {
     if (nearestPath==path)
@@ -2253,6 +2266,13 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
   }
   if (fingerMenu) fingerMenu->onPathChange(currentPage==i->second ? true : false, path, changeType);
   core->getThread()->unlockMutex(accessMutex);
+
+  // Then update the nearest path  
+  MapPosition pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
+  core->getMapEngine()->unlockMapPos();
+  std::list<MapTile*> *centerMapTiles = core->getMapEngine()->lockCenterMapTiles(__FILE__,__LINE__);
+  onMapChange(pos,centerMapTiles);
+  core->getMapEngine()->unlockCenterMapTiles();
 }
 
 // Informs the engine that some data has changed

@@ -70,6 +70,9 @@ protected:
   // Deselects the currently selected page
   void deselectPage();
 
+  // Updates the nearest path
+  void updateNearestPath(MapPosition mapPos, std::list<MapTile*> *centerMapTiles);
+
 public:
 
   // Constructors and destructor

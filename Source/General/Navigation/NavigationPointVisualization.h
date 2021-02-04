@@ -98,6 +98,9 @@ public:
   MapPosition getPos() const {
     return pos;
   }
+  std::string getName() const {
+    return name;
+  }
 
 };
 

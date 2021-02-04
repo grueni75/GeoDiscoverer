@@ -1796,35 +1796,92 @@ void NavigationEngine::removeAddressPoint(std::string name) {
 
 // Reads the address points from disk
 void NavigationEngine::initAddressPoints() {
+
+  // Read the new address points
   std::string path = "Navigation/AddressPoint";
   std::list<std::string> names = core->getConfigStore()->getAttributeValues(path,"name",__FILE__,__LINE__);
-  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
-  std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
-  while (i!=navigationPointsVisualization.end()) {
-    if ((*i).getVisualizationType()==NavigationPointVisualizationTypePoint) {
-      core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-      navigationPointsGraphicObject.removePrimitive((*i).getGraphicPrimitiveKey(),true);
-      core->getDefaultGraphicEngine()->unlockDrawing();
-      i=navigationPointsVisualization.erase(i);
-    } else {
-      i++;
-    }
-  }
-  addressPoints.clear();
   std::string selectedAddressPointGroup = core->getConfigStore()->getStringValue("Navigation","selectedAddressPointGroup",__FILE__,__LINE__);
+  std::list<NavigationPoint> storedAddressPoints;
   for (std::list<std::string>::iterator j=names.begin();j!=names.end();j++) {
     //DEBUG("name=%s",(*j).c_str());
     NavigationPoint addressPoint;
     addressPoint.setName(*j);
     addressPoint.readFromConfig(path);
     if (addressPoint.getGroup()==selectedAddressPointGroup) {
-      addressPoints.push_back(addressPoint);
-      NavigationPointVisualization pointVis(&navigationPointsGraphicObject, addressPoint.getLat(),addressPoint.getLng(), NavigationPointVisualizationTypePoint, addressPoint.getName(),NULL);
-      navigationPointsVisualization.push_back(pointVis);
+      storedAddressPoints.push_back(addressPoint);
     }
   }
+
+  // Check which points have changed
+  core->getThread()->lockMutex(addressPointsMutex,__FILE__,__LINE__);
+  std::list<NavigationPoint> addAddressPoints;
+  std::list<NavigationPoint> removeAddressPoints;
+  for (std::list<NavigationPoint>::iterator i=storedAddressPoints.begin();i!=storedAddressPoints.end();i++) {
+    bool found=false;
+    for (std::list<NavigationPoint>::iterator j=addressPoints.begin();j!=addressPoints.end();j++) {
+
+      // Same address point?      
+      if (j->getName()==i->getName()) {
+
+        // Has the address point changed?
+        if (*j!=*i) {
+
+          // Remove the old one and remember the new one for later addition
+          //DEBUG("address point <%s> will be removed",j->getName().c_str());
+          removeAddressPoints.push_back(*j);
+          break;
+        } else {
+          found=true;
+          break;
+        }
+      }
+    }
+    if (!found) {
+      //DEBUG("address point <%s> will be added",i->getName().c_str());
+      addAddressPoints.push_back(*i);
+    } else {
+      //DEBUG("address point <%s> will be skipped",i->getName().c_str());
+    }
+  }
+
+  // Check which points have been removed
+  for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
+    bool found=false;
+    for (std::list<NavigationPoint>::iterator j=storedAddressPoints.begin();j!=storedAddressPoints.end();j++) {
+      if (j->getName()==i->getName()) {
+        found=true;
+        break;
+      }
+    }
+    if (!found) {
+      //DEBUG("address point <%s> will be removed",i->getName().c_str());
+      removeAddressPoints.push_back(*i);
+    }
+  }
+
+  // Remove outdated address points
+  for (std::list<NavigationPoint>::iterator i=removeAddressPoints.begin();i!=removeAddressPoints.end();i++) {
+    for (std::list<NavigationPointVisualization>::iterator j=navigationPointsVisualization.begin();j!=navigationPointsVisualization.end();j++) {
+      if ((j->getVisualizationType()==NavigationPointVisualizationTypePoint)&&(j->getName()==i->getName())) {
+        core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+        navigationPointsGraphicObject.removePrimitive(j->getGraphicPrimitiveKey(),true);
+        core->getDefaultGraphicEngine()->unlockDrawing();
+        navigationPointsVisualization.erase(j);
+        break;
+      }
+    }
+  }
+
+  // Add new address points
+  for (std::list<NavigationPoint>::iterator i=addAddressPoints.begin();i!=addAddressPoints.end();i++) {
+    NavigationPointVisualization pointVis(&navigationPointsGraphicObject, i->getLat(),i->getLng(), NavigationPointVisualizationTypePoint, i->getName(),NULL);
+    navigationPointsVisualization.push_back(pointVis);
+  }
+  addressPoints=storedAddressPoints;
   resetOverlayGraphicHash();
   core->getThread()->unlockMutex(addressPointsMutex);
+
+  // Trigger updates
   triggerNavigationInfoUpdate();
   core->getCommander()->dispatch("forceRemoteMapUpdate()");
 }

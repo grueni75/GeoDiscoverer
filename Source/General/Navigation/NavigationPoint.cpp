@@ -75,4 +75,20 @@ bool NavigationPoint::readFromConfig(std::string path) {
   }
 }
 
+// Operators
+bool NavigationPoint::operator==(const NavigationPoint &rhs)
+{
+  if ((name==rhs.name)&&(address==rhs.address)&&(group==rhs.group)&&
+      (lng==rhs.lng)&&(lat==rhs.lat)&&(timestamp==rhs.timestamp)&&
+      (foreignTimestamp==rhs.foreignTimestamp))
+    return true;
+  else
+    return false;
+}
+
+bool NavigationPoint::operator!=(const NavigationPoint &rhs) {
+  return ! (*this == rhs);
+}
+
+
 } /* namespace GEODISCOVERER */

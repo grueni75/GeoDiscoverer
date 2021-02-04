@@ -142,7 +142,6 @@ std::string Commander::execute(std::string cmd) {
   TRACE(cmd.c_str(),NULL);
   core->getThread()->unlockMutex(accessMutex);
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
-  //DEBUG("cmd=%s",cmd.c_str());
 
   // Set the default result
   std::string result="";

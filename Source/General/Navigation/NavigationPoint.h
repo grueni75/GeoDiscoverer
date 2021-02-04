@@ -74,6 +74,10 @@ public:
   // Extracts the point from the gpx xml node list
   bool readGPX(XMLNode wptNode, std::string group, std::string defaultName, std::string &error);
 
+  // Operators
+  bool operator==(const NavigationPoint &rhs);
+  bool operator!=(const NavigationPoint &rhs);
+
   // Setters and getters
   const std::string& getAddress() const {
     return address;
