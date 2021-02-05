@@ -363,6 +363,9 @@ public:
 
   // Updates the address point group that is displayed on screen
   void addressPointGroupChanged();
+
+  // Removes the path from the map and the disk
+  void trashPath(NavigationPath *path);
   
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)

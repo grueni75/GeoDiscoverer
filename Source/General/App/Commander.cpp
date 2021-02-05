@@ -560,6 +560,14 @@ std::string Commander::execute(std::string cmd) {
     core->getNavigationEngine()->setActiveRoute(nearestPath);
     cmdExecuted=true;
   }
+  if (cmdName=="trashPath") {
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(NULL,NULL);
+    if (nearestPath==NULL) {
+      WARNING("cannot delete path: no path near to the current map center found",NULL);
+    }
+    core->getNavigationEngine()->trashPath(nearestPath);
+    cmdExecuted=true;
+  }
   if (cmdName=="log") {
     if (core->getDebug()) {
       if (args[0]=="DEBUG") core->getDebug()->print(verbosityDebug,args[1].c_str(),0,true,args[2].c_str());

@@ -2056,5 +2056,60 @@ void NavigationEngine::triggerGoogleBookmarksSynchronization() {
   core->getThread()->issueSignal(synchronizeGoogleBookmarksSignal);
 }
 
+// Removes the path from the map and the disk
+void NavigationEngine::trashPath(NavigationPath *path) {
+
+  // The track in recording cannot be removed
+  NavigationPath *nearestPath=lockRecordedTrack(__FILE__,__LINE__);
+  if (path==recordedTrack) {
+    WARNING("cannot delete the path (used for recording)",NULL);
+    unlockRecordedTrack();
+    return;
+  }
+  unlockRecordedTrack();
+
+  // If the track is not yet loaded, it cannot be removed
+  if (!path->getIsInit()) {
+    WARNING("cannot delete the path (not yet loaded)",NULL);
+    return;
+  }
+
+  // If the path is used as the active route, disable it
+  if (path==getActiveRoute()) {
+    setActiveRoute(NULL);
+  }
+
+  // First delete it from the disk
+  remove((path->getGpxFilefolder()+"/"+path->getGpxFilename()).c_str());
+
+  // Then remove the path from the route list
+  lockRoutes(__FILE__, __LINE__);
+  routes.remove(path);
+  unlockRoutes();
+
+  // Remove the flags
+  std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
+  while (i!=navigationPointsVisualization.end()) {
+    if ((*i).getReference()==(void*)path) {
+      core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+      navigationPointsGraphicObject.removePrimitive((*i).getGraphicPrimitiveKey(),true);
+      core->getDefaultGraphicEngine()->unlockDrawing();
+      i=navigationPointsVisualization.erase(i);
+    } else {
+      i++;
+    }
+  }
+
+  // Ensure that no one is using the path anymore
+  MapPosition pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
+  core->getMapEngine()->unlockMapPos();
+  std::list<MapTile*> *centerMapTiles = core->getMapEngine()->lockCenterMapTiles(__FILE__,__LINE__);
+  core->onMapChange(pos,centerMapTiles);
+  core->getMapEngine()->unlockCenterMapTiles();
+
+  // Delete the path from memory
+  deletePath(path);
+}
+  
 }
 

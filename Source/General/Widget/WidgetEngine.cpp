@@ -1449,6 +1449,19 @@ void WidgetEngine::createGraphic() {
       config.addPosition(position);
       addWidgetToPage(config);
     }
+    // ---------------------------------------------------------
+    if (deviceName=="Default") {
+      config=WidgetConfig();
+      config.setPageName("Finger Menu");
+      config.setName("Delete Path");
+      config.setType(WidgetTypeButton);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","delete");
+      config.setParameter("command","trashPath()");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+    }
   }
   if (enableFingerMenu) {
     if (c->getStringValue("Graphic/Widget/Device[@name='" + deviceName + "']","selectedPage",__FILE__, __LINE__)!="Finger Menu")
@@ -1461,10 +1474,10 @@ void WidgetEngine::createGraphic() {
   // Create the widgets from the config
   pageNames=c->getAttributeValues("Graphic/Widget/Device[@name='" + deviceName + "']/Page","name",__FILE__, __LINE__);
   std::list<std::string>::iterator i;
-  std::vector<WidgetPrimitive*> fingerMenuFirstCircleEntries;
-  fingerMenuFirstCircleEntries.resize(7);
-  std::vector<WidgetPrimitive*> fingerMenuSecondCircleEntries;
-  fingerMenuSecondCircleEntries.resize(4);
+  std::vector<WidgetPrimitive*> fingerMenuCircleEntries;
+  fingerMenuCircleEntries.resize(7);
+  std::vector<WidgetPrimitive*> fingerMenuRowEntries;
+  fingerMenuRowEntries.resize(5);
   for(i=pageNames.begin();i!=pageNames.end();i++) {
     //DEBUG("found a widget page with name %s",(*i).c_str());
 
@@ -1760,17 +1773,18 @@ void WidgetEngine::createGraphic() {
       // Add the widget to the page
       bool skipPageAdd=false;
       if (isFingerMenuPage) {
-        if (*j=="Track Recording")     { fingerMenuFirstCircleEntries[2]=primitive; skipPageAdd=true; }
-        if (*j=="Change Map Layer")    { fingerMenuFirstCircleEntries[1]=primitive; skipPageAdd=true;  }
-        if (*j=="Return To Location")  { fingerMenuFirstCircleEntries[3]=primitive; skipPageAdd=true;  }
-        if (*j=="Zoom Level Lock")     { fingerMenuFirstCircleEntries[0]=primitive; skipPageAdd=true;  }
-        if (*j=="Target Visibility")   { fingerMenuFirstCircleEntries[4]=primitive; skipPageAdd=true;  }
-        if (*j=="Target At Address")   { fingerMenuFirstCircleEntries[5]=primitive; skipPageAdd=true;  }
-        if (*j=="Target At Center")    { fingerMenuFirstCircleEntries[6]=primitive; skipPageAdd=true;  }
-        if (*j=="Set Path End Flag")   { fingerMenuSecondCircleEntries[0]=primitive; skipPageAdd=true;  }
-        if (*j=="Set Path Start Flag") { fingerMenuSecondCircleEntries[1]=primitive; skipPageAdd=true;  }
-        if (*j=="Set Active Route")    { fingerMenuSecondCircleEntries[2]=primitive; skipPageAdd=true;  }
-        if (*j=="Path Info Lock")      { fingerMenuSecondCircleEntries[3]=primitive; skipPageAdd=true;  }
+        if (*j=="Track Recording")     { fingerMenuCircleEntries[2]=primitive; skipPageAdd=true; }
+        if (*j=="Change Map Layer")    { fingerMenuCircleEntries[1]=primitive; skipPageAdd=true;  }
+        if (*j=="Return To Location")  { fingerMenuCircleEntries[3]=primitive; skipPageAdd=true;  }
+        if (*j=="Zoom Level Lock")     { fingerMenuCircleEntries[0]=primitive; skipPageAdd=true;  }
+        if (*j=="Target Visibility")   { fingerMenuCircleEntries[4]=primitive; skipPageAdd=true;  }
+        if (*j=="Target At Address")   { fingerMenuCircleEntries[5]=primitive; skipPageAdd=true;  }
+        if (*j=="Target At Center")    { fingerMenuCircleEntries[6]=primitive; skipPageAdd=true;  }
+        if (*j=="Set Path End Flag")   { fingerMenuRowEntries[0]=primitive; skipPageAdd=true;  }
+        if (*j=="Set Path Start Flag") { fingerMenuRowEntries[1]=primitive; skipPageAdd=true;  }
+        if (*j=="Set Active Route")    { fingerMenuRowEntries[2]=primitive; skipPageAdd=true;  }
+        if (*j=="Path Info Lock")      { fingerMenuRowEntries[3]=primitive; skipPageAdd=true;  }
+        if (*j=="Delete Path")         { fingerMenuRowEntries[4]=primitive; skipPageAdd=true;  }
         if (*j=="Cursor Info")         { fingerMenu->setCursorInfoWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
       }
       if (!skipPageAdd) {
@@ -1786,11 +1800,11 @@ void WidgetEngine::createGraphic() {
 
   // Add all the finger menu entries
   if (enableFingerMenu) {
-    for (int i=fingerMenuFirstCircleEntries.size()-1;i>=0;i--) {
-      fingerMenu->addWidgetToCircle(fingerMenuFirstCircleEntries[i]);
+    for (int i=fingerMenuCircleEntries.size()-1;i>=0;i--) {
+      fingerMenu->addWidgetToCircle(fingerMenuCircleEntries[i]);
     }
-    for (int i=fingerMenuSecondCircleEntries.size()-1;i>=0;i--) {
-      fingerMenu->addWidgetToRow(fingerMenuSecondCircleEntries[i]);
+    for (int i=fingerMenuRowEntries.size()-1;i>=0;i--) {
+      fingerMenu->addWidgetToRow(fingerMenuRowEntries[i]);
     }
   }
 
