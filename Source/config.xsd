@@ -782,6 +782,35 @@
                                           </xsd:sequence>
                                         </xsd:complexType>
                                       </xsd:element>
+                                      <xsd:element name="SafetyColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the widget if it is in safety state.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
                                       <xsd:element name="iconFilename" type="xsd:string" default="unknown" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Filename of the background image.</xsd:documentation>
@@ -797,6 +826,11 @@
                                           <xsd:documentation>Command to execute if widget is pressed for some time.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
+                                      <xsd:element name="safetyStepDuration" type="xsd:integer" default="1">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Duratio of the safety step in microseconds.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>                  
                                       <xsd:element name="repeat" type="xsd:integer" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Executes command repeatedly if set.</xsd:documentation>

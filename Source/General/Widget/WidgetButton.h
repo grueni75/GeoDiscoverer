@@ -37,6 +37,12 @@ protected:
   TimestampInMicroseconds longPressTime;      // Time when to execute the long press command
   bool repeat;                                // Decides if commands are repeatedly executed
   bool skipCommand;                           // Decides if the command shall be executed when widget is untouched
+  bool safetyStep;                            // Indicates that the command is only executed after the user confirms
+  GraphicColor safetyStepColor;               // Color to use for the safety step
+  TimestampInMicroseconds safetyStepDuration; // Duration the safety step remains active
+  bool safetyState;                           // Indicates that the widget is in the safety state
+  TimestampInMicroseconds safetyStateStart;   // Time when to start the safety state
+  TimestampInMicroseconds safetyStateEnd;     // Time when to end the safety state
 
 public:
 
@@ -66,6 +72,18 @@ public:
 
   void setRepeat(bool repeat) {
     this->repeat = repeat;
+  }
+
+  void setSafetyStep(bool safetyStep) {
+    this->safetyStep=safetyStep;
+  }
+
+  void setSafetyStepColor(GraphicColor safetyStepColor) {
+    this->safetyStepColor=safetyStepColor;
+  }
+
+  void setSafetyStepDuration(TimestampInMicroseconds safetyStepDuration) {
+    this->safetyStepDuration=safetyStepDuration;
   }
 };
 

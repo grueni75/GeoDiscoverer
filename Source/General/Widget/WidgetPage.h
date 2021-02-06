@@ -31,8 +31,8 @@ class WidgetPage: public GEODISCOVERER::WidgetContainer {
 
 protected:
 
-  std::string name;    
-  bool widgetsActive;                                   // Indicates if the widgets are active                                 // Name of the page
+  std::string name;                                     // Name of the page
+  bool widgetsActive;                                   // Indicates if the widgets are active                                 
   TimestampInMicroseconds hiddenAnimationDuration;      // Time duration in microseconds of the translate animation if a widget is outside the screen
 
 public:

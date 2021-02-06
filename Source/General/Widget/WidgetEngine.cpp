@@ -124,6 +124,9 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
   }
   c->setGraphicColorValue(path + "/ActiveColor",GraphicColor(config.getActiveColor().getRed(),config.getActiveColor().getGreen(),config.getActiveColor().getBlue(),config.getActiveColor().getAlpha()),__FILE__, __LINE__);
   c->setGraphicColorValue(path + "/InactiveColor",GraphicColor(config.getInactiveColor().getRed(),config.getInactiveColor().getGreen(),config.getInactiveColor().getBlue(),config.getInactiveColor().getAlpha()),__FILE__, __LINE__);
+  if (config.getHasSafetyColor()) {
+    c->setGraphicColorValue(path + "/SafetyColor",GraphicColor(config.getSafetyColor().getRed(),config.getSafetyColor().getGreen(),config.getSafetyColor().getBlue(),config.getSafetyColor().getAlpha()),__FILE__, __LINE__);
+  }
   if (config.getType()==WidgetTypeNavigation)
     c->setGraphicColorValue(path + "/BusyColor",GraphicColor(config.getBusyColor().getRed(),config.getBusyColor().getGreen(),config.getBusyColor().getBlue(),config.getBusyColor().getAlpha()),__FILE__, __LINE__);
   if (config.getType()==WidgetTypeEBike) {
@@ -1453,13 +1456,15 @@ void WidgetEngine::createGraphic() {
     if (deviceName=="Default") {
       config=WidgetConfig();
       config.setPageName("Finger Menu");
-      config.setName("Delete Path");
+      config.setName("Trash Path");
       config.setType(WidgetTypeButton);
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setSafetyColor(GraphicColor(255,63,63,255));
       config.setParameter("iconFilename","delete");
       config.setParameter("command","trashPath()");
       config.setParameter("repeat","0");
+      config.setParameter("safetyStepDuration","3000000");
       addWidgetToPage(config);
     }
   }
@@ -1637,6 +1642,11 @@ void WidgetEngine::createGraphic() {
         if (longPressCommand!="unknown")
           button->setLongPressCommand(longPressCommand);
         button->setRepeat(c->getIntValue(widgetPath,"repeat",__FILE__, __LINE__));
+        if (c->pathExists(widgetPath + "/SafetyColor", __FILE__, __LINE__)) {
+          button->setSafetyStep(true);
+          button->setSafetyStepColor(c->getGraphicColorValue(widgetPath + "/SafetyColor", __FILE__, __LINE__));
+          button->setSafetyStepDuration(c->getIntValue(widgetPath,"safetyStepDuration",__FILE__,__LINE__));
+        }
       }
       if (widgetType=="checkbox") {
         checkbox->setConfigPath(widgetPath);
@@ -1784,7 +1794,7 @@ void WidgetEngine::createGraphic() {
         if (*j=="Set Path Start Flag") { fingerMenuRowEntries[1]=primitive; skipPageAdd=true;  }
         if (*j=="Set Active Route")    { fingerMenuRowEntries[2]=primitive; skipPageAdd=true;  }
         if (*j=="Path Info Lock")      { fingerMenuRowEntries[3]=primitive; skipPageAdd=true;  }
-        if (*j=="Delete Path")         { fingerMenuRowEntries[4]=primitive; skipPageAdd=true;  }
+        if (*j=="Trash Path")          { fingerMenuRowEntries[4]=primitive; skipPageAdd=true;  }
         if (*j=="Cursor Info")         { fingerMenu->setCursorInfoWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
       }
       if (!skipPageAdd) {

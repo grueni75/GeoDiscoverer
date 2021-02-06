@@ -35,6 +35,9 @@ WidgetButton::WidgetButton(WidgetContainer *widgetContainer) : WidgetPrimitive(w
   longPressTime=0;
   repeat=true;
   skipCommand=false;
+  safetyState=false;
+  safetyStateStart=0;
+  safetyStateEnd=0;
 }
 
 // Destructor
@@ -62,6 +65,19 @@ bool WidgetButton::work(TimestampInMicroseconds t) {
   // Do the inherited stuff
   bool changed=WidgetPrimitive::work(t);
 
+  // Handle the color change
+  if (safetyState) {
+    if ((safetyStateStart!=0)&&(t>=safetyStateStart)) {      
+      setFadeAnimation(t,getColor(),safetyStepColor,false,fadeDuration);      
+      safetyStateStart=0;
+    } else {
+      if (t>=safetyStateEnd) {
+        setFadeAnimation(t,getColor(),activeColor,false,fadeDuration);
+        safetyState=false;
+      }
+    }
+  }
+  
   // Handle button presses
   if (getIsSelected()) {
 
@@ -86,6 +102,18 @@ void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cance
   WidgetPrimitive::onTouchUp(t,x,y,cancel);
   if (getIsHit()) {
 
+    // Frist check if we are allowed to execute
+    if (safetyStep) { 
+      if (!safetyState) {
+        safetyState=true;
+        safetyStateStart=t+fadeDuration;
+        safetyStateEnd=safetyStateStart+safetyStepDuration;
+        return;
+      } else {
+        safetyState=false;
+      }
+    }
+
     // Execute the command only if the repeating dispatching has not yet started
     if ((!skipCommand)&&((!repeat)||(t<nextDispatchTime))) {
       core->getCommander()->execute(command);
@@ -93,6 +121,5 @@ void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cance
     skipCommand=false;
   }
 }
-
 
 }

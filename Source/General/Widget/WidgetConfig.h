@@ -54,6 +54,10 @@ class WidgetConfig {
   // Busy color
   GraphicColor busyColor;
 
+  // Safety color
+  GraphicColor safetyColor;
+  bool hasSafetyColor;
+
   // Gauge colors
   GraphicColor gaugeBackgroundColor;
   GraphicColor gaugeForegroundColor;
@@ -83,6 +87,19 @@ public:
 
   void setInactiveColor(const GraphicColor& inactiveColor) {
     this->inactiveColor = inactiveColor;
+  }
+
+  const GraphicColor& getSafetyColor() const {
+    return safetyColor;
+  }
+
+  void setSafetyColor(const GraphicColor& safetyColor) {
+    this->safetyColor = safetyColor;
+    hasSafetyColor = true;
+  }
+
+  bool getHasSafetyColor() {
+    return hasSafetyColor;
   }
 
   const GraphicColor& getBusyColor() const {

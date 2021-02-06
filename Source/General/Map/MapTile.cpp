@@ -30,6 +30,7 @@
 #include <GraphicPointBuffer.h>
 #include <GraphicLine.h>
 #include <GraphicRectangleList.h>
+#include <NavigationPathSegment.h>
 
 namespace GEODISCOVERER {
 

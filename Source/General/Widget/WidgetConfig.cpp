@@ -28,6 +28,7 @@ namespace GEODISCOVERER {
 // Constructor
 WidgetConfig::WidgetConfig() {
   type=WidgetTypePrimitive;
+  hasSafetyColor=false;
 }
 
 // Destructor
