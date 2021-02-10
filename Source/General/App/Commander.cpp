@@ -539,6 +539,16 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="resetPathStartFlag") {
+    Int nearestPathIndex;
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(&nearestPathIndex,NULL);
+    if (nearestPath==NULL) {
+      WARNING("cannot set start flag: no path near to the current map center found",NULL);
+    } else {
+      core->getNavigationEngine()->setStartFlag(nearestPath,-1,__FILE__, __LINE__);
+    }
+    cmdExecuted=true;
+  }
   if (cmdName=="setPathEndFlag") {
     Int nearestPathIndex;
     NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(&nearestPathIndex,NULL);
@@ -546,6 +556,16 @@ std::string Commander::execute(std::string cmd) {
       WARNING("cannot set end flag: no path near to the current map center found",NULL);
     } else {
       core->getNavigationEngine()->setEndFlag(nearestPath,nearestPathIndex,__FILE__, __LINE__);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="resetPathEndFlag") {
+    Int nearestPathIndex;
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(&nearestPathIndex,NULL);
+    if (nearestPath==NULL) {
+      WARNING("cannot set end flag: no path near to the current map center found",NULL);
+    } else {
+      core->getNavigationEngine()->setEndFlag(nearestPath,-1,__FILE__, __LINE__);
     }
     cmdExecuted=true;
   }

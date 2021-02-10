@@ -1203,6 +1203,7 @@ void WidgetEngine::createGraphic() {
         config.setInactiveColor(GraphicColor(255,255,255,100));
         config.setParameter("iconFilename","setPathEndFlag");
         config.setParameter("command","setPathEndFlag()");
+        config.setParameter("longPressCommand","resetPathEndFlag()");
         config.setParameter("repeat","0");
         addWidgetToPage(config);
         config.setPageName("Finger Menu");
@@ -1234,6 +1235,7 @@ void WidgetEngine::createGraphic() {
         config.setInactiveColor(GraphicColor(255,255,255,100));
         config.setParameter("iconFilename","setPathStartFlag");
         config.setParameter("command","setPathStartFlag()");
+        config.setParameter("longPressCommand","resetPathStartFlag()");
         config.setParameter("repeat","0");
         addWidgetToPage(config);
         config.setPageName("Finger Menu");

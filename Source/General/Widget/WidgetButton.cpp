@@ -38,6 +38,7 @@ WidgetButton::WidgetButton(WidgetContainer *widgetContainer) : WidgetPrimitive(w
   safetyState=false;
   safetyStateStart=0;
   safetyStateEnd=0;
+  safetyStep=false;
 }
 
 // Destructor
