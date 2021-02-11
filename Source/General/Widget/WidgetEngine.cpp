@@ -2268,12 +2268,12 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
     if (nearestPath==path)
       nearestPath=NULL;
   }
+  core->getThread()->unlockMutex(accessMutex);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onPathChange(currentPage==i->second ? true : false, path, changeType);
   }
   if (fingerMenu) fingerMenu->onPathChange(currentPage==i->second ? true : false, path, changeType);
-  core->getThread()->unlockMutex(accessMutex);
 
   // Then update the nearest path  
   MapPosition pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
@@ -2285,13 +2285,11 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
 
 // Informs the engine that some data has changed
 void WidgetEngine::onDataChange() {
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onDataChange();
   }
   if (fingerMenu) fingerMenu->onDataChange();
-  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Sets the widgets of the current page active

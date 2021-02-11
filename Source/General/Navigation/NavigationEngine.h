@@ -26,6 +26,7 @@
 #include <GraphicPosition.h>
 #include <NavigationInfo.h>
 #include <MapPosition.h>
+#include <GraphicEngine.h>
 
 #ifndef NAVIGATIONENGINE_H_
 #define NAVIGATIONENGINE_H_
@@ -164,9 +165,6 @@ protected:
 
   // List of address points
   std::list<NavigationPoint> addressPoints;
-
-  // Mutex for accessing the address points
-  ThreadMutexInfo *addressPointsMutex;
 
   // Stores the nearest address point
   NavigationPoint nearestAddressPoint;
@@ -467,12 +465,12 @@ public:
 
   std::list<NavigationPoint>  *lockAddressPoints(const char *file, int line)
   {
-    core->getThread()->lockMutex(addressPointsMutex, file, line);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
     return &addressPoints;
   }
   void unlockAddressPoints()
   {
-    core->getThread()->unlockMutex(addressPointsMutex);
+    core->getDefaultGraphicEngine()->unlockDrawing();
   }
 
   void getArrowInfo(bool &visible, double &angle) {
@@ -481,9 +479,9 @@ public:
   }
 
   const std::string getOverlayGraphicHash() const {
-    core->getThread()->lockMutex(addressPointsMutex, __FILE__, __LINE__);
+    core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
     std::string hash=overlayGraphicHash;
-    core->getThread()->unlockMutex(addressPointsMutex);
+    core->getDefaultGraphicEngine()->unlockDrawing();
     return hash;
   }
 };
