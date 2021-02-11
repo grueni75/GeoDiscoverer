@@ -1992,23 +1992,19 @@ void WidgetEngine::deinit() {
 // Called when the screen is touched
 bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
-  // Only one thread please
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
-
   // Do we have an active page?
   if (!currentPage) {
-    core->getThread()->unlockMutex(accessMutex);
     return false;
   }
 
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
-    core->getThread()->unlockMutex(accessMutex);
     return false;
   }
 
   // First check if a widget in the finger menu was touched
   if ((fingerMenu)&&(fingerMenu->onTouchDown(t,x,y))) {
+    core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
     isTouched=false;
     core->getThread()->unlockMutex(accessMutex);
     GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
@@ -2019,12 +2015,14 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
     // Then check if widget on page is touched
     if (currentPage->onTouchDown(t,x,y)) {
+      core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
       isTouched=false;
       core->getThread()->unlockMutex(accessMutex);
       return true;
     }
 
     // Check if we should show the context menu
+    core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
     if (isTouched) {
       if ((abs(lastTouchDownX-x)<=contextMenuAllowedPixelJitter)&&(abs(lastTouchDownY-y)<=contextMenuAllowedPixelJitter)) {
         if (t-firstStableTouchDownTime >= contextMenuDelay) {
@@ -2045,59 +2043,43 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     }
     lastTouchDownX=x;
     lastTouchDownY=y;
+    core->getThread()->unlockMutex(accessMutex);
   }
-
-  // Allow access by the next thread
-  core->getThread()->unlockMutex(accessMutex);
 
   return false;
 }
 
 // Called when the screen is untouched
 bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
-
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   if (!currentPage) {
-    core->getThread()->unlockMutex(accessMutex);
     return false;
   }
   if (t<=ignoreTouchesEnd) {
-    core->getThread()->unlockMutex(accessMutex);
     return false;
   }
   deselectPage();
   currentPage->onTouchUp(t,x,y,cancel);
   if (fingerMenu) fingerMenu->onTouchUp(t,x,y,cancel);
-  core->getThread()->unlockMutex(accessMutex);
   return true;
 }
 
 // Called when the screen is touched
 bool WidgetEngine::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff) {
 
-  // Only one thread please
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
-
   // Do we have an active page?
   if (!currentPage) {
-    core->getThread()->unlockMutex(accessMutex);
     return false;
   }
 
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
-    core->getThread()->unlockMutex(accessMutex);
     return false;
   }
 
   // First check if a widget on the page was touched
   if (currentPage->onTwoFingerGesture(t,dX,dY,angleDiff,scaleDiff)) {
-    core->getThread()->unlockMutex(accessMutex);
     return true;
   }
-
-  // Allow access by the next thread
-  core->getThread()->unlockMutex(accessMutex);
 
   return false;
 }

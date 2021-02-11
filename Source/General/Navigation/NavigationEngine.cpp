@@ -69,7 +69,6 @@ NavigationEngine::NavigationEngine() :
   routesMutex=core->getThread()->createMutex("navigation engine routes mutex");
   locationPosMutex=core->getThread()->createMutex("navigation engine location pos mutex");
   compassBearingMutex=core->getThread()->createMutex("navigation engine compass bearing mutex");
-  updateGraphicsMutex=core->getThread()->createMutex("navigation engine update graphics mutex");
   recordTrack=core->getConfigStore()->getIntValue("Navigation","recordTrack", __FILE__, __LINE__);
   compassBearing=0;
   isInitialized=false;
@@ -198,7 +197,6 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(routesMutex);
   core->getThread()->destroyMutex(locationPosMutex);
   core->getThread()->destroyMutex(compassBearingMutex);
-  core->getThread()->destroyMutex(updateGraphicsMutex);
   core->getThread()->destroyMutex(statusMutex);
   core->getThread()->destroyMutex(targetPosMutex);
   core->getThread()->destroyMutex(backgroundLoaderFinishedMutex);
@@ -703,18 +701,12 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   MapPosition mapPos;
   MapEngine *mapEngine=core->getMapEngine();
 
-  // Ensure that only one thread is executing this function at most
-  //DEBUG("before graphics update",NULL);
-  core->getThread()->lockMutex(updateGraphicsMutex, __FILE__, __LINE__);
-
   // We need a map tile to compute the coordinates
   //DEBUG("before map pos lock",NULL);
   mapPos=*(mapEngine->lockMapPos(__FILE__, __LINE__));
   mapEngine->unlockMapPos();
   //DEBUG("after map pos lock",NULL);
   if (!mapPos.getMapTile()) {
-    core->getThread()->unlockMutex(updateGraphicsMutex);
-    //DEBUG("after graphics update",NULL);
     return;
   }
 
@@ -1080,10 +1072,6 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     (*i).updateVisualization(t,mapPos,displayArea);
   }
   core->getThread()->unlockMutex(addressPointsMutex);
-
-  // Unlock the drawing mutex
-  core->getThread()->unlockMutex(updateGraphicsMutex);
-  //DEBUG("after graphics update",NULL);
 }
 
 // Updates navigation-related graphic that is overlayed on the map

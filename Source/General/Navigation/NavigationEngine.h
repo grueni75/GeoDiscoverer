@@ -75,9 +75,6 @@ protected:
   // Mutex for accessing the routes
   ThreadMutexInfo *routesMutex;
 
-  // Mutex for accessing the drawing function
-  ThreadMutexInfo *updateGraphicsMutex;
-
   // Required minimum navigationDistance in meter to the last track point such that the point is added to the track
   double trackRecordingMinDistance;
 
