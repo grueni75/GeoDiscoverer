@@ -246,7 +246,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   std::list<MapTile*> foundTiles;
 
   // Get the list of tiles in the area
-  core->getMapSource()->fillGeographicAreaWithTiles(area, preferredNeighbor, maxTiles, &foundTiles, &abortUpdate);
+  core->getMapSource()->fillGeographicAreaWithTiles(area, preferredNeighbor, maxTiles, &foundTiles);
 
   // Go through all found ones
   for (std::list<MapTile*>::iterator i=foundTiles.begin();i!=foundTiles.end();i++) {

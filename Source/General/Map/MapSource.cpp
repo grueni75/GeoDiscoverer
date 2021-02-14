@@ -1461,8 +1461,7 @@ void MapSource::remoteServer() {
         // Search for the map tile
         lockAccess(__FILE__,__LINE__);
         std::list<MapTile*> tiles;
-        bool abortUpdate=false;
-        fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,&tiles,&abortUpdate);
+        fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,&tiles);
         //DEBUG("tiles.size()=%d",tiles.size());
         for (std::list<MapTile*>::iterator i=tiles.begin();i!=tiles.end();i++) {
           MapTile *t=*i;
@@ -1629,13 +1628,7 @@ bool MapSource::addOverlayArchive(std::string path, std::string hash) {
 }
 
 // Fills the given area with tiles
-void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abort) {
-
-  // If an abort has been requested, stop here
-  if (*abort) {
-    //DEBUG("update aborted",NULL);
-    return;
-  }
+void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles) {
 
   // Check if the area is plausible
   if (area.getYNorth()<area.getYSouth()) {
@@ -1734,7 +1727,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in north west quadrant",NULL);
   if (nw!=area)
-    MapSource::fillGeographicAreaWithTiles(nw,tile,maxTiles,tiles,abort);
+    MapSource::fillGeographicAreaWithTiles(nw,tile,maxTiles,tiles);
   MapArea n=area;
   if (searchedYNorth>=area.getYSouth()) {
     n.setYSouth(searchedYNorth+1);
@@ -1750,7 +1743,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in north quadrant",NULL);
   if (n!=area)
-    MapSource::fillGeographicAreaWithTiles(n,tile,maxTiles,tiles,abort);
+    MapSource::fillGeographicAreaWithTiles(n,tile,maxTiles,tiles);
   MapArea ne=area;
   if (searchedYNorth>=area.getYSouth()) {
     ne.setYSouth(searchedYNorth+1);
@@ -1762,7 +1755,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in north east quadrant",NULL);
   if (ne!=area)
-    MapSource::fillGeographicAreaWithTiles(ne,tile,maxTiles,tiles,abort);
+    MapSource::fillGeographicAreaWithTiles(ne,tile,maxTiles,tiles);
   MapArea e=area;
   if (searchedYNorth<area.getYNorth()) {
     e.setYNorth(searchedYNorth);
@@ -1778,7 +1771,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in east quadrant",NULL);
   if (e!=area)
-    MapSource::fillGeographicAreaWithTiles(e,tile,maxTiles,tiles,abort);
+    MapSource::fillGeographicAreaWithTiles(e,tile,maxTiles,tiles);
   MapArea se=area;
   if (searchedYSouth<=area.getYNorth()) {
     se.setYNorth(searchedYSouth-1);
@@ -1790,7 +1783,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in south east quadrant",NULL);
   if (se!=area)
-    MapSource::fillGeographicAreaWithTiles(se,tile,maxTiles,tiles,abort);
+    MapSource::fillGeographicAreaWithTiles(se,tile,maxTiles,tiles);
   MapArea s=area;
   if (searchedYSouth<=area.getYNorth()) {
     s.setYNorth(searchedYSouth-1);
@@ -1806,7 +1799,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in south quadrant",NULL);
   if (s!=area)
-    MapSource::fillGeographicAreaWithTiles(s,tile,maxTiles,tiles,abort);
+    MapSource::fillGeographicAreaWithTiles(s,tile,maxTiles,tiles);
   MapArea sw=area;
   if (searchedYSouth<=area.getYNorth()) {
     sw.setYNorth(searchedYSouth-1);
@@ -1818,7 +1811,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in south west quadrant",NULL);
   if (sw!=area)
-    MapSource::fillGeographicAreaWithTiles(sw,tile,maxTiles,tiles,abort);
+    MapSource::fillGeographicAreaWithTiles(sw,tile,maxTiles,tiles);
   MapArea w=area;
   if (searchedYNorth<area.getYNorth()) {
     w.setYNorth(searchedYNorth);
@@ -1834,7 +1827,7 @@ void MapSource::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
   }
   //DEBUG("search for new tile in west quadrant",NULL);
   if (w!=area)
-    MapSource::fillGeographicAreaWithTiles(w,tile,maxTiles,tiles,abort);
+    MapSource::fillGeographicAreaWithTiles(w,tile,maxTiles,tiles);
 }
 
 // Creates all graphics

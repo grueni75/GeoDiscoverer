@@ -545,7 +545,7 @@ std::string Commander::execute(std::string cmd) {
     if (nearestPath==NULL) {
       WARNING("cannot set start flag: no path near to the current map center found",NULL);
     } else {
-      core->getNavigationEngine()->setStartFlag(nearestPath,-1,__FILE__, __LINE__);
+      core->getNavigationEngine()->setStartFlag(nearestPath,-2,__FILE__, __LINE__);
     }
     cmdExecuted=true;
   }
@@ -565,7 +565,7 @@ std::string Commander::execute(std::string cmd) {
     if (nearestPath==NULL) {
       WARNING("cannot set end flag: no path near to the current map center found",NULL);
     } else {
-      core->getNavigationEngine()->setEndFlag(nearestPath,-1,__FILE__, __LINE__);
+      core->getNavigationEngine()->setEndFlag(nearestPath,-2,__FILE__, __LINE__);
     }
     cmdExecuted=true;
   }

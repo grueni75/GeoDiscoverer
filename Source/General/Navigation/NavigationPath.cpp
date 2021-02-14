@@ -1021,6 +1021,11 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
     //DEBUG("startIndex=%d",startIndex);
   } else {
 
+    // Shall the start flag be resetted?
+    if (index==-2) {
+      index = reverse ? mapPositions.size()-1 : 0;
+    }
+
     // First check if start flag is within range of path
     //DEBUG("index=%d",index);
     if (index<0)
@@ -1081,6 +1086,11 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
     endIndex=-1;
     //DEBUG("endIndex=%d",startIndex);
   } else {
+
+    // Shall the end flag be resetted?
+    if (index==-2) {
+      index = reverse ? 0 : mapPositions.size()-1;
+    }
 
     // First check if end flag is within range of path
     //DEBUG("index=%d",index);

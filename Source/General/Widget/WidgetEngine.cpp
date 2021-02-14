@@ -2183,7 +2183,7 @@ void WidgetEngine::updateNearestPath(MapPosition mapPos, std::list<MapTile*> *ce
   if (!core->getMapEngine()->calculateMaxDistanceInMeters(maxPathDistance,overlapInMeters)) {
     overlapInMeters=0;
   }
-  //DEBUG("mapPos=(%f,%f)",mapPos.getLat(),mapPos.getLng());
+  //DEBUG("mapPos=(%f,%f) centerMapTiles.size()=%d",mapPos.getLat(),mapPos.getLng(),centerMapTiles->size());
 
   // Find the nearest path in the currently visible map tile
   NavigationPath *nearestPath=NULL;
@@ -2207,7 +2207,8 @@ void WidgetEngine::updateNearestPath(MapPosition mapPos, std::list<MapTile*> *ce
         if ((visPos!=NavigationPath::getPathInterruptedPos())&&(prevVisPos!=NavigationPath::getPathInterruptedPos())) {
           //DEBUG("j=%d",j);
           MapPosition normalPos;
-          double d=visPos.computeNormalDistance(prevVisPos,mapPos,overlapInMeters,true,false,&normalPos);            
+          double d=visPos.computeNormalDistance(prevVisPos,mapPos,overlapInMeters,true,false,&normalPos);   
+          //DEBUG("d=%f minDistance=%f",d,minDistance);         
           if ((d!=std::numeric_limits<double>::max())&&(d<minDistance)) {
             /*d=visPos.computeNormalDistance(prevVisPos,mapPos,overlapInMeters,true,true,&normalPos);           
             DEBUG("d=%f",d); */

@@ -1453,7 +1453,7 @@ public class ViewMap extends GDActivity {
     builder.cancelable(true);
     builder.items(items);
     builder.positiveText(R.string.finished);
-    builder.negativeText(R.string.cancel);
+    builder.negativeText(R.string.cancel);  
     builder.itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
       @Override
       public boolean onSelection(MaterialDialog dialog, Integer[] which,

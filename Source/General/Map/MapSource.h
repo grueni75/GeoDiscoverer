@@ -157,7 +157,7 @@ public:
   std::list<MapContainer*> findMapContainersByGeographicCoordinate(MapPosition pos, Int zoomLevel=0);
 
   // Fills the given area with tiles
-  virtual void fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles, bool *abort);
+  virtual void fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles);
 
   // Initializes the progress bar
   void openProgress(std::string title, Int valueMax);
