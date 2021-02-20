@@ -436,6 +436,9 @@ void NavigationEngine::deinit() {
   for (std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
     deletePath(*i);
   }
+  for (std::list<NavigationPath*>::iterator i=unusedRoutes.begin();i!=unusedRoutes.end();i++) {
+    deletePath(*i);
+  }
   routes.clear();
   unlockRoutes();
 
@@ -2069,6 +2072,7 @@ void NavigationEngine::trashPath(NavigationPath *path) {
   // Then remove the path from the route list
   lockRoutes(__FILE__, __LINE__);
   routes.remove(path);
+  unusedRoutes.push_back(path);
   unlockRoutes();
 
   // Remove the flags
@@ -2091,8 +2095,9 @@ void NavigationEngine::trashPath(NavigationPath *path) {
   core->onMapChange(pos,centerMapTiles);
   core->getMapEngine()->unlockCenterMapTiles();
 
-  // Delete the path from memory
-  deletePath(path);
+  // Deinit the path
+  core->onPathChange(path,NavigationPathChangeTypeWillBeRemoved);
+  path->deinit();
 }
   
 }

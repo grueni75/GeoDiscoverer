@@ -67,8 +67,11 @@ protected:
   // Mutex for accessing the current track
   ThreadMutexInfo *recordedTrackMutex;
 
-  // Routes
+  // Routes still in use
   std::list<NavigationPath*> routes;
+
+  // Routes that are not used anymore
+  std::list<NavigationPath*> unusedRoutes;
 
   // Active route that is for navigation
   NavigationPath *activeRoute;
