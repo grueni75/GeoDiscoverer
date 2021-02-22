@@ -110,6 +110,7 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   batteryLevel=0;
   remoteBatteryCharging=false;
   remoteBatteryLevel=0;
+  dashboardDevicesReadAccessCount=0;
 
   // Create core objects that are required early
   if (!(thread=new Thread())) {
@@ -477,7 +478,7 @@ void Core::addDashboardDevice(std::string host, Int port) {
   // First check if device already exists
   std::stringstream name;
   name << host << ":" << port;
-  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  dashboardDevicesLockAccessAfterReadComplete(__FILE__,__LINE__);
   for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
     Device *d = *i;
     if (d->getName()==name.str()) {
@@ -507,7 +508,7 @@ void Core::addDashboardDevice(std::string host, Int port) {
   d->closeSocket();
 
   // Add the device
-  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  dashboardDevicesLockAccessAfterReadComplete(__FILE__,__LINE__);
   DEBUG("adding device %04x",d);
   dashboardDevices.push_back(d);
   core->getThread()->unlockMutex(dashboardDevicesMutex);
@@ -544,9 +545,9 @@ void Core::updateDashboardScreens() {
     //DEBUG("sleepTime=%d",sleepTime);
 
     // Get all devices
-    core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+    dashboardDevicesReadAccessStart(__FILE__,__LINE__);
     std::list<Device*> devices = dashboardDevices;
-    core->getThread()->unlockMutex(dashboardDevicesMutex);
+    dashboardDevicesReadAccessStop();
 
     // Create a new EGL context if required
     bool createGraphic=false;
@@ -586,9 +587,9 @@ void Core::updateDashboardScreens() {
     }
 
     // Shutdown the context if devices were removed to prevent resource leaks
-    core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+    dashboardDevicesLockAccessAfterReadComplete(__FILE__,__LINE__);
     if (devicesToBeRemoved.size()>0) {
-      for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
+      for (std::list<Device*>::iterator i=devicesToBeRemoved.begin();i!=devicesToBeRemoved.end();i++) {
         Device *d=*i;
         DEBUG("destroying device 0x%04x",d);
         d->destroyGraphic(false);
@@ -612,7 +613,7 @@ void Core::updateDashboardScreens() {
   }
 
   // Destroy the screens of the devices
-  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  dashboardDevicesLockAccessAfterReadComplete(__FILE__,__LINE__);
   for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
     Device *d = *i;
     d->destroyGraphic(false);
@@ -941,50 +942,78 @@ GraphicEngine *Core::getDefaultGraphicEngine() {
 // Informs the engines that the map has changed
 void Core::onMapChange(MapPosition pos, std::list<MapTile*> *centerMapTiles) {
   defaultDevice->getWidgetEngine()->onMapChange(pos,centerMapTiles);
-  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  dashboardDevicesReadAccessStart(__FILE__,__LINE__);
   for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
     if (((*i)->isInitDone())&&((*i)->getWidgetEngine())) {
       (*i)->getWidgetEngine()->onMapChange(pos,centerMapTiles);
     }
   }
-  core->getThread()->unlockMutex(dashboardDevicesMutex);
+  dashboardDevicesReadAccessStop();
 }
 
 // Informs the engines that the location has changed
 void Core::onLocationChange(MapPosition mapPos) {
   defaultDevice->getWidgetEngine()->onLocationChange(mapPos);
-  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  dashboardDevicesReadAccessStart(__FILE__,__LINE__);
   for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
     if (((*i)->isInitDone())&&((*i)->getWidgetEngine())) {
       (*i)->getWidgetEngine()->onLocationChange(mapPos);
     }
   }
-  core->getThread()->unlockMutex(dashboardDevicesMutex);
+  dashboardDevicesReadAccessStop();
 }
 
 // Informs the engines that a path has changed
 void Core::onPathChange(NavigationPath *path, NavigationPathChangeType changeType) {
   defaultDevice->getWidgetEngine()->onPathChange(path,changeType);
-  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  dashboardDevicesReadAccessStart(__FILE__,__LINE__);
   for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
     if (((*i)->isInitDone())&&((*i)->getWidgetEngine())) {
       (*i)->getWidgetEngine()->onPathChange(path,changeType);
     }
   }
-  core->getThread()->unlockMutex(dashboardDevicesMutex);
+  dashboardDevicesReadAccessStop();
 }
 
 // Informs the engines that some data has changed
 void Core::onDataChange() {
   defaultDevice->getWidgetEngine()->onDataChange();
-  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  dashboardDevicesReadAccessStart(__FILE__,__LINE__);
   for (std::list<Device*>::iterator i=dashboardDevices.begin();i!=dashboardDevices.end();i++) {
     if (((*i)->isInitDone())&&((*i)->getWidgetEngine())) {
       (*i)->getWidgetEngine()->onDataChange();
     }
   }
+  dashboardDevicesReadAccessStop();
+}
+
+// Indicates that a read access has started
+void Core::dashboardDevicesReadAccessStart(const char *file, int line) {
+  core->getThread()->lockMutex(dashboardDevicesMutex,file,line);
+  dashboardDevicesReadAccessCount++;
   core->getThread()->unlockMutex(dashboardDevicesMutex);
 }
 
+// Indicates that a read access has ended
+void Core::dashboardDevicesReadAccessStop() {
+  core->getThread()->lockMutex(dashboardDevicesMutex,__FILE__,__LINE__);
+  dashboardDevicesReadAccessCount--;
+  if (dashboardDevicesReadAccessCount<0) {
+    FATAL("too many dashboard devices read access stops",NULL);
+  }
+  core->getThread()->unlockMutex(dashboardDevicesMutex);
+}
+
+// Waits until all read accesses are over
+void Core::dashboardDevicesLockAccessAfterReadComplete(const char *file, int line) {
+  core->getThread()->lockMutex(dashboardDevicesMutex,file,line);
+  while (true) {
+    if (dashboardDevicesReadAccessCount<=0)
+      break;
+    core->getThread()->unlockMutex(dashboardDevicesMutex);
+    usleep(1);
+    core->getThread()->lockMutex(dashboardDevicesMutex,file,line);
+  } 
+}
 
 }

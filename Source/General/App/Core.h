@@ -153,6 +153,9 @@ protected:
   // Used to control access to the devices list
   ThreadMutexInfo *dashboardDevicesMutex;
 
+  // Number of read accesses to the dashboard device list
+  int dashboardDevicesReadAccessCount;
+
   // Indicates if the core is initialized
   bool isInitialized;
 
@@ -204,6 +207,15 @@ protected:
 
   // Inits cURL
   void initCURL();
+
+  // Indicates that a read access has started
+  void dashboardDevicesReadAccessStart(const char *file, int line);
+
+  // Indicates that a read access has ended
+  void dashboardDevicesReadAccessStop();
+
+  // Waits until all read accesses are over
+  void dashboardDevicesLockAccessAfterReadComplete(const char *file, int line);
 
 public:
 

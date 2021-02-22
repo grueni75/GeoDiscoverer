@@ -70,6 +70,7 @@ WidgetEngine::WidgetEngine(Device *device) :
   nearestPath=NULL;
   nearestPathIndex=-1;
   accessMutex=core->getThread()->createMutex("widget engine access mutex");
+  readAccessCount=0;
   fingerMenu=NULL;
   if (enableFingerMenu) {
     if (!(fingerMenu=new WidgetFingerMenu(this))) {
@@ -161,8 +162,8 @@ void WidgetEngine::createGraphic() {
 
   ConfigStore *c=core->getConfigStore();
 
-  // Only one thread please
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  // Wait until all read accesses are over
+  lockAccessAfterReadComplete(__FILE__,__LINE__);
 
   // Get all widget pages
   // If no exist, create the default ones
@@ -1868,7 +1869,7 @@ void WidgetEngine::createGraphic() {
 void WidgetEngine::updateWidgetPositions() {
 
   // Only one thread please
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  lockAccessAfterReadComplete(__FILE__,__LINE__);
 
   // CLose the finger menu
   closeFingerMenu();
@@ -1962,7 +1963,7 @@ void WidgetEngine::deinit() {
   getGraphicEngine()->unlockDrawing();
 
   // Only one thread
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  lockAccessAfterReadComplete(__FILE__,__LINE__);
 
   // No page is active
   currentPage=NULL;
@@ -1992,13 +1993,18 @@ void WidgetEngine::deinit() {
 // Called when the screen is touched
 bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
+  // Indicate access to the object
+  readAccessStart(__FILE__,__LINE__);
+
   // Do we have an active page?
   if (!currentPage) {
+    readAccessStop();
     return false;
   }
 
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
+    readAccessStop();
     return false;
   }
 
@@ -2010,6 +2016,7 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
     visPos->updateLastUserModification();
     core->getDefaultGraphicEngine()->unlockPos();
+    readAccessStop();
     return true;
   } else {
 
@@ -2018,6 +2025,7 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
       core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
       isTouched=false;
       core->getThread()->unlockMutex(accessMutex);
+      readAccessStop();
       return true;
     }
 
@@ -2046,48 +2054,67 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     core->getThread()->unlockMutex(accessMutex);
   }
 
+  // Read is over
+  readAccessStop();
+  
   return false;
 }
 
 // Called when the screen is untouched
 bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel) {
+  readAccessStart(__FILE__,__LINE__);
   if (!currentPage) {
+    readAccessStop();
     return false;
   }
   if (t<=ignoreTouchesEnd) {
+    readAccessStop();
     return false;
   }
   deselectPage();
   currentPage->onTouchUp(t,x,y,cancel);
   if (fingerMenu) fingerMenu->onTouchUp(t,x,y,cancel);
+  readAccessStop();
   return true;
 }
 
 // Called when the screen is touched
 bool WidgetEngine::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY, double angleDiff, double scaleDiff) {
 
+  // Indicate access to the object
+  readAccessStart(__FILE__,__LINE__);
+
   // Do we have an active page?
   if (!currentPage) {
+    readAccessStop();
     return false;
   }
 
   // Shall we ignore touches?
   if (t<=ignoreTouchesEnd) {
+    readAccessStop();
     return false;
   }
 
   // First check if a widget on the page was touched
   if (currentPage->onTwoFingerGesture(t,dX,dY,angleDiff,scaleDiff)) {
+    readAccessStop();
     return true;
   }
 
+
+  // Read access is over
+  readAccessStop();
+  
   return false;
 }
 
 // Deselects the currently selected page
 void WidgetEngine::deselectPage() {
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   isTouched=false;
   touchOpenedFingerMenu=false;
+  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Sets a new page
@@ -2240,24 +2267,24 @@ void WidgetEngine::onMapChange(MapPosition mapPos, std::list<MapTile*> *centerMa
   updateNearestPath(mapPos,centerMapTiles);
 
   // Inform the widget
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  readAccessStart(__FILE__,__LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onMapChange(currentPage==i->second ? true : false, mapPos);
   }
   if (fingerMenu) fingerMenu->onMapChange(currentPage==i->second ? true : false, mapPos);
-  core->getThread()->unlockMutex(accessMutex);
+  readAccessStop();
 }
 
 // Informs the engine that the location has changed
 void WidgetEngine::onLocationChange(MapPosition mapPos) {
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  readAccessStart(__FILE__,__LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onLocationChange(currentPage==i->second ? true : false, mapPos);
   }
   if (fingerMenu) fingerMenu->onLocationChange(currentPage==i->second ? true : false, mapPos);
-  core->getThread()->unlockMutex(accessMutex);
+  readAccessStop();
 }
 
 // Informs the engine that a path has changed
@@ -2270,11 +2297,13 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
       nearestPath=NULL;
   }
   core->getThread()->unlockMutex(accessMutex);
+  readAccessStart(__FILE__,__LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onPathChange(currentPage==i->second ? true : false, path, changeType);
   }
   if (fingerMenu) fingerMenu->onPathChange(currentPage==i->second ? true : false, path, changeType);
+  readAccessStop();
 
   // Then update the nearest path  
   MapPosition pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
@@ -2286,11 +2315,13 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
 
 // Informs the engine that some data has changed
 void WidgetEngine::onDataChange() {
+  readAccessStart(__FILE__,__LINE__);
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onDataChange();
   }
   if (fingerMenu) fingerMenu->onDataChange();
+  readAccessStop();
 }
 
 // Sets the widgets of the current page active
@@ -2367,5 +2398,35 @@ void WidgetEngine::toggleFingerMenu() {
     openFingerMenu();
   core->getThread()->unlockMutex(accessMutex);
 }
+
+// Indicates that a read access has started
+void WidgetEngine::readAccessStart(const char *file, int line) {
+  core->getThread()->lockMutex(accessMutex,file,line);
+  readAccessCount++;
+  core->getThread()->unlockMutex(accessMutex);
+}
+
+// Indicates that a read access has ended
+void WidgetEngine::readAccessStop() {
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  readAccessCount--;
+  if (readAccessCount<0) {
+    FATAL("too many read access stops",NULL);
+  }
+  core->getThread()->unlockMutex(accessMutex);
+}
+
+// Waits until all read accesses are over
+void WidgetEngine::lockAccessAfterReadComplete(const char *file, int line) {
+  core->getThread()->lockMutex(accessMutex,file,line);
+  while (true) {
+    if (readAccessCount<=0)
+      break;
+    core->getThread()->unlockMutex(accessMutex);
+    usleep(1);
+    core->getThread()->lockMutex(accessMutex,file,line);
+  } 
+}
+
 
 }

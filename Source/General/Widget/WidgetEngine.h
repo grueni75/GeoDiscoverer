@@ -63,6 +63,7 @@ protected:
   MapPosition nearestPathMapPos;                        // Position of the nearest point on the nearest path
   bool enableFingerMenu;                                // Indicates if finger menu is enabled
   Int maxPathDistance;                                  // Maximum distance in pixels to a path to show it to the user
+  int readAccessCount;                                  // Number of read accesses to this object
 
   // Adds a widget to a page
   void addWidgetToPage(WidgetConfig config);
@@ -72,6 +73,15 @@ protected:
 
   // Updates the nearest path
   void updateNearestPath(MapPosition mapPos, std::list<MapTile*> *centerMapTiles);
+
+  // Indicates that a read access has started
+  void readAccessStart(const char *file, int line);
+
+  // Indicates that a read access has ended
+  void readAccessStop();
+
+  // Waits until all read accesses are over
+  void lockAccessAfterReadComplete(const char *file, int line);
 
 public:
 
