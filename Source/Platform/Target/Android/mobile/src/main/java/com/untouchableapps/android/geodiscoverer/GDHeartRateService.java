@@ -289,7 +289,6 @@ public class GDHeartRateService {
 
           } else {
 
-
             // Handle the heart rate alarm
             try {
 
@@ -367,10 +366,6 @@ public class GDHeartRateService {
 
                 }
               }
-
-              // Wait for next round
-              Thread.sleep(1000);
-            } catch (InterruptedException e) {
             } catch (IOException e) {
               GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDAppHR", e.getMessage());
             }
@@ -397,6 +392,13 @@ public class GDHeartRateService {
               heartRateZoneChangeTimestamp = 0;
             }
             //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR",String.format("current heart rate zone: %d",currentHeartRateZone));
+          }
+
+          // Wait for next round
+          try {
+            Thread.sleep(1000);
+          }
+          catch (InterruptedException e) {
           }
         }
 
