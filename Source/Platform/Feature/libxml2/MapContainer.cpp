@@ -67,8 +67,8 @@ void MapContainer::writeCalibrationFile(ZipArchive *mapArchive)
     case MapCalibratorTypeSphericalNormalMercator:
       mapProjection="sphericalNormalMercator";
       break;
-    case MapCalibratorTypeProj4:
-      mapProjection="proj4";
+    case MapCalibratorTypeProj:
+      mapProjection="proj";
       break;
     default:
       FATAL("unsupported map calibrator type",NULL);
@@ -257,8 +257,8 @@ bool MapContainer::readGDMCalibrationFile()
             calibratorType=MapCalibratorTypeLinear;
           } else if ((mapProjection=="mercator")||(mapProjection=="sphericalNormalMercator")) {
             calibratorType=MapCalibratorTypeSphericalNormalMercator;
-          } else if (mapProjection=="proj4") {
-            calibratorType=MapCalibratorTypeProj4;
+          } else if ((mapProjection=="proj4")||(mapProjection=="proj")) {
+            calibratorType=MapCalibratorTypeProj;
           } else {
             ERROR("map projection <%s> defined in <%s> not supported",mapProjection.c_str(),calibrationFilePath);
             goto cleanup;
@@ -330,9 +330,9 @@ bool MapContainer::readGDMCalibrationFile()
   result=true;
 
   // Create the calibrator
-  if (calibratorType==MapCalibratorTypeProj4) {
+  if (calibratorType==MapCalibratorTypeProj) {
     if (!mapProjectionArgsFound) {
-      ERROR("map projection arguments not found for map projection type \"proj4\" in <$s>",calibrationFilePath);
+      ERROR("map projection arguments not found for map projection type \"proj\" in <$s>",calibrationFilePath);
       goto cleanup;
     }
   }

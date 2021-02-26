@@ -26,7 +26,7 @@
 
 namespace GEODISCOVERER {
 
-typedef enum { MapCalibratorTypeLinear=0, MapCalibratorTypeSphericalNormalMercator=1, MapCalibratorTypeProj4=2 } MapCalibratorType;
+typedef enum { MapCalibratorTypeLinear=0, MapCalibratorTypeSphericalNormalMercator=1, MapCalibratorTypeProj=2 } MapCalibratorType;
 
 class MapCalibrator {
 

@@ -1,0 +1,1 @@
+./configure --enable-tiff=no --with-curl=no

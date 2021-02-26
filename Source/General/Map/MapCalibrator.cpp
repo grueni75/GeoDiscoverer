@@ -25,7 +25,7 @@
 #include <MapPosition.h>
 #include <Storage.h>
 #include <MapCalibratorLinear.h>
-#include <MapCalibratorProj4.h>
+#include <MapCalibratorProj.h>
 #include <MapCalibratorSphericalNormalMercator.h>
 
 namespace GEODISCOVERER {
@@ -110,8 +110,8 @@ void MapCalibrator::store(std::ofstream *ofs) {
     case MapCalibratorTypeSphericalNormalMercator:
       size=sizeof(MapCalibratorSphericalNormalMercator);
       break;
-    case MapCalibratorTypeProj4:
-      size=sizeof(MapCalibratorProj4);
+    case MapCalibratorTypeProj:
+      size=sizeof(MapCalibratorProj);
       break;
     default:
       FATAL("map calibrator type not supported",NULL);
@@ -163,8 +163,8 @@ MapCalibrator *MapCalibrator::retrieve(char *&cacheData, Int &cacheSize) {
       }
 #endif
       break;
-    case MapCalibratorTypeProj4:
-      expectedSize=sizeof(MapCalibratorProj4);
+    case MapCalibratorTypeProj:
+      expectedSize=sizeof(MapCalibratorProj);
 #ifdef TARGET_LINUX
       if (expectedSize!=72) {
         FATAL("unknown size of object (%d), please adapt class storage",expectedSize);
@@ -235,8 +235,8 @@ MapCalibrator *MapCalibrator::newMapCalibrator(MapCalibratorType type) {
     case MapCalibratorTypeSphericalNormalMercator:
       return new MapCalibratorSphericalNormalMercator();
       break;
-    case MapCalibratorTypeProj4:
-      return new MapCalibratorProj4();
+    case MapCalibratorTypeProj:
+      return new MapCalibratorProj();
       break;
     default:
       FATAL("unsupported map calibration type",NULL);
@@ -260,9 +260,9 @@ MapCalibrator *MapCalibrator::newMapCalibrator(MapCalibratorType type, char *&ca
       size=sizeof(MapCalibratorSphericalNormalMercator);
       mapCalibrator=new(cacheData) MapCalibratorSphericalNormalMercator(true);
       break;
-    case MapCalibratorTypeProj4:
-      size=sizeof(MapCalibratorProj4);
-      mapCalibrator=new(cacheData) MapCalibratorProj4(true);
+    case MapCalibratorTypeProj:
+      size=sizeof(MapCalibratorProj);
+      mapCalibrator=new(cacheData) MapCalibratorProj(true);
       break;
     default:
       FATAL("unsupported map calibration type",NULL);

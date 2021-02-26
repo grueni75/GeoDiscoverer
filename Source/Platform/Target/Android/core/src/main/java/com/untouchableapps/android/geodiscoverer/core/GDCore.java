@@ -233,7 +233,9 @@ public class GDCore implements
     System.loadLibrary("gdpng");
     System.loadLibrary("gdopenssl");
     System.loadLibrary("gdcurl");
-    System.loadLibrary("gdproj4");
+    System.loadLibrary("gdproj");
+    System.loadLibrary("gdsqlite3");
+    System.loadLibrary("gdgdal");
     System.loadLibrary("gdcore");
   }
   

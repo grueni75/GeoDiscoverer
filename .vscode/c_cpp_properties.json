@@ -8,7 +8,7 @@
                 "${workspaceFolder}/Source/Platform/Feature/libfreetype2/**",
                 "${workspaceFolder}/Source/Platform/Feature/libjpeg/**",
                 "${workspaceFolder}/Source/Platform/Feature/libpng/**",
-                "${workspaceFolder}/Source/Platform/Feature/libproj4/**",
+                "${workspaceFolder}/Source/Platform/Feature/libproj/**",
                 "${workspaceFolder}/Source/Platform/Feature/libxml2/**",
                 "${workspaceFolder}/Source/Platform/Feature/libzip/**",
                 "${workspaceFolder}/Source/Platform/Feature/Linux/**",
@@ -16,7 +16,7 @@
                 "${workspaceFolder}/Source/Platform/Feature/OpenGL/**",
                 "${workspaceFolder}/Source/Platform/Feature/POSIX/**",
                 "${workspaceFolder}/Source/Platform/Target/Linux/**",
-                "/usr/include/**"                
+                "/usr/include/**"
             ],
             "defines": [
                 "SRC_ROOT=\"/home/grueni/Apps/GeoDiscoverer\"",

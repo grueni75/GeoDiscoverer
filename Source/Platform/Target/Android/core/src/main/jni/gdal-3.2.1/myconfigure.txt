@@ -1,0 +1,1 @@
+./configure --disable-all-optional-drivers --with-crypto=no --with-webp=no --with-curl=no --with-libtiff=internal --without-lerc --with-expat=no --with-qhull=no --with-pcre=no --with-pcidsk=no --with-sqlite3=no --with-libiconv=no --with-python=no --with-avx=no --with-ssse3=no --with-sse=no --with-libtool=no --with-jpeg=no --with--png=no
