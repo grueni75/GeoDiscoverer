@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GDS xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" version="1.0">
+  <MapSourceRef>
+    <name>Mapsforge</name>
+    <layerGroupName>Mapsforge Cycling</layerGroupName>
+    <themePath>Elevate/Elements.xml</themePath>
+    <themeStyle>elmt-cycling</themeStyle>
+    <themeOverlays></themeOverlays>
+    <minZoomLevel>7</minZoomLevel>
+  </MapSourceRef>
+  <MapSourceRef>
+    <name>Hillshade</name>
+    <layerGroupName>Mapsforge Cycling</layerGroupName>
+  </MapSourceRef>
+</GDS>

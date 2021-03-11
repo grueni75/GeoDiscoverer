@@ -1,5 +1,5 @@
 # -*- Makefile -*- for emacs.
-GDAL_ROOT	=	/home/grueni/Downloads/gdal-3.2.1
+GDAL_ROOT	=	/home/grueni/Apps/GeoDiscoverer/Source/Platform/Target/Android/core/src/main/jni/gdal-3.2.1
 top_builddir	=	$(GDAL_ROOT)
 
 #
@@ -31,7 +31,7 @@ INSTALL_LIB 	=	$(LIBTOOL_INSTALL) $(GDAL_ROOT)/install-sh -c
 INSTALL_DATA	= 	$(GDAL_ROOT)/install-sh -c -m 0644
 INSTALL_DIR	= 	$(GDAL_ROOT)/install-sh -d
 
-LIBS	=	-lpng -lproj  -lz -lpthread -lm -lrt -ldl  $(KAK_LIBS) $(DWG_LIBS) $(CURL_LIB) \
+LIBS	=	-lfreexl -lgeos_c -lkmlbase -lkmldom -lkmlengine -lkmlxsd -lkmlregionator -lxerces-c -lpthread -logdi -lgif -lCharLS -lpng -lcfitsio -lpq -lzstd -lproj  -lz -lpthread -lm -lrt -ldl  $(KAK_LIBS) $(DWG_LIBS) $(CURL_LIB) \
 		$(MRSID_LIBS) $(MRSID_LIDAR_LIBS) $(ECW_LIBS) $(INGRES_LIB) \
 		$(PCIDSK_LIB) $(RASDAMAN_LIB) $(SOSI_LIB) \
 		$(OPENCL_LIB) $(JVM_LIB) $(LIBICONV) $(FGDB_LIB) $(LIBXML2_LIB) $(MONGODB_LIB) \
@@ -47,7 +47,7 @@ PY_HAVE_SETUPTOOLS=
 # Next Generation SWIG bindings
 BINDINGS	=	
 
-HAVE_OGDI = no
+HAVE_OGDI = yes
 OGR_ENABLED = yes
 GNM_ENABLED = yes
 
@@ -149,9 +149,9 @@ MACOSX_FRAMEWORK =
 #
 # GDAL/OGR PostgreSQL support.
 #
-HAVE_OGR_PG     = no
-HAVE_POSTGISRASTER  = no
-PG_INC	=	
+HAVE_OGR_PG     = yes
+HAVE_POSTGISRASTER  = yes
+PG_INC	=	-I/usr/include/postgresql
 
 #
 # INGRES
@@ -196,7 +196,7 @@ LIBS       +=   $(KEA_LIB)
 #
 # NetCDF Support.
 #
-NETCDF_MEM = 
+NETCDF_MEM = no
 NETCDF_ROOT = 
 NETCDF_HAS_NC4 = 
 NETCDF_HAS_HDF4 = 
@@ -271,8 +271,8 @@ JP2LURA_INCLUDE 	=
 
 # Xerces C++ XML Parser for GML and ILI
 #
-HAVE_XERCES	= no
-XERCES_INCLUDE	= 
+HAVE_XERCES	= yes
+XERCES_INCLUDE	= -I/usr/include -I/usr/include/xercesc
 ifeq ($(HAVE_XERCES),yes)
 CPPFLAGS	+= -DHAVE_XERCES $(XERCES_INCLUDE) $(CPPFLAGS)
 endif
@@ -286,7 +286,7 @@ EXPAT_INCLUDE =
 #
 # Google libkml for the new OGR KML driver written by Brian Case
 #
-HAVE_LIBKML = no
+HAVE_LIBKML = yes
 LIBKML_INCLUDE = 
 
 #
@@ -297,8 +297,8 @@ OCI_INCLUDE	=
 
 # GEOS Support
 
-HAVE_GEOS       =       
-GEOS_CFLAGS     =       
+HAVE_GEOS       =       yes
+GEOS_CFLAGS     =       -I/usr/include
 
 # SFCGAL Support
 
@@ -420,7 +420,7 @@ PCRASTER_SETTING	=	internal
 #
 HAVE_LERC =	no
 
-OGDI_INCLUDE	=	
+OGDI_INCLUDE	=	-I/usr/include/ogdi -I/usr/include/tirpc
 
 PNG_SETTING     =	external
 JPEG_SETTING	=	no
@@ -432,16 +432,16 @@ GEOTIFF_SETTING	=	internal
 GEOTIFF_INCLUDE =	
 RENAME_INTERNAL_LIBGEOTIFF_SYMBOLS = no
 RENAME_INTERNAL_SHAPELIB_SYMBOLS = no
-GIF_SETTING	=	internal
-FITS_SETTING    =       no
-OGDI_SETTING	=	no
+GIF_SETTING	=	external
+FITS_SETTING    =       external
+OGDI_SETTING	=	yes
 ODBC_SETTING    =       no
 NETCDF_SETTING  =       no
 LIBZ_SETTING	=	external
 LIBDEFLATE_SETTING =    no
 LIBLZMA_SETTING	=	no
 WEBP_SETTING	=	no
-ZSTD_SETTING	=	no
+ZSTD_SETTING	=	yes
 TILEDB_SETTING  =   no
 RDB_SETTING     =       no
 
@@ -491,8 +491,8 @@ PDFIUM_PLUGIN_LIB =
 #
 # CharLs stuff
 #
-HAVE_CHARLS = no
-CHARLS_INC = 
+HAVE_CHARLS = yes
+CHARLS_INC = -DCHARLS_2
 
 #
 # Teigha stuff
@@ -542,7 +542,7 @@ JNI_LIB =
 # freexl stuff
 #
 
-HAVE_FREEXL = no
+HAVE_FREEXL = yes
 FREEXL_INCLUDE = 
 
 #
@@ -573,9 +573,9 @@ HAVE_OPENSSL_CRYPTO    =       no
 #	and their uppercase form should be the format portion of the
 #	format registration entry point.  eg. gdb -> GDALRegister_GTiff().
 #
-GDAL_FORMATS := derived gtiff hfa mem vrt  gif png pcraster 
-OGR_FORMATS := 
-OGR_FORMATS_ENABLED_CFLAGS := 
+GDAL_FORMATS := derived gtiff hfa mem vrt  srtmhgt gif png pcraster fits 
+OGR_FORMATS :=  pgdump
+OGR_FORMATS_ENABLED_CFLAGS :=  -DPGDUMP_ENABLED
 
 ifneq ($(PCIDSK_SETTING),no)
 GDAL_FORMATS += pcidsk

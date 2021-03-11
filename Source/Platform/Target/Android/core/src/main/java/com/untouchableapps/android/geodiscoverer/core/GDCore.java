@@ -204,7 +204,8 @@ public class GDCore implements
   private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
     @Override
     public boolean onScaleBegin(ScaleGestureDetector detector) {
-      appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale begins");
+      //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale begins");
+      scaleGestureOccured=true;
       return true;
     }
 
@@ -216,6 +217,7 @@ public class GDCore implements
     }
   }
   boolean zoomMode=false;
+  boolean scaleGestureOccured=false;
   /*float zoomStartX;
   float zoomStartY;*/
 
@@ -565,11 +567,11 @@ public class GDCore implements
     coreLock.unlock();
 
     // Stop the cockpit apps
-    appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","before cockpit engine stop");
+    //appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","before cockpit engine stop");
     appIf.cockpitEngineStop();
 
     // Deinit the core
-    appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","before deinit core");
+    //appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","before deinit core");
     deinitCore();
 
     // Update flags
@@ -821,6 +823,14 @@ public class GDCore implements
     }
     if (cmd.startsWith("playNewNearestAddressPointAlarm()")) {
       playSound("nearAddressPointAlarm.wav",3, 100);
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("startMapTileServer()")) {
+      Intent intent = appIf.createServiceIntent();
+      if (intent!=null) {
+        intent.setAction("startMapTileServer");
+        appIf.getApplication().startService(intent);
+      }
       cmdExecuted=true;
     }
 
@@ -1381,7 +1391,7 @@ public class GDCore implements
 
   @Override
   public boolean onDoubleTap(MotionEvent e) {
-    //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("double tap!"));
+    appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("double tap!"));
     zoomMode=true;
     /*zoomStartX=e.getX();
     zoomStartY=e.getY();
@@ -1391,7 +1401,16 @@ public class GDCore implements
 
   @Override
   public boolean onDoubleTapEvent(MotionEvent e) {
-    return false;
+    if (e.getAction()==MotionEvent.ACTION_UP) {
+      if (!scaleGestureOccured) {
+        //appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", String.format("double tap event!"));
+        executeCoreCommand("toggleZoomLevelLock()(");
+      }
+      scaleGestureOccured=false;
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @Override

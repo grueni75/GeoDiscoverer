@@ -129,6 +129,20 @@
 			                </xsd:documentation>
 			              </xsd:annotation>
 			            </xsd:element>                  
+			            <xsd:element name="themeStyle" type="xsd:string" minOccurs="0">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Theme file the tile server shall use for rendering the tiles.
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>                  
+			            <xsd:element name="themeOverlays" type="xsd:string" minOccurs="0">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Theme overlay IDs the tile server shall render on top of the tile (comma seperated list).
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>                  
                 </xsd:sequence>
               </xsd:complexType>
             </xsd:element>
@@ -196,6 +210,13 @@
 			              <xsd:annotation>
 			                <xsd:documentation>
 			                  Maximum zoom level supported by this tile server.
+			                </xsd:documentation>
+			              </xsd:annotation>
+			            </xsd:element>
+			            <xsd:element name="httpHeader" type="xsd:string" minOccurs="0" maxOccurs="unbounded">
+			              <xsd:annotation>
+			                <xsd:documentation>
+			                  Line to add to the http header when downloading tiles from this server.
 			                </xsd:documentation>
 			              </xsd:annotation>
 			            </xsd:element>

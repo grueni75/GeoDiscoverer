@@ -23,6 +23,7 @@
 
 #include <Core.h>
 #include <MapSource.h>
+#include <Commander.h>
 
 namespace GEODISCOVERER {
 
@@ -71,10 +72,22 @@ bool MapSource::resolveGDSInfo(XMLNode startNode, std::vector<std::string> path)
   return result;
 }*/
 
+// Replaces a variable in a string
+bool MapSource::replaceVariable(std::string &text, std::string variableName, std::string variableValue) {
+  size_t pos;
+  pos=text.find(variableName);
+  if (pos==std::string::npos) {
+    return false;
+  }
+  text.replace(pos,variableName.size(),variableValue);
+  return true;
+}
+
 // Reads information about the map
 bool MapSource::resolveGDSInfo(std::string infoFilePath)
 {
   std::string mapSourceSchemaFilePath = core->getHomePath() +"/source.xsd";
+  bool mapTileServerStarted=false;
 
   // Create a new resolvedGDSInfo object or merge the new info file if object already exists
   if (!resolvedGDSInfo) {
@@ -118,6 +131,12 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
     bool refMaxZoomLevelSet=resolvedGDSInfo->getNodeText(*i,"maxZoomLevel",refMaxZoomLevel);
     std::string refLayerGroupName="";
     bool refLayerGroupNameSet=resolvedGDSInfo->getNodeText(*i,"layerGroupName",refLayerGroupName);
+    std::string themePath="";
+    bool themePathSet=resolvedGDSInfo->getNodeText(*i,"themePath",themePath);
+    std::string themeStyle="";
+    bool themeStyleSet=resolvedGDSInfo->getNodeText(*i,"themeStyle",themeStyle);
+    std::string themeOverlays="";
+    bool themeOverlaysSet=resolvedGDSInfo->getNodeText(*i,"themeOverlays",themeOverlays);
 
     // Does the entry have a name?
     if (nameFound) {
@@ -156,6 +175,23 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
             XMLNode n2=xmlCopyNode(*k,true);
             if (n2==NULL)
               FATAL("can not copy node",NULL);
+
+            // Start the tile server (if necessary) 
+            std::string serverURL;
+            (*j)->getNodeText(n2,"serverURL",serverURL);
+            if (serverURL.find("localhost")!=std::string::npos) {
+              if (!mapTileServerStarted) {
+                std::string cmd="startMapTileServer()";
+                core->getCommander()->dispatch(cmd);
+                mapTileServerStarted=true;
+              }
+            }
+
+            // Replace variables in the server url
+            replaceVariable(serverURL,"${themePath}",themePath);
+            replaceVariable(serverURL,"${themeStyle}",themeStyle);
+            replaceVariable(serverURL,"${themeOverlays}",themeOverlays);
+            (*j)->setNodeText(n2,"serverURL",serverURL);
 
             // Update all fields
             Int minZoomLevel=localMinZoomLevel;
@@ -246,6 +282,21 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
     /*std::string t;
     resolvedGDSInfo->getNodeText(*i,"serverURL",t);
     DEBUG("%s",t.c_str());*/
+  }
+
+  // Wait for the startup of the map tile server
+  if (mapTileServerStarted) {
+    DownloadResult result;
+    Int port=core->getConfigStore()->getIntValue("MapTileServer","port",__FILE__,__LINE__);
+    std::stringstream url;
+    UInt size;
+    url<<"http://localhost:"<<port<<"/status.txt";
+    do {      
+      usleep(100);
+      //DEBUG("downloading <%s>",url.str().c_str());
+      core->downloadURL(url.str(),result,size,false,false);
+    }
+    while (result!=DownloadResultSuccess);
   }
   return true;
 }

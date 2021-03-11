@@ -158,8 +158,10 @@ void FontEngine::lockFont(std::string type, const char *file, int line) {
   core->getThread()->lockMutex(accessMutex, file, line);
 
   // Lookup the font
-  if (!(currentFont=findFont(type)))
+  if (!(currentFont=findFont(type))) {
+    DEBUG("found %s not found",type.c_str());
     return;
+  }
 }
 
 // Cleans up the engine

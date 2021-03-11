@@ -33,6 +33,37 @@ std::string traceLogPath = "";
 
 namespace GEODISCOVERER {
 
+// Stderr handler
+void *stderrThread(void *args) {
+  ssize_t redirect_size;
+  int *pipeStderr=(int*)args;
+  char buf[2048];
+  DEBUG("%d %d",pipeStderr[0],pipeStderr[1]);
+  while((redirect_size = read(pipeStderr[0], buf, sizeof buf - 1)) > 0) {
+    if(buf[redirect_size - 1] == '\n')
+        --redirect_size;
+    buf[redirect_size] = 0;
+    ERROR(buf,NULL);
+  }
+  return 0;
+}
+
+// Stdout handler
+void *stdoutThread(void *args) {
+  ssize_t redirect_size;
+  int *pipeStdout=(int*)args;
+  char buf[2048];
+  DEBUG("%d %d",pipeStdout[0],pipeStdout[1]);
+  while((redirect_size = read(pipeStdout[0], buf, sizeof buf - 1)) > 0) {
+    //__android_log will add a new line anyway.
+    if(buf[redirect_size - 1] == '\n')
+        --redirect_size;
+    buf[redirect_size] = 0;
+    DEBUG(buf,NULL);
+  }
+  return 0;
+}
+
 // Constructor
 Debug::Debug() {
 
@@ -40,6 +71,22 @@ Debug::Debug() {
   fatalOccured=false;
   tracelog=NULL;
   messagelog=NULL;
+  stdoutThreadInfo=NULL;
+  stderrThreadInfo=NULL;
+
+  // Redirect stdout & stderr to make it visible (only on Android)
+#ifdef __ANDROID__
+  setvbuf(stdout, 0, _IONBF, 0);
+  pipe(pipeStdout);
+  dup2(pipeStdout[1], STDOUT_FILENO);
+  stderrThreadInfo=core->getThread()->createThread("stdout logger thread",stdoutThread,&pipeStdout);
+  //detachThread(stderrThreadInfo);
+  setvbuf(stderr, 0, _IONBF, 0);
+  pipe(pipeStderr);
+  dup2(pipeStderr[1], STDERR_FILENO);
+  stdoutThreadInfo=core->getThread()->createThread("stderr logger thread",stderrThread,&pipeStderr);
+  //detachThread(stdoutThreadInfo);
+#endif
 }
 
 // Replays a trace log
@@ -158,6 +205,20 @@ void Debug::write(FILE *out, const char *prefix, const char *postfix, const char
 
 // Destructor
 Debug::~Debug() {
+
+  // Destroy all threads
+  if (stdoutThreadInfo!=NULL) {
+    if (core->getThread()->cancelThread(stdoutThreadInfo)) {
+      core->getThread()->waitForThread(stdoutThreadInfo);
+    }
+    free(stdoutThreadInfo);
+  }
+  if (stderrThreadInfo!=NULL) {
+    if (core->getThread()->cancelThread(stderrThreadInfo)) {
+      core->getThread()->waitForThread(stderrThreadInfo);
+    }
+    free(stderrThreadInfo);
+  }
 
   // Close the log files
   if (tracelog)

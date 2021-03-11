@@ -111,6 +111,9 @@ protected:
   // Reads all available map sources
   static void readAvailableGDSInfos();
 
+  // Replaces a variable in a string
+  static bool replaceVariable(std::string &text, std::string variableName, std::string variableValue);
+
   // Reads information about the map
   static bool resolveGDSInfo(std::string infoFilePath);
 

@@ -639,7 +639,7 @@ MY_PROJ_PATH := proj-7.2.1
 LOCAL_CPP_FEATURES += exceptions
 LOCAL_CPP_FEATURES += rtti
 LOCAL_CFLAGS := -DHAVE_CONFIG_H -Ijni/$(MY_PROJ_PATH)/include -Ijni/$(MY_PROJ_PATH)/src -Ijni/$(MY_SQLITE3_PATH) -DMUTEX_pthread 
-LOCAL_LDLIBS := 
+LOCAL_LDLIBS := -llog
 LOCAL_SRC_FILES += $(addprefix $(MY_PROJ_PATH)/,src/iso19111/static.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_PROJ_PATH)/,src/iso19111/util.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_PROJ_PATH)/,src/iso19111/metadata.cpp)
@@ -1263,8 +1263,8 @@ LOCAL_CFLAGS :=  -Ijni/$(MY_ICONV_PATH)/include -Ijni/$(MY_XML2_PATH)/include -I
 LOCAL_CFLAGS +=  -Ijni/$(MY_GDAL_PATH)/port -Ijni/$(MY_GDAL_PATH)/gcore -Ijni/$(MY_GDAL_PATH)/alg -Ijni/$(MY_GDAL_PATH)/ogr -Ijni/$(MY_GDAL_PATH)/ogr/ogrsf_frmts -Ijni/$(MY_GDAL_PATH)/gnm -Ijni/$(MY_GDAL_PATH)/apps -Ijni/$(MY_GDAL_PATH)/ogr/ogrsf_frmts/geojson/libjson -Ijni/$(MY_GDAL_PATH)/frmts/pcraster/libcsf -Ijni/$(MY_GDAL_PATH)/ogr/ogrsf_frmts/mem
 LOCAL_CFLAGS +=  -Ijni/$(MY_GDAL_PATH)/ogr/ogrsf_frmts/generic -Ijni/$(MY_GDAL_PATH)/frmts/vrt -Ijni/$(MY_GDAL_PATH)/frmts/mem -Ijni/$(MY_GDAL_PATH)/frmts/gtiff -Ijni/$(MY_GDAL_PATH)/frmts/geojson -Ijni/$(MY_GDAL_PATH)/ogr/ogrsf_frmts/geojson -Ijni/$(MY_GDAL_PATH)/alg/marching_squares -Ijni/$(MY_GDAL_PATH)/gnm/gnm_frmts -Ijni/$(MY_GDAL_PATH)/frmts/gtiff/libtiff -Ijni/$(MY_GDAL_PATH)/frmts/gtiff/libgeotiff -Ijni/$(MY_GDAL_PATH)/frmts/gif/giflib
 LOCAL_CFLAGS += -DGNM_ENABLED -DGDAL_COMPILATION -DINST_DATA=\"/usr/local/share/gdal\" -DHAVE_LIBZ -DHAVE_LIBXML2 -DUSE_ONLY_CRYPTODLL_ALG -DENABLE_UFFD
-LOCAL_CFLAGS += -DFRMT_derived  -DFRMT_gtiff  -DFRMT_hfa  -DFRMT_mem  -DFRMT_vrt  -DFRMT_gif  -DFRMT_png  -DFRMT_pcraster -DGDAL_FORMATS="derived gtiff hfa mem vrt  gif png pcraster " 
-LOCAL_LDLIBS := -lz -lm -ldl
+LOCAL_CFLAGS += -DFRMT_derived  -DFRMT_gtiff  -DFRMT_hfa  -DFRMT_mem  -DFRMT_vrt  -DFRMT_gif  -DFRMT_png  -DFRMT_pcraster -DFRMT_srtmhgt -DGDAL_FORMATS="derived gtiff hfa mem vrt  gif png pcraster "
+LOCAL_LDLIBS := -lz -lm -ldl -llog
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,port/cpl_conv.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,port/cpl_error.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,port/cpl_string.cpp)
@@ -1394,6 +1394,7 @@ LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,gcore/gdalpython.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,gcore/gdalpythondriverloader.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,gcore/tilematrixset.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,gcore/gdal_thread_pool.cpp)
+LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,gcore/nasakeywordhandler.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,gcore/rasterio_ssse3.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,alg/gdalmediancut.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,alg/gdaldither.cpp)
@@ -1463,6 +1464,7 @@ LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,frmts/vrt/vrtderivedrasterband.c
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,frmts/vrt/vrtpansharpened.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,frmts/vrt/pixelfunctions.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,frmts/vrt/vrtmultidim.cpp)
+LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,frmts/srtmhgt/srtmhgtdataset.cpp)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,frmts/gif/giflib/egif_lib.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,frmts/gif/giflib/dgif_lib.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_GDAL_PATH)/,frmts/gif/giflib/gifalloc.c)
@@ -1710,7 +1712,6 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := gdtiff
 MY_TIFF_PATH := gdal-3.2.1/frmts/gtiff/libtiff
 LOCAL_CFLAGS := -Ijni/$(MY_GDAL_PATH)/port -std=gnu89 -DGNM_ENABLED -DGDAL_COMPILATION -DDONT_DEPRECATE_SPRINTF -DHOST_FILLORDER=FILLORDER_LSB2MSB -DPIXARLOG_SUPPORT -DZIP_SUPPORT
-LOCAL_LDLIBS := -lz
 LOCAL_SRC_FILES += $(addprefix $(MY_TIFF_PATH)/,tif_aux.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_TIFF_PATH)/,tif_close.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_TIFF_PATH)/,tif_codec.c)
@@ -1757,7 +1758,6 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdgeotiff
 MY_GEOTIFF_PATH := gdal-3.2.1/frmts/gtiff/libgeotiff
-LOCAL_LDLIBS := -lz
 LOCAL_CFLAGS := -Ijni/$(MY_PROJ_PATH)/src -Ijni/$(MY_GDAL_PATH)/port -Ijni/$(MY_TIFF_PATH) -DGNM_ENABLED -DGDAL_COMPILATION -std=gnu89 -DDONT_DEPRECATE_SPRINTF
 LOCAL_SRC_FILES += $(addprefix $(MY_GEOTIFF_PATH)/,xtiff.c)
 LOCAL_SRC_FILES += $(addprefix $(MY_GEOTIFF_PATH)/,geo_free.c)
@@ -1788,6 +1788,7 @@ MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libpng
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libcurl -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libzip -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libproj -name '*.cpp' -exec echo ../{} \;)
+MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/libgdal -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/openssl -name '*.cpp' -exec echo ../{} \;)
 MY_GD_PLATFORM_SRCS += $(shell find $(MY_GD_ROOT)/Source/Platform/Feature/Android -name '*.cpp' -exec echo ../{} \;)
 MY_GD_GENERAL_SRCS = $(shell find $(MY_GD_ROOT)/Source/General -name '*.cpp' -exec echo ../{} \;)
@@ -1800,10 +1801,12 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libpng
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libcurl
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libzip
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libproj
+MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/libgdal
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/openssl
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/Platform/Feature/Android
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/App
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Map
+MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Elevation
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Navigation
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Image
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Graphic
@@ -1813,20 +1816,21 @@ MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Config
 MY_GD_INCLUDES += -I$(MY_GD_ROOT)/Source/General/Profile
 LOCAL_CFLAGS += -I$(MY_GD_ROOT) $(MY_GD_INCLUDES) -DTARGET_ANDROID -DSRC_ROOT='"jni/../../../../../../../../Source"'
 LOCAL_CFLAGS += -Ijni/$(MY_BREAKPAD_PATH)/src/common/android/include 
-LOCAL_CFLAGS += -Ijni/libxml2-2.9.2/include
-LOCAL_CFLAGS += -Ijni/freetype-2.4.2/include 
-LOCAL_CFLAGS += -Ijni/jpeg-8b 
-LOCAL_CFLAGS += -Ijni/libpng-1.6.26
-LOCAL_CFLAGS += -Ijni/curl-7.51.0/include 
-LOCAL_CFLAGS += -Ijni/libzip-0.10.1/lib 
-LOCAL_CFLAGS += -Ijni/proj-7.2.1/src 
-LOCAL_CFLAGS += -Ijni/google-breakpad-20180304/src
+LOCAL_CFLAGS += -Ijni/$(MY_XML2_PATH)/include
+LOCAL_CFLAGS += -Ijni/$(MY_FREETYPE_PATH)/include 
+LOCAL_CFLAGS += -Ijni/$(MY_JPEG_PATH)
+LOCAL_CFLAGS += -Ijni/$(MY_PNG_PATH)
+LOCAL_CFLAGS += -Ijni/$(MY_CURL_PATH)/include 
+LOCAL_CFLAGS += -Ijni/$(MY_ZIP_PATH)
+LOCAL_CFLAGS += -Ijni/$(MY_PROJ_PATH)/src 
+LOCAL_CFLAGS += -Ijni/$(MY_GDAL_PATH)/port -Ijni/$(MY_GDAL_PATH)/gcore -Ijni/$(MY_GDAL_PATH)/ogr -Ijni/$(MY_GDAL_PATH)/alg -Ijni/$(MY_GDAL_PATH)/apps
+LOCAL_CFLAGS += -Ijni/$(MY_BREAKPAD_PATH)/src
 LOCAL_CFLAGS += -Ijni/glm-0.9.6.3
-LOCAL_CFLAGS += -Ijni/openssl-1.1.0c/include
+LOCAL_CFLAGS += -Ijni/$(MY_OPENSSL_PATH)/include
 LOCAL_LDLIBS += -lz -dl -llog -lGLESv2 -lEGL
 LOCAL_SRC_FILES := GDCore.cpp $(MY_GD_PLATFORM_SRCS) $(MY_GD_GENERAL_SRCS)
 LOCAL_STATIC_LIBRARIES := gdbreakpad
-LOCAL_SHARED_LIBRARIES := gdjpeg gdxml gdfreetype gdpng gdopenssl gdcurl gdzip gdproj
+LOCAL_SHARED_LIBRARIES := gdjpeg gdxml gdfreetype gdpng gdopenssl gdcurl gdzip gdproj gdgdal
 #test:
 #	@echo $(MY_GD_PLATFORM_SRCS)
 include $(BUILD_SHARED_LIBRARY)

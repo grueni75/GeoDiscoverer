@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GDS 
+  xmlns="http://www.untouchableapps.de/GeoDiscoverer/source/1/0" 
+  version="1.0">
+  <name>Mapsforge</name>
+  <isMarkup>false</isMarkup>
+  <TileServer>
+    <serverURL>http://localhost:8383/mapsforge/${z}/${x}/${y}.png?themePath=${themePath}&amp;themeStyle=${themeStyle}&amp;themeOverlays=${themeOverlays}</serverURL>
+    <overlayAlpha>1.0</overlayAlpha>
+  </TileServer>
+  <minZoomLevel>3</minZoomLevel>
+  <maxZoomLevel>20</maxZoomLevel>
+</GDS>

@@ -35,10 +35,9 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
 
-import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.server.MapTileServer;
 
 import java.io.File;
 
@@ -55,7 +54,10 @@ public class GDService extends Service {
   
   /** Reference to the core object */
   GDCore coreObject = null;
-  
+
+  /** Reference to the tile server */
+  MapTileServer mapTileServer = null;
+
   // The notification that is displayed in the status bar
   PendingIntent pendingIntent = null;
   Notification notification = null;
@@ -302,6 +304,16 @@ public class GDService extends Service {
       }
     }
 
+    // Handle start of the mapsforge server
+    if (intent.getAction().equals("startMapTileServer")) {
+      if (mapTileServer !=null) {
+        mapTileServer.stop();
+      } else {
+        mapTileServer = new MapTileServer((GDApplication)getApplication(),coreObject);
+      }
+      mapTileServer.start();
+    }
+
     return START_STICKY;
   }
   
@@ -325,6 +337,11 @@ public class GDService extends Service {
 
     // Stop watching location
     locationManager.removeUpdates(coreObject);
+
+    // Stop the mapsforge server
+    if (mapTileServer !=null) {
+      mapTileServer.stop();
+    }
   }
   
   

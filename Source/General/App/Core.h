@@ -84,6 +84,7 @@ class GraphicEngine;
 class WidgetEngine;
 class MapCache;
 class MapEngine;
+class ElevationEngine;
 class MapSource;
 class MapSourceMercatorTiles;
 class UnitConverter;
@@ -192,6 +193,7 @@ protected:
   Clock *clock;
   UnitConverter *unitConverter;
   MapCache *mapCache;
+  ElevationEngine *elevationEngine;
   MapEngine *mapEngine;
   MapSource *mapSource;
   Image *image;
@@ -216,6 +218,9 @@ protected:
 
   // Waits until all read accesses are over
   void dashboardDevicesLockAccessAfterReadComplete(const char *file, int line);
+
+  // Init libproj
+  void initProj();
 
 public:
 
@@ -352,6 +357,11 @@ public:
   NavigationEngine *getNavigationEngine() const
   {
       return navigationEngine;
+  }
+
+  ElevationEngine *getElevationEngine() const
+  {
+      return elevationEngine;
   }
 
   Commander *getCommander() const

@@ -25,6 +25,7 @@
 #include <NavigationEngine.h>
 #include <GraphicEngine.h>
 #include <MapEngine.h>
+#include <ElevationEngine.h>
 #include <FontEngine.h>
 #include <Device.h>
 #include <ProfileEngine.h>
@@ -95,6 +96,7 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   thread = NULL;
   dialog = NULL;
   clock = NULL;
+  elevationEngine = NULL;
   mapCache = NULL;
   mapEngine = NULL;
   mapSource = NULL;
@@ -185,6 +187,8 @@ Core::~Core() {
   if (commander) delete commander;
   DEBUG("deleting navigationEngine",NULL);
   if (navigationEngine) delete navigationEngine;
+  DEBUG("deleting elevationEngine",NULL);
+  if (elevationEngine) delete elevationEngine;
   DEBUG("deleting mapEngine",NULL);
   if (mapEngine) delete mapEngine;
   DEBUG("deleting mapCache",NULL);
@@ -245,6 +249,9 @@ bool Core::init() {
 
   // Init cURL
   initCURL();
+
+  // Init libproj
+  initProj();
 
   // Create components
   if (!(clock=new Clock())) {
@@ -323,6 +330,12 @@ bool Core::init() {
     FATAL("can not create map cache object",NULL);
     return false;
   }
+  DEBUG("initializing elevationEngine",NULL);
+  if (!(elevationEngine=new ElevationEngine())) {
+    FATAL("can not create elevation engine object",NULL);
+    return false;
+  }
+
   DEBUG("initializing mapEngine",NULL);
   if (!(mapEngine=new MapEngine())) {
     FATAL("can not create map engine object",NULL);
@@ -680,6 +693,18 @@ void Core::lateInit() {
   if (!mapSource->getIsInitialized()) {
     DEBUG("late initializing mapSource",NULL);
     if (!mapSource->init()) {
+      return;
+    }
+  }
+
+  // Stop here if quit requested
+  if (quitCore)
+    return;
+
+  // Initialize elevation engine if required
+  if (!elevationEngine->getIsInitialized()) {
+    DEBUG("late initializing elevationEngine",NULL);
+    if (!elevationEngine->init()) {
       return;
     }
   }

@@ -1,6 +1,7 @@
 assets/GeoDiscoverer/Icon/*
 assets/GeoDiscoverer/config.shipped.xsd
 assets/GeoDiscoverer/source.xsd
+assets/GeoDiscoverer/proj.db
 assets/GeoDiscoverer.list
 sym/
 obj/

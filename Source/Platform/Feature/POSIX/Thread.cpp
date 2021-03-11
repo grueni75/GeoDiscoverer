@@ -51,7 +51,6 @@ Thread::Thread() {
   pthread_mutex_init(&accessMutex,NULL);
   createMutexLog=false;
   mutexDebugThreadInfo=createThread("mutex debug thread",mutexDebugThread,this);
-
 }
 
 // Creates a thread

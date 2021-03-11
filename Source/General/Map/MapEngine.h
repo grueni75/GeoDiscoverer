@@ -232,6 +232,12 @@ public:
     unlockDisplayArea();
     return zoomLevel;
   }
+
+  void toggleZoomLevelLock()
+  {
+    setZoomLevelLock(!zoomLevelLock);
+  }
+
 };
 
 }

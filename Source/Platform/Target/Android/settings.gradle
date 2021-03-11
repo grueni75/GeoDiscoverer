@@ -1,2 +1,9 @@
-include ':mobile', ':wear', ':colorPickerPreference', ':core'
+include ':mobile', ':wear', ':colorPickerPreference', ':core' // , ':mapsforge-core', ':mapsforge-map', ':mapsforge-map-reader', ':mapsforge-themes', ':mapsforge-poi', ':mapsforge-map-android', ':mapsforge-poi-android'
 project(':colorPickerPreference').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/ColorPickerPreference')
+//project(':mapsforge-core').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-core')
+//project(':mapsforge-map').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-map')
+//project(':mapsforge-map-reader').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-map-reader')
+//project(':mapsforge-themes').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-themes')
+//project(':mapsforge-poi').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-poi')
+//project(':mapsforge-map-android').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-map-android')
+//project(':mapsforge-poi-android').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-poi-android')

@@ -61,6 +61,7 @@ void ProfileEngine::startMeasure(std::string method) {
 
   // Update the timestamp
   result->setLastTimestamp(core->getClock()->getMicrosecondsSinceStart());
+  //DEBUG("method=%s lastTimestamp=%ld",method.c_str(),result->getLastTimestamp());
 
   // Release mutex
   core->getThread()->unlockMutex(accessMutex);
@@ -80,11 +81,12 @@ void ProfileEngine::addElapsedTime(std::string method, std::string name) {
   if (i!=methodResultMap.end()) {
     methodResult=i->second;
   } else {
-    DEBUG("measurement for method <%s> has not been started",NULL);
+    DEBUG("measurement for method <%s> has not been started",method.c_str());
     core->getThread()->unlockMutex(accessMutex);
     return;
   }
   TimestampInMicroseconds timeDiff=currentTimestamp-methodResult->getLastTimestamp();
+  //DEBUG("method=%s timeDiff=%ld",method.c_str(),timeDiff);
 
   // Check if the elasped time makes sense
   if (timeDiff/(1000*1000)>60*60) {

@@ -23,36 +23,28 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import android.content.res.ColorStateList;
-import android.opengl.Visibility;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
-import com.untouchableapps.android.geodiscoverer.core.GDTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
 
 public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
 

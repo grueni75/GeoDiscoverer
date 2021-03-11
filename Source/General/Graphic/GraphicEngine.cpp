@@ -455,7 +455,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
                           if (debugMode) {
                             std::list<std::string> name=rectangle->getName();
                             FontEngine *fontEngine=device->getFontEngine();
-                            fontEngine->lockFont("sansSmall", __FILE__, __LINE__);
+                            fontEngine->lockFont("sansTiny", __FILE__, __LINE__);
                             Int nameHeight=name.size()*fontEngine->getLineHeight();
                             Int lineNr=name.size()-1;
                             x1=rectangle->getX();
@@ -465,9 +465,17 @@ bool GraphicEngine::draw(bool forceRedraw) {
                             for(std::list<std::string>::iterator i=name.begin();i!=name.end();i++) {
                               //DEBUG("text=%s",(*i).c_str());
                               FontString *fontString=fontEngine->createString(*i);
-                              fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
-                              fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
+                              //fontString->setX(x1+(rectangle->getWidth()-fontString->getIconWidth())/2);
+                              //fontString->setY(y1+(rectangle->getHeight()-nameHeight)/2+lineNr*fontEngine->getLineHeight());
+                              fontString->setX(-fontString->getIconWidth()/2);
+                              fontString->setY(-fontString->getIconHeight()/2);
+                              screen->startObject();
+                              screen->translate(x1+rectangle->getWidth()/2,y1+(rectangle->getHeight()-nameHeight/2)/2+lineNr*fontEngine->getLineHeight(),0);
+                              screen->startObject();
+                              screen->scale(0.5,0.5,1.0);
                               fontString->draw(currentTime);
+                              screen->endObject();
+                              screen->endObject();
                               fontEngine->destroyString(fontString);
                               lineNr--;
                             }

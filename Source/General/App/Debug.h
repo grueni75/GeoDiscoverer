@@ -68,6 +68,7 @@
 //
 //============================================================================
 
+#include <Thread.h>
 
 #ifndef DEBUG_H_
 #define DEBUG_H_
@@ -115,6 +116,14 @@ protected:
 
   // Indicates if a trace log file shall be created
   bool createTraceFile;
+
+  // Pipes for redirecting stdout & stderr
+  int pipeStdout[2];
+  int pipeStderr[2];
+
+  // Threads that handle stdout and stderr
+  ThreadInfo *stdoutThreadInfo;
+  ThreadInfo *stderrThreadInfo;
 
 public:
 

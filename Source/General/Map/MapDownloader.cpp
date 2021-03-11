@@ -236,7 +236,13 @@ bool MapDownloader::addTileServer(std::string serverURL, double overlayAlpha, Im
 
   // Check if the image is supported
   if (imageType==ImageTypeUnknown) {
-    std::string imageFileExtension = serverURL.substr(serverURL.find_last_of(".")+1);
+    std::string t=serverURL;
+    int pos=serverURL.find("?");
+    if (pos!=std::string::npos) {
+      t=serverURL.substr(0,pos);
+    }
+    //DEBUG("t=%s",t.c_str());
+    std::string imageFileExtension = t.substr(t.find_last_of(".")+1);
     Int endPos = imageFileExtension.find_first_of("?");
     if (endPos!=std::string::npos)
       imageFileExtension=imageFileExtension.substr(0,endPos);

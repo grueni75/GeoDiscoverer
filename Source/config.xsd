@@ -158,6 +158,40 @@
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
+        <xsd:element name="MapTileServer">
+          <xsd:annotation>
+            <xsd:documentation>Preferences related to the built-in map tile server.</xsd:documentation>
+          </xsd:annotation>
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="language" type="xsd:string" default="de" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Language to use in the map.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="port" type="xsd:integer" default="8383" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Port at which the server is listening.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="userScale" type="xsd:double" default="1.0" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>User defined map scale factor during Mapsforge rendering.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="textScale" type="xsd:double" default="1.0" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Text scale factor during Mapsforge rendering.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="workerCount" type="xsd:integer" default="4" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Number of worker (threads) to use for rendering.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
         <xsd:element name="EBikeMonitor">
           <xsd:annotation>
             <xsd:documentation>Preferences related to the E-Bike status monitor.</xsd:documentation>
@@ -1589,7 +1623,7 @@
                   <xsd:documentation>Reference DPI the map tiles have been created for.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="debugMode" type="xsd:boolean" default="0">
+              <xsd:element name="debugMode" type="xsd:boolean" default="0" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Indicates if debugging mode is active.</xsd:documentation>
                 </xsd:annotation>

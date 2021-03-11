@@ -1,3 +1,6 @@
 [submodule "ThirdParty/single-header-file-c-libs"]
 	path = ThirdParty/single-header-file-c-libs
 	url = https://github.com/arkanis/single-header-file-c-libs
+[submodule "ThirdParty/mapsforge"]
+	path = ThirdParty/mapsforge
+	url = https://github.com/mapsforge/mapsforge

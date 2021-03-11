@@ -5,6 +5,16 @@ def computeVersionName() {
     return date.format('yyyyMMdd')
 }
 
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+    }
+}
+
 ext {
     supportLibVersion = '27.1.0'
 }
@@ -14,6 +24,9 @@ allprojects {
         jcenter()
         maven {
             url "https://maven.google.com"
+        }
+        maven {
+            url "https://jitpack.io"
         }
     }
 }
@@ -76,10 +89,19 @@ dependencies {
     implementation 'com.google.android.gms:play-services-wearable:11.8.0'
     implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
     implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
     def acraVersion = '5.2.1'
     implementation "ch.acra:acra-mail:$acraVersion"
     implementation "ch.acra:acra-notification:$acraVersion"
-    implementation 'org.apache.commons:commons-text:1.6'
+    implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-core/build/libs', include: ['*.jar'])
+    implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-map/build/libs', include: ['*.jar'])
+    implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-map-reader/build/libs', include: ['*.jar'])
+    implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-themes/build/libs', include: ['*.jar'])
+    implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-map-android/build/libs', include: ['*.jar'])
+    implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-poi-android/build/libs', include: ['*.jar'])
+    implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-poi/build/libs', include: ['*.jar'])
+    implementation 'net.sf.kxml:kxml2:2.3.0'
+    implementation 'com.caverock:androidsvg:1.4'
 }
 
 task collectAssets(type: Exec) {

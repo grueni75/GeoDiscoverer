@@ -496,6 +496,14 @@ public class Preferences extends PreferenceActivity implements
       addPreference(mapCategory, mapCategory, "Map", "folder");
       addPreference(mapCategory, mapCategory, "Map", "downloadAreaLength");
       addPreference(rootScreen, rootScreen, "Navigation", "Route");
+      PreferenceCategory mapsforgeCategory = new PreferenceCategory(this);
+      mapsforgeCategory.setTitle("Map Tile Server");
+      rootScreen.addPreference(mapsforgeCategory);
+      addPreference(mapsforgeCategory, mapsforgeCategory, "MapTileServer", "userScale");
+      addPreference(mapsforgeCategory, mapsforgeCategory, "MapTileServer", "textScale");
+      addPreference(mapsforgeCategory, mapsforgeCategory, "MapTileServer", "language");
+      addPreference(mapsforgeCategory, mapsforgeCategory, "MapTileServer", "port");
+      addPreference(mapsforgeCategory, mapsforgeCategory, "MapTileServer", "workerCount");
       PreferenceCategory navigationCategory = new PreferenceCategory(this);
       navigationCategory.setTitle("Navigation");
       rootScreen.addPreference(navigationCategory);

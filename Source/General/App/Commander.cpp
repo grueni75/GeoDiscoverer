@@ -31,6 +31,7 @@
 #include <WidgetPathInfo.h>
 #include <UnitConverter.h>
 #include <NavigationPath.h>
+#include <ElevationEngine.h>
 
 namespace GEODISCOVERER {
 
@@ -436,6 +437,10 @@ std::string Commander::execute(std::string cmd) {
     core->getMapEngine()->setZoomLevelLock(atoi(args[0].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="toggleZoomLevelLock") {
+    core->getMapEngine()->toggleZoomLevelLock();
+    cmdExecuted=true;
+  }
   if (cmdName=="forceMapRedownload") {
     core->getMapEngine()->setForceMapRedownload(atoi(args[0].c_str()),__FILE__,__LINE__);
     core->getMapEngine()->setForceMapUpdate(__FILE__,__LINE__);
@@ -827,6 +832,10 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="updateGoogleBookmarks") {
     core->getNavigationEngine()->triggerGoogleBookmarksSynchronization();
+    cmdExecuted=true;
+  }
+  if (cmdName=="renderHillshadeTile") {
+    core->getElevationEngine()->renderHillshadeTile(atoi(args[0].c_str()),atoi(args[1].c_str()),atoi(args[2].c_str()),args[3]);
     cmdExecuted=true;
   }
 

@@ -106,6 +106,9 @@ public:
       this->abortLoad = true;
   }
 
+  // Computes a gaussion blur
+  bool iirGaussFilter(ImagePixel *image, Int width, Int height, UInt pixelSize, float sigma);
+
   // Getters and setters
   static UInt getRGBPixelSize()
   {
