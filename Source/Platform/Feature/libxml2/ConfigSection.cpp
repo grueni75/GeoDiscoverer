@@ -30,6 +30,7 @@ ConfigSection::ConfigSection() {
   schema=NULL;
   xpathSchemaCtx=NULL;
   xpathConfigCtx=NULL;
+  lastModification=0;
 }
 
 // Deinits the data
@@ -76,6 +77,14 @@ bool ConfigSection::readConfig(std::string configFilepath) {
   char *t = strdup(configFilepath.c_str());
   folder=std::string(dirname(t));
   free(t);
+
+  // Remember the modification date of the file
+  struct stat stats;
+  if (stat(configFilepath.c_str(),&stats)!=0) {
+    FATAL("can not read timestamp of <%s>",configFilepath.c_str());
+    return false;
+  }
+  lastModification=stats.st_mtime;
 
   // Merge the info if config is already set
   if (config) {

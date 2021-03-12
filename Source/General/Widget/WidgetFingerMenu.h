@@ -71,7 +71,7 @@ public:
   void setCursorInfoWidget(WidgetCursorInfo *primitive);
 
   // Opens the menu
-  void open(Int x, Int y);
+  void open();
 
   // Closes the menu
   void close();

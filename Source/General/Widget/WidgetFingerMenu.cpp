@@ -142,7 +142,7 @@ void WidgetFingerMenu::positionWidgetOnRow(TimestampInMicroseconds t,  Int x, In
 }
 
 // Opens the finger menu
-void WidgetFingerMenu::open(Int x, Int y) {
+void WidgetFingerMenu::open() {
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   positionWidgetOnCircle(t, 0, 0, circleRadius);
   positionWidgetOnRow(t, 0, rowOffsetY, rowDistance);

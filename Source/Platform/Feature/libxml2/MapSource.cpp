@@ -84,7 +84,7 @@ bool MapSource::replaceVariable(std::string &text, std::string variableName, std
 }
 
 // Reads information about the map
-bool MapSource::resolveGDSInfo(std::string infoFilePath)
+bool MapSource::resolveGDSInfo(std::string infoFilePath, TimestampInSeconds *lastModification)
 {
   std::string mapSourceSchemaFilePath = core->getHomePath() +"/source.xsd";
   bool mapTileServerStarted=false;
@@ -106,6 +106,9 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
   if (!resolvedGDSInfo->readConfig(infoFilePath))
     return false;
   resolvedGDSInfo->prepareXPath("http://www.untouchableapps.de/GeoDiscoverer/source/1/0");
+  if (lastModification!=NULL) {
+    *lastModification=resolvedGDSInfo->getLastModification();
+  }
 
   // Check the version
   char *text = (char *)xmlGetProp(xmlDocGetRootElement(resolvedGDSInfo->getConfig()),BAD_CAST "version");
@@ -151,6 +154,13 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath)
           refType="tileServer";
         if ((refType=="tileServer")&&(name==refName)) {
           found=true;
+
+          // If this was modified laster, update the global modification timestamp
+          if (lastModification!=NULL) {
+            if ((*j)->getLastModification()>*lastModification) {
+              *lastModification=(*j)->getLastModification();
+            }
+          }
 
           // Update the min and max zoom level
           Int localMinZoomLevel=refMinZoomLevel;

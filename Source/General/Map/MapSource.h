@@ -115,7 +115,7 @@ protected:
   static bool replaceVariable(std::string &text, std::string variableName, std::string variableValue);
 
   // Reads information about the map
-  static bool resolveGDSInfo(std::string infoFilePath);
+  static bool resolveGDSInfo(std::string infoFilePath, TimestampInSeconds *lastModification);
 
   // Renames the layers with the infos in the gds file
   void renameLayers();

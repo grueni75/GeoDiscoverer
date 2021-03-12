@@ -375,6 +375,7 @@ MapSource *MapSource::newMapSource() {
   std::string folder = core->getConfigStore()->getStringValue("Map","folder", __FILE__, __LINE__);
   std::string folderPath = core->getHomePath() + "/Map/" + folder;
   std::string infoPath = folderPath + "/info.gds";
+  TimestampInSeconds lastGDSModification=0;
 
   // Check if the folder exists
   struct stat s;
@@ -400,7 +401,7 @@ MapSource *MapSource::newMapSource() {
       delete resolvedGDSInfo;
       resolvedGDSInfo=NULL;
     }
-    resolveGDSInfo(infoPath);
+    resolveGDSInfo(infoPath,&lastGDSModification);
 
     // Find out the kind of source
     resolvedGDSInfo->getNodeText("/GDS/type",type);
@@ -452,7 +453,7 @@ MapSource *MapSource::newMapSource() {
 
   // Online source?
   if (type=="tileServer") {
-    result = new MapSourceMercatorTiles();
+    result = new MapSourceMercatorTiles(lastGDSModification);
   }
 
   // External map archive?

@@ -46,6 +46,9 @@ protected:
   ThreadInfo *processDownloadJobsThreadInfo;        // Thread that processes all download jobs
   bool quitProcessDownloadJobsThread;               // Indicates if the process download jobs thread shall quit
   Int unqueuedDownloadTileCount;                    // Number of tiles that are not yet queued but must be downloaded
+  TimestampInSeconds lastGDSModification;           // Time when the GDS for this map was last modified
+  TimestampInSeconds lastGDMModification;           // Time when the newest GDM for this map was last modified
+
 
   // Fetches the map tile in which the given position lies from disk or server
   MapTile *fetchMapTile(MapPosition pos, Int zoomLevel);
@@ -60,7 +63,7 @@ protected:
   bool parseGDSInfo();
 
   // Clears the given map directory
-  void cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels);
+  void cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels, bool removeAll=false);
 
   // Computes the mercator x and y ranges for the given area and zoom level
   void computeMercatorBounds(MapArea *displayArea,Int zMap,Int &zServer,Int &startX,Int &endX,Int &startY,Int &endY);
@@ -74,7 +77,7 @@ protected:
 public:
 
   // Constructurs and destructor
-  MapSourceMercatorTiles();
+  MapSourceMercatorTiles(TimestampInSeconds lastGDSModification);
   virtual ~MapSourceMercatorTiles();
 
   // Initialzes the source

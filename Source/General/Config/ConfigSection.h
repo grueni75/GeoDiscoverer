@@ -48,6 +48,9 @@ protected:
   // Sets a default namespace for all the nodes
   void setDefaultNamespace(XMLNamespace ns, XMLNode node);
 
+  // Time of the last modification
+  TimestampInSeconds lastModification;
+
 public:
 
   // Constructor
@@ -166,6 +169,10 @@ public:
 
   const std::string& getFolder() const {
     return folder;
+  }
+
+  const TimestampInSeconds getLastModification() const {
+    return lastModification;
   }
 };
 

@@ -519,16 +519,6 @@
                         <xsd:documentation>Time distance in microseconds between command dispatching.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="contextMenuDelay" type="xsd:integer" default="1000000">
-                      <xsd:annotation>
-                        <xsd:documentation>Time distance in microseconds before the context menu is shown.</xsd:documentation>
-                      </xsd:annotation>
-                    </xsd:element>
-                    <xsd:element name="contextMenuAllowedPixelJitter" type="xsd:integer" default="2">
-                      <xsd:annotation>
-                        <xsd:documentation>Allowed pixel jitter when checking if a context menu shall be displayed.</xsd:documentation>
-                      </xsd:annotation>
-                    </xsd:element>
                     <xsd:element name="changePageDuration" type="xsd:integer" default="500000">
                       <xsd:annotation>
                         <xsd:documentation>Time in microseconds that the transition from the current page to the next page takes.</xsd:documentation>

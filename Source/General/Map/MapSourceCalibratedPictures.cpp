@@ -84,7 +84,7 @@ bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::li
         DEBUG("info.gds found",NULL);
         std::string gdsFilename = getFolderPath() + "/infoFromGDA.gds";
         (*i)->exportEntry("info.gds",gdsFilename);
-        resolveGDSInfo(gdsFilename);
+        resolveGDSInfo(gdsFilename,NULL);
         unlink(gdsFilename.c_str());
       }
 

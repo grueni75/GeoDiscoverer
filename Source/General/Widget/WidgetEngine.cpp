@@ -55,14 +55,11 @@ WidgetEngine::WidgetEngine(Device *device) :
   buttonRepeatDelay=c->getIntValue("Graphic/Widget","buttonRepeatDelay",__FILE__, __LINE__);
   buttonLongPressDelay=c->getIntValue("Graphic/Widget","buttonLongPressDelay",__FILE__, __LINE__);
   buttonRepeatPeriod=c->getIntValue("Graphic/Widget","buttonRepeatPeriod",__FILE__, __LINE__);
-  contextMenuDelay=c->getIntValue("Graphic/Widget","contextMenuDelay",__FILE__, __LINE__);
-  contextMenuAllowedPixelJitter=c->getIntValue("Graphic/Widget","contextMenuAllowedPixelJitter",__FILE__, __LINE__);
   maxPathDistance=c->getDoubleValue("Graphic/Widget","maxPathDistance",__FILE__, __LINE__)*device->getDPI();
   enableFingerMenu=c->getIntValue("Graphic/Widget/FingerMenu","enable",__FILE__, __LINE__);
   if (device->getName()!="Default")
     enableFingerMenu=false;
   isTouched=false;
-  touchOpenedFingerMenu=false;
   currentPage=NULL;
   changePageDuration=c->getIntValue("Graphic/Widget","changePageDuration",__FILE__, __LINE__);
   ignoreTouchesEnd=0;
@@ -2037,30 +2034,6 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
       readAccessStop();
       return true;
     }
-
-    // Check if we should show the context menu
-    core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
-    if (isTouched) {
-      if ((abs(lastTouchDownX-x)<=contextMenuAllowedPixelJitter)&&(abs(lastTouchDownY-y)<=contextMenuAllowedPixelJitter)) {
-        if (t-firstStableTouchDownTime >= contextMenuDelay) {
-          if (!touchOpenedFingerMenu) {
-            lastTouchDownX=x;
-            lastTouchDownY=y;
-            //showContextMenu();
-            //openFingerMenu();
-            touchOpenedFingerMenu=true;
-          }
-        }
-      } else {
-        firstStableTouchDownTime=t;
-      }
-    } else {
-      isTouched=true;
-      firstStableTouchDownTime=t;
-    }
-    lastTouchDownX=x;
-    lastTouchDownY=y;
-    core->getThread()->unlockMutex(accessMutex);
   }
 
   // Read is over
@@ -2122,7 +2095,6 @@ bool WidgetEngine::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int dY,
 void WidgetEngine::deselectPage() {
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   isTouched=false;
-  touchOpenedFingerMenu=false;
   core->getThread()->unlockMutex(accessMutex);
 }
 
@@ -2380,7 +2352,7 @@ void WidgetEngine::openFingerMenu() {
     return;
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   setWidgetsActive(false);
-  fingerMenu->open(lastTouchDownX,lastTouchDownY);
+  fingerMenu->open();
   core->getThread()->unlockMutex(accessMutex);
   GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
   visPos->updateLastUserModification();

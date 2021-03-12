@@ -48,11 +48,7 @@ protected:
   TimestampInMicroseconds buttonLongPressDelay;         // Time to wait before dispatching long press command
   TimestampInMicroseconds buttonRepeatPeriod;           // Time distance between command dispatching
   TimestampInMicroseconds firstStableTouchDownTime;     // Time of the first touch down
-  Int lastTouchDownX, lastTouchDownY;                   // Coordinates of the last touch down
   bool isTouched;                                       // Indicates that the screen is currently touched
-  bool touchOpenedFingerMenu;                           // Indicates that the finger menu was opened during this touch down event
-  TimestampInMicroseconds contextMenuDelay;             // Time that must passed before the context menu is displayed
-  Int contextMenuAllowedPixelJitter;                    // Allowed pixel jitter when checking if a context menu shall be displayed
   GraphicObject visiblePages;                           // The currently visible pages
   TimestampInMicroseconds changePageDuration;           // Time that the transition from the current page to the next page takes
   Int changePageOvershoot;                              // Distance that the page change shall overshoot

@@ -47,7 +47,7 @@ void *mapSourceMercatorTilesProcessDownloadJobsThread(void *args) {
 }
 
 // Constructor
-MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
+MapSourceMercatorTiles::MapSourceMercatorTiles(TimestampInSeconds lastGDSModification) : MapSource() {
   type=MapSourceTypeMercatorTiles;
   mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize",__FILE__, __LINE__);
   downloadAreaLength=core->getConfigStore()->getIntValue("Map","downloadAreaLength",__FILE__, __LINE__) * 1000;
@@ -64,6 +64,8 @@ MapSourceMercatorTiles::MapSourceMercatorTiles() : MapSource() {
   quitProcessDownloadJobsThread=false;
   processDownloadJobsThreadInfo=NULL;
   unqueuedDownloadTileCount=0;
+  this->lastGDSModification=lastGDSModification;
+  this->lastGDMModification=0;
 }
 
 // Destructor
@@ -96,6 +98,13 @@ bool MapSourceMercatorTiles::init() {
   // Read the information from the config file
   if (!parseGDSInfo())
     return false;
+
+  // Remove the Tiles dir if the gds info is newer than the tiles
+  cleanMapFolder(getFolderPath() + "/Tiles",NULL,false);
+  if (lastGDSModification>lastGDMModification) {
+    DEBUG("GDS information is newer than map tiles; removing all tiles",NULL);
+    cleanMapFolder(getFolderPath() + "/Tiles",NULL,false,true);
+  }
 
   // We always need the default tiles.gda file
   lockMapArchives(__FILE__, __LINE__);
@@ -490,7 +499,7 @@ void MapSourceMercatorTiles::computeMercatorBounds(MapArea *displayArea,Int zMap
 }
 
 // Clears the given map directory
-void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels) {
+void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels,bool removeAll) {
 
   // Go through the directory list
   DIR *dfd;
@@ -499,7 +508,7 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
   //DEBUG("dirPath=%s",dirPath.c_str());
   dfd=core->openDir(dirPath);
   if (dfd==NULL) {
-    FATAL("can not read directory <%s>",dirPath.c_str());
+    DEBUG("can not read directory <%s>",dirPath.c_str());
     return;
   }
   while ((dp = readdir(dfd)) != NULL) {
@@ -509,7 +518,7 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
     std::string entryPath = dirPath + "/" + entry;
     if (dp->d_type == DT_DIR) {
       if ((entry!=".")&&(entry!=".."))
-        cleanMapFolder(entryPath,displayArea,allZoomLevels);
+        cleanMapFolder(entryPath,displayArea,allZoomLevels,removeAll);
     } else {
 
       // Is this left over from a write trial
@@ -532,6 +541,14 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
         std::getline(s,t,'.');
         s2.clear(); s2.str(t);
         s2 >> y;
+
+        // Find out the modification date
+        struct stat stats;
+        if (stat(entryPath.c_str(),&stats)!=0) {
+          FATAL("can not read timestamp of <%s>",entryPath.c_str());
+        }
+        if (stats.st_mtime>lastGDMModification) 
+          lastGDMModification=stats.st_mtime;
 
         // Shall we remove it?
         if (displayArea) {
@@ -557,9 +574,19 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
           }
         }
       }
+
+      // Shall we remove everything?
+      if (removeAll) {
+        remove(entryPath.c_str());
+      }
     }
   }
   closedir(dfd);
+
+  // Shall we delete the directory?
+  if (removeAll) {
+    remove(dirPath.c_str());
+  }
 }
 
 // Removes all obsolete map containers
