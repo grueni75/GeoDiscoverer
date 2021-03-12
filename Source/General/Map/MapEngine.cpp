@@ -499,21 +499,19 @@ void MapEngine::updateMap() {
       // Open a busy dialog
       DialogKey busyDialog = core->getDialog()->createProgress("Cleaning map archives",0);
 
-      // Remove the visible tiles from the map engine
-      while (tiles.size()>0) {
-        MapTile *t=tiles.back();
-        if (t->getParentMapContainer()->getDownloadComplete()) {
-          lockMapPos(__FILE__, __LINE__);
-          if (mapPos.getMapTile()==t) {
-            mapPos.setMapTile(NULL);
-          }
-          unlockMapPos();
-          deinitTile(t, __FILE__, __LINE__);
-        }
-        tiles.pop_back();
-      }
+      // Ensure that noone uses the center map tiles anymore
+      //DEBUG("remove center map tiles",NULL);
+      lockCenterMapTiles(__FILE__,__LINE__);
+      centerMapTiles.clear();
+      unlockCenterMapTiles();
+
+      // Ensure that the map pos has no reference more to any tile
+      lockMapPos(__FILE__, __LINE__);
+      mapPos.setMapTile(NULL);
+      unlockMapPos();
 
       // Mark map containers obsolete depending on the requested zoom level to clear
+      //DEBUG("mark obsolete map containers",NULL);
       lockDisplayArea(__FILE__, __LINE__);
       MapArea displayArea=this->displayArea;
       unlockDisplayArea();
@@ -527,15 +525,26 @@ void MapEngine::updateMap() {
         if ((c)&&(c->getDownloadComplete())&&
         (c->getLatSouth()<=displayArea.getLatNorth())&&(c->getLatNorth()>=displayArea.getLatSouth())&&
         (c->getLngWest()<=displayArea.getLngEast())&&(c->getLngEast()>=displayArea.getLngWest())) {
+
+          // If the tiles of this container are drawn, remove them
+          std::vector<MapTile*> *ct=c->getMapTiles();
+          for (std::vector<MapTile*>::iterator j=ct->begin();j!=ct->end();j++) {
+            tiles.remove(*j);
+            deinitTile(*j, __FILE__, __LINE__);
+          }
+
+          // Then mark the map container as complete
           mapSource->markMapContainerObsolete(c);
         }
       }
       mapSource->unlockAccess();
 
       // Finally remove the map containers
+      //DEBUG("remove obsolete map containers",NULL);
       mapSource->removeObsoleteMapContainers(&displayArea,redownloadAllZoomLevels);
 
       // Close busy dialog
+      //DEBUG("map clean up complete",NULL);
       core->getDialog()->closeProgress(busyDialog);
 
       // Map has changed
