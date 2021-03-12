@@ -1436,7 +1436,7 @@ public class GDCore implements
   @Override
   public void onLongPress(MotionEvent e) {
     //appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", String.format("on long press!"));
-    executeCoreCommand("toggleFingerMenu()(");
+    //executeCoreCommand("toggleFingerMenu()(");
   }
 
   @Override

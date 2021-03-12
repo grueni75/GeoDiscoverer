@@ -2287,11 +2287,12 @@ void WidgetEngine::onPathChange(NavigationPath *path, NavigationPathChangeType c
   readAccessStop();
 
   // Then update the nearest path  
-  MapPosition pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
+  core->getMapEngine()->setForceMapUpdate(__FILE__,__LINE__);
+  /*MapPosition pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
   core->getMapEngine()->unlockMapPos();
   std::list<MapTile*> *centerMapTiles = core->getMapEngine()->lockCenterMapTiles(__FILE__,__LINE__);
   onMapChange(pos,centerMapTiles);
-  core->getMapEngine()->unlockCenterMapTiles();
+  core->getMapEngine()->unlockCenterMapTiles();*/
 }
 
 // Informs the engine that some data has changed
