@@ -38,7 +38,7 @@ void *stderrThread(void *args) {
   ssize_t redirect_size;
   int *pipeStderr=(int*)args;
   char buf[2048];
-  DEBUG("%d %d",pipeStderr[0],pipeStderr[1]);
+  //DEBUG("%d %d",pipeStderr[0],pipeStderr[1]);
   while((redirect_size = read(pipeStderr[0], buf, sizeof buf - 1)) > 0) {
     if(buf[redirect_size - 1] == '\n')
         --redirect_size;

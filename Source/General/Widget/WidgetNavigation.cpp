@@ -604,7 +604,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
           std::list<GraphicRotateAnimationParameter> rotateAnimationSequence = navigationPointObject.getRotateAnimationSequence();
           rotateAnimationSequence.push_back(rotateParameter);
           navigationPointObject.setRotateAnimationSequence(rotateAnimationSequence);
-          DEBUG("navigation point: angle start=%f angle end=%f",navigationPointObject.getAngle(),navigationInfo->getNearestNavigationPointBearing());
+          //DEBUG("navigation point: angle start=%f angle end=%f",navigationPointObject.getAngle(),navigationInfo->getNearestNavigationPointBearing());
         } else {
           navigationPointObject.setAngle(navigationInfo->getNearestNavigationPointBearing());
         }

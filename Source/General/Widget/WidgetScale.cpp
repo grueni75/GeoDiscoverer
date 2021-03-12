@@ -75,6 +75,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
   bool changed=WidgetPrimitive::work(t);
 
   // Only update the info at given update interval
+  //DEBUG("t=%ld nextUpdateTime=%ld",t,nextUpdateTime);
   if (t>=nextUpdateTime) {
 
     // Get the map and layer name
@@ -89,6 +90,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     MapPosition pos=*(core->getMapEngine()->lockMapPos(__FILE__, __LINE__));
     core->getMapEngine()->unlockMapPos();
     MapCalibrator *calibrator=NULL;
+    //DEBUG("%s %f 0x%08x",layerName.c_str(),pos.getLngScale(),pos.getMapTile());
     if ((pos.getLngScale()>0)&&(pos.getMapTile())&&(pos.getMapTile()->getParentMapContainer())&&((calibrator=pos.getMapTile()->getParentMapContainer()->getMapCalibrator())!=NULL)) {
       //DEBUG("angle=%f zoom=%f",angle,zoom);
       MapPosition pos2=pos;
@@ -139,10 +141,10 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
 
     // Compute the layer name
     fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
-    std::size_t t=layerName.find_last_of(" ");
+    std::size_t i=layerName.find_last_of(" ");
     Int keepEndCharCount=-1;
-    if (t!=std::string::npos) {
-      std::string layerNamePostfix=layerName.substr(t);
+    if (i!=std::string::npos) {
+      std::string layerNamePostfix=layerName.substr(i);
       //DEBUG("layerNamePostfix=%s",layerNamePostfix.c_str());
       keepEndCharCount=layerNamePostfix.length();
     }
@@ -157,6 +159,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
 
     // Set the next update time
     nextUpdateTime=t+updateInterval;
+    //DEBUG("nextUpdateTime=%ld",nextUpdateTime);
 
   }
 
