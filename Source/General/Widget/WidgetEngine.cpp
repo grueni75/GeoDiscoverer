@@ -1799,6 +1799,8 @@ void WidgetEngine::createGraphic() {
         if (*j=="Path Info Lock")      { fingerMenuRowEntries[3]=primitive; skipPageAdd=true;  }
         if (*j=="Trash Path")          { fingerMenuRowEntries[4]=primitive; skipPageAdd=true;  }
         if (*j=="Cursor Info")         { fingerMenu->setCursorInfoWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
+        if (*j=="Menu Right")          { fingerMenu->addWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
+        if (*j=="Menu Left")           { fingerMenu->addWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
       }
       if (!skipPageAdd) {
         page->addWidget(primitive);
@@ -1889,21 +1891,27 @@ void WidgetEngine::updateWidgetPositions() {
   // Set global variables that depend on the device->getScreen() configuration
   changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*device->getScreen()->getWidth()/100.0);
 
-  // Go through all pages
+  // Go through all pages and the cursor info  
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   ConfigStore *c=core->getConfigStore();
-  WidgetPageMap::iterator i;
-  for(i=pageMap.begin();i!=pageMap.end();i++) {
-    WidgetPage *page=i->second;
+  std::list<WidgetContainer*> containers;
+  if (fingerMenu) containers.push_back(fingerMenu);
+  WidgetPageMap::iterator j;
+  for(j=pageMap.begin();j!=pageMap.end();j++) {
+    containers.push_back(j->second);
+  }
+  std::list<WidgetContainer*>::iterator i;
+  for(i=containers.begin();i!=containers.end();i++) {
+    WidgetContainer *container=*i;
 
     // Go through all widgets
     std::list<WidgetPrimitive*> primitives;
     getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-    GraphicPrimitiveMap *widgetMap=page->getGraphicObject()->getPrimitiveMap();
+    GraphicPrimitiveMap *widgetMap=container->getGraphicObject()->getPrimitiveMap();
     GraphicPrimitiveMap::iterator j;
     for(j=widgetMap->begin();j!=widgetMap->end();j++) {
       WidgetPrimitive *primitive=(WidgetPrimitive*)j->second;
-      std::string path="Graphic/Widget/Device[@name='" + device->getName() + "']/Page[@name='" + page->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/Position";
+      std::string path="Graphic/Widget/Device[@name='" + device->getName() + "']/Page[@name='" + container->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/Position";
 
       // Find the position that is closest to the reference device->getScreen() diagonal
       std::list<std::string> refScreenDiagonals = c->getAttributeValues(path,"refScreenDiagonal",__FILE__,__LINE__);
@@ -1942,9 +1950,9 @@ void WidgetEngine::updateWidgetPositions() {
     }
 
     // Re-add the widget to the graphic object to get them sorted
-    page->deinit(false);
+    container->deinit(false);
     for(std::list<WidgetPrimitive*>::iterator i=primitives.begin();i!=primitives.end();i++) {
-      page->addWidget(*i);
+      container->addWidget(*i);
     }
     getGraphicEngine()->unlockDrawing();
 
@@ -2020,8 +2028,9 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     return true;
   } else {
 
+
     // Then check if widget on page is touched
-    if (currentPage->onTouchDown(t,x,y)) {
+    if ((!fingerMenu)||(!fingerMenu->isOpen())&&(currentPage->onTouchDown(t,x,y))) {
       core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
       isTouched=false;
       core->getThread()->unlockMutex(accessMutex);
@@ -2072,7 +2081,7 @@ bool WidgetEngine::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cance
     return false;
   }
   deselectPage();
-  currentPage->onTouchUp(t,x,y,cancel);
+  if ((!fingerMenu)||(!fingerMenu->isOpen())) currentPage->onTouchUp(t,x,y,cancel);
   if (fingerMenu) fingerMenu->onTouchUp(t,x,y,cancel);
   readAccessStop();
   return true;

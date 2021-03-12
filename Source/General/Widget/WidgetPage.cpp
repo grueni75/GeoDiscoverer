@@ -28,10 +28,8 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetPage::WidgetPage(WidgetEngine *widgetEngine, std::string name) : 
-  WidgetContainer(widgetEngine)
+WidgetPage::WidgetPage(WidgetEngine *widgetEngine, std::string name) : WidgetContainer(widgetEngine, name)
 {
-  this->name=name;
   widgetsActive=false;
   hiddenAnimationDuration=core->getConfigStore()->getIntValue("Graphic/Widget","hiddenAnimationDuration",__FILE__, __LINE__);
 }

@@ -30,7 +30,7 @@ namespace GEODISCOVERER {
 
 // Constructor
 WidgetFingerMenu::WidgetFingerMenu(WidgetEngine *widgetEngine) : 
-  WidgetContainer(widgetEngine)
+  WidgetContainer(widgetEngine,"Finger Menu")
 {
   circleRadius=core->getConfigStore()->getDoubleValue("Graphic/Widget/FingerMenu","radiusCircle",__FILE__,__LINE__)*widgetEngine->getScreen()->getDPI();
   angleOffset=FloatingPoint::degree2rad(core->getConfigStore()->getDoubleValue("Graphic/Widget/FingerMenu","angleOffset",__FILE__,__LINE__));
@@ -65,8 +65,6 @@ void WidgetFingerMenu::addWidgetToCircle(WidgetPrimitive *primitive) {
   // Configure the primitive
   primitive->setScale(0);
   primitive->setColor(primitive->getActiveColor());
-  primitive->setX(-primitive->getIconWidth()/2);
-  primitive->setY(-primitive->getIconHeight()/2);
 
   // Add the primitive
   WidgetContainer::addWidget(primitive);
@@ -79,8 +77,6 @@ void WidgetFingerMenu::addWidgetToRow(WidgetPrimitive *primitive) {
   // Configure the primitive
   primitive->setScale(0);
   primitive->setColor(primitive->getActiveColor());
-  primitive->setX(-primitive->getIconWidth()/2);
-  primitive->setY(-primitive->getIconHeight()/2);
 
   // Call the inhertied function
   WidgetContainer::addWidget(primitive);
@@ -91,7 +87,6 @@ void WidgetFingerMenu::addWidgetToRow(WidgetPrimitive *primitive) {
 void WidgetFingerMenu::setCursorInfoWidget(WidgetCursorInfo *primitive) {
   if (cursorInfo==NULL) {
     cursorInfo=primitive;
-    cursorInfo->setX(0);
     WidgetContainer::addWidget(primitive);
     cursorInfo->onDataChange();
   }
@@ -151,8 +146,10 @@ void WidgetFingerMenu::open(Int x, Int y) {
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   positionWidgetOnCircle(t, 0, 0, circleRadius);
   positionWidgetOnRow(t, 0, rowOffsetY, rowDistance);
-  if (cursorInfo)
+  if (cursorInfo) {
+    cursorInfo->setX(0);
     cursorInfo->changeState(cursorInfoOpenedOffsetY,true,animationDuration);
+  }
   closeTimestamp=core->getClock()->getMicrosecondsSinceStart()+closeTimeout;
   opened=true;
   stateChanged=true;
@@ -161,24 +158,23 @@ void WidgetFingerMenu::open(Int x, Int y) {
 // Closes the finger menu
 void WidgetFingerMenu::close() {
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
-  std::list<GraphicPrimitive*> *drawingList = graphicObject.getDrawList();
-  for(std::list<GraphicPrimitive*>::iterator i=drawingList->begin();i!=drawingList->end();i++) {
+  std::list<WidgetPrimitive*> drawingList = rowWidgets;
+  drawingList.insert(drawingList.end(), circleWidgets.begin(), circleWidgets.end());
+  for(std::list<WidgetPrimitive*>::iterator i=drawingList.begin();i!=drawingList.end();i++) {
     WidgetPrimitive *primitive = (WidgetPrimitive*) *i;
-    if (primitive->getWidgetType()!=WidgetTypeCursorInfo) {
-      primitive->setTranslateAnimation(t,
-        primitive->getX(),
-        primitive->getY(),
-        -primitive->getIconWidth()/2,
-        -primitive->getIconHeight()/2,
-        false,
-        animationDuration,
-        GraphicTranslateAnimationTypeAccelerated);
-      primitive->setScaleAnimation(t,
-        primitive->getScale(),
-        0.0,
-        false,
-        animationDuration);
-    }
+    primitive->setTranslateAnimation(t,
+      primitive->getX(),
+      primitive->getY(),
+      -primitive->getIconWidth()/2,
+      -primitive->getIconHeight()/2,
+      false,
+      animationDuration,
+      GraphicTranslateAnimationTypeAccelerated);
+    primitive->setScaleAnimation(t,
+      primitive->getScale(),
+      0.0,
+      false,
+      animationDuration);
   }
   if (cursorInfo) {
     cursorInfo->changeState(cursorInfoClosedOffsetY,false,animationDuration);
@@ -188,13 +184,9 @@ void WidgetFingerMenu::close() {
 
 // Called when the page is touched
 bool WidgetFingerMenu::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
-  if (!opened)
-    return false;
-  else {
-    closeTimestamp=t+closeTimeout;
-    bool hit = WidgetContainer::onTouchDown(t,x,y);
-    return hit;
-  }
+  closeTimestamp=t+closeTimeout;
+  bool hit = WidgetContainer::onTouchDown(t,x,y);
+  return hit;
 }
 
 // Let the page work

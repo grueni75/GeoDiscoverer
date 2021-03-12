@@ -32,6 +32,7 @@ class WidgetContainer {
 
 protected:
 
+  std::string name;                                     // Name of the container
   WidgetEngine *widgetEngine;                           // Widget engine this page belongs to
   GraphicObject graphicObject;                          // Contains the widgets of this page
   bool touchStartedOutside;                             // Indicates that the widgets were not touched directly at the beginning
@@ -43,7 +44,7 @@ protected:
 public:
 
   // Constructors and destructor
-  WidgetContainer(WidgetEngine *widgetEngine);
+  WidgetContainer(WidgetEngine *widgetEngine, std::string name);
   virtual ~WidgetContainer();
 
   // Adds a widget to the page
@@ -83,6 +84,10 @@ public:
   GraphicObject *getGraphicObject()
   {
       return &graphicObject;
+  }
+  std::string getName() const
+  {
+      return name;
   }
 
   FontEngine *getFontEngine();

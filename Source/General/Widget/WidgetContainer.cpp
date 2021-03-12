@@ -29,13 +29,14 @@
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetContainer::WidgetContainer(WidgetEngine *widgetEngine) : graphicObject(widgetEngine->getScreen()){
+WidgetContainer::WidgetContainer(WidgetEngine *widgetEngine, std::string name) : graphicObject(widgetEngine->getScreen()){
   touchStartedOutside=false;
   firstTouch=true;
   selectedWidget=NULL;
   touchEndTime=0;
   lastTouchStartedOutside=true;
   this->widgetEngine=widgetEngine;
+  this->name=name;
 }
 
 // Destructor
