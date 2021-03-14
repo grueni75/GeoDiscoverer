@@ -517,7 +517,7 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 </div></div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="202103110635" changecount="173">
+<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="202103140918" changecount="175">
 <pre>! Copyright (C) Matthias Grünewald - All Rights Reserved
 Geo Discoverer has been developed by Matthias Grünewald. He owns the copyright for the application, this help and all the media used. The app uses also many libraries and media from others. See [[Acknowledgements|About##Acknowledgements]]. 
 ! License
@@ -627,7 +627,8 @@ The Mapsforge library renders bitmaps from vector maps. It is used within a http
 The code for providing a hillshade tile server has been inspired from Lukáš Karas Python based server. It is licensed under the BSD 3-Clause License. See his [[homepage|https://github.com/Karry/hillshade-tile-server]] for more details. 
 !! GDAL
 The rendering of hillshades and the reading of bitmaps with altitude information is performed with the gdal library. See License-GDAL for more information.
-</pre>
+!! Gaussian blur filter
+The C code implementation of a Gaussian blur filter is copied from the single-header-file C libraries from Stephan Soller. It is licensed under the License-MIT.</pre>
 </div>
 <div title="AppPreferences" creator="Matthias" modifier="Matthias" created="201412221203" changecount="1">
 <pre>The preferences of Geo Discoverer can be opened via the [[menu entry &quot;Preferences&quot;|MapView##Menu]]. Every entry has an explanation. So the preferences should be self explaining. By default, only the most important preferences are shown. An expert mode can be enabled that shows all available preferences. Please note that not all preferences are remembered if the app version is upgraded. If you think that your favorite preferences shall survive an app upgrade, please [[contact the developer|ContactDeveloper]]. </pre>
@@ -3385,6 +3386,31 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 &lt;http://www.gnu.org/philosophy/why-not-lgpl.html&gt;.
 </pre>
+</div>
+<div title="License-MIT" creator="Matthias" modifier="Matthias" created="202103140918" modified="202103140918" changecount="2">
+<pre>{{{
+The MIT License (MIT)
+
+Copyright (c) 2016 arkanis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+}}}</pre>
 </div>
 <div title="License-MaterialDialog" creator="Matthias" modifier="Matthias" created="201506110545" modified="201506110545" changecount="2">
 <pre>The MIT License (MIT)
