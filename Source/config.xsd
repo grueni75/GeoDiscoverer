@@ -406,6 +406,11 @@
                   <xsd:documentation>Time in milliseconds to wait before vibrating to ensure that app is updated.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="minSpeedToAlert" type="xsd:double" default="0.2">
+                <xsd:annotation>
+                  <xsd:documentation>Minimum speed required to trigger an alert.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>            
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
@@ -2293,11 +2298,6 @@
               <xsd:element name="minDistanceToNavigationUpdate" type="xsd:double" default="5">
                 <xsd:annotation>
                   <xsd:documentation>Minimum distance that need to be travelled before the navigation information is updated.</xsd:documentation>
-                </xsd:annotation>
-              </xsd:element>
-              <xsd:element name="minSpeedToSignalOffRoute" type="xsd:double" default="0.2">
-                <xsd:annotation>
-                  <xsd:documentation>Minimum speed required to indicate an off route situation.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="minDistanceToBeOffRoute" type="xsd:double" default="50">

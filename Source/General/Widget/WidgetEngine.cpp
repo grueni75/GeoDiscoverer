@@ -2027,7 +2027,7 @@ bool WidgetEngine::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
 
 
     // Then check if widget on page is touched
-    if ((!fingerMenu)||(!fingerMenu->isOpen())&&(currentPage->onTouchDown(t,x,y))) {
+    if (((!fingerMenu)||(!fingerMenu->isOpen()))&&(currentPage->onTouchDown(t,x,y))) {
       core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
       isTouched=false;
       core->getThread()->unlockMutex(accessMutex);

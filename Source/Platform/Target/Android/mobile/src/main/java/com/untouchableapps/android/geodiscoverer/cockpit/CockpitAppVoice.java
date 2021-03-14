@@ -51,7 +51,7 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
 
   // Maximum angle a turn is detected as a forward drive
   float forwardTurnMaxAngle;
-  
+
   // Text to speech engine for saying something
   TextToSpeech textToSpeech;
   Locale textToSpeechLocale;
@@ -116,47 +116,6 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("t(alert)=%d", System.currentTimeMillis() / 1000));
   }
 
-  /** Converts a distance string into meters */
-  protected float textDistanceToMeters(String text) {
-    if (text.equals(""))
-      return 0;
-    float number = Float.valueOf(text.substring(0, text.indexOf(" ")));
-    String unit = text.substring(text.indexOf(" ") + 1);
-    if (unit.equals("m")) {
-      return (float) number;
-    }
-    if (unit.equals("km")) {
-      return (float) number*(float)1e3;
-    }
-    if (unit.equals("Mm")) {
-      return (float) number*(float)1e6;
-    }
-    if (unit.equals("mi")) {
-      return (float) number*(float)1609.34;
-    }
-    if (unit.equals("yd")) {
-      return (float) number*(float)0.9144;
-    }
-    GDApplication.coreObject.executeAppCommand("fatalDialog(\"Distance unit not supported\")");
-    return 0;
-  }
-
-  /** Converts a speed string into meters per second */
-  protected float textSpeedToMetersPerSecond(String text) {
-    if (text.equals(""))
-      return 0;
-    float number = Float.valueOf(text.substring(0, text.indexOf(" ")));
-    String unit = text.substring(text.indexOf(" ")+1);
-    if (unit.equals("km/h")) {
-      return (float) (number/3.6);
-    }
-    if (unit.equals("mph")) {
-      return (float) (number*0.44704);
-    }
-    GDApplication.coreObject.executeAppCommand("fatalDialog(\"Speed unit not supported\")");
-    return 0;
-  }
-
   /** Converts a distance string into a speakable string */
   protected String textDistanceToVoiceDistance(String distance) {
     if (distance.equals(""))
@@ -208,9 +167,9 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
     if (!distance.equals("")) {
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("distance=%s",distance));
       if ((!infos.targetBearing.equals("-")) && (!infos.locationSpeed.equals("-"))) {
-        float distanceOriginal = textDistanceToMeters(distance);
+        float distanceOriginal = cockpitEngine.textDistanceToMeters(distance);
         float distanceNew;
-        float speed = textSpeedToMetersPerSecond(infos.locationSpeed);
+        float speed = cockpitEngine.textSpeedToMetersPerSecond(infos.locationSpeed);
         float distanceTravelled = speed * audioDelay / 1000;
         float angleDegree = Float.parseFloat(infos.targetBearing) - Float.parseFloat(infos.locationBearing);
         float angle = angleDegree * (float) Math.PI / (float) 180.0;

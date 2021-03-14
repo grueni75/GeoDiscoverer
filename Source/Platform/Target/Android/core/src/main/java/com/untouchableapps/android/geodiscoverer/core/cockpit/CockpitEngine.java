@@ -72,9 +72,55 @@ public class CockpitEngine {
   boolean quitVibrateThread = false;
   Thread vibrateThread = null;
 
+  // Minimum speed required to trigger an alert
+  float minSpeedToAlert;
+
+  // Current speed in m/s
+  float locationSpeed;
+
   // List of registered apps
   protected LinkedList<CockpitAppInterface> apps = new LinkedList<CockpitAppInterface>();
 
+  /** Converts a distance string into meters */
+  public float textDistanceToMeters(String text) {
+    if (text.equals(""))
+      return 0;
+    float number = Float.valueOf(text.substring(0, text.indexOf(" ")));
+    String unit = text.substring(text.indexOf(" ") + 1);
+    if (unit.equals("m")) {
+      return (float) number;
+    }
+    if (unit.equals("km")) {
+      return (float) number*(float)1e3;
+    }
+    if (unit.equals("Mm")) {
+      return (float) number*(float)1e6;
+    }
+    if (unit.equals("mi")) {
+      return (float) number*(float)1609.34;
+    }
+    if (unit.equals("yd")) {
+      return (float) number*(float)0.9144;
+    }
+    coreObject.executeAppCommand("fatalDialog(\"Distance unit not supported\")");
+    return 0;
+  }
+
+  /** Converts a speed string into meters per second */
+  public float textSpeedToMetersPerSecond(String text) {
+    if (text.equals(""))
+      return 0;
+    float number = Float.valueOf(text.substring(0, text.indexOf(" ")));
+    String unit = text.substring(text.indexOf(" ")+1);
+    if (unit.equals("km/h")) {
+      return (float) (number/3.6);
+    }
+    if (unit.equals("mph")) {
+      return (float) (number*0.44704);
+    }
+    coreObject.executeAppCommand("fatalDialog(\"Speed unit not supported\")");
+    return 0;
+  }
 
   /** Constructor */
   public CockpitEngine(Context context, GDCore coreObject) {
@@ -91,6 +137,7 @@ public class CockpitEngine {
     offRouteAlertFastPeriod = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertFastPeriod"));
     offRouteAlertFastCount = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertFastCount"));
     offRouteAlertSlowPeriod = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertSlowPeriod"));
+    minSpeedToAlert = Float.parseFloat(coreObject.configStoreGetStringValue("Cockpit", "minSpeedToAlert"));
 
     // Add all activated apps
     if (Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit/App/Vibration", "active"))>0) {
@@ -123,12 +170,16 @@ public class CockpitEngine {
                 app.inform();
                 app.focus();
               }
-                            
+
               // Wait a little bit before vibrating
               Thread.sleep(waitTimeBeforeAlert);
               if (quitVibrateThread)
                 return;
-              
+
+              // Skip the vibrate if the current speed is below the threshold
+              if (locationSpeed<minSpeedToAlert)
+                return;
+
               // Skip vibrate if we are not off route anymore 
               // and this is is not the first vibrate
               if (((!currentOffRoute)||(!currentTurnDistance.equals("-")))&&(fastVibrateCount>1))
@@ -240,7 +291,14 @@ public class CockpitEngine {
     currentTurnDistance = cockpitInfos.turnDistance;
     currentOffRoute = cockpitInfos.offRoute;
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "update: currentOffRoute=" + Boolean.toString(currentOffRoute));
-    
+
+    // Remember the current speed
+    if (!cockpitInfos.locationSpeed.equals("-")) {
+      locationSpeed = textSpeedToMetersPerSecond(cockpitInfos.locationSpeed);
+    } else {
+      locationSpeed = -1;
+    }
+
     // If the turn has appeared or disappears or we are off route, force an update
     if ((currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals("-")))
       forceUpdate=true;
