@@ -336,6 +336,10 @@ public:
   MapDownloader* getMapDownloader() {
     return mapDownloader;
   }
+
+  MapSourceType getType() {
+    return type;
+  }
 };
 
 }

@@ -32,6 +32,8 @@
 #include <UnitConverter.h>
 #include <NavigationPath.h>
 #include <ElevationEngine.h>
+#include <MapSourceMercatorTiles.h>
+#include <ZipArchive.h>
 
 namespace GEODISCOVERER {
 
@@ -40,6 +42,7 @@ Commander::Commander() {
   accessMutex=core->getThread()->createMutex("commander access mutex");
   lastTouchedX=0;
   lastTouchedY=0;
+  mapTileNr=0;
 }
 
 // Destructor
@@ -836,6 +839,46 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="renderHillshadeTile") {
     core->getElevationEngine()->renderHillshadeTile(atoi(args[0].c_str()),atoi(args[1].c_str()),atoi(args[2].c_str()),args[3]);
+    cmdExecuted=true;
+  }
+  if (cmdName=="fetchMapTile") {
+    core->getMapSource()->lockAccess(__FILE__,__LINE__);
+    if (core->getMapSource()->getIsInitialized()) {
+      if (core->getMapSource()->getType()==MapSourceTypeMercatorTiles) {
+        MapSourceMercatorTiles *mapSource=(MapSourceMercatorTiles*)core->getMapSource();
+        //DEBUG("cmd=%s",cmd.c_str());
+        MapTile *mapTile=mapSource->fetchMapTile(atoi(args[0].c_str()),atoi(args[1].c_str()),atoi(args[2].c_str()));
+        if (mapTile!=NULL) {
+          while (!mapTile->getParentMapContainer()->getDownloadComplete()) {          
+            core->getMapSource()->unlockAccess();
+            //DEBUG("waiting for download",NULL);
+            usleep(1000);
+            core->getMapSource()->lockAccess(__FILE__,__LINE__);
+          }
+          if (!mapTile->getParentMapContainer()->getDownloadErrorOccured()) {
+            std::stringstream tempImageFilePath;
+            tempImageFilePath << args[3] << "/" << mapTileNr << "_" << mapTile->getParentMapContainer()->getImageFilePath();
+            mapTileNr++;
+            ZipArchive *mapArchive = new ZipArchive(mapTile->getParentMapContainer()->getArchiveFileFolder(),mapTile->getParentMapContainer()->getArchiveFileName());
+            if ((mapArchive==NULL)||(!mapArchive->init()))
+              FATAL("can not create zip archive object",NULL);
+            mapArchive->exportEntry(mapTile->getParentMapContainer()->getImageFilePath(),tempImageFilePath.str());
+            delete mapArchive;
+            result=tempImageFilePath.str();
+            //DEBUG("result=%s",result.c_str());
+          } else {
+            DEBUG("download error for tile (%d,%d,%d)",atoi(args[0].c_str()),atoi(args[1].c_str()),atoi(args[2].c_str()));
+          }
+        } else {
+          DEBUG("no map tile found at (%d,%d,%d)",atoi(args[0].c_str()),atoi(args[1].c_str()),atoi(args[2].c_str()));
+        }
+      } else {
+        ERROR("only mercator tile map source is supported for serving map tiles",NULL);
+      }
+    } else {
+      ERROR("map source is not initialized",NULL);
+    }
+    core->getMapSource()->unlockAccess();
     cmdExecuted=true;
   }
 

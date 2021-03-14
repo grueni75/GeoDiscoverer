@@ -307,6 +307,7 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(MapPosition pos, Int zoomLevel) {
     zMap=maxZoomLevel;
   }
   Int zServer=zMap-minZoomLevelMap+minZoomLevelServer;
+  //DEBUG("zServer=%d zMap=%d",zServer,zMap);
 
   // Compute the tile numbers
   Int x,y,max;
@@ -1156,6 +1157,30 @@ bool MapSourceMercatorTiles::hasDownloadJobs() {
     return true;
   else
     return false;
+}
+
+// Returns the map tile for the given mercator coordinates
+MapTile *MapSourceMercatorTiles::fetchMapTile(Int z, Int x, Int y) {
+
+  // First find out the zoom level to use
+  Int zMap;
+  std::list<MapTileServer*> *tileServers=mapDownloader->getTileServers();
+  for (std::list<MapTileServer*>::iterator j=tileServers->begin();j!=tileServers->end();j++) {
+    MapTileServer *tileServer=*j;
+    //DEBUG("minZoomLevelServer=%d maxZoomLevelServer=%d minZoomLevelMap=%d",tileServer->getMinZoomLevelServer(),tileServer->getMaxZoomLevelServer(),tileServer->getMinZoomLevelMap());
+    if ((z>=tileServer->getMinZoomLevelServer())&&(z<=tileServer->getMaxZoomLevelServer())) {
+      zMap=tileServer->getMinZoomLevelMap()+z-tileServer->getMinZoomLevelServer();
+      break;
+    }
+  }
+  //DEBUG("zServer=%d zMap=%d",z,zMap);
+
+  // Compute the position from the found zoom level
+  MapPosition pos;
+  pos.setFromMercatorTileXY(z,x,y);
+
+  // Then find the map tile
+  return fetchMapTile(pos,zMap);
 }
 
 } /* namespace GEODISCOVERER */

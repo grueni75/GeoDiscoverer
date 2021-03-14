@@ -337,7 +337,6 @@ void MapPosition::setFromMercatorTileXY(Int zoomLevel, Int x, Int y) {
   setLng((x+0.5) * unit * 360.0 - 180.0);
   double n = M_PI - 2.0 * M_PI * (y+0.5) * unit;
   setLat(180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n))));
-
 }
 
 // Checks if the location is valid

@@ -55,7 +55,9 @@ public class MapTileServerHandler extends NanoHTTPD {
   protected final List<File> mapFiles;
   protected GDCore coreObject=null;
   protected String mapsforgePath=null;
+  protected String loopbackPath=null;
   private static final Pattern P = Pattern.compile("/(.+)/(\\d+)/(\\d+)/(\\d+)\\.(.*)");
+  protected int hilllshadeTileNr=0;
 
   protected class RuntimeMeasurement {
     String function;
@@ -76,13 +78,26 @@ public class MapTileServerHandler extends NanoHTTPD {
     this.mapFiles = mapFiles;
     this.coreObject = coreObject;
     this.mapsforgePath = coreObject.homePath+"/Server/Mapsforge";
+    this.loopbackPath = coreObject.homePath+"/Server/Loopback";
 
-    // CLeanup any left over files
+    // Cleanup any left over files
     File hillshadeDir = new File(coreObject.homePath+"/Server/Hillshade");
     File[] children = hillshadeDir.listFiles();
     if (children != null) {
       for (File child : children) {
         if ((child.isFile())&&(child.getName().startsWith("hillshade_"))) {
+          child.delete();
+        }
+      }
+    }
+    File loopbackDir = new File(loopbackPath);
+    if (!loopbackDir.exists()) {
+      loopbackDir.mkdir();
+    }
+    children = loopbackDir.listFiles();
+    if (children != null) {
+      for (File child : children) {
+        if ((child.isFile())) {
           child.delete();
         }
       }
@@ -116,8 +131,35 @@ public class MapTileServerHandler extends NanoHTTPD {
     return newFixedLengthResponse(Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT, msg);
   }
 
+  // Reads the image and return it to the caller
+  protected Response serveImage(String uri, String function, int z, long startTime, String filepath) {
+    File file = new File(filepath);
+    byte[] image;
+    try {
+      FileInputStream fin = new FileInputStream(file);
+      image = new byte[(int)file.length()];
+      fin.read(image);
+      fin.close();
+      file.delete();
+      File auxFile = new File(filepath+".aux.xml");
+      if (auxFile.exists())
+        auxFile.delete();
+    }
+    catch (Exception e) {
+      return serveError("image <" + filepath + "> can not be read");
+    }
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    InputStream fis = new ByteArrayInputStream(image);
+    addRuntime(uri,function,z,startTime);
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"MapTileServer",filepath + ": " + image.length);
+    return newFixedLengthResponse(Response.Status.OK, "image/png", fis, image.length);
+  }
+
   @Override
   public Response serve(IHTTPSession session) {
+
+    // Set the right priority
+    coreObject.setThreadPriority(3);
 
     // Start time measurement
     long startTime=System.currentTimeMillis();
@@ -219,29 +261,26 @@ public class MapTileServerHandler extends NanoHTTPD {
     }
     if (type.equals("hillshade")) {
 
+      // Assign a unique number to prevent file conflicts
+      int fileNr=0;
+      synchronized (this) {
+        fileNr=this.hilllshadeTileNr;
+        this.hilllshadeTileNr++;
+      }
+
       // Ask the core to do the rendering
-      String hillshadeTileFilepath=coreObject.homePath+"/Server/Hillshade/hillshade_"+z+"_"+y+"_"+x+".png";
+      String hillshadeTileFilepath=coreObject.homePath+"/Server/Hillshade/hillshade_"+fileNr+"_"+z+"_"+y+"_"+x+".png";
       coreObject.executeCoreCommand("renderHillshadeTile",String.valueOf(z),String.valueOf(y),String.valueOf(x),hillshadeTileFilepath);
 
       // Read the png and return it to the caller
-      File hillshadeTileFile = new File(hillshadeTileFilepath);
-      byte[] hillshadeImage;
-      try {
-        FileInputStream fin = new FileInputStream(hillshadeTileFile);
-        hillshadeImage = new byte[(int)hillshadeTileFile.length()];
-        fin.read(hillshadeImage);
-        fin.close();
-        hillshadeTileFile.delete();
-        File hillshadeTileFileAuxXml = new File(hillshadeTileFilepath+".aux.xml");
-        hillshadeTileFileAuxXml.delete();
-      }
-      catch (Exception e) {
-        return serveError("hillshade tile can not be read");
-      }
-      ByteArrayOutputStream os = new ByteArrayOutputStream();
-      InputStream fis = new ByteArrayInputStream(hillshadeImage);
-      addRuntime(uri,"hillshade",z,startTime);
-      return newFixedLengthResponse(Response.Status.OK, "image/png", fis, hillshadeImage.length);
+      return serveImage(uri,"hillshade",z,startTime,hillshadeTileFilepath);
+    }
+    if (type.equals("geodiscoverer")) {
+
+      // Get the tile from the core
+      String tileFilename=coreObject.executeCoreCommand("fetchMapTile",String.valueOf(z),String.valueOf(x),String.valueOf(y),loopbackPath);
+      addRuntime(uri,"geodiscoverer",z,startTime);
+      return serveImage(uri,"geodiscoverer",z,startTime,tileFilename);
     }
     return serveError("tile type <" + type + "> not supported");
   }

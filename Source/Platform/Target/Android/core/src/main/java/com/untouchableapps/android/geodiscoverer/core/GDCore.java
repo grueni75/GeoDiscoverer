@@ -60,12 +60,15 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -443,27 +446,58 @@ public class GDCore implements
     String title = "Updating home directory";
     executeAppCommand("createProgressDialog(\"" + title + "\"," + files.size() + ")");
     
-    // Copy all files
+    // Copy all files (only if changed)
     int i = 0;
     for (String path : files) {
       String externalPath = homePath + "/" + path;
       String internalPath = "GeoDiscoverer/" + path;
+      boolean copyFile=true;
       File f = new File(externalPath);
-      try {
-        f.getParentFile().mkdirs();
-        FileOutputStream os = new FileOutputStream(f);
-        is = am.open(internalPath);
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = is.read(buf)) > 0) {
-            os.write(buf, 0, len);
+      if (f.exists()) {
+        try {
+          InputStream is1 = new FileInputStream(f);
+          InputStream is2 = am.open(internalPath);
+          byte[] buf1 = new byte[1024];
+          byte[] buf2 = new byte[1024];
+          int len1,len2;
+          boolean mismatch=false;
+          while ((len1 = is1.read(buf1)) > 0) {
+            len2 = is2.read(buf2);
+            if (len1!=len2) {
+              mismatch=true;
+              break;
+            }
+            if (!Arrays.equals(buf1,buf2)) {
+              mismatch = true;
+              break;
+            }
+          }
+          is1.close();
+          is2.close();
+          if (!mismatch)
+            copyFile=false;
+          //appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp",f.getPath() + " mismatch=" + String.valueOf(mismatch));
         }
-        os.close();
-        is.close();
-      } 
-      catch (IOException e) {
-        executeAppCommand("fatalDialog(\"Could not copy file to home directory: " + e.getMessage() + "!\")");
-        return false;
+        catch (IOException e) {
+          appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp",e.getMessage());
+        }
+      }
+      if (copyFile) {
+        try {
+          f.getParentFile().mkdirs();
+          FileOutputStream os = new FileOutputStream(f);
+          is = am.open(internalPath);
+          byte[] buf = new byte[1024];
+          int len;
+          while ((len = is.read(buf)) > 0) {
+            os.write(buf, 0, len);
+          }
+          os.close();
+          is.close();
+        } catch (IOException e) {
+          executeAppCommand("fatalDialog(\"Could not copy file to home directory: " + e.getMessage() + "!\")");
+          return false;
+        }
       }
       i++;
       executeAppCommand("updateProgressDialog(\"" + title + "\"," + i + ")");

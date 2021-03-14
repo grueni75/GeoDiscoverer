@@ -133,6 +133,9 @@ public:
   // Ensures that all threads that download tiles are stopped
   virtual void stopDownloadThreads();
 
+  // Returns the map tile for the given mercator coordinates
+  MapTile *fetchMapTile(Int z, Int x, Int y);
+
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {
     core->getThread()->lockMutex(accessMutex, file, line);

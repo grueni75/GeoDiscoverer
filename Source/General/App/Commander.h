@@ -37,6 +37,9 @@ protected:
   Int lastTouchedX;
   Int lastTouchedY;
 
+  // Current number for the map tile
+  Int mapTileNr;
+
 public:
 
   // Constructor and destructor
