@@ -32,6 +32,8 @@
 #include <Device.h>
 #include <UnitConverter.h>
 #include <Storage.h>
+#include <NavigationPoint.h>
+#include <NavigationPointVisualization.h>
 
 namespace GEODISCOVERER {
 
@@ -1875,10 +1877,10 @@ NavigationPath *NavigationEngine::findRoute(std::string name) {
   return NULL;
 }
 
-// Returns the name of the address point at the given position
-std::string NavigationEngine::getAddressPointName(GraphicPosition visPos) {
-
-  std::string result="";
+// Returns the address point at the given position
+bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &result) {
+  bool success=false;  
+  std::string name="";
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   std::list<GraphicPrimitive*> *visibleAddressPoints = navigationPointsGraphicObject.getDrawList();
   //DEBUG("visPos.getX()=%d visPos.getY()=%d visPos.getZoom()=%f",visPos.getX(),visPos.getY(),visPos.getZoom());
@@ -1887,16 +1889,36 @@ std::string NavigationEngine::getAddressPointName(GraphicPosition visPos) {
     double diffX = r->getX()-visPos.getX();
     double diffY = r->getY()-visPos.getY();
     double distance = sqrt( diffX*diffX + diffY*diffY ) * visPos.getZoom();
+    if (r->getReference()==NULL) {
+      FATAL("navigation point has no reference",NULL);
+      continue;
+    }
+    NavigationPointVisualization *v=(NavigationPointVisualization*)r->getReference();
+    switch (v->getVisualizationType()) {
+      case NavigationPointVisualizationTypeStartFlag:
+      case NavigationPointVisualizationTypeEndFlag:
+        continue;
+        break;
+    }
     //DEBUG("distance=%f",distance);
     //DEBUG("r.getX()=%d r.getY()=%d",r->getX(),r->getY());
     if (distance < r->getIconHeight()/8) {
-      result=r->getName().front();
+      name=r->getName().front();
       //DEBUG("result=%s",result.c_str());
       break;
     }
   }
+  if (name!="") {
+    for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
+      if (i->getName()==name) {
+        result=*i;
+        success=true;
+        break;
+      }
+    }
+  }
   core->getDefaultGraphicEngine()->unlockDrawing();
-  return result;
+  return success;
 }
 
 // Exports the active route inclusive selection as an GPX file
@@ -2034,21 +2056,34 @@ void NavigationEngine::triggerGoogleBookmarksSynchronization() {
 }
 
 // Removes the path from the map and the disk
-void NavigationEngine::trashPath(NavigationPath *path) {
+bool NavigationEngine::trashPath(NavigationPath *path) {
 
-  // The track in recording cannot be removed
-  NavigationPath *nearestPath=lockRecordedTrack(__FILE__,__LINE__);
+  // If the path can be hidden, remove it also from the disk
+  std::string filePath=path->getGpxFilefolder()+"/"+path->getGpxFilename();
+  if (hidePath(path)) {
+    remove(filePath.c_str());
+    return true;
+  } else {
+    return false;
+  }
+}
+  
+// Hides the path on the map
+bool NavigationEngine::hidePath(NavigationPath *path) {
+
+  // The track in recording cannot be hidden
+  lockRecordedTrack(__FILE__,__LINE__);
   if (path==recordedTrack) {
-    WARNING("cannot delete the path (used for recording)",NULL);
+    WARNING("cannot hide the path (used for recording)",NULL);
     unlockRecordedTrack();
-    return;
+    return false;
   }
   unlockRecordedTrack();
 
   // If the track is not yet loaded, it cannot be removed
   if (!path->getIsInit()) {
-    WARNING("cannot delete the path (not yet loaded)",NULL);
-    return;
+    WARNING("cannot hide the path (not yet loaded)",NULL);
+    return false;
   }
 
   // If the path is used as the active route, disable it
@@ -2056,8 +2091,9 @@ void NavigationEngine::trashPath(NavigationPath *path) {
     setActiveRoute(NULL);
   }
 
-  // First delete it from the disk
-  remove((path->getGpxFilefolder()+"/"+path->getGpxFilename()).c_str());
+  // Set the hidden flag for this path (such that it is hidden when core is restarted)
+  std::string configPath="Navigation/Route[@name='" + path->getGpxFilename() + "']";
+  core->getConfigStore()->setIntValue(configPath,"visible",0,__FILE__,__LINE__);
 
   // Then remove the path from the route list
   lockRoutes(__FILE__, __LINE__);
@@ -2086,9 +2122,11 @@ void NavigationEngine::trashPath(NavigationPath *path) {
   core->getMapEngine()->unlockCenterMapTiles();
 
   // Deinit the path
-  core->onPathChange(path,NavigationPathChangeTypeWillBeRemoved);
+  core->onPathChange(path,NavigationPathChangeTypeWillBeRemoved);  
   path->deinit();
+  return true;
 }
-  
+
+
 }
 

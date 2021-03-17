@@ -116,8 +116,9 @@ void NavigationPointVisualization::updateVisualization(TimestampInMicroseconds t
       }
       graphicRectangle->setDestroyTexture(false);
       std::list<std::string> l;
-      l.push_back(name);
+      l.push_back(name);      
       graphicRectangle->setName(l);
+      graphicRectangle->setReference(this);
       graphicPrimitiveKey=visualizationObject->addPrimitive((GraphicPrimitive*)graphicRectangle);
     }
 

@@ -29,6 +29,7 @@ namespace GEODISCOVERER {
 GraphicPrimitive::GraphicPrimitive(Screen *screen) {
   type=GraphicTypePrimitive;
   this->screen=screen;
+  this->reference=NULL;
   setTexture(Screen::getTextureNotDefined());
   setX(0);
   setY(0);
@@ -120,6 +121,8 @@ void GraphicPrimitive::setScaleAnimation(TimestampInMicroseconds startTime, doub
   if (duration==0)
     scale=endFactor;
   scaleInfinite=infinite;
+  /*if ((getName().size()>0)&&(getName().front()=="Trash Path"))
+    DEBUG("startTime=%llu duration=%llu endFactor=%f scale=%f",startTime,duration,endFactor,scale);*/
 }
 
 // Sets a new translate target
@@ -282,7 +285,6 @@ bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
       double factor=(double)elapsedTime/(double)scaleDuration;
       double scaleDiff=scaleEndFactor-scaleStartFactor;
       scale=scaleDiff*factor+scaleStartFactor;
-      //DEBUG("scaleDiff=%f factor=%f, scaleStartFactor=%f",scaleDiff,factor,scaleStartFactor);
     } else {
       scale=scaleEndFactor;
       scaleStartTime=scaleEndTime;

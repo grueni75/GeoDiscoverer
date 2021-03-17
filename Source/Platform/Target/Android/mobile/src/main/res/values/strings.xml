@@ -151,4 +151,7 @@
     <string name="waypoint_import_message">Tour &lt;%2$s&gt; contains %1$s waypoints. Import them?</string>
     <string name="authenticate_google_bookmarks">Please authenticate Google Bookmarks</string>
     <string name="synchronize_google_maps_bookmarks">Sync Google Bookmarks</string>
+    <string name="route_remove_question">Shall the route be hidden only or deleted from storage?</string>
+    <string name="remove">Remove</string>
+    <string name="hide">Hide</string>
 </resources>

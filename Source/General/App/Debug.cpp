@@ -53,7 +53,7 @@ void *stdoutThread(void *args) {
   ssize_t redirect_size;
   int *pipeStdout=(int*)args;
   char buf[2048];
-  DEBUG("%d %d",pipeStdout[0],pipeStdout[1]);
+  //DEBUG("%d %d",pipeStdout[0],pipeStdout[1]);
   while((redirect_size = read(pipeStdout[0], buf, sizeof buf - 1)) > 0) {
     //__android_log will add a new line anyway.
     if(buf[redirect_size - 1] == '\n')

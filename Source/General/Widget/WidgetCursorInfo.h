@@ -51,6 +51,9 @@ class WidgetCursorInfo: public GEODISCOVERER::WidgetPrimitive {
   // Indicates if a path is nearby
   bool pathNearby;
 
+  // Indicates if an address pointis nearby
+  bool addressPointNearby;
+
   // Number of characters to keep at the end of the info string
   int infoKeepEndCharCount;
 
@@ -87,6 +90,9 @@ public:
   // Getters and setters
   bool getPathNearby() {
       return pathNearby;
+  }
+  bool getAddressPointNearby() {
+      return addressPointNearby;
   }
 };
 

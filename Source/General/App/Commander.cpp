@@ -147,6 +147,8 @@ std::string Commander::execute(std::string cmd) {
   core->getThread()->unlockMutex(accessMutex);
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
 
+  //DEBUG("cmd=%s",cmd.c_str());
+
   // Set the default result
   std::string result="";
 
@@ -357,7 +359,7 @@ std::string Commander::execute(std::string cmd) {
       else
         result="false";
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -375,7 +377,7 @@ std::string Commander::execute(std::string cmd) {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->createNewTrack();
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -383,7 +385,7 @@ std::string Commander::execute(std::string cmd) {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->exportActiveRoute();
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -464,7 +466,7 @@ std::string Commander::execute(std::string cmd) {
       core->getNavigationEngine()->hideTarget();
       INFO("target has been hidden",NULL);
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -475,7 +477,7 @@ std::string Commander::execute(std::string cmd) {
       visPos->updateLastUserModification();
       core->getDefaultGraphicEngine()->unlockPos();
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -486,7 +488,7 @@ std::string Commander::execute(std::string cmd) {
       visPos->updateLastUserModification();
       core->getDefaultGraphicEngine()->unlockPos();
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -497,7 +499,7 @@ std::string Commander::execute(std::string cmd) {
       visPos->updateLastUserModification();
       core->getDefaultGraphicEngine()->unlockPos();
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -541,7 +543,7 @@ std::string Commander::execute(std::string cmd) {
     Int nearestPathIndex;
     NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(&nearestPathIndex,NULL);
     if (nearestPath==NULL) {
-      WARNING("cannot set start flag: no path near to the current map center found",NULL);
+      WARNING("no path near to the current map center found",NULL);
     } else {
       core->getNavigationEngine()->setStartFlag(nearestPath,nearestPathIndex,__FILE__, __LINE__);
     }
@@ -551,7 +553,7 @@ std::string Commander::execute(std::string cmd) {
     Int nearestPathIndex;
     NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(&nearestPathIndex,NULL);
     if (nearestPath==NULL) {
-      WARNING("cannot set start flag: no path near to the current map center found",NULL);
+      WARNING("no path near to the current map center found",NULL);
     } else {
       core->getNavigationEngine()->setStartFlag(nearestPath,-2,__FILE__, __LINE__);
     }
@@ -561,7 +563,7 @@ std::string Commander::execute(std::string cmd) {
     Int nearestPathIndex;
     NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(&nearestPathIndex,NULL);
     if (nearestPath==NULL) {
-      WARNING("cannot set end flag: no path near to the current map center found",NULL);
+      WARNING("no path near to the current map center found",NULL);
     } else {
       core->getNavigationEngine()->setEndFlag(nearestPath,nearestPathIndex,__FILE__, __LINE__);
     }
@@ -571,7 +573,7 @@ std::string Commander::execute(std::string cmd) {
     Int nearestPathIndex;
     NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(&nearestPathIndex,NULL);
     if (nearestPath==NULL) {
-      WARNING("cannot set end flag: no path near to the current map center found",NULL);
+      WARNING("no path near to the current map center found",NULL);
     } else {
       core->getNavigationEngine()->setEndFlag(nearestPath,-2,__FILE__, __LINE__);
     }
@@ -580,7 +582,7 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setActiveRoute") {
     NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(NULL,NULL);
     if (nearestPath==NULL) {
-      WARNING("no path near to the current map center found: disabling active route",NULL);
+      WARNING("no path near to the current map center found: Disabling active route",NULL);
     }
     if (nearestPath==core->getNavigationEngine()->getActiveRoute()) {
       nearestPath=NULL;
@@ -591,9 +593,19 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="trashPath") {
     NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(NULL,NULL);
     if (nearestPath==NULL) {
-      WARNING("cannot delete path: no path near to the current map center found",NULL);
+      WARNING("no path near to the current map center found",NULL);
+    } else {
+      core->getNavigationEngine()->trashPath(nearestPath);
     }
-    core->getNavigationEngine()->trashPath(nearestPath);
+    cmdExecuted=true;
+  }
+  if (cmdName=="hidePath") {
+    NavigationPath *nearestPath = core->getDefaultWidgetEngine()->getNearestPath(NULL,NULL);
+    if (nearestPath==NULL) {
+      WARNING("no path near to the current map center found",NULL);
+    } else {
+      core->getNavigationEngine()->hidePath(nearestPath);
+    }
     cmdExecuted=true;
   }
   if (cmdName=="log") {
@@ -629,7 +641,7 @@ std::string Commander::execute(std::string cmd) {
       std::string appCmd = "changeMapLayer()";
       dispatch(appCmd);
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -637,7 +649,7 @@ std::string Commander::execute(std::string cmd) {
     if (core->getIsInitialized()) {
       core->getMapSource()->selectMapLayer(args[0]);
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -651,7 +663,7 @@ std::string Commander::execute(std::string cmd) {
       }
       core->getMapSource()->addDownloadJob(atoi(args[0].c_str()),args[1],zoomLevels);
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -665,7 +677,7 @@ std::string Commander::execute(std::string cmd) {
           result += "," + *i;
       }
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -673,7 +685,7 @@ std::string Commander::execute(std::string cmd) {
     if (core->getIsInitialized()) {
       result=core->getMapSource()->getSelectedMapLayer();
     } else {
-      WARNING("Please wait until map is loaded (command ignored)",NULL);
+      WARNING("please wait until map is loaded (command ignored)",NULL);
     }
     cmdExecuted=true;
   }
@@ -720,12 +732,24 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="setTargetAtAddressPoint") {
     NavigationPoint point;
-    point.setName(args[0]);
-    point.readFromConfig("Navigation/AddressPoint");
-    core->getNavigationEngine()->setTargetAtGeographicCoordinate(point.getLng(),point.getLat(),true);
-    GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
-    visPos->updateLastUserModification();
-    core->getDefaultGraphicEngine()->unlockPos();
+    bool found=true;
+    if (args[0]=="") {
+      GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+      core->getDefaultGraphicEngine()->unlockPos();
+      if (!core->getNavigationEngine()->getAddressPoint(visPos,point)) {
+        WARNING("no address point near to the current map center found",NULL);
+        found=false;
+      }
+    } else {
+      point.setName(args[0]);
+      point.readFromConfig("Navigation/AddressPoint");
+    }
+    if (found) {
+      core->getNavigationEngine()->setTargetAtGeographicCoordinate(point.getLng(),point.getLat(),true);
+      GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
+      visPos->updateLastUserModification();
+      core->getDefaultGraphicEngine()->unlockPos();
+    }
     cmdExecuted=true;
   }
   if (cmdName=="downloadActiveRoute") {
@@ -879,6 +903,37 @@ std::string Commander::execute(std::string cmd) {
       ERROR("map source is not initialized",NULL);
     }
     core->getMapSource()->unlockAccess();
+    cmdExecuted=true;
+  }
+  if (cmdName=="trashAddressPoint") {
+    GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+    core->getDefaultGraphicEngine()->unlockPos();
+    NavigationPoint addressPoint;
+    if (core->getNavigationEngine()->getAddressPoint(visPos,addressPoint)) {
+      core->getNavigationEngine()->removeAddressPoint(addressPoint.getName());
+    } else {
+      WARNING("no address point near to the current map center found",NULL);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="setTargetAtAddressPoint") {
+    GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
+    core->getDefaultGraphicEngine()->unlockPos();
+    NavigationPoint addressPoint;
+    if (core->getNavigationEngine()->getAddressPoint(visPos,addressPoint)) {
+      core->getNavigationEngine()->setTargetPos(addressPoint.getLng(),addressPoint.getLat());
+    } else {
+      WARNING("no address point near to the current map center found",NULL);
+    }
+    cmdExecuted=true;
+  }
+  if (cmdName=="askForRouteRemovalKind") {
+    if (core->getIsInitialized()) {
+      std::string appCmd = "askForRouteRemovalKind()";
+      dispatch(appCmd);
+    } else {
+      WARNING("please wait until map is loaded (command ignored)",NULL);
+    }
     cmdExecuted=true;
   }
 

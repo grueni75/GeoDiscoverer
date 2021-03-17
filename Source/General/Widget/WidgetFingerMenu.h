@@ -33,28 +33,33 @@ class WidgetFingerMenu: public GEODISCOVERER::WidgetContainer {
 
 protected:
 
-  Int circleRadius;                           // Radius in pixels to use for positioning the widgets on the circle
-  Int rowDistance;                            // Distance in pixels to use for positioning the widgets on the row
-  Int rowOffsetY;                             // Vertical offset in pixels of the widget row
-  Int cursorInfoClosedOffsetY;                // Vertical offset in pixels of the cursor info in closed state
-  Int cursorInfoOpenedOffsetY;                 // Vertical offset in pixels of the cursor info in opened state
-  double angleOffset;                         // Angle in degree to start placing widgets from the south of the menu
-  std::list<WidgetPrimitive*> circleWidgets;  // Contains the widgets of the circle
-  std::list<WidgetPrimitive*> rowWidgets;     // Contains the widgets of the row
-  WidgetCursorInfo *cursorInfo;               // Reference to the cursor info
-  bool opened;                                // Indicates if the finger menu is open
-  FontString *pathNameFontString;             // Graphical representation of the nearest path
-  TimestampInMicroseconds animationDuration;  // Duration of the change animation
-  bool pathNearby;                            // Indicates if a path is nearby
-  TimestampInMicroseconds closeTimeout;       // Timeout in microseconds after the finger menu closes if not touched
-  TimestampInMicroseconds closeTimestamp;     // Timestamp when to close the menu
-  bool stateChanged;                          // Indicates that a state change has happened
+  Int circleRadius;                                   // Radius in pixels to use for positioning the widgets on the circle
+  Int rowDistance;                                    // Distance in pixels to use for positioning the widgets on the row
+  Int rowOffsetY;                                     // Vertical offset in pixels of the widget row
+  Int cursorInfoClosedOffsetY;                        // Vertical offset in pixels of the cursor info in closed state
+  Int cursorInfoOpenedOffsetY;                        // Vertical offset in pixels of the cursor info in opened state
+  double angleOffset;                                 // Angle in degree to start placing widgets from the south of the menu
+  std::list<WidgetPrimitive*> circleWidgets;          // Contains the widgets of the circle
+  std::list<WidgetPrimitive*> pathRowWidgets;         // Contains the widgets that appear if a path is nearby
+  std::list<WidgetPrimitive*> addressPointRowWidgets; // Contains the widgets that appear if an address point is nearby
+  WidgetCursorInfo *cursorInfo;                       // Reference to the cursor info
+  bool opened;                                        // Indicates if the finger menu is open
+  FontString *pathNameFontString;                     // Graphical representation of the nearest path
+  TimestampInMicroseconds animationDuration;          // Duration of the change animation
+  bool pathNearby;                                    // Indicates if a path is nearby
+  bool addressPointNearby;                            // Indicates if an address point is nearby
+  TimestampInMicroseconds closeTimeout;               // Timeout in microseconds after the finger menu closes if not touched
+  TimestampInMicroseconds closeTimestamp;             // Timestamp when to close the menu
+  bool stateChanged;                                  // Indicates that a state change has happened
 
   // Puts the widgets on a circle
   void positionWidgetOnCircle(TimestampInMicroseconds t, Int x, Int y, double radius);
 
   // Puts the widgets on a row
-  void positionWidgetOnRow(TimestampInMicroseconds t, Int x, Int y, double distance);
+  void positionWidgetOnRow(TimestampInMicroseconds t, std::list<WidgetPrimitive*> *list, Int x, Int y, double distance);
+
+  // Adds a widget to the given list
+  void addWidgetToList(WidgetPrimitive *primitive, std::list<WidgetPrimitive*> *list);
 
 public:
 
@@ -67,7 +72,8 @@ public:
   
   // Adds a widget to the menu
   void addWidgetToCircle(WidgetPrimitive *primitive);
-  void addWidgetToRow(WidgetPrimitive *primitive);
+  void addWidgetToPathRow(WidgetPrimitive *primitive);
+  void addWidgetToAddressPointRow(WidgetPrimitive *primitive);
   void setCursorInfoWidget(WidgetCursorInfo *primitive);
 
   // Opens the menu

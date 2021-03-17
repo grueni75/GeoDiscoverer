@@ -47,6 +47,7 @@ WidgetCursorInfo::WidgetCursorInfo(WidgetContainer *widgetContainer) : WidgetPri
   permanentVisible=false;
   maxPathDistance=core->getConfigStore()->getDoubleValue("Graphic/Widget","maxPathDistance",__FILE__, __LINE__)*widgetContainer->getScreen()->getDPI();
   pathNearby=false;
+  addressPointNearby=false;
   infoKeepEndCharCount=-1;
 }
 
@@ -189,10 +190,11 @@ void WidgetCursorInfo::draw(TimestampInMicroseconds t) {
       } else
         widthScale = 1.0;
       if (permanentVisible) {
-        w=infoFontString->getIconWidth()+widthScale*(width-infoFontString->getIconWidth());
+        w=infoFontString->getIconWidth()+widthScale*(width-infoFontString->getIconWidth());        
       } else {
         w=width-widthScale*(width-infoFontString->getIconWidth());
       }
+      //DEBUG("w=%d widthScale=%f",w,widthScale);
       Int x1=-w/2;
       Int y1=-height/2;
       Int x2=x1+w;
@@ -238,8 +240,18 @@ void WidgetCursorInfo::onDataChange() {
   GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
   core->getDefaultGraphicEngine()->unlockPos();
   infoKeepEndCharCount=-1;
-  std::string name = core->getNavigationEngine()->getAddressPointName(visPos);
-  if (name=="") {
+  NavigationPoint addressPoint;
+  std::string name;
+  if (core->getNavigationEngine()->getAddressPoint(visPos,addressPoint)) {
+
+    // Address point found
+    name=addressPoint.getName();
+    addressPointNearby=true;
+    
+  } else {
+
+    // No address point nearby
+    addressPointNearby=false;
 
     // Now check if an navigation path is hit
     MapPosition nearestPathMapPos;
@@ -312,14 +324,18 @@ void WidgetCursorInfo::onDataChange() {
 // Changes the state of the widget
 void WidgetCursorInfo::changeState(Int y, bool permanentVisible, TimestampInMicroseconds animationDuration) {
 
-  // Update the fields
-  this->permanentVisible=permanentVisible;
-  onDataChange();
-  updateInfo=true;
+  // Ensure that we are not drawing
 
   // Setup the animations
+  widgetContainer->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+  this->permanentVisible=permanentVisible;
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   setTranslateAnimation(t,getX(),getY(),getX(),y,false,animationDuration,GraphicTranslateAnimationTypeAccelerated);
+  widgetContainer->getGraphicEngine()->unlockDrawing();
+
+  // Update the fields
+  onDataChange();
+  updateInfo=true;
 }
 
 

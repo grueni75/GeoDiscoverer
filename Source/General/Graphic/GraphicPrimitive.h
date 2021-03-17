@@ -40,6 +40,7 @@ class GraphicPrimitive {
 protected:
 
   GraphicType type;                                     // Type of primitive
+  void *reference;                                      // Reference to an object that is related to this
   Screen *screen;                                       // Screen this primitive belongs to
   GraphicPrimitive *animator;                           // Object to use as the animator
   std::list<std::string> name;                          // Multiline name of primitive
@@ -86,7 +87,7 @@ protected:
   bool translateInfinite;                               // Translation is repeated infinitely if set
   bool isUpdated;                                       // Indicates that the primitive has been changed
   bool destroyTexture;                                  // Indicates if the texture shall be destroyed if the object is deleted
-  TimestampInMicroseconds lifeEnd;                      // Time point at which the object can be removed from the parent container
+  TimestampInMicroseconds lifeEnd;                      // Time point at which the object can be removed from the parent container  
 
   // List of texture animations to execute on this object
   std::list<GraphicTextureAnimationParameter> textureAnimationSequence;
@@ -375,6 +376,14 @@ public:
 
   const GraphicColor& getFadeStartColor() const {
     return fadeStartColor;
+  }
+
+  void *getReference() const {
+    return reference;
+  }
+
+  void setReference(void *reference) {
+    this->reference = reference;
   }
 };
 

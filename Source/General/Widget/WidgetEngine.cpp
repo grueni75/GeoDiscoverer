@@ -1460,11 +1460,31 @@ void WidgetEngine::createGraphic() {
       config.setType(WidgetTypeButton);
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","delete");
+      config.setParameter("command","askForRouteRemovalKind()");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      config=WidgetConfig();
+      config.setPageName("Finger Menu");
+      config.setName("Trash Address Point");
+      config.setType(WidgetTypeButton);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setSafetyColor(GraphicColor(255,63,63,255));
       config.setParameter("iconFilename","delete");
-      config.setParameter("command","trashPath()");
+      config.setParameter("command","trashAddressPoint()");
       config.setParameter("repeat","0");
       config.setParameter("safetyStepDuration","3000000");
+      addWidgetToPage(config);
+      config=WidgetConfig();
+      config.setPageName("Finger Menu");
+      config.setName("Target At Address Point");
+      config.setType(WidgetTypeButton);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","setTargetAtAddressPoint");
+      config.setParameter("command","setTargetAtAddressPoint()");
+      config.setParameter("repeat","0");
       addWidgetToPage(config);
     }
   }
@@ -1481,8 +1501,10 @@ void WidgetEngine::createGraphic() {
   std::list<std::string>::iterator i;
   std::vector<WidgetPrimitive*> fingerMenuCircleEntries;
   fingerMenuCircleEntries.resize(7);
-  std::vector<WidgetPrimitive*> fingerMenuRowEntries;
-  fingerMenuRowEntries.resize(5);
+  std::vector<WidgetPrimitive*> fingerMenuPathRowEntries;
+  fingerMenuPathRowEntries.resize(5);
+  std::vector<WidgetPrimitive*> fingerMenuAddressPointRowEntries;
+  fingerMenuAddressPointRowEntries.resize(2);
   for(i=pageNames.begin();i!=pageNames.end();i++) {
     //DEBUG("found a widget page with name %s",(*i).c_str());
 
@@ -1783,21 +1805,23 @@ void WidgetEngine::createGraphic() {
       // Add the widget to the page
       bool skipPageAdd=false;
       if (isFingerMenuPage) {
-        if (*j=="Track Recording")     { fingerMenuCircleEntries[2]=primitive; skipPageAdd=true; }
-        if (*j=="Change Map Layer")    { fingerMenuCircleEntries[1]=primitive; skipPageAdd=true;  }
-        if (*j=="Return To Location")  { fingerMenuCircleEntries[3]=primitive; skipPageAdd=true;  }
-        if (*j=="Zoom Level Lock")     { fingerMenuCircleEntries[0]=primitive; skipPageAdd=true;  }
-        if (*j=="Target Visibility")   { fingerMenuCircleEntries[4]=primitive; skipPageAdd=true;  }
-        if (*j=="Target At Address")   { fingerMenuCircleEntries[5]=primitive; skipPageAdd=true;  }
-        if (*j=="Target At Center")    { fingerMenuCircleEntries[6]=primitive; skipPageAdd=true;  }
-        if (*j=="Set Path End Flag")   { fingerMenuRowEntries[0]=primitive; skipPageAdd=true;  }
-        if (*j=="Set Path Start Flag") { fingerMenuRowEntries[1]=primitive; skipPageAdd=true;  }
-        if (*j=="Set Active Route")    { fingerMenuRowEntries[2]=primitive; skipPageAdd=true;  }
-        if (*j=="Path Info Lock")      { fingerMenuRowEntries[3]=primitive; skipPageAdd=true;  }
-        if (*j=="Trash Path")          { fingerMenuRowEntries[4]=primitive; skipPageAdd=true;  }
-        if (*j=="Cursor Info")         { fingerMenu->setCursorInfoWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
-        if (*j=="Menu Right")          { fingerMenu->addWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
-        if (*j=="Menu Left")           { fingerMenu->addWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
+        if (*j=="Track Recording")          { fingerMenuCircleEntries[2]=primitive; skipPageAdd=true; }
+        if (*j=="Change Map Layer")         { fingerMenuCircleEntries[1]=primitive; skipPageAdd=true;  }
+        if (*j=="Return To Location")       { fingerMenuCircleEntries[3]=primitive; skipPageAdd=true;  }
+        if (*j=="Zoom Level Lock")          { fingerMenuCircleEntries[0]=primitive; skipPageAdd=true;  }
+        if (*j=="Target Visibility")        { fingerMenuCircleEntries[4]=primitive; skipPageAdd=true;  }
+        if (*j=="Target At Address")        { fingerMenuCircleEntries[5]=primitive; skipPageAdd=true;  }
+        if (*j=="Target At Center")         { fingerMenuCircleEntries[6]=primitive; skipPageAdd=true;  }
+        if (*j=="Set Path End Flag")        { fingerMenuPathRowEntries[0]=primitive; skipPageAdd=true;  }
+        if (*j=="Set Path Start Flag")      { fingerMenuPathRowEntries[1]=primitive; skipPageAdd=true;  }
+        if (*j=="Set Active Route")         { fingerMenuPathRowEntries[2]=primitive; skipPageAdd=true;  }
+        if (*j=="Path Info Lock")           { fingerMenuPathRowEntries[3]=primitive; skipPageAdd=true;  }
+        if (*j=="Trash Path")               { fingerMenuPathRowEntries[4]=primitive; skipPageAdd=true;  }
+        if (*j=="Target At Address Point")  { fingerMenuAddressPointRowEntries[0]=primitive; skipPageAdd=true;  }
+        if (*j=="Trash Address Point")      { fingerMenuAddressPointRowEntries[1]=primitive; skipPageAdd=true;  }
+        if (*j=="Cursor Info")              { fingerMenu->setCursorInfoWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
+        if (*j=="Menu Right")               { fingerMenu->addWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
+        if (*j=="Menu Left")                { fingerMenu->addWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
       }
       if (!skipPageAdd) {
         page->addWidget(primitive);
@@ -1815,8 +1839,11 @@ void WidgetEngine::createGraphic() {
     for (int i=fingerMenuCircleEntries.size()-1;i>=0;i--) {
       fingerMenu->addWidgetToCircle(fingerMenuCircleEntries[i]);
     }
-    for (int i=fingerMenuRowEntries.size()-1;i>=0;i--) {
-      fingerMenu->addWidgetToRow(fingerMenuRowEntries[i]);
+    for (int i=fingerMenuPathRowEntries.size()-1;i>=0;i--) {
+      fingerMenu->addWidgetToPathRow(fingerMenuPathRowEntries[i]);
+    }
+    for (int i=fingerMenuAddressPointRowEntries.size()-1;i>=0;i--) {
+      fingerMenu->addWidgetToAddressPointRow(fingerMenuAddressPointRowEntries[i]);
     }
   }
 
@@ -1934,6 +1961,8 @@ void WidgetEngine::updateWidgetPositions() {
         nearestString=smallestString;
       }
       path=path + "[@refScreenDiagonal='" + nearestString + "']/" + orientation;
+      //DEBUG("path=%s",path.c_str());
+      //DEBUG("x=%f y=%f",c->getDoubleValue(path,"x",__FILE__, __LINE__),c->getDoubleValue(path,"y",__FILE__, __LINE__));
 
       // Update the position
       primitive->updatePosition(width*c->getDoubleValue(path,"x",__FILE__, __LINE__)/100.0-width/2-primitive->getIconWidth()/2,height*c->getDoubleValue(path,"y",__FILE__, __LINE__)/100.0-height/2-primitive->getIconHeight()/2,c->getIntValue(path,"z",__FILE__, __LINE__));

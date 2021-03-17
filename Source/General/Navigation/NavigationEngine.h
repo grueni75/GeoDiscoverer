@@ -343,8 +343,8 @@ public:
   // Finds a route with the given name
   NavigationPath *findRoute(std::string name);
 
-  // Returns the name of the address point at the given position
-  std::string getAddressPointName(GraphicPosition visPos);
+  // Returns the address point at the given position
+  bool getAddressPoint(GraphicPosition visPos, NavigationPoint &result);
 
   // Returns information about the address point that is the nearest to the current position
   bool getNearestAddressPoint(NavigationPoint &navigationPoint, double &distance, TimestampInMicroseconds &updateTimestamp, bool &alarm);
@@ -362,8 +362,11 @@ public:
   void addressPointGroupChanged();
 
   // Removes the path from the map and the disk
-  void trashPath(NavigationPath *path);
-  
+  bool trashPath(NavigationPath *path);
+
+  // Hides the path on the map
+  bool hidePath(NavigationPath *path);
+
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)
   {

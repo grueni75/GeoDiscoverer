@@ -45,6 +45,7 @@ WidgetFingerMenu::WidgetFingerMenu(WidgetEngine *widgetEngine) :
   cursorInfo=NULL;
   opened=false;
   pathNearby=false;
+  addressPointNearby=false;
   stateChanged=true;
 }
 
@@ -59,20 +60,8 @@ void WidgetFingerMenu::deinit(bool deleteWidgets) {
   WidgetContainer::deinit(deleteWidgets);
 }
 
-// Adds a widget to the circle of the menu
-void WidgetFingerMenu::addWidgetToCircle(WidgetPrimitive *primitive) {
-
-  // Configure the primitive
-  primitive->setScale(0);
-  primitive->setColor(primitive->getActiveColor());
-
-  // Add the primitive
-  WidgetContainer::addWidget(primitive);
-  circleWidgets.push_back(primitive);
-}
-
-// Adds a widget to the row of the menu
-void WidgetFingerMenu::addWidgetToRow(WidgetPrimitive *primitive) {
+// Adds a widget to the given list
+void WidgetFingerMenu::addWidgetToList(WidgetPrimitive *primitive, std::list<WidgetPrimitive*> *list) {
 
   // Configure the primitive
   primitive->setScale(0);
@@ -80,7 +69,22 @@ void WidgetFingerMenu::addWidgetToRow(WidgetPrimitive *primitive) {
 
   // Call the inhertied function
   WidgetContainer::addWidget(primitive);
-  rowWidgets.push_back(primitive);
+  list->push_back(primitive);
+}
+
+// Adds a widget to the circle of the menu
+void WidgetFingerMenu::addWidgetToCircle(WidgetPrimitive *primitive) {
+  addWidgetToList(primitive,&circleWidgets);
+}
+
+// Adds a widget to the path row of the menu
+void WidgetFingerMenu::addWidgetToPathRow(WidgetPrimitive *primitive) {
+  addWidgetToList(primitive,&pathRowWidgets);
+}
+
+// Adds a widget to the address point row of the menu
+void WidgetFingerMenu::addWidgetToAddressPointRow(WidgetPrimitive *primitive) {
+  addWidgetToList(primitive,&addressPointRowWidgets);
 }
 
 // Sets the cursor info 
@@ -118,11 +122,12 @@ void WidgetFingerMenu::positionWidgetOnCircle(TimestampInMicroseconds t, Int x, 
 }
 
 // Puts the widgets on a row
-void WidgetFingerMenu::positionWidgetOnRow(TimestampInMicroseconds t,  Int x, Int y, double distance) {
-  Int tx=x-(rowWidgets.size()-1)*distance/2;
-  for(std::list<WidgetPrimitive*>::iterator i=rowWidgets.begin();i!=rowWidgets.end();i++) {
+void WidgetFingerMenu::positionWidgetOnRow(TimestampInMicroseconds t, std::list<WidgetPrimitive*> *list, Int x, Int y, double distance) {
+  Int tx=x-(list->size()-1)*distance/2;
+  //DEBUG("tx=%d",tx);
+  for(std::list<WidgetPrimitive*>::iterator i=list->begin();i!=list->end();i++) {
     WidgetPrimitive *primitive = (WidgetPrimitive*) *i;
-    //DEBUG("name=%s",primitive->getName().front().c_str());
+    //DEBUG("name=%s x=%d y=%d",primitive->getName().front().c_str(),primitive->getX(),primitive->getY());
     primitive->setTranslateAnimation(t,
       primitive->getX(),
       primitive->getY(),
@@ -131,11 +136,6 @@ void WidgetFingerMenu::positionWidgetOnRow(TimestampInMicroseconds t,  Int x, In
       false,
       animationDuration,
       GraphicTranslateAnimationTypeAccelerated);
-    primitive->setScaleAnimation(t,
-      primitive->getScale(),
-      1.0,
-      false,
-      animationDuration);
     primitive->setIsHidden(false);
     tx+=distance;
   }
@@ -145,7 +145,8 @@ void WidgetFingerMenu::positionWidgetOnRow(TimestampInMicroseconds t,  Int x, In
 void WidgetFingerMenu::open() {
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   positionWidgetOnCircle(t, 0, 0, circleRadius);
-  positionWidgetOnRow(t, 0, rowOffsetY, rowDistance);
+  positionWidgetOnRow(t, &pathRowWidgets, 0, rowOffsetY, rowDistance);
+  positionWidgetOnRow(t, &addressPointRowWidgets, 0, rowOffsetY, rowDistance);
   if (cursorInfo) {
     cursorInfo->setX(0);
     cursorInfo->changeState(cursorInfoOpenedOffsetY,true,animationDuration);
@@ -158,8 +159,9 @@ void WidgetFingerMenu::open() {
 // Closes the finger menu
 void WidgetFingerMenu::close() {
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
-  std::list<WidgetPrimitive*> drawingList = rowWidgets;
+  std::list<WidgetPrimitive*> drawingList = pathRowWidgets;
   drawingList.insert(drawingList.end(), circleWidgets.begin(), circleWidgets.end());
+  drawingList.insert(drawingList.end(), addressPointRowWidgets.begin(), addressPointRowWidgets.end());
   for(std::list<WidgetPrimitive*>::iterator i=drawingList.begin();i!=drawingList.end();i++) {
     WidgetPrimitive *primitive = (WidgetPrimitive*) *i;
     primitive->setTranslateAnimation(t,
@@ -195,16 +197,21 @@ bool WidgetFingerMenu::work(TimestampInMicroseconds t) {
   // Only work if opened
   if (opened) {
 
-    // If cursor info has just changed state regarding nearby route:
-    // Enable or disable the row buttons
-    if ((stateChanged)||(pathNearby!=cursorInfo->getPathNearby())) {
+    // Check if we need to take action
+    if ((stateChanged)||(addressPointNearby!=cursorInfo->getAddressPointNearby())||(pathNearby!=cursorInfo->getPathNearby())) {
+      //DEBUG("stateChanged=%d addressPointNearby=%d pathNearby=%d",stateChanged,addressPointNearby,pathNearby);
+      addressPointNearby=cursorInfo->getAddressPointNearby();
       pathNearby=cursorInfo->getPathNearby();
+      //DEBUG("stateChanged=%d addressPointNearby=%d pathNearby=%d",stateChanged,addressPointNearby,pathNearby);
+
+      // First scale the address point nearby widgets
       double scaleTarget;
-      if (pathNearby) 
+      if (addressPointNearby)
         scaleTarget=1.0;
       else
         scaleTarget=0.0;
-      for(std::list<WidgetPrimitive*>::iterator i=rowWidgets.begin();i!=rowWidgets.end();i++) {
+      //DEBUG("scaleTarget=%f animationDuration=%ld",scaleTarget,animationDuration);
+      for(std::list<WidgetPrimitive*>::iterator i=addressPointRowWidgets.begin();i!=addressPointRowWidgets.end();i++) {
         WidgetPrimitive *primitive = (WidgetPrimitive*) *i;
         primitive->setScaleAnimation(t,
           primitive->getScale(),
@@ -212,25 +219,42 @@ bool WidgetFingerMenu::work(TimestampInMicroseconds t) {
           false,
           animationDuration);
       }
+
+      // Second scale the path nearby widgets
+      if ((pathNearby)&&(!addressPointNearby))
+        scaleTarget=1.0;
+      else
+        scaleTarget=0.0;
+      //DEBUG("scaleTarget=%f animationDuration=%ld",scaleTarget,animationDuration);
+      for(std::list<WidgetPrimitive*>::iterator i=pathRowWidgets.begin();i!=pathRowWidgets.end();i++) {
+        WidgetPrimitive *primitive = (WidgetPrimitive*) *i;
+        primitive->setScaleAnimation(t,
+          primitive->getScale(),
+          scaleTarget,
+          false,
+          animationDuration);
+      }
+      stateChanged=false;
     }
-    stateChanged=false;
 
     // If timeout is reached, close menu
     if (t>=closeTimestamp) 
       close();
 
-  } else {
+  } 
 
-    // Hide the widget if not visible anymore
-    std::list<GraphicPrimitive*> *drawingList = graphicObject.getDrawList();
-    for(std::list<GraphicPrimitive*>::iterator i=drawingList->begin();i!=drawingList->end();i++) {
-      WidgetPrimitive *primitive = (WidgetPrimitive*) *i;
-      if (primitive->getWidgetType()!=WidgetTypeCursorInfo) {
-        if ((primitive->getScale()==0)&&(!primitive->getIsHidden()))
-          primitive->setIsHidden(true);
-      }
+  // Handle the visibility of the widget
+  std::list<GraphicPrimitive*> *drawingList = graphicObject.getDrawList();
+  for(std::list<GraphicPrimitive*>::iterator i=drawingList->begin();i!=drawingList->end();i++) {
+    WidgetPrimitive *primitive = (WidgetPrimitive*) *i;
+    if (primitive->getWidgetType()!=WidgetTypeCursorInfo) {
+      if ((primitive->getScale()==0)&&(!primitive->getIsHidden()))
+        primitive->setIsHidden(true);
+      if ((primitive->getScale()!=0)&&(primitive->getIsHidden()))
+        primitive->setIsHidden(false);
     }
   }
+
   return false;
 }
 

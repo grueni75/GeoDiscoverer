@@ -30,7 +30,6 @@ import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -45,7 +44,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.opengl.GLSurfaceView;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -62,7 +60,6 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -70,7 +67,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -81,20 +77,16 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView;
 import com.untouchableapps.android.geodiscoverer.core.GDTools;
 
 import org.acra.*;
-import org.acra.config.ACRAConfigurationException;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -445,6 +437,10 @@ public class ViewMap extends GDActivity {
             Intent intent = new Intent(viewMap, AuthenticateGoogleBookmarks.class);
             //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             viewMap.startActivity(intent);
+            commandExecuted=true;
+          }
+          if (commandFunction.equals("askForRouteRemovalKind")) {
+            viewMap.askForRouteRemovalKind();
             commandExecuted=true;
           }
           if (!commandExecuted) {
@@ -878,6 +874,31 @@ public class ViewMap extends GDActivity {
     builder.cancelable(true);
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
     builder.negativeText(R.string.cancel);
+    Dialog alert = builder.build();
+    alert.show();
+  }
+
+  /** Asks the user if the route shall just be hidden or deleted */
+  void askForRouteRemovalKind() {
+    MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
+    builder.title(getTitle());
+    builder.content(R.string.route_remove_question);
+    builder.cancelable(true);
+    builder.positiveText(R.string.remove);
+    builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        coreObject.executeCoreCommand("trashPath");
+      }
+    });
+    builder.negativeText(R.string.hide);
+    builder.onNegative(new MaterialDialog.SingleButtonCallback() {
+      @Override
+      public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        coreObject.executeCoreCommand("hidePath");
+      }
+    });
+    builder.icon(getDrawable(android.R.drawable.ic_dialog_alert));
     Dialog alert = builder.build();
     alert.show();
   }

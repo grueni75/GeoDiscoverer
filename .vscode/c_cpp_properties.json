@@ -19,7 +19,8 @@
                 "${workspaceFolder}/Source/Platform/Target/Linux/**",
                 "/usr/include/",
                 "/usr/include/libxml2/",
-                "/usr/include/gdal/"
+                "/usr/include/gdal/",
+                "/usr/include/freetype2/"
             ],
             "defines": [
                 "SRC_ROOT=\"/home/grueni/Apps/GeoDiscoverer\"",
