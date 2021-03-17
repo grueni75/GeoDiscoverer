@@ -1766,6 +1766,7 @@ std::string NavigationEngine::renameAddressPoint(std::string oldName, std::strin
 
 // Removes an address point
 void NavigationEngine::removeAddressPoint(std::string name) {
+  
   //DEBUG("name=%s",name.c_str());
   std::string path = "Navigation/AddressPoint[@name='" + name + "']";
   core->getConfigStore()->removePath(path);
