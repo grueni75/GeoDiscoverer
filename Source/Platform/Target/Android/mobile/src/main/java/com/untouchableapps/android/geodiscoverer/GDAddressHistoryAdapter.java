@@ -156,11 +156,12 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
           newestName = name;
         }
       }
-      String groupName = coreObject.configStoreGetStringValue("Navigation/AddressPoint[@name='" + newestName + "']","group");
+      String foreignRemovalRequest = coreObject.configStoreGetStringValue("Navigation/AddressPoint[@name='" + newestName + "']","foreignRemovalRequest");
+      String groupName = coreObject.configStoreGetStringValue("Navigation/AddressPoint[@name='" + newestName + "']", "group");
       if (!groupNames.contains(groupName)) {
         addGroupName(groupName);
       }
-      if (groupName.equals(selectedGroupName))
+      if ((groupName.equals(selectedGroupName))&&(!foreignRemovalRequest.equals("1")))
         add(newestName);
       unsortedNames.remove(newestName);
     }

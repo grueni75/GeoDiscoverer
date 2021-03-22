@@ -2346,6 +2346,11 @@
                         <xsd:documentation>Timestamp in seconds used in the system this entry was synchronized with.</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>              
+                    <xsd:element name="foreignRemovalRequest" type="xsd:boolean" default="0">
+                      <xsd:annotation>
+                        <xsd:documentation>Indicates that this entry shall be removed from the system it was synchronized from.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>              
                     <xsd:element name="group" type="xsd:string" default="Default" gd:upgrade="restore">
                       <xsd:annotation>
                         <xsd:documentation>Name of the group the address belongs to.</xsd:documentation>

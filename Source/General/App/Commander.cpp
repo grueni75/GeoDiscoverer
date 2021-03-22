@@ -916,17 +916,6 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
-  if (cmdName=="setTargetAtAddressPoint") {
-    GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
-    core->getDefaultGraphicEngine()->unlockPos();
-    NavigationPoint addressPoint;
-    if (core->getNavigationEngine()->getAddressPoint(visPos,addressPoint)) {
-      core->getNavigationEngine()->setTargetPos(addressPoint.getLng(),addressPoint.getLat());
-    } else {
-      WARNING("no address point near to the current map center found",NULL);
-    }
-    cmdExecuted=true;
-  }
   if (cmdName=="askForRouteRemovalKind") {
     if (core->getIsInitialized()) {
       std::string appCmd = "askForRouteRemovalKind()";

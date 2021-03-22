@@ -1767,13 +1767,21 @@ std::string NavigationEngine::renameAddressPoint(std::string oldName, std::strin
 // Removes an address point
 void NavigationEngine::removeAddressPoint(std::string name) {
   
-  //DEBUG("name=%s",name.c_str());
+  // If this is synchronized from a foreign source, 
+  // mark it for removal and trigger the synchronization
   std::string path = "Navigation/AddressPoint[@name='" + name + "']";
-  core->getConfigStore()->removePath(path);
-  initAddressPoints();
-
-  // Inform widget engine that data has changed
-  core->onDataChange();
+  NavigationPoint p;
+  p.setName(name);
+  if (!p.readFromConfig("Navigation/AddressPoint")) 
+    FATAL("can not read existing address point",NULL);
+  if (p.getForeignTimestamp()!="0") {
+    p.setForeignRemovalRequest(true);
+    p.writeToConfig("Navigation/AddressPoint");
+    triggerGoogleBookmarksSynchronization();
+  } else {
+    core->getConfigStore()->removePath(path);
+    initAddressPoints();
+  }
 }
 
 // Reads the address points from disk
@@ -1866,6 +1874,7 @@ void NavigationEngine::initAddressPoints() {
   // Trigger updates
   triggerNavigationInfoUpdate();
   core->getCommander()->dispatch("forceRemoteMapUpdate()");
+  core->onDataChange();
 }
 
 // Finds a route with the given name
@@ -1899,6 +1908,8 @@ bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &
       case NavigationPointVisualizationTypeStartFlag:
       case NavigationPointVisualizationTypeEndFlag:
         continue;
+        break;
+      default:
         break;
     }
     //DEBUG("distance=%f",distance);

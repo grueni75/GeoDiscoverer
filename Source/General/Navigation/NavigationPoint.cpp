@@ -32,6 +32,7 @@ NavigationPoint::NavigationPoint() {
   lat = undefPos.getLat();
   timestamp=0;
   foreignTimestamp="0";
+  foreignRemovalRequest=false;
   distance=0;
   x=0;
   y=0;
@@ -55,6 +56,7 @@ void NavigationPoint::writeToConfig(std::string path, TimestampInSeconds timesta
     timestamp=core->getClock()->getSecondsSinceEpoch();
   configStore->setLongValue(path,"timestamp",timestamp,__FILE__,__LINE__);
   configStore->setStringValue(path,"foreignTimestamp",foreignTimestamp,__FILE__,__LINE__);
+  configStore->setIntValue(path,"foreignRemovalRequest",foreignRemovalRequest,__FILE__,__LINE__);
 }
 
 // Reads the point from the config
@@ -69,6 +71,7 @@ bool NavigationPoint::readFromConfig(std::string path) {
     lng=configStore->getDoubleValue(path,"lng",__FILE__,__LINE__);
     timestamp=configStore->getLongValue(path,"timestamp",__FILE__,__LINE__);
     foreignTimestamp=configStore->getStringValue(path,"foreignTimestamp",__FILE__,__LINE__);
+    foreignRemovalRequest=configStore->getIntValue(path,"foreignRemovalRequest",__FILE__,__LINE__);
     return true;
   } else {
     return false;
@@ -80,7 +83,7 @@ bool NavigationPoint::operator==(const NavigationPoint &rhs)
 {
   if ((name==rhs.name)&&(address==rhs.address)&&(group==rhs.group)&&
       (lng==rhs.lng)&&(lat==rhs.lat)&&(timestamp==rhs.timestamp)&&
-      (foreignTimestamp==rhs.foreignTimestamp))
+      (foreignTimestamp==rhs.foreignTimestamp)&&(foreignRemovalRequest==rhs.foreignRemovalRequest))
     return true;
   else
     return false;

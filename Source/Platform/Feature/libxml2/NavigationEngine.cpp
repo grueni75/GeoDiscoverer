@@ -66,6 +66,22 @@ void NavigationEngine::synchronizeGoogleBookmarks() {
     if (quitSynchronizeGoogleBookmarksThread)
       return;    
 
+    // Go through all existing bookmarks and check if anyone shall be deleted
+    std::list<std::string> removeNavigationPointNames;
+    std::string path = "Navigation/AddressPoint";
+    std::list<std::string> names = core->getConfigStore()->getAttributeValues(path,"name",__FILE__,__LINE__);
+    for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
+      //DEBUG("name=%s",(*i).c_str());
+      NavigationPoint p;
+      p.setName(*i);
+      if (!p.readFromConfig("Navigation/AddressPoint")) 
+        FATAL("can not read existing address point",NULL);
+      if (p.getForeignRemovalRequest()) {
+        DEBUG("address point <%s> marked for removal",(*i).c_str());
+        removeNavigationPointNames.push_back(*i);
+      }
+    }
+
     // Download the current bookmarks and process them
     DEBUG("updating google bookmarks",NULL);
     std::list<NavigationPoint> newNavigationPoints;
@@ -73,10 +89,12 @@ void NavigationEngine::synchronizeGoogleBookmarks() {
     DownloadResult result;
     UInt size;
     std::string cookies=core->getConfigStore()->getStringValue("GoogleBookmarksSync","cookies",__FILE__,__LINE__);
-    UByte *data=core->downloadURL("https://www.google.com/bookmarks/?output=xml",result,size,true,false,NULL,&cookies);
+    //DEBUG("cookies=%s",cookies.c_str());
+    UByte *data=core->downloadURL("https://www.google.com/bookmarks/?output=rss",result,size,true,false,NULL,&cookies);
     if (data!=NULL) {
       
       // Did we get a XML file?
+      //DEBUG("data=%s",data);
       if (strncmp((const char *)data,"<?xml version",13)!=0) {
         
         // Ask for updating the cookie
@@ -111,95 +129,141 @@ void NavigationEngine::synchronizeGoogleBookmarks() {
         free(data);
         continue;
       }
-      bookmark=bookmark->children;
-      while (bookmark!=NULL) {
-        XMLNode field=bookmark->children;
-        std::string title="";
-        std::string url="";        
-        std::string timestamp="";      
-        std::string address="";
-        std::string lat="";
-        std::string lng="";
-        while (field!=NULL) {
-          if ((field->name!=NULL)&&(field->children!=NULL)&&(field->children->content!=NULL)) {
-            if (strcmp((const char *)field->name,"title")==0) 
-              title=(const char *)field->children->content;
-            if (strcmp((const char *)field->name,"url")==0) {
-              url=(const char *)field->children->content;
-              
-              // Check if the url contains already coordinates
-              DEBUG("url=%s",url.c_str());
-              size_t pos;
-              if ((url.find("ftid=")==std::string::npos)&&(url.find("cid=")==std::string::npos)) {
-                pos=url.find("q=");
-                if (pos!=std::string::npos) {
-                  url=url.substr(pos+2);
-                  pos=url.find(",");
-                  lat=url.substr(0,pos);
-                  lng=url.substr(pos+1);
-                  //DEBUG("lat=%s lng=%s",lat.c_str(),lng.c_str());
-                }
-              } else {
-                pos=url.find("cid=");                
-                if (pos!=std::string::npos) {
-                  address=url.substr(pos);
-                } else {
-                  pos=url.find("q=");
-                  if (pos!=std::string::npos) {
-                    address=url.substr(pos);
+
+      // Go through all bookmarks
+      std::string signature="";
+      XMLNode top=bookmark->children;
+      while (top!=NULL) {
+        if ((top->name!=NULL)&&(top->children!=NULL)) {
+          //DEBUG("name=%s",top->name);
+
+          // Extract signature
+          if ((strcmp((const char *)top->name,"signature")==0)&&(top->children->content!=NULL))
+            signature=(const char *)top->children->content;
+
+          // Extract bookmarks
+          if (strcmp((const char *)top->name,"item")==0) {
+            XMLNode field=top->children;
+            std::string title="";
+            std::string url="";        
+            std::string timestamp="";      
+            std::string address="";
+            std::string lat="";
+            std::string lng="";
+            std::string id="";
+            while (field!=NULL) {
+              if ((field->name!=NULL)&&(field->children!=NULL)&&(field->children->content!=NULL)) {
+                if (strcmp((const char *)field->name,"title")==0) 
+                  title=(const char *)field->children->content;
+                if (strcmp((const char *)field->name,"link")==0) {
+                  url=(const char *)field->children->content;
+                  
+                  // Check if the url contains already coordinates
+                  //DEBUG("url=%s",url.c_str());
+                  size_t pos;
+                  if ((url.find("ftid=")==std::string::npos)&&(url.find("cid=")==std::string::npos)) {
+                    pos=url.find("q=");
+                    if (pos!=std::string::npos) {
+                      url=url.substr(pos+2);
+                      pos=url.find(",");
+                      lat=url.substr(0,pos);
+                      lng=url.substr(pos+1);
+                      //DEBUG("lat=%s lng=%s",lat.c_str(),lng.c_str());
+                    }
+                  } else {
+                    pos=url.find("cid=");                
+                    if (pos!=std::string::npos) {
+                      address=url.substr(pos);
+                    } else {
+                      pos=url.find("q=");
+                      if (pos!=std::string::npos) {
+                        address=url.substr(pos);
+                      }
+                    }
+                    DEBUG("address: %s",address.c_str());
                   }
                 }
-                DEBUG("address: %s",address.c_str());
+                if (strcmp((const char *)field->name,"pubDate")==0) 
+                  timestamp=(const char *)field->children->content;
+                if (strcmp((const char *)field->name,"bkmk_id")==0) 
+                  id=(const char *)field->children->content;
               }
+              field=field->next;
             }
-            if (strcmp((const char *)field->name,"timestamp")==0) 
-              timestamp=(const char *)field->children->content;
-          }
-          field=field->next;
-        }
-        if ((title=="")||((address=="")&&((lng=="")||(lat=="")))||(timestamp=="")) {
-          DEBUG("title=%s url=%s",title.c_str(),url.c_str());
-          if (title=="") {
-            WARNING("can not import Google Bookmark with unkown title",NULL);
-          } else {
-            WARNING("can not import Google Bookmark <%s>",title.c_str());
-          }
-        } else {
-        
-          // Remember the title for deleting not existing googlemarks later
-          allBookmarkTitles.push_back(title);
-          
-          // Check if this bookmark is not yet known or updated
-          NavigationPoint p;
-          p.setName(title);
-          p.setGroup(group);
-          bool addPoint=false;
-          if (!p.readFromConfig("Navigation/AddressPoint"))           
-            addPoint=true;
-          else {
-            if (p.getForeignTimestamp()!=timestamp) {
-              addPoint=true;
-            }
-          }
-          if (addPoint) {
-            
-            // If we have the coordinates already, finish this point
-            p.setForeignTimestamp(timestamp);
-            if (address=="") {
-              DEBUG("adding/updating google bookmark <%s>",p.getName().c_str());
-              p.setLat(atof(lat.c_str()));
-              p.setLng(atof(lng.c_str()));
-              p.writeToConfig("Navigation/AddressPoint",0); 
+            if ((title=="")||((address=="")&&((lng=="")||(lat=="")))||(timestamp=="")) {
+              //DEBUG("title=%s url=%s",title.c_str(),url.c_str());
+              if (title=="") {
+                WARNING("can not import Google Bookmark with unkown title",NULL);
+              } else {
+                WARNING("can not import Google Bookmark <%s>",title.c_str());
+              }
             } else {
-              p.setAddress(address);
-              newNavigationPoints.push_back(p);
-            }            
-            DEBUG("adding <%s> for processing",p.getName().c_str());
-          } else {
-            DEBUG("skipping google bookmark <%s> (already known and up-to-date)",p.getName().c_str());
+            
+              // Check if this bookmark shall be deleted
+              bool removed=false;
+              for (std::list<std::string>::iterator i=removeNavigationPointNames.begin();i!=removeNavigationPointNames.end();i++) {
+                if (*i==title) {
+                  if (id=="") {
+                    ERROR("can not remove google bookmark <%s> (no ID)",(*i).c_str());
+                  } else {
+                    if (signature=="") {
+                      ERROR("can not remove google bookmark <%s> (no signature available)",(*i).c_str());
+                      break;
+                    }
+                    DEBUG("removing google bookmark <%s> from server",title.c_str());
+                    UByte *data=core->downloadURL("https://www.google.com/bookmarks/mark?dlq="+id+"&sig="+signature,result,size,true,false,NULL,&cookies);
+                    if (data) free(data);
+                    if (result!=DownloadResultSuccess) {
+                      ERROR("can not remove google bookmark <%s> (server answer not ok)",(*i).c_str());
+                      break;
+                    }
+                    removeNavigationPointNames.erase(i);
+                    removed=true;
+                    break;
+                  }
+                }
+              }
+
+              // Only process the bookmark if it hasn't been deleted
+              if (!removed) {
+
+                // Remember the title for deleting not existing googlemarks later
+                allBookmarkTitles.push_back(title);
+                
+                // Check if this bookmark is not yet known or updated
+                NavigationPoint p;
+                p.setName(title);
+                p.setGroup(group);
+                bool addPoint=false;
+                if (!p.readFromConfig("Navigation/AddressPoint"))           
+                  addPoint=true;
+                else {
+                  if (p.getForeignTimestamp()!=timestamp) {
+                    addPoint=true;
+                  }
+                }
+                if (addPoint) {
+                  
+                  // If we have the coordinates already, finish this point
+                  p.setForeignTimestamp(timestamp);
+                  if (address=="") {
+                    DEBUG("adding/updating google bookmark <%s>",p.getName().c_str());
+                    p.setLat(atof(lat.c_str()));
+                    p.setLng(atof(lng.c_str()));
+                    p.writeToConfig("Navigation/AddressPoint",0); 
+                  } else {
+                    p.setAddress(address);
+                    newNavigationPoints.push_back(p);
+                  }            
+                  DEBUG("adding <%s> for processing",p.getName().c_str());
+                } else {
+                  DEBUG("skipping google bookmark <%s> (already known and up-to-date)",p.getName().c_str());
+                }
+              }        
+            }
           }
-        }        
-        bookmark=bookmark->next;
+        }
+        top=top->next;
       }
       xmlFreeDoc(doc);
       free(data);
@@ -297,8 +361,6 @@ void NavigationEngine::synchronizeGoogleBookmarks() {
     }
     
     // Go through all existing bookmarks
-    std::string path = "Navigation/AddressPoint";
-    std::list<std::string> names = core->getConfigStore()->getAttributeValues(path,"name",__FILE__,__LINE__);
     for (std::list<std::string>::iterator i=names.begin();i!=names.end();i++) {
       
       // Check if the address point is a google bookmark

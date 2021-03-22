@@ -47,6 +47,9 @@ class NavigationPoint {
 
   // Last update in foreign database
   std::string foreignTimestamp;
+
+  // Request to remove the entry in the foreign databse
+  bool foreignRemovalRequest;
   
   // Position on the screen
   double x,y;
@@ -153,6 +156,14 @@ public:
 
   void setForeignTimestamp(const std::string& foreignTimestamp) {
     this->foreignTimestamp = foreignTimestamp;
+  }
+
+  const bool getForeignRemovalRequest() const {
+    return foreignRemovalRequest;
+  }
+
+  void setForeignRemovalRequest(const bool foreignRemovalRequest) {
+    this->foreignRemovalRequest = foreignRemovalRequest;
   }
 
 };
