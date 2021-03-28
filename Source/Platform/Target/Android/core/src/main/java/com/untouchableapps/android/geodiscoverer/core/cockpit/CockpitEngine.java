@@ -178,7 +178,7 @@ public class CockpitEngine {
 
               // Skip the vibrate if the current speed is below the threshold
               if (locationSpeed<minSpeedToAlert)
-                return;
+                break;
 
               // Skip vibrate if we are not off route anymore 
               // and this is is not the first vibrate
