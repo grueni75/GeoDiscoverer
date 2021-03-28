@@ -2072,8 +2072,17 @@ bool NavigationEngine::trashPath(NavigationPath *path) {
 
   // If the path can be hidden, remove it also from the disk
   std::string filePath=path->getGpxFilefolder()+"/"+path->getGpxFilename();
+  std::string cachePath=path->getGpxFilefolder()+"/.cache/"+path->getGpxFilename();
+  std::string configPath="Navigation/Route[@name='" + path->getGpxFilename() + "']";
   if (hidePath(path)) {
+
+    // Ensure that the path is correctly reloaded after it is re-added
+    core->getConfigStore()->removePath(configPath);
+
+    // Remove files
     remove(filePath.c_str());
+    remove(cachePath.c_str());
+
     return true;
   } else {
     return false;
