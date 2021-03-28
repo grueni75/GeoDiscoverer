@@ -539,7 +539,7 @@ Please have a look at read_me_elevate.txt for reuse and licenses of resources us
 		<cat id="restaurants" />
 	</layer>
 
-	<layer id="elmt-shops-h" enabled="false">
+	<layer id="elmt-shops-h" enabled="true">
 		<name lang="de" value="Geschäfte + Dienstleistungen" />
 		<name lang="en" value="shops + services" />
 		<name lang="es" value="comercios y servicios" />
@@ -557,7 +557,7 @@ Please have a look at read_me_elevate.txt for reuse and licenses of resources us
 		<cat id="shops" />
 		<cat id="fuel" />
 	</layer>
-	<layer id="elmt-shops-b" enabled="false">
+	<layer id="elmt-shops-b" enabled="true">
 		<name lang="de" value="Geschäfte + Dienstleistungen" />
 		<name lang="en" value="shops + services" />
 		<name lang="es" value="comercios y servicios" />
@@ -566,7 +566,7 @@ Please have a look at read_me_elevate.txt for reuse and licenses of resources us
 		<cat id="shops" />
 		<cat id="fuel" />
 	</layer>
-	<layer id="elmt-shops-m" enabled="false">
+	<layer id="elmt-shops-m" enabled="true">
 		<name lang="de" value="Geschäfte + Dienstleistungen" />
 		<name lang="en" value="shops + services" />
 		<name lang="es" value="comercios y servicios" />
