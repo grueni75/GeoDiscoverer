@@ -1500,9 +1500,9 @@ void NavigationEngine::computeNavigationInfo() {
     unlockTargetPos();
 
     // Update the nearest address point
-    bool pointValid=false;
-    NavigationPoint point;
-    double distance=std::numeric_limits<double>::max();
+    bool nearestAddressPointValid=false;
+    NavigationPoint nearestAddressPoint;
+    double nearestAddressPointDistance=std::numeric_limits<double>::max();
     if (locationPos.isValid()) {
       core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
       for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
@@ -1510,18 +1510,14 @@ void NavigationEngine::computeNavigationInfo() {
         pos.setLat((*i).getLat());
         pos.setLng((*i).getLng());
         double t=locationPos.computeDistance(pos);
-        if (t<distance) {
-          distance=t;
-          point=*i;
-          pointValid=true;
+        if (t<nearestAddressPointDistance) {
+          nearestAddressPointDistance=t;
+          nearestAddressPoint=*i;
+          nearestAddressPointValid=true;
         }
       }
       core->getDefaultGraphicEngine()->unlockDrawing();
     }
-    core->getThread()->lockMutex(nearestAddressPointMutex,__FILE__,__LINE__);
-    this->nearestAddressPoint=point;
-    this->nearestAddressPointValid=pointValid;
-    this->nearestAddressPointDistance=distance;
     
     // If a route is active, compute the details for the given route
     NavigationInfo navigationInfo=NavigationInfo();
@@ -1605,19 +1601,23 @@ void NavigationEngine::computeNavigationInfo() {
     unlockTargetPos();
 
     // Play alert if new address point is found
-    if ((pointValid)&&(nearestAddressPointDistance<=maxAddressPointAlarmDistance)) {
-      if (nearestAddressPointName!=point.getName()) {
+    core->getThread()->lockMutex(nearestAddressPointMutex,__FILE__,__LINE__);
+    this->nearestAddressPoint=nearestAddressPoint;
+    this->nearestAddressPointValid=nearestAddressPointValid;
+    this->nearestAddressPointDistance=nearestAddressPointDistance;
+    if ((nearestAddressPointValid)&&(nearestAddressPointDistance<=maxAddressPointAlarmDistance)) {
+      if (this->nearestAddressPointName!=nearestAddressPoint.getName()) {
         core->getCommander()->dispatch("playNewNearestAddressPointAlarm()");
-        nearestAddressPointName=point.getName();
-        nearestAddressPointNameUpdate=core->getClock()->getMicrosecondsSinceStart();
+        this->nearestAddressPointName=nearestAddressPoint.getName();
+        this->nearestAddressPointNameUpdate=core->getClock()->getMicrosecondsSinceStart();
       }
-      nearestAddressPointAlarm=true;
+      this->nearestAddressPointAlarm=true;
     } else {
-      if (nearestAddressPointName!="") {
-        nearestAddressPointNameUpdate=core->getClock()->getMicrosecondsSinceStart();
+      if (this->nearestAddressPointName!="") {
+        this->nearestAddressPointNameUpdate=core->getClock()->getMicrosecondsSinceStart();
       }
-      nearestAddressPointName="";
-      nearestAddressPointAlarm=false;
+      this->nearestAddressPointName="";
+      this->nearestAddressPointAlarm=false;
     }
     core->getThread()->unlockMutex(nearestAddressPointMutex);
     core->onDataChange();
