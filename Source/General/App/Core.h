@@ -293,6 +293,9 @@ public:
   // Adds a new dashboard device
   void addDashboardDevice(std::string host, Int port);
 
+  // Force a map change event
+  void forceOnMapChange();
+
   // Getters and setters
   std::string getHomePath() const
   {

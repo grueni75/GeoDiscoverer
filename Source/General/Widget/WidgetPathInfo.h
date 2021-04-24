@@ -305,7 +305,10 @@ public:
 
   static void setCurrentPathLocked(bool currentPathLocked, const char *file, int line) {
     WidgetPathInfo::currentPathLocked = currentPathLocked;
-    core->getConfigStore()->setIntValue("Navigation","pathInfoLocked",currentPathLocked,file,line);
+    core->getConfigStore()->setIntValue("Navigation","pathInfoLocked",currentPathLocked,file,line);    
+    if (!currentPathLocked) {
+        core->forceOnMapChange();
+    }
   }
 
   void setPathAltitudeDownOffsetX(Int pathAltitudeDownOffsetX) {

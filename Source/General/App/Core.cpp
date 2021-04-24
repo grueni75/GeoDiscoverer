@@ -1041,4 +1041,13 @@ void Core::dashboardDevicesLockAccessAfterReadComplete(const char *file, int lin
   } 
 }
 
+// Force a map change event
+void Core::forceOnMapChange() {
+  MapPosition pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
+  core->getMapEngine()->unlockMapPos();
+  std::list<MapTile*> *centerMapTiles = core->getMapEngine()->lockCenterMapTiles(__FILE__,__LINE__);
+  core->onMapChange(pos,centerMapTiles);
+  core->getMapEngine()->unlockCenterMapTiles();
+}
+
 }

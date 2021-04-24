@@ -2136,11 +2136,7 @@ bool NavigationEngine::hidePath(NavigationPath *path) {
   }
 
   // Ensure that no one is using the path anymore
-  MapPosition pos = *core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
-  core->getMapEngine()->unlockMapPos();
-  std::list<MapTile*> *centerMapTiles = core->getMapEngine()->lockCenterMapTiles(__FILE__,__LINE__);
-  core->onMapChange(pos,centerMapTiles);
-  core->getMapEngine()->unlockCenterMapTiles();
+  core->forceOnMapChange();
 
   // Deinit the path
   core->onPathChange(path,NavigationPathChangeTypeWillBeRemoved);  
