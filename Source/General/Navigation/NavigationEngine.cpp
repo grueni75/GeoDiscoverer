@@ -1094,18 +1094,14 @@ void NavigationEngine::updateMapGraphic() {
   // Process the unfinished tile list
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
     //PROFILE_START;
-    (*i)->lockAccess(__FILE__, __LINE__);
     //PROFILE_ADD("path locking");
     (*i)->addVisualization(&containers);
     //PROFILE_ADD("add visualization");
-    (*i)->unlockAccess();
     //PROFILE_ADD("path unlocking");
   }
   //core->getProfileEngine()->outputResult("",false);
   if (recordedTrack) {
-    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->addVisualization(&containers);
-    recordedTrack->unlockAccess();
   }
 
   // Indicate that all tiles have been processed
@@ -1118,17 +1114,13 @@ void NavigationEngine::updateMapGraphic() {
 
 // Destroys all graphics
 void NavigationEngine::destroyGraphic() {
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->destroyGraphic();
-    (*i)->unlockAccess();
   }
   if (recordedTrack) {
-    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->destroyGraphic();
-    recordedTrack->unlockAccess();
   }
-  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
     (*i).destroyGraphic();
   }
@@ -1144,17 +1136,13 @@ void NavigationEngine::createGraphic() {
   core->getDefaultGraphicEngine()->unlockArrowIcon();
 
   // Creates the buffers used in the path object
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->createGraphic();
-    (*i)->unlockAccess();
   }
   if (recordedTrack) {
-    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->createGraphic();
-    recordedTrack->unlockAccess();
   }
-  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
     (*i).createGraphic();
   }
@@ -1165,20 +1153,19 @@ void NavigationEngine::createGraphic() {
 void NavigationEngine::optimizeGraphic() {
 
   // Optimize the buffers used in the path object
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->optimizeGraphic();
-    (*i)->unlockAccess();
   }
   if (recordedTrack) {
-    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->optimizeGraphic();
-    recordedTrack->unlockAccess();
   }
+  core->getDefaultGraphicEngine()->unlockDrawing();
 }
 
 // Adds the visualization for the given tile
 void NavigationEngine::addGraphics(MapContainer *container) {
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   std::list<MapContainer*>::iterator i;
   bool inserted=false;
   for (i=unvisualizedMapContainers.begin();i!=unvisualizedMapContainers.end();i++) {
@@ -1190,6 +1177,7 @@ void NavigationEngine::addGraphics(MapContainer *container) {
   }
   if (!inserted)
     unvisualizedMapContainers.push_back(container);
+  core->getMapSource()->unlockAccess();
 }
 
 // Removes the viualization for the given map container
@@ -1197,14 +1185,10 @@ void NavigationEngine::removeGraphics(MapContainer *container) {
 
   // Process the unfinished tile list
   for(std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
-    (*i)->lockAccess(__FILE__, __LINE__);
     (*i)->removeVisualization(container);
-    (*i)->unlockAccess();
   }
   if (recordedTrack) {
-    recordedTrack->lockAccess(__FILE__, __LINE__);
     recordedTrack->removeVisualization(container);
-    recordedTrack->unlockAccess();
   }
 }
 

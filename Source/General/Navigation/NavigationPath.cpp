@@ -328,10 +328,9 @@ void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapCon
 
 // Adds a point to the path
 void NavigationPath::addEndPosition(MapPosition pos) {
-
-  lockAccess(__FILE__, __LINE__);
   
   // Decide whether to add a new point or use the last one
+  lockAccess(__FILE__, __LINE__);
   if (!hasLastPoint) {
     hasLastPoint=true;
   } else {
@@ -352,6 +351,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   // Path was modified
   hasChanged=true;
   isStored=false;
+  unlockAccess();
 
   // Update the visualization for each zoom level
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
@@ -390,19 +390,21 @@ void NavigationPath::addEndPosition(MapPosition pos) {
           // Check if an arrow needs to be added
           bool addArrow=false;
           double arrowDistance=calibrator->computePixelDistance(visualization->getPrevArrowPoint(),pos);
-          core->getMapSource()->unlockAccess();
           if (arrowDistance>=pathMinDirectionDistance) {
             pos.setHasBearing(true);  // bearing flag is used to indicate that an arrow must be added
           } else {
             pos.setHasBearing(false);
           }
+          core->getMapSource()->unlockAccess();
 
           // Add a line stroke to all matching tiles
           updateTileVisualization(NULL,visualization,visualization->getPrevLinePoint(),visualization->getPrevArrowPoint(),pos);
 
           // Update the previous point
+          core->getMapSource()->lockAccess(__FILE__,__LINE__);
           visualization->addPoint(pos);
           updateCrossingTileSegments(NULL, visualization, visualization->getPointsSize()-1);
+          core->getMapSource()->unlockAccess();
 
         } else {
           core->getMapSource()->unlockAccess();
@@ -415,7 +417,6 @@ void NavigationPath::addEndPosition(MapPosition pos) {
       delete calibrator;
 
   }
-  unlockAccess();
 
   // Inform the widgets
   core->onPathChange(this,NavigationPathChangeTypeEndPositionAdded);
@@ -561,7 +562,9 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
             updateTileVisualization(&mapContainersOfSameZoomLevel,visualization,prevPoint,prevArrowPoint,p);
 
             /// Update crossing tile segments
+            core->getMapSource()->lockAccess(__FILE__,__LINE__);
             updateCrossingTileSegments(&mapContainersOfSameZoomLevel, visualization, i);
+            core->getMapSource()->unlockAccess();
 
             // Remember the last point
             prevPoint=p;
@@ -593,12 +596,14 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
   Int zoomLevel=-1;
 
   // Remove the tile from the visualization
+  core->getMapSource()->lockAccess(__FILE__,__LINE__);
   NavigationPathVisualization *visualization=zoomLevelVisualizations[mapContainer->getZoomLevelMap()-1];
   std::vector<MapTile*> *mapTiles=mapContainer->getMapTiles();
   for(std::vector<MapTile*>::iterator i=mapTiles->begin();i!=mapTiles->end();i++) {
     visualization->removeTileInfo(*i);
     (*i)->removeCrossingNavigationPathSegments(this);
   }
+  core->getMapSource()->unlockAccess();
 }
 
 // Computes navigation details for the given location

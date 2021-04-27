@@ -54,7 +54,6 @@ MapEngine::MapEngine() {
   forceCacheUpdateMutex=core->getThread()->createMutex("map engine force cache update mutex");
   forceMapUpdateMutex=core->getThread()->createMutex("map engine force map update mutex");
   forceMapRedownloadMutex=core->getThread()->createMutex("map engine force map redownload mutex");
-  centerMapTilesMutex=core->getThread()->createMutex("map engine center map tiles mutex");
   prevCompassBearing=-std::numeric_limits<double>::max();
   compassBearing=prevCompassBearing;
   isInitialized=false;
@@ -72,7 +71,6 @@ MapEngine::~MapEngine() {
   core->getThread()->destroyMutex(forceCacheUpdateMutex);
   core->getThread()->destroyMutex(forceMapUpdateMutex);
   core->getThread()->destroyMutex(forceMapRedownloadMutex);
-  core->getThread()->destroyMutex(centerMapTilesMutex);
 }
 
 // Does all action to remove a tile from the map
