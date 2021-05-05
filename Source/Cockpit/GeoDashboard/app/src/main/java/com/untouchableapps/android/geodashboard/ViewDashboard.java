@@ -112,6 +112,8 @@ public class ViewDashboard extends Activity {
   private int orientation = 1;  // from Screen.h in Geo Discoverer
   private int width;
   private int height;
+  private int updateCount=0;
+  private final int FULL_REFRESH_UPDATE_COUNT=60;
 
   /**
    * Indicates that the network service shall be restarted
@@ -526,9 +528,26 @@ public class ViewDashboard extends Activity {
       public void handleMessage(Message inputMessage) {
         switch(inputMessage.what) {
           case ViewDashboard.ACTION_DISPLAY_BITMAP:
-            Bitmap dashboardBitmap = (Bitmap) inputMessage.obj;
-            dashboardView.setImageBitmap(dashboardBitmap);
-            dashboardBitmap = null;
+            updateCount++;
+            long delay=0;
+            if (updateCount>=FULL_REFRESH_UPDATE_COUNT) {
+              Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+              Canvas canvas = new Canvas(bitmap);
+              Paint paint = new Paint();
+              paint.setColor(Color.BLACK);
+              canvas.drawRect(0F, 0F, (float) width, (float) height, paint);;
+              dashboardView.setImageBitmap(bitmap);
+              updateCount=0;
+              delay=100;
+            }
+            final Handler handler = new Handler(Looper.getMainLooper());
+            final Bitmap dashboardBitmap = (Bitmap) inputMessage.obj;
+            handler.postDelayed(new Runnable() {
+              @Override
+              public void run() {
+                dashboardView.setImageBitmap(dashboardBitmap);
+              }
+            }, delay);
             break;
           case ViewDashboard.ACTION_DISPLAY_TOAST:
             String message = (String) inputMessage.obj;

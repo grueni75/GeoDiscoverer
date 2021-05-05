@@ -2380,10 +2380,10 @@ Device *WidgetEngine::getDevice() {
 void WidgetEngine::openFingerMenu() {
   if (!enableFingerMenu)
     return;
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   setWidgetsActive(false);
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   fingerMenu->open();
-  core->getThread()->unlockMutex(accessMutex);
+  core->getDefaultGraphicEngine()->unlockDrawing();
   GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
   visPos->updateLastUserModification();
   core->getDefaultGraphicEngine()->unlockPos();
@@ -2393,21 +2393,19 @@ void WidgetEngine::openFingerMenu() {
 void WidgetEngine::closeFingerMenu() {
   if (!enableFingerMenu)
     return;
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   fingerMenu->close();
-  core->getThread()->unlockMutex(accessMutex);
+  core->getDefaultGraphicEngine()->unlockDrawing();
 }
 
 // Open or close the finger menu
 void WidgetEngine::toggleFingerMenu() {
   if (!enableFingerMenu)
     return;
-  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   if (fingerMenu->isOpen())
     closeFingerMenu();
   else
     openFingerMenu();
-  core->getThread()->unlockMutex(accessMutex);
 }
 
 // Indicates that a read access has started
