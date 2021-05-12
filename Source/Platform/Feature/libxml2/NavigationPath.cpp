@@ -577,8 +577,10 @@ bool NavigationPath::readGPXFile() {
           if (point.readGPX(node,getGpxFilename(),defaultName.str(),error)) {
             core->getNavigationEngine()->addAddressPoint(point);
           } else {
-            error="file <%s> " + error;
-            WARNING(error.c_str(),gpxFilename.c_str());
+            if (error!="contains a routing waypoint") {
+              error="file <%s> " + error;
+              WARNING(error.c_str(),gpxFilename.c_str());
+            }
           }
           processedPoints++;
           processedPercentage=processedPoints*100/totalNumberOfPoints;

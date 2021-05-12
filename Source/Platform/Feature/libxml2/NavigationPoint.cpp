@@ -79,6 +79,7 @@ bool NavigationPoint::readGPX(XMLNode wptNode, std::string group, std::string de
   std::string gpxName="";
   std::string gpxComment="";
   std::string gpxDescription="";
+  std::string gpxType="";
   for (XMLNode node=wptNode->children;node!=NULL;node=node->next) {
     if ((isGPXNameSpace(node))&&(node->type==XML_ELEMENT_NODE)) {
       std::string name=(char*)node->name;
@@ -93,8 +94,15 @@ bool NavigationPoint::readGPX(XMLNode wptNode, std::string group, std::string de
         if (name == "cmt") {
           gpxComment=text;
         }
+        if (name == "type") {
+          gpxType=text;
+        }
       }
     }
+  }
+  if (gpxType!="") {
+    error="contains a routing waypoint";
+    return false;
   }
   if (gpxDescription!="")
     setName(gpxDescription);
