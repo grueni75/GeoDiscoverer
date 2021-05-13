@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.server.MapTileServer;
 
@@ -180,10 +181,17 @@ public class GDService extends Service {
       if (intent.getAction()==null)
         return START_STICKY;
     }
-    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDapp",intent.getAction());
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",intent.getAction());
+
+    // Check if we need to restart listening to location updates
+    boolean initService=false;
+    if ((serviceRestarted)&&(intent.getAction().equals("lateInitComplete"))) {
+      initService=true;
+      serviceRestarted=false;
+    }
 
     // Handle activity start / stop actions
-    if ((serviceRestarted)||(intent.getAction().equals("activityResumed"))) {
+    if ((initService)||(intent.getAction().equals("activityResumed"))) {
 
       // Start watching the location
       if (!locationWatchStarted) {
@@ -205,7 +213,7 @@ public class GDService extends Service {
         serviceInForeground=true;
       }
     }
-    if ((serviceRestarted)||(intent.getAction().equals("activityPaused"))) {
+    if ((initService)||(intent.getAction().equals("activityPaused"))) {
 
       // Stop watching location if track recording is disabled
       boolean recordingPosition = true;
@@ -231,9 +239,6 @@ public class GDService extends Service {
 
     // Handle initialization of core
     if (intent.getAction().equals("lateInitComplete")) {
-
-      // Service restart is complete
-      serviceRestarted=false;
 
       // Stop all bluetooth services
       if (heartRateService != null) {
@@ -306,12 +311,22 @@ public class GDService extends Service {
 
     // Handle start of the mapsforge server
     if (intent.getAction().equals("startMapTileServer")) {
-      if (mapTileServer !=null) {
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","starting map tile server");
+      if (mapTileServer!=null) {
         mapTileServer.stop();
       } else {
         mapTileServer = new MapTileServer((GDApplication)getApplication(),coreObject);
       }
       mapTileServer.start();
+    }
+
+    // Handle updates from the tandem tracker
+    if (intent.getAction().equals("updateFLStats")) {
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","updateFLStats intent received!");
+      coreObject.configStoreSetStringValue("Forumslader","connected","1");
+      coreObject.configStoreSetStringValue("Forumslader","batteryLevel",String.valueOf(intent.getIntExtra("batteryLevel",0)));
+      coreObject.configStoreSetStringValue("Forumslader","powerDrawLevel",String.valueOf(intent.getIntExtra("powerDrawLevel",0)));
+      coreObject.executeCoreCommand("dataChanged");
     }
 
     return START_STICKY;
