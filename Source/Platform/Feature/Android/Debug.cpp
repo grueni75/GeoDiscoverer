@@ -27,6 +27,9 @@
 // Executes an command on the java side
 std::string GDApp_executeAppCommand(std::string command);
 
+// Handles a fatal situation
+void GDApp_handleFatal();
+
 // Adds a message on the java side
 void GDApp_addMessage(int severity, std::string tag, std::string message);
 
@@ -128,7 +131,7 @@ void Debug::print(Verbosity verbosity, const char *file, int line, bool messageL
           GDApp_executeAppCommand("warningDialog(\"" + message + "\")");
           break;
         case verbosityFatal:
-          GDApp_executeAppCommand("fatalDialog(\"" + message + "\")");
+          //GDApp_executeAppCommand("fatalDialog(\"" + message + "\")");
           break;
         case verbosityInfo:
           GDApp_executeAppCommand("infoDialog(\"" + message + "\")");
@@ -144,6 +147,11 @@ void Debug::print(Verbosity verbosity, const char *file, int line, bool messageL
     if (fatalOccured) {
       while(1) sleep(1);
     }*/
+
+    // Trigger a crash if a fatal error has occured
+    if (fatalOccured) {
+      GDApp_handleFatal();
+    }
   }
 }
 

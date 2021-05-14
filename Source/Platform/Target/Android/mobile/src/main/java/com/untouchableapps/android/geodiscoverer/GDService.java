@@ -163,6 +163,11 @@ public class GDService extends Service {
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
 
+    // Is this a service restart?
+    if ((intent!=null)&&(intent.getAction().equals("scheduledRestart"))) {
+      intent=null;
+    }
+
     // Ignore empty intents
     if (intent==null) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "service has been restarted due to low memory situation");

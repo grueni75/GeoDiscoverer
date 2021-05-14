@@ -96,4 +96,8 @@ public interface GDAppInterface {
    */
   void sendWearCommand( final String command );
 
+  /**
+   * Schedules a restart of the service
+   */
+  void scheduleRestart();
 }

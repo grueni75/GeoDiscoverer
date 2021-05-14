@@ -762,6 +762,10 @@ public class GDCore implements
         }
       }
     }
+    if (cmd.startsWith("scheduleRestart(")) {
+      appIf.scheduleRestart();
+      cmdExecuted=true;
+    }
     if (cmd.equals("lateInitComplete()")) {
       coreLock.lock();
       for (String queuedCmd : queuedCoreCommands) {
@@ -976,6 +980,7 @@ public class GDCore implements
   
   /** Called when the surface changes */
   public void onSurfaceChanged(GL10 gl, int width, int height) {
+    appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", "onSurfaceChanged called");
     coreLock.lock();
     int orientationValue = appIf.getActivityOrientation();
     if (orientationValue!= Configuration.ORIENTATION_UNDEFINED) {
@@ -995,6 +1000,7 @@ public class GDCore implements
 
   /** Called when the surface is created */
   public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+    appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", "onSurfaceCreated called");
     coreLock.lock();
     // Context is lost, so tell the core to recreate any textures
     graphicInvalidated=true;

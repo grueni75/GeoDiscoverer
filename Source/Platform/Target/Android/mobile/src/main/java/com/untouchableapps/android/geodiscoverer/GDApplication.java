@@ -49,7 +49,9 @@ import org.acra.*;
 import org.acra.annotation.*;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Application;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -465,6 +467,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
         InputStreamReader isr = new InputStreamReader(fis);
         BufferedReader br = new BufferedReader(isr);
         while ((logPath = br.readLine()) != null) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", logPath);
           File logFile = new File(logPath);
           if (logFile.exists())
             zipFile(zipOut, logFile.getName(), logPath);
@@ -495,6 +498,16 @@ public class GDApplication extends Application implements GDAppInterface, Google
     // Send report via ACRA
     Exception e = new Exception("GDCore has crashed");
     ACRA.getErrorReporter().handleException(e,quitApp);
+  }
+
+  // Schedules a restart of the GDService
+  @Override
+  public void scheduleRestart() {
+    Intent intent = new Intent(getApplicationContext(), GDService.class);
+    intent.setAction("scheduledRestart");
+    PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(),0,intent,0);
+    AlarmManager alarmManager = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+    alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 10000, pendingIntent);
   }
 
   // Returns the application context

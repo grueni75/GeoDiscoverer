@@ -77,6 +77,7 @@ static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
       fclose(logsOut);
     }
   }
+  GDApp_executeAppCommand("scheduleRestart()");
   succeeded=false;
   return succeeded;
 }
@@ -294,7 +295,7 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_core_GDCor
   google_breakpad::MinidumpDescriptor descriptor(dumpDir);
   if (!(google_breakpad_exception_handler = new google_breakpad::ExceptionHandler(descriptor,NULL,dumpCallback,NULL,true,-1))) {
   //if (!(google_breakpad_exception_handler = new google_breakpad::ExceptionHandler(descriptor,NULL,NULL,NULL,true,-1))) {
-        __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create google breakpad exception handler!");
+    __android_log_write(ANDROID_LOG_FATAL,"GDCore","can not create google breakpad exception handler!");
     Java_com_untouchableapps_android_geodiscoverer_core_GDCore_deinitCore(env,thiz);
     exit(1);
   }
@@ -616,4 +617,12 @@ void GDApp_addMessage(int severity, std::string tag, std::string message)
   env->DeleteLocalRef(tagJavaString);
   env->DeleteLocalRef(messageJavaString);
   GDApp_releaseJNIEnv(env,isAttached);
+}
+
+// Handles a fatal message
+void GDApp_handleFatal()
+{
+  google_breakpad_exception_handler->WriteMinidump();
+  GDApp_executeAppCommand("scheduleRestart()");
+  exit(1);
 }

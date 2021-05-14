@@ -183,6 +183,12 @@ public class GDApplication extends Application implements GDAppInterface {
     addMessage(FATAL_MSG,"GDApp","Native crash occured in GDCore!");
   }
 
+  // Sends a native crash report
+  @Override
+  public void scheduleRestart() {
+    addMessage(FATAL_MSG,"GDApp","Schedule restart is not supported!");
+  }
+
   // Returns the application context
   @Override
   public Context getContext() {
