@@ -77,7 +77,6 @@ static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
       fclose(logsOut);
     }
   }
-  GDApp_executeAppCommand("scheduleRestart()");
   succeeded=false;
   return succeeded;
 }
@@ -623,6 +622,6 @@ void GDApp_addMessage(int severity, std::string tag, std::string message)
 void GDApp_handleFatal()
 {
   google_breakpad_exception_handler->WriteMinidump();
-  GDApp_executeAppCommand("scheduleRestart()");
+  //GDApp_executeAppCommand("scheduleRestart()"); => Android will anyway do this
   exit(1);
 }

@@ -144,7 +144,9 @@
             android:theme="@style/GDStyle">
         </activity>
 
-        <service android:name=".GDService"/>
+        <service
+            android:name=".GDService"
+            android:exported="true"/>
 
         <receiver
             android:name=".GDDeviceAdminReceiver"

@@ -180,7 +180,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
           txtPath = txtPath.substring(0,txtPath.length()-4) + ".zip.base64";
           File file2 = new File(txtPath);
           if (!file2.exists()) {
-            sendNativeCrashReport(file.getAbsolutePath(), true);
+            sendNativeCrashReport(file.getAbsolutePath(), false);
             break; // only one report at a time
           }
         }

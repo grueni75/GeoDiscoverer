@@ -737,6 +737,14 @@ void Core::lateInit() {
   thread->unlockMutex(isInitializedMutex);
   core->getThread()->issueSignal(isInitializedSignal);
   core->getCommander()->dispatch("lateInitComplete()");
+
+  /*std::string crash_trigger_path=getHomePath()+"/trigger_crash.txt";
+  if (access( crash_trigger_path.c_str(), F_OK ) == 0) {
+    remove(crash_trigger_path.c_str());
+    //FATAL("forced crash",NULL);
+    int *a=NULL;
+    *a=0;
+  }*/
 }
 
 // Main loop of the maintenance thread

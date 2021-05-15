@@ -42,7 +42,7 @@ public class CockpitEngine {
   int offRouteAlertFastCount;
   int offRouteAlertSlowPeriod;
 
-  // Time in milliseconds to sleep before alerting
+  // Time in milliseconds to slee+p before alerting
   int waitTimeBeforeAlert;
 
   // Last time the navigation info was updated

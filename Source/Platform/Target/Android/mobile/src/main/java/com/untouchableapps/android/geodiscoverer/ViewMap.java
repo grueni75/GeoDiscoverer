@@ -118,6 +118,7 @@ public class ViewMap extends GDActivity {
   NavigationView navDrawerList= null;
   CoordinatorLayout snackbarPosition=null;
   MaterialDialog mapDownloadDialog=null;
+  View renderBugFixView=null;
 
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -1657,6 +1658,8 @@ public class ViewMap extends GDActivity {
     splashLayout = (LinearLayout) findViewById(R.id.view_map_splash_layout);
     navDrawerList = (NavigationView) findViewById(R.id.view_map_nav_drawer);
     snackbarPosition = (CoordinatorLayout) findViewById(R.id.view_map_snackbar_position);
+    renderBugFixView = (View) findViewById(R.id.view_map_render_bug_fix_view);
+
     PackageManager packageManager = getPackageManager();
     String appVersion;
     try {
@@ -1689,6 +1692,9 @@ public class ViewMap extends GDActivity {
             Message m=Message.obtain(coreObject.messageHandler);
             m.what = GDCore.STOP_CORE;
             coreObject.messageHandler.sendMessage(m);
+            break;
+          case R.id.nav_restart:
+            restartCore(false);
             break;
           case R.id.nav_toggle_messages:
             if (messageLayout.getVisibility()==LinearLayout.VISIBLE) {
@@ -1836,6 +1842,15 @@ public class ViewMap extends GDActivity {
     if (coreObject.coreLateInitComplete)
       processIntent();
 
+    // Schedule render bug fix
+    renderBugFixView.setVisibility(View.VISIBLE);
+    Handler handler = new Handler();
+    handler.postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        renderBugFixView.setVisibility(View.INVISIBLE);
+      }
+    }, 100);
   }
 
   // Processes the intent of the activity

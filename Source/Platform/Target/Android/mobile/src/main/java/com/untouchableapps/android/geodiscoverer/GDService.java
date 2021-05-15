@@ -165,6 +165,7 @@ public class GDService extends Service {
 
     // Is this a service restart?
     if ((intent!=null)&&(intent.getAction().equals("scheduledRestart"))) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "scheduled restart happened");
       intent=null;
     }
 

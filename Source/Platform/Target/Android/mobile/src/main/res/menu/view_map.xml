@@ -20,7 +20,7 @@
                     android:title="@string/cleanup_map"/>
                 <item
                     android:id="@+id/nav_sync_google_bookmarks"
-                    android:icon="@drawable/refresh"
+                    android:icon="@drawable/sync"
                     android:title="@string/synchronize_google_maps_bookmarks"/>
             </menu>
         </item>
@@ -54,6 +54,10 @@
                     android:id="@+id/nav_preferences"
                     android:icon="@drawable/prefs"
                     android:title="@string/preferences"/>
+                <item
+                    android:id="@+id/nav_restart"
+                    android:icon="@drawable/restart"
+                    android:title="@string/restart"/>
                 <item
                     android:id="@+id/nav_exit"
                     android:icon="@drawable/exit"

@@ -154,4 +154,5 @@
     <string name="route_remove_question">Shall the route be hidden only or deleted from storage?</string>
     <string name="remove">Remove</string>
     <string name="hide">Hide</string>
+    <string name="restart">Restart</string>
 </resources>
