@@ -298,7 +298,9 @@ public class GDCore implements
         executeCoreCommand("setBattery",String.valueOf(percentage), (isCharging ? "1" : "0"));
       }
     };
-    appIf.getContext().registerReceiver(batteryStatusReceiver, ifilter);
+    Intent batteryStatus=appIf.getContext().registerReceiver(batteryStatusReceiver, ifilter);
+    if (batteryStatus!=null)
+      batteryStatusReceiver.onReceive(appIf.getContext(),batteryStatus);
 
     // Install gesture detectors
     gestureDetector = new GestureDetector(appIf.getContext(),this);

@@ -58,6 +58,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
+import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
@@ -159,6 +160,15 @@ public class GDApplication extends Application implements GDAppInterface, Google
   /** Called when the application starts */
   @Override
   public void onCreate() {
+
+    /*StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectAll()
+        .penaltyLog()
+        .build());
+    StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+        .detectAll()
+        .penaltyLog()
+        .build());*/
     super.onCreate();  
 
     // Initialize the core object
@@ -519,6 +529,13 @@ public class GDApplication extends Application implements GDAppInterface, Google
   // Sends a command to the activity
   @Override
   public void executeAppCommand(String cmd) {
+    if (cmd.equals("coreInitialized()")) {
+
+      // Inform the service
+      Intent intent = new Intent(this, GDService.class);
+      intent.setAction("coreInitialized");
+      startService(intent);
+    }
     if (cmd.equals("lateInitComplete()")) {
 
       // Inform the service

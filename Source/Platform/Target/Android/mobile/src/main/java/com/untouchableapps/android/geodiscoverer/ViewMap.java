@@ -1829,11 +1829,6 @@ public class ViewMap extends GDActivity {
     Intent intent = new Intent(this, GDService.class);
     intent.setAction("activityResumed");
     startService(intent);
-    if (coreObject.coreStopped) {
-      Message m=Message.obtain(coreObject.messageHandler);
-      m.what = GDCore.START_CORE;
-      coreObject.messageHandler.sendMessage(m);
-    }
 
     // Synchronize google bookmarks
     GDApplication.coreObject.executeCoreCommand("updateGoogleBookmarks");

@@ -28,6 +28,7 @@
 #include <WidgetCheckbox.h>
 #include <WidgetCursorInfo.h>
 #include <WidgetEBike.h>
+#include <WidgetForumslader.h>
 #include <WidgetFingerMenu.h>
 #include <WidgetMeter.h>
 #include <WidgetNavigation.h>
@@ -103,6 +104,7 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
     case WidgetTypeCursorInfo: widgetTypeString="cursorInfo"; break;
     case WidgetTypeAddressPoint: widgetTypeString="addressPoint"; break;
     case WidgetTypeEBike: widgetTypeString="eBike"; break;
+    case WidgetTypeForumslader: widgetTypeString="forumslader"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
   c->setStringValue(path,"type",widgetTypeString,__FILE__, __LINE__);
@@ -127,7 +129,7 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
   }
   if (config.getType()==WidgetTypeNavigation)
     c->setGraphicColorValue(path + "/BusyColor",GraphicColor(config.getBusyColor().getRed(),config.getBusyColor().getGreen(),config.getBusyColor().getBlue(),config.getBusyColor().getAlpha()),__FILE__, __LINE__);
-  if (config.getType()==WidgetTypeEBike) {
+  if ((config.getType()==WidgetTypeEBike)||(config.getType()==WidgetTypeForumslader)) {
     c->setGraphicColorValue(path + "/GaugeBackgroundColor",GraphicColor(config.getGaugeBackgroundColor().getRed(),config.getGaugeBackgroundColor().getGreen(),config.getGaugeBackgroundColor().getBlue(),config.getGaugeBackgroundColor().getAlpha()),__FILE__, __LINE__);
     c->setGraphicColorValue(path + "/GaugeForegroundColor",GraphicColor(config.getGaugeForegroundColor().getRed(),config.getGaugeForegroundColor().getGreen(),config.getGaugeForegroundColor().getBlue(),config.getGaugeForegroundColor().getAlpha()),__FILE__, __LINE__);
   }
@@ -426,7 +428,7 @@ void WidgetEngine::createGraphic() {
         position.setPortraitY(0.0);
         position.setPortraitZ(1);
         position.setLandscapeX(62.0);
-        position.setLandscapeY(67.0);
+        position.setLandscapeY(70.5);
         position.setLandscapeZ(1);
       } else {
         position.setRefScreenDiagonal(4.0);
@@ -631,8 +633,8 @@ void WidgetEngine::createGraphic() {
         position.setPortraitX(0.0);
         position.setPortraitY(0.0);
         position.setPortraitZ(0);
-        position.setLandscapeX(40.5);
-        position.setLandscapeY(85.0);
+        position.setLandscapeX(36.5);
+        position.setLandscapeY(87.0);
         position.setLandscapeZ(0);
         config.addPosition(position);
         config.setInactiveColor(GraphicColor(255,255,255,255));
@@ -677,8 +679,8 @@ void WidgetEngine::createGraphic() {
         position.setPortraitX(0.0);
         position.setPortraitY(0.0);
         position.setPortraitZ(0);
-        position.setLandscapeX(64.0);
-        position.setLandscapeY(85.0);
+        position.setLandscapeX(81.0);
+        position.setLandscapeY(87.0);
         position.setLandscapeZ(0);
         config.addPosition(position);
         config.setInactiveColor(GraphicColor(255,255,255,255));
@@ -722,8 +724,8 @@ void WidgetEngine::createGraphic() {
         position.setPortraitX(0.0);
         position.setPortraitY(0.0);
         position.setPortraitZ(1);
-        position.setLandscapeX(64.0);
-        position.setLandscapeY(85.0);
+        position.setLandscapeX(81.0);
+        position.setLandscapeY(87.0);
         position.setLandscapeZ(1);
         config.addPosition(position);
       }
@@ -763,6 +765,53 @@ void WidgetEngine::createGraphic() {
       }
       // ---------------------------------------------------------
       config=WidgetConfig();
+      config.setName("Forumslader");
+      config.setType(WidgetTypeForumslader);
+      if (deviceName=="Default") {
+        config.setPageName("Finger Menu");
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(70.0);
+        position.setPortraitY(89.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(86.0);
+        position.setLandscapeY(78.0);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+      }
+      if (deviceName!="Default") {
+        config.setPageName("Default");
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(0.0);
+        position.setPortraitX(0.0);
+        position.setPortraitY(0.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(81.0);
+        position.setLandscapeY(87.0);
+        position.setLandscapeZ(1);
+        config.addPosition(position);
+      }
+      config.setInactiveColor(GraphicColor(255,255,255,255));
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setGaugeBackgroundColor(GraphicColor(255,127,0,255));
+      config.setGaugeForegroundColor(GraphicColor(255,190,127,255));
+      config.setParameter("iconFilename", "forumsladerBackground");
+      config.setParameter("powerDrawLevelOffsetY","12");
+      config.setParameter("powerDrawGaugeOffsetY","35");
+      config.setParameter("powerDrawGaugeRadius","0.2");
+      config.setParameter("powerDrawGaugeBackgroundWidth","0.14");
+      config.setParameter("powerDrawGaugeForegroundWidth","0.08");
+      config.setParameter("batteryLevelOffsetY","12");
+      config.setParameter("batteryGaugeOffsetX","35");
+      config.setParameter("batteryGaugeOffsetY","35");
+      config.setParameter("batteryGaugeMaxHeight","33");
+      config.setParameter("batteryGaugeBackgroundWidth","0.15");
+      config.setParameter("batteryGaugeForegroundWidth","0.09");
+      config.setParameter("batteryGaugeTipWidth","0.08");
+      config.setParameter("batteryGaugeTipHeight","0.05");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
       config.setPageName("Default");
       config.setName("Track length");
       config.setType(WidgetTypeMeter);
@@ -793,8 +842,8 @@ void WidgetEngine::createGraphic() {
         position.setPortraitX(0.0);
         position.setPortraitY(0.0);
         position.setPortraitZ(0);
-        position.setLandscapeX(87.5);
-        position.setLandscapeY(85.0);
+        position.setLandscapeX(55.0);
+        position.setLandscapeY(87.0);
         position.setLandscapeZ(0);
         config.addPosition(position);
         config.setInactiveColor(GraphicColor(255,255,255,255));
@@ -819,7 +868,7 @@ void WidgetEngine::createGraphic() {
         position.setPortraitY(0.0);
         position.setPortraitZ(2);
         position.setLandscapeX(50.0);
-        position.setLandscapeY(23.0);
+        position.setLandscapeY(26.0);
         position.setLandscapeZ(2);
       } else {
         position.setRefScreenDiagonal(4.0);
@@ -988,14 +1037,14 @@ void WidgetEngine::createGraphic() {
         config.setParameter("pathNameOffsetX","3.0");
         config.setParameter("pathNameOffsetY","85.5");
         config.setParameter("pathNameWidth","94.0");
-        config.setParameter("pathValuesWidth","22.5");
-        config.setParameter("pathLengthOffsetX","77.0");
+        config.setParameter("pathValuesWidth","20.0");
+        config.setParameter("pathLengthOffsetX","78.0");
         config.setParameter("pathLengthOffsetY","65.5");
-        config.setParameter("pathAltitudeUpOffsetX","77.0");
+        config.setParameter("pathAltitudeUpOffsetX","78.0");
         config.setParameter("pathAltitudeUpOffsetY","45.5");
-        config.setParameter("pathAltitudeDownOffsetX","77.0");
+        config.setParameter("pathAltitudeDownOffsetX","78.0");
         config.setParameter("pathAltitudeDownOffsetY","26.0");
-        config.setParameter("pathDurationOffsetX","77.0");
+        config.setParameter("pathDurationOffsetX","78.0");
         config.setParameter("pathDurationOffsetY","6.5");
         config.setParameter("altitudeProfileWidth","55.0");
         config.setParameter("altitudeProfileHeightWithNavigationPoints","47.5");
@@ -1015,30 +1064,30 @@ void WidgetEngine::createGraphic() {
         position.setPortraitY(0.0);
         position.setPortraitZ(0);
         position.setLandscapeX(50.0);
-        position.setLandscapeY(31.0);
+        position.setLandscapeY(33.0);
         position.setLandscapeZ(0);
         config.addPosition(position);
         config.setInactiveColor(GraphicColor(255,255,255,255));
         config.setParameter("iconFilename","pathInfoLargeBackground");
         config.setParameter("pathNameOffsetX","2.0");
-        config.setParameter("pathNameOffsetY","90.0");
+        config.setParameter("pathNameOffsetY","92.0");
         config.setParameter("pathNameWidth","96.0");
         config.setParameter("pathValuesWidth","18.5");
         config.setParameter("pathLengthOffsetX","5.5");
-        config.setParameter("pathLengthOffsetY","75.0");
+        config.setParameter("pathLengthOffsetY","80.5");
         config.setParameter("pathAltitudeUpOffsetX","30.0");
-        config.setParameter("pathAltitudeUpOffsetY","75.0");
+        config.setParameter("pathAltitudeUpOffsetY","80.5");
         config.setParameter("pathAltitudeDownOffsetX","55.0");
-        config.setParameter("pathAltitudeDownOffsetY","75.0");
-        config.setParameter("pathDurationOffsetX","80.5");
-        config.setParameter("pathDurationOffsetY","75.0");
-        config.setParameter("altitudeProfileWidth","87.0");
-        config.setParameter("altitudeProfileHeightWithNavigationPoints","50.0");
-        config.setParameter("altitudeProfileHeightWithoutNavigationPoints","53.0");
-        config.setParameter("altitudeProfileOffsetX","8.0");
-        config.setParameter("altitudeProfileOffsetY","10.0");
+        config.setParameter("pathAltitudeDownOffsetY","80.5");
+        config.setParameter("pathDurationOffsetX","80.0");
+        config.setParameter("pathDurationOffsetY","80.5");
+        config.setParameter("altitudeProfileWidth","88.5");
+        config.setParameter("altitudeProfileHeightWithNavigationPoints","57.0");
+        config.setParameter("altitudeProfileHeightWithoutNavigationPoints","61.0");
+        config.setParameter("altitudeProfileOffsetX","7.5");
+        config.setParameter("altitudeProfileOffsetY","9.5");
         config.setParameter("noAltitudeProfileOffsetX","50.0");
-        config.setParameter("noAltitudeProfileOffsetY","37.5");
+        config.setParameter("noAltitudeProfileOffsetY","39.0");
         config.setParameter("altitudeProfileXTickCount","7");
         config.setParameter("altitudeProfileYTickCount","5");
       }
@@ -1371,7 +1420,7 @@ void WidgetEngine::createGraphic() {
       position.setPortraitY(0.0);
       position.setPortraitZ(0);
       position.setLandscapeX(14.5);
-      position.setLandscapeY(80.0);
+      position.setLandscapeY(82.0);
       position.setLandscapeZ(0);
       config.addPosition(position);
       config.setInactiveColor(GraphicColor(255,255,255,255));
@@ -1548,6 +1597,7 @@ void WidgetEngine::createGraphic() {
       WidgetCursorInfo *cursorInfo;
       WidgetAddressPoint *addressPoint;
       WidgetEBike *eBike;
+      WidgetForumslader *forumslader;
       if (widgetType=="button") {
         WidgetContainer *container;
         if (isFingerMenuPage)
@@ -1601,6 +1651,10 @@ void WidgetEngine::createGraphic() {
         eBike=new WidgetEBike(page);
         primitive=eBike;
       }
+      if (widgetType=="forumslader") {
+        forumslader=new WidgetForumslader(page);
+        primitive=forumslader;
+      }
 
       // Set type-independent properties
       std::list<std::string> name;
@@ -1611,7 +1665,7 @@ void WidgetEngine::createGraphic() {
       primitive->setColor(primitive->getInactiveColor());
 
       // Load the image of the widget
-      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")||(widgetType=="addressPoint")||(widgetType=="eBike")) {
+      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")||(widgetType=="addressPoint")||(widgetType=="eBike")||(widgetType=="forumslader")) {
         primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {
@@ -1800,6 +1854,23 @@ void WidgetEngine::createGraphic() {
         eBike->setBatteryLevelRadius(c->getDoubleValue(widgetPath,"batteryLevelRadius",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
         eBike->setBatteryLevelBackgroundWidth(c->getDoubleValue(widgetPath,"batteryLevelBackgroundWidth",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
         eBike->setBatteryLevelForegroundWidth(c->getDoubleValue(widgetPath,"batteryLevelForegroundWidth",__FILE__, __LINE__)*eBike->getBatteryLevelBackgroundWidth()/100.0);        
+      }
+      if (widgetType=="forumslader") {
+        forumslader->setGaugeBackgroundColor(c->getGraphicColorValue(widgetPath + "/GaugeBackgroundColor",__FILE__, __LINE__));        
+        forumslader->setGaugeForegroundColor(c->getGraphicColorValue(widgetPath + "/GaugeForegroundColor",__FILE__, __LINE__));        
+        forumslader->setPowerDrawLevelOffsetY(c->getDoubleValue(widgetPath,"powerDrawLevelOffsetY",__FILE__,__LINE__)*forumslader->getIconHeight()/100.0);
+        forumslader->setPowerDrawGaugeOffsetY(c->getDoubleValue(widgetPath,"powerDrawGaugeOffsetY",__FILE__,__LINE__)*forumslader->getIconHeight()/100.0);
+        forumslader->setPowerDrawGaugeRadius(c->getDoubleValue(widgetPath,"powerDrawGaugeRadius",__FILE__,__LINE__)*getScreen()->getDPI());
+        forumslader->setPowerDrawGaugeBackgroundWidth(c->getDoubleValue(widgetPath,"powerDrawGaugeBackgroundWidth",__FILE__,__LINE__)*getScreen()->getDPI());
+        forumslader->setPowerDrawGaugeForegroundWidth(c->getDoubleValue(widgetPath,"powerDrawGaugeForegroundWidth",__FILE__,__LINE__)*getScreen()->getDPI());
+        forumslader->setBatteryLevelOffsetY(c->getDoubleValue(widgetPath,"batteryLevelOffsetY",__FILE__,__LINE__)*forumslader->getIconHeight()/100.0);
+        forumslader->setBatteryGaugeOffsetX(c->getDoubleValue(widgetPath,"batteryGaugeOffsetX",__FILE__,__LINE__)*forumslader->getIconWidth()/100.0);
+        forumslader->setBatteryGaugeOffsetY(c->getDoubleValue(widgetPath,"batteryGaugeOffsetY",__FILE__,__LINE__)*forumslader->getIconHeight()/100.0);
+        forumslader->setBatteryGaugeMaxHeight(c->getDoubleValue(widgetPath,"batteryGaugeMaxHeight",__FILE__,__LINE__)*forumslader->getIconHeight()/100.0);
+        forumslader->setBatteryGaugeBackgroundWidth(c->getDoubleValue(widgetPath,"batteryGaugeBackgroundWidth",__FILE__,__LINE__)*getScreen()->getDPI());
+        forumslader->setBatteryGaugeForegroundWidth(c->getDoubleValue(widgetPath,"batteryGaugeForegroundWidth",__FILE__,__LINE__)*getScreen()->getDPI());
+        forumslader->setBatteryGaugeTipWidth(c->getDoubleValue(widgetPath,"batteryGaugeTipWidth",__FILE__,__LINE__)*getScreen()->getDPI());
+        forumslader->setBatteryGaugeTipHeight(c->getDoubleValue(widgetPath,"batteryGaugeTipHeight",__FILE__,__LINE__)*getScreen()->getDPI());
       }
 
       // Add the widget to the page

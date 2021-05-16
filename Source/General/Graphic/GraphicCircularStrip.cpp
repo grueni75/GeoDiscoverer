@@ -99,9 +99,11 @@ bool GraphicCircularStrip::work(TimestampInMicroseconds currentTime) {
     double textX = 0;
     double coordX, coordY, r;
     double prevTextX, prevCoordX, prevCoordY;
-    Short x,y;
+    Short x,y;    
     for (Int i=1;i<numberOfPoints;i++) {
 
+      //DEBUG("i=%d alpha=%f",i,FloatingPoint::rad2degree(alpha));
+      
       // Lower left point
       r = radius-thickness/2;
       coordX = r*cos(alpha);

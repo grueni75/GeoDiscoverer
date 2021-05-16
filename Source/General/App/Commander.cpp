@@ -837,11 +837,13 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setBattery") {
     core->setBatteryLevel(atoi(args[0].c_str()));
     core->setBatteryCharging(atoi(args[1].c_str()));
+    core->onDataChange();
     cmdExecuted=true;
   }
   if (cmdName=="setRemoteBattery") {
     core->setRemoteBatteryLevel(atoi(args[0].c_str()));
     core->setRemoteBatteryCharging(atoi(args[1].c_str()));
+    core->onDataChange();
     cmdExecuted=true;
   }
   if (cmdName=="showMenu") {

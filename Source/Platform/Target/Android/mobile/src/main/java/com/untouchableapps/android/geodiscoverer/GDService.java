@@ -51,8 +51,8 @@ public class GDService extends Service {
   // Flags
   boolean locationWatchStarted = false;
   boolean serviceInForeground = false;
-  boolean serviceRestarted = false;
-  
+  boolean activityRunning = false;
+
   /** Reference to the core object */
   GDCore coreObject = null;
 
@@ -159,73 +159,54 @@ public class GDService extends Service {
     return notification;
   }
 
-  /** Called when the service is started */
-  @Override
-  public int onStartCommand(Intent intent, int flags, int startId) {
+  /** Updates the state depending on the activity status */
+  private void handleActivityStatus(boolean forceStart) {
 
-    // Is this a service restart?
-    if ((intent!=null)&&(intent.getAction().equals("scheduledRestart"))) {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "scheduled restart happened");
-      intent=null;
-    }
+    // Now act depending if activity is running or not
+    if ((activityRunning)||(forceStart)) {
 
-    // Ignore empty intents
-    if (intent==null) {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "service has been restarted due to low memory situation");
-
-      // Start the core if the service is re-created
-      if (coreObject.coreStopped) {
-        serviceRestarted=true;
-        Message m = Message.obtain(coreObject.messageHandler);
-        m.what = GDCore.START_CORE;
-        coreObject.messageHandler.sendMessage(m);
+      // Set the service to foreground
+      if (!serviceInForeground) {
+        notification = updateNotification();
+        startForeground(R.string.notification_title, notification);
+        serviceInForeground = true;
       }
-
-      return START_STICKY;
-
-    } else {
-      if (intent.getAction()==null)
-        return START_STICKY;
-    }
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",intent.getAction());
-
-    // Check if we need to restart listening to location updates
-    boolean initService=false;
-    if ((serviceRestarted)&&(intent.getAction().equals("lateInitComplete"))) {
-      initService=true;
-      serviceRestarted=false;
-    }
-
-    // Handle activity start / stop actions
-    if ((initService)||(intent.getAction().equals("activityResumed"))) {
 
       // Start watching the location
       if (!locationWatchStarted) {
         try {
           locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, coreObject);
-        } 
-        catch (Exception e) {};
+        } catch (Exception e) {
+        }
+        ;
         try {
           locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, coreObject);
+        } catch (Exception e) {
         }
-        catch (Exception e) {};
+        ;
         locationWatchStarted = true;
       }
-            
-      // Set the service to foreground
-      if (!serviceInForeground) {
-        notification=updateNotification();
-        startForeground(R.string.notification_title, notification);
-        serviceInForeground=true;
+
+      // Start the core if it is not already running
+      if (coreObject.coreStopped) {
+        Message m=Message.obtain(coreObject.messageHandler);
+        m.what = GDCore.START_CORE;
+        coreObject.messageHandler.sendMessage(m);
       }
-    }
-    if ((initService)||(intent.getAction().equals("activityPaused"))) {
+
+    } else {
+
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",coreObject.coreLateInitComplete ? "core is initialized" : "core is not initialized");
+
+      // Don't act if GDCore is not initialized
+      if (!coreObject.coreLateInitComplete)
+        return;
 
       // Stop watching location if track recording is disabled
       boolean recordingPosition = true;
       String state=coreObject.executeCoreCommand("getRecordTrack");
       if (state.equals("false")||state.equals(""))
-          recordingPosition = false;
+        recordingPosition = false;
       boolean downloadingMaps = true;
       state=coreObject.executeCoreCommand("getMapDownloadActive");
       if (state.equals("false")||state.equals(""))
@@ -243,8 +224,44 @@ public class GDService extends Service {
 
     }
 
+  }
+
+  /** Called when the service is started */
+  @Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+
+    // Is this a service restart?
+    if ((intent!=null)&&(intent.getAction().equals("scheduledRestart"))) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "scheduled restart happened");
+      intent=null;
+    }
+
+    // Empty intents indicate a restart
+    if (intent==null) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "service has been restarted due to low memory situation");
+
+      // Start the core if the service is re-created
+      handleActivityStatus(true);
+      return START_STICKY;
+
+    } else {
+      if (intent.getAction()==null)
+        return START_STICKY;
+    }
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",intent.getAction());
+
+    // Handle activity start / stop actions
+    if (intent.getAction().equals("activityResumed")) {
+      activityRunning=true;
+      handleActivityStatus(false);
+    }
+    if (intent.getAction().equals("activityPaused")) {
+      activityRunning=false;
+      handleActivityStatus(false);
+    }
+
     // Handle initialization of core
-    if (intent.getAction().equals("lateInitComplete")) {
+    if (intent.getAction().equals("coreInitialized")) {
 
       // Stop all bluetooth services
       if (heartRateService != null) {
@@ -256,14 +273,20 @@ public class GDService extends Service {
 
       // Start all bluetooth services
       if (GDHeartRateService.isSupported(this)) {
-        heartRateService = new GDHeartRateService(this,coreObject);
+        heartRateService = new GDHeartRateService(this, coreObject);
       }
 
       // Start the ebike monitor (if supported)
       if (GDEBikeService.isSupported(this)) {
-        eBikeService = new GDEBikeService(this,coreObject);
+        eBikeService = new GDEBikeService(this, coreObject);
       }
+    }
 
+    // Handle late initialization of core
+    if (intent.getAction().equals("lateInitComplete")) {
+
+      // Update depending on the activity status
+      handleActivityStatus(false);
 
       // Replay the trace if it exists
       File replayLog = new File(coreObject.homePath + "/replay.log");
@@ -284,6 +307,7 @@ public class GDService extends Service {
       timeLeft = intent.getStringExtra("timeLeft");
       notification = updateNotification();
       notificationManager.notify(R.string.notification_title, notification);
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",tilesLeft + " tiles left for downloading");
     }
 
     // Handle exit request
@@ -328,11 +352,17 @@ public class GDService extends Service {
 
     // Handle updates from the tandem tracker
     if (intent.getAction().equals("updateFLStats")) {
-      GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","updateFLStats intent received!");
-      coreObject.configStoreSetStringValue("Forumslader","connected","1");
-      coreObject.configStoreSetStringValue("Forumslader","batteryLevel",String.valueOf(intent.getIntExtra("batteryLevel",0)));
-      coreObject.configStoreSetStringValue("Forumslader","powerDrawLevel",String.valueOf(intent.getIntExtra("powerDrawLevel",0)));
-      coreObject.executeCoreCommand("dataChanged");
+
+      // Start the core (if it's not already)
+      handleActivityStatus(true);
+
+      if (coreObject.coreInitialized) {
+        //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","updateFLStats intent received!");
+        coreObject.configStoreSetStringValue("Forumslader", "connected", "1");
+        coreObject.configStoreSetStringValue("Forumslader", "batteryLevel", String.valueOf(intent.getStringExtra("batteryLevel")));
+        coreObject.configStoreSetStringValue("Forumslader", "powerDrawLevel", String.valueOf(intent.getStringExtra("powerDrawLevel")));
+        coreObject.executeCoreCommand("dataChanged");
+      }
     }
 
     return START_STICKY;

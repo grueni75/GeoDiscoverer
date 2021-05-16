@@ -744,6 +744,7 @@ void Core::lateInit() {
     //FATAL("forced crash",NULL);
     int *a=NULL;
     *a=0;
+    exit(1);
   }*/
 }
 

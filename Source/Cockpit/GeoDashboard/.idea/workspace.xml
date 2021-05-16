@@ -11,9 +11,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c9e79f9a-25b2-4976-9b88-f17693dc2c08" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/untouchableapps/android/geodashboard/ViewDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/untouchableapps/android/geodashboard/ViewDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../General/Widget/WidgetEngine.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../General/Widget/WidgetEngine.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -295,10 +292,11 @@
       <screen x="3840" y="0" width="3840" height="2160" />
     </state>
     <state width="3750" height="538" key="GridCell.Tab.0.right/0.54.3840.2106/3840.0.3840.2160@3840.0.3840.2160" timestamp="1620107445934" />
-    <state x="1261" y="262" key="com.intellij.ide.util.TipDialog" timestamp="1620059804211">
-      <screen x="0" y="54" width="3840" height="2106" />
+    <state x="5101" y="199" key="com.intellij.ide.util.TipDialog" timestamp="1620315694130">
+      <screen x="3840" y="0" width="3840" height="2160" />
     </state>
     <state x="1261" y="262" key="com.intellij.ide.util.TipDialog/0.54.3840.2106/3840.0.3840.2160@3840.0.3840.2160" timestamp="1620059804211" />
+    <state x="5101" y="199" key="com.intellij.ide.util.TipDialog/3840.0.3840.2160/0.54.3840.2106@3840.0.3840.2160" timestamp="1620315694130" />
     <state width="600" height="118" key="javadoc.popup.new" timestamp="1620107439694">
       <screen x="3840" y="0" width="3840" height="2160" />
     </state>

@@ -241,6 +241,35 @@
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
+        <xsd:element name="Forumslader">
+          <xsd:annotation>
+            <xsd:documentation>Preferences related to the Forumslader status monitor.</xsd:documentation>
+          </xsd:annotation>
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element name="connected" type="xsd:integer" default="0" minOccurs="0">
+                <xsd:annotation>
+                  <xsd:documentation>Indicates if the Forumslader is connected.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="batteryLevel" type="xsd:string" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Battery level in percent.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="powerDrawLevel" type="xsd:string" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Power draw level in Watt.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="powerDrawLevelMax" type="xsd:string" default="15">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum possible power draw level in Watt.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
         <xsd:element name="GoogleBookmarksSync">
           <xsd:annotation>
             <xsd:documentation>Preferences related to the Google Maps bookmark synchronizer.</xsd:documentation>
@@ -350,7 +379,7 @@
                               <xsd:documentation>Enables the network cockpit app.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="dotsPerInch" type="xsd:integer" default="320" gd:upgrade="restore">
+                          <xsd:element name="dotsPerInch" type="xsd:integer" default="460" gd:upgrade="restore">
                             <xsd:annotation>
                               <xsd:documentation>Density to use when drawing the dashboard.</xsd:documentation>
                             </xsd:annotation>
@@ -1350,6 +1379,71 @@
                                       <xsd:element name="batteryLevelForegroundWidth" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Width of the inner battery level gauge in percent of the outer width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="powerDrawLevelOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the power draw level label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="powerDrawGaugeOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the power draw gauge in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="powerDrawGaugeRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius of the power draw gauge in inch.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="powerDrawGaugeBackgroundWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Background width of the power draw gauge in inch.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="powerDrawGaugeForegroundWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Foreground width of the power draw gauge in inch.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryLevelOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the battery level label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryGaugeOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the battery gauge in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryGaugeOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset of the battery gauge in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryGaugeMaxHeight" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Maximum height of the battery gauge in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryGaugeBackgroundWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Background width of the battery gauge in inch.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryGaugeForegroundWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Foreground width of the battery gauge in inch.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryGaugeTipWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the battery gauge tip in inch.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="batteryGaugeTipHeight" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Height of the battery gauge tip in inch.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
                                       <xsd:element name="TurnColor">
