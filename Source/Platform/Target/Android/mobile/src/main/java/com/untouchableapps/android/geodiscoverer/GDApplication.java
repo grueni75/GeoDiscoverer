@@ -559,6 +559,10 @@ public class GDApplication extends Application implements GDAppInterface, Google
       b.putString("command", cmd);
       m.setData(b);
       activity.coreMessageHandler.sendMessage(m);
+    } else {
+      if (cmd.equals("exitActivity()")) {
+        System.exit(0);
+      }
     }
   }
 
