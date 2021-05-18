@@ -133,6 +133,9 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
     c->setGraphicColorValue(path + "/GaugeBackgroundColor",GraphicColor(config.getGaugeBackgroundColor().getRed(),config.getGaugeBackgroundColor().getGreen(),config.getGaugeBackgroundColor().getBlue(),config.getGaugeBackgroundColor().getAlpha()),__FILE__, __LINE__);
     c->setGraphicColorValue(path + "/GaugeForegroundColor",GraphicColor(config.getGaugeForegroundColor().getRed(),config.getGaugeForegroundColor().getGreen(),config.getGaugeForegroundColor().getBlue(),config.getGaugeForegroundColor().getAlpha()),__FILE__, __LINE__);
   }
+  if (config.getType()==WidgetTypeForumslader) {
+    c->setGraphicColorValue(path + "/GaugeFillgroundColor",GraphicColor(config.getGaugeFillgroundColor().getRed(),config.getGaugeFillgroundColor().getGreen(),config.getGaugeFillgroundColor().getBlue(),config.getGaugeFillgroundColor().getAlpha()),__FILE__, __LINE__);
+  }
   ParameterMap::iterator i;
   for (i=config.getParameters()->begin();i!=config.getParameters()->end();i++) {
     std::string innerPath = path;
@@ -794,6 +797,7 @@ void WidgetEngine::createGraphic() {
       config.setInactiveColor(GraphicColor(255,255,255,255));
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setGaugeBackgroundColor(GraphicColor(255,127,0,255));
+      config.setGaugeFillgroundColor(GraphicColor(0.9*255,0.9*127,0,255));
       config.setGaugeForegroundColor(GraphicColor(255,190,127,255));
       config.setParameter("iconFilename", "forumsladerBackground");
       config.setParameter("powerDrawLevelOffsetY","12");
@@ -1857,6 +1861,7 @@ void WidgetEngine::createGraphic() {
       }
       if (widgetType=="forumslader") {
         forumslader->setGaugeBackgroundColor(c->getGraphicColorValue(widgetPath + "/GaugeBackgroundColor",__FILE__, __LINE__));        
+        forumslader->setGaugeFillgroundColor(c->getGraphicColorValue(widgetPath + "/GaugeFillgroundColor",__FILE__, __LINE__));        
         forumslader->setGaugeForegroundColor(c->getGraphicColorValue(widgetPath + "/GaugeForegroundColor",__FILE__, __LINE__));        
         forumslader->setPowerDrawLevelOffsetY(c->getDoubleValue(widgetPath,"powerDrawLevelOffsetY",__FILE__,__LINE__)*forumslader->getIconHeight()/100.0);
         forumslader->setPowerDrawGaugeOffsetY(c->getDoubleValue(widgetPath,"powerDrawGaugeOffsetY",__FILE__,__LINE__)*forumslader->getIconHeight()/100.0);

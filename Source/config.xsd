@@ -1620,6 +1620,35 @@
                                           </xsd:sequence>
                                         </xsd:complexType>
                                       </xsd:element>
+                                      <xsd:element name="GaugeFillgroundColor">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Fillground color of any gauge.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
                                     </xsd:sequence>
                                     <xsd:attribute name="name">
                                       <xsd:annotation>

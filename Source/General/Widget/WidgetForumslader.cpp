@@ -33,6 +33,7 @@ namespace GEODISCOVERER {
 WidgetForumslader::WidgetForumslader(WidgetContainer *widgetContainer) : 
   WidgetPrimitive(widgetContainer),
   powerDrawGaugeBackground(widgetContainer->getScreen()),
+  powerDrawGaugeFillground(widgetContainer->getScreen()),
   powerDrawGaugeForeground(widgetContainer->getScreen())
 {
   phBatteryLevelFontString=NULL;
@@ -180,7 +181,17 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
       powerDrawGaugeBackground.setHeight(powerDrawGaugeBackgroundWidth);
       powerDrawGaugeBackground.setIconWidth(powerDrawGaugeBackground.getWidth());
       powerDrawGaugeBackground.setIconHeight(powerDrawGaugeBackground.getHeight());      
-      changed |= powerDrawGaugeBackground.work(t);            
+      changed |= powerDrawGaugeBackground.work(t);         
+      powerDrawGaugeFillground.setColor(gaugeFillgroundColor);
+      powerDrawGaugeFillground.setAngle(90.0);
+      powerDrawGaugeFillground.setWidth(powerDrawCircumference);
+      powerDrawGaugeFillground.setRadius(radius);
+      powerDrawGaugeFillground.setX(x+getIconWidth()/2);
+      powerDrawGaugeFillground.setY(y+powerDrawGaugeOffsetY);
+      powerDrawGaugeFillground.setHeight(powerDrawGaugeForegroundWidth);
+      powerDrawGaugeFillground.setIconWidth(powerDrawGaugeFillground.getWidth());
+      powerDrawGaugeFillground.setIconHeight(powerDrawGaugeFillground.getHeight());      
+      changed |= powerDrawGaugeFillground.work(t);
       powerDrawGaugeForeground.setColor(gaugeForegroundColor);
       powerDrawGaugeForeground.setAngle(90.0-powerDrawPercentage*powerDrawAngleSweep/4);
       powerDrawGaugeForeground.setWidth(fabs(powerDrawPercentage)*powerDrawCircumference/2);
@@ -231,6 +242,14 @@ void WidgetForumslader::drawBattery(TimestampInMicroseconds t, Int offsetX, Int 
                         x+getIconWidth()/2+offsetX+batteryGaugeTipWidth/2,
                         y+batteryGaugeOffsetY+batteryGaugeMaxHeight+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth)+batteryGaugeTipHeight,
                         Screen::getTextureNotDefined(),true);
+  c=gaugeFillgroundColor;
+  c.setAlpha(color.getAlpha());
+  screen->setColor(c.getRed(),c.getGreen(),c.getBlue(),c.getAlpha());
+  screen->drawRectangle(x+getIconWidth()/2+offsetX-batteryGaugeForegroundWidth/2,
+                        y+batteryGaugeOffsetY+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth)/2,
+                        x+getIconWidth()/2+offsetX+batteryGaugeForegroundWidth/2,
+                        y+batteryGaugeOffsetY+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth)/2+batteryGaugeMaxHeight,
+                        Screen::getTextureNotDefined(),true);
   c=gaugeForegroundColor;
   c.setAlpha(color.getAlpha());
   screen->setColor(c.getRed(),c.getGreen(),c.getBlue(),c.getAlpha());
@@ -264,6 +283,10 @@ void WidgetForumslader::draw(TimestampInMicroseconds t) {
   c.setAlpha(color.getAlpha());
   powerDrawGaugeBackground.setColor(c);
   powerDrawGaugeBackground.draw(t);
+  c=powerDrawGaugeFillground.getColor();
+  c.setAlpha(color.getAlpha());
+  powerDrawGaugeFillground.setColor(c);
+  powerDrawGaugeFillground.draw(t);
   c=powerDrawGaugeForeground.getColor();
   c.setAlpha(color.getAlpha());
   powerDrawGaugeForeground.setColor(c);

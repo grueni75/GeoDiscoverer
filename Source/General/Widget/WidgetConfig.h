@@ -60,6 +60,7 @@ class WidgetConfig {
 
   // Gauge colors
   GraphicColor gaugeBackgroundColor;
+  GraphicColor gaugeFillgroundColor;
   GraphicColor gaugeForegroundColor;
 
   // Additional parameters
@@ -160,6 +161,14 @@ public:
 
   void setGaugeBackgroundColor(const GraphicColor& gaugeBackgroundColor) {
     this->gaugeBackgroundColor = gaugeBackgroundColor;
+  }
+
+  const GraphicColor& getGaugeFillgroundColor() const {
+    return gaugeFillgroundColor;
+  }
+
+  void setGaugeFillgroundColor(const GraphicColor& gaugeFillgroundColor) {
+    this->gaugeFillgroundColor = gaugeFillgroundColor;
   }
 
   const GraphicColor& getGaugeForegroundColor() const {

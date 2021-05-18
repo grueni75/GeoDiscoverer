@@ -44,10 +44,12 @@ protected:
 
   // Power draw visualization
   GraphicCircularStrip powerDrawGaugeBackground;
+  GraphicCircularStrip powerDrawGaugeFillground;
   GraphicCircularStrip powerDrawGaugeForeground;
   
   // Gauge colors
   GraphicColor gaugeBackgroundColor;
+  GraphicColor gaugeFillgroundColor;
   GraphicColor gaugeForegroundColor;
 
   // Indicates that the widget must be updated
@@ -104,6 +106,10 @@ public:
   // Getters and setters
   void setGaugeBackgroundColor(GraphicColor gaugeBackgroundColor) {
     this->gaugeBackgroundColor = gaugeBackgroundColor;
+  }
+
+  void setGaugeFillgroundColor(GraphicColor gaugeFillgroundColor) {
+    this->gaugeFillgroundColor = gaugeFillgroundColor;
   }
 
   void setGaugeForegroundColor(GraphicColor gaugeForegroundColor) {
