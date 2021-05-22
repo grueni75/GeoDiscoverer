@@ -183,6 +183,7 @@ public class MapTileServerHandler extends NanoHTTPD {
     // Get parameters
     Map<String, List<String>> params = session.getParameters();
     String themeFilePath="",themeFileStyle="",themeFileOverlays="";
+    float saturationOffset=0,brightnessOffset=0;
     for (Map.Entry<String, List<String>> name : params.entrySet()) {
       if (name.getKey().equals("themePath"))
         themeFilePath=name.getValue().get(0);
@@ -190,6 +191,12 @@ public class MapTileServerHandler extends NanoHTTPD {
         themeFileStyle=name.getValue().get(0);
       if (name.getKey().equals("themeOverlays"))
         themeFileOverlays=name.getValue().get(0);
+      if (name.getKey().equals("themePath"))
+        themeFilePath=name.getValue().get(0);
+      if (name.getKey().equals("saturationOffset"))
+        saturationOffset=Float.valueOf(name.getValue().get(0));
+      if (name.getKey().equals("brightnessOffset"))
+        brightnessOffset=Float.valueOf(name.getValue().get(0));
     }
 
     // Get the tile type and number
@@ -278,7 +285,7 @@ public class MapTileServerHandler extends NanoHTTPD {
     if (type.equals("geodiscoverer")) {
 
       // Get the tile from the core
-      String tileFilename=coreObject.executeCoreCommand("fetchMapTile",String.valueOf(z),String.valueOf(x),String.valueOf(y),loopbackPath);
+      String tileFilename=coreObject.executeCoreCommand("fetchMapTile",String.valueOf(z),String.valueOf(x),String.valueOf(y),String.valueOf(saturationOffset),String.valueOf(brightnessOffset),loopbackPath);
       addRuntime(uri,"geodiscoverer",z,startTime);
       return serveImage(uri,"geodiscoverer",z,startTime,tileFilename);
     }

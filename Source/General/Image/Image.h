@@ -109,6 +109,24 @@ public:
   // Computes a gaussion blur
   bool iirGaussFilter(ImagePixel *image, Int width, Int height, UInt pixelSize, float sigma);
 
+  // Changes the brightness by the given value
+  void brightnessFilter(ImagePixel *image, Int width, Int height, UInt pixelSize, Int brightnessOffset);
+
+  // Changes the brightness of the given PNG file
+  bool brightnessFilter(std::string pngFilename, Int brightnessOffset);
+
+  // Converts RGB pixel into HSL
+  void rgb2hsv(ImagePixel *pixel, double &h, double &s, double &v);
+  
+  // Converts RGB pixel into HSL
+  void hsv2rgb(double h, double s, double v, ImagePixel *pixel);
+
+  // Changes the hsv components by the given value
+  void hsvFilter(ImagePixel *image, Int width, Int height, UInt pixelSize, double hOffset, double sOffset, double vOffset);
+
+  // Changes the hsv components of the given PNG file by the given values
+  bool hsvFilter(std::string pngFilename, double hOffset, double sOffset, double vOffset);
+
   // Getters and setters
   static UInt getRGBPixelSize()
   {

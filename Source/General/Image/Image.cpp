@@ -238,4 +238,167 @@ bool Image::iirGaussFilter(ImagePixel *image, Int width, Int height, UInt pixelS
   return true;
 }
 
+// Changes the brightness by the given value
+void Image::brightnessFilter(ImagePixel *image, Int width, Int height, UInt pixelSize, Int brightnessOffset) {
+	for (Int i=0;i<width*height*pixelSize;i++) {
+		Int p=(Int)image[i]+brightnessOffset;
+		if (p>255) p=255;
+		if (p<0) p=0;
+		image[i]=(ImagePixel)p;
+	}
+}
+
+// Changes the hsv components by the given value
+void Image::hsvFilter(ImagePixel *image, Int width, Int height, UInt pixelSize, double hOffset, double sOffset, double vOffset) {
+	ImagePixel *curPixel=image;
+	for (Int i=0;i<width*height;i++) {
+		double h,s,v;
+		rgb2hsv(curPixel,h,s,v);
+		h+=hOffset; if (h<0) h=0; if (h>360.0) h=360.0;
+		s+=sOffset; if (s<0) s=0; if (s>1.0) s=1.0;
+		v+=vOffset; if (v<0) v=0; if (v>1.0) v=1.0;
+		hsv2rgb(h,s,v,curPixel);
+		curPixel+=pixelSize;
+	}
+}
+
+// Changes the hsv components of the given PNG file by the given values
+bool Image::hsvFilter(std::string pngFilename, double hOffset, double sOffset, double vOffset) {
+	Int width,height;
+	UInt pixelSize;
+  ImagePixel *pixels=loadPNG(pngFilename,width,height,pixelSize,false);
+  if (!pixels) {
+    DEBUG("can not read <%s>",pngFilename.c_str());
+    return false;		
+  }
+	DEBUG("hOffset=%f sOffset=%f vOffset=%f",hOffset,sOffset,vOffset);
+	hsvFilter(pixels,width,height,pixelSize,hOffset,sOffset,vOffset);
+  writePNG(pixels,pngFilename,width,height,pixelSize,false);
+  free(pixels);
+	return true;
+}
+
+// Changes the brightness of the given PNG file
+bool Image::brightnessFilter(std::string pngFilename, Int brightnessOffset) {
+	Int width,height;
+	UInt pixelSize;
+  ImagePixel *pixels=loadPNG(pngFilename,width,height,pixelSize,false);
+  if (!pixels) {
+    DEBUG("can not read <%s>",pngFilename.c_str());
+    return false;		
+  }
+	brightnessFilter(pixels,width,height,pixelSize,brightnessOffset);
+  writePNG(pixels,pngFilename,width,height,pixelSize,false);
+  free(pixels);
+	return true;
+} 
+
+// Converts RGB pixel into HSL
+void Image::rgb2hsv(ImagePixel *pixel, double &h, double &s, double &v) {
+	double      min, max, delta;
+
+	double r=pixel[0]/255.0;
+	double g=pixel[1]/255.0;
+	double b=pixel[2]/255.0;
+
+	min = r < g ? r : g;
+	min = min < b ? min : b;
+	max = r > g ? r : g;
+	max = max > b ? max : b;
+
+	v = max;                        
+	delta = max - min;
+	if (delta < 0.00001)
+	{
+		s = 0;
+		h = 0; 																// undefined, maybe nan?
+		return;
+	}
+	if (max > 0.0 ) { 											// NOTE: if Max is == 0, this divide would cause a crash
+		s = (delta / max);       
+	} else {
+		// if max is 0, then r = g = b = 0              
+		// s = 0, h is undefined
+		s = 0.0;
+		h = NAN;                            	// its now undefined
+		return;
+	}
+	if (r >= max)                           // > is bogus, just keeps compilor happy
+		h = ( g - b ) / delta;        				// between yellow & magenta
+	else
+	if (g >= max)
+		h = 2.0 + ( b - r ) / delta;  				// between cyan & yellow
+	else
+		h = 4.0 + ( r - g ) / delta;  				// between magenta & cyan
+
+	h *= 60.0;                              // degrees
+
+	if (h < 0.0 )
+		h += 360.0;
+
+	return;
+}
+
+// Converts RGB pixel into HSL
+void Image::hsv2rgb(double h, double s, double v, ImagePixel *pixel) {
+	double hh, p, q, t, ff;
+	long i; 
+	double r,g,b;
+
+	if (s <= 0.0) {       	// < is bogus, just shuts up warnings
+		r = v;
+		g = v;
+		b = v;
+
+	} else {
+
+		hh = h;
+		if (hh >= 360.0) hh = 0.0;
+		hh /= 60.0;
+		i = (long)hh;
+		ff = hh - i;
+		p = v * (1.0 - s);
+		q = v * (1.0 - (s * ff));
+		t = v * (1.0 - (s * (1.0 - ff)));
+
+		switch(i) {
+		case 0:
+			r = v;
+			g = t;
+			b = p;
+			break;
+		case 1:
+			r = q;
+			g = v;
+			b = p;
+			break;
+		case 2:
+			r = p;
+			g = v;
+			b = t;
+			break;
+		case 3:
+			r = p;
+			g = q;
+			b = v;
+			break;
+		case 4:
+			r = t;
+			g = p;
+			b = v;
+			break;
+		case 5:
+		default:
+			r = v;
+			g = p;
+			b = q;
+			break;
+		}
+	}
+
+	pixel[0]=r*255;
+	pixel[1]=g*255;
+	pixel[2]=b*255;
+}
+
 }

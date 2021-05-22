@@ -883,13 +883,18 @@ std::string Commander::execute(std::string cmd) {
           }
           if (!mapTile->getParentMapContainer()->getDownloadErrorOccured()) {
             std::stringstream tempImageFilePath;
-            tempImageFilePath << args[3] << "/" << mapTileNr << "_" << mapTile->getParentMapContainer()->getImageFilePath();
+            tempImageFilePath << args[5] << "/" << mapTileNr << "_" << mapTile->getParentMapContainer()->getImageFilePath();
             mapTileNr++;
             ZipArchive *mapArchive = new ZipArchive(mapTile->getParentMapContainer()->getArchiveFileFolder(),mapTile->getParentMapContainer()->getArchiveFileName());
             if ((mapArchive==NULL)||(!mapArchive->init()))
               FATAL("can not create zip archive object",NULL);
             mapArchive->exportEntry(mapTile->getParentMapContainer()->getImageFilePath(),tempImageFilePath.str());
             delete mapArchive;
+            double sOffset=atof(args[3].c_str());
+            double vOffset=atof(args[4].c_str());
+            if ((sOffset!=0)||(vOffset!=0)) {
+              core->getImage()->hsvFilter(tempImageFilePath.str(),0,sOffset,vOffset);
+            }
             result=tempImageFilePath.str();
             //DEBUG("result=%s",result.c_str());
           } else {

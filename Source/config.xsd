@@ -2219,12 +2219,12 @@
                 </xsd:annotation>
                 <xsd:complexType>
                   <xsd:sequence>
-                    <xsd:element name="red" type="xsd:integer" default="255">
+                    <xsd:element name="red" type="xsd:integer" default="213">
                       <xsd:annotation>
                         <xsd:documentation>Red component [0-255]</xsd:documentation>
                       </xsd:annotation>
                     </xsd:element>
-                    <xsd:element name="green" type="xsd:integer" default="127">
+                    <xsd:element name="green" type="xsd:integer" default="173">
                       <xsd:annotation>
                         <xsd:documentation>Green component [0-255]</xsd:documentation>
                       </xsd:annotation>
