@@ -83,6 +83,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration",__FILE__, __LINE__);
   blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration",__FILE__, __LINE__);
   mapReferenceDPI=core->getConfigStore()->getIntValue("Graphic","mapReferenceDotsPerInch",__FILE__,__LINE__);
+  timeOffsetPeriod=core->getConfigStore()->getIntValue("Graphic","timeOffsetPeriod",__FILE__,__LINE__);
   targetDrawingTime=(TimestampInMicroseconds) 1.0/((double)core->getConfigStore()->getIntValue("Graphic","refreshRate",__FILE__,__LINE__))*1.0e6; 
   drawingTooSlow=false;
 
@@ -204,6 +205,9 @@ bool GraphicEngine::draw(bool forceRedraw) {
 
   // Indicate that the engine is drawing
   isDrawing=true;
+
+  // Set the time offset
+  screen->setTimeOffset(((double)(currentTime%timeOffsetPeriod))/(double)timeOffsetPeriod);
 
   // Force redraw if requested externally
   if (forceRedraw) {

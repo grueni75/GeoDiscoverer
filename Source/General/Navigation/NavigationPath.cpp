@@ -209,7 +209,7 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           if (!rectangleList) {
 
             // Create a new rectangle list and add it to the tile
-            rectangleList=new GraphicRectangleList(core->getDefaultScreen(),0);
+            rectangleList=new GraphicRectangleList(core->getDefaultScreen(),0,true);
             if (!rectangleList) {
               FATAL("can not create graphic rectangle list object",NULL);
               return;
@@ -256,7 +256,7 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
           double x=x1+dist/2*cos(angle);
           double y=y1+dist/2*sin(angle);
           core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-          rectangleList->addRectangle(x,y,angle);
+          rectangleList->addRectangle(x,y,angle,currentPos.getBearing());
           core->getDefaultGraphicEngine()->unlockDrawing();
 
         }
@@ -392,6 +392,8 @@ void NavigationPath::addEndPosition(MapPosition pos) {
           double arrowDistance=calibrator->computePixelDistance(visualization->getPrevArrowPoint(),pos);
           if (arrowDistance>=pathMinDirectionDistance) {
             pos.setHasBearing(true);  // bearing flag is used to indicate that an arrow must be added
+            pos.setBearing(visualization->getColorOffset());
+            visualization->updateColorOffset(reverse);
           } else {
             pos.setHasBearing(false);
           }

@@ -35,6 +35,7 @@ NavigationPathVisualization::NavigationPathVisualization() {
   lngScale=0;
   latScale=0;
   zoomLevel=0;
+  colorOffset=0;
 }
 
 // Destructor

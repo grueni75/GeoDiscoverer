@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicLineSegment.cpp
+// Name        : GraphicPointBuffer.cpp
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010-2016 Matthias Gruenewald
 //

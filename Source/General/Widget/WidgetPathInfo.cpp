@@ -231,7 +231,7 @@ bool WidgetPathInfo::work(TimestampInMicroseconds t) {
       if (altitudeProfileNavigationPoints) delete altitudeProfileNavigationPoints;
       altitudeProfileNavigationPoints=NULL;
       if (visualizationAltitudeProfileNavigationPoints) {
-        altitudeProfileNavigationPoints=new GraphicRectangleList(screen,visualizationAltitudeProfileNavigationPoints->size());
+        altitudeProfileNavigationPoints=new GraphicRectangleList(screen,visualizationAltitudeProfileNavigationPoints->size(),false);
         if (!altitudeProfileLinePointBuffer) {
           FATAL("can not create point buffer for altitude profile",NULL);
           return changed;

@@ -654,11 +654,13 @@ void MapTile::storeOverlayGraphics(std::ofstream *ofs) {
         GraphicRectangleListSegment *rectangleListSegment=*j;
         for(Int k=0;k<rectangleListSegment->getRectangleCount();k++) {
           Short x[4],y[4];
-          rectangleListSegment->getRectangle(k,&x[0],&y[0]);
+          Float t;
+          rectangleListSegment->getRectangle(k,&x[0],&y[0],&t);
           for(Int l=0;l<4;l++) {
             Storage::storeShort(ofs,x[l]);
             Storage::storeShort(ofs,y[l]);
           }
+            Storage::storeDouble(ofs,t);
         }
       }
       break;
@@ -747,7 +749,7 @@ void MapTile::retrieveOverlayGraphics(char *&data, Int &size) {
 
       // Create the rectangle list
       GraphicRectangleList *rectangleList;
-      if (!(rectangleList=new GraphicRectangleList(core->getDefaultScreen(),0))) {
+      if (!(rectangleList=new GraphicRectangleList(core->getDefaultScreen(),0,true))) {
         FATAL("can not create graphic primitive object",NULL);
       }
       rectangleList->setAnimator(animator);
@@ -773,7 +775,9 @@ void MapTile::retrieveOverlayGraphics(char *&data, Int &size) {
           Storage::retrieveShort(data,size,x[k]);
           Storage::retrieveShort(data,size,y[k]);
         }
-        rectangleList->addRectangle(x,y);
+        double t;
+        Storage::retrieveDouble(data,size,t);
+        rectangleList->addRectangle(x,y,t);
       }
       rectangleList->optimize();
 

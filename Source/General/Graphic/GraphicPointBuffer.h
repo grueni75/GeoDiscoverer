@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : GraphicLineSegment.h
+// Name        : GraphicPointBuffer.h
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010-2016 Matthias Gruenewald
 //

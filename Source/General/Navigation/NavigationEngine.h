@@ -201,6 +201,9 @@ protected:
   // Hash that represents the overlay content
   std::string overlayGraphicHash;
 
+  // Time delta to use between two arrow color animation
+  double colorOffsetDelta;                        
+
   // Forces an update of the navigation infos
   void triggerNavigationInfoUpdate();
 
@@ -466,6 +469,10 @@ public:
 
   const NavigationPath *getActiveRoute() const {
     return activeRoute;
+  }
+
+  const double getColorOffsetDelta() const {
+    return colorOffsetDelta;
   }
 
   std::list<NavigationPoint>  *lockAddressPoints(const char *file, int line)

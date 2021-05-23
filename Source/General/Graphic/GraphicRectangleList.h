@@ -33,6 +33,7 @@ class GraphicRectangleList : public GraphicPrimitive {
 protected:
 
   std::list<GraphicRectangleListSegment*> segments;   // List of segments the rectangle list consists of
+  bool enableTimeColoring;                            // Enables coloring of vertices depending on time
   Int numberOfRectanglesOtherSegments;                // Number of rectangle in all other segments
   GraphicRectangleListSegment *currentSegment;        // The current segment where points are added to
   Int cutEnabled;                                     // If set: line will be cutted such that it is within the area defined by x,y,cutWidth,cutHeight
@@ -45,16 +46,16 @@ protected:
 public:
 
   // Constructor
-  GraphicRectangleList(Screen *screen, Int numberOfRectangles);
+  GraphicRectangleList(Screen *screen, Int numberOfRectangles, bool enableTimeColoring);
 
   // Destructor
   virtual ~GraphicRectangleList();
 
   // Adds a new rectangle (from center point and angle)
-  void addRectangle(double x, double y, double angle);
+  void addRectangle(double x, double y, double angle, Float timeOffset=0);
 
   // Adds a new rectangle (from corner points)
-  void addRectangle(Short x[4], Short y[4]);
+  void addRectangle(Short x[4], Short y[4], Float timeOffset=0);
 
   // Frees all memories
   void deinit();

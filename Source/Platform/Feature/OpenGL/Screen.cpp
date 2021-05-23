@@ -131,43 +131,88 @@ namespace GEODISCOVERER {
 // Program for the vertex shader
 const char *Screen::vertexShaderProgram =
 #ifdef TARGET_LINUX
-"   #version 130                                      \n"
+"   #version 130                                                                    \n"
 #endif
+    // Functions
+"   vec3 rgb2hsv(vec3 c)                                                            \n"
+"   {                                                                               \n"
+"     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);                              \n"
+"     vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));             \n"
+"     vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));             \n"
+"     float d = q.x - min(q.w, q.y);                                                \n"
+"     float e = 1.0e-10;                                                            \n"
+"     return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);      \n"
+"   }                                                                               \n"
+"   vec3 hsv2rgb(vec3 c)                                                            \n"
+"   {                                                                               \n"
+"     vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);                                \n"
+"     vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);                             \n"
+"     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);                     \n"
+"   }                                                                               \n"
+    // Constants
+"   #define M_PI 3.1415926535897932384626433832795                                  \n"
+"   #define WHITE_BLEND_START 0.2                                                   \n"
+"   #define WHITE_BLEND_END 0.8                                                     \n"
+"   #define WHITE_BLEND_DURATION 0.1                                                \n"
     // Inputs
-"   uniform mat4 mvpMatrix;                           \n"
-"   uniform vec4 colorIn;                             \n"
-"   attribute vec4 positionIn;                        \n"
-"   attribute vec2 textureCoordinateIn;               \n"
+"   uniform bool timeColoringEnabled;                                               \n"
+"   uniform mat4 mvpMatrix;                                                         \n"
+"   uniform vec4 colorIn;                                                           \n"
+"   uniform float timeOffset;                                                       \n"
+"   attribute vec4 positionIn;                                                      \n"
+"   attribute vec2 textureCoordinateIn;                                             \n"
+"   attribute float colorOffsetIn;                                                  \n"
     // Variables shared with the fragment shader
-"   varying vec4 colorOut;                            \n"
-"   varying vec2 textureCoordinateOut;                \n"
-"                                                     \n"
-"   void main()                                       \n"
-"   {                                                 \n"
-"     colorOut = colorIn;                             \n"
-"     gl_Position = mvpMatrix * positionIn;           \n"
-"     textureCoordinateOut = textureCoordinateIn;     \n"
-"   }                                                 \n";
+"   varying vec4 colorOut;                                                          \n"
+"   varying vec2 textureCoordinateOut;                                              \n"
+"                                                                                   \n"
+"   void main()                                                                     \n"
+"   {                                                                               \n"
+"     if (timeColoringEnabled) {                                                    \n"
+"       float t=timeOffset-colorOffsetIn;                                           \n"
+"       if (t <= 0.0)                                                               \n"
+"         t = t + 1.0;                                                              \n"
+"       if (t >= 1.0)                                                               \n"
+"         t = t - 1.0;                                                              \n"
+"       float b;                                                                    \n"
+"       if (t < WHITE_BLEND_START)                                                  \n"
+"         b = 0.0;                                                                  \n"
+"       else if (t < WHITE_BLEND_START + WHITE_BLEND_DURATION)                      \n"
+"         b = sin((t-WHITE_BLEND_START)/WHITE_BLEND_DURATION*M_PI/2.0);             \n"
+"       else if (t < WHITE_BLEND_END)                                               \n"
+"         b = 1.0;                                                                  \n"
+"       else if (t < WHITE_BLEND_END + WHITE_BLEND_DURATION)                        \n"
+"         b = cos((t-WHITE_BLEND_END)/WHITE_BLEND_DURATION*M_PI/2.0);               \n"
+"       else                                                                        \n"
+"         b = 0.0;                                                                  \n"
+"       colorOut = vec4(1.0*b+colorIn.x*(1.0-b),1.0*b+colorIn.y*(1.0-b),1.0*b       \n"
+"                  +colorIn.z*(1.0-b),colorIn.w);                                   \n"
+"     } else {                                                                      \n"
+"       colorOut = colorIn;                                                         \n"
+"     }                                                                             \n"
+"     gl_Position = mvpMatrix * positionIn;                                         \n"
+"     textureCoordinateOut = textureCoordinateIn;                                   \n"
+"   }                                                                               \n";
 
 // Program for the fragment shader
 const char *Screen::fragmentShaderProgram =
 #ifdef TARGET_LINUX
-"   #version 130                                                                  \n"
+"   #version 130                                                                    \n"
 #endif
     // Inputs
-"   uniform bool textureEnabled;                                                  \n"
-"   uniform sampler2D textureImageIn;                                             \n"
+"   uniform bool textureEnabled;                                                    \n"
+"   uniform sampler2D textureImageIn;                                               \n"
     // Variables shared with the vertex shader
-"   varying lowp vec4 colorOut;                                                   \n"
-"   varying lowp vec2 textureCoordinateOut;                                       \n"
-"                                                                                 \n"
-"   void main()                                                                   \n"
-"   {                                                                             \n"
-"     if (textureEnabled)                                                         \n"
-"       gl_FragColor = colorOut * texture2D(textureImageIn, textureCoordinateOut);\n"
-"     else                                                                        \n"
-"       gl_FragColor = colorOut;                                                  \n"
-"   }                                                                             \n";
+"   varying lowp vec4 colorOut;                                                     \n"
+"   varying lowp vec2 textureCoordinateOut;                                         \n"
+"                                                                                   \n"
+"   void main()                                                                     \n"
+"   {                                                                               \n"
+"     if (textureEnabled)                                                           \n"
+"       gl_FragColor = colorOut * texture2D(textureImageIn, textureCoordinateOut);  \n"
+"     else                                                                          \n"
+"       gl_FragColor = colorOut;                                                    \n"
+"   }                                                                               \n";
 
 // Constructor: open window and init opengl
 Screen::Screen(Device *device) {
@@ -191,9 +236,12 @@ Screen::Screen(Device *device) {
   mvpMatrixHandle=-1;
   positionInHandle=-1;
   colorInHandle=-1;
+  timeOffsetHandle=-1;
   textureCoordinateInHandle=-1;
   textureImageInHandle=-1;
   textureEnabledHandle=-1;
+  timeColoringEnabledHandle=-1;
+  colorOffsetInHandle=-1;
   lineWidth=0;
   openglES30Supported=false;
   pixelBuffer=0;
@@ -430,6 +478,13 @@ void Screen::translate(Int x, Int y, Int z) {
 void Screen::setColor(UByte r, UByte g, UByte b, UByte a) {
   drawingColor = glm::vec4((float) (r) / 255.0, (float) (g) / 255.0, (float) (b) / 255.0, (float) (a) / 255.0);
   glUniform4fv(colorInHandle,1,glm::value_ptr(drawingColor));
+}
+
+// Sets the time offset
+void Screen::setTimeOffset(double timeOffset) {
+  GLfloat value = timeOffset;
+  //DEBUG("timeOffset=%f",value);
+  glUniform1f(timeOffsetHandle,value);
 }
 
 // Sets color mode such that alpha channel of primitive determines its transparency
@@ -875,9 +930,12 @@ void Screen::createGraphic() {
   mvpMatrixHandle = glGetUniformLocation(shaderProgramHandle, "mvpMatrix");
   positionInHandle = glGetAttribLocation(shaderProgramHandle, "positionIn");
   colorInHandle = glGetUniformLocation(shaderProgramHandle, "colorIn");
+  timeOffsetHandle = glGetUniformLocation(shaderProgramHandle, "timeOffset");
   textureCoordinateInHandle = glGetAttribLocation(shaderProgramHandle, "textureCoordinateIn");
   textureImageInHandle = glGetUniformLocation(shaderProgramHandle, "textureImageIn");
   textureEnabledHandle = glGetUniformLocation(shaderProgramHandle, "textureEnabled");
+  timeColoringEnabledHandle = glGetUniformLocation(shaderProgramHandle, "timeColoringEnabled");
+  colorOffsetInHandle = glGetAttribLocation(shaderProgramHandle, "colorOffsetIn");
   /*DEBUG("vertexShaderHandle=%d",vertexShaderHandle);
   DEBUG("fragmentShaderHandle=%d",fragmentShaderHandle);
   DEBUG("shaderProgramHandle=%d",shaderProgramHandle);
@@ -903,6 +961,10 @@ void Screen::createGraphic() {
   // Update dependent matrixes
   vpMatrix=projectionMatrix*viewMatrix;
   mvpMatrix=vpMatrix*modelMatrix;
+
+  // Init the time offset
+  setTimeOffset(0);
+  setTimeColoringMode(false);
 
   // Check for error
   GLenum error=glGetError();
@@ -1051,6 +1113,19 @@ double Screen::getDiagonal() const {
 Int Screen::getDPI() const
 {
     return device->getDPI();
+}
+
+// Enables or disables the time coloring mode
+void Screen::setTimeColoringMode(bool enable, GraphicBufferInfo buffer) {
+  glUniform1i(timeColoringEnabledHandle,enable ? 1 : 0);
+  if (enable) {
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glVertexAttribPointer(colorOffsetInHandle, 1, GL_FLOAT, false, 0, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glEnableVertexAttribArray(colorOffsetInHandle);
+  } else {
+    glDisableVertexAttribArray(colorOffsetInHandle);
+  }
 }
 
 }

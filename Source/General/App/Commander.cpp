@@ -864,7 +864,11 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="renderHillshadeTile") {
-    core->getElevationEngine()->renderHillshadeTile(atoi(args[0].c_str()),atoi(args[1].c_str()),atoi(args[2].c_str()),args[3]);
+    ElevationEngine *elevationEngine;
+    elevationEngine=core->getElevationEngine();
+    if (elevationEngine) {
+      elevationEngine->renderHillshadeTile(atoi(args[0].c_str()),atoi(args[1].c_str()),atoi(args[2].c_str()),args[3]);
+    }
     cmdExecuted=true;
   }
   if (cmdName=="fetchMapTile") {

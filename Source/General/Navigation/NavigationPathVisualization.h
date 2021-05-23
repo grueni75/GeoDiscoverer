@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <NavigationPathTileInfo.h>
+#include <NavigationEngine.h>
 #include <MapCalibrator.h>
 #include <MapPosition.h>
 
@@ -38,6 +39,7 @@ class NavigationPathVisualization {
 protected:
 
   Int zoomLevel;                                  // Zoom level that is represented by this visualization
+  double colorOffset;                             // Current offset for animating the color of the arrow
   MapPosition prevLinePoint;                      // Last position used for creating the graphic line
   MapPosition prevArrowPoint;                     // Last position used for creating the direction arrow
   std::vector<MapPosition> points;                // All used points
@@ -134,6 +136,20 @@ public:
   void setLngScale(double lngScale) {
     this->lngScale = lngScale;
   }
+
+  double getColorOffset() {
+    return colorOffset;
+  }
+
+  void updateColorOffset(bool reverse) {
+    double t=core->getNavigationEngine()->getColorOffsetDelta();
+    colorOffset += reverse ? -t : +t;
+    if (colorOffset>=1.0)
+      colorOffset=0;
+    if (colorOffset<0.0)
+      colorOffset=1.0;
+  }
+
 };
 
 }

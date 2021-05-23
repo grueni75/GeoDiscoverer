@@ -124,6 +124,9 @@ protected:
   // Default duration of a blink animation
   TimestampInMicroseconds blinkDuration;
 
+  // Period of the time offset used for color animation
+  TimestampInMicroseconds timeOffsetPeriod;
+
   // Reference DPI the map tiles have been created for
   Int mapReferenceDPI;
 

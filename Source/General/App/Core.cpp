@@ -330,12 +330,13 @@ bool Core::init() {
     FATAL("can not create map cache object",NULL);
     return false;
   }
-  DEBUG("initializing elevationEngine",NULL);
-  if (!(elevationEngine=new ElevationEngine())) {
-    FATAL("can not create elevation engine object",NULL);
-    return false;
+  if (defaultDevice->getName()!="Watch") {
+    DEBUG("initializing elevationEngine",NULL);
+    if (!(elevationEngine=new ElevationEngine())) {
+      FATAL("can not create elevation engine object",NULL);
+      return false;
+    }
   }
-
   DEBUG("initializing mapEngine",NULL);
   if (!(mapEngine=new MapEngine())) {
     FATAL("can not create map engine object",NULL);
@@ -702,7 +703,7 @@ void Core::lateInit() {
     return;
 
   // Initialize elevation engine if required
-  if (!elevationEngine->getIsInitialized()) {
+  if ((elevationEngine!=NULL)&&(!elevationEngine->getIsInitialized())) {
     DEBUG("late initializing elevationEngine",NULL);
     if (!elevationEngine->init()) {
       return;

@@ -26,13 +26,14 @@
 namespace GEODISCOVERER {
 
 // Constructor
-GraphicRectangleList::GraphicRectangleList(Screen *screen, Int numberOfRectangles) : GraphicPrimitive(screen) {
+GraphicRectangleList::GraphicRectangleList(Screen *screen, Int numberOfRectangles, bool enableTimeColoring) : GraphicPrimitive(screen) {
   type=GraphicTypeRectangleList;
   this->numberOfRectanglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","rectangleListNumberOfRectanglesOtherSegemnts",__FILE__, __LINE__);
+  this->enableTimeColoring=enableTimeColoring;
   if (numberOfRectangles==0) {
     numberOfRectangles=numberOfRectanglesOtherSegments;
   }
-  if (!(currentSegment=new GraphicRectangleListSegment(screen, numberOfRectangles))) {
+  if (!(currentSegment=new GraphicRectangleListSegment(screen, numberOfRectangles, enableTimeColoring))) {
     FATAL("can not create rectangle list entry",NULL);
     return;
   }
@@ -54,7 +55,7 @@ void GraphicRectangleList::deinit() {
 }
 
 // Adds a new rectangle (from center point and angle)
-void GraphicRectangleList::addRectangle(double x, double y, double angle) {
+void GraphicRectangleList::addRectangle(double x, double y, double angle, Float timeOffset) {
 
   // Check if the point lies within the cut area
   if (cutEnabled) {
@@ -80,19 +81,19 @@ void GraphicRectangleList::addRectangle(double x, double y, double angle) {
   ry[3]=round(y+radius*sin(angle+M_PI/2+M_PI/4));
 
   // Add the rectangle
-  addRectangle(rx,ry);
+  addRectangle(rx,ry,timeOffset);
 }
 
 // Adds a new rectangle (from center point and angle)
-void GraphicRectangleList::addRectangle(Short x[4], Short y[4]) {
+void GraphicRectangleList::addRectangle(Short x[4], Short y[4], Float timeOffset) {
 
   // Add the rectangle
-  if (!currentSegment->addRectangle(x,y)) {
-    if (!(currentSegment=new GraphicRectangleListSegment(screen, numberOfRectanglesOtherSegments))) {
+  if (!currentSegment->addRectangle(x,y,timeOffset)) {
+    if (!(currentSegment=new GraphicRectangleListSegment(screen, numberOfRectanglesOtherSegments, enableTimeColoring))) {
       FATAL("can not create rectangle list entry",NULL);
       return;
     }
-    currentSegment->addRectangle(x,y);
+    currentSegment->addRectangle(x,y,timeOffset);
     segments.push_back(currentSegment);
   }
 }
@@ -125,7 +126,7 @@ void GraphicRectangleList::optimize() {
   }
 
   // Create a new segment that holds all points
-  if (!(currentSegment=new GraphicRectangleListSegment(screen, totalPoints))) {
+  if (!(currentSegment=new GraphicRectangleListSegment(screen, totalPoints, enableTimeColoring))) {
     FATAL("can not create rectangle list segment",NULL);
     return;
   }

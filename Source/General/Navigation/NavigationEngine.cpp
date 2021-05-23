@@ -72,6 +72,7 @@ NavigationEngine::NavigationEngine() :
   locationPosMutex=core->getThread()->createMutex("navigation engine location pos mutex");
   compassBearingMutex=core->getThread()->createMutex("navigation engine compass bearing mutex");
   recordTrack=core->getConfigStore()->getIntValue("Navigation","recordTrack", __FILE__, __LINE__);
+  colorOffsetDelta=core->getConfigStore()->getDoubleValue("Navigation","colorOffsetDelta", __FILE__, __LINE__);
   compassBearing=0;
   isInitialized=false;
   recordedTrack=NULL;

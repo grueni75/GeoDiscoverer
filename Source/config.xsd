@@ -1736,6 +1736,11 @@
                   <xsd:documentation>Duration in microseconds to show the highlight color.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="timeOffsetPeriod" type="xsd:integer" default="1000000">
+                <xsd:annotation>
+                  <xsd:documentation>Period in microseconds of the time offset used for color animation.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="mapReferenceDotsPerInch" type="xsd:integer" default="240">
                 <xsd:annotation>
                   <xsd:documentation>Reference DPI the map tiles have been created for.</xsd:documentation>
@@ -2265,6 +2270,11 @@
               <xsd:element name="averageTravelSpeed" type="xsd:double" default="4.167">
                 <xsd:annotation>
                   <xsd:documentation>Average speed in meters per second for estimating travel duration.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="colorOffsetDelta" type="xsd:double" default="0.2">
+                <xsd:annotation>
+                  <xsd:documentation>Time delta to use between two navigation path arrow color animation.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="Target">

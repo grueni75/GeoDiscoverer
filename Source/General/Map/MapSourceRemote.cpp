@@ -320,6 +320,7 @@ MapTile *MapSourceRemote::findMapTileByGeographicCoordinate(MapPosition pos, Int
 
   // Ask the remote side to send any missing map containers
   cmd << ")";
+  //DEBUG("cmd: %s", cmd.str().c_str());
   core->getCommander()->dispatch(cmd.str());
 
   return result;
@@ -356,9 +357,8 @@ void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferr
 
   // Ask the remote side to send any missing map containers
   cmd << ")";
-  if (!*abort) {
-    core->getCommander()->dispatch(cmd.str());
-  }
+  //DEBUG("cmd: %s", cmd.str().c_str());
+  core->getCommander()->dispatch(cmd.str());
 }
 
 // Returns the next free map archive file name

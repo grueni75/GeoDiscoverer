@@ -36,6 +36,7 @@ typedef short Short;
 typedef unsigned short UShort;
 typedef long Long;
 typedef unsigned long ULong;
+typedef float Float;
 
 // Direction enum for searching
 typedef enum { north, south, west, east } Direction;

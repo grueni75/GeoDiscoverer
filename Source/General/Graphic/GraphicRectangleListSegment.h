@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <GraphicPointBuffer.h>
+#include <GraphicFloatBuffer.h>
 
 #ifndef GRAPHICRECTANGLELISTSEGMENT_H_
 #define GRAPHICRECTANGLELISTSEGMENT_H_
@@ -31,22 +32,24 @@ class GraphicRectangleListSegment {
 
 protected:
 
-  GraphicPointBuffer *textureCoordinates;     // Coordinates of the texture
-  GraphicPointBuffer *triangleCoordinates;    // Coordinates of the triangles
+  Screen *screen;                                // Screen this rectangle list belongs to
+  GraphicFloatBuffer *timeColoringOffsets;       // Time offsets for vertex coloring
+  GraphicPointBuffer *textureCoordinates;        // Coordinates of the texture
+  GraphicPointBuffer *triangleCoordinates;       // Coordinates of the triangles
 
 public:
 
   // Constructor
-  GraphicRectangleListSegment(Screen *screen, Int numberOfRectangles);
+  GraphicRectangleListSegment(Screen *screen, Int numberOfRectangles, bool enableTimeColoring);
 
   // Destructor
   virtual ~GraphicRectangleListSegment();
 
   // Adds a new rectangle
-  bool addRectangle(Short x[4], Short y[4]);
+  bool addRectangle(Short x[4], Short y[4], Float t=0);
 
   // Gets the rectangle for the given position
-  void getRectangle(Int pos, Short *x, Short *y);
+  void getRectangle(Int pos, Short *x, Short *y, Float *t=NULL);
 
   // Draws the rectangles
   void draw(GraphicTextureInfo textureInfo);
@@ -81,6 +84,11 @@ public:
   GraphicPointBuffer *getTriangleCoordinates() const
   {
     return triangleCoordinates;
+  }
+
+  GraphicFloatBuffer *getTimeColoringOffsets() const
+  {
+    return timeColoringOffsets;
   }
 
 };

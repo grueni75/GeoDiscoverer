@@ -137,10 +137,13 @@ protected:
   GLuint shaderProgramHandle;
   GLint mvpMatrixHandle;
   GLint colorInHandle;
+  GLint timeOffsetHandle;
   GLint positionInHandle;
   GLint textureCoordinateInHandle;
   GLint textureImageInHandle;
   GLint textureEnabledHandle;
+  GLint timeColoringEnabledHandle;
+  GLint colorOffsetInHandle;
 
   // Compiles a shader program
   void compileShaderProgram(GLuint handle, const char *program);
@@ -274,6 +277,12 @@ public:
   // Main loop that handles events
   void mainLoop();
 
+  // Sets the time offset
+  void setTimeOffset(double timeOffset);
+
+  // Enables or disables the time coloring mode
+  void setTimeColoringMode(bool enable, GraphicBufferInfo buffer=Screen::getBufferNotDefined());
+
   // Getters and setters
   static const GraphicBufferInfo getBufferNotDefined()
   {
@@ -326,7 +335,6 @@ public:
   double getDiagonal() const;
 
   Int getDPI() const;
-
 };
 
 }
