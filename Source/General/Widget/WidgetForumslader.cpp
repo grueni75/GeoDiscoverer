@@ -80,7 +80,7 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
     // Is ebike connected?
     boolean prevConnected=connected;
     connected=configStore->getIntValue("Forumslader","connected",__FILE__,__LINE__);
-    //connected=true;
+    connected=true;
     //DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
     
     // Update the widget visibility
@@ -287,10 +287,17 @@ void WidgetForumslader::draw(TimestampInMicroseconds t) {
   c.setAlpha(color.getAlpha());
   powerDrawGaugeFillground.setColor(c);
   powerDrawGaugeFillground.draw(t);
+  screen->setColor(gaugeBackgroundColor.getRed(),gaugeBackgroundColor.getGreen(),gaugeBackgroundColor.getBlue(),gaugeBackgroundColor.getAlpha());
+  Int w=powerDrawGaugeBackgroundWidth-powerDrawGaugeForegroundWidth;
+  screen->drawRectangle(x+getIconWidth()/2-w/4,
+                        y+powerDrawGaugeOffsetY+powerDrawGaugeRadius+powerDrawGaugeBackgroundWidth/2,
+                        x+getIconWidth()/2+w/4,
+                        y+powerDrawGaugeOffsetY+powerDrawGaugeRadius-powerDrawGaugeBackgroundWidth/2,
+                        Screen::getTextureNotDefined(),true);
   c=powerDrawGaugeForeground.getColor();
   c.setAlpha(color.getAlpha());
   powerDrawGaugeForeground.setColor(c);
-  powerDrawGaugeForeground.draw(t);
+  powerDrawGaugeForeground.draw(t);  
   if (powerDrawLevelFontString) {
     powerDrawLevelFontString->setColor(color);
     powerDrawLevelFontString->draw(t);
