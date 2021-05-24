@@ -80,7 +80,7 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
     // Is ebike connected?
     boolean prevConnected=connected;
     connected=configStore->getIntValue("Forumslader","connected",__FILE__,__LINE__);
-    connected=true;
+    //connected=true;
     //DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
     
     // Update the widget visibility
