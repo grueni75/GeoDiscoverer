@@ -536,6 +536,14 @@ public class GDApplication extends Application implements GDAppInterface, Google
       intent.setAction("coreInitialized");
       startService(intent);
     }
+    if (cmd.equals("earlyInitComplete()")) {
+
+      // Inform the service
+      Intent intent = new Intent(this, GDService.class);
+      intent.setAction("earlyInitComplete");
+      startService(intent);
+      return;
+    }
     if (cmd.equals("lateInitComplete()")) {
 
       // Inform the service

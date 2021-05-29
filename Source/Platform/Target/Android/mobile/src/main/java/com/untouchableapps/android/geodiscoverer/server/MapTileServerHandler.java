@@ -56,6 +56,7 @@ public class MapTileServerHandler extends NanoHTTPD {
   protected GDCore coreObject=null;
   protected String mapsforgePath=null;
   protected String loopbackPath=null;
+  protected String brouterWebPath=null;
   private static final Pattern P = Pattern.compile("/(.+)/(\\d+)/(\\d+)/(\\d+)\\.(.*)");
   protected int hilllshadeTileNr=0;
 
@@ -79,6 +80,7 @@ public class MapTileServerHandler extends NanoHTTPD {
     this.coreObject = coreObject;
     this.mapsforgePath = coreObject.homePath+"/Server/Mapsforge";
     this.loopbackPath = coreObject.homePath+"/Server/Loopback";
+    this.brouterWebPath = coreObject.homePath+"/Server/BRouter/Frontend";
 
     // Cleanup any left over files
     File hillshadeDir = new File(coreObject.homePath+"/Server/Hillshade");
@@ -155,6 +157,26 @@ public class MapTileServerHandler extends NanoHTTPD {
     return newFixedLengthResponse(Response.Status.OK, "image/png", fis, image.length);
   }
 
+  // Reads the file and return it to the caller
+  protected Response serveFile(String uri, String function, long startTime, String filepath) {
+    File file = new File(filepath);
+    byte[] content;
+    String mime = NanoHTTPD.getMimeTypeForFile(filepath);
+    try {
+      FileInputStream fin = new FileInputStream(file);
+      content = new byte[(int)file.length()];
+      fin.read(content);
+      fin.close();
+    } catch (Exception e) {
+      return serveError("file <" + filepath + "> can not be read");
+    }
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    InputStream fis = new ByteArrayInputStream(content);
+    addRuntime(uri,function,0,startTime);
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"MapTileServer",filepath + ": " + content.length);
+    return newFixedLengthResponse(Response.Status.OK, mime, fis, content.length);
+  }
+
   @Override
   public Response serve(IHTTPSession session) {
 
@@ -202,7 +224,7 @@ public class MapTileServerHandler extends NanoHTTPD {
     // Get the tile type and number
     String uri = session.getUri();
     String type;
-    int x, y, z;
+    int x=-1, y=-1, z=-1;
     Matcher m = P.matcher(session.getUri());
     if (m.matches()) {
       type = m.group(1);
@@ -213,7 +235,11 @@ public class MapTileServerHandler extends NanoHTTPD {
         return serveError("unsupported image format");
       }
     } else {
-      return serveError("missing tile type and numbers");
+      if (uri.startsWith("/brouter-web/")) {
+        type = "brouter-web";
+      } else {
+        return serveError("missing tile type and numbers");
+      }
     }
 
     // Render the tile depending on the type
@@ -289,6 +315,11 @@ public class MapTileServerHandler extends NanoHTTPD {
       addRuntime(uri,"geodiscoverer",z,startTime);
       return serveImage(uri,"geodiscoverer",z,startTime,tileFilename);
     }
+    if (type.equals("brouter-web")) {
+      String path=uri.substring("brouter-web/".length());
+      return serveFile(uri,"brouter-web",startTime,brouterWebPath+"/"+path);
+    }
+
     return serveError("tile type <" + type + "> not supported");
   }
 }

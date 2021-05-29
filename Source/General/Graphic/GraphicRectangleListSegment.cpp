@@ -38,7 +38,7 @@ GraphicRectangleListSegment::GraphicRectangleListSegment(Screen *screen, Int num
     return;
   }
   if (enableTimeColoring) {
-    if (!(timeColoringOffsets=new GraphicFloatBuffer(screen, 2*numberOfRectangles))) {
+    if (!(timeColoringOffsets=new GraphicFloatBuffer(screen, 2*3*numberOfRectangles))) {
       FATAL("can not create time coloring offset buffer",NULL);
       return;
     }
@@ -61,6 +61,14 @@ bool GraphicRectangleListSegment::addRectangle(Short x[4], Short y[4], Float t) 
   // No space left?
   if (triangleCoordinates->getIsFull())
     return false;
+
+  /*if (timeColoringOffsets!=NULL) {
+    if (timeColoringOffsets->getSize()>1) {
+      if (timeColoringOffsets->getPoint(timeColoringOffsets->getSize()-1)==t) {
+        ERROR("color offset not increasing!",NULL);
+      }
+    }
+  }*/
 
   // Add the points
   triangleCoordinates->addPoint(x[0],y[0]);
@@ -126,7 +134,7 @@ void GraphicRectangleListSegment::copy(GraphicRectangleListSegment *otherSegment
       FATAL("can not add point",NULL);
     }
     if (timeColoringOffsets!=NULL) {
-      t=timeColoringOffsets->getPoint(j);
+      t=timeColoringOffsets->getPoint(j);      
       if (!otherSegment->timeColoringOffsets->addPoint(t)) {
         FATAL("can not add point",NULL);
       }

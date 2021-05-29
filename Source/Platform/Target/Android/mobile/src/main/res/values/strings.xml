@@ -155,4 +155,5 @@
     <string name="remove">Remove</string>
     <string name="hide">Hide</string>
     <string name="restart">Restart</string>
+    <string name="brouter">BRouter</string>
 </resources>

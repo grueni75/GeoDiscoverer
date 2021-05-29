@@ -139,6 +139,10 @@
             android:label="@string/button_label_help"
             android:theme="@style/GDStyle.NoTitleBar.Fullscreen"/>
         <activity
+            android:name=".ShowBRouter"
+            android:label="@string/brouter"
+            android:theme="@style/GDStyle.NoTitleBar.Fullscreen"/>
+        <activity
             android:name=".AuthenticateGoogleBookmarks"
             android:label="@string/authenticate_google_bookmarks"
             android:theme="@style/GDStyle">

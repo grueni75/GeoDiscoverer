@@ -517,7 +517,7 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 </div></div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="202103140918" changecount="175">
+<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="202105290719" changecount="177">
 <pre>! Copyright (C) Matthias Grünewald - All Rights Reserved
 Geo Discoverer has been developed by Matthias Grünewald. He owns the copyright for the application, this help and all the media used. The app uses also many libraries and media from others. See [[Acknowledgements|About##Acknowledgements]]. 
 ! License
@@ -628,7 +628,10 @@ The code for providing a hillshade tile server has been inspired from Lukáš Ka
 !! GDAL
 The rendering of hillshades and the reading of bitmaps with altitude information is performed with the gdal library. See License-GDAL for more information.
 !! Gaussian blur filter
-The C code implementation of a Gaussian blur filter is copied from the single-header-file C libraries from Stephan Soller. It is licensed under the License-MIT.</pre>
+The C code implementation of a Gaussian blur filter is copied from the single-header-file C libraries from Stephan Soller. It is licensed under the License-MIT.
+!! ~BRouter
+The app is hosting the well-known server ~BRouter for routing bicycle paths. As a GUI front end ~BRouter-Web is as well integrated. Both components are licensed under the License-MIT.
+</pre>
 </div>
 <div title="AppPreferences" creator="Matthias" modifier="Matthias" created="201412221203" changecount="1">
 <pre>The preferences of Geo Discoverer can be opened via the [[menu entry &quot;Preferences&quot;|MapView##Menu]]. Every entry has an explanation. So the preferences should be self explaining. By default, only the most important preferences are shown. An expert mode can be enabled that shows all available preferences. Please note that not all preferences are remembered if the app version is upgraded. If you think that your favorite preferences shall survive an app upgrade, please [[contact the developer|ContactDeveloper]]. </pre>
@@ -5447,8 +5450,9 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="202103110639" changecount="58">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="202105290721" changecount="60">
 <pre>|!Date |!Changes |
+|2021-05-29|Added copyright notices for ~BRouter server and its web frontend brouter-web to [[About]]|
 |2021-03-11|Added copyright notices for rendering map tiles with mapsforge and gdal to [[About]]|
 |2020-05-24|Added copyright notices for ebike connect and disconnect sounds to [[About]]|
 |2019-12-28|Added copyright notices for heart rate sensor not connected alarm to [[About]]|

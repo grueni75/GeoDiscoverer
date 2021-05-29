@@ -22,6 +22,7 @@
 
 #include <Core.h>
 #include <NavigationPathTileInfo.h>
+#include <MapPosition.h>
 
 namespace GEODISCOVERER {
 
@@ -35,6 +36,16 @@ NavigationPathTileInfo::NavigationPathTileInfo() {
 
 // Destructor
 NavigationPathTileInfo::~NavigationPathTileInfo() {
+}
+
+// Adds a new point to the visualization only if it is not yet in
+bool NavigationPathTileInfo::addPoint(MapPosition point) {
+  for (std::list<MapPosition>::iterator i=visualizedPoints.begin();i!=visualizedPoints.end();i++) {
+    if (*i==point)
+      return false;
+  }
+  visualizedPoints.push_back(point);
+  return true;
 }
 
 }

@@ -1,3 +1,9 @@
 [submodule "ThirdParty/mapsforge"]
 	path = ThirdParty/mapsforge
 	url = https://github.com/mapsforge/mapsforge
+[submodule "ThirdParty/brouter"]
+	path = ThirdParty/brouter
+	url = https://github.com/abrensch/brouter
+[submodule "ThirdParty/brouter-web"]
+	path = ThirdParty/brouter-web
+	url = /home/grueni/Apps/GeoDiscoverer/ThirdParty/brouter-web

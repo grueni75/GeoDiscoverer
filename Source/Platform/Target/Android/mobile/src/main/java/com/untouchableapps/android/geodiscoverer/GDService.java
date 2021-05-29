@@ -38,6 +38,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.server.BRouterServer;
 import com.untouchableapps.android.geodiscoverer.server.MapTileServer;
 
 import java.io.File;
@@ -58,6 +59,9 @@ public class GDService extends Service {
 
   /** Reference to the tile server */
   MapTileServer mapTileServer = null;
+
+  /** Reference to the brouter server */
+  BRouterServer brouterServer = null;
 
   // The notification that is displayed in the status bar
   PendingIntent pendingIntent = null;
@@ -258,6 +262,31 @@ public class GDService extends Service {
     if (intent.getAction().equals("activityPaused")) {
       activityRunning=false;
       handleActivityStatus(false);
+      if (coreObject!=null)
+        coreObject.executeCoreCommand("maintenance");
+    }
+
+    // Handle early init of the core
+    if (intent.getAction().equals("earlyInitComplete")) {
+
+      // Start the brouter server
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","starting brouter server");
+      System.err.println("Test");
+      if (brouterServer!=null) {
+        brouterServer.stop();
+      } else {
+        brouterServer = new BRouterServer(coreObject);
+      }
+      brouterServer.start();
+
+      // Start the map tile server
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","starting map tile server");
+      if (mapTileServer!=null) {
+        mapTileServer.stop();
+      } else {
+        mapTileServer = new MapTileServer((GDApplication)getApplication(),coreObject);
+      }
+      mapTileServer.start();
     }
 
     // Handle initialization of core
@@ -388,6 +417,11 @@ public class GDService extends Service {
 
     // Stop watching location
     locationManager.removeUpdates(coreObject);
+
+    // Stop the brouter
+    if (brouterServer!=null) {
+      brouterServer.stop();
+    }
 
     // Stop the mapsforge server
     if (mapTileServer !=null) {

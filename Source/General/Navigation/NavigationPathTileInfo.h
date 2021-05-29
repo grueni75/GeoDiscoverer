@@ -40,6 +40,9 @@ class NavigationPathTileInfo {
   GraphicPrimitiveKey pathArrowListKey;
   GraphicRectangleList *pathArrowList;
 
+  // List of visualized points
+  std::list<MapPosition> visualizedPoints;
+
 public:
 
   // Constructor
@@ -47,6 +50,9 @@ public:
 
   // Destructor
   virtual ~NavigationPathTileInfo();
+
+  // Adds a new point to the visualization only if it is not yet in
+  bool addPoint(MapPosition point);
 
   // Getters and setters
   GraphicLine *getPathLine() const

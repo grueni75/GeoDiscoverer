@@ -87,7 +87,7 @@ bool MapSource::replaceVariable(std::string &text, std::string variableName, std
 bool MapSource::resolveGDSInfo(std::string infoFilePath, TimestampInSeconds *lastModification)
 {
   std::string mapSourceSchemaFilePath = core->getHomePath() +"/source.xsd";
-  bool mapTileServerStarted=false;
+  bool mapTileServerRequired=false;
 
   // Create a new resolvedGDSInfo object or merge the new info file if object already exists
   if (!resolvedGDSInfo) {
@@ -186,15 +186,11 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath, TimestampInSeconds *las
             if (n2==NULL)
               FATAL("can not copy node",NULL);
 
-            // Start the tile server (if necessary) 
+            // Remember if we need a server to be available
             std::string serverURL;
             (*j)->getNodeText(n2,"serverURL",serverURL);
             if (serverURL.find("localhost")!=std::string::npos) {
-              if (!mapTileServerStarted) {
-                std::string cmd="startMapTileServer()";
-                core->getCommander()->dispatch(cmd);
-                mapTileServerStarted=true;
-              }
+              mapTileServerRequired=true;
             }
 
             // Replace variables in the server url
@@ -295,7 +291,7 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath, TimestampInSeconds *las
   }
 
   // Wait for the startup of the map tile server
-  if (mapTileServerStarted) {
+  if (mapTileServerRequired) {
     DownloadResult result;
     Int port=core->getConfigStore()->getIntValue("MapTileServer","port",__FILE__,__LINE__);
     std::stringstream url;

@@ -23,6 +23,7 @@
 package com.untouchableapps.android.geodiscoverer.server;
 
 import com.untouchableapps.android.geodiscoverer.GDApplication;
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;

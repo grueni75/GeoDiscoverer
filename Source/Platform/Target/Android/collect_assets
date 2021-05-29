@@ -6,6 +6,10 @@ sh -c "cd $ROOT/Source/Media/Icon && make android"
 cp $ROOT/Source/Platform/Target/Android/core/src/main/jni/proj-7.2.1/data/proj.db assets/GeoDiscoverer/
 if [ $1 == "mobile" ]; then
   sh -c "rsync -ahvz --progress --exclude .directory --exclude '*.xcf' --delete $ROOT/Source/Platform/Target/Help/public/ assets/GeoDiscoverer/Help"
+  sh -c "mkdir -p assets/GeoDiscoverer/Server/BRouter/Frontend"
+  sh -c "rsync -ahvz --progress --exclude .directory --delete $ROOT/ThirdParty/brouter-web/brouter-web/* assets/GeoDiscoverer/Server/BRouter/Frontend/"
+   sh -c "mkdir -p assets/GeoDiscoverer/Server/BRouter/Backend/Profiles2"
+  sh -c "rsync -ahvz --progress --exclude .directory --delete $ROOT/ThirdParty/brouter-web/profiles2/* assets/GeoDiscoverer/Server/BRouter/Backend/Profiles2/"
   #sh -c "rsync -ahvz --progress --exclude .directory --exclude '*.xcf' --delete /etc/ssl/certs/ca-certificates.crt assets/GeoDiscoverer/Misc/ca-certificates.crt"
 fi
 if [ $1 == "wear" ]; then

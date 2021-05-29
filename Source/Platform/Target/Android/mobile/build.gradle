@@ -17,6 +17,7 @@ buildscript {
 
 ext {
     supportLibVersion = '27.1.0'
+    brouterVersion = '1.6.1'
 }
 
 allprojects {
@@ -78,6 +79,13 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation files("../../../../../ThirdParty/brouter/brouter-server/target/brouter-server-${brouterVersion}.jar")
+    implementation files("../../../../../ThirdParty/brouter/brouter-core/target/brouter-core-${brouterVersion}.jar")
+    implementation files("../../../../../ThirdParty/brouter/brouter-mapaccess/target/brouter-mapaccess-${brouterVersion}.jar")
+    implementation files("../../../../../ThirdParty/brouter/brouter-codec/target/brouter-codec-${brouterVersion}.jar")
+    implementation files("../../../../../ThirdParty/brouter/brouter-expressions/target/brouter-expressions-${brouterVersion}.jar")
+    implementation files("../../../../../ThirdParty/brouter/brouter-map-creator/target/brouter-map-creator-${brouterVersion}.jar")
+    implementation files("../../../../../ThirdParty/brouter/brouter-util/target/brouter-util-${brouterVersion}.jar")
     wearApp project(':wear')
     implementation "com.android.support:appcompat-v7:${supportLibVersion}"
     implementation "com.android.support:support-v4:${supportLibVersion}"

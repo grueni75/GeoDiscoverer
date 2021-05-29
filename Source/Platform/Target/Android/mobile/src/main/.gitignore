@@ -4,6 +4,7 @@ assets/GeoDiscoverer/config.shipped.xsd
 assets/GeoDiscoverer/source.xsd
 assets/GeoDiscoverer/proj.db
 assets/GeoDiscoverer.list
+assets/GeoDiscoverer/Server/BRouter/Frontend
 sym/
 obj/
 libs/

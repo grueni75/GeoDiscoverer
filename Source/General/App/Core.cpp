@@ -305,6 +305,7 @@ bool Core::init() {
     FATAL("can not create dialog object",NULL);
     return false;
   }
+  core->getCommander()->dispatch("earlyInitComplete()");
   std::string name=Commander::dispatch("getDeviceName()");
   DEBUG("initializing default device with name <%s>",name.c_str());
   if (!(defaultDevice=new Device(name,false,true))) {

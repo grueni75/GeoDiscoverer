@@ -86,7 +86,25 @@
 			"typeinfo": "cpp",
 			"valarray": "cpp",
 			"variant": "cpp",
-			"*.ipp": "cpp"
+			"*.ipp": "cpp",
+			"*.inc": "cpp",
+			"*.def": "cpp",
+			"armadillo": "cpp",
+			"cassert": "cpp",
+			"ccomplex": "cpp",
+			"cerrno": "cpp",
+			"cfloat": "cpp",
+			"ciso646": "cpp",
+			"climits": "cpp",
+			"cstdalign": "cpp",
+			"cstdbool": "cpp",
+			"ctgmath": "cpp",
+			"execution": "cpp",
+			"filesystem": "cpp",
+			"ios": "cpp",
+			"locale": "cpp",
+			"queue": "cpp",
+			"stack": "cpp"
 		},
 		"git.ignoreLimitWarning": true
 	}

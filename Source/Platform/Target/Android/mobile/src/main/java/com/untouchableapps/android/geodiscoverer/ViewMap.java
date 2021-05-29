@@ -1724,6 +1724,14 @@ public class ViewMap extends GDActivity {
             intent = new Intent(getApplicationContext(), ShowHelp.class);
             startActivity(intent);
             break;
+          case R.id.nav_show_brouter:
+            /*intent = new Intent(getApplicationContext(), ShowBRouter.class);
+            startActivity(intent);*/
+            String url = "http://localhost:8383/brouter-web/index.html";
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse(url));
+            startActivity(i);
+            break;
           case R.id.nav_send_logs:
             sendLogs();
             break;
@@ -1794,14 +1802,12 @@ public class ViewMap extends GDActivity {
     if (mapSurfaceView!=null)
       mapSurfaceView.onPause();
     stopWatchingCompass();
-    if (coreObject!=null)
-      coreObject.executeCoreCommand("maintenance");
     if ((!exitRequested)&&(!restartRequested)) {
       Intent intent = new Intent(this, GDService.class);
       intent.setAction("activityPaused");
       startService(intent);
     }
-
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onPause finished");
   }
 
   /** Called when the app resumes */

@@ -168,97 +168,104 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
       // Go through all of them
       for(std::list<MapTile*>::iterator k=mapTiles.begin();k!=mapTiles.end();k++) {
 
-        // Check if the map tile has already graphic objects for this path
+        // Check that the given point is not yet visualized
         NavigationPathTileInfo *info=visualization->findTileInfo(*k);
-        GraphicLine *line=info->getPathLine();
-        GraphicObject *tileVisualization=(*k)->getVisualization();
-        if (!line) {
-
-          // Create a new line and add it to the tile
-          line=new GraphicLine(core->getDefaultScreen(),0,pathWidth);
-          if (!line) {
-            FATAL("can not create graphic line object",NULL);
-            return;
-          }
-          line->setAnimator(&animator);
-          line->setZ(1); // ensure that line is drawn after tile texture
-          line->setCutEnabled(true);
-          line->setCutWidth((*k)->getWidth());
-          line->setCutHeight((*k)->getHeight());
-          info->setPathLine(line);
-          core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-          info->setPathLineKey(tileVisualization->addPrimitive(line));
-          core->getDefaultGraphicEngine()->unlockDrawing();
-
-        }
-
-        // Add the stroke to the line
-        Int x1=prevPos.getX()-(*k)->getMapX(0);
-        Int y1=(*k)->getHeight()-(prevPos.getY()-(*k)->getMapY(0));
-        Int x2=currentPos.getX()-(*k)->getMapX(0);
-        Int y2=(*k)->getHeight()-(currentPos.getY()-(*k)->getMapY(0));
         core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-        line->addStroke(x1,y1,x2,y2);
+        bool missing=info->addPoint(currentPos);
         core->getDefaultGraphicEngine()->unlockDrawing();
+        if (missing) {
 
-        // Add arrow if necessary
-        if (currentPos.getHasBearing()) {
+          // Check if the map tile has already graphic objects for this path
+          GraphicLine *line=info->getPathLine();
+          GraphicObject *tileVisualization=(*k)->getVisualization();
+          if (!line) {
 
-          // Get the existing rectangle list or create a new one
-          GraphicRectangleList *rectangleList=info->getPathArrowList();
-          if (!rectangleList) {
-
-            // Create a new rectangle list and add it to the tile
-            rectangleList=new GraphicRectangleList(core->getDefaultScreen(),0,true);
-            if (!rectangleList) {
-              FATAL("can not create graphic rectangle list object",NULL);
+            // Create a new line and add it to the tile
+            line=new GraphicLine(core->getDefaultScreen(),0,pathWidth);
+            if (!line) {
+              FATAL("can not create graphic line object",NULL);
               return;
             }
-            rectangleList->setAnimator(&animator);
-            rectangleList->setZ(2); // ensure that arrow is drawn after line texture
-            rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
-            rectangleList->setDestroyTexture(false);
-            rectangleList->setCutEnabled(true);
-            rectangleList->setCutWidth((*k)->getWidth());
-            rectangleList->setCutHeight((*k)->getHeight());
-            Int arrowWidth=core->getDefaultGraphicEngine()->getPathDirectionIcon()->getWidth();
-            Int arrowHeight=core->getDefaultGraphicEngine()->getPathDirectionIcon()->getHeight();
-            Int arrowXToCenter=arrowWidth/2-core->getDefaultGraphicEngine()->getPathDirectionIcon()->getIconWidth()/2;
-            Int arrowYToCenter=arrowHeight/2-core->getDefaultGraphicEngine()->getPathDirectionIcon()->getIconHeight()/2;
-            double totalRadius=sqrt((double)(arrowWidth*arrowWidth/4+arrowHeight*arrowHeight/4));
-            double distanceToCenter=sqrt((double)(arrowXToCenter*arrowXToCenter+arrowYToCenter*arrowYToCenter));
-            double angleToCenter;
-            if (arrowXToCenter==0) {
-              angleToCenter=M_PI/2;
-            } else {
-              angleToCenter=atan((double)arrowYToCenter/(double)arrowXToCenter);
-            }
-            rectangleList->setParameter(totalRadius,distanceToCenter,angleToCenter);
-            info->setPathArrowList(rectangleList);
+            line->setAnimator(&animator);
+            line->setZ(1); // ensure that line is drawn after tile texture
+            line->setCutEnabled(true);
+            line->setCutWidth((*k)->getWidth());
+            line->setCutHeight((*k)->getHeight());
+            info->setPathLine(line);
             core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            info->setPathArrowListKey(tileVisualization->addPrimitive(rectangleList));
+            info->setPathLineKey(tileVisualization->addPrimitive(line));
             core->getDefaultGraphicEngine()->unlockDrawing();
+
           }
 
-          // Add the arrow
-          if (reverse) {
-            Int t=x1;
-            x1=x2;
-            x2=t;
-            t=y1;
-            y1=y2;
-            y2=t;
-          }
-          Int distX=x2-x1;
-          Int distY=y2-y1;
-          double dist=sqrt((double)(distX*distX+distY*distY));
-          double angle=FloatingPoint::computeAngle(distX,distY);
-          double x=x1+dist/2*cos(angle);
-          double y=y1+dist/2*sin(angle);
+          // Add the stroke to the line
+          Int x1=prevPos.getX()-(*k)->getMapX(0);
+          Int y1=(*k)->getHeight()-(prevPos.getY()-(*k)->getMapY(0));
+          Int x2=currentPos.getX()-(*k)->getMapX(0);
+          Int y2=(*k)->getHeight()-(currentPos.getY()-(*k)->getMapY(0));
           core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-          rectangleList->addRectangle(x,y,angle,currentPos.getBearing());
+          line->addStroke(x1,y1,x2,y2);
           core->getDefaultGraphicEngine()->unlockDrawing();
 
+          // Add arrow if necessary
+          if (currentPos.getHasBearing()) {
+
+            // Get the existing rectangle list or create a new one
+            GraphicRectangleList *rectangleList=info->getPathArrowList();
+            if (!rectangleList) {
+
+              // Create a new rectangle list and add it to the tile
+              rectangleList=new GraphicRectangleList(core->getDefaultScreen(),0,true);
+              if (!rectangleList) {
+                FATAL("can not create graphic rectangle list object",NULL);
+                return;
+              }
+              rectangleList->setAnimator(&animator);
+              rectangleList->setZ(2); // ensure that arrow is drawn after line texture
+              rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
+              rectangleList->setDestroyTexture(false);
+              rectangleList->setCutEnabled(true);
+              rectangleList->setCutWidth((*k)->getWidth());
+              rectangleList->setCutHeight((*k)->getHeight());
+              Int arrowWidth=core->getDefaultGraphicEngine()->getPathDirectionIcon()->getWidth();
+              Int arrowHeight=core->getDefaultGraphicEngine()->getPathDirectionIcon()->getHeight();
+              Int arrowXToCenter=arrowWidth/2-core->getDefaultGraphicEngine()->getPathDirectionIcon()->getIconWidth()/2;
+              Int arrowYToCenter=arrowHeight/2-core->getDefaultGraphicEngine()->getPathDirectionIcon()->getIconHeight()/2;
+              double totalRadius=sqrt((double)(arrowWidth*arrowWidth/4+arrowHeight*arrowHeight/4));
+              double distanceToCenter=sqrt((double)(arrowXToCenter*arrowXToCenter+arrowYToCenter*arrowYToCenter));
+              double angleToCenter;
+              if (arrowXToCenter==0) {
+                angleToCenter=M_PI/2;
+              } else {
+                angleToCenter=atan((double)arrowYToCenter/(double)arrowXToCenter);
+              }
+              rectangleList->setParameter(totalRadius,distanceToCenter,angleToCenter);
+              info->setPathArrowList(rectangleList);
+              core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+              info->setPathArrowListKey(tileVisualization->addPrimitive(rectangleList));
+              core->getDefaultGraphicEngine()->unlockDrawing();
+            }
+
+            // Add the arrow
+            if (reverse) {
+              Int t=x1;
+              x1=x2;
+              x2=t;
+              t=y1;
+              y1=y2;
+              y2=t;
+            }
+            Int distX=x2-x1;
+            Int distY=y2-y1;
+            double dist=sqrt((double)(distX*distX+distY*distY));
+            double angle=FloatingPoint::computeAngle(distX,distY);
+            double x=x1+dist/2*cos(angle);
+            double y=y1+dist/2*sin(angle);
+            core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);
+            //DEBUG("tile: %s => (%f,%f) %f",(*k)->getVisName().front().c_str(),currentPos.getLat(),currentPos.getLng(),currentPos.getBearing());
+            rectangleList->addRectangle(x,y,angle,currentPos.getBearing());
+            core->getDefaultGraphicEngine()->unlockDrawing();
+          }
         }
       }
     }
@@ -393,6 +400,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
           if (arrowDistance>=pathMinDirectionDistance) {
             pos.setHasBearing(true);  // bearing flag is used to indicate that an arrow must be added
             pos.setBearing(visualization->getColorOffset());
+            //DEBUG("addEndPosition: %d (%f,%f) => %f",visualization->getZoomLevel(),pos.getLat(),pos.getLng(),pos.getBearing());
             visualization->updateColorOffset(reverse);
           } else {
             pos.setHasBearing(false);
@@ -550,15 +558,21 @@ void NavigationPath::addVisualization(std::list<MapContainer*> *mapContainers) {
         MapPosition prevPoint=NavigationPath::getPathInterruptedPos();
         MapPosition prevArrowPoint;
         NavigationPathVisualization *visualization = zoomLevelVisualizations[zoomLevel-1];
-        std::vector<MapPosition> *points = visualization->getPoints();
-        for(Int i=0;i<points->size();i++) {
+        core->getMapSource()->lockAccess(__FILE__,__LINE__);
+        std::vector<MapPosition> points(*visualization->getPoints());
+        core->getMapSource()->unlockAccess();
+        for(Int i=0;i<points.size();i++) {
 
           // Handle path interrupted positions
-          MapPosition p=(*points)[i];
+          MapPosition p=points[i];
           if ((p==NavigationPath::getPathInterruptedPos())||(prevPoint==NavigationPath::getPathInterruptedPos())) {
             prevArrowPoint=p;
             prevPoint=p;
           } else {
+
+            /*if (p.getHasBearing()) {
+              DEBUG("addVisualization: %d (%f,%f) => %f",visualization->getZoomLevel(),p.getLat(),p.getLng(),p.getBearing());
+            }*/
 
             // Add visualization
             updateTileVisualization(&mapContainersOfSameZoomLevel,visualization,prevPoint,prevArrowPoint,p);
