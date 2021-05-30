@@ -27,13 +27,16 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
@@ -48,11 +51,17 @@ public class GDService extends Service {
   // Managers
   LocationManager locationManager;
   NotificationManager notificationManager;
+  PowerManager powerManager;
+
+  // Receivers
+  BroadcastReceiver userPresentReceiver = null;
 
   // Flags
   boolean locationWatchStarted = false;
   boolean serviceInForeground = false;
   boolean activityRunning = false;
+  boolean activityStarted = false;
+  boolean startActivity = false;
 
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -98,7 +107,20 @@ public class GDService extends Service {
     locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
     
     // Get the notification manager
-    notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);    
+    notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+    // Get power manager
+    powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+    // Register for user present events
+    userPresentReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        launchActivityIfNeeded();
+      }
+    };
+    IntentFilter i=new IntentFilter(Intent.ACTION_USER_PRESENT);
+    registerReceiver(userPresentReceiver,i);
 
     // Prepare the notification
     Intent notificationIntent = new Intent(this, ViewMap.class);
@@ -163,6 +185,15 @@ public class GDService extends Service {
     return notification;
   }
 
+  /** Starts the view map activity if needed */
+  void launchActivityIfNeeded() {
+    if ((!activityRunning)&&(startActivity)) {
+      Intent startViewMapIntent = new Intent(GDService.this, ViewMap.class);
+      startViewMapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      startActivity(startViewMapIntent);
+    }
+  }
+
   /** Updates the state depending on the activity status */
   private void handleActivityStatus(boolean forceStart) {
 
@@ -196,6 +227,14 @@ public class GDService extends Service {
         Message m=Message.obtain(coreObject.messageHandler);
         m.what = GDCore.START_CORE;
         coreObject.messageHandler.sendMessage(m);
+      }
+
+      // Indicate that the activity must be started if the user is present
+      if ((forceStart)&&(!activityStarted)) {
+        startActivity = true;
+        if (powerManager.isScreenOn()) {
+          launchActivityIfNeeded();
+        }
       }
 
     } else {
@@ -257,6 +296,8 @@ public class GDService extends Service {
     // Handle activity start / stop actions
     if (intent.getAction().equals("activityResumed")) {
       activityRunning=true;
+      activityStarted=true;
+      startActivity=false;
       handleActivityStatus(false);
     }
     if (intent.getAction().equals("activityPaused")) {
@@ -400,6 +441,11 @@ public class GDService extends Service {
   /** Called when the service is stopped */
   @Override
   public void onDestroy() {
+
+    // Stop the user present receiver
+    if (userPresentReceiver!=null) {
+      unregisterReceiver(userPresentReceiver);
+    }
 
     // Stop the bluetooth services
     if (heartRateService!=null) {
