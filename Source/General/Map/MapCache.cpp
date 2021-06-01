@@ -286,8 +286,8 @@ void MapCache::updateMapTileImages() {
         GraphicRectangle *r=t->getRectangle();
         r->setZ(0);
         core->getDefaultGraphicEngine()->unlockDrawing();
-        t->setIsCached(false);
         core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
+        t->setIsCached(false);
         usedTextures.remove(m);
         unusedTextures.push_back(m);
         core->getThread()->unlockMutex(accessMutex);

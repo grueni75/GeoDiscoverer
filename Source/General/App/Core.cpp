@@ -743,7 +743,7 @@ void Core::lateInit() {
   /*std::string crash_trigger_path=getHomePath()+"/trigger_crash.txt";
   if (access( crash_trigger_path.c_str(), F_OK ) == 0) {
     remove(crash_trigger_path.c_str());
-    //FATAL("forced crash",NULL);
+    FATAL("forced crash",NULL);
     int *a=NULL;
     *a=0;
     exit(1);

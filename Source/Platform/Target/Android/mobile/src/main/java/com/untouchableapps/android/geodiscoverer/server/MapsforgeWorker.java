@@ -174,7 +174,9 @@ public class MapsforgeWorker {
     }
 
     renderThemeFuture = new RenderThemeFuture(AndroidGraphicFactory.INSTANCE, xmlRenderTheme, displayModel);
-    new Thread(renderThemeFuture).start();
+    Thread renderThemeFutureThread = new Thread(renderThemeFuture);
+    renderThemeFutureThread.setPriority(3);
+    renderThemeFutureThread.start();
     return true;
   }
 

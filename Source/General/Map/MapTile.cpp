@@ -458,6 +458,7 @@ void MapTile::setIsHidden(bool isHidden, const char *file, int line, bool fadeOu
 // Updates the cache status
 void MapTile::setIsCached(bool isCached, GraphicTextureInfo texture, bool fadeOutAnimation)
 {
+  //DEBUG("isCached=%d from %s:%d",isCached,file,line);
   this->isCached = isCached;
   if (!isCached) {
     if (this->getParentMapContainer()->getDownloadComplete()) {
