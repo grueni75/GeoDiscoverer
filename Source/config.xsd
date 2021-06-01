@@ -262,7 +262,7 @@
                   <xsd:documentation>Power draw level in Watt.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="powerDrawLevelMax" type="xsd:string" default="15">
+              <xsd:element name="powerDrawLevelMax" type="xsd:string" default="9">
                 <xsd:annotation>
                   <xsd:documentation>Maximum possible power draw level in Watt.</xsd:documentation>
                 </xsd:annotation>

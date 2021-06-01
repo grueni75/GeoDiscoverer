@@ -81,6 +81,7 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
     boolean prevConnected=connected;
     connected=configStore->getIntValue("Forumslader","connected",__FILE__,__LINE__);
     //connected=true;
+    //core->getConfigStore()->setIntValue("Forumslader","powerDrawLevel",-10,__FILE__,__LINE__);
     //DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
     
     // Update the widget visibility
@@ -168,6 +169,8 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
       
       // Update the power draw gauge
       double powerDrawLevelMax=atof(configStore->getStringValue("Forumslader","powerDrawLevelMax",__FILE__,__LINE__).c_str());      
+      if (powerDrawLevel>powerDrawLevelMax) powerDrawLevel=powerDrawLevelMax;
+      if (powerDrawLevel<-powerDrawLevelMax) powerDrawLevel=-powerDrawLevelMax;
       double powerDrawPercentage=powerDrawLevel/powerDrawLevelMax;
       double powerDrawAngleSweep=180;
       double powerDrawCircumference=floor(FloatingPoint::degree2rad(powerDrawAngleSweep)*powerDrawGaugeRadius);
