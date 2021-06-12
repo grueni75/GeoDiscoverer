@@ -77,6 +77,12 @@ bool MapSourceCalibratedPictures::collectMapTiles(std::string directory, std::li
         std::string legendPath=getFolderPath() + "/legend.png";
         (*i)->exportEntry(filename,legendPath);
         legendPaths[getFolder()]=legendPath;
+      } else {
+        if (filename=="legend.pdf") {
+          std::string legendPath=getFolderPath() + "/legend.pdf";
+          (*i)->exportEntry(filename,legendPath);
+          legendPaths[getFolder()]=legendPath;
+        }
       }
 
       // If the file is a info.gds file, merge it's info into the existing list

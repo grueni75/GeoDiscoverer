@@ -909,11 +909,14 @@ public class ViewMap extends GDActivity {
     String legendPath = coreObject.executeCoreCommand("getMapLegendPath", name);
     File legendPathFile = new File(legendPath);
     if (!legendPathFile.exists()) {
-      errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder"),legendPath));
+      errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder")));
     } else {
       Intent intent = new Intent();
       intent.setAction(Intent.ACTION_VIEW);
-      intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
+      if (legendPath.endsWith(".png"))
+        intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
+      if (legendPath.endsWith(".pdf"))
+        intent.setDataAndType(Uri.parse("file://" + legendPath), "application/pdf");
       startActivity(intent);
     }
   }

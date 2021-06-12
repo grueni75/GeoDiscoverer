@@ -2,11 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Android.iml" filepath="$PROJECT_DIR$/Android.iml" group="Android" />
-      <module fileurl="file://$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference/colorPickerPreference.iml" filepath="$PROJECT_DIR$/../../../../ThirdParty/ColorPickerPreference/colorPickerPreference.iml" group="Android/colorPickerPreference" />
-      <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" group="Android/core" />
-      <module fileurl="file://$PROJECT_DIR$/mobile/mobile.iml" filepath="$PROJECT_DIR$/mobile/mobile.iml" group="Android/mobile" />
-      <module fileurl="file://$PROJECT_DIR$/wear/wear.iml" filepath="$PROJECT_DIR$/wear/wear.iml" group="Android/wear" />
+      <module fileurl="file://$PROJECT_DIR$/Android.iml" filepath="$PROJECT_DIR$/Android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1530380361/Android.colorPickerPreference.iml" filepath="$PROJECT_DIR$/.idea/modules/1530380361/Android.colorPickerPreference.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/Android.core.iml" filepath="$PROJECT_DIR$/.idea/modules/core/Android.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mobile/Android.mobile.iml" filepath="$PROJECT_DIR$/.idea/modules/mobile/Android.mobile.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wear/Android.wear.iml" filepath="$PROJECT_DIR$/.idea/modules/wear/Android.wear.iml" />
     </modules>
   </component>
 </project>

@@ -61,6 +61,11 @@ MapSource::MapSource() {
   std::string defaultLegendPath=core->getHomePath() + "/Map/" + folder + "/legend.png";
   if (access(defaultLegendPath.c_str(),F_OK)==0)
     legendPaths[getFolder()]=defaultLegendPath;
+  else {
+    defaultLegendPath=core->getHomePath() + "/Map/" + folder + "/legend.pdf";
+    if (access(defaultLegendPath.c_str(),F_OK)==0)
+      legendPaths[getFolder()]=defaultLegendPath;
+  }
   quitRemoteServerThread=false;
   remoteServerStartSignal=NULL;
   remoteServerThreadInfo=NULL;

@@ -246,8 +246,15 @@ bool MapSource::resolveGDSInfo(std::string infoFilePath, TimestampInSeconds *las
 
           // Add this map legend if it exists
           std::string legendPath=(*j)->getFolder()+"/legend.png";
+          //DEBUG("legendPath=%s",legendPath.c_str());
           if (access(legendPath.c_str(),F_OK)==0) {
             legendPaths[name]=legendPath;
+          } else {
+            legendPath=(*j)->getFolder()+"/legend.pdf";
+            //DEBUG("legendPath=%s",legendPath.c_str());
+            if (access(legendPath.c_str(),F_OK)==0) {
+              legendPaths[name]=legendPath;
+            }
           }
 
           // Unlink the map source ref
