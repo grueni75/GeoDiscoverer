@@ -394,7 +394,7 @@ Thread::~Thread() {
 void Thread::debugMutexLocks() {
 
   // Set the priority
-  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+  setThreadPriority(threadPriorityBackgroundLow);
 
   // Wait until the core object is available
   while (core==NULL) {

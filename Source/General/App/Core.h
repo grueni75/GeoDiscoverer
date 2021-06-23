@@ -122,6 +122,9 @@ protected:
   // Used to interrupt the maintenance thread
   ThreadMutexInfo *maintenanceMutex;
 
+  // Used to trigger a maintenance
+  ThreadSignalInfo *maintenanceSignal;
+
   // Current thread info about the map update thread
   ThreadInfo *mapUpdateThreadInfo;
 
@@ -248,6 +251,11 @@ public:
 
   // Stores unsaved data
   void maintenance(bool endlessLoop=true);
+
+  // Triggers a maintenance via the maintenance thread
+  void triggerMaintenance() {
+    thread->issueSignal(maintenanceSignal);
+  }
 
   // Indicates the map cache has prepared a new texture
   void tileTextureAvailable(const char *file, int line);

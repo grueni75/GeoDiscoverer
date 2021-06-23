@@ -73,6 +73,7 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   // Reset variables
   this->maintenanceThreadInfo=NULL;
   this->maintenanceMutex=NULL;
+  this->maintenanceSignal=NULL;
   this->lateInitThreadInfo=NULL;
   this->mapUpdateThreadInfo=NULL;
   this->updateDashboardScreensThreadInfo=NULL;
@@ -214,6 +215,9 @@ Core::~Core() {
   DEBUG("deleting mutexes and signals",NULL);
   if (maintenanceMutex) {
     thread->destroyMutex(maintenanceMutex);
+  }
+  if (maintenanceSignal) {
+    thread->destroySignal(maintenanceSignal);
   }
   if (mapUpdateInterruptMutex) {
     thread->destroyMutex(mapUpdateInterruptMutex);
@@ -363,6 +367,7 @@ bool Core::init() {
   mapUpdateStartSignal=thread->createSignal();
   mapUpdateTileTextureProcessedSignal=thread->createSignal();
   maintenanceMutex=thread->createMutex("core maintenance mutex");
+  maintenanceSignal=thread->createSignal(false);
   dashboardDevicesMutex=thread->createMutex("devices mutex");
   updateDashboardScreensWakeupSignal=thread->createSignal(false);
 
@@ -765,7 +770,7 @@ void Core::maintenance(bool endlessLoop) {
     // Ensure that only one thread is executing this at most
     thread->lockMutex(maintenanceMutex, __FILE__, __LINE__);
 
-    //DEBUG("performing maintenance",NULL);
+    DEBUG("performing maintenance",NULL);
 
     // Do the backup
     if ((navigationEngine)&&(navigationEngine->getIsInitialized()))
@@ -799,8 +804,10 @@ void Core::maintenance(bool endlessLoop) {
       TimestampInSeconds duration=1;
       while(duration>0) {
         duration=sleepEndTime-core->getClock()->getSecondsSinceEpoch();
-        if (duration>0)
-          sleep(duration);
+        if (duration>0) {
+          if (thread->waitForSignal(maintenanceSignal,duration*1000)) 
+            break;
+        }
       }
     } else
       return;

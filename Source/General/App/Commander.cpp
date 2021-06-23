@@ -397,7 +397,8 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="maintenance") {
     if (core->getIsInitialized()) {
-      core->maintenance(false);
+      //DEBUG("triggering maintenance",NULL);
+      core->triggerMaintenance();
     }
     cmdExecuted=true;
   }
