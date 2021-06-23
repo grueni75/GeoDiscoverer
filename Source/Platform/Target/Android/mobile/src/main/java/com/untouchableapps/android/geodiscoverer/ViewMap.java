@@ -51,6 +51,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.StrictMode;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -1573,6 +1574,14 @@ public class ViewMap extends GDActivity {
   /** Prepares activity for functions only available on gingerbread */
   @TargetApi(Build.VERSION_CODES.GINGERBREAD)
   void onCreateGingerbread() {
+    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectAll()
+        .penaltyLog()
+        .build());
+    StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+        .detectAll()
+        .penaltyLog()
+        .build());
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
       downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
       IntentFilter filter = new IntentFilter();

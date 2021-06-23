@@ -24,6 +24,8 @@
 
 package com.untouchableapps.android.geodiscoverer.server;
 
+import android.os.Process;
+
 import com.untouchableapps.android.geodiscoverer.GDApplication;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 
@@ -175,7 +177,7 @@ public class MapsforgeWorker {
 
     renderThemeFuture = new RenderThemeFuture(AndroidGraphicFactory.INSTANCE, xmlRenderTheme, displayModel);
     Thread renderThemeFutureThread = new Thread(renderThemeFuture);
-    renderThemeFutureThread.setPriority(3);
+    renderThemeFutureThread.setPriority(Process.THREAD_PRIORITY_BACKGROUND);
     renderThemeFutureThread.start();
     return true;
   }

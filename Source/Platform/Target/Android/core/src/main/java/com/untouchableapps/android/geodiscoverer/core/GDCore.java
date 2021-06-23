@@ -371,7 +371,7 @@ public class GDCore implements
     coreLock.lock();
 
     // This is a background thread
-    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+    setThreadPriority(2);
 
     // Process messages
     Looper.prepare();
@@ -1380,6 +1380,7 @@ public class GDCore implements
       int remainingRepeats=repeat;
       @Override
       public void run() {
+        setThreadPriority(2);
         audioWakeup();
         try {
           final AssetFileDescriptor afd = appIf.getContext().getAssets().openFd("Sound/" + filename);

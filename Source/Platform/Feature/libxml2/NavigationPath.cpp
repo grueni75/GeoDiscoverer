@@ -211,24 +211,28 @@ void NavigationPath::writeGPXFile(bool forceStorage, bool skipBackup, bool onlyS
     }
     usleep(core->getFileOpenForWritingWaitTime());
   }
+  bool errorOccured=false;
   if (tries>=core->getFileOpenForWritingRetries()) {
-    FATAL("can not write gpx file <%s>",tempFilepath.c_str());
-    return;
+    ERROR("can not write gpx file <%s>",tempFilepath.c_str());
+    errorOccured=true;
+  } else {
+
+    rename(tempFilepath.c_str(),filepath.c_str());
+    //DEBUG("path storing is complete",NULL);
+
+    // Update the cache
+    writeCache();
   }
-
-  rename(tempFilepath.c_str(),filepath.c_str());
-  //DEBUG("path storing is complete",NULL);
-
-  // Update the cache
-  writeCache();
 
   // Cleanup
   xmlFreeDoc(doc);
-  lockAccess(__FILE__, __LINE__);
-  if (this->mapPositions.size()==mapPositions.size()) {
-    isStored=true;
+  if (!errorOccured) {
+    lockAccess(__FILE__, __LINE__);
+    if (this->mapPositions.size()==mapPositions.size()) {
+      isStored=true;
+    }
+    unlockAccess();
   }
-  unlockAccess();
 }
 
 // Finds nodes in a xml tree

@@ -847,6 +847,9 @@ void MapSourceMercatorTiles::processDownloadJobs() {
 
   core->getThread()->lockMutex(downloadJobsMutex,__FILE__,__LINE__);
 
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+
   // Get free storage space
   double freeStorageSpace=0;
   struct statvfs stat;

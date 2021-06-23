@@ -274,6 +274,7 @@ public class GDHeartRateService {
       boolean alarmPlaying = false;
       @Override
       public void run() {
+        coreObject.setThreadPriority(2);
         while (!quitAlarmThread) {
 
           // If heart rate is not available, issue an alarm from time to time
@@ -464,6 +465,7 @@ public class GDHeartRateService {
     if (!connected) {
       connectionNotificationThread = new Thread() {
         public void run() {
+          coreObject.setThreadPriority(2);
           try {
             Thread.sleep(CONNECTION_RECOVERY_TIME);
           } catch (InterruptedException e) {

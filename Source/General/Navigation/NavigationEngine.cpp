@@ -1922,7 +1922,7 @@ bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &
 void NavigationEngine::exportActiveRoute() {
   if (activeRoute!=NULL) {
     activeRoute->lockAccess(__FILE__,__LINE__);
-    std::string name = activeRoute->getName() + " " + core->getClock()->getFormattedDate();
+    std::string name = activeRoute->getGpxFilename() + " " + core->getClock()->getFormattedDate();
     std::string filepath = getExportRoutePath() + "/" + name + ".gpx";
     activeRoute->unlockAccess();
     activeRoute->writeGPXFile(true,true,true,true,name,filepath);

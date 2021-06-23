@@ -238,7 +238,7 @@ public class MapTileServerHandler extends NanoHTTPD {
       if (uri.startsWith("/brouter-web/")) {
         type = "brouter-web";
       } else {
-        return serveError("missing tile type and numbers");
+        return serveError("missing tile type and numbers in <" + uri + ">");
       }
     }
 

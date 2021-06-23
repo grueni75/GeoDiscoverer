@@ -393,6 +393,9 @@ Thread::~Thread() {
 // Thread function that debugs mute locks
 void Thread::debugMutexLocks() {
 
+  // Set the priority
+  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+
   // Wait until the core object is available
   while (core==NULL) {
     sleep(1);

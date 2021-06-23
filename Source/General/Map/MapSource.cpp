@@ -1201,7 +1201,7 @@ void MapSource::remoteServer() {
   std::list<std::string> servedOverlays;
 
   // Set the priority
-  core->getThread()->setThreadPriority(threadPriorityBackgroundLow);
+  core->getThread()->setThreadPriority(threadPriorityBackgroundHigh);
 
   // Delete any left over remote tiles
   Int tileNr=0;

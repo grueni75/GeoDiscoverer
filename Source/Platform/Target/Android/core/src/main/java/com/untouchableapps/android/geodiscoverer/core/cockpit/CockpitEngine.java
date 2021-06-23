@@ -155,6 +155,7 @@ public class CockpitEngine {
     quitVibrateThread=false;
     vibrateThread = new Thread(new Runnable() {
       public void run() {
+        coreObject.setThreadPriority(2);
         while (!quitVibrateThread) {
           try {
             lock.lock();

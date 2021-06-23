@@ -43,7 +43,7 @@ void *stderrThread(void *args) {
     if(buf[redirect_size - 1] == '\n')
         --redirect_size;
     buf[redirect_size] = 0;
-    ERROR(buf,NULL);
+    DEBUG(buf,NULL);
   }
   return 0;
 }

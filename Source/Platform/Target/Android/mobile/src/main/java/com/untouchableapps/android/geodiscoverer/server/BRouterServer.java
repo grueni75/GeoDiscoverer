@@ -51,6 +51,7 @@ public class BRouterServer {
       public void run() {
         super.run();
         try {
+          coreObject.setThreadPriority(3);
           String args[] = new String[] {
               brouterPath+"/Segments4",
               brouterPath+"/Profiles2",

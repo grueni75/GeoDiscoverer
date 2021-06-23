@@ -67,6 +67,9 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
       @Override
       public void run() {
 
+        // Set the right priority
+        coreObject.setThreadPriority(2);
+
         // Open server socket
         if (networkServerSocket==null) {
           try {
@@ -139,6 +142,7 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
     Thread stopThread = new Thread(new Runnable() {
       @Override
       public void run() {
+        coreObject.setThreadPriority(2);
         try {
           Socket clientSocket = new Socket("localhost",networkServerSocket.getLocalPort());
           clientSocket.getOutputStream().write(255);
