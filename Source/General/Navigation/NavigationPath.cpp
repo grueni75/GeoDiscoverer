@@ -1338,13 +1338,18 @@ double NavigationPath::computeDistance(MapPosition targetPos, double overlapInMe
   double selectedDistance=0;
   double distance=0;
   double bearing;
-  MapPosition pos;
   MapPosition prevPathPos=NavigationPath::getPathInterruptedPos();
   for (int i=0; i<points.size(); i++) {
-    if ((prevPathPos!=NavigationPath::getPathInterruptedPos())&&(points[i]!=NavigationPath::getPathInterruptedPos())) {
-      distance+=prevPathPos.computeDistance(points[i]);
-      double d=points[i].computeDistance(targetPos);
-      if ((points[i].computeNormalDistance(prevPathPos,targetPos,overlapInMeters,true,false,&pos)!=std::numeric_limits<double>::max())) {
+    MapPosition pos;
+    if (getReverse())
+      pos=points[points.size()-1-i];
+    else
+      pos=points[i];
+    if ((prevPathPos!=NavigationPath::getPathInterruptedPos())&&(pos!=NavigationPath::getPathInterruptedPos())) {
+      distance+=prevPathPos.computeDistance(pos);
+      double d=pos.computeDistance(targetPos);
+      MapPosition t;
+      if ((pos.computeNormalDistance(prevPathPos,targetPos,overlapInMeters,true,false,&t)!=std::numeric_limits<double>::max())) {
         if (d<nearestDistance) {
           //bearing=fabs(prevPathPos.computeBearing(points[i])-points[i].computeBearing(pos));
           nearestDistance=d;          
@@ -1352,13 +1357,13 @@ double NavigationPath::computeDistance(MapPosition targetPos, double overlapInMe
             selectedDistance=distance-points[i].computeDistance(pos);
           else
             selectedDistance=distance-points[i].computeDistance(pos);*/
-          selectedDistance=distance-points[i].computeDistance(targetPos);
-          selectedPos=pos;
+          selectedDistance=distance-pos.computeDistance(targetPos);
+          selectedPos=t;
           //DEBUG("i=%d d=%f bearing=%f selectedDistance=%f",i,d,bearing,selectedDistance);
         }
       } 
     }
-    prevPathPos=points[i];
+    prevPathPos=pos;
   }
   return selectedDistance;
 }
