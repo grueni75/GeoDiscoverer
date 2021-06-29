@@ -156,4 +156,5 @@
     <string name="hide">Hide</string>
     <string name="restart">Restart</string>
     <string name="brouter">BRouter</string>
+    <string name="routes_outdated">Restarting core (Routes outdated)</string>
 </resources>

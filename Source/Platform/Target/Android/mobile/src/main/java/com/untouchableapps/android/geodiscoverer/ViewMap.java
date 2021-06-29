@@ -75,6 +75,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -92,6 +93,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -978,6 +982,50 @@ public class ViewMap extends GDActivity {
     alert.show();
   }
 
+  /** Checks if routes have been updated */
+  private class CheckForOutdatedRoutesTask extends AsyncTask<Void, Integer, Void> {
+
+    boolean routesOutdated=false;
+
+    protected void onPreExecute() {
+    }
+
+    protected Void doInBackground(Void... params) {
+
+      // Go through all route files
+      File routeDir = new File(coreObject.homePath+"/Route");
+      String cacheDir = coreObject.homePath+"/Route/.cache";
+      for (File routeFile : routeDir.listFiles()) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",routeFile.getName());
+        if (routeFile.isDirectory())
+          continue;
+        if (routeFile.getName().endsWith(".gpx")) {
+          File cacheFile = new File(cacheDir+"/"+routeFile.getName());
+          if (!cacheFile.exists()) {
+            routesOutdated=true;
+            break;
+          }
+          if (routeFile.lastModified()>cacheFile.lastModified()) {
+            routesOutdated=true;
+            break;
+          }
+        }
+      }
+      return null;
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+    }
+
+    protected void onPostExecute(Void result) {
+      if (routesOutdated) {
+        Toast.makeText(ViewMap.this,R.string.routes_outdated,Toast.LENGTH_LONG).show();
+        restartCore(false);
+      }
+    }
+  }
+
+
   /** Copies tracks from the Track into the Route directory */
   private class CopyTracksTask extends AsyncTask<Void, Integer, Void> {
 
@@ -1574,14 +1622,14 @@ public class ViewMap extends GDActivity {
   /** Prepares activity for functions only available on gingerbread */
   @TargetApi(Build.VERSION_CODES.GINGERBREAD)
   void onCreateGingerbread() {
-    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+    /*StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
         .detectAll()
         .penaltyLog()
         .build());
     StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
         .detectAll()
         .penaltyLog()
-        .build());
+        .build());*/
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
       downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
       IntentFilter filter = new IntentFilter();
@@ -1850,6 +1898,12 @@ public class ViewMap extends GDActivity {
 
     // Synchronize google bookmarks
     GDApplication.coreObject.executeCoreCommand("updateGoogleBookmarks");
+
+    // Check for outdated routes
+    if (coreObject.coreInitialized) {
+      CheckForOutdatedRoutesTask checkForOutdatedRoutesTask = new CheckForOutdatedRoutesTask();
+      checkForOutdatedRoutesTask.execute();
+    }
 
     // Process intent only if geo discoverer is initialized
     if (coreObject.coreLateInitComplete)

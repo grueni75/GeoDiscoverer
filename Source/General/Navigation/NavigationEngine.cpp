@@ -347,14 +347,10 @@ void NavigationEngine::updateRoutes() {
     if (core->statFile( filepath, &filestat ))      continue;
     if (S_ISDIR( filestat.st_mode ))                continue;
 
-    // If the file is a backup, skip it
-    if (filename.substr(filename.length()-1)=="~")  continue;
-
-    // If the file is a cache, skip it
-    if (filename.substr(filename.length()-4)==".bin")  continue;
-
-    // Add the found route
-    routes.push_back(filename);
+    // Add any .gpx file
+    if (filename.substr(filename.length()-4)==".gpx") {
+      routes.push_back(filename);      
+    }
   }
   closedir(dp);
    

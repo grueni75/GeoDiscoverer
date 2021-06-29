@@ -104,7 +104,9 @@
 			"ios": "cpp",
 			"locale": "cpp",
 			"queue": "cpp",
-			"stack": "cpp"
+			"stack": "cpp",
+			"coroutine": "cpp",
+			"source_location": "cpp"
 		},
 		"git.ignoreLimitWarning": true
 	}

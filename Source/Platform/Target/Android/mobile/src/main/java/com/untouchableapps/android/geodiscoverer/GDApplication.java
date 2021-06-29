@@ -161,14 +161,14 @@ public class GDApplication extends Application implements GDAppInterface, Google
   @Override
   public void onCreate() {
 
-    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+    /*StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
         .detectAll()
         .penaltyLog()
         .build());
     StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
         .detectAll()
         .penaltyLog()
-        .build());
+        .build());*/
     super.onCreate();  
 
     // Initialize the core object
