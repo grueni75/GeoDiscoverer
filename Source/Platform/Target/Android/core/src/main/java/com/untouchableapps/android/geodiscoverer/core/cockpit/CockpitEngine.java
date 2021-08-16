@@ -24,6 +24,7 @@ package com.untouchableapps.android.geodiscoverer.core.cockpit;
 
 import android.content.Context;
 
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppInterface.AlertType;
 
@@ -178,6 +179,7 @@ public class CockpitEngine {
                 return;
 
               // Skip the vibrate if the current speed is below the threshold
+              //coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("locationSpeed=%f",locationSpeed));
               if (locationSpeed<minSpeedToAlert)
                 break;
 
@@ -299,6 +301,7 @@ public class CockpitEngine {
     } else {
       locationSpeed = -1;
     }
+    //coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","locationSpeed updated to " + locationSpeed);
 
     // If the turn has appeared or disappears or we are off route, force an update
     if ((currentTurnDistance.equals("-"))&&(!lastTurnDistance.equals("-")))

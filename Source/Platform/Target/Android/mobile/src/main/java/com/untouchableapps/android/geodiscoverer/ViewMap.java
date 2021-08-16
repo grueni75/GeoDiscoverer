@@ -996,7 +996,7 @@ public class ViewMap extends GDActivity {
       File routeDir = new File(coreObject.homePath+"/Route");
       String cacheDir = coreObject.homePath+"/Route/.cache";
       for (File routeFile : routeDir.listFiles()) {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",routeFile.getName());
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",routeFile.getName());
         if (routeFile.isDirectory())
           continue;
         if (routeFile.getName().endsWith(".gpx")) {

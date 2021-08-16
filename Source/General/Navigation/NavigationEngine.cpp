@@ -482,7 +482,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
   bool isNewer=false;
 
   //PROFILE_START;
-  //DEBUG("checking new location pos (locationPos.getTimestamp()=%ld)",locationPos.getTimestamp());
+  //DEBUG("checking new location pos (locationPos.getTimestamp()=%lu)",locationPos.getTimestamp());
 
   // Check if the new fix is older or newer
   if (newLocationPos.getTimestamp()>locationPos.getTimestamp()) {
@@ -521,9 +521,12 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
         // If the new fix is from the same provider and is not significantly less accurate, use it
         if ((newLocationPos.getSource()==locationPos.getSource())&&(newLocationPos.getAccuracy()<=locationSignificantlyInaccurateThreshold)) {
           updatePos=true;
+        } else {
+          //DEBUG("new location pos is significantly less accurate, discarding it",NULL);
         }
-
       }
+    } else {
+      //DEBUG("new location pos is older, discarding it",NULL); 
     }
   }
 
@@ -531,6 +534,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
 
   // Update the position
   if (updatePos) {
+    //DEBUG("new location fix received: hasSpeed=%d speed=%f",newLocationPos.getHasSpeed(),newLocationPos.getSpeed());
     /*DEBUG("new location fix received: source=%s lng=%f lat=%f hasAltitude=%d altitude=%f hasBearing=%d bearing=%f hasSpeed=%d speed=%f hasAccuracy=%d accuracy=%f",
           newLocationPos.getSource().c_str(),
           newLocationPos.getLng(),
@@ -1463,6 +1467,14 @@ void NavigationEngine::computeNavigationInfo() {
     this->locationPos.setSpeed(this->locationPos.getSpeed()+1);*/
     MapPosition locationPos=this->locationPos;
     unlockLocationPos();
+
+    // In case the new location has a lower speed, always use it
+    // This ensures that the cockpit engine is informed if motion is stopped
+    if ((lastNavigationLocationPos.isValid())&&(lastNavigationLocationPos.getHasSpeed())) {
+      if ((locationPos.getHasSpeed())&&(locationPos.getSpeed()<lastNavigationLocationPos.getSpeed())) {
+        forceNavigationInfoUpdate=true;
+      }
+    }
 
     // Use the last bearing if the new location has no bearing
 

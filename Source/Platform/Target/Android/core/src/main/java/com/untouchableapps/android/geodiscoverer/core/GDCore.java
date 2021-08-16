@@ -174,7 +174,7 @@ public class GDCore implements
   long lastDownloadStatusUpdate = 0;
 
   // Reference to the object that implements the interface functions
-  GDAppInterface appIf = null;
+  public GDAppInterface appIf = null;
 
   // Indicates if core is running on a watch
   boolean isWatch = false;
@@ -1047,6 +1047,11 @@ public class GDCore implements
       }
       args[11]=String.valueOf(t);
       args[12]=String.valueOf(location.getAccuracy());
+      StringBuffer sb = new StringBuffer();
+      for(int i = 0; i < args.length; i++) {
+        sb.append(args[i]);
+      }
+      //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","locationChanged: hasSpeed=" + args[9] + " speed=" + args[10]);
       executeCoreCommand("locationChanged",args);
     }
   }
