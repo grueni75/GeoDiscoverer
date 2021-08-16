@@ -48,6 +48,7 @@ $(ANDROID_GDC): $(PNGS)
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/car.png $(ANDROID_GDB_QUOTED)\/drawable-\2\//' | sh
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/ship.png $(ANDROID_GDB_QUOTED)\/drawable-\2\//' | sh
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/dog.png $(ANDROID_GDB_QUOTED)\/drawable-\2\//' | sh
+	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/light.png $(ANDROID_GDB_QUOTED)\/drawable-\2\//' | sh
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/mv $(ANDROID_GDC_QUOTED)\/drawable-\2\/ok.png $(ANDROID_GDCW_QUOTED)\/drawable-\2\//' | sh
 	@find -name '*dpi_drawable*' | sed 's/\(.*\n*dpi_drawable-\(.*\)\)/cp $(ANDROID_GDC_QUOTED)\/mipmap-\2\/ic_launcher.png $(ANDROID_GDCW_QUOTED)\/mipmap-\2\/ic_launcher.png/' | sh
 	@touch $(ANDROID_GDC)

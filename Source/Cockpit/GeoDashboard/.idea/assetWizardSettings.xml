@@ -25,7 +25,7 @@
                                               <map>
                                                 <entry key="color" value="000000" />
                                                 <entry key="imagePath" value="/tmp/baseline_highlight_24.xml" />
-                                                <entry key="opacityPercent" value="60" />
+                                                <entry key="opacityPercent" value="80" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -37,6 +37,18 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="url" value="jar:file:/home/grueni/Apps/android/android-studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/highlight/baseline_highlight_24.xml" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                      <entry key="image">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="color" value="000000" />
+                                                <entry key="opacityPercent" value="80" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -69,6 +81,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="outputName" value="light" />
+                                      <entry key="theme" value="CUSTOM" />
+                                      <entry key="themeColor" value="000000" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -139,7 +153,18 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="/tmp/ic_android_black_24dp.xml" />
+                                                <entry key="imagePath" value="/tmp/baseline_highlight_24.xml" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                      <entry key="clipartAsset">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="url" value="jar:file:/home/grueni/Apps/android/android-studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/highlight/baseline_highlight_24.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -167,6 +192,12 @@
                                           </PersistentState>
                                         </value>
                                       </entry>
+                                    </map>
+                                  </option>
+                                  <option name="values">
+                                    <map>
+                                      <entry key="iconShape" value="CIRCLE" />
+                                      <entry key="outputName" value="light" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -295,7 +326,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputIconType" value="ACTIONBAR" />
+                            <entry key="outputIconType" value="LAUNCHER_LEGACY" />
                           </map>
                         </option>
                       </PersistentState>

@@ -22,8 +22,11 @@
 
 package com.untouchableapps.android.geodashboard;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.Inet4Address;
@@ -45,16 +48,19 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
@@ -63,6 +69,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -136,6 +143,11 @@ public class ViewDashboard extends Activity {
   boolean serviceActive = false;
 
   /**
+   * Handle to the thread that monitors state changes
+   */
+  Thread monitorThread = null;
+
+  /**
    * References to the full screen image view
    */
   ImageView dashboardView;
@@ -144,6 +156,21 @@ public class ViewDashboard extends Activity {
    * References to the sound buttons bar
    */
   LinearLayout soundButtonsView;
+
+  /**
+   * References to the backlight indicator image view
+   */
+  ImageView backlightIndicatorView;
+
+  /**
+   * Resolver for system settings
+   */
+  ContentResolver systemSettingsResolver;
+
+  /**
+   * Observer for system settings
+   */
+  ContentObserver systemSettingsObserver;
 
   /**
    * Handler that receives message from the server thread
@@ -248,6 +275,38 @@ public class ViewDashboard extends Activity {
     Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,b);
     msg.sendToTarget();
   }
+
+  /** Indicates if backlight is on or off
+   *
+   */
+  protected void updateBacklightIndicator() {
+
+    // Read the sys entry to get the current led brightness
+    final int brightnessLevel;
+    File file = new File("/sys/devices/platform/mxc_msp430_fl.0/backlight/mxc_msp430_fl.0/actual_brightness");
+    int t=0;
+    try {
+      BufferedReader br = new BufferedReader(new FileReader(file));
+      String line=br.readLine();
+      br.close();
+      t=Integer.valueOf(line);
+    }
+    catch (IOException e) {
+      Log.d("GeoDashboard", String.format(e.getMessage()));
+    }
+    brightnessLevel=t;
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        //Toast.makeText(ViewDashboard.this,String.valueOf(brightnessLevel),Toast.LENGTH_LONG).show();
+        if (brightnessLevel != 0)
+          backlightIndicatorView.setVisibility(View.VISIBLE);
+        else
+          backlightIndicatorView.setVisibility(View.INVISIBLE);
+      }
+    });
+  }
+
 
   /**
    * Sends a message to the client
@@ -461,6 +520,12 @@ public class ViewDashboard extends Activity {
    */
   private boolean quitServerThread = false;
 
+
+  /**
+   * Tells all other threads to quit
+   */
+  private boolean quitThreads = false;
+
   /**
    * Thread that handles the communication with geo discoverer
    */
@@ -479,6 +544,7 @@ public class ViewDashboard extends Activity {
     setContentView(R.layout.view_dashboard);
     dashboardView = (ImageView)findViewById(R.id.fullscreen_content);
     soundButtonsView = (LinearLayout)findViewById(R.id.sound_buttons);
+    backlightIndicatorView = (ImageView)findViewById(R.id.backlight_indicator);
 
     // Keep the screen on
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -574,15 +640,17 @@ public class ViewDashboard extends Activity {
 
     }, intentFilter);
 
-    // Start thread that handles wlan changes
+    // Start thread that handles wlan and backlight changes
     wifiManager = (android.net.wifi.WifiManager) getSystemService(android.content.Context.WIFI_SERVICE);
-    new Thread(new Runnable() {
+    monitorThread = new Thread(new Runnable() {
 
       @Override
       public void run() {
 
         // Endless loop
-        while (true) {
+        while (!quitThreads) {
+
+          // Handle waln changes
           //Log.d("GeoDashboard",String.format("appActive=%s wlanActive=%s",Boolean.toString(appActive),Boolean.toString(wlanActive)));
           if (appActive) {
             if (!serviceActive) {
@@ -599,6 +667,13 @@ public class ViewDashboard extends Activity {
               stopService(true);
             }
           }
+
+          // Handle brightness changes
+          if (appActive) {
+            updateBacklightIndicator();
+          }
+
+          // Wait for the next round
           try {
             Thread.sleep(1000);
           }
@@ -606,7 +681,8 @@ public class ViewDashboard extends Activity {
           }
         }
       }
-    }).start();
+    });
+    monitorThread.start();
 
     // Service is down
     displayTextBitmap(getString(R.string.server_down));
@@ -719,6 +795,15 @@ public class ViewDashboard extends Activity {
   /** Close the socket on destroy */
   @Override
   protected void onDestroy() {
+    quitThreads=true;
+    if (monitorThread!=null) {
+      try {
+        monitorThread.join();
+      }
+      catch (Exception e) {
+      }
+    }
+    stopService(false);
     while (serviceActive) {
       try {
         Thread.sleep(1000);
@@ -734,6 +819,7 @@ public class ViewDashboard extends Activity {
       }
       serverSocket=null;
     }
+    Toast.makeText(this,R.string.quit_message, Toast.LENGTH_LONG).show();
     super.onDestroy();
   }
 

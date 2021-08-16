@@ -34,6 +34,7 @@
         (DOT) in 1974 and 1979. All images in the collection are public domain.
     </string>
     <string name="about_dismiss">OK</string>
+    <string name="quit_message">Geo Dashboard is destroyed!</string>
 
 
 </resources>

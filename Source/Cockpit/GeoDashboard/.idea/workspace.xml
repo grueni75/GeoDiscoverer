@@ -8,9 +8,22 @@
   <component name="AndroidLogFilters">
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
   </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="c9e79f9a-25b2-4976-9b88-f17693dc2c08" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/untouchableapps/android/geodashboard/ViewDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/untouchableapps/android/geodashboard/ViewDashboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/view_dashboard.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/view_dashboard.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../General/Navigation/NavigationEngine.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../General/Navigation/NavigationEngine.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Media/Android/Icon/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/../../Media/Android/Icon/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDCore.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/GDCore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/cockpit/CockpitEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/cockpit/CockpitEngine.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/java/com/untouchableapps/android/geodiscoverer/ViewMap.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,7 +33,7 @@
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="7_WSVGA_Tablet_API_28" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[VirtualDevicePath@/home/grueni/.android/avd/7_WSVGA_Tablet_API_28.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -32,9 +45,6 @@
         <projects_view />
       </state>
     </system>
-  </component>
-  <component name="FavoritesManager">
-    <favorites_list name="GeoDashboard" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -55,11 +65,12 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="ApkExportedModule" value="app" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="VirtualDevicePath@/home/grueni/.android/avd/7_WSVGA_Tablet_API_28.avd" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2021-08-14T17:01:05.307433Z" />
     <property name="ExportApk.ApkPath" value="$PROJECT_DIR$/export" />
     <property name="ExportApk.BuildType" value="release" />
     <property name="ExportApk.BuildVariants" value="release" />
@@ -202,6 +213,8 @@
       <option name="DEPLOY_AS_INSTANT" value="false" />
       <option name="ARTIFACT_NAME" value="" />
       <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
       <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
       <option name="ACTIVITY_EXTRA_FLAGS" value="" />
       <option name="MODE" value="default_activity" />
@@ -237,11 +250,16 @@
       </Native>
       <Profilers>
         <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
       </Profilers>
       <option name="DEEP_LINK" value="" />
       <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
       <method v="2">
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
@@ -262,6 +280,7 @@
       </method>
     </configuration>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -276,30 +295,17 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state width="3750" height="538" key="GridCell.Tab.0.bottom" timestamp="1620107445934">
-      <screen x="3840" y="0" width="3840" height="2160" />
+    <state x="652" y="266" width="291" height="404" key="AndroidCreateXmlResourceDialog" timestamp="1628965586870">
+      <screen x="0" y="27" width="1600" height="873" />
     </state>
-    <state width="3750" height="538" key="GridCell.Tab.0.bottom/0.54.3840.2106/3840.0.3840.2160@3840.0.3840.2160" timestamp="1620107445934" />
-    <state width="3750" height="538" key="GridCell.Tab.0.center" timestamp="1620107445934">
-      <screen x="3840" y="0" width="3840" height="2160" />
+    <state x="652" y="266" width="291" height="404" key="AndroidCreateXmlResourceDialog/0.27.1600.873@0.27.1600.873" timestamp="1628965586870" />
+    <state x="464" y="203" key="run.anything.popup" timestamp="1628964768382">
+      <screen x="0" y="27" width="1600" height="873" />
     </state>
-    <state width="3750" height="538" key="GridCell.Tab.0.center/0.54.3840.2106/3840.0.3840.2160@3840.0.3840.2160" timestamp="1620107445934" />
-    <state width="3750" height="538" key="GridCell.Tab.0.left" timestamp="1620107445934">
-      <screen x="3840" y="0" width="3840" height="2160" />
+    <state x="464" y="203" key="run.anything.popup/0.27.1600.873@0.27.1600.873" timestamp="1628964768382" />
+    <state x="463" y="209" width="672" height="678" key="search.everywhere.popup" timestamp="1628962215496">
+      <screen x="0" y="27" width="1600" height="873" />
     </state>
-    <state width="3750" height="538" key="GridCell.Tab.0.left/0.54.3840.2106/3840.0.3840.2160@3840.0.3840.2160" timestamp="1620107445934" />
-    <state width="3750" height="538" key="GridCell.Tab.0.right" timestamp="1620107445934">
-      <screen x="3840" y="0" width="3840" height="2160" />
-    </state>
-    <state width="3750" height="538" key="GridCell.Tab.0.right/0.54.3840.2106/3840.0.3840.2160@3840.0.3840.2160" timestamp="1620107445934" />
-    <state x="5101" y="199" key="com.intellij.ide.util.TipDialog" timestamp="1620315694130">
-      <screen x="3840" y="0" width="3840" height="2160" />
-    </state>
-    <state x="1261" y="262" key="com.intellij.ide.util.TipDialog/0.54.3840.2106/3840.0.3840.2160@3840.0.3840.2160" timestamp="1620059804211" />
-    <state x="5101" y="199" key="com.intellij.ide.util.TipDialog/3840.0.3840.2160/0.54.3840.2106@3840.0.3840.2160" timestamp="1620315694130" />
-    <state width="600" height="118" key="javadoc.popup.new" timestamp="1620107439694">
-      <screen x="3840" y="0" width="3840" height="2160" />
-    </state>
-    <state width="600" height="118" key="javadoc.popup.new/0.54.3840.2106/3840.0.3840.2160@3840.0.3840.2160" timestamp="1620107439694" />
+    <state x="463" y="209" width="672" height="678" key="search.everywhere.popup/0.27.1600.873@0.27.1600.873" timestamp="1628962215496" />
   </component>
 </project>
