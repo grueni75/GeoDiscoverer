@@ -25,6 +25,9 @@ package com.untouchableapps.android.geodiscoverer;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +37,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -52,6 +56,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.support.wearable.watchface.Gles2WatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -89,12 +94,16 @@ public class WatchFace extends Gles2WatchFaceService {
   LayoutInflater inflater = null;
   SensorManager sensorManager = null;
   Vibrator vibrator = null;
+  NotificationManager notificationManager = null;
 
   // Indicates that the compass provides readings
   boolean compassWatchStarted = false;
 
   // Indicates if the dialog is open
   boolean dialogVisible = false;
+
+  // Indicates if the permission dialog has been launched
+  boolean permissionDialogLaunched = false;
 
   // Indicates if an overlay window shall be used to capture gestures
   View touchHandlerView = null;
@@ -412,6 +421,7 @@ public class WatchFace extends Gles2WatchFaceService {
     inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
     vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+    notificationManager = (NotificationManager) getSystemService(NotificationManager.class);
 
     // Get a wake lock
     if (wakeLockCore!=null)
@@ -543,12 +553,14 @@ public class WatchFace extends Gles2WatchFaceService {
 
       // Inform the user that permissions must be granted
       if (coreObject==null) {
+
+        /*GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","Launching permission dialog");
         Intent intent = new Intent(getApplication(), Dialog.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Dialog.EXTRA_TEXT, getResources().getString(R.string.permission_instructions));
         intent.putExtra(Dialog.EXTRA_KIND, ERROR_DIALOG);
         intent.putExtra(Dialog.EXTRA_GET_PERMISSIONS, true);
-        startActivity(intent);
+        startActivity(intent);*/
 
       } else {
 
@@ -659,6 +671,17 @@ public class WatchFace extends Gles2WatchFaceService {
         else {
           if (permissionsGranted())
             System.exit(0);
+          else {
+            if (!permissionDialogLaunched) {
+              GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "Launching permission dialog");
+              Intent intent = new Intent(getApplication(), Dialog.class);
+              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+              intent.putExtra(Dialog.EXTRA_TEXT, getResources().getString(R.string.permission_instructions));
+              intent.putExtra(Dialog.EXTRA_KIND, ERROR_DIALOG);
+              intent.putExtra(Dialog.EXTRA_GET_PERMISSIONS, true);
+              startActivity(intent);
+            }
+          }
           GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
           GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         }

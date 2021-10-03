@@ -15,6 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
+
 public class Dialog extends WearableActivity {
 
   // Identifiers for extras
@@ -69,10 +71,12 @@ public class Dialog extends WearableActivity {
 
     // Shall permissions be granted?
     if (intent.hasExtra(EXTRA_GET_PERMISSIONS)) {
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","Requesting write permission");
       requestPermissions(new String[]{
           Manifest.permission.WRITE_EXTERNAL_STORAGE,
           Manifest.permission.VIBRATE}, 0);
       if (!Settings.canDrawOverlays(getApplicationContext())) {
+        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","Requesting overlay permission");
         GDApplication.showMessageBar(getApplicationContext(), getResources().getString(R.string.overlay_instructions), GDApplication.MESSAGE_BAR_DURATION_LONG);
         final String packageName = getApplicationContext().getPackageName();
         final Intent t = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + packageName));
