@@ -1072,7 +1072,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   TimestampInMicroseconds t = core->getClock()->getMicrosecondsSinceStart();
   for (std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();i!=navigationPointsVisualization.end();i++) {
-    (*i).updateVisualization(t,mapPos,displayArea);
+    (*i).updateVisualization(t,mapPos,displayArea,true);
   }
   core->getDefaultGraphicEngine()->unlockDrawing();
 }

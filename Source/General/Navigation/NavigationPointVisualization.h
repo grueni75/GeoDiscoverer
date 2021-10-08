@@ -32,6 +32,8 @@ typedef enum {NavigationPointVisualizationTypeUnknown=0, NavigationPointVisualiz
 
 class NavigationPointVisualization {
 
+  double prevLng, prevLat;
+
   // Visualization object of this
   GraphicObject *visualizationObject;
 
@@ -71,7 +73,7 @@ public:
   virtual ~NavigationPointVisualization();
 
   // Updates the visualization
-  void updateVisualization(TimestampInMicroseconds t, MapPosition mapPos, MapArea displayArea);
+  void updateVisualization(TimestampInMicroseconds t, MapPosition mapPos, MapArea displayArea, bool debug=false);
 
   // Indicates that textures and buffers have been cleared
   void destroyGraphic();

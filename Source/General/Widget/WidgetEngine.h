@@ -121,6 +121,9 @@ public:
   // Informs the engine that some data has changed
   void onDataChange();
 
+  // Toggles touch mode on/off
+  void setTouchMode(Int mode);
+
   // Let the engine work
   bool work(TimestampInMicroseconds t);
 

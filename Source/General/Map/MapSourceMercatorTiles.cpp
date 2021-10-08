@@ -745,7 +745,6 @@ cleanup:
 // Adds a download job from the current visible map
 void MapSourceMercatorTiles::addDownloadJob(bool estimateOnly, std::string routeName, std::string zoomLevels) {
 
-
   // Get the display area to download
   MapArea area;
   if (routeName=="") {

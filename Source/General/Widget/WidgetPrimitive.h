@@ -48,6 +48,7 @@ protected:
   Int yHidden;                        // Y coordinate when widget is outside screen
   Int xOriginal;                      // Original x coordinate of the widget when it was on screen
   Int yOriginal;                      // Original y coordinate of the widget when it was on screen
+  Int touchMode;                      // Indicates if touch mode is enabled or disabled
 
   // Updates various flags
   virtual void updateFlags(Int x, Int y);
@@ -78,6 +79,11 @@ public:
 
   // Called when some data has changed
   virtual void onDataChange();
+
+  // Called when touch mode is changed
+  void setTouchMode(Int touchMode) {
+    this->touchMode=touchMode;
+  }
 
   // Called when the widget has changed his position
   virtual void updatePosition(Int x, Int y, Int z);

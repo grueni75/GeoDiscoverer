@@ -205,12 +205,14 @@ public class WatchFace extends Gles2WatchFaceService {
           GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","activating touch handler");
           windowManager.addView(touchHandlerView, touchHandlerLayoutParams);
           touchHandlerActive = true;
+          coreObject.executeCoreCommand("setTouchMode","1");
         }
       } else {
         if (touchHandlerActive) {
           GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","deactivating touch handler");
           windowManager.removeView(touchHandlerView);
           touchHandlerActive = false;
+          coreObject.executeCoreCommand("setTouchMode","0");
         }
       }
     }

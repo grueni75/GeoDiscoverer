@@ -50,6 +50,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
     batteryIconCharging(widgetContainer->getScreen()),
     batteryIconEmpty(widgetContainer->getScreen()),
     batteryIconFull(widgetContainer->getScreen()),
+    touchModeIcon(widgetContainer->getScreen()),
     targetObject(widgetContainer->getScreen()),
     navigationPointObject(widgetContainer->getScreen()),
     compassObject(widgetContainer->getScreen()),
@@ -79,6 +80,8 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   statusTextAbove=false;
   orientationLabelRadius=0;
   batteryIconRadius=0;
+  clockRadius=0;
+  touchModeRadius=0;
   isWatch=widgetContainer->getWidgetEngine()->getDevice()->getIsWatch();
   FontEngine *fontEngine=widgetContainer->getFontEngine();
   if (!isWatch) {
@@ -117,6 +120,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   skipTurn=false;
   active=false;
   firstRun=true;
+  prevTouchMode=0;
   lastClockUpdate=0;
   secondRowState=0;
   firstTouchAfterInactive=true;
@@ -136,6 +140,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   batteryIconCharging.setColor(GraphicColor(255,255,255,255));
   batteryIconEmpty.setColor(GraphicColor(255,255,255,255));
   batteryIconFull.setColor(GraphicColor(255,255,255,255));
+  touchModeIcon.setColor(GraphicColor(255,255,255,0));
   targetObject.setColor(GraphicColor(255,255,255,255));
   navigationPointObject.setColor(GraphicColor(255,255,255,255));
   compassObject.setColor(GraphicColor(255,255,255,255));
@@ -278,6 +283,25 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       clockCircularStrip.setIconHeight(clockFontString->getIconHeight());
     }
     changed=true;
+  }
+
+  // Update the touch mode icon
+  if (isWatch) {
+    if (firstRun) {
+      touchModeIcon.setY(touchModeIcon.getY()+touchModeRadius);  
+      //DEBUG("x=%d y=%d",touchModeIcon.getX(),touchModeIcon.getY());
+    }
+    if (prevTouchMode!=touchMode) {
+      GraphicColor endColor=touchModeIcon.getColor();
+      if (!touchMode) {
+        endColor.setAlpha(0);
+      } else {
+        endColor.setAlpha(255);
+      }
+      touchModeIcon.setFadeAnimation(t,touchModeIcon.getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+    }
+    prevTouchMode=touchMode;
+    touchModeIcon.work(t);
   }
 
   // Update the arrow
@@ -790,6 +814,13 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
     clockFontString->updateTexture();
     clockCircularStrip.setTexture(clockFontString->getTexture());
     clockCircularStrip.draw(t);
+  }
+
+  // Draw the touch mode 
+  if ((isWatch)&&(!((showTurn)&&(!skipTurn)))) {
+    //DEBUG("alpha=%d",touchModeIcon.getColor().getAlpha());
+    if (touchModeIcon.getColor().getAlpha()!=0)
+      touchModeIcon.draw(t);
   }
 
   // Draw the compass

@@ -1056,6 +1056,11 @@
                                           <xsd:documentation>Filename of the image showing the status fields.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
+                                      <xsd:element name="touchModeIconFilename" type="xsd:string" default="unknown" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Filename of the image indicating the touch mode.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
                                       <xsd:element name="batteryIconChargingFilename" type="xsd:string" default="unknown" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Filename of the image showing the a battery dot that is charging.</xsd:documentation>
@@ -1154,6 +1159,11 @@
                                       <xsd:element name="clockRadius" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Radius in percent of the widget width the clock on a watch shall have.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>	
+                                      <xsd:element name="touchModeRadius" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Radius in percent of the widget width the touch mode icon on a watch shall have.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>	
                                       <xsd:element name="statusTextAngleOffset" type="xsd:double" default="0" minOccurs="0">

@@ -1401,6 +1401,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("arrowIconFilename","navigationWatchArrow");
       config.setParameter("blindIconFilename","navigationWatchBlind");
       config.setParameter("statusIconFilename","navigationWatchStatus");
+      config.setParameter("touchModeIconFilename","touchMode");
       config.setParameter("orientationLabelRadius","90.0");
       config.setParameter("targetRadius","91.5");
       config.setParameter("textColumnCount","1");
@@ -1413,6 +1414,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("statusTextWidthLimit","24.0");
       config.setParameter("statusTextAngleOffset","3.25");
       config.setParameter("clockRadius","36.0");
+      config.setParameter("touchModeRadius","34.5");
       config.setParameter("batteryIconRadius","92.0");
       config.setParameter("batteryIconFullFilename","batteryDotFull");
       config.setParameter("batteryIconEmptyFilename","batteryDotEmpty");
@@ -1459,7 +1461,7 @@ void WidgetEngine::createGraphic() {
     config.setParameter("TurnColor/blue","0");
     config.setParameter("TurnColor/alpha","255");
     config.setParameter("turnWatchAlpha","96");
-    config.setParameter("minTouchDetectionRadius","75.0");
+    config.setParameter("minTouchDetectionRadius","60.0");
     config.setParameter("circularButtonAngle","20.0");
     addWidgetToPage(config);
     if (deviceName=="Default") {
@@ -1705,6 +1707,9 @@ void WidgetEngine::createGraphic() {
           navigation->getStatusIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"statusIconFilename",__FILE__, __LINE__));
           navigation->getStatusIcon()->setX(-navigation->getStatusIcon()->getIconWidth()/2);
           navigation->getStatusIcon()->setY(-navigation->getStatusIcon()->getIconHeight()/2);
+          navigation->getTouchModeIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"touchModeIconFilename",__FILE__, __LINE__));
+          navigation->getTouchModeIcon()->setX(-navigation->getTouchModeIcon()->getIconWidth()/2);
+          navigation->getTouchModeIcon()->setY(-navigation->getTouchModeIcon()->getIconHeight()/2);
           navigation->getBatteryIconCharging()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"batteryIconChargingFilename",__FILE__, __LINE__));
           navigation->getBatteryIconFull()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"batteryIconFullFilename",__FILE__, __LINE__));
           navigation->getBatteryIconEmpty()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"batteryIconEmptyFilename",__FILE__, __LINE__));
@@ -1797,6 +1802,7 @@ void WidgetEngine::createGraphic() {
           navigation->setStatusTextRadius(c->getDoubleValue(widgetPath,"statusTextRadius",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);
           navigation->setStatusTextAngleOffset(c->getDoubleValue(widgetPath,"statusTextAngleOffset",__FILE__, __LINE__));
           navigation->setClockRadius(c->getDoubleValue(widgetPath,"clockRadius",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);
+          navigation->setTouchModeRadius(c->getDoubleValue(widgetPath,"touchModeRadius",__FILE__, __LINE__)*navigation->getIconWidth()/100.0);
         }
       }
       if (widgetType=="pathInfo") {
@@ -2406,6 +2412,17 @@ void WidgetEngine::onDataChange() {
   WidgetPageMap::iterator i;
   for(i = pageMap.begin(); i!=pageMap.end(); i++) {
     i->second->onDataChange();
+  }
+  if (fingerMenu) fingerMenu->onDataChange();
+  readAccessStop();
+}
+
+// Informs the engine about the touch mode
+void WidgetEngine::setTouchMode(int mode) {
+  readAccessStart(__FILE__,__LINE__);
+  WidgetPageMap::iterator i;
+  for(i = pageMap.begin(); i!=pageMap.end(); i++) {
+    i->second->setTouchMode(mode);
   }
   if (fingerMenu) fingerMenu->onDataChange();
   readAccessStop();

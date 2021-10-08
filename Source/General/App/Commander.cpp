@@ -802,6 +802,10 @@ std::string Commander::execute(std::string cmd) {
     core->setRemoteServerActive(atoi(args[0].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="setTouchMode") {
+    core->getDefaultWidgetEngine()->setTouchMode(atoi(args[0].c_str()));
+    cmdExecuted=true;
+  }
   if (cmdName=="setPlainNavigationInfo") {
     NavigationInfo *navigationInfo=core->getNavigationEngine()->lockNavigationInfo(__FILE__,__LINE__);
     navigationInfo->setType((NavigationInfoType)atoi(args[0].c_str()));

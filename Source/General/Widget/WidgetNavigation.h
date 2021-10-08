@@ -74,6 +74,9 @@ protected:
   GraphicRectangle batteryIconFull;
   GraphicRectangle batteryIconCharging;
 
+  // Graphic indicating the touch mode
+  GraphicRectangle touchModeIcon;
+
   // Container that represents the target (displacement)
   GraphicObject targetObject;
 
@@ -94,6 +97,12 @@ protected:
 
   // Radius of the clock on watch
   Int clockRadius;
+
+  // Radius of the touch mode on watch
+  Int touchModeRadius;
+
+  // Indicates the previous touch mode
+  Int prevTouchMode;
 
   // Decides if the compass is shown
   bool hideCompass;
@@ -297,6 +306,10 @@ public:
     return &batteryIconCharging;
   }
 
+  GraphicRectangle *getTouchModeIcon() {
+    return &touchModeIcon;
+  }
+
   void setDirectionChangeDuration(double directionChangeDuration) {
     this->directionChangeDuration = directionChangeDuration;
   }
@@ -396,6 +409,10 @@ public:
 
   void setClockRadius(Int clockRadius) {
     this->clockRadius = clockRadius;
+  }
+
+  void setTouchModeRadius(Int touchModeRadius) {
+    this->touchModeRadius = touchModeRadius;
   }
 
   void setCircularButtonAngle(double circularButtonAngle) {

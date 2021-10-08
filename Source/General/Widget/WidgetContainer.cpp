@@ -206,4 +206,14 @@ void WidgetContainer::onDataChange() {
   }
 }
 
+// Called when touch mode has changed
+void WidgetContainer::setTouchMode(Int mode) {
+
+  // Check all widgets
+  std::list<GraphicPrimitive*> *drawList=graphicObject.getDrawList();
+  for(std::list<GraphicPrimitive*>::iterator i = drawList->begin(); i!=drawList->end(); i++) {
+    WidgetPrimitive *primitive=(WidgetPrimitive*)*i;
+    primitive->setTouchMode(mode);
+  }
+}
 }

@@ -61,7 +61,7 @@ NavigationPointVisualization::~NavigationPointVisualization() {
 }
 
 // Updates the visualization
-void NavigationPointVisualization::updateVisualization(TimestampInMicroseconds t, MapPosition mapPos, MapArea displayArea) {
+void NavigationPointVisualization::updateVisualization(TimestampInMicroseconds t, MapPosition mapPos, MapArea displayArea, bool debug) {
 
   Int mapDiffX, mapDiffY;
   Int visPosX, visPosY;

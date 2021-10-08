@@ -41,6 +41,7 @@ WidgetPrimitive::WidgetPrimitive(WidgetContainer *widgetContainer) : GraphicRect
   yHidden=0;
   xOriginal=0;
   yOriginal=0;
+  touchMode=0;
 }
 
 // Destructor

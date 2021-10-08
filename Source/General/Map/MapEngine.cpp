@@ -270,7 +270,7 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
       if (preferredNeighbor) {
         DEBUG("preferred neighbor: %s found tile: %s",preferredNeighbor->getVisName().front().c_str(),tile->getVisName().front().c_str());
       } else {
-        DEBUG("found tile: %s",tile->getVisName().front().c_str());
+        DEBUG("found tile: %s => setting position to (%d, %d)",tile->getVisName().front().c_str(),visXByCalibrator,visYByCalibrator);
       }*/
 
       // If the found tile is a direct neighbor: set the visual position accordingly
@@ -321,10 +321,15 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
       // Use the position computed by the calibrator if no direct neighbor
       if (useCalibratorPosition) {
         //DEBUG("using calibrator to compute position",NULL);
-        MapPosition pos=area.getRefPos();
-        tile->getParentMapContainer()->getMapCalibrator()->setPictureCoordinates(pos);
-        tile->setVisX(visXByCalibrator);
-        tile->setVisY(visYByCalibrator);
+        //MapPosition pos=area.getRefPos();
+        //tile->getParentMapContainer()->getMapCalibrator()->setPictureCoordinates(pos);
+        /*if ((tile->getVisX()!=visXByCalibrator)||(tile->getVisY()!=visYByCalibrator)) {
+          DEBUG("tile %s has changed position to (%d, %d)",tile->getVisName().front().c_str(),visXByCalibrator,visYByCalibrator);
+        }*/
+        if (!tile->isDrawn()) {
+          tile->setVisX(visXByCalibrator);
+          tile->setVisY(visYByCalibrator);
+        }
       }
 
       // Remember this tile if it is in the direct neighborhood of the center position
@@ -597,6 +602,7 @@ void MapEngine::updateMap() {
           //DEBUG("refX=%d refY=%d newX=%d newY=%d",mapPos.getX(),mapPos.getY(),requestedMapPos.getX(),requestedMapPos.getY());
           diffVisX=requestedMapPos.getX()-mapPos.getX();
           diffVisY=mapPos.getY()-requestedMapPos.getY();
+          //DEBUG("diffVisX=%d diffVisY=%d",diffVisX,diffVisY);
           Int newX = displayArea.getRefPos().getX()+diffVisX;
           Int newY = displayArea.getRefPos().getY()-diffVisY;
           if (newX>displayArea.getXEast())
@@ -623,7 +629,8 @@ void MapEngine::updateMap() {
         diffVisY=0;
       } else {
         visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
-        visPosRW->set(visPosRW->getX()+diffVisX,visPosRW->getY()+diffVisY,visPosRW->getZoom(),visPosRW->getAngle());
+        visPosRW->set(visPosRO.getX()+diffVisX,visPosRO.getY()+diffVisY,visPosRO.getZoom(),visPosRO.getAngle());
+        visPosRO=*visPosRW;
         core->getDefaultGraphicEngine()->unlockPos();
       }
       //DEBUG("diffVisX=%d diffVisY=%d lng=%f lat=%f forceMapRecreation=%d",diffVisX,diffVisY,mapPos.getLng(),mapPos.getLat(),forceMapRecreation);
@@ -643,25 +650,27 @@ void MapEngine::updateMap() {
     //DEBUG("diffZoom=%f zoomLevelLock=%d zoomLevel=%d",diffZoom,zoomLevelLock,zoomLevel);
 
     // Check if visual position is near to overflow
-    visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
     Int dX;
-    if (visPosRW->getX()>=0) {
-      dX=std::numeric_limits<Int>::max()-visPosRW->getX();
+    if (visPosRO.getX()>=0) {
+      dX=std::numeric_limits<Int>::max()-visPosRO.getX();
     } else {
-      dX=visPosRW->getX()-std::numeric_limits<Int>::min();
+      dX=visPosRO.getX()-std::numeric_limits<Int>::min();
     }
     Int dY;
-    if (visPosRW->getY()>=0) {
-      dY=std::numeric_limits<Int>::max()-visPosRW->getY();
+    if (visPosRO.getY()>=0) {
+      dY=std::numeric_limits<Int>::max()-visPosRO.getY();
     } else {
-      dY=visPosRW->getY()-std::numeric_limits<Int>::min();
+      dY=visPosRO.getY()-std::numeric_limits<Int>::min();
     }
     bool visPosResetted=false;
     if ((dY<initDistance)||(dX<initDistance)||(forceMapRecreation)) {
-      visPosRW->set(0,0,visPosRW->getZoom(),visPosRW->getAngle());
+      DEBUG("Resetting visPos (near to overflow)",NULL);
+      visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__,__LINE__);
+      visPosRW->set(0,0,visPosRO.getZoom(),visPosRO.getAngle());
+      visPosRO=*visPosRW;
+      core->getDefaultGraphicEngine()->unlockPos();
       visPosResetted=true;
     }
-    core->getDefaultGraphicEngine()->unlockPos();
     core->getThread()->lockMutex(forceMapUpdateMutex, __FILE__, __LINE__);
     forceMapUpdate=false;
     core->getThread()->unlockMutex(forceMapUpdateMutex);
@@ -686,7 +695,7 @@ void MapEngine::updateMap() {
       calibrator=bestMapTile->getParentMapContainer()->getMapCalibrator();
       if ((!newMapPos.getMapTile())||(calibrator!=newMapPos.getMapTile()->getParentMapContainer()->getMapCalibrator()))
         calibrator->setPictureCoordinates(newMapPos);
-      //DEBUG("bestMapTile=%08x",bestMapTile);
+      //DEBUG("bestMapTile=%s",bestMapTile->getVisName().front().c_str());
       //DEBUG("newMapPos.getX()=%d newMapPos.getY()=%d",newMapPos.getX(),newMapPos.getY());
       newMapPos.setMapTile(bestMapTile);
       newMapPos.setX(newMapPos.getX()+diffVisX);
@@ -699,12 +708,13 @@ void MapEngine::updateMap() {
       if (!core->getMapSource()->findMapTileByGeographicCoordinate(newMapPos,zoomLevel,zoomLevelLock)) {
 
         // Reset the visual position to the previous one
-        //DEBUG("resetting visPos",NULL);
+        DEBUG("resetting visPos (no tile found at the new position)",NULL);
         lockMapPos(__FILE__, __LINE__);
         mapPos.setMapTile(NULL);
         unlockMapPos();
         visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
         *visPosRW=this->visPos;
+        visPosRO=this->visPos;
         core->getDefaultGraphicEngine()->unlockPos();
         //PROFILE_ADD("negative map tile existance check");
 
@@ -733,18 +743,19 @@ void MapEngine::updateMap() {
 
         // Compute the new zoom value for the found scale
         double newZoom;
-        visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
         if (bestMapTile->getParentMapContainer()->getZoomLevelMap()!=displayArea.getZoomLevel()) {
           double newLngZoom=newMapPos.getLngScale()/bestMapTile->getLngScale();
           double newLatZoom=newMapPos.getLatScale()/bestMapTile->getLatScale();
           newZoom=(newLngZoom+newLatZoom)/2;
+          visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
           visPosRW->setZoom(newZoom);
+          visPosRO.setZoom(newZoom);
+          core->getDefaultGraphicEngine()->unlockPos();
           //DEBUG("zoom level changed",NULL);
         } else {
-          newZoom=visPosRW->getZoom();
+          newZoom=visPosRO.getZoom();
           //DEBUG("zoom level not changed",NULL);
         }
-        core->getDefaultGraphicEngine()->unlockPos();
         //DEBUG("newZoom=%f",newZoom);
 
         // Compute the required display length
@@ -762,8 +773,10 @@ void MapEngine::updateMap() {
         // Abort if the screen width is unreasonable
         if (zoomedScreenWidth<=1) {
 
+          DEBUG("resetting visPos (screen width unreasonable)",NULL);
           visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
           *visPosRW=this->visPos;
+          visPosRO=this->visPos;
           core->getDefaultGraphicEngine()->unlockPos();
 
         } else {
@@ -772,10 +785,8 @@ void MapEngine::updateMap() {
           // Use the scale from the found map container
           MapArea newDisplayArea;
           MapPosition refPos=newMapPos;
-          visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
-          refPos.setX(visPosRW->getX());
-          refPos.setY(visPosRW->getY());
-          core->getDefaultGraphicEngine()->unlockPos();
+          refPos.setX(visPosRO.getX());
+          refPos.setY(visPosRO.getY());
           //DEBUG("refPos.getX()=%d refPos.getY()=%d",refPos.getX(),refPos.getY());
           refPos.setLngScale(bestMapTile->getLngScale());
           refPos.setLatScale(bestMapTile->getLatScale());
@@ -815,9 +826,7 @@ void MapEngine::updateMap() {
                 newDisplayArea.getLngEast(),newDisplayArea.getLngWest());*/
 
           // Remember the current visual position
-          visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
-          this->visPos=*visPosRW;          
-          core->getDefaultGraphicEngine()->unlockPos();
+          this->visPos=visPosRO;          
           lockMapPos(__FILE__, __LINE__);
           mapPos=newMapPos;
           unlockMapPos();
@@ -904,8 +913,10 @@ void MapEngine::updateMap() {
       lockMapPos(__FILE__, __LINE__);
       mapPos.setMapTile(NULL);
       unlockMapPos();
+      DEBUG("resetting visPos (no tile found)",NULL);
       visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
       *visPosRW=this->visPos;
+      visPosRO=this->visPos;
       core->getDefaultGraphicEngine()->unlockPos();
       //PROFILE_ADD("no tile found");
 

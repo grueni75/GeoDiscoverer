@@ -80,6 +80,9 @@ public:
   // Called when some data has changed
   void onDataChange();
 
+  // Called when touch mode is changed
+  void setTouchMode(Int mode);
+
   // Getters and setters
   GraphicObject *getGraphicObject()
   {

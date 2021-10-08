@@ -78,7 +78,7 @@ public:
   bool setGeographicCoordinates(MapPosition &pos);
 
   // Updates the picture coordinates from the given geographic coordinates
-  bool setPictureCoordinates(MapPosition &pos);
+  bool setPictureCoordinates(MapPosition &pos, bool debug=false);
 
   // Compute the distance in pixels for the given points
   double computePixelDistance(MapPosition a, MapPosition b);

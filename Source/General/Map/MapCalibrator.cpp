@@ -383,7 +383,7 @@ bool MapCalibrator::setGeographicCoordinates(MapPosition &pos) {
 }
 
 // Updates the picture coordinates from the given geographic coordinates
-bool MapCalibrator::setPictureCoordinates(MapPosition &pos) {
+bool MapCalibrator::setPictureCoordinates(MapPosition &pos, bool debug) {
 
   // Ensure that only one thread is executing this function at a time
   core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
@@ -396,6 +396,11 @@ bool MapCalibrator::setPictureCoordinates(MapPosition &pos) {
   if (!findThreeNearestCalibrationPoints(false,pos,picX,picY,cartX,cartY)) {
     core->getThread()->unlockMutex(accessMutex);
     return false;
+  }
+  if (debug) {
+    for (int i=0;i<3;i++) {
+      DEBUG("%d: picX=%03.0f picY=%03.0f cartX=%02.6f cartY=%02.6f",i,picX[i],picY[i],cartX[i],cartY[i]);
+    }
   }
 
   // Solve the equation to compute picture coordinates from cartesian coordinates
