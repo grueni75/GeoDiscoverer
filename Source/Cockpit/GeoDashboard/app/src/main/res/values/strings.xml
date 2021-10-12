@@ -9,7 +9,7 @@
     <string name="service_registered">Dashboard service registered!</string>
     <string name="service_unregistered">Dashboard service unregistered!</string>
     <string name="fullscreen_content_description">Shows the dashboard</string>
-    <string name="refresh_title">Restart the network service</string>
+    <string name="refresh_title">Restart network</string>
     <string name="about">About</string>
     <string name="waiting_for_connection">Waiting at %1$s:%2$d&#8230;</string>
     <string name="init_server">Initializing network service&#8230;</string>
@@ -35,6 +35,7 @@
     </string>
     <string name="about_dismiss">OK</string>
     <string name="quit_message">Geo Dashboard is destroyed!</string>
-
+    <string name="reboot">Reboot</string>
+    <string name="shutdown">Shutdown</string>
 
 </resources>

@@ -69,6 +69,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
@@ -202,6 +203,11 @@ public class ViewDashboard extends Activity {
    */
   String lastClientAddress = null;
 
+  /**
+   * Bitmap to display
+   */
+  Bitmap dashboardBitmap = null;
+
   // Actions for message handling
   static final int ACTION_DISPLAY_BITMAP = 0;
   static final int ACTION_DISPLAY_TOAST = 1;
@@ -212,6 +218,34 @@ public class ViewDashboard extends Activity {
   static final int NET_CMD_PLAY_SOUND_DOG = 3;
   static final int NET_CMD_PLAY_SOUND_SHIP = 4;
   static final int NET_CMD_PLAY_SOUND_CAR = 5;
+
+  // Executes a command after an image view has drawn the image
+  String command=null;
+  View.OnLayoutChangeListener executeCommandAfterDrawingListener = new View.OnLayoutChangeListener() {
+    int count = 0;
+
+    @Override
+    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+      count++;
+      if (count == 2) {
+        try {
+          Process su = Runtime.getRuntime().exec("su");
+          DataOutputStream outputStream = new DataOutputStream(su.getOutputStream());
+          outputStream.writeBytes("sleep 3\n");
+          outputStream.flush();
+          outputStream.writeBytes(command + "\n");
+          outputStream.flush();
+          outputStream.writeBytes("exit\n");
+          outputStream.flush();
+          //su.waitFor();
+        } catch (IOException e) {
+          Log.d("GeoDashboard", e.getMessage());
+        }/* catch (InterruptedException e) {
+          Log.d("GeoDashboard", e.getMessage());
+        }*/
+      }
+    }
+  };
 
   /**
    * Registers the network service of this app
@@ -271,8 +305,8 @@ public class ViewDashboard extends Activity {
    * Displays a bitmap with a text
    */
   protected void displayTextBitmap(String text) {
-    Bitmap b = createTextBitmap(text);
-    Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,b);
+    dashboardBitmap = createTextBitmap(text);
+    Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP);
     msg.sendToTarget();
   }
 
@@ -393,10 +427,9 @@ public class ViewDashboard extends Activity {
         }
 
         // Set bitmap to indicate "wait for first connection"
-        Bitmap b = createTextBitmap(getString(R.string.waiting_for_connection,address.toString(),serverSocket.getLocalPort()));
-        Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,b);
+        dashboardBitmap = createTextBitmap(getString(R.string.waiting_for_connection,address.toString(),serverSocket.getLocalPort()));
+        Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP);
         msg.sendToTarget();
-        b=null;
         serviceActive = true;
 
         // Handle network communication
@@ -417,10 +450,14 @@ public class ViewDashboard extends Activity {
                 dos = null;
                 break;
               case NET_CMD_DISPLAY_BITMAP:
-                Bitmap dashboardBitmap = BitmapFactory.decodeStream(client.getInputStream());
-                msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP,dashboardBitmap);
+
+                // Do not send a message but override image only if prev image not yet displayed
+                if (dashboardBitmap!=null) {
+                  Log.d("GeoDashboard","previous image has not been consumed, overriding it");
+                }
+                dashboardBitmap = BitmapFactory.decodeStream(client.getInputStream());
+                msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP);
                 msg.sendToTarget();
-                dashboardBitmap = null;
                 break;
             }
             client.close();
@@ -594,6 +631,8 @@ public class ViewDashboard extends Activity {
       public void handleMessage(Message inputMessage) {
         switch(inputMessage.what) {
           case ViewDashboard.ACTION_DISPLAY_BITMAP:
+            if (command!=null)
+              break;
             updateCount++;
             long delay=0;
             if (updateCount>=FULL_REFRESH_UPDATE_COUNT) {
@@ -607,13 +646,16 @@ public class ViewDashboard extends Activity {
               delay=100;
             }
             final Handler handler = new Handler(Looper.getMainLooper());
-            final Bitmap dashboardBitmap = (Bitmap) inputMessage.obj;
-            handler.postDelayed(new Runnable() {
-              @Override
-              public void run() {
-                dashboardView.setImageBitmap(dashboardBitmap);
-              }
-            }, delay);
+            final Bitmap bitmap = dashboardBitmap;
+            dashboardBitmap = null;
+            if (bitmap!=null) {
+              handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                  dashboardView.setImageBitmap(bitmap);
+                }
+              }, delay);
+            }
             break;
           case ViewDashboard.ACTION_DISPLAY_TOAST:
             String message = (String) inputMessage.obj;
@@ -770,6 +812,16 @@ public class ViewDashboard extends Activity {
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
+      case R.id.action_reboot:
+        command="reboot";
+        dashboardView.addOnLayoutChangeListener(executeCommandAfterDrawingListener);
+        dashboardView.setImageResource(R.drawable.poweroff);
+        return true;
+      case R.id.action_shutdown:
+        command="reboot -p";
+        dashboardView.addOnLayoutChangeListener(executeCommandAfterDrawingListener);
+        dashboardView.setImageResource(R.drawable.poweroff);
+        return true;
       case R.id.action_refresh:
         restartService();
         return true;

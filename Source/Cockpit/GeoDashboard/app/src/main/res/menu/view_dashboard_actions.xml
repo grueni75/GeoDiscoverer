@@ -1,9 +1,21 @@
 
     <menu xmlns:android="http://schemas.android.com/apk/res/android">
-        <item android:id="@+id/action_refresh" 
-              android:title="@string/refresh_title"
-              android:showAsAction="always"></item>
-      <item android:id="@+id/action_about"
+        <item android:id="@+id/action_about"
             android:title="@string/about"
             android:showAsAction="always"></item>
+        <item android:id="@+id/action_refresh"
+            android:title="@string/refresh_title"
+            android:showAsAction="always"
+            android:icon="@drawable/restart">
+        </item>
+        <item android:id="@+id/action_shutdown"
+            android:title="@string/shutdown"
+            android:showAsAction="always"
+            android:icon="@drawable/shutdown">
+        </item>
+        <item android:id="@+id/action_reboot"
+            android:title="@string/reboot"
+            android:showAsAction="always"
+            android:icon="@drawable/reboot">
+        </item>
     </menu>
