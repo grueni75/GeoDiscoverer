@@ -148,6 +148,18 @@
             android:theme="@style/GDStyle">
         </activity>
 
+        <!--
+        <activity
+            android:name=".GetGoogleMapPlaceList"
+            android:label="@string/get_google_map_place_list"
+            android:theme="@style/GDStyle">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        -->
+
         <service
             android:name=".GDService"
             android:exported="true"/>
@@ -172,6 +184,14 @@
                 <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT"/>
                 <data android:scheme="wear" android:host="*" android:pathPrefix="/com.untouchableapps.android.geodiscoverer" />
             </intent-filter>
+        </service>
+
+        <service android:name=".GDAccessibilityService"
+                 android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibility_service" />
         </service>
 
     </application>

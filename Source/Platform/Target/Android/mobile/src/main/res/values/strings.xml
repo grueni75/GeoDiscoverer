@@ -157,4 +157,17 @@
     <string name="restart">Restart</string>
     <string name="brouter">BRouter</string>
     <string name="routes_outdated">Restarting core (Routes outdated)</string>
+    <string name="get_google_map_place_list">Map Place List</string>
+    <string name="notification_accessibility_service_not_enabled_title">Accessibility service is not enabled</string>
+    <string name="notification_accessibility_service_not_enabled_text">Press here to change this!</string>
+    <string name="notification_channel_accessibility_service_name">Accessibility service</string>
+    <string name="notification_channel_accessibility_service_description">Notifications that indicate a disabled accessibility service</string>
+    <string name="notification_channel_status_name">Status</string>
+    <string name="notification_channel_status_description">Notifications that indicate the app status</string>
+    <string name="notification_channel_address_point_grabber_name">Address point grabber</string>
+    <string name="notification_channel_address_point_grabber_description">Notifications showing new address points grabbed from other apps</string>
+    <string name="notification_address_point_grabbed_title">%1$s grabbed</string>
+    <string name="notification_address_point_grabbed_text">Press here to add it as an address point!</string>
+    <string name="address_point_added">%1$s added!</string>
+    <string name="address_point_not_found">%1$s can not be geocoded!</string>
 </resources>

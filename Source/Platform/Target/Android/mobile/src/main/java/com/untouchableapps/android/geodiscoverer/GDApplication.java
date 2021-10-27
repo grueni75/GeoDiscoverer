@@ -102,6 +102,10 @@ import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 /* Main application class */
 public class GDApplication extends Application implements GDAppInterface, GoogleApiClient.ConnectionCallbacks, ChannelApi.ChannelListener {
 
+  // Notification IDs
+  static final int NOTIFICATION_STATUS_ID=1;
+  static final int NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID=2;
+
   /** Interface to the native C++ core */
   public static GDCore coreObject=null;
   

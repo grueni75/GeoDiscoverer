@@ -24,6 +24,7 @@ package com.untouchableapps.android.geodiscoverer;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -31,20 +32,33 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.server.BRouterServer;
 import com.untouchableapps.android.geodiscoverer.server.MapTileServer;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GDService extends Service {
   
@@ -93,6 +107,77 @@ public class GDService extends Service {
   int tilesTotal;
   String timeLeft;
 
+  /** Finds the geographic position for the given address */
+  private class LocationFromAddressTask extends AsyncTask<Void, Void, Void> {
+
+    String name;
+    String address;
+    String group;
+    boolean locationFound=false;
+
+    protected void onPreExecute() {
+    }
+
+    protected Void doInBackground(Void... params) {
+
+      Geocoder geocoder = new Geocoder(GDService.this);
+      try {
+        List<Address> addresses = geocoder.getFromLocationName(address, 1);
+        if (addresses.size()>0) {
+          Address a = addresses.get(0);
+          coreObject.scheduleCoreCommand("addAddressPoint",
+              name, address,
+              String.valueOf(a.getLongitude()), String.valueOf(a.getLatitude()),
+              group);
+          locationFound=true;
+        } else {
+          locationFound=false;
+        }
+      }
+      catch(IOException e) {
+        GDApplication.addMessage(GDApplication.WARNING_MSG, "GDApp", "Geocoding not successful: " + e.getMessage());
+      }
+      return null;
+    }
+
+    protected void onPostExecute(Void result) {
+      if (!locationFound) {
+        Toast.makeText(GDService.this,getString(R.string.address_point_not_found,name),Toast.LENGTH_LONG).show();
+      } else {
+        Toast.makeText(GDService.this,getString(R.string.address_point_added,name),Toast.LENGTH_LONG).show();
+      }
+    }
+  }
+
+  /** Checks if accessibility service is enabled */
+  public boolean isAccessibilityEnabled() {
+    int accessibilityEnabled = 0;
+    final String ACCESSIBILITY_SERVICE_NAME = "com.untouchableapps.android.geodiscoverer/com.untouchableapps.android.geodiscoverer.GDAccessibilityService";
+    try {
+      accessibilityEnabled = Settings.Secure.getInt(this.getContentResolver(),android.provider.Settings.Secure.ACCESSIBILITY_ENABLED);
+    } catch (Settings.SettingNotFoundException e) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Error finding accessibility service setting: " + e.getMessage());
+    }
+    TextUtils.SimpleStringSplitter stringColonSplitter = new TextUtils.SimpleStringSplitter(':');
+    if (accessibilityEnabled==1) {
+      String settingValue = Settings.Secure.getString(getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "Setting: " + settingValue);
+      if (settingValue != null) {
+        TextUtils.SimpleStringSplitter splitter = stringColonSplitter;
+        splitter.setString(settingValue);
+        while (splitter.hasNext()) {
+          String accessabilityService = splitter.next();
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Setting: " + accessabilityService);
+          if (accessabilityService.equalsIgnoreCase(ACCESSIBILITY_SERVICE_NAME)){
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","We've found the correct setting - accessibility is switched on!");
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   /** Called when the service is created the first time */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   @Override
@@ -122,6 +207,20 @@ public class GDService extends Service {
     IntentFilter i=new IntentFilter(Intent.ACTION_USER_PRESENT);
     registerReceiver(userPresentReceiver,i);
 
+    // Create the notification channel
+    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+      NotificationChannel channel = new NotificationChannel("accessibilityService",
+          getString(R.string.notification_channel_accessibility_service_name),
+          NotificationManager.IMPORTANCE_HIGH);
+      channel.setDescription(getString(R.string.notification_channel_accessibility_service_description));
+      notificationManager.createNotificationChannel(channel);
+      channel = new NotificationChannel("status",
+          getString(R.string.notification_channel_status_name),
+          NotificationManager.IMPORTANCE_DEFAULT);
+      channel.setDescription(getString(R.string.notification_channel_status_description));
+      notificationManager.createNotificationChannel(channel);
+    }
+
     // Prepare the notification
     Intent notificationIntent = new Intent(this, ViewMap.class);
     pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
@@ -143,6 +242,22 @@ public class GDService extends Service {
     stopHeartRateUnavailableSoundAction = new NotificationCompat.Action.Builder(
         R.drawable.mute, "No Heartrate", pendingStopHeartRateUnavailableSoundIntent
     ).build();
+
+    // Check if accessibility service is enabled
+    if (!isAccessibilityEnabled()) {
+      notificationIntent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+      PendingIntent pi = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+      NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "accessibilityService")
+          .setContentTitle(getText(R.string.notification_accessibility_service_not_enabled_title))
+          .setContentText(getString(R.string.notification_accessibility_service_not_enabled_text))
+          .setContentIntent(pi)
+          .setSmallIcon(R.drawable.notification_running)
+          .setDefaults(Notification.DEFAULT_ALL)
+          .setAutoCancel(true)
+          .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+          .setPriority(NotificationCompat.PRIORITY_HIGH);
+      notificationManager.notify(GDApplication.NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID, builder.build());
+    }
   }
   
   /** No binding supported */
@@ -158,7 +273,7 @@ public class GDService extends Service {
     // Handle download status updates
     NotificationCompat.Builder builder;
     if (tilesLeft==0) {
-      builder = new NotificationCompat.Builder(this)
+      builder = new NotificationCompat.Builder(this,"status")
           .setContentTitle(getText(R.string.notification_title))
           .setContentText(getText(R.string.notification_service_in_foreground_message))
           .setSmallIcon(R.drawable.notification_running)
@@ -169,7 +284,7 @@ public class GDService extends Service {
       /*Drawable notificationDownloadingDrawble= ResourcesCompat.getDrawable(getResources(),
           R.drawable.notification_downloading,null);
       DrawableCompat.setTint(notificationDownloadingDrawble,Color.WHITE);*/
-      builder = new NotificationCompat.Builder(this)
+      builder = new NotificationCompat.Builder(this, "status")
           .setContentTitle(getText(R.string.notification_title))
           .setContentText(getString(R.string.notification_map_download_ongoing_message, tilesLeft, timeLeft))
           .setSmallIcon(R.drawable.notification_downloading)
@@ -376,7 +491,7 @@ public class GDService extends Service {
       tilesTotal = intent.getIntExtra("tilesLeft", 0) + tilesDone;
       timeLeft = intent.getStringExtra("timeLeft");
       notification = updateNotification();
-      notificationManager.notify(R.string.notification_title, notification);
+      notificationManager.notify(GDApplication.NOTIFICATION_STATUS_ID, notification);
       GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",tilesLeft + " tiles left for downloading");
     }
 
@@ -398,7 +513,7 @@ public class GDService extends Service {
       if (heartRateService!=null) {
         heartRateService.heartRateUnavailableSound=false;
         notification = updateNotification();
-        notificationManager.notify(R.string.notification_title, notification);
+        notificationManager.notify(GDApplication.NOTIFICATION_STATUS_ID, notification);
       }
     }
 
@@ -433,6 +548,16 @@ public class GDService extends Service {
         coreObject.configStoreSetStringValue("Forumslader", "powerDrawLevel", String.valueOf(intent.getStringExtra("powerDrawLevel")));
         coreObject.executeCoreCommand("dataChanged");
       }
+    }
+
+    // Handle new address point
+    if (intent.getAction().equals("addAddressPoint")) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","adding address point " + intent.getStringExtra("name"));
+      LocationFromAddressTask task = new LocationFromAddressTask();
+      task.name=intent.getStringExtra("name");
+      task.address=intent.getStringExtra("address");
+      task.group=intent.getStringExtra("group");
+      task.execute();
     }
 
     return START_STICKY;

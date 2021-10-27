@@ -14,7 +14,7 @@ ANDROID_GDCW_QUOTED = $(subst /,\/,$(ANDROID_GDCW))
 
 SVGS = exit.svg
 SVGS = $(shell find SVG -name '*.svg' -printf '%P\n')
-DPIS = 120dpi_drawable-ldpi 160dpi_drawable-mdpi 240dpi_drawable-hdpi 320dpi_drawable-xhdpi 480dpi_drawable-xxhdpi 640dpi_drawable-xxxhdpi
+DPIS = 160dpi_drawable-mdpi 240dpi_drawable-hdpi 320dpi_drawable-xhdpi 480dpi_drawable-xxhdpi 
 PNGS = $(foreach dpi,$(DPIS),$(foreach svg,$(SVGS),$(dpi)/$(patsubst %.svg,%.png,$(svg))))
 
 # Macros:

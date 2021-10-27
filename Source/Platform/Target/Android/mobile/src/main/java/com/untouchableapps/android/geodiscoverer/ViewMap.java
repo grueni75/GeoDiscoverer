@@ -27,6 +27,9 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.DownloadManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -53,10 +56,12 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.StrictMode;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -137,6 +142,7 @@ public class ViewMap extends GDActivity {
   PowerManager powerManager;
   DevicePolicyManager devicePolicyManager;
   DownloadManager downloadManager;
+  NotificationManager notificationManager;
 
   // Wake lock
   WakeLock wakeLock = null;
@@ -1706,6 +1712,7 @@ public class ViewMap extends GDActivity {
     sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
     powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
     devicePolicyManager = (DevicePolicyManager)this.getSystemService(Context.DEVICE_POLICY_SERVICE);
+    notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
     // Prepare the window contents
     setContentView(R.layout.view_map);
