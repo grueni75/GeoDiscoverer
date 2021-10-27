@@ -218,7 +218,7 @@ public class GDAccessibilityService extends AccessibilityService {
         String names[] = GDApplication.coreObject.configStoreGetAttributeValues("Navigation/AddressPoint","name");
         boolean found=false;
         for (int i=0;i<names.length;i++) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","name="+names[i]);
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","name="+names[i]);
           if (names[i].equals(currentAddressPoint.name)) {
             found=true;
             break;
@@ -230,7 +230,7 @@ public class GDAccessibilityService extends AccessibilityService {
         }
 
         // Schedule the thread to create the notification
-        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Starting notification thread");
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Starting notification thread");
         notificationThread=new Thread(new Runnable() {
 
           AddressPoint addressPoint=currentAddressPoint;
@@ -249,7 +249,7 @@ public class GDAccessibilityService extends AccessibilityService {
             notificationThread=null;
 
             // Create the notification
-            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Creating notification");
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Creating notification");
             Intent notificationIntent = new Intent(GDAccessibilityService.this, GDService.class);
             notificationIntent.setAction("addAddressPoint");
             notificationIntent.putExtra("name",addressPoint.name);
