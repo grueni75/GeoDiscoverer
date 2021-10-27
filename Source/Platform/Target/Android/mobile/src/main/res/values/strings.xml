@@ -170,4 +170,5 @@
     <string name="notification_address_point_grabbed_text">Press here to add it as an address point!</string>
     <string name="address_point_added">%1$s added!</string>
     <string name="address_point_not_found">%1$s can not be geocoded!</string>
+    <string name="back_button">Press again to exit!</string>
 </resources>

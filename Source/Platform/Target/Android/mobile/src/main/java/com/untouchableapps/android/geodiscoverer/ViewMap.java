@@ -155,6 +155,7 @@ public class ViewMap extends GDActivity {
   boolean exitRequested = false;
   boolean restartRequested = false;
   int nestedImportWaypointsDecisions = 0;
+  boolean doubleBackToExitPressedOnce = false;
 
   // Handles finished queued downloads
   LinkedList<Bundle> downloads = new LinkedList<Bundle>();
@@ -1673,6 +1674,14 @@ public class ViewMap extends GDActivity {
     busyTextView.setText(" " + getString(R.string.stopping_core_object) + " ");
   }
 
+  /** Exits the app */
+  void exitApp() {
+    setExitBusyText();
+    Message m=Message.obtain(coreObject.messageHandler);
+    m.what = GDCore.STOP_CORE;
+    coreObject.messageHandler.sendMessage(m);
+  }
+
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -1755,10 +1764,7 @@ public class ViewMap extends GDActivity {
             }
             break;
           case R.id.nav_exit:
-            setExitBusyText();
-            Message m=Message.obtain(coreObject.messageHandler);
-            m.what = GDCore.STOP_CORE;
-            coreObject.messageHandler.sendMessage(m);
+            exitApp();
             break;
           case R.id.nav_restart:
             restartCore(false);
@@ -2151,4 +2157,20 @@ public class ViewMap extends GDActivity {
     return super.onKeyDown(keyCode,event);
   }
 
+  @Override
+  public void onBackPressed() {
+    if (doubleBackToExitPressedOnce) {
+      super.onBackPressed();
+      exitApp();
+      return;
+    }
+    doubleBackToExitPressedOnce=true;
+    Toast.makeText(this,R.string.back_button,Toast.LENGTH_LONG).show();
+    new Handler().postDelayed(new Runnable() {
+      @Override
+      public void run() {
+        doubleBackToExitPressedOnce=false;
+      }
+    }, 2000);
+  }
 }
