@@ -1979,7 +1979,12 @@
               </xsd:element>
               <xsd:element name="tileOffScreenFactor" type="xsd:double" default="2">
                 <xsd:annotation>
-                  <xsd:documentation>Factor to scale the screen length for rendering additional tiles outside the screen .</xsd:documentation>
+                  <xsd:documentation>Factor to scale the screen length for rendering additional tiles outside the screen.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="tileOffScreenFactorWatch" type="xsd:double" default="1.2">
+                <xsd:annotation>
+                  <xsd:documentation>Factor to scale the screen length for rendering additional tiles outside the screen on a watch.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="visibleTileLimit" type="xsd:integer" default="3">

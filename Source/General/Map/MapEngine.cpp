@@ -33,7 +33,11 @@ namespace GEODISCOVERER {
 // Constructor
 MapEngine::MapEngine() {
   initDistance=core->getConfigStore()->getIntValue("Map","initDistance", __FILE__, __LINE__);
-  tileOffScreenFactor=core->getConfigStore()->getIntValue("Map","tileOffScreenFactor", __FILE__, __LINE__);
+  if (core->getDefaultDevice()->getIsWatch())
+    tileOffScreenFactor=core->getConfigStore()->getDoubleValue("Map","tileOffScreenFactorWatch", __FILE__, __LINE__);
+  else
+    tileOffScreenFactor=core->getConfigStore()->getDoubleValue("Map","tileOffScreenFactor", __FILE__, __LINE__);
+  //DEBUG("tileOffScreenFactor=%f",tileOffScreenFactor);
   maxTiles=0;
   returnToLocationTimeout=core->getConfigStore()->getIntValue("Map","returnToLocationTimeout", __FILE__, __LINE__);
   returnToLocationOneTime=false;

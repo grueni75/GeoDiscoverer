@@ -1185,7 +1185,7 @@ void MapSource::queueRemoteNavigationEngineOverlayArchive(std::string remoteHash
   }
 
   // Did the overlay change?
-  //DEBUG("remoteHash=%s localHash=%s",(*alreadyKnownMapContainers)[i+1].c_str(),c->getOverlayGraphicHash().c_str());
+  //DEBUG("remoteHash=%s localHash=%s",remoteHash.c_str(),core->getNavigationEngine()->getOverlayGraphicHash().c_str());
   if (remoteHash!=core->getNavigationEngine()->getOverlayGraphicHash()) {
     DEBUG("navigation engine overlay out dated at remote side, adding it to queue", NULL);
     queueRemoteServerCommand("serveRemoteNavigationEngineOverlay(" + workPath + "/navigationEngine.gdo)");
@@ -1468,11 +1468,13 @@ void MapSource::remoteServer() {
         lockAccess(__FILE__,__LINE__);
         std::list<MapTile*> tiles;
         fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,&tiles);
-        //DEBUG("tiles.size()=%d",tiles.size());
-        for (std::list<MapTile*>::iterator i=tiles.begin();i!=tiles.end();i++) {
-          MapTile *t=*i;
-          //DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFilePath());
-          queueRemoteMapContainer(t->getParentMapContainer(), &args, 20, &mapImagesToServe);
+        if (((args.size()-20)/2)<maxTiles) {
+          DEBUG("tile count mobile: %d",tiles.size());
+          for (std::list<MapTile*>::iterator i=tiles.begin();i!=tiles.end();i++) {
+            MapTile *t=*i;
+            //DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFilePath());
+            queueRemoteMapContainer(t->getParentMapContainer(), &args, 20, &mapImagesToServe);
+          }
         }
         unlockAccess();
         commandProcessed=true;

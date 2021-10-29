@@ -329,6 +329,8 @@ MapTile *MapSourceRemote::findMapTileByGeographicCoordinate(MapPosition pos, Int
 // Fills the given area with tiles
 void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles) {
 
+  DEBUG("fillGeographicAreaWithTiles called",NULL);
+
   // Prepare the cmd for the remote side
   std::stringstream cmd;
   cmd << "fillGeographicAreaWithRemoteTiles("
@@ -349,9 +351,11 @@ void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferr
 
   // First check what is available locally
   MapSource::fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,tiles);
+  //DEBUG("tile count watch: %d",tiles->size());
 
   // Get all found map containers
   for (std::list<MapTile*>::iterator i=tiles->begin();i!=tiles->end();i++) {
+    //DEBUG((*i)->getParentMapContainer()->getCalibrationFilePath(),NULL);
     cmd << "," << (*i)->getParentMapContainer()->getCalibrationFilePath() << "," << (*i)->getParentMapContainer()->getOverlayGraphicHash();
   }
 
