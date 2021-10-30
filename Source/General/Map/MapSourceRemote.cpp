@@ -329,8 +329,6 @@ MapTile *MapSourceRemote::findMapTileByGeographicCoordinate(MapPosition pos, Int
 // Fills the given area with tiles
 void MapSourceRemote::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeighbor, Int maxTiles, std::list<MapTile*> *tiles) {
 
-  DEBUG("fillGeographicAreaWithTiles called",NULL);
-
   // Prepare the cmd for the remote side
   std::stringstream cmd;
   cmd << "fillGeographicAreaWithRemoteTiles("

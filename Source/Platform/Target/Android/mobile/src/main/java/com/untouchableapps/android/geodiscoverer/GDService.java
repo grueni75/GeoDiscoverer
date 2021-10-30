@@ -318,7 +318,7 @@ public class GDService extends Service {
       // Set the service to foreground
       if (!serviceInForeground) {
         notification = updateNotification();
-        startForeground(R.string.notification_title, notification);
+        startForeground(GDApplication.NOTIFICATION_STATUS_ID, notification);
         serviceInForeground = true;
       }
 

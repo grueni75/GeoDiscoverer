@@ -1469,7 +1469,7 @@ void MapSource::remoteServer() {
         std::list<MapTile*> tiles;
         fillGeographicAreaWithTiles(area,preferredNeighbor,maxTiles,&tiles);
         if (((args.size()-20)/2)<maxTiles) {
-          DEBUG("tile count mobile: %d",tiles.size());
+          //DEBUG("tile count mobile: %d",tiles.size());
           for (std::list<MapTile*>::iterator i=tiles.begin();i!=tiles.end();i++) {
             MapTile *t=*i;
             //DEBUG("map container %s found",t->getParentMapContainer()->getCalibrationFilePath());
