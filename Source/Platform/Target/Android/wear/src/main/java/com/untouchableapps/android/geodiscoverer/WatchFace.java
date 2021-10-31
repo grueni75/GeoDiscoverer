@@ -62,6 +62,7 @@ import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -132,6 +133,45 @@ public class WatchFace extends Gles2WatchFaceService {
 
   /** Minimum distance between two toasts in milliseconds */
   int toastDistance = 5000;
+
+  /** Thread that does the zooming */
+  Object zoomStart=new Object();
+  String zoomValue;
+  boolean zoomStop=false;
+  final long zoomWaitTime=10;
+  final int zoomRepeats=10;
+  int zoomPos=0;
+  int zoomEnd=0;
+  Thread zoomThread = new Thread(new Runnable() {
+    @Override
+    public void run() {
+
+      // Repeat until quit
+      while (!zoomStop) {
+
+        // Wait for next round
+        synchronized(zoomStart) {
+          try {
+            zoomStart.wait();
+          } catch (InterruptedException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
+        }
+
+        // Do the zoom
+        while ((!zoomStop)&&(zoomPos<zoomEnd)) {
+          coreObject.executeCoreCommand("zoom", zoomValue);
+          try {
+            Thread.sleep(zoomWaitTime);
+          } catch (InterruptedException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
+          zoomPos++;
+        }
+        zoomPos=0;
+      }
+    }
+  });
 
   /** Shows a dialog  */
   public synchronized void dialog(int kind, String message) {
@@ -457,6 +497,9 @@ public class WatchFace extends Gles2WatchFaceService {
       return;
     }
 
+    // Start the zoom thread
+    zoomThread.start();
+
     // Only start the core object if all permissions are available
     if (permissionsGranted()) {
 
@@ -578,11 +621,39 @@ public class WatchFace extends Gles2WatchFaceService {
             return coreObject.onTouchEvent(event);
           }
         });
+        touchHandlerView.setOnGenericMotionListener(new View.OnGenericMotionListener() {
+          @Override
+          public boolean onGenericMotion(View v, MotionEvent event) {
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", event.toString());
+            if (event.getAction() == MotionEvent.ACTION_SCROLL && event.isFromSource(android.view.InputDevice.SOURCE_ROTARY_ENCODER)) {
+              boolean startZoom=false;
+              if (event.getAxisValue(MotionEvent.AXIS_SCROLL) == 1) {
+                zoomValue="0.98";
+                startZoom=true;
+              }
+              if (event.getAxisValue(MotionEvent.AXIS_SCROLL) == -1) {
+                zoomValue="1.02";
+                startZoom=true;
+              }
+              if (startZoom) {
+                synchronized (zoomStart) {
+                  zoomEnd = zoomPos + zoomRepeats;
+                  zoomStart.notify();
+                }
+              }
+            }
+            return false;
+          }
+        });
       }
     }
 
     @Override
     public void onDestroy() {
+      zoomStop=true;
+      synchronized (zoomStart) {
+        zoomStart.notify();
+      }
       if ((touchHandlerActive)&&(touchHandlerView!=null))
         windowManager.removeView(touchHandlerView);
       touchHandlerView=null;
