@@ -258,7 +258,7 @@ public class GDAccessibilityService extends AccessibilityService {
               notificationIntent.putExtra("address",addressPoint.plusCode);
             else
               notificationIntent.putExtra("address",addressPoint.address);
-            PendingIntent pi = PendingIntent.getService(GDAccessibilityService.this, 0, notificationIntent, 0);
+            PendingIntent pi = PendingIntent.getService(GDAccessibilityService.this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT|PendingIntent.FLAG_CANCEL_CURRENT);
             String notificationTitle=getString(R.string.notification_address_point_grabbed_title,addressPoint.name);
             NotificationCompat.Builder builder = new NotificationCompat.Builder(GDAccessibilityService.this, "addressPointGrabber")
                 .setContentTitle(notificationTitle)
