@@ -165,6 +165,9 @@ protected:
   // Indicates if OpenGL ES 3.0 is available
   bool openglES30Supported;
 
+  // Alpha scale to use
+  double alphaScale;
+
 #ifdef TARGET_ANDROID
   // EGL context
   static EGLConfig eglConfig;
@@ -322,6 +325,11 @@ public:
   void setAllowAllocation(bool allowAllocation)
   {
       this->allowAllocation=allowAllocation;
+  }
+
+  void setAlphaScale(double alphaScale) 
+  {
+    this->alphaScale=alphaScale;
   }
 
   bool isTextureFormatRGB888Supported() const {

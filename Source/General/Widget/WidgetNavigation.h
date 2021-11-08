@@ -159,6 +159,7 @@ protected:
   // Font string objects for drawing
   FontString *distanceLabelFontString;
   FontString *distanceValueFontString;
+  FontString *distanceValueWatchFontString;
   FontString *turnFontString;
   FontString *durationLabelFontString;
   FontString *durationValueFontString;
@@ -259,7 +260,10 @@ public:
   virtual void updatePosition(Int x, Int y, Int z);
 
   // Draws the status texts on a watch
-  void drawStatus(TimestampInMicroseconds t);
+  void drawWatchStatus(TimestampInMicroseconds t);
+
+  // Draws the widget status
+  void drawWidgetStatus(TimestampInMicroseconds t);
 
   // Getters and setters
   void setUpdateInterval(TimestampInMicroseconds updateInterval) {

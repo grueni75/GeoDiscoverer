@@ -59,6 +59,9 @@ public:
   // Called when the widget is not touched anymore
   virtual void onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cancel);
 
+  // Called when the widget must be drawn
+  virtual void draw(TimestampInMicroseconds t);
+
   // Getters and setters
   void setCommand(std::string command)
   {

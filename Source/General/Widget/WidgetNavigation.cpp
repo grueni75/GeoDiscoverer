@@ -63,6 +63,7 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   distanceLabelFontString=NULL;
   durationLabelFontString=NULL;
   distanceValueFontString=NULL;
+  distanceValueWatchFontString=NULL;
   durationValueFontString=NULL;
   clockFontString=NULL;
   turnFontString=NULL;
@@ -84,14 +85,12 @@ WidgetNavigation::WidgetNavigation(WidgetPage *widgetPage) :
   touchModeRadius=0;
   isWatch=widgetContainer->getWidgetEngine()->getDevice()->getIsWatch();
   FontEngine *fontEngine=widgetContainer->getFontEngine();
-  if (!isWatch) {
-    fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
-    fontEngine->updateString(&durationLabelFontString,"Duration");
-    fontEngine->updateString(&altitudeLabelFontString,"Altitude");
-    fontEngine->updateString(&trackLengthLabelFontString,"Track");
-    fontEngine->updateString(&speedLabelFontString,"Speed");
-    fontEngine->unlockFont();
-  }
+  fontEngine->lockFont("sansBoldTiny",__FILE__, __LINE__);
+  fontEngine->updateString(&durationLabelFontString,"Duration");
+  fontEngine->updateString(&altitudeLabelFontString,"Altitude");
+  fontEngine->updateString(&trackLengthLabelFontString,"Track");
+  fontEngine->updateString(&speedLabelFontString,"Speed");
+  fontEngine->unlockFont();
   fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
   for(int i=0;i<8;i++)
     orientationLabelFontStrings[i]=NULL;
@@ -178,6 +177,7 @@ WidgetNavigation::~WidgetNavigation() {
   if (turnFontString) fontEngine->destroyString(turnFontString);
   fontEngine->unlockFont();
   fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
+  if (distanceValueWatchFontString) fontEngine->destroyString(distanceValueWatchFontString);
   if (durationValueFontString) fontEngine->destroyString(durationValueFontString);
   if (altitudeValueFontString) fontEngine->destroyString(altitudeValueFontString);
   if (trackLengthValueFontString) fontEngine->destroyString(trackLengthValueFontString);
@@ -257,7 +257,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   }
 
   // Update the font strings (if not already)
-  if ((distanceLabelFontString==NULL)&&(!isWatch)) {
+  if (distanceLabelFontString==NULL) {
     if (textColumnCount==2)
       fontEngine->lockFont("sansBoldSmall",__FILE__, __LINE__);
     else
@@ -480,13 +480,16 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         unitConverter->formatMeters(distance,value,unit,isWatch ? 1 : 2);
         infos.str("");
         infos << value << " " << unit;
-        fontEngine->updateString(&distanceValueFontString,infos.str(),statusTextWidthLimit);
+        fontEngine->updateString(&distanceValueFontString,infos.str(),isWatch ? -1 : statusTextWidthLimit);
         activateWidget=true;
       } else {
-        fontEngine->updateString(&distanceValueFontString,"unknown",statusTextWidthLimit);
+        fontEngine->updateString(&distanceValueFontString,"unknown",isWatch ? -1 : statusTextWidthLimit);
       }
       fontEngine->unlockFont();
       if (isWatch) {
+        fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
+        fontEngine->updateString(&distanceValueWatchFontString,distanceValueFontString->getContents(),statusTextWidthLimit);
+        fontEngine->unlockFont();
         for (Int i=0;i<4;i++) {
           FontString *s=getQuadrantFontString(i);
           circularStrip[i]->setWidth(s->getWidth());
@@ -697,7 +700,7 @@ FontString* WidgetNavigation::getQuadrantFontString(Int i) {
     s = durationValueFontString;
     break;
   case 1:
-    s = distanceValueFontString;
+    s = distanceValueWatchFontString;
     break;
   case 2:
     s = altitudeValueFontString;
@@ -710,7 +713,7 @@ FontString* WidgetNavigation::getQuadrantFontString(Int i) {
 }
 
 // Draws the status texts on a watch
-void WidgetNavigation::drawStatus(TimestampInMicroseconds t) {
+void WidgetNavigation::drawWatchStatus(TimestampInMicroseconds t) {
   GraphicColor c = statusIcon.getColor();
   c.setAlpha(color.getAlpha());
   statusIcon.setColor(c);
@@ -735,6 +738,92 @@ void WidgetNavigation::drawStatus(TimestampInMicroseconds t) {
   screen->endObject();
 }
 
+// Draws the widget status
+void WidgetNavigation::drawWidgetStatus(TimestampInMicroseconds t) {
+  GraphicColor c;
+  c=separatorIcon.getColor();
+  c.setAlpha(color.getAlpha());
+  separatorIcon.setColor(c);
+  separatorIcon.draw(t);
+  if (distanceLabelFontString) {
+    c=distanceLabelFontString->getColor();
+    c.setAlpha(color.getAlpha());
+    distanceLabelFontString->setColor(c);
+    distanceLabelFontString->draw(t);
+  }
+  if (distanceValueFontString) {
+    c=distanceValueFontString->getColor();
+    c.setAlpha(color.getAlpha());
+    distanceValueFontString->setColor(c);
+    distanceValueFontString->draw(t);
+  }
+  FontString *leftLabelFontString = NULL;
+  FontString *leftValueFontString = NULL;
+  FontString *rightLabelFontString = NULL;
+  FontString *rightValueFontString = NULL;
+  if (textColumnCount==2) {
+    switch (secondRowState) {
+    case 0:
+      leftLabelFontString=durationLabelFontString;
+      leftValueFontString=durationValueFontString;
+      rightLabelFontString=altitudeLabelFontString;
+      rightValueFontString=altitudeValueFontString;
+      break;
+    case 1:
+      leftLabelFontString=trackLengthLabelFontString;
+      leftValueFontString=trackLengthValueFontString;
+      rightLabelFontString=speedLabelFontString;
+      rightValueFontString=speedValueFontString;
+      break;
+    }
+  } else {
+    switch (secondRowState) {
+    case 0:
+      leftLabelFontString=durationLabelFontString;
+      leftValueFontString=durationValueFontString;
+      break;
+    case 1:
+      leftLabelFontString=altitudeLabelFontString;
+      leftValueFontString=altitudeValueFontString;
+      break;
+    case 2:
+      leftLabelFontString=trackLengthLabelFontString;
+      leftValueFontString=trackLengthValueFontString;
+      break;
+    case 3:
+      leftLabelFontString=speedLabelFontString;
+      leftValueFontString=speedValueFontString;
+      break;
+    }
+  }
+  if (leftLabelFontString) {
+    c=leftLabelFontString->getColor();
+    c.setAlpha(color.getAlpha());
+    leftLabelFontString->setColor(c);
+    leftLabelFontString->draw(t);
+    c=leftValueFontString->getColor();
+    c.setAlpha(color.getAlpha());
+    leftValueFontString->setColor(c);
+    leftValueFontString->draw(t);
+  }
+  if (rightLabelFontString) {
+    c=rightLabelFontString->getColor();
+    c.setAlpha(color.getAlpha());
+    rightLabelFontString->setColor(c);
+    rightLabelFontString->draw(t);
+    c=rightValueFontString->getColor();
+    c.setAlpha(color.getAlpha());
+    rightValueFontString->setColor(c);
+    rightValueFontString->draw(t);
+  }
+  if (clockFontString) {
+    c=clockFontString->getColor();
+    c.setAlpha(color.getAlpha());
+    clockFontString->setColor(c);
+    clockFontString->draw(t);
+  }
+}
+
 // Draws a compass marker
 void WidgetNavigation::drawCompassMarker(TimestampInMicroseconds t, FontString *marker, double x, double y) {
   x-=((double)marker->getIconWidth())/2;
@@ -753,259 +842,194 @@ void WidgetNavigation::draw(TimestampInMicroseconds t) {
 
   GraphicColor c;
 
-  // Let the primitive draw the background
-  WidgetPrimitive::draw(t);
+  // Get the fade scale depending on ambiet mode
+  double fadeScale=widgetContainer->getWidgetEngine()->getGraphicEngine()->getAmbientFadeScale();
+  screen->setAlphaScale(fadeScale);
+  if (fadeScale>0) {
 
-  // Draw the battery status
-  if (isWatch) {
-    screen->startObject();
-    screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
-    for (Int kind=0;kind<2;kind++) {
-      Int batteryLevel;
-      bool batteryCharging;
-      if (kind==0) {
-        batteryLevel=core->getBatteryLevel();
-        batteryCharging=core->getBatteryCharging();
-      } else {
-        batteryLevel=core->getRemoteBatteryLevel();
-        batteryCharging=core->getRemoteBatteryCharging();
-      }
-      for (Int i=0;i<batteryDotCount;i++) {
-        double angle;
-        if (kind==0)
-          angle=FloatingPoint::degree2rad(270-batteryTotalAngle/2+i*batteryTotalAngle/(batteryDotCount-1));
-        else
-          angle=FloatingPoint::degree2rad(90+batteryTotalAngle/2-i*batteryTotalAngle/(batteryDotCount-1));
-        double x=batteryIconRadius*sin(angle);
-        double y=batteryIconRadius*cos(angle);
-        GraphicRectangle *dot;
-        if (batteryLevel>=100*i/batteryDotCount) {
-          if (batteryCharging)
-            dot=&batteryIconCharging;
-          else
-            dot=&batteryIconFull;
-        } else {
-          dot=&batteryIconEmpty;
-        }
-        GraphicColor c=dot->getColor();
-        c.setAlpha(color.getAlpha());
-        dot->setColor(c);
-        dot->setX(round(x-dot->getIconWidth()/2));
-        dot->setY(round(y-dot->getIconHeight()/2));
-        dot->draw(t);
-      }
-    }
-    screen->endObject();
-  }
+    // Let the primitive draw the background
+    WidgetPrimitive::draw(t);
 
-  /* Draw the blind if necessary
-  if ((isWatch)&&(showTurn)&&(!skipTurn)) {
-    c=blindIcon.getColor();
-    c.setAlpha(color.getAlpha());
-    blindIcon.setColor(c);
-    blindIcon.draw(t);
-  }*/
-
-  // Draw the clock
-  if ((isWatch)&&(clockFontString)&&(!((showTurn)&&(!skipTurn)))) {
-    c=clockCircularStrip.getColor();
-    c.setAlpha(color.getAlpha());
-    clockCircularStrip.setColor(c);
-    clockFontString->updateTexture();
-    clockCircularStrip.setTexture(clockFontString->getTexture());
-    clockCircularStrip.draw(t);
-  }
-
-  // Draw the touch mode 
-  if ((isWatch)&&(!((showTurn)&&(!skipTurn)))) {
-    //DEBUG("alpha=%d",touchModeIcon.getColor().getAlpha());
-    if (touchModeIcon.getColor().getAlpha()!=0)
-      touchModeIcon.draw(t);
-  }
-
-  // Draw the compass
-  if (!hideCompass) {
-    screen->startObject();
-    screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
-    screen->rotate(compassObject.getAngle(),0,0,1);
-    c=directionIcon.getColor();
-    c.setAlpha(color.getAlpha());
-    directionIcon.setColor(c);
-    directionIcon.draw(t);
-    screen->endObject();
-    screen->startObject();
-    screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
-    for (Int i=0;i<4;i++) {
-      double x=orientationLabelRadius*sin((i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
-      double y=orientationLabelRadius*cos((i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
-      drawCompassMarker(t,orientationLabelFontStrings[i],x,y);
-    }
+    // Draw the battery status
     if (isWatch) {
+      screen->startObject();
+      screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
+      for (Int kind=0;kind<2;kind++) {
+        Int batteryLevel;
+        bool batteryCharging;
+        if (kind==0) {
+          batteryLevel=core->getBatteryLevel();
+          batteryCharging=core->getBatteryCharging();
+        } else {
+          batteryLevel=core->getRemoteBatteryLevel();
+          batteryCharging=core->getRemoteBatteryCharging();
+        }
+        for (Int i=0;i<batteryDotCount;i++) {
+          double angle;
+          if (kind==0)
+            angle=FloatingPoint::degree2rad(270-batteryTotalAngle/2+i*batteryTotalAngle/(batteryDotCount-1));
+          else
+            angle=FloatingPoint::degree2rad(90+batteryTotalAngle/2-i*batteryTotalAngle/(batteryDotCount-1));
+          double x=batteryIconRadius*sin(angle);
+          double y=batteryIconRadius*cos(angle);
+          GraphicRectangle *dot;
+          if (batteryLevel>=100*i/batteryDotCount) {
+            if (batteryCharging)
+              dot=&batteryIconCharging;
+            else
+              dot=&batteryIconFull;
+          } else {
+            dot=&batteryIconEmpty;
+          }
+          GraphicColor c=dot->getColor();
+          c.setAlpha(color.getAlpha());
+          dot->setColor(c);
+          dot->setX(round(x-dot->getIconWidth()/2));
+          dot->setY(round(y-dot->getIconHeight()/2));
+          dot->draw(t);
+        }
+      }
+      screen->endObject();
+    }
+
+    /* Draw the blind if necessary
+    if ((isWatch)&&(showTurn)&&(!skipTurn)) {
+      c=blindIcon.getColor();
+      c.setAlpha(color.getAlpha());
+      blindIcon.setColor(c);
+      blindIcon.draw(t);
+    }*/
+
+    // Draw the clock
+    if ((isWatch)&&(clockFontString)&&(!((showTurn)&&(!skipTurn)))) {
+      c=clockCircularStrip.getColor();
+      c.setAlpha(color.getAlpha());
+      clockCircularStrip.setColor(c);
+      clockFontString->updateTexture();
+      clockCircularStrip.setTexture(clockFontString->getTexture());
+      clockCircularStrip.draw(t);
+    }
+
+    // Draw the touch mode 
+    if ((isWatch)&&(!((showTurn)&&(!skipTurn)))) {
+      //DEBUG("alpha=%d",touchModeIcon.getColor().getAlpha());
+      if (touchModeIcon.getColor().getAlpha()!=0)
+        touchModeIcon.draw(t);
+    }
+
+    // Draw the compass
+    if (!hideCompass) {
+      screen->startObject();
+      screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
+      screen->rotate(compassObject.getAngle(),0,0,1);
+      c=directionIcon.getColor();
+      c.setAlpha(color.getAlpha());
+      directionIcon.setColor(c);
+      directionIcon.draw(t);
+      screen->endObject();
+      screen->startObject();
+      screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
       for (Int i=0;i<4;i++) {
-        double x=orientationLabelRadius*sin(M_PI/4+(i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
-        double y=orientationLabelRadius*cos(M_PI/4+(i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
-        drawCompassMarker(t,orientationLabelFontStrings[i+4],x,y);
+        double x=orientationLabelRadius*sin((i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
+        double y=orientationLabelRadius*cos((i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
+        drawCompassMarker(t,orientationLabelFontStrings[i],x,y);
       }
-    }
-    screen->endObject();
-  }
-
-  // Draw the status below the arrow and the target if widget is not active
-  if ((isWatch)&&(!statusTextAbove)) {
-    drawStatus(t);
-  }
-
-  // Draw the arrow
-  if (arrowIcon.getColor().getAlpha()>0) {
-    //DEBUG("drawing arrow",NULL);
-    screen->startObject();
-    screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
-    screen->rotate(arrowIcon.getAngle(),0,0,1);
-    c=arrowIcon.getColor();
-    c.setAlpha(c.getAlpha()*color.getAlpha()/255);
-    arrowIcon.setColor(c);
-    arrowIcon.draw(t);
-    screen->endObject();
-  }
-
-  // Draw the target and the navigation point
-  if (!hideCompass) {
-    if (!hideTarget) {
-      screen->startObject();
-      screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
-      screen->rotate(compassObject.getAngle(),0,0,1);
-      screen->translate(targetRadius*sin(FloatingPoint::degree2rad(targetObject.getAngle())),targetRadius*cos(FloatingPoint::degree2rad(targetObject.getAngle())),getZ());
-      c=targetIcon.getColor();
-      c.setAlpha(color.getAlpha());
-      targetIcon.setColor(c);
-      screen->rotate(targetIcon.getAngle(),0,0,1);
-      targetIcon.draw(t);
-      screen->endObject();
-    }
-    if (!hideNavigationPoint) {
-      screen->startObject();
-      screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
-      screen->rotate(compassObject.getAngle(),0,0,1);
-      screen->translate(targetRadius*sin(FloatingPoint::degree2rad(navigationPointObject.getAngle())),targetRadius*cos(FloatingPoint::degree2rad(navigationPointObject.getAngle())),getZ());
-      c=navigationPointIcon.getColor();
-      c.setAlpha(color.getAlpha());
-      navigationPointIcon.setColor(c);
-      screen->rotate(-navigationPointObject.getAngle(),0,0,1);
-      navigationPointIcon.draw(t);
-      screen->endObject();
-    }
-  }
-  
-  // Draw the status above the arrow and the target if widget is active
-  if ((isWatch)&&(statusTextAbove)) {
-    drawStatus(t);
-  }
-
-  // Is a turn coming?
-  if ((showTurn)&&(!skipTurn)) {
-
-    // Draw the turn
-    screen->startObject();
-    screen->translate(getX(),getY(),getZ());
-    screen->setColor(turnColor.getRed(),turnColor.getGreen(),turnColor.getBlue(),255*turnColor.getAlpha()/color.getAlpha());
-    turnArrowPointBuffer.drawAsTriangles();
-    screen->endObject();
-    if (turnFontString) {
-      c=turnFontString->getColor();
-      c.setAlpha(color.getAlpha());
-      turnFontString->setColor(c);
-      turnFontString->draw(t);
-    }
-
-  } else {
-
-    // Draw the information about the target / route
-    if (!showTurn)
-      skipTurn=false;
-    if (!isWatch) {
-      c=separatorIcon.getColor();
-      c.setAlpha(color.getAlpha());
-      separatorIcon.setColor(c);
-      separatorIcon.draw(t);
-      if (distanceLabelFontString) {
-        c=distanceLabelFontString->getColor();
-        c.setAlpha(color.getAlpha());
-        distanceLabelFontString->setColor(c);
-        distanceLabelFontString->draw(t);
-      }
-      if (distanceValueFontString) {
-        c=distanceValueFontString->getColor();
-        c.setAlpha(color.getAlpha());
-        distanceValueFontString->setColor(c);
-        distanceValueFontString->draw(t);
-      }
-      FontString *leftLabelFontString = NULL;
-      FontString *leftValueFontString = NULL;
-      FontString *rightLabelFontString = NULL;
-      FontString *rightValueFontString = NULL;
-      if (textColumnCount==2) {
-        switch (secondRowState) {
-        case 0:
-          leftLabelFontString=durationLabelFontString;
-          leftValueFontString=durationValueFontString;
-          rightLabelFontString=altitudeLabelFontString;
-          rightValueFontString=altitudeValueFontString;
-          break;
-        case 1:
-          leftLabelFontString=trackLengthLabelFontString;
-          leftValueFontString=trackLengthValueFontString;
-          rightLabelFontString=speedLabelFontString;
-          rightValueFontString=speedValueFontString;
-          break;
-        }
-      } else {
-        switch (secondRowState) {
-        case 0:
-          leftLabelFontString=durationLabelFontString;
-          leftValueFontString=durationValueFontString;
-          break;
-        case 1:
-          leftLabelFontString=altitudeLabelFontString;
-          leftValueFontString=altitudeValueFontString;
-          break;
-        case 2:
-          leftLabelFontString=trackLengthLabelFontString;
-          leftValueFontString=trackLengthValueFontString;
-          break;
-        case 3:
-          leftLabelFontString=speedLabelFontString;
-          leftValueFontString=speedValueFontString;
-          break;
+      if (isWatch) {
+        for (Int i=0;i<4;i++) {
+          double x=orientationLabelRadius*sin(M_PI/4+(i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
+          double y=orientationLabelRadius*cos(M_PI/4+(i+4)*M_PI/2-FloatingPoint::degree2rad(compassObject.getAngle()));
+          drawCompassMarker(t,orientationLabelFontStrings[i+4],x,y);
         }
       }
-      if (leftLabelFontString) {
-        c=leftLabelFontString->getColor();
+      screen->endObject();
+    }
+
+    // Draw the status below the arrow and the target if widget is not active
+    if ((isWatch)&&(!statusTextAbove)) {
+      drawWatchStatus(t);
+    }
+
+    // Draw the arrow
+    if (arrowIcon.getColor().getAlpha()>0) {
+      //DEBUG("drawing arrow",NULL);
+      screen->startObject();
+      screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
+      screen->rotate(arrowIcon.getAngle(),0,0,1);
+      c=arrowIcon.getColor();
+      c.setAlpha(c.getAlpha()*color.getAlpha()/255);
+      arrowIcon.setColor(c);
+      arrowIcon.draw(t);
+      screen->endObject();
+    }
+
+    // Draw the target and the navigation point
+    if (!hideCompass) {
+      if (!hideTarget) {
+        screen->startObject();
+        screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
+        screen->rotate(compassObject.getAngle(),0,0,1);
+        screen->translate(targetRadius*sin(FloatingPoint::degree2rad(targetObject.getAngle())),targetRadius*cos(FloatingPoint::degree2rad(targetObject.getAngle())),getZ());
+        c=targetIcon.getColor();
         c.setAlpha(color.getAlpha());
-        leftLabelFontString->setColor(c);
-        leftLabelFontString->draw(t);
-        c=leftValueFontString->getColor();
-        c.setAlpha(color.getAlpha());
-        leftValueFontString->setColor(c);
-        leftValueFontString->draw(t);
+        targetIcon.setColor(c);
+        screen->rotate(targetIcon.getAngle(),0,0,1);
+        targetIcon.draw(t);
+        screen->endObject();
       }
-      if (rightLabelFontString) {
-        c=rightLabelFontString->getColor();
+      if (!hideNavigationPoint) {
+        screen->startObject();
+        screen->translate(getX()+getIconWidth()/2,getY()+getIconHeight()/2,getZ());
+        screen->rotate(compassObject.getAngle(),0,0,1);
+        screen->translate(targetRadius*sin(FloatingPoint::degree2rad(navigationPointObject.getAngle())),targetRadius*cos(FloatingPoint::degree2rad(navigationPointObject.getAngle())),getZ());
+        c=navigationPointIcon.getColor();
         c.setAlpha(color.getAlpha());
-        rightLabelFontString->setColor(c);
-        rightLabelFontString->draw(t);
-        c=rightValueFontString->getColor();
-        c.setAlpha(color.getAlpha());
-        rightValueFontString->setColor(c);
-        rightValueFontString->draw(t);
-      }
-      if (clockFontString) {
-        c=clockFontString->getColor();
-        c.setAlpha(color.getAlpha());
-        clockFontString->setColor(c);
-        clockFontString->draw(t);
+        navigationPointIcon.setColor(c);
+        screen->rotate(-navigationPointObject.getAngle(),0,0,1);
+        navigationPointIcon.draw(t);
+        screen->endObject();
       }
     }
+    
+    // Draw the status above the arrow and the target if widget is active
+    if ((isWatch)&&(statusTextAbove)) {
+      drawWatchStatus(t);
+    }
+
+    // Is a turn coming?
+    if ((showTurn)&&(!skipTurn)) {
+
+      // Draw the turn
+      screen->startObject();
+      screen->translate(getX(),getY(),getZ());
+      screen->setColor(turnColor.getRed(),turnColor.getGreen(),turnColor.getBlue(),255*turnColor.getAlpha()/color.getAlpha());
+      turnArrowPointBuffer.drawAsTriangles();
+      screen->endObject();
+      if (turnFontString) {
+        c=turnFontString->getColor();
+        c.setAlpha(color.getAlpha());
+        turnFontString->setColor(c);
+        turnFontString->draw(t);
+      }
+
+    } else {
+
+      // Draw the information about the target / route
+      if (!showTurn)
+        skipTurn=false;
+      if (!isWatch) {
+        drawWidgetStatus(t);
+      }
+    }
+  } 
+
+  // Draw the widget status in ambient mode
+  if (fadeScale!=1.0) {
+    screen->setAlphaScale(1.0-fadeScale);
+    drawWidgetStatus(t);
   }
+
+  // Restore fade scale 
+  screen->setAlphaScale(1.0);
 }
 
 // Called when the widget has changed its position

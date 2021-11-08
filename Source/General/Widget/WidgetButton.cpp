@@ -25,6 +25,8 @@
 #include <WidgetContainer.h>
 #include <Commander.h>
 #include <WidgetEngine.h>
+#include <WidgetContainer.h>
+#include <GraphicEngine.h>
 
 namespace GEODISCOVERER {
 
@@ -121,6 +123,18 @@ void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cance
     }
     skipCommand=false;
   }
+}
+
+// Executed every time the graphic engine needs to draw
+void WidgetButton::draw(TimestampInMicroseconds t) {
+
+  // Get the fade scale depending on ambiet mode
+  double fadeScale=widgetContainer->getWidgetEngine()->getGraphicEngine()->getAmbientFadeScale();
+  screen->setAlphaScale(fadeScale);
+  if (fadeScale>0) {
+    WidgetPrimitive::draw(t);
+  }
+  screen->setAlphaScale(1.0);
 }
 
 }

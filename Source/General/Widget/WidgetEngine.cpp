@@ -1404,12 +1404,12 @@ void WidgetEngine::createGraphic() {
       config.setParameter("touchModeIconFilename","touchMode");
       config.setParameter("orientationLabelRadius","90.0");
       config.setParameter("targetRadius","91.5");
-      config.setParameter("textColumnCount","1");
-      config.setParameter("textRowFirstOffsetY","75");
-      config.setParameter("textRowSecondOffsetY","60");
-      config.setParameter("textRowThirdOffsetY","42");
-      config.setParameter("textRowFourthOffsetY","31");
-      config.setParameter("clockOffsetY","16");
+      config.setParameter("textColumnCount","2");
+      config.setParameter("textRowFirstOffsetY","74");
+      config.setParameter("textRowSecondOffsetY","59");
+      config.setParameter("textRowThirdOffsetY","38");
+      config.setParameter("textRowFourthOffsetY","28");
+      config.setParameter("clockOffsetY","10");
       config.setParameter("statusTextRadius","43.0");
       config.setParameter("statusTextWidthLimit","24.0");
       config.setParameter("statusTextAngleOffset","3.25");
@@ -1419,6 +1419,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("batteryIconFullFilename","batteryDotFull");
       config.setParameter("batteryIconEmptyFilename","batteryDotEmpty");
       config.setParameter("batteryIconChargingFilename","batteryDotCharging");
+      config.setParameter("separatorIconFilename","navigationWatchSeparator");
     } else {
       position=WidgetPosition();
       position.setRefScreenDiagonal(0.0);
@@ -1691,11 +1692,10 @@ void WidgetEngine::createGraphic() {
         navigation->getNavigationPointIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"navigationPointIconFilename",__FILE__, __LINE__));        
         navigation->getNavigationPointIcon()->setX(-navigation->getNavigationPointIcon()->getIconWidth()/2);
         navigation->getNavigationPointIcon()->setY(-navigation->getNavigationPointIcon()->getIconHeight()/2-navigation->getNavigationPointIcon()->getIconHeight()/4);
-        if (deviceName!="Watch") {
-          navigation->getSeparatorIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
-          navigation->getSeparatorIcon()->setX(0);
-          navigation->getSeparatorIcon()->setY(0);
-        } else {
+        navigation->getSeparatorIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"separatorIconFilename",__FILE__, __LINE__));
+        navigation->getSeparatorIcon()->setX(0);
+        navigation->getSeparatorIcon()->setY(0);
+        if (deviceName=="Watch") {
           navigation->setMinTouchDetectionRadius(c->getDoubleValue(widgetPath,"minTouchDetectionRadius",__FILE__, __LINE__)*navigation->getIconHeight()/2/100.0);
           navigation->setCircularButtonAngle(c->getDoubleValue(widgetPath,"circularButtonAngle",__FILE__, __LINE__));
           navigation->getArrowIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"arrowIconFilename",__FILE__, __LINE__));

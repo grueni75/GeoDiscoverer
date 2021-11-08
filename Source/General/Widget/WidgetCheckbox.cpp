@@ -23,6 +23,9 @@
 #include <Core.h>
 #include <WidgetCheckbox.h>
 #include <Commander.h>
+#include <WidgetEngine.h>
+#include <WidgetContainer.h>
+#include <GraphicEngine.h>
 
 namespace GEODISCOVERER {
 
@@ -94,5 +97,16 @@ void WidgetCheckbox::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool can
   }
 }
 
+// Executed every time the graphic engine needs to draw
+void WidgetCheckbox::draw(TimestampInMicroseconds t) {
+
+  // Get the fade scale depending on ambiet mode
+  double fadeScale=widgetContainer->getWidgetEngine()->getGraphicEngine()->getAmbientFadeScale();
+  screen->setAlphaScale(fadeScale);
+  if (fadeScale>0) {
+    WidgetPrimitive::draw(t);
+  }
+  screen->setAlphaScale(1.0);
+}
 
 }

@@ -56,7 +56,7 @@
                   <xsd:documentation>Screen backlight is kept on if ticked.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="watchDisplayTimeout" type="xsd:integer" default="10000">
+              <xsd:element name="watchDisplayTimeout" type="xsd:integer" default="0">
                 <xsd:annotation>
                   <xsd:documentation>Timeout in milliseconds for the display if executed on a watch.</xsd:documentation>
                 </xsd:annotation>
@@ -1694,6 +1694,11 @@
               <xsd:element name="fadeDuration" type="xsd:integer" default="250000">
                 <xsd:annotation>
                   <xsd:documentation>Time in microseconds that a fade animation lasts.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="ambientModeTransitionDuration" type="xsd:integer" default="500000">
+                <xsd:annotation>
+                  <xsd:documentation>Time in microseconds that the transition into ambient mode lasts.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="targetRotateDuration" type="xsd:integer" default="5000000">

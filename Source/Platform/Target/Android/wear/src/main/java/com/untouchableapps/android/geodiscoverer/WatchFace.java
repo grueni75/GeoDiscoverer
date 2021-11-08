@@ -238,18 +238,18 @@ public class WatchFace extends Gles2WatchFaceService {
 
   // Enables or disable the touch handler
   void setTouchHandlerEnabled(boolean enable) {
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","setTouchHandlerEnabled called");
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","setTouchHandlerEnabled called");
     if (touchHandlerView!=null) {
       if (enable) {
         if (!touchHandlerActive) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","activating touch handler");
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","activating touch handler");
           windowManager.addView(touchHandlerView, touchHandlerLayoutParams);
           touchHandlerActive = true;
           coreObject.executeCoreCommand("setTouchMode","1");
         }
       } else {
         if (touchHandlerActive) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","deactivating touch handler");
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","deactivating touch handler");
           windowManager.removeView(touchHandlerView);
           touchHandlerActive = false;
           coreObject.executeCoreCommand("setTouchMode","0");
@@ -258,15 +258,28 @@ public class WatchFace extends Gles2WatchFaceService {
     }
   }
 
+  // Releases the display
+  synchronized void releaseDisplay() {
+    if (displayTimer!=null) {
+      displayTimer.cancel();
+      displayTimer=null;
+    }
+    //windowManager.removeView(keepDisplayOnView);
+    //wakeLockApp.release();
+    keepDisplayOnActive=false;
+  }
+
   // Keeps the screen on for more than the default time
   synchronized void updateDisplayTimeout() {
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "display timeout update");
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "display timeout update");
+    if (displayTimeout==0)
+      return;
     if (displayTimer!=null) {
       displayTimer.cancel();
     }
     if (!keepDisplayOnActive) {
-      windowManager.addView(keepDisplayOnView, keepDisplayOnLayoutParams);
-      wakeLockApp.acquire();
+      //windowManager.addView(keepDisplayOnView, keepDisplayOnLayoutParams);
+      //wakeLockApp.acquire();
     }
     keepDisplayOnActive = true;
     displayTimer = new Timer();
@@ -274,11 +287,12 @@ public class WatchFace extends Gles2WatchFaceService {
       @Override
       public void run() {
         GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "display timeout expired");
-        windowManager.removeView(keepDisplayOnView);
-        wakeLockApp.release();
-        keepDisplayOnActive=false;
+        releaseDisplay();
       }
     }, displayTimeout);
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","ambient mode start time pushed out");
+    if (coreObject!=null)
+      coreObject.executeCoreCommand("setAmbientModeStartTime",String.valueOf(displayTimeout*1000));
   }
 
   // Short vibration to give feedback to user
@@ -402,7 +416,7 @@ public class WatchFace extends Gles2WatchFaceService {
             commandExecuted=true;
           }
           if (commandFunction.equals("coreInitialized")) {
-            watchFace.displayTimeout=Long.valueOf(watchFace.coreObject.configStoreGetStringValue("General","watchDisplayTimeout"));
+            //watchFace.displayTimeout=Long.valueOf(watchFace.coreObject.configStoreGetStringValue("General","watchDisplayTimeout"));
             commandExecuted=true;
           }
           if (commandFunction.equals("lateInitComplete")) {
@@ -464,6 +478,15 @@ public class WatchFace extends Gles2WatchFaceService {
     sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
     vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     notificationManager = (NotificationManager) getSystemService(NotificationManager.class);
+
+    // Get display timeout
+    try {
+      displayTimeout=Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT);
+    }
+    catch (Settings.SettingNotFoundException e) {
+      displayTimeout=0;
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+    }
 
     // Get a wake lock
     if (wakeLockCore!=null)
@@ -555,6 +578,7 @@ public class WatchFace extends Gles2WatchFaceService {
   private class Engine extends Gles2WatchFaceService.Engine {
 
     BroadcastReceiver screenStateReceiver = null;
+    boolean inAmbientMode=false;
 
     @Override
     public void onCreate(SurfaceHolder surfaceHolder) {
@@ -640,6 +664,7 @@ public class WatchFace extends Gles2WatchFaceService {
                   zoomEnd = zoomPos + zoomRepeats;
                   zoomStart.notify();
                 }
+                updateDisplayTimeout();
               }
             }
             return false;
@@ -705,8 +730,17 @@ public class WatchFace extends Gles2WatchFaceService {
     @Override
     public void onAmbientModeChanged(boolean inAmbientMode) {
       super.onAmbientModeChanged(inAmbientMode);
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","this.inAmbientMode="+this.inAmbientMode+" inAmbientMode="+inAmbientMode);
       invalidate();
       visibilityChanged(!inAmbientMode);
+      if ((!this.inAmbientMode)&&(inAmbientMode)) {
+        releaseDisplay();
+        if (coreObject!=null) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","ambient mode started");
+          coreObject.executeCoreCommand("setAmbientModeStartTime", "0");
+        }
+      }
+      this.inAmbientMode=inAmbientMode;
     }
 
     @Override
@@ -730,34 +764,25 @@ public class WatchFace extends Gles2WatchFaceService {
 
       //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","draw!");
 
-      // In ambient mode, do not draw
-      if (isInAmbientMode()) {
-
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-
-      } else {
-
-        // Let the core object draw
-        if (coreObject!=null)
-          coreObject.onDrawFrame(null);
+      // Let the core object draw
+      if (coreObject!=null)
+        coreObject.onDrawFrame(null);
+      else {
+        if (permissionsGranted())
+          System.exit(0);
         else {
-          if (permissionsGranted())
-            System.exit(0);
-          else {
-            if (!permissionDialogLaunched) {
-              GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "Launching permission dialog");
-              Intent intent = new Intent(getApplication(), Dialog.class);
-              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-              intent.putExtra(Dialog.EXTRA_TEXT, getResources().getString(R.string.permission_instructions));
-              intent.putExtra(Dialog.EXTRA_KIND, ERROR_DIALOG);
-              intent.putExtra(Dialog.EXTRA_GET_PERMISSIONS, true);
-              startActivity(intent);
-            }
+          if (!permissionDialogLaunched) {
+            GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "Launching permission dialog");
+            Intent intent = new Intent(getApplication(), Dialog.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(Dialog.EXTRA_TEXT, getResources().getString(R.string.permission_instructions));
+            intent.putExtra(Dialog.EXTRA_KIND, ERROR_DIALOG);
+            intent.putExtra(Dialog.EXTRA_GET_PERMISSIONS, true);
+            startActivity(intent);
           }
-          GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-          GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         }
+        GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
       }
 
       // Draw every frame as long as we're visible and in interactive mode.

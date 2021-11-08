@@ -941,6 +941,10 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="setAmbientModeStartTime") {
+    core->getDefaultGraphicEngine()->setAmbientModeStartTime(atol(args[0].c_str()));
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

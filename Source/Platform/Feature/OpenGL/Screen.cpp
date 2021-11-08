@@ -225,6 +225,7 @@ Screen::Screen(Device *device) {
   this->halfEllipseCoordinatesBuffer=bufferNotDefined;
   this->separateFramebuffer=(device!=core->getDefaultDevice());
   this->testTextureInfo=getTextureNotDefined();
+  this->alphaScale=1.0;
   framebuffer=0;
   colorRenderbuffer=0;
   screenShotPixel=NULL;
@@ -476,7 +477,7 @@ void Screen::translate(Int x, Int y, Int z) {
 
 // Sets the drawing color
 void Screen::setColor(UByte r, UByte g, UByte b, UByte a) {
-  drawingColor = glm::vec4((float) (r) / 255.0, (float) (g) / 255.0, (float) (b) / 255.0, (float) (a) / 255.0);
+  drawingColor = glm::vec4((float) (r) / 255.0, (float) (g) / 255.0, (float) (b) / 255.0, (float) (a) * alphaScale / 255.0);
   glUniform4fv(colorInHandle,1,glm::value_ptr(drawingColor));
 }
 

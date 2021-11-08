@@ -121,11 +121,23 @@ protected:
   // Default duration of a fade animation
   TimestampInMicroseconds fadeDuration;
 
+  // Default duration of a fade animation
+  TimestampInMicroseconds ambientModeTransitionDuration;
+
   // Default duration of a blink animation
   TimestampInMicroseconds blinkDuration;
 
   // Period of the time offset used for color animation
   TimestampInMicroseconds timeOffsetPeriod;
+
+  // Timepoint at which thw ambient mode starts
+  TimestampInMicroseconds ambientModeStartTime;
+
+  // Timepoint at which the interactive mode starts
+  TimestampInMicroseconds interactiveModeStartTime;
+
+  // Last drawing time
+  TimestampInMicroseconds currentTime;
 
   // Reference DPI the map tiles have been created for
   Int mapReferenceDPI;
@@ -167,6 +179,15 @@ public:
 
   // Returns the additional scale to match the scale the map tiles have been made for
   double getMapTileToScreenScale(Screen *screen);
+
+  // Checks if display is in ambient mode
+  bool isAmbientMode(TimestampInMicroseconds &duration);
+
+  // Sets the stat time of the ambient mode
+  void setAmbientModeStartTime(TimestampInMicroseconds offset);
+
+  // Returns the fade scale for the ambient transition
+  double getAmbientFadeScale();
 
   // Getters and setters
   void lockDrawing(const char *file, int line) const {
@@ -329,6 +350,7 @@ public:
   bool getDrawingTooSlow() const {
     return drawingTooSlow;
   }
+
 };
 
 }
