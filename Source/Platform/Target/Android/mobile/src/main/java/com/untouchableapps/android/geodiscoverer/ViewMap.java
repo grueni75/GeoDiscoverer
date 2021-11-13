@@ -2160,7 +2160,7 @@ public class ViewMap extends GDActivity {
   @Override
   public void onBackPressed() {
     if (doubleBackToExitPressedOnce) {
-      super.onBackPressed();
+      //super.onBackPressed();
       exitApp();
       return;
     }
