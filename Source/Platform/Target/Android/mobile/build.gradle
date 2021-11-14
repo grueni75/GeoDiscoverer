@@ -34,7 +34,7 @@ allprojects {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "28.0.3"
+    buildToolsVersion "30.0.2"
     ndkVersion "21.1.6352462"
     useLibrary 'org.apache.http.legacy'
 
