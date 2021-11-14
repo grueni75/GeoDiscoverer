@@ -378,6 +378,10 @@ void ConfigStore::write()
       FATAL("can not write configuration file <%s>",configFilepath.c_str());
       return;
     }
+    std::stringstream backupFilepath;
+    backupFilepath<<core->getHomePath()<<"/Backup/config."<<core->getClock()->getSecondsSinceEpoch()<<".xml";
+    //DEBUG("backupFilepath=%s",backupFilepath.str().c_str());
+    rename(configFilepath.c_str(),backupFilepath.str().c_str());
     rename(tempFilepath.c_str(),configFilepath.c_str());
   }
   hasChanged=false;

@@ -36,6 +36,8 @@ bool ConfigStore::parserInitialized = false;
 
 // Constructor
 ConfigStore::ConfigStore() {
+
+  // Init the store
   configFilepath=core->getHomePath() + "/config.xml";
   schemaShippedFilepath=core->getHomePath() + "/config.shipped.xsd";
   schemaCurrentFilepath=core->getHomePath() + "/config.current.xsd";
@@ -51,7 +53,49 @@ ConfigStore::ConfigStore() {
   init();
   read();
 
+  // Read parameters
   writeConfigMinWaitTime=getIntValue("General","writeConfigMinWaitTime", __FILE__, __LINE__);
+  maxConfigBackups=getIntValue("General","maxConfigBackups", __FILE__, __LINE__);
+
+  // Check if the Backup dir exists
+  struct stat st;
+  std::string backupPath=core->getHomePath()+"/Backup";
+  if (core->statFile(backupPath, &st) != 0)
+  {
+    if (mkdir(backupPath.c_str(),S_IRWXU | S_IRWXG | S_IRWXO)!=0) {
+      puts("FATAL: can not create backup directory!");
+      exit(1);
+    }
+  }
+
+  // Clean up backup directory
+  //DEBUG("cleaning up backup directory",NULL);
+  struct dirent *dp;
+  DIR *dfd;
+  TimestampInSeconds t;
+  std::list<std::string> backupFiles;
+  dfd=core->openDir(backupPath.c_str());
+  if (dfd==NULL) {
+    FATAL("can not read directory <%s>",backupPath.c_str());
+    return;
+  }
+  while ((dp = readdir(dfd)) != NULL)
+  {
+    if (sscanf(dp->d_name,"config.%ld.gda",&t)==1) {
+      backupFiles.push_back(dp->d_name);
+    }
+  }
+  closedir(dfd);
+  //DEBUG("backupFiles.size()=%d",backupFiles.size());
+  if (backupFiles.size()>maxConfigBackups) {
+    backupFiles.sort();
+    while (backupFiles.size()>maxConfigBackups) {
+      std::string path=core->getHomePath()+"/Backup/"+backupFiles.front();
+      DEBUG("removing <%s>",path.c_str());
+      unlink(path.c_str());
+      backupFiles.pop_front();
+    }
+  }
 }
 
 // Destructor

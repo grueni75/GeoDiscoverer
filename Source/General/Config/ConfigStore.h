@@ -60,6 +60,9 @@ protected:
   // Minimum distance in seconds between writes of the config store
   Int writeConfigMinWaitTime;
 
+  // Maximum number of config backups to keep
+  Int maxConfigBackups;
+
   // Indicates if the config has changed
   bool hasChanged;
 
