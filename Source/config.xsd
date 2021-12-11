@@ -179,7 +179,7 @@
                   <xsd:documentation>Port at which the server is listening.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="userScale" type="xsd:double" default="1.0" gd:upgrade="restore">
+              <xsd:element name="userScale" type="xsd:double" default="0.75" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>User defined map scale factor during Mapsforge rendering.</xsd:documentation>
                 </xsd:annotation>

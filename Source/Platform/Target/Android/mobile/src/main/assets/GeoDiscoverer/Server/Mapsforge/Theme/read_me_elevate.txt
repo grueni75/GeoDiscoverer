@@ -1,4 +1,4 @@
-4.4.4
+5.0
 
 Elevate themes read me:
 ***********************
@@ -108,6 +108,33 @@ Manuelle Installation (fortgeschritten):
 -------------------------------------------------------------------------
 CHANGELOG
 -------------------------------------------------------------------------
+
+5.0 05/12/21
+- made for next OAM map generation based on mapsforge maps V5, starting December 2021
+- new routes and separate route refs: hknetwork=own, network=ocn, mtbnetwork=omn, ref_hike/rec_cycle/ref_mtb 
+- better waymarks support: OSMC waycolors orange/brown/gray, lots of additional, new OSMC foreground/backgrounds, changed rendering of OSMC waycolors
+- changed symbols fee=yes symbols for parking and toilets, removed obsolete uwn/ucn networks
+- added building=greenhouse 
+
+4.5.2 14/10/21
+- optimized drag_lift and chair_lift symbols, changed rendering of path/footway areas, natural=tree_row
+- added rendering for closed highway=pedestrian ways, highway=construction as area, cutting=yes, hillshading (for apps that support it), waymarks: white background when background is missing
+
+4.5.1 27/05/21
+- added new rendering of MTB Routes (local/unspecified yellow, regional/national/international green), rendering alpine_huts as restaurants when accommodations are turned off, man_made=reservoir_covered, fee=yes for parking and toilets, bicycle charging station
+- changed historic=stone/shop=farm for latest maps, updated translations
+- removed tourism=information without specific information=*
+- optimized contour lines (hiking/mtb for mountain areas, cycling/city for flat areas)
+
+4.5.0 21/04/21
+- many changes in POI symbols - new colors, remodeled categories, unified symbols, reworked many symbols, category letters for mapstyle options (R=Route, W=Ways, P=POIs, A=Areas)
+- restructured POI categories
+- added minor contour lines in cycling for ZL13/14, some access additions, historic=stone, shop=farm, man_made=wastewater_plant, man_made=water_works, amenity=ice_cream, sport=cliff_diving, sport=free_flying, sport=climbing_adventure, sport=roller_skating, sport=skateboard, sport=miniature_golf
+- changed aerial ways rendering, removed workaround for missing building tags, removed symbol for water_well/drinking (now same as drinking_water)
+
+4.4.5 06/03/21
+- added mtb:scale and mtb:scale:uphill to highway=steps in MTB-mapstyle
+- fixed error in cliffs
 
 4.4.4 15/02/21
 - added additional rendering for protected areas with limited access (onroad only, discouraged, conditional no etc.), natural=tree_row
@@ -585,24 +612,22 @@ For non-commercial usage you are free to reuse everything I made if you stick to
 
 I'm always happy to hear someone can use my work, so it would be nice if you contact me to let me know.
 
-For automatic updates you can check the current version number here: https://www.openandromaps.org/wp-content/users/tobias/licenses.txt
+For automatic updates you can check the current version number here: https://www.openandromaps.org/wp-content/users/tobias/version.txt
 
 
 Symbols and patterns licenses:
 ******************************
 
-- all patterns, symbols for cliff, geyser, ladder, oneways, peaks, railway_crossings, ridge, rungs, safety_rope, via ferrata, volcano, waterfall, wilderness hut, goods_lift, drag_lift, bridge_movable, turnstile, hot spring, public transport, cities, apartment, beach_resort, water_park, swimming_area, bunkers, windpump, watermill, log and modifications/adaptions of other symbols by Tobias Kuehn - CC BY NC SA 4.0 license (commercial usage: CC BY ND 4.0 license)
+- all patterns, symbols for cliff, geyser, ladder, oneways, peaks, railway_crossings, ridge, rungs, safety_rope, via ferrata, volcano, waterfall, wilderness hut, goods_lift, drag_lift, bridge_movable, turnstile, hot spring, public transport, cities, apartment, beach_resort, water_park, swimming_area, bunkers, windpump, watermill, log, climbing_adventure, water_works, wastewater_plant and modifications/adaptions of other symbols by Tobias Kuehn - CC BY NC SA 4.0 license (commercial usage: CC BY ND 4.0 license)
 - most symbols: http://www.sjjb.co.uk/mapicons - CC-0 license
-- waymark symbols based on: Locus internal theme, Apache License
+- waymark symbols based on: Locus internal theme, Apache License and LocusUser#1 (Frank Schöneck)
 - rapids and chemist symbols are adaptions of original symbols from: http://mapicons.nicolasmollet.com - CC BY SA 3.0 license
 - sport shop contains a modification of an original symbol from: http://openclipart.org/detail/173952/shoe-by-spacefem-173952 - Public Domain
 - cable_car, chair_lift, gondola, rail_funicular are modifications of original symbols from: http://wiki.openstreetmap.org/wiki/Template:Aerialway/doc - CC BY SA 2.0 license
 - bench is a modification of an original symbol from: http://wiki.openstreetmap.org/wiki/File:Amenity_Bench-br.svg - Public Domain
 - farmyard, emergency_access_point, stone, boundary_stone: http://osm-icons.org - CC-0 by Markus59
-- defibrillator, water_well: http://osm-icons.org - CC BY SA 2.0 license by Msemm
-- hunting_stand, townhall: https://gitlab.com/gmgeo/osmic - CC-0 by Michael Glanznig
+- defibrillator, water_well, free_flying, farm_shop: http://osm-icons.org - CC BY SA 2.0 license by Msemm
+- hunting_stand, townhall, ice_cream, charging_station: https://gitlab.com/gmgeo/osmic - CC-0 by Michael Glanznig
 - artwork, petroleum well: https://github.com/gravitystorm/openstreetmap-carto - CC-0 by Tomasz Wójcik
-- elevator: https://www.svgrepo.com/ - CC-0 by SVG Repo
-
-
-
+- elevator, roller_skating, skateboard, dollar coin: https://www.svgrepo.com/ - CC-0 by SVG Repo
+- cliff_diving - CC_0 by Werner Huth

@@ -109,6 +109,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import static android.support.v4.content.FileProvider.getUriForFile;
+
 public class ViewMap extends GDActivity {
 
   // Request codes for calling other activities
@@ -919,16 +921,19 @@ public class ViewMap extends GDActivity {
   /** Shows the legend with the given name */
   void showMapLegend(String name) {
     String legendPath = coreObject.executeCoreCommand("getMapLegendPath", name);
-    File legendPathFile = new File(legendPath);
-    if (!legendPathFile.exists()) {
+    File legendFile = new File(legendPath);
+    if (!legendFile.exists()) {
       errorDialog(getString(R.string.map_has_no_legend,coreObject.executeCoreCommand("getMapFolder")));
     } else {
+      Uri legendUri = getUriForFile(getApplicationContext(),"com.untouchableapps.android.geodiscoverer.fileprovider", legendFile);
       Intent intent = new Intent();
       intent.setAction(Intent.ACTION_VIEW);
+      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
       if (legendPath.endsWith(".png"))
-        intent.setDataAndType(Uri.parse("file://" + legendPath), "image/*");
+        intent.setDataAndType(legendUri, "image/*");
       if (legendPath.endsWith(".pdf"))
-        intent.setDataAndType(Uri.parse("file://" + legendPath), "application/pdf");
+        intent.setDataAndType(legendUri, "application/pdf");
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Viewing " + legendPath);
       startActivity(intent);
     }
   }

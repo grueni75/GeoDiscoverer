@@ -3,8 +3,8 @@
   <MapSourceRef>
     <name>Mapsforge</name>
     <layerGroupName>Mapsforge Hiking</layerGroupName>
-    <themePath>Elements.xml</themePath>
-    <themeStyle>elmt-hiking</themeStyle>
+    <themePath>Elevate.xml</themePath>
+    <themeStyle>elv-hiking</themeStyle>
     <themeOverlays></themeOverlays>
     <minZoomLevel>7</minZoomLevel>
   </MapSourceRef>

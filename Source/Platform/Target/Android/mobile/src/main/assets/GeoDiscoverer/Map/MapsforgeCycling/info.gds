@@ -3,8 +3,8 @@
   <MapSourceRef>
     <name>Mapsforge</name>
     <layerGroupName>Mapsforge Cycling</layerGroupName>
-    <themePath>Elements.xml</themePath>
-    <themeStyle>elmt-cycling</themeStyle>
+    <themePath>Elevate.xml</themePath>
+    <themeStyle>elv-cycling</themeStyle>
     <themeOverlays></themeOverlays>
     <minZoomLevel>7</minZoomLevel>
   </MapSourceRef>
