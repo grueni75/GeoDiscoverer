@@ -795,6 +795,9 @@ void Core::maintenance(bool endlessLoop) {
       mapSource->maintenance();
     }
 
+    // Clean up the config backups
+    configStore->maintenance();
+
     // Other threads can access now
     thread->unlockMutex(maintenanceMutex);
 

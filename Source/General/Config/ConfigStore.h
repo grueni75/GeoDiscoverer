@@ -113,6 +113,9 @@ public:
   // Destructor
   virtual ~ConfigStore();
 
+  // Perform maintenance
+  void maintenance();
+
   // Test if a path exists
   bool pathExists(std::string path, const char *file, int line);
 
