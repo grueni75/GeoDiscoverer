@@ -2170,7 +2170,7 @@ public class ViewMap extends GDActivity {
       return;
     }
     doubleBackToExitPressedOnce=true;
-    Toast.makeText(this,R.string.back_button,Toast.LENGTH_LONG).show();
+    infoDialog(getString(R.string.back_button));
     new Handler().postDelayed(new Runnable() {
       @Override
       public void run() {

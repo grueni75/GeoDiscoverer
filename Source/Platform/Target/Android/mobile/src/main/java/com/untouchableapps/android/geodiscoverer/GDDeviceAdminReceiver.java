@@ -30,10 +30,6 @@ import android.widget.Toast;
 /* Handles messages from the device administrator service */
 public class GDDeviceAdminReceiver extends DeviceAdminReceiver {
 
-  void showToast(Context context, String msg) {
-    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-  }
-
   @Override
   public void onEnabled(Context context, Intent intent) {
       //showToast(context, "enabled");
