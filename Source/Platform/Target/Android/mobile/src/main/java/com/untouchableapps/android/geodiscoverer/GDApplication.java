@@ -203,6 +203,9 @@ public class GDApplication extends Application implements GDAppInterface, Google
       if (permissionsMissing) {
 
         // Start the activity to request the permission
+        Intent intent = new Intent(this, RequestPermissions.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
         return;
       }
       coreObject=new GDCore(this, homeDirPath);

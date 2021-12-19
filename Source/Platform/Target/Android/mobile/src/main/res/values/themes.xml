@@ -1,0 +1,12 @@
+<resources>
+
+    <style name="GDStyle.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="GDStyle.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="GDStyle.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+</resources>

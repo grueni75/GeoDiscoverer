@@ -9,10 +9,9 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.android' version '1.5.31'
+    id 'com.android.application'
+    id 'kotlin-android'
 }
-
-apply plugin: 'com.android.application'
 
 def computeVersionName() {
     def date = new Date()
@@ -37,7 +36,7 @@ allprojects {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion "30.0.2"
     ndkVersion "21.1.6352462"
     useLibrary 'org.apache.http.legacy'
@@ -53,6 +52,9 @@ android {
         targetSdkVersion 23
         versionCode 28
         versionName computeVersionName()
+        vectorDrawables {
+            useSupportLibrary true
+        }
     }
     buildTypes {
         release {
@@ -87,10 +89,16 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        useIR = true
     }
 
     composeOptions {
         kotlinCompilerExtensionVersion '1.0.5'
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
     }
 }
 
@@ -103,6 +111,9 @@ dependencies {
     implementation files("../../../../../ThirdParty/brouter/brouter-expressions/target/brouter-expressions-${brouterVersion}.jar")
     implementation files("../../../../../ThirdParty/brouter/brouter-map-creator/target/brouter-map-creator-${brouterVersion}.jar")
     implementation files("../../../../../ThirdParty/brouter/brouter-util/target/brouter-util-${brouterVersion}.jar")
+    implementation "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
     wearApp project(':wear')
     implementation 'androidx.appcompat:appcompat:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'

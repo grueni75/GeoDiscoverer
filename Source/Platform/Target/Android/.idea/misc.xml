@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="../../../../../../../../layout/compose-model-1639935230475.xml" value="0.19890202702702703" />
+        <entry key="../../../../../../../../layout/compose-model-1639935320888.xml" value="0.1" />
+        <entry key="../../../../../../../../layout/compose-model-1639935621038.xml" value="0.12795608108108109" />
+      </map>
+    </option>
+  </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="android.support.annotation.Nullable" />
     <option name="myDefaultNotNull" value="android.support.annotation.NonNull" />
