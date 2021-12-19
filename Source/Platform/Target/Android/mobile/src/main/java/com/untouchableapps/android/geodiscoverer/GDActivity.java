@@ -23,10 +23,9 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;

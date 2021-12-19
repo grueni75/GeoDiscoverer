@@ -26,18 +26,12 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -48,30 +42,27 @@ import java.util.zip.ZipOutputStream;
 import org.acra.*;
 import org.acra.annotation.*;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
-import android.os.StrictMode;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentActivity;
+
+import com.google.android.material.snackbar.Snackbar;
+
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.wearable.Channel;
 import com.google.android.gms.wearable.ChannelApi;
 import com.google.android.gms.wearable.MessageApi;
@@ -81,7 +72,6 @@ import com.google.android.gms.wearable.Wearable;
 import com.untouchableapps.android.geodiscoverer.cockpit.CockpitEngine;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
-import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppVibration;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 
 /* Configuration of ACRA for reporting crashes */
@@ -89,7 +79,7 @@ import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
     buildConfigClass = BuildConfig.class
 )
 @AcraMailSender(
-    mailTo = "geodiscoverer@gmail.com",
+    mailTo = "matthias.gruenewald@gmail.com",
     resSubject = R.string.crash_mail_subject
 )
 @AcraNotification(
@@ -105,6 +95,26 @@ public class GDApplication extends Application implements GDAppInterface, Google
   // Notification IDs
   static final int NOTIFICATION_STATUS_ID=1;
   static final int NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID=2;
+
+  /** Required permissions */
+  public final String[] requiredPermissions = {
+      Manifest.permission.READ_EXTERNAL_STORAGE,
+      Manifest.permission.WRITE_EXTERNAL_STORAGE,
+      Manifest.permission.ACCESS_FINE_LOCATION,
+      Manifest.permission.WAKE_LOCK,
+      Manifest.permission.INTERNET,
+      Manifest.permission.VIBRATE
+  };
+
+  /*
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+      Manifest.permission.BLUETOOTH,
+      Manifest.permission.BLUETOOTH_ADMIN
+  */
 
   /** Interface to the native C++ core */
   public static GDCore coreObject=null;
@@ -181,6 +191,20 @@ public class GDApplication extends Application implements GDAppInterface, Google
       Toast.makeText(this, String.format(String.format(getString(R.string.no_home_dir),homeDirPath)), Toast.LENGTH_LONG).show();
       System.exit(1);
     } else {
+
+      // Check if we have the required permissions
+      boolean permissionsMissing=false;
+      for (int i = 0; i < requiredPermissions.length; i++) {
+        if(checkSelfPermission(requiredPermissions[i])!= PackageManager.PERMISSION_GRANTED) {
+          permissionsMissing=true;
+          break;
+        }
+      }
+      if (permissionsMissing) {
+
+        // Start the activity to request the permission
+        return;
+      }
       coreObject=new GDCore(this, homeDirPath);
     }
     

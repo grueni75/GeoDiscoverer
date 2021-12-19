@@ -6,7 +6,7 @@ def computeVersionName() {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 30
     buildToolsVersion "30.0.2"
     ndkVersion "21.1.6352462"
 
@@ -47,7 +47,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:wear:27.1.0'
+    implementation 'androidx.wear:wear:1.0.0'
     implementation 'com.google.android.support:wearable:2.2.0'
     compileOnly 'com.google.android.wearable:wearable:2.2.0'
     implementation 'com.google.android.gms:play-services-wearable:11.8.0'

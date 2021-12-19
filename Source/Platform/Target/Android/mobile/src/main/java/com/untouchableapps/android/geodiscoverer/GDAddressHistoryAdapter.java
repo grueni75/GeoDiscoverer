@@ -23,7 +23,7 @@
 package com.untouchableapps.android.geodiscoverer;
 
 import android.content.res.ColorStateList;
-import android.support.v4.graphics.drawable.DrawableCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
