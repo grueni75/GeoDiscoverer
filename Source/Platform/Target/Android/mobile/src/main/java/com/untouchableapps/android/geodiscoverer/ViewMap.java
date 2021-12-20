@@ -2138,19 +2138,6 @@ public class ViewMap extends GDActivity {
 
   /** Called when a key is pressed */
   public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (keyCode == KeyEvent.KEYCODE_BACK) {
-      if (coreObject!=null) {
-        if (Integer.parseInt(coreObject.configStoreGetStringValue("General", "backButtonTurnsScreenOff"))!=0) {
-          try {
-            devicePolicyManager.lockNow();
-          }
-          catch (SecurityException e) {
-            GDApplication.showMessageBar(this, getString(R.string.device_admin_not_enabled), GDApplication.MESSAGE_BAR_DURATION_LONG);
-          }
-          return true;
-        }
-      }
-    }
     if (keyCode == KeyEvent.KEYCODE_MENU) {
       if (!viewMapRootLayout.isDrawerOpen(navDrawerList)) {
         viewMapRootLayout.openDrawer(navDrawerList);

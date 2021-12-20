@@ -162,6 +162,9 @@
     <string name="address_point_not_found">%1$s can not be geocoded!</string>
     <string name="back_button">Press again to exit!</string>
     <string name="title_activity_request_permissions">RequestPermissions</string>
+    <string name="request_permissions_description">Please grant the required permissions!</string>
+    <string name="request_permissions_fail">Permission is mandatory!</string>
+    <string name="request_permissions_wait_for_restart">Geo Discoverer will restart automatically</string>
     <string-array name="donation_google_catalog_values">
         <item>1 €</item>
         <item>2 €</item>

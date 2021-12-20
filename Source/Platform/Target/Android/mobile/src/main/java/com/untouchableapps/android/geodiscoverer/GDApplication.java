@@ -97,13 +97,15 @@ public class GDApplication extends Application implements GDAppInterface, Google
   static final int NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID=2;
 
   /** Required permissions */
-  public final String[] requiredPermissions = {
+  public static final String[] requiredPermissions = {
       Manifest.permission.READ_EXTERNAL_STORAGE,
       Manifest.permission.WRITE_EXTERNAL_STORAGE,
       Manifest.permission.ACCESS_FINE_LOCATION,
       Manifest.permission.WAKE_LOCK,
       Manifest.permission.INTERNET,
-      Manifest.permission.VIBRATE
+      Manifest.permission.VIBRATE,
+      Manifest.permission.BLUETOOTH,
+      Manifest.permission.BLUETOOTH_ADMIN
   };
 
   /*
@@ -193,14 +195,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
     } else {
 
       // Check if we have the required permissions
-      boolean permissionsMissing=false;
-      for (int i = 0; i < requiredPermissions.length; i++) {
-        if(checkSelfPermission(requiredPermissions[i])!= PackageManager.PERMISSION_GRANTED) {
-          permissionsMissing=true;
-          break;
-        }
-      }
-      if (permissionsMissing) {
+      if (!checkPermissions(this)) {
 
         // Start the activity to request the permission
         Intent intent = new Intent(this, RequestPermissions.class);
@@ -693,5 +688,15 @@ public class GDApplication extends Application implements GDAppInterface, Google
         attachment.notifyAll();
       }
     }
+  }
+
+  // Checks if all required permissions are available
+  public static boolean checkPermissions(Context context) {
+    for (int i = 0; i < requiredPermissions.length; i++) {
+      if(context.checkSelfPermission(requiredPermissions[i])!= PackageManager.PERMISSION_GRANTED) {
+        return false;
+      }
+    }
+    return true;
   }
 }

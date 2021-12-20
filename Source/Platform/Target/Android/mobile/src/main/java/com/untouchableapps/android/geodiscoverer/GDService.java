@@ -182,6 +182,9 @@ public class GDService extends Service {
     
     // Get the core object
     coreObject=GDApplication.coreObject;
+    if (coreObject==null) {
+      return;
+    }
 
     // Get the location manager
     locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);

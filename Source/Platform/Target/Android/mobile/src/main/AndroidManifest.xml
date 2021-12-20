@@ -269,20 +269,6 @@
                 android:resource="@xml/file_provider_paths" />
         </provider>
 
-        <receiver
-            android:name=".GDDeviceAdminReceiver"
-            android:description="@string/device_admin_description"
-            android:label="@string/app_name"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.device_admin"
-                android:resource="@xml/device_admin" />
-        </receiver>
-
         <service
             android:name=".GDService"
             android:exported="true" />
@@ -321,20 +307,18 @@
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="false" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
-
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
+    <!-- For Android Wear -->
+    <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
 </manifest>

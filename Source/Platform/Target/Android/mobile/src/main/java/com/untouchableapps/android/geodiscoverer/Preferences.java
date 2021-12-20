@@ -484,7 +484,6 @@ public class Preferences extends PreferenceActivity implements
       rootScreen.addPreference(generalCategory);
       addPreference(generalCategory, generalCategory, "General", "unitSystem");
       addPreference(generalCategory, generalCategory, "General", "wakeLock");
-      addPreference(generalCategory, generalCategory, "General", "backButtonTurnsScreenOff");
       addPreference(generalCategory, generalCategory, "", "expertMode");
       PreferenceCategory fingerMenuCategory = new PreferenceCategory(this);
       fingerMenuCategory.setTitle("Finger Menu");
