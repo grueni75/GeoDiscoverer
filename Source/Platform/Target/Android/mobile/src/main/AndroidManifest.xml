@@ -9,15 +9,7 @@
         android:label="@string/app_name"
         android:theme="@style/GDStyle">
         <activity
-            android:name=".RequestPermissions"
-            android:exported="false"
-            android:label="@string/title_activity_request_permissions"
-            android:theme="@style/GDStyle.NoActionBar" />
-        <activity
-            android:name=".Donate"
-            android:theme="@style/GDStyle.Dialog" />
-        <activity
-            android:name=".ViewMap"
+            android:name=".ui.activity.ViewMap"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleTask"
@@ -232,22 +224,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Preferences"
+            android:name=".ui.activity.Preferences"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/preferences"
             android:theme="@style/GDStyle" />
         <activity
-            android:name=".ShowHelp"
+            android:name=".ui.activity.ShowHelp"
             android:label="@string/button_label_help"
             android:theme="@style/GDStyle.NoTitleBar.Fullscreen" />
         <activity
-            android:name=".ShowBRouter"
+            android:name=".ui.activity.ShowBRouter"
             android:label="@string/brouter"
             android:theme="@style/GDStyle.NoTitleBar.Fullscreen" />
         <activity
-            android:name=".AuthenticateGoogleBookmarks"
+            android:name=".ui.activity.AuthenticateGoogleBookmarks"
             android:label="@string/authenticate_google_bookmarks"
-            android:theme="@style/GDStyle"></activity>
+            android:theme="@style/GDStyle">
+        </activity>
+        <activity
+            android:name=".ui.activity.RequestPermissions"
+            android:label="@string/title_activity_request_permissions" />
         <!--
         <activity
             android:name=".GetGoogleMapPlaceList"
@@ -270,9 +266,9 @@
         </provider>
 
         <service
-            android:name=".GDService"
+            android:name=".logic.GDService"
             android:exported="true" />
-        <service android:name=".GDMessageListenerService">
+        <service android:name=".logic.GDMessageListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
                 <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
@@ -285,7 +281,7 @@
         </service>
 
         <service
-            android:name=".GDAccessibilityService"
+            android:name=".logic.GDAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />

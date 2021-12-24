@@ -1,5 +1,4 @@
-include ':mobile', ':wear', ':colorPickerPreference', ':core' // , ':mapsforge-core', ':mapsforge-map', ':mapsforge-map-reader', ':mapsforge-themes', ':mapsforge-poi', ':mapsforge-map-android', ':mapsforge-poi-android'
-project(':colorPickerPreference').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/ColorPickerPreference')
+include ':mobile', ':wear', ':core' // , ':mapsforge-core', ':mapsforge-map', ':mapsforge-map-reader', ':mapsforge-themes', ':mapsforge-poi', ':mapsforge-map-android', ':mapsforge-poi-android'
 //project(':mapsforge-core').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-core')
 //project(':mapsforge-map').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-map')
 //project(':mapsforge-map-reader').projectDir = new File(rootProject.projectDir, '../../../../ThirdParty/mapsforge/mapsforge-map-reader')

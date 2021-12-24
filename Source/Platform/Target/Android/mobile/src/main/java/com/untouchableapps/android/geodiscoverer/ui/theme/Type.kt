@@ -1,7 +1,8 @@
 package com.untouchableapps.android.geodiscoverer.ui.theme
 
-import androidx.compose.material3.Typography
-
 // Set of Material typography styles to start with
-val Typography = Typography(
+val M3Typography = androidx.compose.material3.Typography(
+)
+
+val M2Typography = androidx.compose.material.Typography(
 )

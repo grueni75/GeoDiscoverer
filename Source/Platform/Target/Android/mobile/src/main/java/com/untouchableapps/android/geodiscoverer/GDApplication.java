@@ -69,10 +69,14 @@ import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
-import com.untouchableapps.android.geodiscoverer.cockpit.CockpitEngine;
+import com.untouchableapps.android.geodiscoverer.logic.GDService;
+import com.untouchableapps.android.geodiscoverer.logic.cockpit.CockpitEngine;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
+import com.untouchableapps.android.geodiscoverer.ui.activity.AuthenticateGoogleBookmarks;
+import com.untouchableapps.android.geodiscoverer.ui.activity.RequestPermissions;
+import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap;
 
 /* Configuration of ACRA for reporting crashes */
 @AcraCore (
@@ -93,8 +97,8 @@ import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 public class GDApplication extends Application implements GDAppInterface, GoogleApiClient.ConnectionCallbacks, ChannelApi.ChannelListener {
 
   // Notification IDs
-  static final int NOTIFICATION_STATUS_ID=1;
-  static final int NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID=2;
+  static public final int NOTIFICATION_STATUS_ID=1;
+  static public final int NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID=2;
 
   /** Required permissions */
   public static final String[] requiredPermissions = {
@@ -134,7 +138,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
   CockpitEngine cockpitEngine = null;
 
   /** Reference to the viewmap activity */
-  ViewMap activity = null;
+  public ViewMap activity = null;
 
   /** Time to wait for a connection */
   final static long WEAR_CONNECTION_TIME_OUT_MS = 1000;

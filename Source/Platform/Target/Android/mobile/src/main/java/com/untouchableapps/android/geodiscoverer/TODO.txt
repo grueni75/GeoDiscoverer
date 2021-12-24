@@ -1,2 +1,9 @@
 * Check if ACRA still works as expected
 * Check if wear app still works as expected
+* Remove unnecessary files
+** Icons
+** layouts
+* Test if preferences screen shows the correct title when changing hierarchy
+* Add acknowledge for color picker jetpack component (https://github.com/godaddy/compose-color-picker)
+* Widget pref container looks strange
+* Check if Tandem Tracker can still send message to Geo Discoverer
