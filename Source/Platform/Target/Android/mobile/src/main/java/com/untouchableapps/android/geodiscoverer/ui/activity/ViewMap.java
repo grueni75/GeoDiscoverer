@@ -457,6 +457,10 @@ public class ViewMap extends GDActivity {
             viewMap.askForRouteRemovalKind();
             commandExecuted=true;
           }
+          if (commandFunction.equals("setExitBusyText")) {
+            viewMap.setExitBusyText();
+            commandExecuted=true;
+          }
           if (!commandExecuted) {
             GDApplication.addMessage(GDApplication.ERROR_MSG, "GDApp", "unknown command " + command + " received");
           }
@@ -1722,7 +1726,7 @@ public class ViewMap extends GDActivity {
       finish();
       return;
     }
-    ((GDApplication)getApplication()).setActivity(this);
+    ((GDApplication)getApplication()).setActivity(this, coreMessageHandler);
 
     // Get important handles
     locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -2103,7 +2107,7 @@ public class ViewMap extends GDActivity {
   public void onDestroy() {
     super.onDestroy();
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "onDestroy called by " + Thread.currentThread().getName());
-    ((GDApplication)getApplication()).setActivity(null);
+    ((GDApplication)getApplication()).setActivity(null, null);
     if ((wakeLock!=null)&&(wakeLock.isHeld()))
       wakeLock.release();
     if (downloadCompleteReceiver!=null)

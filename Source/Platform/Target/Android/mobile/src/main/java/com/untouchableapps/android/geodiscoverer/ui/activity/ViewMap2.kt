@@ -22,8 +22,15 @@
 
 package com.untouchableapps.android.geodiscoverer.ui.activity
 
+import android.app.ActivityManager
+import android.content.Intent
+import android.content.pm.ConfigurationInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.AttributeSet
+import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -52,11 +59,26 @@ import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.viewinterop.AndroidView
+import com.untouchableapps.android.geodiscoverer.GDApplication
+import com.untouchableapps.android.geodiscoverer.core.GDCore
+import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
+import com.untouchableapps.android.geodiscoverer.logic.GDService
 import kotlin.jvm.internal.Intrinsics
 
 class ViewMap2 : ComponentActivity() {
@@ -68,6 +90,7 @@ class ViewMap2 : ComponentActivity() {
     val titleIndent = 15.dp
     val rowVerticalPadding = 10.dp
     val drawerWidth = 250.dp
+    val drawerCornerRadius = 16.dp
   }
   val drawerLayout = NavigationDrawerLayout()
 
@@ -78,10 +101,37 @@ class ViewMap2 : ComponentActivity() {
     val onClick = onClick
   }
 
+  // Reference to the core object and it's view
+  var coreObject: GDCore? = null
+
+  // Flags
+  var compassWatchStarted = false
+  var exitRequested = false
+  var restartRequested = false
+
   // Creates the activity
   @ExperimentalMaterial3Api
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    // Check for OpenGL ES 2.00
+    val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+    val configurationInfo = activityManager.deviceConfigurationInfo
+    val supportsEs2 =
+      configurationInfo.reqGlEsVersion >= 0x20000 || Build.FINGERPRINT.startsWith("generic")
+    if (!supportsEs2) {
+      Toast.makeText(this, getString(R.string.opengles20_required), Toast.LENGTH_LONG)
+      finish();
+      return
+    }
+
+    // Get the core object
+    coreObject = GDApplication.coreObject
+    if (coreObject == null) {
+      finish()
+      return
+    }
+    (application as GDApplication).setActivity(this, null)
 
     // Create the content for the navigation drawer
     val navigationItems=arrayOf(
@@ -122,8 +172,45 @@ class ViewMap2 : ComponentActivity() {
     }
   }
 
+  override fun onPause() {
+    super.onPause()
+    GDApplication.addMessage(
+      GDApplication.DEBUG_MSG,
+      "GDApp",
+      "onPause called by " + Thread.currentThread().name
+    )
+
+    //stopWatchingCompass()
+    if (!exitRequested && !restartRequested) {
+      val intent = Intent(this, GDService::class.java)
+      intent.action = "activityPaused"
+      startService(intent)
+    }
+  }
+
   override fun onResume() {
     super.onResume()
+    GDApplication.addMessage(
+      GDApplication.DEBUG_MSG,
+      "GDApp",
+      "onResume called by " + Thread.currentThread().name
+    )
+
+    // Bug fix: Somehow the emulator calls onResume before onCreate
+    // But the code relies on the fact that onCreate is called before
+    // Do nothing if onCreate has not yet initialized the objects
+    if (coreObject == null) return
+
+    // If we shall restart or exit, don't init anything here
+    if (exitRequested || restartRequested) return
+
+    // Resume all components only if a exit or restart is not requested
+
+    // Resume all components only if a exit or restart is not requested
+    //startWatchingCompass()
+    val intent = Intent(this, GDService::class.java)
+    intent.action = "activityResumed"
+    startService(intent)
   }
 
   @ExperimentalMaterial3Api
@@ -136,9 +223,15 @@ class ViewMap2 : ComponentActivity() {
         NavigationDrawer(
           drawerState = drawerState,
           modifier = Modifier
-            .width(drawerLayout.drawerWidth),
+            .fillMaxWidth()
+            .fillMaxHeight(),
+          gesturesEnabled = drawerState.isOpen,
+          drawerShape = navigationDrawerShape(),
           drawerContent = {
-            Column() {
+            Column(
+              modifier=Modifier
+                .fillMaxWidth()
+            ) {
               Box(
                 contentAlignment = Alignment.CenterStart
               ) {
@@ -185,21 +278,43 @@ class ViewMap2 : ComponentActivity() {
             }
           },
           content = {
-            Column(
+            AndroidView(
+              factory = { context ->
+                GDMapSurfaceView(context, null).apply {
+                  layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                  )
+                  setCoreObject(coreObject)
+                }
+              },
               modifier = Modifier
-                .fillMaxSize(),
-              horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-              Text(text = if (drawerState.isClosed) ">>> Swipe >>>" else "<<< Swipe <<<")
-              Spacer(Modifier.height(20.dp))
-              Button(onClick = { scope.launch { drawerState.open() } }) {
-                Text("Click to open")
-              }
-            }
+                .fillMaxWidth()
+                .fillMaxHeight(),
+            )
           }
         )
       }
     )
+  }
+
+  // Sets the width of the navigation drawer correctly
+  fun navigationDrawerShape() = object : Shape {
+    override fun createOutline(
+      size: Size,
+      layoutDirection: LayoutDirection,
+      density: Density
+    ): Outline {
+      val cornerRadius=with(density) { drawerLayout.drawerCornerRadius.toPx() }
+      return Outline.Rounded(RoundRect(
+        left=0f,
+        top=0f,
+        right=with(density) { drawerLayout.drawerWidth.toPx() },
+        bottom=size.height,
+        topRightCornerRadius = CornerRadius(cornerRadius),
+        bottomRightCornerRadius = CornerRadius(cornerRadius)
+      ))
+    }
   }
 
   // Creates a navigation item for the drawer

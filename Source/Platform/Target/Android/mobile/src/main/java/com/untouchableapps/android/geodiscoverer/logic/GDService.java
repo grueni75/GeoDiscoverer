@@ -38,6 +38,7 @@ import android.location.Geocoder;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
@@ -501,10 +502,7 @@ public class GDService extends Service {
     // Handle exit request
     if (intent.getAction().equals("exitApp")) {
       if (coreObject!=null) {
-        ViewMap viewMap = ((GDApplication)getApplication()).activity;
-        if (viewMap!=null) {
-          viewMap.setExitBusyText();
-        }
+        ((GDApplication)getApplication()).executeAppCommand("setExitBusyText()");
         Message m=Message.obtain(coreObject.messageHandler);
         m.what = GDCore.STOP_CORE;
         coreObject.messageHandler.sendMessage(m);

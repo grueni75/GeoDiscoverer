@@ -53,6 +53,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -138,7 +139,8 @@ public class GDApplication extends Application implements GDAppInterface, Google
   CockpitEngine cockpitEngine = null;
 
   /** Reference to the viewmap activity */
-  public ViewMap activity = null;
+  public Activity activity = null;
+  public Handler messageHandler = null;
 
   /** Time to wait for a connection */
   final static long WEAR_CONNECTION_TIME_OUT_MS = 1000;
@@ -441,8 +443,9 @@ public class GDApplication extends Application implements GDAppInterface, Google
   }
 
   /** Sets the view map activity */
-  public void setActivity(ViewMap activity) {
+  public void setActivity(Activity activity, Handler messageHandler) {
     this.activity = activity;
+    this.messageHandler = messageHandler;
   }
 
   // Cockpit engine related interface methods
@@ -592,13 +595,13 @@ public class GDApplication extends Application implements GDAppInterface, Google
       startActivity(intent);
       return;
     }
-    if (activity != null) {
-      Message m = Message.obtain(activity.coreMessageHandler);
+    if (messageHandler != null) {
+      Message m = Message.obtain(messageHandler);
       m.what = ViewMap.EXECUTE_COMMAND;
       Bundle b = new Bundle();
       b.putString("command", cmd);
       m.setData(b);
-      activity.coreMessageHandler.sendMessage(m);
+      messageHandler.sendMessage(m);
     } else {
       if (cmd.equals("exitActivity()")) {
         System.exit(0);
