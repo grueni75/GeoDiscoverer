@@ -604,7 +604,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
           content = {
             LazyColumn(
               modifier = Modifier
-                .height(180.dp)
+                .heightIn(max=180.dp)
                 .fillMaxWidth()
             ) {
               items(allValues.value) {

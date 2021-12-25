@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import com.untouchableapps.android.geodiscoverer.core.R
 
@@ -24,7 +25,8 @@ fun Material2Theme(content: @Composable () -> Unit) {
 fun AndroidTheme(content: @Composable() () -> Unit) {
     val darkColorScheme = darkColorScheme(
         primary = colorResource(id = R.color.gd_orange),
-        surface = colorResource(id = R.color.gd_surface)
+        surface = colorResource(id = R.color.gd_surface),
+        onPrimary = darkColorScheme().onBackground
     )
     MaterialTheme(
         colorScheme = darkColorScheme,

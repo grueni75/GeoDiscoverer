@@ -3,7 +3,10 @@
 * Remove unnecessary files
 ** Icons
 ** layouts
+** background picture
 * Test if preferences screen shows the correct title when changing hierarchy
 * Add acknowledge for color picker jetpack component (https://github.com/godaddy/compose-color-picker)
 * Widget pref container looks strange
 * Check if Tandem Tracker can still send message to Geo Discoverer
+* Limit the list view pref to the actual height if below max height
+* Check if bluetooth address exchange works settings
