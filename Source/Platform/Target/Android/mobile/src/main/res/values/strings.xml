@@ -170,6 +170,7 @@
   <string name="prefs_set_value">Set value of \"%1$s\"</string>
   <string name="prefs_not_ready">Preference values are not yet loaded!</string>
   <string name="app_name2">Geo Discoverer 2</string>
+  <string name="missing_system_service">System service missing!</string>
   <string-array name="donation_google_catalog_values">
     <item>1 €</item>
     <item>2 €</item>

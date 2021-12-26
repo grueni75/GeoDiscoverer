@@ -37,8 +37,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -263,7 +263,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
           navigationIcon = {
             IconButton(onClick = { finish() }) {
               Icon(
-                imageVector = Icons.Filled.ArrowBack,
+                imageVector = Icons.Outlined.ArrowBack,
                 contentDescription = null
               )
             }
@@ -747,7 +747,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
               )
             } else {
               Icon(
-                imageVector = Icons.Filled.ArrowForward,
+                imageVector = Icons.Outlined.ArrowForward,
                 tint = MaterialTheme.colorScheme.primary,
                 contentDescription = null
               )
