@@ -44,6 +44,8 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.provider.Settings;
 import androidx.core.app.NotificationCompat;
+import kotlinx.coroutines.CoroutineScope;
+
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -70,6 +72,9 @@ public class GDService extends Service {
 
   // Receivers
   BroadcastReceiver userPresentReceiver = null;
+
+  // Background tasks
+  GDBackgroundTask backgroundTask = null;
 
   // Flags
   boolean locationWatchStarted = false;
@@ -107,48 +112,6 @@ public class GDService extends Service {
   int tilesDone;
   int tilesTotal;
   String timeLeft;
-
-  /** Finds the geographic position for the given address */
-  private class LocationFromAddressTask extends AsyncTask<Void, Void, Void> {
-
-    String name;
-    String address;
-    String group;
-    boolean locationFound=false;
-
-    protected void onPreExecute() {
-    }
-
-    protected Void doInBackground(Void... params) {
-
-      Geocoder geocoder = new Geocoder(GDService.this);
-      try {
-        List<Address> addresses = geocoder.getFromLocationName(address, 1);
-        if (addresses.size()>0) {
-          Address a = addresses.get(0);
-          coreObject.scheduleCoreCommand("addAddressPoint",
-              name, address,
-              String.valueOf(a.getLongitude()), String.valueOf(a.getLatitude()),
-              group);
-          locationFound=true;
-        } else {
-          locationFound=false;
-        }
-      }
-      catch(IOException e) {
-        GDApplication.addMessage(GDApplication.WARNING_MSG, "GDApp", "Geocoding not successful: " + e.getMessage());
-      }
-      return null;
-    }
-
-    protected void onPostExecute(Void result) {
-      if (!locationFound) {
-        Toast.makeText(GDService.this,getString(R.string.address_point_not_found,name),Toast.LENGTH_LONG).show();
-      } else {
-        Toast.makeText(GDService.this,getString(R.string.address_point_added,name),Toast.LENGTH_LONG).show();
-      }
-    }
-  }
 
   /** Checks if accessibility service is enabled */
   public boolean isAccessibilityEnabled() {
@@ -200,6 +163,9 @@ public class GDService extends Service {
 
     // Get power manager
     powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+    // Create the background task handler
+    backgroundTask = new GDBackgroundTask(this, coreObject);
 
     // Register for user present events
     userPresentReceiver = new BroadcastReceiver() {
@@ -554,11 +520,10 @@ public class GDService extends Service {
     // Handle new address point
     if (intent.getAction().equals("addAddressPoint")) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","adding address point " + intent.getStringExtra("name"));
-      LocationFromAddressTask task = new LocationFromAddressTask();
-      task.name=intent.getStringExtra("name");
-      task.address=intent.getStringExtra("address");
-      task.group=intent.getStringExtra("group");
-      task.execute();
+      backgroundTask.getLocationFromAddress(
+          intent.getStringExtra("name"),
+          intent.getStringExtra("address"),
+          intent.getStringExtra("group"));
     }
 
     return START_STICKY;
@@ -596,9 +561,13 @@ public class GDService extends Service {
     }
 
     // Stop the mapsforge server
-    if (mapTileServer !=null) {
+    if (mapTileServer!=null) {
       mapTileServer.stop();
     }
+
+    // Stop the background tasks
+    if (backgroundTask!=null)
+      backgroundTask.stop();
   }
   
   

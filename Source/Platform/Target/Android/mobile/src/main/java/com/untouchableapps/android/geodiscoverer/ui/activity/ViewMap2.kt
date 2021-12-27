@@ -22,17 +22,22 @@
 
 package com.untouchableapps.android.geodiscoverer.ui.activity
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Intent
+import android.content.SharedPreferences
+import android.content.SharedPreferences.Editor
 import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.hardware.Sensor
 import android.hardware.SensorManager
+import android.location.LocationManager
 import android.os.*
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -57,6 +62,9 @@ import com.untouchableapps.android.geodiscoverer.ui.theme.AndroidTheme
 import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
@@ -66,6 +74,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.*
@@ -74,10 +83,15 @@ import androidx.lifecycle.ViewModel
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
+import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
 import com.untouchableapps.android.geodiscoverer.logic.GDService
+import com.untouchableapps.android.geodiscoverer.logic.viewmap.GDIntent
+import com.untouchableapps.android.geodiscoverer.ui.component.GDDialog
+import com.untouchableapps.android.geodiscoverer.ui.component.GDLinearProgressIndicator
 import java.lang.ref.WeakReference
 
 import com.untouchableapps.android.geodiscoverer.ui.component.GDSnackBar
+import com.untouchableapps.android.geodiscoverer.ui.component.GDTextField
 import kotlinx.coroutines.*
 
 
@@ -105,7 +119,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
   }
 
   // Communication with the composable world
-  class ActivityViewModel() : ViewModel() {
+  inner class ActivityViewModel() : ViewModel() {
 
     // State
     var drawerStatus : DrawerValue by mutableStateOf(DrawerValue.Closed)
@@ -114,16 +128,88 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     var messagesVisible : Boolean by mutableStateOf(false)
     var busyText : String by mutableStateOf("")
     var snackbarText : String by mutableStateOf("")
+      private set
+    var snackbarActionText : String by mutableStateOf("")
+      private set
+    var snackbarActionHandler : ()->Unit={}
+      private set
+    var progressMax : Int by mutableStateOf(0)
+    var progressCurrent : Int by mutableStateOf(0)
+      private set
+    var progressMessage : String by mutableStateOf("")
+      private set
+    var dialogMessage : String by mutableStateOf("")
+      private set
+    var dialogIsFatal : Boolean by mutableStateOf(false)
+      private set
+    var askTitle : String by mutableStateOf("")
+      private set
+    var askSubject : String by mutableStateOf("")
+      private set
+    var askEditTextValue : String by mutableStateOf("")
+      private set
+    var askEditTextLabel : String by mutableStateOf("")
+      private set
+    var askConfirmText : String by mutableStateOf("")
+      private set
+    var askDismissText : String by mutableStateOf("")
+      private set
+    var askEditTextConfirmHandler : (String)->Unit={}
+      private set
+    var fixSurfaceViewBug : Boolean by mutableStateOf(false)
 
     // Methods to modify the state
     fun toggleMessagesVisibility() {
       messagesVisible=!messagesVisible
+    }
+    fun setProgress(message: String, value: Int) {
+      progressMessage=message
+      progressCurrent=value
+    }
+    fun setDialog(message: String, isFatal: Boolean=false) {
+      dialogIsFatal=isFatal
+      dialogMessage=message
+    }
+    fun showSnackbar(text: String, actionText: String="", actionHandler: ()->Unit = {}) {
+      snackbarActionHandler=actionHandler
+      snackbarActionText=actionText
+      snackbarText=text
+    }
+    fun askForAddress(subject: String, address: String, confirmHandler: (String)->Unit = {}) {
+      askEditTextValue=address
+      askEditTextLabel=getString(R.string.dialog_address_input_hint)
+      askConfirmText=getString(R.string.dialog_lookup)
+      askDismissText=getString(R.string.dialog_dismiss)
+      askEditTextConfirmHandler=confirmHandler
+      askSubject=subject
+      askTitle=getString(R.string.dialog_address_title)
+    }
+    fun closeQuestion() {
+      askTitle=""
+      askEditTextValue=""
     }
   }
   val viewModel = ActivityViewModel()
 
   // Reference to the core object and it's view
   var coreObject: GDCore? = null
+
+  // The dialog handler
+  val dialogHandler=GDDialog(
+    showSnackbar = { message ->
+      viewModel.showSnackbar(message)
+    },
+    showDialog = viewModel::setDialog
+  )
+
+  // The intent handler
+  val intentHandler=GDIntent(this)
+
+  // Background tasks
+  var backgroundTask: GDBackgroundTask? = null
+
+  // Prefs
+  var prefs: SharedPreferences? = null
 
   // Flags
   var compassWatchStarted = false
@@ -133,6 +219,22 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
 
   // Managers
   var sensorManager: SensorManager? = null
+  var locationManager: LocationManager? = null
+
+  /** Sets the screen time out  */
+  @SuppressLint("Wakelock")
+  fun updateWakeLock() {
+    if (coreObject != null) {
+      val state = coreObject!!.executeCoreCommand("getWakeLock")
+      if (state == "true") {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "wake lock enabled")
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+      } else {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "wake lock disabled")
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+      }
+    }
+  }
 
   // Start listening for compass bearing
   @Synchronized
@@ -193,7 +295,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       return
     }
     doubleBackToExitPressedOnce = true
-    viewModel.snackbarText=getString(R.string.back_button)
+    viewModel.showSnackbar(getString(R.string.back_button))
     launch() {
       delay(2000)
       doubleBackToExitPressedOnce = false
@@ -250,58 +352,57 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           // Execute command
           var commandExecuted = false
           if (commandFunction == "fatalDialog") {
-            //viewMap.fatalDialog(commandArgs[0])
-            //commandExecuted = true
+            viewMap.dialogHandler.fatalDialog(commandArgs[0])
+            commandExecuted = true
           }
           if (commandFunction == "errorDialog") {
-            //viewMap.errorDialog(commandArgs[0])
-            //commandExecuted = true
+            viewMap.dialogHandler.errorDialog(commandArgs[0])
+            commandExecuted = true
           }
           if (commandFunction == "warningDialog") {
-            //viewMap.warningDialog(commandArgs[0])
-            //commandExecuted = true
+            viewMap.dialogHandler.warningDialog(commandArgs[0])
+            commandExecuted = true
           }
           if (commandFunction == "infoDialog") {
-            //viewMap.infoDialog(commandArgs[0])
-            //commandExecuted = true
+            viewMap.dialogHandler.infoDialog(commandArgs[0])
+            commandExecuted = true
           }
           if (commandFunction == "createProgressDialog") {
-            //viewMap.progressMax = commandArgs[1].toInt()
-            //viewMap.updateProgressDialog(commandArgs[0], 0)
+            viewMap.viewModel.setProgress(commandArgs[0],commandArgs[1].toInt())
+            viewMap.viewModel.progressMax=commandArgs[1].toInt()
             commandExecuted = true
           }
           if (commandFunction == "updateProgressDialog") {
-            //viewMap.updateProgressDialog(commandArgs[0], commandArgs[1].toInt())
-            //commandExecuted = true
+            viewMap.viewModel.setProgress(commandArgs[0], commandArgs[1].toInt())
+            commandExecuted = true
           }
           if (commandFunction == "closeProgressDialog") {
-            /*if (viewMap.progressDialog != null) {
-              viewMap.progressDialog.dismiss()
-              viewMap.progressDialog = null
-            }
-            commandExecuted = true*/
+            viewMap.viewModel.progressMax=0
+            commandExecuted = true
           }
           if (commandFunction == "getLastKnownLocation") {
-            /*if (viewMap.coreObject != null) {
-              viewMap.coreObject.onLocationChanged(
-                viewMap.locationManager.getLastKnownLocation(
-                  LocationManager.NETWORK_PROVIDER
-                )!!
-              )
-              viewMap.coreObject.onLocationChanged(
-                viewMap.locationManager.getLastKnownLocation(
-                  LocationManager.GPS_PROVIDER
-                )!!
-              )
+            if (viewMap.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED) {
+              if (viewMap.coreObject!=null) {
+                viewMap.coreObject!!.onLocationChanged(
+                  viewMap.locationManager!!.getLastKnownLocation(
+                    LocationManager.NETWORK_PROVIDER
+                  )!!
+                )
+                viewMap.coreObject!!.onLocationChanged(
+                  viewMap.locationManager!!.getLastKnownLocation(
+                    LocationManager.GPS_PROVIDER
+                  )!!
+                )
+              }
             }
-            commandExecuted = true*/
+            commandExecuted = true
           }
           if (commandFunction == "coreInitialized") {
             commandExecuted = true
           }
           if (commandFunction == "updateWakeLock") {
-            //viewMap.updateWakeLock()
-            //commandExecuted = true
+            viewMap.updateWakeLock()
+            commandExecuted = true
           }
           if (commandFunction == "updateMessages") {
             viewMap.viewModel.messages=GDApplication.messages
@@ -326,8 +427,8 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
             commandExecuted = true
           }
           if (commandFunction == "restartActivity") {
-            /*viewMap.stopService(Intent(viewMap, GDService::class.java))
-            val prefsEditor = viewMap.prefs.edit()
+            viewMap.stopService(Intent(viewMap, GDService::class.java))
+            val prefsEditor = viewMap.prefs!!.edit()
             prefsEditor.putBoolean("processIntent", false)
             prefsEditor.commit()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -335,35 +436,25 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
             } else {
               viewMap.finish()
             }
-            commandExecuted = true*/
+            commandExecuted = true
           }
           if (commandFunction == "lateInitComplete") {
-/*
+
             // Process the latest intent (if any)
-            viewMap.processIntent()
+            viewMap.intentHandler.processIntent()
 
             // Inform the user about the app drawer
-            if (!viewMap.prefs.getBoolean("bindDeviceAdminHintShown", false)) {
-              val builder = MaterialDialog.Builder(viewMap)
-              builder.title(R.string.device_admin_info_dialog_title)
-              builder.icon(viewMap.resources.getDrawable(android.R.drawable.ic_dialog_info))
-              builder.content(R.string.device_admin_info_dialog_description)
-              builder.cancelable(false)
-              builder.negativeText(viewMap.getString(R.string.button_label_do_not_show_again))
-              builder.onNegative { dialog, which ->
-                val prefsEditor = viewMap.prefs.edit()
-                prefsEditor.putBoolean("bindDeviceAdminHintShown", true)
+            if (!viewMap.prefs!!.getBoolean("navDrawerHintShown", false)) {
+              viewMap.viewModel.showSnackbar(
+                viewMap.getString(R.string.nav_drawer_hint),
+                viewMap.getString(R.string.got_it)
+              ) {
+                val prefsEditor = viewMap.prefs!!.edit()
+                prefsEditor.putBoolean("navDrawerHintShown", true)
                 prefsEditor.commit()
-                showNavDrawerHint(viewMap)
               }
-              builder.positiveText(viewMap.getString(R.string.button_label_ok))
-              builder.onPositive { dialog, which -> showNavDrawerHint(viewMap) }
-              builder.build().show()
-            } else {
-              showNavDrawerHint(viewMap)
             }
             commandExecuted = true
- */
           }
           if (commandFunction == "decideContinueOrNewTrack") {
             //viewMap.decideContinueOrNewTrack()
@@ -438,8 +529,8 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
             commandExecuted = true*/
           }
           if (commandFunction == "setExitBusyText") {
-            /*viewMap.setExitBusyText()
-            commandExecuted = true*/
+            viewMap.setExitBusyText()
+            commandExecuted = true
           }
           if (!commandExecuted) {
             GDApplication.addMessage(
@@ -450,26 +541,6 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
         }
       }
     }
-
-    /* Inform the user about the app drawer
-    protected fun showNavDrawerHint(viewMap: ViewMap) {
-      if (!viewMap.prefs.getBoolean("navDrawerHintShown", false)) {
-        Snackbar
-          .make(
-            viewMap.snackbarPosition,
-            viewMap.getString(R.string.nav_drawer_hint), Snackbar.LENGTH_LONG
-          )
-          .setAction(R.string.got_it) {
-            val viewMap: ViewMap? = weakViewMap.get()
-            if (viewMap != null) {
-              val prefsEditor = viewMap.prefs.edit()
-              prefsEditor.putBoolean("navDrawerHintShown", true)
-              prefsEditor.commit()
-            }
-          }
-          .show()
-      }
-    }*/
   }
   var coreMessageHandler = CoreMessageHandler(this)
 
@@ -491,12 +562,17 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     }
 
     // Get important handles
-    if (this.getSystemService(SENSOR_SERVICE)==null) {
+    sensorManager = this.getSystemService(SENSOR_SERVICE) as SensorManager
+    if (sensorManager==null) {
       Toast.makeText(this, getString(R.string.missing_system_service), Toast.LENGTH_LONG)
       finish();
       return
-    } else {
-      sensorManager = this.getSystemService(SENSOR_SERVICE) as SensorManager
+    }
+    locationManager = this.getSystemService(LOCATION_SERVICE) as LocationManager
+    if (locationManager==null) {
+      Toast.makeText(this, getString(R.string.missing_system_service), Toast.LENGTH_LONG)
+      finish();
+      return
     }
 
     // Get the core object
@@ -506,6 +582,9 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       return
     }
     (application as GDApplication).setActivity(this, coreMessageHandler)
+
+    // Create the background task
+    backgroundTask=GDBackgroundTask(this, coreObject!!)!!
 
     // Create the content for the navigation drawer
     val navigationItems=arrayOf(
@@ -524,9 +603,9 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       NavigationItem(Icons.Outlined.Replay, getString(R.string.restart), { }),
       NavigationItem(Icons.Outlined.Logout, getString(R.string.exit), { }),
       NavigationItem(null, getString(R.string.debug), { }),
-      NavigationItem(Icons.Outlined.Message, getString(R.string.toggle_messages), {
+      NavigationItem(Icons.Outlined.Message, getString(R.string.toggle_messages)) {
         viewModel.toggleMessagesVisibility()
-      }),
+      },
       NavigationItem(Icons.Outlined.UploadFile, getString(R.string.send_logs), { }),
       NavigationItem(Icons.Outlined.Clear, getString(R.string.reset), { }),
     )
@@ -546,6 +625,18 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
         content(viewModel,appVersion,navigationItems.toList())
       }
     }
+
+    // Restore the last processed intent from the prefs
+    prefs = application.getSharedPreferences("viewMap", MODE_PRIVATE)
+    if (prefs!!.contains("processIntent")) {
+      val processIntent: Boolean = prefs!!.getBoolean("processIntent", true)
+      if (!processIntent) {
+        getIntent().addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY)
+      }
+      val prefsEditor: Editor = prefs!!.edit()
+      prefsEditor.putBoolean("processIntent", true)
+      prefsEditor.commit()
+    }
   }
 
   // Destroys the activity
@@ -559,6 +650,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       "onDestroy called by " + Thread.currentThread().name
     )
     (application as GDApplication).setActivity(null, null)
+    if (backgroundTask!=null) backgroundTask!!.stop()
     //if (wakeLock != null && wakeLock.isHeld()) wakeLock.release()
     //if (downloadCompleteReceiver != null) unregisterReceiver(downloadCompleteReceiver)
     if (exitRequested) System.exit(0)
@@ -570,6 +662,15 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     }
   }
 
+  // Called when a new intent is available
+  override fun onNewIntent(intent: Intent) {
+    setIntent(intent)
+    GDApplication.addMessage(
+      GDApplication.DEBUG_MSG, "GDApp",
+      "onNewIntent: $intent"
+    )
+  }
+
   override fun onPause() {
     super.onPause()
     GDApplication.addMessage(
@@ -577,6 +678,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       "GDApp",
       "onPause called by " + Thread.currentThread().name
     )
+    viewModel.fixSurfaceViewBug=true
     stopWatchingCompass()
     if (!exitRequested && !restartRequested) {
       val intent = Intent(this, GDService::class.java)
@@ -602,12 +704,15 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     if (exitRequested || restartRequested) return
 
     // Resume all components only if a exit or restart is not requested
-
-    // Resume all components only if a exit or restart is not requested
     startWatchingCompass()
     val intent = Intent(this, GDService::class.java)
     intent.action = "activityResumed"
     startService(intent)
+
+    // Process intent only if geo discoverer is initialized
+
+    // Process intent only if geo discoverer is initialized
+    if (coreObject!!.coreLateInitComplete) intentHandler.processIntent()
   }
 
   // Main content of the activity
@@ -615,39 +720,184 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
   @ExperimentalMaterial3Api
   @Composable
   fun content(viewModel: ActivityViewModel, appVersion: String, navigationItems: List<NavigationItem>) {
-    Scaffold(
-      content = { innerPadding ->
-        val drawerState = rememberDrawerState(initialValue = viewModel.drawerStatus, confirmStateChange = {
-          viewModel.drawerStatus=it
-          true
-        })
-        LaunchedEffect(viewModel.drawerStatus) {
-          if ((drawerState.isOpen)&&(viewModel.drawerStatus==DrawerValue.Closed))
-            drawerState.close()
-          if ((!drawerState.isOpen)&&(viewModel.drawerStatus==DrawerValue.Open))
-            drawerState.open()
+    Box(
+      modifier=Modifier
+        .fillMaxSize()
+    ) {
+      Scaffold(
+        content = { innerPadding ->
+          val drawerState =
+            rememberDrawerState(initialValue = viewModel.drawerStatus, confirmStateChange = {
+              viewModel.drawerStatus = it
+              true
+            })
+          LaunchedEffect(viewModel.drawerStatus) {
+            if ((drawerState.isOpen) && (viewModel.drawerStatus == DrawerValue.Closed))
+              drawerState.close()
+            if ((!drawerState.isOpen) && (viewModel.drawerStatus == DrawerValue.Open))
+              drawerState.open()
+          }
+          val density = LocalDensity.current
+          val scope = rememberCoroutineScope()
+          NavigationDrawer(
+            drawerState = drawerState,
+            modifier = Modifier
+              .fillMaxWidth()
+              .fillMaxHeight(),
+            gesturesEnabled = drawerState.isOpen || viewModel.messagesVisible,
+            drawerShape = drawerShape(),
+            drawerContent = drawerContent(appVersion, innerPadding, navigationItems)
+          ) {
+            screenContent(viewModel)
+          }
         }
-        val density = LocalDensity.current
-        val scope = rememberCoroutineScope()
-        NavigationDrawer(
-          drawerState = drawerState,
+      )
+      if (viewModel.progressMax!=0) {
+        AlertDialog(
           modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(),
-          gesturesEnabled = drawerState.isOpen || viewModel.messagesVisible,
-          drawerShape = drawerShape(),
-          drawerContent = drawerContent(appVersion, innerPadding, navigationItems)
+            .wrapContentHeight(),
+          onDismissRequest = {
+          },
+          confirmButton = {
+          },
+          title = {
+            Text(text = viewModel.progressMessage)
+          },
+          text = {
+            GDLinearProgressIndicator(
+              modifier = Modifier.fillMaxWidth(),
+              progress = viewModel.progressCurrent.toFloat() / viewModel.progressMax.toFloat()
+            )
+          }
+        )
+      }
+      if (viewModel.dialogMessage!="") {
+        AlertDialog(
+          modifier = Modifier
+            .wrapContentHeight(),
+          onDismissRequest = {
+            viewModel.setDialog("")
+          },
+          confirmButton = {
+            TextButton(
+              onClick = {
+                if (viewModel.dialogIsFatal)
+                  finish()
+                viewModel.setDialog("")
+              }
+            ) {
+              if (viewModel.dialogIsFatal)
+                Text(stringResource(id = R.string.button_label_exit))
+              else
+                Text(stringResource(id = R.string.button_label_ok))
+            }
+          },
+          icon = {
+            if (viewModel.dialogIsFatal)
+              Icon(Icons.Filled.Error, contentDescription = null)
+            else
+              Icon(Icons.Filled.Warning, contentDescription = null)
+          },
+          title = {
+            Text(text = title.toString())
+          },
+          text = {
+            Text(text = viewModel.dialogMessage)
+          }
+        )
+      }
+      if (viewModel.askTitle!="") {
+        var editTextValue = remember { mutableStateOf(viewModel.askEditTextValue) }
+        AlertDialog(
+          modifier = Modifier
+            .wrapContentHeight(),
+          onDismissRequest = {
+            viewModel.closeQuestion()
+          },
+          confirmButton = {
+            TextButton(
+              onClick = {
+                if (viewModel.askEditTextValue!="")
+                  viewModel.askEditTextConfirmHandler(editTextValue.value)
+                viewModel.closeQuestion()
+              }
+            ) {
+              Text(viewModel.askConfirmText)
+            }
+          },
+          dismissButton = {
+            TextButton(
+              onClick = {
+                viewModel.closeQuestion()
+              }
+            ) {
+              Text(viewModel.askDismissText)
+            }
+          },
+          title = {
+            Text(text = viewModel.askTitle)
+          },
+          text = {
+            if (viewModel.askEditTextValue!="") {
+              Column() {
+                Text(
+                  text = stringResource(R.string.dialog_subject) + viewModel.askSubject
+                )
+                Spacer(Modifier.height(layoutParams.itemPadding))
+                GDTextField(
+                  value = editTextValue.value,
+                  label = { Text(viewModel.askEditTextLabel) },
+                  onValueChange = { editTextValue.value=it })
+              }
+            }
+          }
+        )
+      }
+      AnimatedVisibility(
+        modifier = Modifier
+          .align(Alignment.BottomCenter),
+        enter = fadeIn() + slideInVertically(initialOffsetY = { +it / 2 }),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = { +it / 2 }),
+        visible = viewModel.snackbarText != ""
+      ) {
+        GDSnackBar(
+          modifier = Modifier
+            .padding(horizontal = layoutParams.snackbarHorizontalPadding)
+            .padding(bottom = layoutParams.snackbarVerticalOffset)
         ) {
-          screenContent(viewModel)
+          Row(
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(
+              modifier = Modifier
+                .weight(1.0f),
+              text = viewModel.snackbarText,
+              color = MaterialTheme.colorScheme.onBackground
+            )
+            if (viewModel.snackbarActionText!="") {
+              TextButton(
+                onClick = {
+                  viewModel.snackbarActionHandler()
+                  viewModel.showSnackbar("")
+                }
+              ) {
+                Text(
+                  text = viewModel.snackbarActionText,
+                  color = MaterialTheme.colorScheme.primary
+                )
+              }
+            }
+          }
         }
       }
-    )
+    }
   }
 
   // Main content on the screen
   @ExperimentalAnimationApi
   @Composable
   private fun screenContent(viewModel: ActivityViewModel) {
+    val scope = rememberCoroutineScope()
     Box(
       modifier = Modifier
         .fillMaxSize()
@@ -666,6 +916,17 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           .fillMaxWidth()
           .fillMaxHeight(),
       )
+      if (viewModel.fixSurfaceViewBug) {
+        Box(
+          modifier=Modifier
+            .fillMaxSize()
+            //.background(Color.Red)
+        )
+        LaunchedEffect(Unit) {
+          delay(500)
+          viewModel.fixSurfaceViewBug=false
+        }
+      }
       if (viewModel.messagesVisible) {
         Column(
           modifier = Modifier
@@ -708,22 +969,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       LaunchedEffect(viewModel.snackbarText) {
         if (viewModel.snackbarText != "") {
           delay(3000)
-          viewModel.snackbarText = ""
-        }
-      }
-      AnimatedVisibility(
-        modifier = Modifier
-          .align(Alignment.BottomCenter),
-        enter = fadeIn() + slideInVertically(initialOffsetY = { +it / 2 }),
-        exit = fadeOut() + slideOutVertically(targetOffsetY = { +it / 2 }),
-        visible = viewModel.snackbarText != ""
-      ) {
-        GDSnackBar(
-          modifier = Modifier
-            .padding(horizontal = layoutParams.snackbarHorizontalPadding)
-            .padding(bottom = layoutParams.snackbarVerticalOffset)
-        ) {
-          Text(viewModel.snackbarText)
+          viewModel.showSnackbar("")
         }
       }
     }
@@ -742,7 +988,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           .width(layoutParams.drawerWidth)
       ) {
         Box(
-          modifier=Modifier
+          modifier= Modifier
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxWidth(),
           contentAlignment = Alignment.CenterStart

@@ -769,6 +769,8 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
   ) {
     if (visible) {
       AlertDialog(
+        modifier = Modifier
+          .wrapContentHeight(),
         onDismissRequest = {
           setVisible(false)
         },

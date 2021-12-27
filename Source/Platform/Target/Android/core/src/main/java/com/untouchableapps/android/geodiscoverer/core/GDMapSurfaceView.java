@@ -31,6 +31,7 @@ import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 
@@ -71,5 +72,4 @@ public class GDMapSurfaceView extends GLSurfaceView {
   public boolean onTouchEvent(final MotionEvent event) {
     return coreObject.onTouchEvent(event);
   }
-  
 }

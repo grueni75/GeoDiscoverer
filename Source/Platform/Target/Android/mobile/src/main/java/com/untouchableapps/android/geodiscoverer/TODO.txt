@@ -10,3 +10,6 @@
 * Check if Tandem Tracker can still send message to Geo Discoverer
 * Limit the list view pref to the actual height if below max height
 * Check if bluetooth address exchange works settings
+* Remove showMessageBar from GDApplication
+* Implement ask for address in processIntent()
+* Implement all items in processIntent()

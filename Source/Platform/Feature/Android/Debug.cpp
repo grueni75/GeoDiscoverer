@@ -131,7 +131,7 @@ void Debug::print(Verbosity verbosity, const char *file, int line, bool messageL
           GDApp_executeAppCommand("warningDialog(\"" + message + "\")");
           break;
         case verbosityFatal:
-          //GDApp_executeAppCommand("fatalDialog(\"" + message + "\")");
+          GDApp_executeAppCommand("fatalDialog(\"" + message + "\")");
           break;
         case verbosityInfo:
           GDApp_executeAppCommand("infoDialog(\"" + message + "\")");

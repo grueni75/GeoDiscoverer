@@ -58,8 +58,10 @@
   <string name="context_menu_title">Map actions</string>
   <string name="show_target">Show target</string>
   <string name="manually_entered_address">Manually entered address</string>
-  <string name="dialog_address_title">Set target at address</string>
+  <string name="dialog_address_title">Add point at address</string>
   <string name="dialog_address_input_hint">Alexanderplatz 1, Berlin (single line!)</string>
+  <string name="dialog_dismiss">Dismiss</string>
+  <string name="dialog_lookup">Lookup</string>
   <string name="device_admin_description">Allows Geo Discoverer to turn off the display by locking it.</string>
   <string name="device_admin_not_enabled">Device admin permission required to turn off display! Please grant it in the device settings.</string>
   <string name="device_admin_info_dialog_title">Device admin permission disclosure</string>
@@ -84,7 +86,7 @@
   <string name="importing_route">Importing route &lt;%1$s&gt;</string>
   <string name="cannot_import_route">Could not import route &lt;%1$s&gt; (I/O error)!</string>
   <string name="import_map">Import map</string>
-  <string name="nav_drawer_hint">Swipe from the left edge to the right to open menu.</string>
+  <string name="nav_drawer_hint">Long press gray transparent circles to show menu.</string>
   <string name="importing_external_map_archives">Importing all map archives related to &lt;%1$s&gt;</string>
   <string name="got_it">Got it!</string>
   <string name="duration">Duration</string>
@@ -171,6 +173,7 @@
   <string name="prefs_not_ready">Preference values are not yet loaded!</string>
   <string name="app_name2">Geo Discoverer 2</string>
   <string name="missing_system_service">System service missing!</string>
+  <string name="dialog_subject">"Subject: "</string>
   <string-array name="donation_google_catalog_values">
     <item>1 €</item>
     <item>2 €</item>
