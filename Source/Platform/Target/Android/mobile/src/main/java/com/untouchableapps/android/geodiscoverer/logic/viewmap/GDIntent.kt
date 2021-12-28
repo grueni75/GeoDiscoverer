@@ -23,25 +23,87 @@
 package com.untouchableapps.android.geodiscoverer.logic.viewmap
 
 import android.annotation.SuppressLint
+import android.app.Dialog
+import android.app.DownloadManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.database.Cursor
 import android.location.Geocoder
 import android.net.Uri
 import android.os.*
 import android.provider.OpenableColumns
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.compose.material3.*
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.MaterialDialog.ButtonCallback
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
+import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
 
 import kotlinx.coroutines.*
+import java.io.File
 import java.io.IOException
+import java.util.*
 
 @ExperimentalMaterial3Api
 class GDIntent(viewMap: ViewMap2) : CoroutineScope by MainScope() {
 
-  // Opens a dialog to ask for the address in the outer activity
-  private val viewMap = viewMap
+  // References
+  val viewMap = viewMap
+  var downloadManager: DownloadManager? = null
+
+  // Handles finished queued downloads
+  var downloads = LinkedList<Bundle>()
+  var downloadCompleteReceiver: BroadcastReceiver? = null
+
+  // Init important stuff
+  fun onCreate() {
+
+    // Create the download manager
+    downloadManager = viewMap.getSystemService(ComponentActivity.DOWNLOAD_SERVICE) as DownloadManager
+    if (downloadManager==null) {
+      viewMap.dialogHandler.fatalDialog(viewMap.getString(R.string.missing_system_service))
+    } else {
+      val filter = IntentFilter()
+      filter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+      downloadCompleteReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+
+          // If one of the requested download finished, restart the core
+          for (download in downloads) {
+            val query = DownloadManager.Query()
+            query.setFilterById(download.getLong("ID"))
+            val cur: Cursor = downloadManager!!.query(query)
+            val col = cur.getColumnIndex(DownloadManager.COLUMN_STATUS)
+            if (cur.moveToFirst()) {
+              if (cur.getInt(col) == DownloadManager.STATUS_SUCCESSFUL) {
+                viewMap.restartCore(false)
+              } else {
+                viewMap.dialogHandler.errorDialog(
+                  viewMap.getString(
+                    R.string.download_failed,
+                    download.getString("Name")
+                  )
+                )
+              }
+            }
+            downloads.remove(download)
+            break
+          }
+        }
+      }
+      viewMap.registerReceiver(downloadCompleteReceiver, filter)
+    }
+  }
 
   // Processes the intent of the activity
   @SuppressLint("Range")
@@ -103,8 +165,18 @@ class GDIntent(viewMap: ViewMap2) : CoroutineScope by MainScope() {
 
     // Handle the intent
     if (isAddress) {
-      viewMap.viewModel.askForAddress(subject,text) {
-        viewMap.viewModel.showSnackbar(it)
+      viewMap.viewModel.askForAddress(subject,text) { address ->
+        viewMap.backgroundTask!!.getLocationFromAddress(
+          name=subject,
+          address=address,
+          group="Default"
+        ) { locationFound ->
+          if (!locationFound) {
+            viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_not_found, address))
+          } else {
+            viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_added, address))
+          }
+        }
       }
     }
     if (isGDA) {
@@ -168,8 +240,7 @@ class GDIntent(viewMap: ViewMap2) : CoroutineScope by MainScope() {
 */
     }
     if (isGPXFromWeb) {
-      //downloadRoute(uri)
-      viewMap.dialogHandler.errorDialog("downloadRoute not yet implemented!")
+      if (uri!=null) downloadRoute(uri!!)
     }
     if (isGPXFromFile) {
 
@@ -191,10 +262,69 @@ class GDIntent(viewMap: ViewMap2) : CoroutineScope by MainScope() {
       if (!gpxName!!.endsWith(".gpx")) {
         gpxName = gpxName + ".gpx"
       }
-      //askForRouteName(uri, gpxName)
-      viewMap.dialogHandler.errorDialog("askForRouteName not yet implemented!")
+      viewMap.viewModel.askForRouteName(gpxName) { name ->
+        viewMap.backgroundTask!!.importRoute(
+          name=name,
+          uri=uri
+        ) { success, message ->
+          if (success)
+            viewMap.restartCore(false)
+          else
+            viewMap.dialogHandler.errorDialog(message)
+        }
+      }
     }
-    viewMap.setIntent(null)
+    viewMap.intent = null
   }
+
+  // Downloads a route
+  fun downloadRoute(srcURI: Uri) {
+
+    // Create some variables
+    val name: String = if (srcURI.lastPathSegment==null) "unknown" else srcURI.lastPathSegment!!
+    val dstFilename = GDCore.getHomeDirPath() + "/Route/" + name
+
+    // Check if download is already ongoing
+    val query = DownloadManager.Query()
+    query.setFilterByStatus(DownloadManager.STATUS_PAUSED or DownloadManager.STATUS_PENDING or DownloadManager.STATUS_RUNNING)
+    val cur: Cursor = downloadManager!!.query(query)
+    val col = cur.getColumnIndex(DownloadManager.COLUMN_ID)
+    var downloadOngoing = false
+    for (download in downloads) {
+      cur.moveToFirst()
+      while (!cur.isAfterLast) {
+        if (cur.getLong(col) == download.getLong("ID")) {
+          downloadOngoing = true
+          break
+        }
+        cur.moveToNext()
+      }
+    }
+    if (downloadOngoing) {
+      viewMap.dialogHandler.infoDialog(viewMap.getString(R.string.skipping_download))
+    } else {
+
+      // Ask the user if GPX file shall be downloaded and overwritten if file exists
+      val dstFile = File(dstFilename)
+      viewMap.viewModel.askForRouteDownload(name,dstFile) {
+
+        // Delete old file if it exists
+        if (dstFile.exists()) dstFile.delete()
+
+        // Request download of file
+        val request = DownloadManager.Request(srcURI)
+        request.setDescription(viewMap.getString(R.string.downloading_gpx_to_route_directory))
+        request.setTitle(name)
+        request.setDestinationUri(Uri.fromFile(dstFile))
+        //request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        val id: Long = downloadManager!!.enqueue(request)
+        val download = Bundle()
+        download.putLong("ID", id)
+        download.putString("Name", name)
+        downloads.add(download)
+      }
+    }
+  }
+
 }
 

@@ -13,3 +13,4 @@
 * Remove showMessageBar from GDApplication
 * Implement ask for address in processIntent()
 * Implement all items in processIntent()
+* Remove unused strings

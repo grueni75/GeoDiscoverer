@@ -25,8 +25,7 @@ package com.untouchableapps.android.geodiscoverer.ui.activity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.content.SharedPreferences.Editor
 import android.content.pm.PackageManager
 import android.graphics.Typeface
@@ -34,10 +33,14 @@ import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.LocationManager
 import android.os.*
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -63,7 +66,6 @@ import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
@@ -74,12 +76,12 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
+import com.afollestad.materialdialogs.MaterialDialog
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
@@ -93,6 +95,7 @@ import java.lang.ref.WeakReference
 import com.untouchableapps.android.geodiscoverer.ui.component.GDSnackBar
 import com.untouchableapps.android.geodiscoverer.ui.component.GDTextField
 import kotlinx.coroutines.*
+import java.io.File
 
 
 @ExperimentalMaterial3Api
@@ -105,6 +108,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     val titleIndent = 20.dp
     val drawerWidth = 250.dp
     val itemPadding = 5.dp
+    val hintIndent = 15.dp
     val drawerCornerRadius = 16.dp
     val snackbarHorizontalPadding = 20.dp
     val snackbarVerticalOffset = 40.dp
@@ -144,17 +148,23 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       private set
     var askTitle : String by mutableStateOf("")
       private set
-    var askSubject : String by mutableStateOf("")
+    var askMessage : String by mutableStateOf("")
       private set
     var askEditTextValue : String by mutableStateOf("")
       private set
-    var askEditTextLabel : String by mutableStateOf("")
+    var askEditTextValueChangeHandler : (String)->Unit={}
+      private set
+    var askEditTextHint : String by mutableStateOf("")
+      private set
+    var askEditTextError : String by mutableStateOf("")
       private set
     var askConfirmText : String by mutableStateOf("")
       private set
     var askDismissText : String by mutableStateOf("")
       private set
     var askEditTextConfirmHandler : (String)->Unit={}
+      private set
+    var askQuestionConfirmHandler : ()->Unit={}
       private set
     var fixSurfaceViewBug : Boolean by mutableStateOf(false)
 
@@ -177,16 +187,48 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     }
     fun askForAddress(subject: String, address: String, confirmHandler: (String)->Unit = {}) {
       askEditTextValue=address
-      askEditTextLabel=getString(R.string.dialog_address_input_hint)
+      askEditTextHint=getString(R.string.dialog_address_input_hint)
       askConfirmText=getString(R.string.dialog_lookup)
       askDismissText=getString(R.string.dialog_dismiss)
       askEditTextConfirmHandler=confirmHandler
-      askSubject=subject
+      askMessage=getString(R.string.dialog_address)
       askTitle=getString(R.string.dialog_address_title)
     }
+    fun askForRouteDownload(name: String, dstFile: File, confirmHandler: ()->Unit = {}) {
+      var message: String = if (dstFile.exists())
+          getString(R.string.overwrite_route_question)
+        else getString(R.string.copy_route_question)
+      message = String.format(message, name)
+      askMessage = message
+      askConfirmText = getString(R.string.yes)
+      askDismissText = getString(R.string.no)
+      askQuestionConfirmHandler = confirmHandler
+      askTitle=getString(R.string.dialog_route_name_title)
+    }
+    fun askForRouteName(gpxName: String, confirmHandler: (String)->Unit = {}) {
+      askEditTextValue=gpxName
+      askEditTextValueChangeHandler={ value ->
+        val dstFilename = GDCore.getHomeDirPath() + "/Route/" + value
+        val dstFile = File(dstFilename)
+        askEditTextError = if (value=="" || !dstFile.exists())
+          ""
+        else
+          getString(R.string.route_exists)
+      }
+      askConfirmText=getString(R.string.dialog_import)
+      askDismissText=getString(R.string.dialog_dismiss)
+      askEditTextConfirmHandler=confirmHandler
+      askMessage=getString(R.string.dialog_route_name_message)
+      askTitle=getString(R.string.dialog_route_name_title)
+    }
+
     fun closeQuestion() {
       askTitle=""
       askEditTextValue=""
+      askEditTextValueChangeHandler={}
+      askEditTextHint=""
+      askEditTextError=""
+      askMessage=""
     }
   }
   val viewModel = ActivityViewModel()
@@ -206,7 +248,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
   val intentHandler=GDIntent(this)
 
   // Background tasks
-  var backgroundTask: GDBackgroundTask? = null
+  var backgroundTask=GDBackgroundTask(this)
 
   // Prefs
   var prefs: SharedPreferences? = null
@@ -284,6 +326,18 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     setExitBusyText()
     val m = Message.obtain(coreObject!!.messageHandler)
     m.what = GDCore.STOP_CORE
+    coreObject!!.messageHandler.sendMessage(m)
+  }
+
+  // Restarts the core
+  fun restartCore(resetConfig: Boolean=false) {
+    restartRequested = true
+    viewModel.busyText = getString(R.string.restarting_core_object)
+    val m = Message.obtain(coreObject!!.messageHandler)
+    m.what = GDCore.RESTART_CORE
+    val b = Bundle()
+    b.putBoolean("resetConfig", resetConfig)
+    m.data = b
     coreObject!!.messageHandler.sendMessage(m)
   }
 
@@ -454,6 +508,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
                 prefsEditor.commit()
               }
             }
+
             commandExecuted = true
           }
           if (commandFunction == "decideContinueOrNewTrack") {
@@ -584,7 +639,10 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     (application as GDApplication).setActivity(this, coreMessageHandler)
 
     // Create the background task
-    backgroundTask=GDBackgroundTask(this, coreObject!!)!!
+    backgroundTask.onCreate(coreObject)
+
+    // Init the intent handler
+    intentHandler.onCreate()
 
     // Create the content for the navigation drawer
     val navigationItems=arrayOf(
@@ -650,7 +708,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       "onDestroy called by " + Thread.currentThread().name
     )
     (application as GDApplication).setActivity(null, null)
-    if (backgroundTask!=null) backgroundTask!!.stop()
+    if (backgroundTask!=null) backgroundTask!!.onDestroy()
     //if (wakeLock != null && wakeLock.isHeld()) wakeLock.release()
     //if (downloadCompleteReceiver != null) unregisterReceiver(downloadCompleteReceiver)
     if (exitRequested) System.exit(0)
@@ -802,7 +860,10 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
             Text(text = title.toString())
           },
           text = {
-            Text(text = viewModel.dialogMessage)
+            Text(
+              text = viewModel.dialogMessage,
+              style = MaterialTheme.typography.bodyLarge
+            )
           }
         )
       }
@@ -819,6 +880,8 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
               onClick = {
                 if (viewModel.askEditTextValue!="")
                   viewModel.askEditTextConfirmHandler(editTextValue.value)
+                else
+                  viewModel.askQuestionConfirmHandler()
                 viewModel.closeQuestion()
               }
             ) {
@@ -839,16 +902,44 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           },
           text = {
             if (viewModel.askEditTextValue!="") {
-              Column() {
-                Text(
-                  text = stringResource(R.string.dialog_subject) + viewModel.askSubject
-                )
-                Spacer(Modifier.height(layoutParams.itemPadding))
+              Column(
+                modifier = Modifier
+                  .wrapContentHeight()
+              ) {
+                viewModel.askEditTextValueChangeHandler(editTextValue.value)
                 GDTextField(
                   value = editTextValue.value,
-                  label = { Text(viewModel.askEditTextLabel) },
-                  onValueChange = { editTextValue.value=it })
+                  textStyle = MaterialTheme.typography.bodyLarge,
+                  label = {
+                    Text(
+                      text = viewModel.askMessage
+                    )
+                  },
+                  onValueChange = {
+                    editTextValue.value=it
+                    viewModel.askEditTextValueChangeHandler(it)
+                  })
+                if (viewModel.askEditTextHint!="") {
+                  Text(
+                    modifier = Modifier
+                      .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
+                    text = viewModel.askEditTextHint
+                  )
+                }
+                if (viewModel.askEditTextError!="") {
+                  Text(
+                    modifier = Modifier
+                      .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
+                    text = viewModel.askEditTextError,
+                    color = MaterialTheme.colorScheme.error
+                  )
+                }
               }
+            } else {
+              Text(
+                text = viewModel.askMessage,
+                style = MaterialTheme.typography.bodyLarge
+              )
             }
           }
         )

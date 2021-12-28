@@ -33,21 +33,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.provider.Settings;
 import androidx.core.app.NotificationCompat;
-import kotlinx.coroutines.CoroutineScope;
 
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.untouchableapps.android.geodiscoverer.GDApplication;
 import com.untouchableapps.android.geodiscoverer.R;
@@ -60,8 +54,6 @@ import com.untouchableapps.android.geodiscoverer.logic.server.BRouterServer;
 import com.untouchableapps.android.geodiscoverer.logic.server.MapTileServer;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 public class GDService extends Service {
   
@@ -74,7 +66,7 @@ public class GDService extends Service {
   BroadcastReceiver userPresentReceiver = null;
 
   // Background tasks
-  GDBackgroundTask backgroundTask = null;
+  GDBackgroundTask backgroundTask = new GDBackgroundTask(this);
 
   // Flags
   boolean locationWatchStarted = false;
@@ -165,7 +157,7 @@ public class GDService extends Service {
     powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
     // Create the background task handler
-    backgroundTask = new GDBackgroundTask(this, coreObject);
+    backgroundTask.onCreate(coreObject);
 
     // Register for user present events
     userPresentReceiver = new BroadcastReceiver() {
@@ -566,8 +558,7 @@ public class GDService extends Service {
     }
 
     // Stop the background tasks
-    if (backgroundTask!=null)
-      backgroundTask.stop();
+    backgroundTask.onDestroy();
   }
   
   

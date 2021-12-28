@@ -22,30 +22,33 @@
 
 package com.untouchableapps.android.geodiscoverer.logic
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.location.Geocoder
 import android.net.Uri
-import android.os.*
-import android.provider.OpenableColumns
 import android.widget.Toast
-import androidx.compose.material3.*
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
-import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
+import com.untouchableapps.android.geodiscoverer.core.GDTools
 
 import kotlinx.coroutines.*
+import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStream
 
-class GDBackgroundTask(context: Context, coreObject: GDCore) : CoroutineScope by MainScope() {
+class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
+  // Arguments
   val context=context
-  val coreObject=coreObject
+  var coreObject: GDCore? = null
+
+  // Inits everything
+  fun onCreate(coreObject: GDCore?) {
+    this.coreObject=coreObject
+  }
 
   // Stops all running threads
-  fun stop() {
+  fun onDestroy() {
     cancel()
   }
 
@@ -61,7 +64,7 @@ class GDBackgroundTask(context: Context, coreObject: GDCore) : CoroutineScope by
           val addresses = geocoder.getFromLocationName(address, 1)
           locationFound = if (addresses.size > 0) {
             val a = addresses[0]
-            coreObject.scheduleCoreCommand(
+            coreObject!!.scheduleCoreCommand(
               "addAddressPoint",
               name, address, a.longitude.toString(), a.latitude.toString(),
               group
@@ -82,7 +85,7 @@ class GDBackgroundTask(context: Context, coreObject: GDCore) : CoroutineScope by
     }
   }
 
-  // Looksup an address
+  // Looks up an address
   fun getLocationFromAddress(
     name: String, address: String, group: String
   ) {
@@ -103,5 +106,36 @@ class GDBackgroundTask(context: Context, coreObject: GDCore) : CoroutineScope by
     }
   }
 
+  // Imports a route
+  fun importRoute(name: String, uri: Uri, result: (Boolean, String)->Unit) {
+    launch() {
+      val dstFilename = GDCore.getHomeDirPath() + "/Route/" + name
+      var success = true
+      var message = ""
+      withContext(Dispatchers.IO) {
+
+        // Open the content of the route file
+        var gpxContents: InputStream? = null
+        try {
+          gpxContents = context.contentResolver.openInputStream(uri)
+        } catch (e: FileNotFoundException) {
+          success=false
+          message=context.getString(R.string.cannot_read_uri,uri.toString())
+        }
+        if ((success)&&(gpxContents!=null)) {
+
+          // Create the destination file
+          try {
+            GDTools.copyFile(gpxContents, dstFilename)
+            gpxContents.close()
+          } catch (e: IOException) {
+            success=false
+            message=context.getString(R.string.cannot_import_route, name)
+          }
+        }
+      }
+      result(success, message)
+    }
+  }
 }
 
