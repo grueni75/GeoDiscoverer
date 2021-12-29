@@ -28,13 +28,13 @@
   <string name="restarting_core_object">Restarting core&#8230;</string>
   <string name="stopping_core_object">Stopping core&#8230;</string>
   <string name="reset">Reset</string>
-  <string name="no">No</string>
-  <string name="yes">Yes</string>
+  <string name="dialog_no">No</string>
+  <string name="dialog_yes">Yes</string>
   <string name="reset_question">Are you sure that you want to reset all preferences to their default values?</string>
   <string name="exit">Exit</string>
   <string name="file_does_not_exist">File does not exist!</string>
-  <string name="copy_route_question">Copy file &lt;%s&gt; to route directory?</string>
-  <string name="overwrite_route_question">Overwrite file &lt;%s&gt; in route directory?</string>
+  <string name="dialog_copy_route_question">Copy file &lt;%s&gt; to route directory?</string>
+  <string name="dialog_overwrite_route_question">Overwrite file &lt;%s&gt; in route directory?</string>
   <string name="copying_file">Copying file &lt;%s&gt; to route directory</string>
   <string name="unsupported_path">The path &lt;%s&gt; is not supported!</string>
   <string name="unsupported_host">The host &lt;%s&gt; is not supported!</string>
@@ -118,9 +118,9 @@
   <string name="welcome_dialog_message">Geo Discoverer is a free navigation app. It comes with an extensive help that explains all features. If you like this app, please donate to support the development! </string>
   <string name="support_geodiscoverer">Support Geo Discoverer!</string>
   <string name="opengles20_required">The app is not compatible to this device because it does not support OpenGL ES 2.0.</string>
-  <string name="continue_or_new_track_question">Shall the current track be continued or shall a new track be started?</string>
-  <string name="new_track">New track</string>
-  <string name="contine_track">Continue track</string>
+  <string name="dialog_continue_or_new_track_question">Shall the current track be continued or shall a new track be started?</string>
+  <string name="dialog_new_track">New track</string>
+  <string name="dialog_contine_track">Continue track</string>
   <string name="map_layer_selection_question">Select the layer to display:</string>
   <string name="map">Map</string>
   <string name="routes">Routes</string>
@@ -133,7 +133,7 @@
   <string name="map_cleanup_all_zoom_levels">All zoom levels</string>
   <string name="map_cleanup_current_zoom_level">Current zoom level</string>
   <string name="cleanup_map">Cleanup map</string>
-  <string name="download_job_level_selection_question">Select the map layers to download</string>
+  <string name="download_job_level_selection_question">Select the map layers</string>
   <string name="download_job_estimated_size_message">Estimated disk usage: %1$s required (%2$s available)</string>
   <string name="download_map">Download map</string>
   <string name="download_job_no_level_selected_message">You have to choose at least one layer.</string>
@@ -178,6 +178,9 @@
   <string name="dialog_finished">Finished</string>
   <string name="dialog_import">Import</string>
   <string name="dialog_address">Address</string>
+  <string name="dialog_download">Download</string>
+  <string name="dialog_track_treatment_title">Track treatment</string>
+  <string name="dialog_map_download_type_title">Map download</string>
   <string-array name="donation_google_catalog_values">
     <item>1 €</item>
     <item>2 €</item>

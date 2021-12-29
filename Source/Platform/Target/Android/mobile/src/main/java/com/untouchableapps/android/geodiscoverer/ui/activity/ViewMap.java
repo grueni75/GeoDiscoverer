@@ -421,7 +421,7 @@ public class ViewMap extends GDActivity {
             builder.title(R.string.waypoint_import_title);
             builder.content(viewMap.getResources().getString(R.string.waypoint_import_message,commandArgs.get(1),commandArgs.get(0)));
             builder.cancelable(true);
-            builder.positiveText(R.string.yes);
+            builder.positiveText(R.string.dialog_yes);
             builder.onPositive(new MaterialDialog.SingleButtonCallback() {
               @Override
               public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -433,7 +433,7 @@ public class ViewMap extends GDActivity {
                 }
               }
             });
-            builder.negativeText(R.string.no);
+            builder.negativeText(R.string.dialog_no);
             builder.onNegative(new MaterialDialog.SingleButtonCallback() {
               @Override
               public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -748,14 +748,14 @@ public class ViewMap extends GDActivity {
     builder.title(getTitle());
     builder.content(R.string.reset_question);
     builder.cancelable(true);
-    builder.positiveText(R.string.yes);
+    builder.positiveText(R.string.dialog_yes);
     builder.onPositive(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
         restartCore(true);
       }
     });
-    builder.negativeText(R.string.no);
+    builder.negativeText(R.string.dialog_no);
     builder.icon(getDrawable(android.R.drawable.ic_dialog_alert));
     Dialog alert = builder.build();
     alert.show();
@@ -945,9 +945,9 @@ public class ViewMap extends GDActivity {
   void decideContinueOrNewTrack() {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
     builder.title(getTitle());
-    builder.content(R.string.continue_or_new_track_question);
+    builder.content(R.string.dialog_continue_or_new_track_question);
     builder.cancelable(true);
-    builder.positiveText(R.string.new_track);
+    builder.positiveText(R.string.dialog_new_track);
     builder.onPositive(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -955,7 +955,7 @@ public class ViewMap extends GDActivity {
         coreObject.executeCoreCommand("createNewTrack");
       }
     });
-    builder.negativeText(R.string.contine_track);
+    builder.negativeText(R.string.dialog_contine_track);
     builder.onNegative(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -1595,13 +1595,13 @@ public class ViewMap extends GDActivity {
         builder.title(getTitle());
         String message;
         if (dstFile.exists())
-          message=getString(R.string.overwrite_route_question);
+          message=getString(R.string.dialog_overwrite_route_question);
         else
-          message=getString(R.string.copy_route_question);
+          message=getString(R.string.dialog_copy_route_question);
         message = String.format(message, name);
         builder.content(message);
         builder.cancelable(true);
-        builder.positiveText(R.string.yes);
+        builder.positiveText(R.string.dialog_yes);
         builder.onPositive(new MaterialDialog.SingleButtonCallback() {
           @Override
           public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -1622,7 +1622,7 @@ public class ViewMap extends GDActivity {
             downloads.add(download);
           }
         });
-        builder.negativeText(R.string.no);
+        builder.negativeText(R.string.dialog_no);
         builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
         Dialog alert = builder.build();
         alert.show();
@@ -2040,7 +2040,7 @@ public class ViewMap extends GDActivity {
             message=getString(R.string.create_map_folder_question,mapFolder.getName(),srcFile);
           builder.content(message);
           builder.cancelable(true);
-          builder.positiveText(R.string.yes);
+          builder.positiveText(R.string.dialog_yes);
           builder.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -2051,7 +2051,7 @@ public class ViewMap extends GDActivity {
               task.execute();
             }
           });
-          builder.negativeText(R.string.no);
+          builder.negativeText(R.string.dialog_no);
           builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
           Dialog alert = builder.build();
           alert.show();

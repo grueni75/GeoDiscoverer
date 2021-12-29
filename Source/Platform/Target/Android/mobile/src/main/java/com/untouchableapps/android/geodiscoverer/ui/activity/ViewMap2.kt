@@ -33,14 +33,10 @@ import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.LocationManager
 import android.os.*
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.Gravity
-import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -81,7 +77,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
-import com.afollestad.materialdialogs.MaterialDialog
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
@@ -112,6 +107,8 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     val drawerCornerRadius = 16.dp
     val snackbarHorizontalPadding = 20.dp
     val snackbarVerticalOffset = 40.dp
+    val snackbarMaxWidth = 400.dp
+    val askMaxContentHeight = 190.dp
   }
   val layoutParams = LayoutParams()
 
@@ -124,6 +121,12 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
 
   // Communication with the composable world
   inner class ActivityViewModel() : ViewModel() {
+
+    // Check box item
+    inner class CheckboxItem(text: String) {
+      var text: String = text
+      var checked: Boolean = false
+    }
 
     // State
     var drawerStatus : DrawerValue by mutableStateOf(DrawerValue.Closed)
@@ -158,6 +161,8 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       private set
     var askEditTextError : String by mutableStateOf("")
       private set
+    var askMultipleChoiceList : MutableList<CheckboxItem> by mutableStateOf(mutableListOf<CheckboxItem>())
+      private set
     var askConfirmText : String by mutableStateOf("")
       private set
     var askDismissText : String by mutableStateOf("")
@@ -165,6 +170,10 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     var askEditTextConfirmHandler : (String)->Unit={}
       private set
     var askQuestionConfirmHandler : ()->Unit={}
+      private set
+    var askQuestionDismissHandler : ()->Unit={}
+      private set
+    var askMultipleChoiceConfirmHandler : (List<String>)->Unit={}
       private set
     var fixSurfaceViewBug : Boolean by mutableStateOf(false)
 
@@ -196,12 +205,12 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     }
     fun askForRouteDownload(name: String, dstFile: File, confirmHandler: ()->Unit = {}) {
       var message: String = if (dstFile.exists())
-          getString(R.string.overwrite_route_question)
-        else getString(R.string.copy_route_question)
+          getString(R.string.dialog_overwrite_route_question)
+        else getString(R.string.dialog_copy_route_question)
       message = String.format(message, name)
       askMessage = message
-      askConfirmText = getString(R.string.yes)
-      askDismissText = getString(R.string.no)
+      askConfirmText = getString(R.string.dialog_yes)
+      askDismissText = getString(R.string.dialog_no)
       askQuestionConfirmHandler = confirmHandler
       askTitle=getString(R.string.dialog_route_name_title)
     }
@@ -221,13 +230,44 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       askMessage=getString(R.string.dialog_route_name_message)
       askTitle=getString(R.string.dialog_route_name_title)
     }
-
+    fun askForTrackTreatment(confirmHandler: ()->Unit = {}, dismissHandler: ()->Unit = {}) {
+      askMessage = getString(R.string.dialog_continue_or_new_track_question)
+      askConfirmText = getString(R.string.dialog_new_track)
+      askDismissText = getString(R.string.dialog_contine_track)
+      askQuestionConfirmHandler = confirmHandler
+      askQuestionDismissHandler = dismissHandler
+      askTitle=getString(R.string.dialog_track_treatment_title)
+    }
+    fun askForMapDownloadType(confirmHandler: ()->Unit = {}, dismissHandler: ()->Unit = {}) {
+      askMessage = getString(R.string.map_download_type_question)
+      askConfirmText = getString(R.string.map_download_type_option2)
+      askDismissText = getString(R.string.map_download_type_option1)
+      askQuestionConfirmHandler = confirmHandler
+      askQuestionDismissHandler = dismissHandler
+      askTitle=getString(R.string.dialog_map_download_type_title)
+    }
+    fun askForMapDownloadDetails(confirmHandler: (List<String>)->Unit = {}) {
+      val result = coreObject!!.executeCoreCommand("getMapLayers()")
+      val mapLayers = result.split(",".toRegex()).toList()
+      askConfirmText = getString(R.string.dialog_download)
+      askDismissText = getString(R.string.dialog_dismiss)
+      askMultipleChoiceList = mutableListOf<CheckboxItem>()
+      mapLayers.forEach {
+        askMultipleChoiceList.add(viewModel.CheckboxItem(it))
+      }
+      askMultipleChoiceConfirmHandler = confirmHandler
+      askTitle=getString(R.string.download_job_level_selection_question)
+    }
     fun closeQuestion() {
       askTitle=""
       askEditTextValue=""
       askEditTextValueChangeHandler={}
       askEditTextHint=""
       askEditTextError=""
+      askQuestionConfirmHandler={}
+      askQuestionDismissHandler={}
+      askMultipleChoiceList=mutableListOf<CheckboxItem>()
+      askMultipleChoiceConfirmHandler={}
       askMessage=""
     }
   }
@@ -508,16 +548,37 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
                 prefsEditor.commit()
               }
             }
-
             commandExecuted = true
           }
           if (commandFunction == "decideContinueOrNewTrack") {
-            //viewMap.decideContinueOrNewTrack()
-            //commandExecuted = true
+            viewMap.viewModel.askForTrackTreatment(
+              confirmHandler = {
+                viewMap.coreObject!!.executeCoreCommand("setRecordTrack", "1")
+                viewMap.coreObject!!.executeCoreCommand("createNewTrack")
+              },
+              dismissHandler = {
+                viewMap.coreObject!!.executeCoreCommand("setRecordTrack", "1")
+              }
+            )
+            commandExecuted = true
           }
           if (commandFunction == "changeMapLayer") {
             //viewMap.changeMapLayer()
             //commandExecuted = true
+          }
+          if (commandFunction == "askForMapDownloadDetails") {
+            viewMap.viewModel.askForMapDownloadDetails() { selectedMapLayers ->
+              if (selectedMapLayers.isNotEmpty()) {
+                val args = arrayOfNulls<String>(selectedMapLayers.size + 2)
+                args[0] = "0"
+                args[1] = commandArgs[0]
+                for (i in selectedMapLayers.indices) {
+                  args[i + 2] = selectedMapLayers[i]
+                }
+                viewMap.coreObject!!.executeCoreCommand("addDownloadJob", *args)
+              }
+            }
+            commandExecuted = true
           }
           if (commandFunction == "updateDownloadJobSize") {
             /*val alert = viewMap.mapDownloadDialog
@@ -532,10 +593,6 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
                 alert.getActionButton(DialogAction.POSITIVE).isEnabled = true
               }
             }
-            commandExecuted = true*/
-          }
-          if (commandFunction == "askForMapDownloadDetails") {
-            /*viewMap.askForMapDownloadDetails(commandArgs[0])
             commandExecuted = true*/
           }
           if (commandFunction == "showMenu") {
@@ -648,7 +705,16 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     val navigationItems=arrayOf(
       NavigationItem(null, getString(R.string.map), { }),
       NavigationItem(Icons.Outlined.Article, getString(R.string.show_legend), { }),
-      NavigationItem(Icons.Outlined.Download, getString(R.string.download_map), { }),
+      NavigationItem(Icons.Outlined.Download, getString(R.string.download_map)) {
+        viewModel.askForMapDownloadType(
+          dismissHandler = {
+            coreObject!!.executeAppCommand("askForMapDownloadDetails(\"\")")
+          },
+          confirmHandler={
+            coreObject!!.executeCoreCommand("downloadActiveRoute")
+          }
+        )
+      },
       NavigationItem(Icons.Outlined.CleaningServices, getString(R.string.cleanup_map), { }),
       NavigationItem(null, getString(R.string.routes), { }),
       NavigationItem(Icons.Outlined.AddCircle, getString(R.string.add_tracks_as_routes), { }),
@@ -786,6 +852,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
         content = { innerPadding ->
           val drawerState =
             rememberDrawerState(initialValue = viewModel.drawerStatus, confirmStateChange = {
+              GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","drawerState=$it")
               viewModel.drawerStatus = it
               true
             })
@@ -804,7 +871,11 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
               .fillMaxHeight(),
             gesturesEnabled = drawerState.isOpen || viewModel.messagesVisible,
             drawerShape = drawerShape(),
-            drawerContent = drawerContent(appVersion, innerPadding, navigationItems)
+            drawerContent = drawerContent(appVersion, innerPadding, navigationItems) {
+              scope.launch() {
+                viewModel.drawerStatus = DrawerValue.Closed
+              }
+            }
           ) {
             screenContent(viewModel)
           }
@@ -856,9 +927,6 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
             else
               Icon(Icons.Filled.Warning, contentDescription = null)
           },
-          title = {
-            Text(text = title.toString())
-          },
           text = {
             Text(
               text = viewModel.dialogMessage,
@@ -868,40 +936,14 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
         )
       }
       if (viewModel.askTitle!="") {
-        var editTextValue = remember { mutableStateOf(viewModel.askEditTextValue) }
-        AlertDialog(
-          modifier = Modifier
-            .wrapContentHeight(),
-          onDismissRequest = {
-            viewModel.closeQuestion()
-          },
-          confirmButton = {
-            TextButton(
-              onClick = {
-                if (viewModel.askEditTextValue!="")
-                  viewModel.askEditTextConfirmHandler(editTextValue.value)
-                else
-                  viewModel.askQuestionConfirmHandler()
-                viewModel.closeQuestion()
-              }
-            ) {
-              Text(viewModel.askConfirmText)
-            }
-          },
-          dismissButton = {
-            TextButton(
-              onClick = {
-                viewModel.closeQuestion()
-              }
-            ) {
-              Text(viewModel.askDismissText)
-            }
-          },
-          title = {
-            Text(text = viewModel.askTitle)
-          },
-          text = {
-            if (viewModel.askEditTextValue!="") {
+        if (viewModel.askEditTextValue!="") {
+          val editTextValue = remember { mutableStateOf(viewModel.askEditTextValue) }
+          askAlertDialog(
+            viewModel=viewModel,
+            confirmHandler = {
+              viewModel.askEditTextConfirmHandler(editTextValue.value)
+            },
+            content = {
               Column(
                 modifier = Modifier
                   .wrapContentHeight()
@@ -916,17 +958,17 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
                     )
                   },
                   onValueChange = {
-                    editTextValue.value=it
+                    editTextValue.value = it
                     viewModel.askEditTextValueChangeHandler(it)
                   })
-                if (viewModel.askEditTextHint!="") {
+                if (viewModel.askEditTextHint != "") {
                   Text(
                     modifier = Modifier
                       .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
                     text = viewModel.askEditTextHint
                   )
                 }
-                if (viewModel.askEditTextError!="") {
+                if (viewModel.askEditTextError != "") {
                   Text(
                     modifier = Modifier
                       .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
@@ -935,14 +977,66 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
                   )
                 }
               }
-            } else {
+            }
+          )
+        } else if (viewModel.askMultipleChoiceList.isNotEmpty()) {
+          askAlertDialog(
+            viewModel=viewModel,
+            confirmHandler = {
+              val result = mutableListOf<String>()
+              viewModel.askMultipleChoiceList.forEach() {
+                if (it.checked) {
+                  result.add(it.text)
+                  //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${it.text} selected")
+                }
+              }
+              viewModel.askMultipleChoiceConfirmHandler(result)
+            },
+            content = {
+              LazyColumn(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .wrapContentHeight()
+                  .heightIn(max=layoutParams.askMaxContentHeight)
+              ) {
+                itemsIndexed(viewModel.askMultipleChoiceList) { index, item ->
+                  val checked = remember { mutableStateOf(item.checked) }
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .wrapContentHeight(),
+                    verticalAlignment = Alignment.CenterVertically
+                  ) {
+                    Checkbox(
+                      checked = checked.value,
+                      onCheckedChange = {
+                        checked.value=it
+                        item.checked=it
+                      }
+                    )
+                    Text(
+                      text = item.text,
+                      style = MaterialTheme.typography.bodyLarge
+                    )
+                  }
+                }
+              }
+            }
+          )
+        } else {
+          askAlertDialog(
+            viewModel=viewModel,
+            confirmHandler = {
+              viewModel.askQuestionConfirmHandler()
+            },
+            content = {
               Text(
                 text = viewModel.askMessage,
                 style = MaterialTheme.typography.bodyLarge
               )
             }
-          }
-        )
+          )
+        }
       }
       AnimatedVisibility(
         modifier = Modifier
@@ -955,6 +1049,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           modifier = Modifier
             .padding(horizontal = layoutParams.snackbarHorizontalPadding)
             .padding(bottom = layoutParams.snackbarVerticalOffset)
+            .widthIn(max = layoutParams.snackbarMaxWidth)
         ) {
           Row(
             verticalAlignment = Alignment.CenterVertically
@@ -982,6 +1077,48 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
         }
       }
     }
+  }
+
+  // Alert dialog for multiple use cases
+  @Composable
+  private fun askAlertDialog(
+    viewModel: ActivityViewModel,
+    confirmHandler: ()->Unit,
+    content: @Composable ()->Unit
+  ) {
+    AlertDialog(
+      modifier = Modifier
+        .wrapContentHeight(),
+      onDismissRequest = {
+        viewModel.closeQuestion()
+      },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            confirmHandler()
+            viewModel.closeQuestion()
+          }
+        ) {
+          Text(viewModel.askConfirmText)
+        }
+      },
+      dismissButton = {
+        TextButton(
+          onClick = {
+            viewModel.askQuestionDismissHandler()
+            viewModel.closeQuestion()
+          }
+        ) {
+          Text(viewModel.askDismissText)
+        }
+      },
+      title = {
+        Text(text = viewModel.askTitle)
+      },
+      text = {
+        content()
+      }
+    )
   }
 
   // Main content on the screen
@@ -1071,7 +1208,8 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
   private fun drawerContent(
     appVersion: String,
     innerPadding: PaddingValues,
-    navigationItems: List<NavigationItem>
+    navigationItems: List<NavigationItem>,
+    closeDrawer: ()->Unit
   ): @Composable() (ColumnScope.() -> Unit) =
     {
       Column(
@@ -1122,7 +1260,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
             .fillMaxWidth()
         ) {
           itemsIndexed(navigationItems) { index, item ->
-            navigationItem(index, item)
+            navigationItem(index, item, closeDrawer)
           }
         }
       }
@@ -1149,7 +1287,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
 
   // Creates a navigation item for the drawer
   @Composable
-  fun navigationItem(index: Int, item: NavigationItem) {
+  fun navigationItem(index: Int, item: NavigationItem, closeDrawer: ()->Unit) {
     if (item.imageVector == null) {
       if (index != 0) {
         Box(
@@ -1184,7 +1322,10 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           .padding(horizontal = layoutParams.itemPadding)
           .clip(shape = RoundedCornerShape(layoutParams.drawerCornerRadius))
           .clickable(
-            onClick = item.onClick,
+            onClick = {
+              item.onClick()
+              closeDrawer()
+            },
             interactionSource = interactionSource,
             indication = rememberRipple(bounded = true)
           )

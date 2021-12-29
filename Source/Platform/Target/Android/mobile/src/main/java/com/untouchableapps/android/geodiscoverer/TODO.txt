@@ -14,3 +14,4 @@
 * Implement ask for address in processIntent()
 * Implement all items in processIntent()
 * Remove unused strings
+* Don't use Geo Discoverer title in non GDCore dialogs
