@@ -746,7 +746,7 @@ public class ViewMap extends GDActivity {
   void askForConfigReset() {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
     builder.title(getTitle());
-    builder.content(R.string.reset_question);
+    builder.content(R.string.dialog_reset_question);
     builder.cancelable(true);
     builder.positiveText(R.string.dialog_yes);
     builder.onPositive(new MaterialDialog.SingleButtonCallback() {
@@ -765,16 +765,16 @@ public class ViewMap extends GDActivity {
   void askForMapCleanup() {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
     builder.title(getTitle());
-    builder.content(R.string.map_cleanup_question);
+    builder.content(R.string.dialog_map_cleanup_question);
     builder.cancelable(true);
-    builder.positiveText(R.string.map_cleanup_all_zoom_levels);
+    builder.positiveText(R.string.dialog_map_cleanup_all_zoom_levels);
     builder.onPositive(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
         coreObject.executeCoreCommand("forceMapRedownload","1");
       }
     });
-    builder.negativeText(R.string.map_cleanup_current_zoom_level);
+    builder.negativeText(R.string.dialog_map_cleanup_current_zoom_level);
     builder.onNegative(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -790,16 +790,16 @@ public class ViewMap extends GDActivity {
   void askForMapDownloadType() {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
     builder.title(getTitle());
-    builder.content(R.string.map_download_type_question);
+    builder.content(R.string.dialog_map_download_type_question);
     builder.cancelable(true);
-    builder.positiveText(R.string.map_download_type_option1);
+    builder.positiveText(R.string.dialog_map_download_type_option1);
     builder.onPositive(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
         askForMapDownloadDetails("");
       }
     });
-    builder.negativeText(R.string.map_download_type_option2);
+    builder.negativeText(R.string.dialog_map_download_type_option2);
     builder.onNegative(new MaterialDialog.SingleButtonCallback() {
       @Override
       public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -879,7 +879,7 @@ public class ViewMap extends GDActivity {
   /** Asks the user which map legend to show */
   void askForMapLegend(final String[] names) {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
-    builder.title(R.string.map_legend_selection_question);
+    builder.title(R.string.dialog_map_legend_selection_question);
     builder.items(names);
     builder.itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
       @Override
@@ -900,7 +900,7 @@ public class ViewMap extends GDActivity {
   void askForRouteRemovalKind() {
     MaterialDialog.Builder builder = new MaterialDialog.Builder(ViewMap.this);
     builder.title(getTitle());
-    builder.content(R.string.route_remove_question);
+    builder.content(R.string.dialog_route_remove_question);
     builder.cancelable(true);
     builder.positiveText(R.string.remove);
     builder.onPositive(new MaterialDialog.SingleButtonCallback() {
@@ -1305,7 +1305,7 @@ public class ViewMap extends GDActivity {
 
     // Create the dialog
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
-    builder.title(R.string.log_selection_question);
+    builder.title(R.string.dialog_log_selection_question);
     builder.items(items);
     builder.cancelable(true);
     builder.positiveText(R.string.finished);
@@ -1387,7 +1387,7 @@ public class ViewMap extends GDActivity {
 
     // Create the dialog
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
-    builder.title(R.string.track_as_route_selection_question);
+    builder.title(R.string.dialog_track_as_route_selection_question);
     builder.cancelable(true);
     builder.positiveText(R.string.finished);
     builder.items(items);
@@ -1536,7 +1536,7 @@ public class ViewMap extends GDActivity {
 
     // Create the dialog
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
-    builder.title(R.string.route_remove_selection_question);
+    builder.title(R.string.dialog_route_remove_selection_question);
     builder.cancelable(true);
     builder.items(items);
     builder.positiveText(R.string.finished);

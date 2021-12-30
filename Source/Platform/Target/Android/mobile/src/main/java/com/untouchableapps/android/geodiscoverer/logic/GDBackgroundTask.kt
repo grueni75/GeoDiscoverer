@@ -25,16 +25,21 @@ package com.untouchableapps.android.geodiscoverer.logic
 import android.content.Context
 import android.location.Geocoder
 import android.net.Uri
+import android.os.AsyncTask
 import android.widget.Toast
+import androidx.compose.material3.ExperimentalMaterial3Api
+import com.afollestad.materialdialogs.MaterialDialog
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.core.GDTools
+import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
 
 import kotlinx.coroutines.*
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.InputStream
+import org.acra.ACRA
+import java.io.*
+import java.lang.Exception
 
 class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
@@ -135,6 +140,108 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
         }
       }
       result(success, message)
+    }
+  }
+
+  // Copies tracks as routes
+  @ExperimentalMaterial3Api
+  fun copyTracksToRoutes(selectedTracks: List<String>, viewMap: ViewMap2) {
+    launch() {
+
+      // Open the progress dialog
+      viewMap.viewModel.openProgress(context.getString(R.string.copying_tracks),selectedTracks.size)
+      withContext(Dispatchers.IO) {
+
+        // Copy all selected tracks to the route directory
+        val progress = 0
+        for (trackName in selectedTracks) {
+          val srcFilename: String = coreObject!!.homePath + "/Track/" + trackName
+          val dstFilename: String = coreObject!!.homePath + "/Route/" + trackName
+          try {
+            GDTools.copyFile(srcFilename, dstFilename)
+          } catch (exception: IOException) {
+            viewMap.viewModel.showSnackbar(context.getString(R.string.cannot_copy_file, srcFilename, dstFilename))
+          }
+          viewMap.viewModel.setProgress(progress)
+        }
+
+      }
+      viewMap.viewModel.closeProgress()
+      viewMap.restartCore(false)
+    }
+  }
+
+  // Removes routes
+  @ExperimentalMaterial3Api
+  fun removeRoutes(selectedRoutes: List<String>, viewMap: ViewMap2) {
+    launch() {
+
+      // Open the progress dialog
+      viewMap.viewModel.openProgress(context.getString(R.string.removing_routes),selectedRoutes.size)
+      withContext(Dispatchers.IO) {
+
+        // Remove the routes
+        var progress = 0
+        for (routeName in selectedRoutes) {
+          var route = File(coreObject!!.homePath + "/Route/" + routeName + ".bin")
+          route.delete() // Don't care if .bin does not exist
+          route = File(coreObject!!.homePath + "/Route/" + routeName)
+          if (!route.delete()) {
+            viewMap.viewModel.showSnackbar(context.getString(R.string.cannot_remove_file, route.path))
+          }
+          progress++
+          viewMap.viewModel.setProgress(progress)
+        }
+      }
+      viewMap.viewModel.closeProgress()
+      viewMap.restartCore(false)
+    }
+  }
+
+  // Removes routes
+  @ExperimentalMaterial3Api
+  fun sendLogs(selectedLogs: List<String>, viewMap: ViewMap2) {
+    launch() {
+
+      // Indicate operation to user
+      viewMap.dialogHandler.infoDialog(viewMap.getString(R.string.log_processing_message))
+      var success=true
+      var message=""
+      var logContents = ""
+      withContext(Dispatchers.IO) {
+        try {
+          for (logName in selectedLogs) {
+            val logPath = coreObject!!.homePath + "/Log/" + logName
+            logContents += "$logPath:\n"
+            val logReader = BufferedReader(FileReader(logPath))
+            var inputLine: String?
+            inputLine = logReader.readLine()
+            while (inputLine != null) {
+              logContents += inputLine!! + "\n"
+              //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",inputLine);
+              inputLine = logReader.readLine()
+            }
+            logContents += "\n"
+            logReader.close()
+          }
+        } catch (e: IOException) {
+          success=false
+          message=e.message!!
+        }
+      }
+      if (!success) {
+        viewMap.dialogHandler.errorDialog(viewMap.getString(R.string.send_logs_failed, message))
+      } else {
+
+        // Add the log to the ACRA report
+        ACRA.getErrorReporter().putCustomData("userLogContents", logContents)
+
+        // Send report via ACRA
+
+        // Send report via ACRA
+        val e = Exception("User has sent logs")
+        ACRA.getErrorReporter().handleException(e, false)
+      }
     }
   }
 }

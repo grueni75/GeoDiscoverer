@@ -55,3 +55,16 @@ fun GDLinearProgressIndicator(
     )
   }
 }
+
+// Missing component in material3
+// Replace later when eventually available
+@Composable
+fun GDLinearProgressIndicator(
+  modifier: Modifier = Modifier
+) {
+  Material2Theme {
+    LinearProgressIndicator(
+      modifier = modifier
+    )
+  }
+}

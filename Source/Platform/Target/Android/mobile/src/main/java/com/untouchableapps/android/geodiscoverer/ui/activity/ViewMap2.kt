@@ -1,4 +1,4 @@
-  //============================================================================
+//============================================================================
 // Name        : ViewMap2.kt
 // Author      : Matthias Gruenewald
 // Copyright   : Copyright 2010-2021 Matthias Gruenewald
@@ -22,76 +22,47 @@
 
 package com.untouchableapps.android.geodiscoverer.ui.activity
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.*
 import android.content.pm.PackageManager
-import android.graphics.Typeface
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.LocationManager
+import android.net.Uri
 import android.os.*
-import android.util.TypedValue
-import android.view.Gravity
-import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.ui.theme.AndroidTheme
 import java.util.*
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.*
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.ViewModel
+import androidx.core.content.FileProvider
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.MaterialDialog.ListCallbackMultiChoice
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
-import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
 import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
 import com.untouchableapps.android.geodiscoverer.logic.GDService
-import com.untouchableapps.android.geodiscoverer.logic.viewmap.GDIntent
+import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.CoreMessageHandler
+import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.IntentHandler
+import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.ViewContent
+import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.ViewModel
 import com.untouchableapps.android.geodiscoverer.ui.component.GDDialog
-import com.untouchableapps.android.geodiscoverer.ui.component.GDLinearProgressIndicator
-import java.lang.ref.WeakReference
-import com.untouchableapps.android.geodiscoverer.ui.component.GDSnackBar
-import com.untouchableapps.android.geodiscoverer.ui.component.GDTextField
 import kotlinx.coroutines.*
 import java.io.File
-
+import android.util.DisplayMetrics
 @ExperimentalMaterial3Api
 class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
 
@@ -105,289 +76,8 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
       }
     }
 
-  // Layout parameters for the navigation drawer
-  class LayoutParams() {
-    val iconWidth = 60.dp
-    val itemHeight = 41.dp
-    val titleIndent = 20.dp
-    val drawerWidth = 250.dp
-    val itemPadding = 5.dp
-    val hintIndent = 15.dp
-    val drawerCornerRadius = 16.dp
-    val snackbarHorizontalPadding = 20.dp
-    val snackbarVerticalOffset = 40.dp
-    val snackbarMaxWidth = 400.dp
-    val askMaxContentHeight = 190.dp
-    val askMultipleChoiceMessageOffset = 15.dp
-    val askMultipleChoiceMessageHeight = 40.dp
-  }
-
-  val layoutParams = LayoutParams()
-
-  // Navigation drawer content
-  class NavigationItem(imageVector: ImageVector? = null, title: String, onClick: () -> Unit) {
-    val imageVector = imageVector
-    val title = title
-    val onClick = onClick
-  }
-
-  // Communication with the composable world
-  inner class ActivityViewModel() : ViewModel() {
-
-    // Check box item
-    inner class CheckboxItem(text: String) {
-      var text: String = text
-      var checked: Boolean = false
-    }
-
-    // Pending waypoint import questions
-    inner class PendingImportWaypointsDecision(
-      gpxFilename: String,
-      waypointCount: String,
-      confirmHandler: () -> Unit = {},
-      dismissHandler: () -> Unit = {}
-    ) {
-      val gpxFilename = gpxFilename
-      val waypointCount = waypointCount
-      val confirmHandler = confirmHandler
-      val dismissHandler = dismissHandler
-    }
-
-    // State
-    var drawerStatus: DrawerValue by mutableStateOf(DrawerValue.Closed)
-    var messages: String by mutableStateOf("")
-    var splashVisible: Boolean by mutableStateOf(false)
-    var messagesVisible: Boolean by mutableStateOf(false)
-    var busyText: String by mutableStateOf("")
-    var snackbarText: String by mutableStateOf("")
-      private set
-    var snackbarActionText: String by mutableStateOf("")
-      private set
-    var snackbarActionHandler: () -> Unit = {}
-      private set
-    var progressMax: Int by mutableStateOf(0)
-    var progressCurrent: Int by mutableStateOf(0)
-      private set
-    var progressMessage: String by mutableStateOf("")
-      private set
-    var dialogMessage: String by mutableStateOf("")
-      private set
-    var dialogIsFatal: Boolean by mutableStateOf(false)
-      private set
-    var askTitle: String by mutableStateOf("")
-      private set
-    var askMessage: String by mutableStateOf("")
-      private set
-    var askEditTextValue: String by mutableStateOf("")
-      private set
-    var askEditTextValueChangeHandler: (String) -> Unit = {}
-      private set
-    var askEditTextHint: String by mutableStateOf("")
-      private set
-    var askEditTextError: String by mutableStateOf("")
-      private set
-    var askMultipleChoiceList: MutableList<CheckboxItem> by mutableStateOf(mutableListOf<CheckboxItem>())
-      private set
-    var askConfirmText: String by mutableStateOf("")
-      private set
-    var askDismissText: String by mutableStateOf("")
-      private set
-    var askEditTextConfirmHandler: (String) -> Unit = {}
-      private set
-    var askQuestionConfirmHandler: () -> Unit = {}
-      private set
-    var askQuestionDismissHandler: () -> Unit = {}
-      private set
-    var askMultipleChoiceConfirmHandler: (List<String>) -> Unit = {}
-      private set
-    var askMultipleChoiceCheckedHandler: () -> Unit = {}
-      private set
-    var pendingImportWaypointsDecisions = mutableListOf<PendingImportWaypointsDecision>()
-    var fixSurfaceViewBug: Boolean by mutableStateOf(false)
-
-    // Methods to modify the state
-    @Synchronized
-    fun toggleMessagesVisibility() {
-      messagesVisible = !messagesVisible
-    }
-
-    @Synchronized
-    fun setProgress(message: String, value: Int) {
-      progressMessage = message
-      progressCurrent = value
-    }
-
-    @Synchronized
-    fun setDialog(message: String, isFatal: Boolean = false) {
-      dialogIsFatal = isFatal
-      dialogMessage = message
-    }
-
-    @Synchronized
-    fun showSnackbar(text: String, actionText: String = "", actionHandler: () -> Unit = {}) {
-      snackbarActionHandler = actionHandler
-      snackbarActionText = actionText
-      snackbarText = text
-    }
-
-    @Synchronized
-    fun askForAddress(subject: String, address: String, confirmHandler: (String) -> Unit) {
-      askEditTextValue = address
-      askEditTextHint = getString(R.string.dialog_address_input_hint)
-      askConfirmText = getString(R.string.dialog_lookup)
-      askDismissText = getString(R.string.dialog_dismiss)
-      askEditTextConfirmHandler = confirmHandler
-      askMessage = getString(R.string.dialog_address)
-      askTitle = getString(R.string.dialog_address_title)
-    }
-
-    @Synchronized
-    fun askForRouteDownload(name: String, dstFile: File, confirmHandler: () -> Unit) {
-      var message: String = if (dstFile.exists())
-        getString(R.string.dialog_overwrite_route_question)
-      else getString(R.string.dialog_copy_route_question)
-      message = String.format(message, name)
-      askMessage = message
-      askConfirmText = getString(R.string.dialog_yes)
-      askDismissText = getString(R.string.dialog_no)
-      askQuestionConfirmHandler = confirmHandler
-      askTitle = getString(R.string.dialog_route_name_title)
-    }
-
-    @Synchronized
-    fun askForRouteName(gpxName: String, confirmHandler: (String) -> Unit) {
-      askEditTextValue = gpxName
-      askEditTextValueChangeHandler = { value ->
-        val dstFilename = GDCore.getHomeDirPath() + "/Route/" + value
-        val dstFile = File(dstFilename)
-        askEditTextError = if (value == "" || !dstFile.exists())
-          ""
-        else
-          getString(R.string.route_exists)
-      }
-      askConfirmText = getString(R.string.dialog_import)
-      askDismissText = getString(R.string.dialog_dismiss)
-      askEditTextConfirmHandler = confirmHandler
-      askMessage = getString(R.string.dialog_route_name_message)
-      askTitle = getString(R.string.dialog_route_name_title)
-    }
-
-    @Synchronized
-    fun askForTrackTreatment(confirmHandler: () -> Unit, dismissHandler: () -> Unit) {
-      askMessage = getString(R.string.dialog_continue_or_new_track_question)
-      askConfirmText = getString(R.string.dialog_new_track)
-      askDismissText = getString(R.string.dialog_contine_track)
-      askQuestionConfirmHandler = confirmHandler
-      askQuestionDismissHandler = dismissHandler
-      askTitle = getString(R.string.dialog_track_treatment_title)
-    }
-
-    @Synchronized
-    fun askForMapDownloadType(confirmHandler: () -> Unit, dismissHandler: () -> Unit) {
-      askMessage = getString(R.string.map_download_type_question)
-      askConfirmText = getString(R.string.map_download_type_option2)
-      askDismissText = getString(R.string.map_download_type_option1)
-      askQuestionConfirmHandler = confirmHandler
-      askQuestionDismissHandler = dismissHandler
-      askTitle = getString(R.string.dialog_map_download_type_title)
-    }
-
-    @Synchronized
-    fun askForMapDownloadDetails(routeName: String, confirmHandler: (List<String>) -> Unit) {
-      val result = coreObject!!.executeCoreCommand("getMapLayers()")
-      val mapLayers = result.split(",".toRegex()).toList()
-      askConfirmText = getString(R.string.dialog_download)
-      askDismissText = getString(R.string.dialog_dismiss)
-      askMultipleChoiceList = mutableListOf<CheckboxItem>()
-      mapLayers.forEach {
-        askMultipleChoiceList.add(viewModel.CheckboxItem(it))
-      }
-      askMultipleChoiceCheckedHandler = {
-        askMessage = getString(R.string.dialog_download_job_estimating_size_message)
-        addMapDownloadJob(true, routeName, getSelectedChoices())
-      }
-      askMultipleChoiceConfirmHandler = confirmHandler
-      askMessage = getString(R.string.dialog_download_job_no_level_selected_message)
-      askTitle = getString(R.string.dialog_download_job_level_selection_question)
-    }
-
-    @Synchronized
-    fun askForUpdateMessage(message: String) {
-      askMessage = message
-    }
-
-    @Synchronized
-    private fun askForImportWaypointsDecision(question: PendingImportWaypointsDecision) {
-      askMessage = getString(
-        R.string.dialog_waypoint_import_message,
-        question.waypointCount,
-        question.gpxFilename
-      )
-      askConfirmText = getString(R.string.dialog_yes)
-      askDismissText = getString(R.string.dialog_no)
-      askQuestionConfirmHandler = question.confirmHandler
-      askQuestionDismissHandler = question.dismissHandler
-      askTitle = getString(R.string.dialog_waypoint_import_title)
-    }
-
-    @Synchronized
-    fun askForImportWaypointsDecision(
-      gpxFilename: String,
-      waypointCount: String,
-      confirmHandler: () -> Unit,
-      dismissHandler: () -> Unit
-    ) {
-      val decision = PendingImportWaypointsDecision(
-        gpxFilename, waypointCount, confirmHandler, dismissHandler
-      )
-      if (askTitle != "") {
-        pendingImportWaypointsDecisions.add(decision)
-      } else {
-        askForImportWaypointsDecision(decision)
-      }
-    }
-
-    @Synchronized
-    fun askForImportWaypointsDecisionPending(): Boolean {
-      return pendingImportWaypointsDecisions.isNotEmpty()
-    }
-
-    @Synchronized
-    fun closeQuestion() {
-      askEditTextValue = ""
-      askEditTextValueChangeHandler = {}
-      askEditTextHint = ""
-      askEditTextError = ""
-      askQuestionConfirmHandler = {}
-      askQuestionDismissHandler = {}
-      askMultipleChoiceList = mutableListOf<CheckboxItem>()
-      askMultipleChoiceConfirmHandler = {}
-      askMultipleChoiceCheckedHandler = {}
-      askMessage = ""
-      askTitle = ""
-    }
-
-    @Synchronized
-    fun getSelectedChoices(): List<String> {
-      val result = mutableListOf<String>()
-      askMultipleChoiceList.forEach() {
-        if (it.checked) {
-          result.add(it.text)
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${it.text} selected")
-        }
-      }
-      return result
-    }
-
-    @Synchronized
-    fun allAskAlertDialogsClosed() {
-      if (pendingImportWaypointsDecisions.isNotEmpty()) {
-        var decision = pendingImportWaypointsDecisions.removeAt(0)
-        askForImportWaypointsDecision(decision)
-      }
-    }
-  }
-  val viewModel = ActivityViewModel()
+  // View model for jetpack compose communication
+  val viewModel = ViewModel(this)
 
   // Reference to the core object and it's view
   var coreObject: GDCore? = null
@@ -401,11 +91,14 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
   )
 
   // The intent handler
-  val intentHandler = GDIntent(this)
+  val intentHandler = IntentHandler(this)
 
   // Background tasks
   var backgroundTask = GDBackgroundTask(this)
 
+  // Activity content
+  val viewContent = ViewContent(this)
+  
   // Prefs
   var prefs: SharedPreferences? = null
 
@@ -515,7 +208,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
   }
 
   // Adds a map download job
-  private fun addMapDownloadJob(
+  fun addMapDownloadJob(
     estimate: Boolean,
     routeName: String,
     selectedMapLayers: List<String>,
@@ -529,244 +222,35 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     coreObject!!.executeCoreCommand("addDownloadJob", *args)
   }
 
-
-  // Communication with the native core
-  class CoreMessageHandler(viewMap: ViewMap2) : Handler(Looper.getMainLooper()) {
-    var weakViewMap: WeakReference<ViewMap2> = WeakReference(viewMap)
-
-    /** Called when the core has a message  */
-    override fun handleMessage(msg: Message) {
-
-      // Abort if the object is not available anymore
-      val viewMap = weakViewMap.get() ?: return
-
-      // Handle the message
-      val b = msg.data
-      when (msg.what) {
-        0 -> {
-
-          // Extract the command
-          val command = b.getString("command")
-          val args_start = command!!.indexOf("(")
-          val args_end = command.lastIndexOf(")")
-          val commandFunction = command.substring(0, args_start)
-          val t = command.substring(args_start + 1, args_end)
-          val commandArgs = Vector<String>()
-          var stringStarted = false
-          var startPos = 0
-          var i = 0
-          while (i < t.length) {
-            if (t.substring(i, i + 1) == "\"") {
-              stringStarted = if (stringStarted) false else true
-            }
-            if (!stringStarted) {
-              if (t.substring(i, i + 1) == "," || i == t.length - 1) {
-                var arg: String
-                arg =
-                  if (i == t.length - 1) t.substring(startPos, i + 1) else t.substring(startPos, i)
-                if (arg.startsWith("\"")) {
-                  arg = arg.substring(1)
-                }
-                if (arg.endsWith("\"")) {
-                  arg = arg.substring(0, arg.length - 1)
-                }
-                commandArgs.add(arg)
-                startPos = i + 1
-              }
-            }
-            i++
-          }
-
-          // Execute command
-          var commandExecuted = false
-          if (commandFunction == "fatalDialog") {
-            viewMap.dialogHandler.fatalDialog(commandArgs[0])
-            commandExecuted = true
-          }
-          if (commandFunction == "errorDialog") {
-            viewMap.dialogHandler.errorDialog(commandArgs[0])
-            commandExecuted = true
-          }
-          if (commandFunction == "warningDialog") {
-            viewMap.dialogHandler.warningDialog(commandArgs[0])
-            commandExecuted = true
-          }
-          if (commandFunction == "infoDialog") {
-            viewMap.dialogHandler.infoDialog(commandArgs[0])
-            commandExecuted = true
-          }
-          if (commandFunction == "createProgressDialog") {
-            viewMap.viewModel.setProgress(commandArgs[0], commandArgs[1].toInt())
-            viewMap.viewModel.progressMax = commandArgs[1].toInt()
-            busy dialog missing!
-            commandExecuted = true
-          }
-          if (commandFunction == "updateProgressDialog") {
-            viewMap.viewModel.setProgress(commandArgs[0], commandArgs[1].toInt())
-            commandExecuted = true
-          }
-          if (commandFunction == "closeProgressDialog") {
-            viewMap.viewModel.progressMax = 0
-            commandExecuted = true
-          }
-          if (commandFunction == "getLastKnownLocation") {
-            if (viewMap.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-              if (viewMap.coreObject != null) {
-                viewMap.coreObject!!.onLocationChanged(
-                  viewMap.locationManager!!.getLastKnownLocation(
-                    LocationManager.NETWORK_PROVIDER
-                  )!!
-                )
-                viewMap.coreObject!!.onLocationChanged(
-                  viewMap.locationManager!!.getLastKnownLocation(
-                    LocationManager.GPS_PROVIDER
-                  )!!
-                )
-              }
-            }
-            commandExecuted = true
-          }
-          if (commandFunction == "coreInitialized") {
-            commandExecuted = true
-          }
-          if (commandFunction == "updateWakeLock") {
-            viewMap.updateWakeLock()
-            commandExecuted = true
-          }
-          if (commandFunction == "updateMessages") {
-            viewMap.viewModel.messages = GDApplication.messages
-            commandExecuted = true
-          }
-          if (commandFunction == "setSplashVisibility") {
-            if (commandArgs[0] == "1") {
-              viewMap.setSplashVisibility(true)
-            } else {
-              viewMap.setSplashVisibility(false)
-            }
-            commandExecuted = true
-          }
-          if (commandFunction == "askForAddress") {
-            //viewMap.askForAddress(viewMap.getString(R.string.manually_entered_address), "")
-            //commandExecuted = true
-          }
-          if (commandFunction == "exitActivity") {
-            viewMap.exitRequested = true
-            viewMap.stopService(Intent(viewMap, GDService::class.java))
-            viewMap.finish()
-            commandExecuted = true
-          }
-          if (commandFunction == "restartActivity") {
-            viewMap.stopService(Intent(viewMap, GDService::class.java))
-            val prefsEditor = viewMap.prefs!!.edit()
-            prefsEditor.putBoolean("processIntent", false)
-            prefsEditor.commit()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-              viewMap.recreate()
-            } else {
-              viewMap.finish()
-            }
-            commandExecuted = true
-          }
-          if (commandFunction == "lateInitComplete") {
-
-            // Process the latest intent (if any)
-            viewMap.intentHandler.processIntent()
-
-            // Inform the user about the app drawer
-            if (!viewMap.prefs!!.getBoolean("navDrawerHintShown", false)) {
-              viewMap.viewModel.showSnackbar(
-                viewMap.getString(R.string.nav_drawer_hint),
-                viewMap.getString(R.string.got_it)
-              ) {
-                val prefsEditor = viewMap.prefs!!.edit()
-                prefsEditor.putBoolean("navDrawerHintShown", true)
-                prefsEditor.commit()
-              }
-            }
-            commandExecuted = true
-          }
-          if (commandFunction == "decideContinueOrNewTrack") {
-            viewMap.viewModel.askForTrackTreatment(
-              confirmHandler = {
-                viewMap.coreObject!!.executeCoreCommand("setRecordTrack", "1")
-                viewMap.coreObject!!.executeCoreCommand("createNewTrack")
-              },
-              dismissHandler = {
-                viewMap.coreObject!!.executeCoreCommand("setRecordTrack", "1")
-              }
-            )
-            commandExecuted = true
-          }
-          if (commandFunction == "changeMapLayer") {
-            //viewMap.changeMapLayer()
-            //commandExecuted = true
-          }
-          if (commandFunction == "askForMapDownloadDetails") {
-            viewMap.viewModel.askForMapDownloadDetails(commandArgs[0]) { selectedMapLayers ->
-              if (selectedMapLayers.isNotEmpty()) {
-                viewMap.addMapDownloadJob(false, commandArgs[0], selectedMapLayers)
-              }
-            }
-            commandExecuted = true
-          }
-          if (commandFunction == "updateDownloadJobSize") {
-            viewMap.viewModel.askForUpdateMessage(
-              viewMap.getString(
-                R.string.dialog_download_job_estimated_size_message, commandArgs[0], commandArgs[1]
-              )
-            )
-            commandExecuted = true
-          }
-          if (commandFunction == "showMenu") {
-            viewMap.viewModel.drawerStatus = DrawerValue.Open
-            commandExecuted = true
-          }
-          if (commandFunction == "decideWaypointImport") {
-            viewMap.viewModel.askForImportWaypointsDecision(
-              gpxFilename=commandArgs[0],
-              waypointCount=commandArgs[1],
-              confirmHandler = {
-                val path = "Navigation/Route[@name='" + commandArgs[0] + "']"
-                viewMap.coreObject!!.configStoreSetStringValue(path, "importWaypoints", "1")
-                if (!viewMap.viewModel.askForImportWaypointsDecisionPending()) {
-                  viewMap.restartCore(false)
-                }
-              },
-              dismissHandler = {
-                val path = "Navigation/Route[@name='" + commandArgs[0] + "']"
-                viewMap.coreObject!!.configStoreSetStringValue(path, "importWaypoints", "2")
-                if (!viewMap.viewModel.askForImportWaypointsDecisionPending()) {
-                  viewMap.restartCore(false)
-                }
-              }
-            )
-            commandExecuted = true
-          }
-          if (commandFunction == "authenticateGoogleBookmarks") {
-            val intent = Intent(viewMap, AuthenticateGoogleBookmarks::class.java)
-            //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            viewMap.startActivity(intent)
-            commandExecuted = true
-          }
-          if (commandFunction == "askForRouteRemovalKind") {
-            /*viewMap.askForRouteRemovalKind()
-            commandExecuted = true*/
-          }
-          if (commandFunction == "setExitBusyText") {
-            viewMap.setExitBusyText()
-            commandExecuted = true
-          }
-          if (!commandExecuted) {
-            GDApplication.addMessage(
-              GDApplication.ERROR_MSG, "GDApp",
-              "unknown command $command received"
-            )
-          }
-        }
-      }
+  // Shows the legend with the given name
+  fun showMapLegend(name: String) {
+    val legendPath = coreObject!!.executeCoreCommand("getMapLegendPath", name)
+    val legendFile = File(legendPath)
+    if (!legendFile.exists()) {
+      dialogHandler.errorDialog(
+        getString(
+          R.string.map_has_no_legend,
+          coreObject!!.executeCoreCommand("getMapFolder")
+        )
+      )
+    } else {
+      val legendUri = FileProvider.getUriForFile(
+        applicationContext, "com.untouchableapps.android.geodiscoverer.fileprovider", legendFile
+      )
+      val intent = Intent()
+      intent.action = Intent.ACTION_VIEW
+      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+      if (legendPath.endsWith(".png")) intent.setDataAndType(legendUri, "image/*")
+      if (legendPath.endsWith(".pdf")) intent.setDataAndType(legendUri, "application/pdf")
+      GDApplication.addMessage(
+        GDApplication.DEBUG_MSG, "GDApp",
+        "Viewing $legendPath"
+      )
+      startActivity(intent)
     }
   }
 
+  // Communication with the native core
   var coreMessageHandler = CoreMessageHandler(this)
 
   // Creates the activity
@@ -816,9 +300,21 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
 
     // Create the content for the navigation drawer
     val navigationItems = arrayOf(
-      NavigationItem(null, getString(R.string.map), { }),
-      NavigationItem(Icons.Outlined.Article, getString(R.string.show_legend), { }),
-      NavigationItem(Icons.Outlined.Download, getString(R.string.download_map)) {
+      ViewContent.NavigationItem(null, getString(R.string.map), { }),
+      ViewContent.NavigationItem(Icons.Outlined.Article, getString(R.string.show_legend)) {
+        if (coreObject!=null) {
+          val namesString = coreObject!!.executeCoreCommand("getMapLegendNames")
+          val names = namesString.split(",".toRegex()).toList()
+          if (names.size != 1) {
+            viewModel.askForMapLegend(names) { name ->
+              showMapLegend(name)
+            }
+          } else {
+            showMapLegend(names[0])
+          }
+        }
+      },
+      ViewContent.NavigationItem(Icons.Outlined.Download, getString(R.string.download_map)) {
         viewModel.askForMapDownloadType(
           dismissHandler = {
             coreObject!!.executeAppCommand("askForMapDownloadDetails(\"\")")
@@ -828,26 +324,81 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           }
         )
       },
-      NavigationItem(Icons.Outlined.CleaningServices, getString(R.string.cleanup_map), { }),
-      NavigationItem(null, getString(R.string.routes), { }),
-      NavigationItem(Icons.Outlined.AddCircle, getString(R.string.add_tracks_as_routes), { }),
-      NavigationItem(Icons.Outlined.RemoveCircle, getString(R.string.remove_routes), { }),
-      NavigationItem(Icons.Outlined.SendToMobile, getString(R.string.export_selected_route), { }),
-      NavigationItem(Icons.Outlined.Directions, getString(R.string.brouter), { }),
-      NavigationItem(null, getString(R.string.general), { }),
-      NavigationItem(Icons.Outlined.Help, getString(R.string.help), { }),
-      NavigationItem(Icons.Outlined.Settings, getString(R.string.preferences)) {
+      ViewContent.NavigationItem(Icons.Outlined.CleaningServices, getString(R.string.cleanup_map)) {
+        if (coreObject!=null) {
+          viewModel.askForMapCleanup(
+            confirmHandler = {
+              coreObject!!.executeCoreCommand(
+                "forceMapRedownload",
+                "1"
+              )
+            },
+            dismissHandler = {
+              coreObject!!.executeCoreCommand(
+                "forceMapRedownload",
+                "0"
+              )
+            }
+          )
+        }
+      },
+      ViewContent.NavigationItem(null, getString(R.string.routes), { }),
+      ViewContent.NavigationItem(Icons.Outlined.AddCircle, getString(R.string.add_tracks_as_routes)) {
+        viewModel.askForTracksAsRoutes() { selectedTracks ->
+          if (selectedTracks.isNotEmpty()) {
+            backgroundTask.copyTracksToRoutes(selectedTracks,this)
+          }
+        }
+      },
+      ViewContent.NavigationItem(Icons.Outlined.RemoveCircle, getString(R.string.remove_routes)) {
+        viewModel.askForRemoveRoutes() { selectedRoutes ->
+          if (selectedRoutes.isNotEmpty()) {
+            backgroundTask.removeRoutes(selectedRoutes,this)
+          }
+        }
+      },
+      ViewContent.NavigationItem(Icons.Outlined.SendToMobile, getString(R.string.export_selected_route)) {
+        if (coreObject!=null) {
+          coreObject!!.executeCoreCommand("exportActiveRoute")
+        }
+      },
+      ViewContent.NavigationItem(Icons.Outlined.Directions, getString(R.string.brouter)) {
+        val url = "http://localhost:8383/brouter-web/index.html"
+        val i = Intent(Intent.ACTION_VIEW)
+        i.data = Uri.parse(url)
+        startActivity(i)
+      },
+      ViewContent.NavigationItem(null, getString(R.string.general), { }),
+      ViewContent.NavigationItem(Icons.Outlined.Help, getString(R.string.help)) {
+        intent = Intent(applicationContext, ShowHelp::class.java)
+        startActivity(intent)
+      },
+      ViewContent.NavigationItem(Icons.Outlined.Settings, getString(R.string.preferences)) {
         val myIntent = Intent(applicationContext, Preferences::class.java)
         startPreferencesForResult.launch(myIntent)
       },
-      NavigationItem(Icons.Outlined.Replay, getString(R.string.restart), { }),
-      NavigationItem(Icons.Outlined.Logout, getString(R.string.exit), { }),
-      NavigationItem(null, getString(R.string.debug), { }),
-      NavigationItem(Icons.Outlined.Message, getString(R.string.toggle_messages)) {
+      ViewContent.NavigationItem(Icons.Outlined.Replay, getString(R.string.restart)) {
+        restartCore(false)
+      },
+      ViewContent.NavigationItem(Icons.Outlined.Logout, getString(R.string.exit)) {
+        exitApp()
+      },
+      ViewContent.NavigationItem(null, getString(R.string.debug), { }),
+      ViewContent.NavigationItem(Icons.Outlined.Message, getString(R.string.toggle_messages)) {
         viewModel.toggleMessagesVisibility()
       },
-      NavigationItem(Icons.Outlined.UploadFile, getString(R.string.send_logs), { }),
-      NavigationItem(Icons.Outlined.Clear, getString(R.string.reset), { }),
+      ViewContent.NavigationItem(Icons.Outlined.UploadFile, getString(R.string.send_logs)) {
+        viewModel.askForSendLogs() { selectedLogs ->
+          if (selectedLogs.isNotEmpty()) {
+            backgroundTask.sendLogs(selectedLogs,this)
+          }
+        }
+      },
+      ViewContent.NavigationItem(Icons.Outlined.Clear, getString(R.string.reset)) {
+        viewModel.askForConfigReset() {
+          restartCore(true)
+        }
+      },
     )
 
     // Get the app version
@@ -862,7 +413,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     // Create the activity content
     setContent {
       AndroidTheme {
-        content(viewModel, appVersion, navigationItems.toList())
+        viewContent.content(viewModel, appVersion, navigationItems.toList())
       }
     }
 
@@ -953,546 +504,6 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     if (coreObject!!.coreLateInitComplete) intentHandler.processIntent()
   }
 
-  // Main content of the activity
-  @ExperimentalAnimationApi
-  @ExperimentalMaterial3Api
-  @Composable
-  fun content(
-    viewModel: ActivityViewModel,
-    appVersion: String,
-    navigationItems: List<NavigationItem>
-  ) {
-    Box(
-      modifier = Modifier
-        .fillMaxSize()
-    ) {
-      Scaffold(
-        content = { innerPadding ->
-          val drawerState =
-            rememberDrawerState(initialValue = viewModel.drawerStatus, confirmStateChange = {
-              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "drawerState=$it")
-              viewModel.drawerStatus = it
-              true
-            })
-          LaunchedEffect(viewModel.drawerStatus) {
-            if ((drawerState.isOpen) && (viewModel.drawerStatus == DrawerValue.Closed))
-              drawerState.close()
-            if ((!drawerState.isOpen) && (viewModel.drawerStatus == DrawerValue.Open))
-              drawerState.open()
-          }
-          val density = LocalDensity.current
-          val scope = rememberCoroutineScope()
-          NavigationDrawer(
-            drawerState = drawerState,
-            modifier = Modifier
-              .fillMaxWidth()
-              .fillMaxHeight(),
-            gesturesEnabled = drawerState.isOpen || viewModel.messagesVisible,
-            drawerShape = drawerShape(),
-            drawerContent = drawerContent(appVersion, innerPadding, navigationItems) {
-              scope.launch() {
-                viewModel.drawerStatus = DrawerValue.Closed
-              }
-            }
-          ) {
-            screenContent(viewModel)
-          }
-        }
-      )
-      if (viewModel.progressMax != 0) {
-        AlertDialog(
-          modifier = Modifier
-            .wrapContentHeight(),
-          onDismissRequest = {
-          },
-          confirmButton = {
-          },
-          title = {
-            Text(text = viewModel.progressMessage)
-          },
-          text = {
-            GDLinearProgressIndicator(
-              modifier = Modifier.fillMaxWidth(),
-              progress = viewModel.progressCurrent.toFloat() / viewModel.progressMax.toFloat()
-            )
-          }
-        )
-      }
-      if (viewModel.dialogMessage != "") {
-        AlertDialog(
-          modifier = Modifier
-            .wrapContentHeight(),
-          onDismissRequest = {
-            viewModel.setDialog("")
-          },
-          confirmButton = {
-            TextButton(
-              onClick = {
-                if (viewModel.dialogIsFatal)
-                  finish()
-                viewModel.setDialog("")
-              }
-            ) {
-              if (viewModel.dialogIsFatal)
-                Text(stringResource(id = R.string.button_label_exit))
-              else
-                Text(stringResource(id = R.string.button_label_ok))
-            }
-          },
-          icon = {
-            if (viewModel.dialogIsFatal)
-              Icon(Icons.Filled.Error, contentDescription = null)
-            else
-              Icon(Icons.Filled.Warning, contentDescription = null)
-          },
-          text = {
-            Text(
-              text = viewModel.dialogMessage,
-              style = MaterialTheme.typography.bodyLarge
-            )
-          }
-        )
-      }
-      if (viewModel.askTitle != "") {
-        if (viewModel.askEditTextValue != "") {
-          val editTextValue = remember { mutableStateOf(viewModel.askEditTextValue) }
-          askAlertDialog(
-            viewModel = viewModel,
-            confirmHandler = {
-              viewModel.askEditTextConfirmHandler(editTextValue.value)
-            },
-            content = {
-              Column(
-                modifier = Modifier
-                  .wrapContentHeight()
-              ) {
-                viewModel.askEditTextValueChangeHandler(editTextValue.value)
-                GDTextField(
-                  value = editTextValue.value,
-                  textStyle = MaterialTheme.typography.bodyLarge,
-                  label = {
-                    Text(
-                      text = viewModel.askMessage
-                    )
-                  },
-                  onValueChange = {
-                    editTextValue.value = it
-                    viewModel.askEditTextValueChangeHandler(it)
-                  })
-                if (viewModel.askEditTextHint != "") {
-                  Text(
-                    modifier = Modifier
-                      .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
-                    text = viewModel.askEditTextHint
-                  )
-                }
-                if (viewModel.askEditTextError != "") {
-                  Text(
-                    modifier = Modifier
-                      .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
-                    text = viewModel.askEditTextError,
-                    color = MaterialTheme.colorScheme.error
-                  )
-                }
-              }
-            }
-          )
-        } else if (viewModel.askMultipleChoiceList.isNotEmpty()) {
-          askAlertDialog(
-            viewModel = viewModel,
-            confirmHandler = {
-              viewModel.askMultipleChoiceConfirmHandler(viewModel.getSelectedChoices())
-            },
-            content = {
-              Column(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .wrapContentHeight()
-              ) {
-                LazyColumn(
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .heightIn(max = layoutParams.askMaxContentHeight)
-                ) {
-                  itemsIndexed(viewModel.askMultipleChoiceList) { index, item ->
-                    val checked = remember { mutableStateOf(item.checked) }
-                    Row(
-                      modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                      verticalAlignment = Alignment.CenterVertically
-                    ) {
-                      Checkbox(
-                        checked = checked.value,
-                        onCheckedChange = {
-                          checked.value = it
-                          item.checked = it
-                          viewModel.askMultipleChoiceCheckedHandler()
-                        }
-                      )
-                      Text(
-                        text = item.text,
-                        style = MaterialTheme.typography.bodyLarge
-                      )
-                    }
-                  }
-                }
-                if (viewModel.askMessage != "") {
-                  Spacer(Modifier.height(layoutParams.askMultipleChoiceMessageOffset))
-                  Text(
-                    modifier = Modifier
-                      .height(layoutParams.askMultipleChoiceMessageHeight),
-                    text = viewModel.askMessage
-                  )
-                }
-              }
-            }
-          )
-        } else {
-          askAlertDialog(
-            viewModel = viewModel,
-            confirmHandler = {
-              viewModel.askQuestionConfirmHandler()
-            },
-            content = {
-              Text(
-                text = viewModel.askMessage,
-                style = MaterialTheme.typography.bodyLarge
-              )
-            }
-          )
-        }
-      } else {
-        viewModel.allAskAlertDialogsClosed()
-      }
-      AnimatedVisibility(
-        modifier = Modifier
-          .align(Alignment.BottomCenter),
-        enter = fadeIn() + slideInVertically(initialOffsetY = { +it / 2 }),
-        exit = fadeOut() + slideOutVertically(targetOffsetY = { +it / 2 }),
-        visible = viewModel.snackbarText != ""
-      ) {
-        GDSnackBar(
-          modifier = Modifier
-            .padding(horizontal = layoutParams.snackbarHorizontalPadding)
-            .padding(bottom = layoutParams.snackbarVerticalOffset)
-            .widthIn(max = layoutParams.snackbarMaxWidth)
-        ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Text(
-              modifier = Modifier
-                .weight(1.0f),
-              text = viewModel.snackbarText,
-              color = MaterialTheme.colorScheme.onBackground
-            )
-            if (viewModel.snackbarActionText != "") {
-              TextButton(
-                onClick = {
-                  viewModel.snackbarActionHandler()
-                  viewModel.showSnackbar("")
-                }
-              ) {
-                Text(
-                  text = viewModel.snackbarActionText,
-                  color = MaterialTheme.colorScheme.primary
-                )
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Alert dialog for multiple use cases
-  @Composable
-  private fun askAlertDialog(
-    viewModel: ActivityViewModel,
-    confirmHandler: () -> Unit,
-    content: @Composable () -> Unit
-  ) {
-    AlertDialog(
-      modifier = Modifier
-        .wrapContentHeight(),
-      onDismissRequest = {
-        viewModel.closeQuestion()
-      },
-      confirmButton = {
-        TextButton(
-          onClick = {
-            confirmHandler()
-            viewModel.closeQuestion()
-          }
-        ) {
-          Text(viewModel.askConfirmText)
-        }
-      },
-      dismissButton = {
-        TextButton(
-          onClick = {
-            viewModel.askQuestionDismissHandler()
-            viewModel.closeQuestion()
-          }
-        ) {
-          Text(viewModel.askDismissText)
-        }
-      },
-      title = {
-        Text(text = viewModel.askTitle)
-      },
-      text = {
-        content()
-      }
-    )
-  }
-
-  // Main content on the screen
-  @ExperimentalAnimationApi
-  @Composable
-  private fun screenContent(viewModel: ActivityViewModel) {
-    val scope = rememberCoroutineScope()
-    Box(
-      modifier = Modifier
-        .fillMaxSize()
-    ) {
-      AndroidView(
-        factory = { context ->
-          GDMapSurfaceView(context, null).apply {
-            layoutParams = ViewGroup.LayoutParams(
-              ViewGroup.LayoutParams.MATCH_PARENT,
-              ViewGroup.LayoutParams.MATCH_PARENT,
-            )
-            setCoreObject(coreObject)
-          }
-        },
-        modifier = Modifier
-          .fillMaxWidth()
-          .fillMaxHeight(),
-      )
-      if (viewModel.fixSurfaceViewBug) {
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-        )
-        LaunchedEffect(Unit) {
-          delay(500)
-          viewModel.fixSurfaceViewBug = false
-        }
-      }
-      if (viewModel.messagesVisible) {
-        Column(
-          modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.8f)),
-          horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-          if (viewModel.splashVisible) {
-            Image(
-              painter = painterResource(R.drawable.splash),
-              contentDescription = null
-            )
-            Text(
-              text = viewModel.busyText,
-              style = MaterialTheme.typography.headlineSmall,
-              color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(Modifier.height(20.dp))
-          }
-          AndroidView(
-            modifier = Modifier
-              .fillMaxSize(),
-            factory = { context ->
-              TextView(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                  ViewGroup.LayoutParams.MATCH_PARENT,
-                  ViewGroup.LayoutParams.MATCH_PARENT,
-                )
-                gravity = Gravity.BOTTOM
-                typeface = Typeface.MONOSPACE
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 10.0f)
-              }
-            },
-            update = { view ->
-              view.text = viewModel.messages
-            }
-          )
-        }
-      }
-      LaunchedEffect(viewModel.snackbarText) {
-        if (viewModel.snackbarText != "") {
-          delay(3000)
-          viewModel.showSnackbar("")
-        }
-      }
-    }
-  }
-
-  // Content of the navigation drawer
-  @Composable
-  private fun drawerContent(
-    appVersion: String,
-    innerPadding: PaddingValues,
-    navigationItems: List<NavigationItem>,
-    closeDrawer: () -> Unit
-  ): @Composable() (ColumnScope.() -> Unit) =
-    {
-      Column(
-        modifier = Modifier
-          .width(layoutParams.drawerWidth)
-      ) {
-        Box(
-          modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .fillMaxWidth(),
-          contentAlignment = Alignment.CenterStart
-        ) {
-          /*Image(
-            modifier = Modifier.fillMaxWidth(),
-            painter = painterResource(R.drawable.nav_header),
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth
-          )*/
-          Row(
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Column(
-              modifier = Modifier
-                .width(layoutParams.iconWidth),
-              horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-              Image(
-                painter = painterResource(R.mipmap.ic_launcher),
-                contentDescription = null
-              )
-            }
-            Column() {
-              Text(
-                text = stringResource(id = R.string.app_name),
-                style = MaterialTheme.typography.headlineSmall
-              )
-              Text(
-                text = appVersion,
-                style = MaterialTheme.typography.bodyMedium
-              )
-              Spacer(Modifier.height(4.dp))
-            }
-          }
-        }
-        LazyColumn(
-          modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxWidth()
-        ) {
-          itemsIndexed(navigationItems) { index, item ->
-            navigationItem(index, item, closeDrawer)
-          }
-        }
-      }
-    }
-
-  // Sets the width of the navigation drawer correctly
-  fun drawerShape() = object : Shape {
-    override fun createOutline(
-      size: Size,
-      layoutDirection: LayoutDirection,
-      density: Density
-    ): Outline {
-      val cornerRadius = with(density) { layoutParams.drawerCornerRadius.toPx() }
-      return Outline.Rounded(
-        RoundRect(
-          left = 0f,
-          top = 0f,
-          right = with(density) { layoutParams.drawerWidth.toPx() },
-          bottom = size.height,
-          topRightCornerRadius = CornerRadius(cornerRadius),
-          bottomRightCornerRadius = CornerRadius(cornerRadius)
-        )
-      )
-    }
-  }
-
-  // Creates a navigation item for the drawer
-  @Composable
-  fun navigationItem(index: Int, item: NavigationItem, closeDrawer: () -> Unit) {
-    if (item.imageVector == null) {
-      if (index != 0) {
-        Box(
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(layoutParams.itemPadding)
-            .height(1.dp)
-            .background(MaterialTheme.colorScheme.outline)
-        )
-      }
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(vertical = layoutParams.itemPadding),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Column(
-          modifier = Modifier
-            .absolutePadding(left = layoutParams.titleIndent)
-        ) {
-          Text(
-            text = item.title,
-            style = MaterialTheme.typography.titleSmall
-          )
-        }
-      }
-    } else {
-      val interactionSource = remember { MutableInteractionSource() }
-      Box(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(horizontal = layoutParams.itemPadding)
-          .clip(shape = RoundedCornerShape(layoutParams.drawerCornerRadius))
-          .clickable(
-            onClick = {
-              item.onClick()
-              closeDrawer()
-            },
-            interactionSource = interactionSource,
-            indication = rememberRipple(bounded = true)
-          )
-      ) {
-        Row(
-          modifier = Modifier
-            .fillMaxWidth(),
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Spacer(
-            Modifier
-              .width(0.dp)
-              .height(layoutParams.itemHeight)
-          )
-          Column(
-            modifier = Modifier
-              .width(layoutParams.iconWidth),
-            horizontalAlignment = Alignment.CenterHorizontally
-          ) {
-            Icon(
-              imageVector = item.imageVector,
-              contentDescription = null
-            )
-          }
-          Column(
-            modifier = Modifier
-              .weight(1f)
-          ) {
-            Text(
-              text = item.title,
-              style = MaterialTheme.typography.bodyMedium
-            )
-          }
-        }
-      }
-    }
-  }
-
   @ExperimentalMaterial3Api
   @Preview(showBackground = true)
   @Composable
@@ -1500,5 +511,6 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     AndroidTheme {
     }
   }
+
 }
 

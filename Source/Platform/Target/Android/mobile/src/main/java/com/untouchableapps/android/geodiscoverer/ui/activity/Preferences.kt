@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
@@ -185,7 +186,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
 
     // Get all entries for this path
     var entries: MutableList<Bundle> = mutableListOf()
-    if (!expertMode) {
+    if ((!expertMode)&&(path=="")) {
       entries.add(definePreferenceSection("General"))
       entries.add(definePreferenceEntry("General","unitSystem")!!)
       entries.add(definePreferenceEntry("General","wakeLock")!!)
@@ -256,38 +257,44 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     var entries: List<Bundle> = collectPreferences(path,expertMode.value)
 
     // Create the content
-    Scaffold(
-      topBar = {
-        SmallTopAppBar(
-          title = { Text(title) },
-          navigationIcon = {
-            IconButton(onClick = { finish() }) {
-              Icon(
-                imageVector = Icons.Outlined.ArrowBack,
-                contentDescription = null
-              )
-            }
-          },
-        )
-      },
-      content = { innerPadding ->
-        LazyColumn(
-          modifier = Modifier
-            .padding(innerPadding)
-        ) {
-          itemsIndexed(entries) {
-              index, entry -> inflatePreference(index, entry) {
+    BoxWithConstraints(
+      modifier = Modifier
+        .fillMaxSize()
+    ) {
+      val contentBoxWithConstraintsScope = this
+      Scaffold(
+        topBar = {
+          SmallTopAppBar(
+            title = { Text(title) },
+            navigationIcon = {
+              IconButton(onClick = { finish() }) {
+                Icon(
+                  imageVector = Icons.Outlined.ArrowBack,
+                  contentDescription = null
+                )
+              }
+            },
+          )
+        },
+        content = { innerPadding ->
+          LazyColumn(
+            modifier = Modifier
+              .padding(innerPadding)
+          ) {
+            itemsIndexed(entries) { index, entry ->
+              inflatePreference(index, entry, contentBoxWithConstraintsScope.maxHeight) {
                 expertMode.value = it
               }
+            }
           }
         }
-      }
-    )
+      )
+    }
   }
 
   @ExperimentalGraphicsApi
   @Composable
-  fun inflatePreference(i: Int, info: Bundle, setExpertMode: (Boolean)->Unit) {
+  fun inflatePreference(i: Int, info: Bundle, maxHeight: Dp, setExpertMode: (Boolean)->Unit) {
 
     // Process the type of info
     val parentPath: String = info.getString("parentPath")!!
@@ -608,7 +615,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
           content = {
             LazyColumn(
               modifier = Modifier
-                .heightIn(max=180.dp)
+                .heightIn(max=maxHeight-250.dp)
                 .fillMaxWidth()
             ) {
               items(allValues.value) {
