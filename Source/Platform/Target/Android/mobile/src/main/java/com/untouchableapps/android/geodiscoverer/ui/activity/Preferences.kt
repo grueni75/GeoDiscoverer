@@ -541,6 +541,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
 
               // Handle the different types
               var values = mutableListOf<String>()
+              var reverseSort=false
               when(fullPath) {
                 "Map/folder" -> {
                   val dir = File(coreObject.homePath + "/Map")
@@ -564,6 +565,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
                     }
                   }
                   if (!currentValueFound) values.add(currentValue)
+                  reverseSort=true
                 }
                 "Navigation/activeRoute" -> {
                   values =
@@ -578,6 +580,8 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
                 }
               }
               values.sort();
+              if (reverseSort)
+                values.reverse()
               allValues.value=values;
               //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","background fill finished for $fullPath")
             }

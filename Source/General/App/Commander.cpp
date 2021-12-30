@@ -758,7 +758,7 @@ std::string Commander::execute(std::string cmd) {
     if (!activeRoute) {
       ERROR("please activate a route first",NULL);
     } else {
-      dispatch("askForMapDownloadDetails(" + activeRoute->getName() + ")");
+      dispatch("askForMapDownloadDetails(" + activeRoute->getGpxFilename() + ")");
     }
     cmdExecuted=true;
   }

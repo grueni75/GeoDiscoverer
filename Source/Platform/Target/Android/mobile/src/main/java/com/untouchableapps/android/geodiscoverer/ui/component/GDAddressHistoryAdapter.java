@@ -150,7 +150,7 @@ public class GDAddressHistoryAdapter extends ArrayAdapter<String> {
     LinkedList<String> unsortedNames = new LinkedList<String>(Arrays.asList(temp));
     while (unsortedNames.size()>0) {
       String newestName="";
-      long newestTimestamp = 0;
+      long newestTimestamp = -1;
       for (String name : unsortedNames) {
         String path = "Navigation/AddressPoint[@name='" + name + "']";
         long t = Long.parseLong(coreObject.configStoreGetStringValue(path, "timestamp"));

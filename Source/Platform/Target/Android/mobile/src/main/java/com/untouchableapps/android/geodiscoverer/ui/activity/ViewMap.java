@@ -398,7 +398,7 @@ public class ViewMap extends GDActivity {
           if (commandFunction.equals("updateDownloadJobSize")) {
             MaterialDialog alert = viewMap.mapDownloadDialog;
             if (alert!=null) {
-              alert.setContent(R.string.download_job_estimated_size_message,commandArgs.get(0),commandArgs.get(1));
+              alert.setContent(R.string.dialog_download_job_estimated_size_message,commandArgs.get(0),commandArgs.get(1));
               if (Integer.parseInt(commandArgs.get(2))==1) {
                 alert.getActionButton(DialogAction.POSITIVE).setEnabled(false);
               } else {
@@ -418,8 +418,8 @@ public class ViewMap extends GDActivity {
           if (commandFunction.equals("decideWaypointImport")) {
             viewMap.nestedImportWaypointsDecisions++;
             MaterialDialog.Builder builder = new MaterialDialog.Builder(viewMap);
-            builder.title(R.string.waypoint_import_title);
-            builder.content(viewMap.getResources().getString(R.string.waypoint_import_message,commandArgs.get(1),commandArgs.get(0)));
+            builder.title(R.string.dialog_waypoint_import_title);
+            builder.content(viewMap.getResources().getString(R.string.dialog_waypoint_import_message,commandArgs.get(1),commandArgs.get(0)));
             builder.cancelable(true);
             builder.positiveText(R.string.dialog_yes);
             builder.onPositive(new MaterialDialog.SingleButtonCallback() {
@@ -818,7 +818,7 @@ public class ViewMap extends GDActivity {
     final String commandArgs=new String();
     final LinkedList<String> selectedMapLayers = new LinkedList<String>();
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
-    builder.title(R.string.download_job_level_selection_question);
+    builder.title(R.string.dialog_download_job_level_selection_question);
     builder.items(mapLayers);
     builder.cancelable(true);
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
@@ -845,7 +845,7 @@ public class ViewMap extends GDActivity {
         mapDownloadDialog = null;
       }
     });
-    builder.content(R.string.download_job_no_level_selected_message);
+    builder.content(R.string.dialog_download_job_no_level_selected_message);
     builder.itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
       @Override
       public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
@@ -862,9 +862,9 @@ public class ViewMap extends GDActivity {
             args[i+2]=selectedMapLayers.get(i);
           }
           coreObject.executeCoreCommand("addDownloadJob", args);
-          mapDownloadDialog.setContent(R.string.download_job_estimating_size_message);
+          mapDownloadDialog.setContent(R.string.dialog_download_job_estimating_size_message);
         } else {
-          mapDownloadDialog.setContent(R.string.download_job_no_level_selected_message);
+          mapDownloadDialog.setContent(R.string.dialog_download_job_no_level_selected_message);
         }
         mapDownloadDialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
         return true;
