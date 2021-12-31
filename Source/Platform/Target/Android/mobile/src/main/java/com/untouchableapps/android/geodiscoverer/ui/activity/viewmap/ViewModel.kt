@@ -63,6 +63,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   }
 
   // State
+  var fixSurfaceViewBug: Boolean by mutableStateOf(false)
   var drawerStatus: DrawerValue by mutableStateOf(DrawerValue.Closed)
   var messages: String by mutableStateOf("")
   var splashVisible: Boolean by mutableStateOf(false)
@@ -117,7 +118,9 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   var askMultipleChoiceCheckedHandler: () -> Unit = {}
     private set
   var pendingImportWaypointsDecisions = mutableListOf<PendingImportWaypointsDecision>()
-  var fixSurfaceViewBug: Boolean by mutableStateOf(false)
+  var integratedListVisible: Boolean by mutableStateOf(false)
+    private set
+
 
   // Methods to modify the state
   @Synchronized
@@ -440,6 +443,18 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     askSingleChoiceConfirmHandler = {}
     askMessage = ""
     askTitle = ""
+  }
+
+  @Synchronized
+  fun openIntegratedList() {
+    integratedListVisible=true
+    viewMap.coreObject!!.executeCoreCommand("setWidgetlessMode","1")
+  }
+
+  @Synchronized
+  fun closeIntegratedList() {
+    integratedListVisible=false
+    viewMap.coreObject!!.executeCoreCommand("setWidgetlessMode","0")
   }
 
   @Synchronized

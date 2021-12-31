@@ -22,10 +22,12 @@
 
 package com.untouchableapps.android.geodiscoverer.ui.activity.viewmap
 
+import android.content.res.Configuration
 import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
@@ -46,6 +48,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
@@ -55,6 +58,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -89,6 +93,8 @@ class ViewContent(viewMap: ViewMap2) {
     val askMaxContentHeight = 140.dp
     val askMultipleChoiceMessageOffset = 15.dp
     val dialogButonRowHeight = 200.dp
+    val integratedListHeight = 300.dp
+    val integratedListCloseRowHeight = 45.dp
   }
   val layoutParams = LayoutParams()
 
@@ -142,7 +148,7 @@ class ViewContent(viewMap: ViewMap2) {
               }
             }
           ) {
-            screenContent(viewModel)
+            screenContent(viewModel,contentBoxWithConstraintsScope.maxHeight)
           }
         }
       )
@@ -394,6 +400,12 @@ class ViewContent(viewMap: ViewMap2) {
             }
           }
         }
+        LaunchedEffect(viewModel.snackbarText) {
+          if (viewModel.snackbarText != "") {
+            delay(3000)
+            viewModel.showSnackbar("")
+          }
+        }
       }
     }
   }
@@ -448,26 +460,76 @@ class ViewContent(viewMap: ViewMap2) {
   // Main content on the screen
   @ExperimentalAnimationApi
   @Composable
-  private fun screenContent(viewModel: ViewModel) {
+  private fun screenContent(viewModel: ViewModel, maxScreenHeight: Dp) {
     val scope = rememberCoroutineScope()
     Box(
       modifier = Modifier
         .fillMaxSize()
     ) {
-      AndroidView(
-        factory = { context ->
-          GDMapSurfaceView(context, null).apply {
-            layoutParams = ViewGroup.LayoutParams(
-              ViewGroup.LayoutParams.MATCH_PARENT,
-              ViewGroup.LayoutParams.MATCH_PARENT,
-            )
-            setCoreObject(viewMap.coreObject)
+      val configuration = LocalConfiguration.current
+      when (configuration.orientation) {
+        Configuration.ORIENTATION_PORTRAIT -> {
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+          ) {
+            Surface(
+              modifier = Modifier
+                .fillMaxSize()
+            ) {
+              mapSurface()
+            }
+            AnimatedVisibility(
+              modifier = Modifier
+                .align(Alignment.BottomCenter),
+              enter = slideInVertically(initialOffsetY = { +it / 2 }),
+              exit = slideOutVertically(targetOffsetY = { +it / 2 }),
+              visible = viewModel.integratedListVisible
+            ) {
+              Surface(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .height(layoutParams.integratedListHeight),
+                shadowElevation = 3.dp
+              ) {
+                Column(
+                ) {
+                  Surface(
+                    shadowElevation = 3.dp
+                  ) {
+                    Box(
+                      modifier = Modifier
+                        .fillMaxWidth()
+                        .height(layoutParams.integratedListCloseRowHeight)
+                    ) {
+                      IconButton(
+                        modifier = Modifier
+                          .align(Alignment.Center),
+                        onClick = {
+                          viewModel.closeIntegratedList()
+                        }
+                      ) {
+                        Icon(
+                          imageVector = Icons.Filled.ExpandMore,
+                          contentDescription = null
+                        )
+                      }
+                    }
+                  }
+                  LazyColumn(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                  ) {
+                  }
+                }
+              }
+            }
           }
-        },
-        modifier = Modifier
-          .fillMaxWidth()
-          .fillMaxHeight(),
-      )
+        }
+        else -> {
+          mapSurface()
+        }
+      }
       if (viewModel.fixSurfaceViewBug) {
         Box(
           modifier = Modifier
@@ -517,13 +579,23 @@ class ViewContent(viewMap: ViewMap2) {
           )
         }
       }
-      LaunchedEffect(viewModel.snackbarText) {
-        if (viewModel.snackbarText != "") {
-          delay(3000)
-          viewModel.showSnackbar("")
-        }
-      }
     }
+  }
+
+  // Map surface view
+  @Composable
+  private fun mapSurface() {
+    AndroidView(
+      factory = { context ->
+        GDMapSurfaceView(context, null).apply {
+          layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+          )
+          setCoreObject(viewMap.coreObject)
+        }
+      },
+    )
   }
 
   // Content of the navigation drawer

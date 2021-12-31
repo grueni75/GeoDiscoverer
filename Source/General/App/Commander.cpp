@@ -945,6 +945,10 @@ std::string Commander::execute(std::string cmd) {
     core->getDefaultGraphicEngine()->setAmbientModeStartTime(atol(args[0].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="setWidgetlessMode") {
+    core->getDefaultGraphicEngine()->setWidgetlessMode(atoi(args[0].c_str()));
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

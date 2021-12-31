@@ -1701,9 +1701,9 @@
                   <xsd:documentation>Time in microseconds that a fade animation lasts.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="ambientModeTransitionDuration" type="xsd:integer" default="500000">
+              <xsd:element name="modeTransitionDuration" type="xsd:integer" default="500000">
                 <xsd:annotation>
-                  <xsd:documentation>Time in microseconds that the transition into ambient mode lasts.</xsd:documentation>
+                  <xsd:documentation>Time in microseconds that the transition into ambient or widgetless mode lasts.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="targetRotateDuration" type="xsd:integer" default="5000000">

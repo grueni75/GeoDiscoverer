@@ -210,7 +210,8 @@ class CoreMessageHandler(viewMap: ViewMap2) : Handler(Looper.getMainLooper()) {
         }
         if (commandFunction == "changeMapLayer") {
           //viewMap.changeMapLayer()
-          //commandExecuted = true
+          viewMap.viewModel.openIntegratedList()
+          commandExecuted = true
         }
         if (commandFunction == "askForMapDownloadDetails") {
           viewMap.viewModel.askForMapDownloadDetails(commandArgs[0]) { selectedMapLayers ->

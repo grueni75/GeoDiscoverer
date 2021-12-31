@@ -81,7 +81,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   tileImageNotDownloaded.setColor(GraphicColor(255,255,255,0));
   tileImageDownloadErrorOccured.setColor(GraphicColor(255,255,255,0));
   fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration",__FILE__, __LINE__);
-  ambientModeTransitionDuration=core->getConfigStore()->getIntValue("Graphic","ambientModeTransitionDuration",__FILE__, __LINE__);
+  modeTransitionDuration=core->getConfigStore()->getIntValue("Graphic","modeTransitionDuration",__FILE__, __LINE__);
   blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration",__FILE__, __LINE__);
   mapReferenceDPI=core->getConfigStore()->getIntValue("Graphic","mapReferenceDotsPerInch",__FILE__,__LINE__);
   timeOffsetPeriod=core->getConfigStore()->getIntValue("Graphic","timeOffsetPeriod",__FILE__,__LINE__);
@@ -89,6 +89,8 @@ GraphicEngine::GraphicEngine(Device *device) :
   drawingTooSlow=false;
   ambientModeStartTime=0;
   interactiveModeStartTime=0;
+  widgetlessModeStartTime=0;
+  widgetfullModeStartTime=0;
   currentTime=0;
 
   // Init the dynamic data
@@ -705,35 +707,43 @@ bool GraphicEngine::draw(bool forceRedraw) {
       }
     }
 
-    // Draw all widgets
-    if (widgetGraphicObject) {
-      std::list<GraphicPrimitive*> *pageDrawList=widgetGraphicObject->getDrawList();
-      for(std::list<GraphicPrimitive *>::const_iterator i=pageDrawList->begin(); i != pageDrawList->end(); i++) {
-        GraphicObject *page = (GraphicObject*) *i;
-        std::list<GraphicPrimitive*> *widgetDrawList=page->getDrawList();
-        screen->startObject();
-        screen->translate(page->getX(),page->getY(),0);
-        for(std::list<GraphicPrimitive *>::const_iterator i=widgetDrawList->begin(); i != widgetDrawList->end(); i++) {
+    // Get the fade scale depending on ambiet mode
+    double fadeScale=getWidgetlessFadeScale();
+    screen->setAlphaScale(fadeScale);
+    if (fadeScale>0) {
 
-          // Draw the widget
+      // Draw all widgets
+      if (widgetGraphicObject) {
+
+        std::list<GraphicPrimitive*> *pageDrawList=widgetGraphicObject->getDrawList();
+        for(std::list<GraphicPrimitive *>::const_iterator i=pageDrawList->begin(); i != pageDrawList->end(); i++) {
+          GraphicObject *page = (GraphicObject*) *i;
+          std::list<GraphicPrimitive*> *widgetDrawList=page->getDrawList();
+          screen->startObject();
+          screen->translate(page->getX(),page->getY(),0);
+          for(std::list<GraphicPrimitive *>::const_iterator i=widgetDrawList->begin(); i != widgetDrawList->end(); i++) {
+
+            // Draw the widget
+            WidgetPrimitive *widget;
+            widget=(WidgetPrimitive*)*i;
+            widget->draw(currentTime);
+          }
+          screen->endObject();
+        }
+      }
+      //PROFILE_ADD("widget drawing");
+
+      // Draw the finger menu
+      if (widgetFingerMenu) {
+        std::list<GraphicPrimitive*> *fingerMenuDrawList=widgetFingerMenu->getDrawList();
+        for(std::list<GraphicPrimitive *>::const_iterator i=fingerMenuDrawList->begin(); i != fingerMenuDrawList->end(); i++) {
           WidgetPrimitive *widget;
           widget=(WidgetPrimitive*)*i;
           widget->draw(currentTime);
         }
-        screen->endObject();
-      }
+      }      
     }
-    //PROFILE_ADD("widget drawing");
-
-    // Draw the finger menu
-    if (widgetFingerMenu) {
-      std::list<GraphicPrimitive*> *fingerMenuDrawList=widgetFingerMenu->getDrawList();
-      for(std::list<GraphicPrimitive *>::const_iterator i=fingerMenuDrawList->begin(); i != fingerMenuDrawList->end(); i++) {
-        WidgetPrimitive *widget;
-        widget=(WidgetPrimitive*)*i;
-        widget->draw(currentTime);
-      }
-    }
+    screen->setAlphaScale(1.0);
 
     // Finish the drawing
     screen->endScene();
@@ -848,7 +858,7 @@ void GraphicEngine::setAmbientModeStartTime(TimestampInMicroseconds offset) {
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   if ((ambientModeStartTime!=0)&&(t>=ambientModeStartTime)) 
     interactiveModeStartTime=t;
-  ambientModeStartTime=t+offset-ambientModeTransitionDuration;
+  ambientModeStartTime=t+offset-modeTransitionDuration;
 }
 
 // Returns the fade scale for the ambient transition
@@ -870,5 +880,51 @@ double GraphicEngine::getAmbientFadeScale() {
   }
   return fadeScale;
 }
+
+// Checks if display is in no widgets mode
+bool GraphicEngine::isWidgetlessMode(TimestampInMicroseconds &duration) {
+  duration=0;
+  //DEBUG("currentTime=%ld",currentTime);
+  //DEBUG("ambientModeStartTime=%ld currentTime=%ld",ambientModeStartTime,currentTime);
+  if ((widgetlessModeStartTime!=0)&&(currentTime>=widgetlessModeStartTime)) {
+    duration=currentTime-widgetlessModeStartTime;
+    //DEBUG("duration=%ld",duration);
+    return true;
+  } else {
+    duration=currentTime-widgetfullModeStartTime;
+    return false;
+  }
+}
+
+// Enables or disables the widgetless mode
+void GraphicEngine::setWidgetlessMode(boolean mode) {
+  TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
+  if (mode) {
+    widgetlessModeStartTime=t+modeTransitionDuration;
+  } else {
+    widgetfullModeStartTime=t;
+  }
+}
+
+// Returns the fade scale for the ambient transition
+double GraphicEngine::getWidgetlessFadeScale() {
+  double fadeScale=1.0;
+  TimestampInMicroseconds duration;
+  if (isWidgetlessMode(duration)) {
+    if (duration<fadeDuration) {
+      fadeScale=((double)(fadeDuration-duration))/((double)fadeDuration);
+      DEBUG("fadeScale=%f",fadeScale);
+    } else {
+      fadeScale=0.0;
+    }
+  } else {
+    if (duration<fadeDuration) {
+      fadeScale=((double)(duration))/((double)fadeDuration);
+      DEBUG("fadeScale=%f",fadeScale);
+    }
+  }
+  return fadeScale;
+}
+
 
 }

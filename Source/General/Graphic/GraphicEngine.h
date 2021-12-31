@@ -121,8 +121,8 @@ protected:
   // Default duration of a fade animation
   TimestampInMicroseconds fadeDuration;
 
-  // Default duration of a fade animation
-  TimestampInMicroseconds ambientModeTransitionDuration;
+  // Duration of transition into ambient or widgetless mode
+  TimestampInMicroseconds modeTransitionDuration;
 
   // Default duration of a blink animation
   TimestampInMicroseconds blinkDuration;
@@ -130,11 +130,17 @@ protected:
   // Period of the time offset used for color animation
   TimestampInMicroseconds timeOffsetPeriod;
 
-  // Timepoint at which thw ambient mode starts
+  // Timepoint at which the ambient mode starts
   TimestampInMicroseconds ambientModeStartTime;
 
   // Timepoint at which the interactive mode starts
   TimestampInMicroseconds interactiveModeStartTime;
+
+  // Timepoint at which the widgetless mode starts
+  TimestampInMicroseconds widgetlessModeStartTime;
+
+  // Timepoint at which the widgetfull mode starts
+  TimestampInMicroseconds widgetfullModeStartTime;
 
   // Last drawing time
   TimestampInMicroseconds currentTime;
@@ -188,6 +194,15 @@ public:
 
   // Returns the fade scale for the ambient transition
   double getAmbientFadeScale();
+
+  // Checks if display is in widgetless mode
+  bool isWidgetlessMode(TimestampInMicroseconds &duration);
+
+  // Enables or disables the widgetless mode
+  void setWidgetlessMode(boolean mode);
+
+  // Returns the fade scale for the widgetless transition
+  double getWidgetlessFadeScale();
 
   // Getters and setters
   void lockDrawing(const char *file, int line) const {
