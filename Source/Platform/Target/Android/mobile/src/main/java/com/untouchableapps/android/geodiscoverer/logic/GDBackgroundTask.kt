@@ -244,5 +244,41 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
       }
     }
   }
+
+  // Check for outdated routes
+  @ExperimentalMaterial3Api
+  fun checkForOutdatedRoutes(viewMap: ViewMap2) {
+    launch() {
+
+      // Indicate operation to user
+      var routesOutdated=false
+      withContext(Dispatchers.IO) {
+
+        // Go through all route files
+        val routeDir = File(coreObject!!.homePath + "/Route")
+        val cacheDir = coreObject!!.homePath + "/Route/.cache"
+        for (routeFile in routeDir.listFiles()) {
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",routeFile.getName());
+          if (routeFile.isDirectory) continue
+          if (routeFile.name.endsWith(".gpx")) {
+            val cacheFile = File(cacheDir + "/" + routeFile.name)
+            if (!cacheFile.exists()) {
+              routesOutdated = true
+              break
+            }
+            if (routeFile.lastModified() > cacheFile.lastModified()) {
+              routesOutdated = true
+              break
+            }
+          }
+        }
+      }
+      if (routesOutdated) {
+        viewMap.viewModel.showSnackbar(viewMap.getString(R.string.routes_outdated))
+        viewMap.restartCore(false)
+      }
+    }
+  }
+
 }
 

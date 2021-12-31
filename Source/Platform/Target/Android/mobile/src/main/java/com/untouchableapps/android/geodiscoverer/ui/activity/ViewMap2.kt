@@ -62,7 +62,7 @@ import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.ViewModel
 import com.untouchableapps.android.geodiscoverer.ui.component.GDDialog
 import kotlinx.coroutines.*
 import java.io.File
-import android.util.DisplayMetrics
+
 @ExperimentalMaterial3Api
 class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
 
@@ -499,6 +499,11 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     val intent = Intent(this, GDService::class.java)
     intent.action = "activityResumed"
     startService(intent)
+
+    // Check for outdated routes
+    if (coreObject!!.coreInitialized) {
+      backgroundTask.checkForOutdatedRoutes(this)
+    }
 
     // Process intent only if geo discoverer is initialized
     if (coreObject!!.coreLateInitComplete) intentHandler.processIntent()

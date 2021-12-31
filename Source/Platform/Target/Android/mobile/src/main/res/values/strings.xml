@@ -86,7 +86,7 @@
   <string name="importing_route">Importing route &lt;%1$s&gt;</string>
   <string name="cannot_import_route">Could not import route &lt;%1$s&gt; (I/O error)!</string>
   <string name="import_map">Import map</string>
-  <string name="nav_drawer_hint">Long press gray transparent circles to show menu.</string>
+  <string name="nav_drawer_hint">Long press gray transparent circles at the bottom to show the menu.</string>
   <string name="importing_external_map_archives">Importing all map archives related to &lt;%1$s&gt;</string>
   <string name="got_it">Got it!</string>
   <string name="duration">Duration</string>
@@ -136,7 +136,7 @@
   <string name="dialog_download_job_level_selection_question">Select the map layers</string>
   <string name="dialog_download_job_estimated_size_message">Estimated disk usage: %1$s required (%2$s available)</string>
   <string name="download_map">Download map</string>
-  <string name="dialog_download_job_no_level_selected_message">You have to choose at least one layer to .</string>
+  <string name="dialog_download_job_no_level_selected_message">Please choose at least one map layer</string>
   <string name="dialog_download_job_estimating_size_message">Estimating storage usage of download job...</string>
   <string name="heart_rate_unavailable_sound_muted">Muting hear rate sensor unavailable sound!</string>
   <string name="dialog_waypoint_import_title">Waypoints in route found</string>
