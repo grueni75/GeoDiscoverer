@@ -23,6 +23,7 @@
 #include <GraphicObject.h>
 #include <MapPosition.h>
 #include <GraphicPosition.h>
+#include <GraphicEngine.h>
 #include <MapArea.h>
 #include <MapCache.h>
 #include <MapSource.h>
@@ -73,6 +74,7 @@ protected:
   bool returnToLocationOneTime;                   // Return immediately to the current location the next time
   bool isInitialized;                             // Indicates if the map source is initialized
   std::list<MapTile*> centerMapTiles;             // All tiles around the neighborhood of the map center
+  Int width,height;                               // Position of the map on the screen
 
   // Does all action to remove a tile from the map
   void deinitTile(MapTile *t, const char *file, int line);
@@ -236,6 +238,30 @@ public:
   void toggleZoomLevelLock()
   {
     setZoomLevelLock(!zoomLevelLock);
+  }
+
+  void setWindow(Int x, Int y, Int width, Int height) {
+    core->getMapSource()->lockAccess(__FILE__,__LINE__);
+    this->width=width;
+    this->height=height; 
+    core->getMapSource()->unlockAccess();    
+    if (map) {
+      core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+      map->setTranslateAnimation(
+        core->getClock()->getMicrosecondsSinceStart(),
+        map->getX(),map->getY(),x,y,false,
+        core->getDefaultGraphicEngine()->getFadeDuration(),
+        GraphicTranslateAnimationTypeLinear);
+      core->getDefaultGraphicEngine()->unlockDrawing();
+    }
+  }
+
+  Int getWidth() const {
+    return width;
+  }
+
+  Int getHeight() const {
+    return height;
   }
 
 };

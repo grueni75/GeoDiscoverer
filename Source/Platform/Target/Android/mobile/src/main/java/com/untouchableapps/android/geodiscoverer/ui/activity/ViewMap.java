@@ -980,7 +980,7 @@ public class ViewMap extends GDActivity {
       }
     }
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
-    builder.title(R.string.map_layer_selection_question);
+    builder.title(R.string.dialog_map_layer_selection_question);
     builder.items(mapLayers);
     builder.itemsCallbackSingleChoice(index, new MaterialDialog.ListCallbackSingleChoice() {
       @Override

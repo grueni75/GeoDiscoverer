@@ -103,7 +103,7 @@ public:
   void init();
 
   // Reconfigures the device based on the new dimension
-  void reconfigure();
+  void reconfigure(bool updateWidgetEngine=true);
 
   // Finds out the device details from a network device
   bool discover();

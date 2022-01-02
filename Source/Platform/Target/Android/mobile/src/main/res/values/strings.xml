@@ -121,7 +121,7 @@
   <string name="dialog_continue_or_new_track_question">Shall the current track be continued or shall a new track be started?</string>
   <string name="dialog_new_track">New track</string>
   <string name="dialog_contine_track">Continue track</string>
-  <string name="map_layer_selection_question">Select the layer to display:</string>
+  <string name="dialog_map_layer_selection_question">Select the layer to display</string>
   <string name="map">Map</string>
   <string name="routes">Routes</string>
   <string name="general">General</string>

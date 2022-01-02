@@ -109,6 +109,14 @@ void *debugThread(void *args) {
   // Add an address point
   //GEODISCOVERER::core->getCommander()->execute("addAddressPoint(\"Dessauer Straße 19/20, 06886 Lutherstadt / Wittenberg\",\"Dessauer Straße 19/20, 06886 Lutherstadt Wittenberg\",0,0)");
 
+  // Test the view port
+  while (true) {    
+    sleep(10);
+    GEODISCOVERER::core->getCommander()->execute("setMapWindow(0,300,960,1236)");
+    sleep(10);
+    GEODISCOVERER::core->getCommander()->execute("setMapWindow(0,0,960,1536)");
+  }
+
   // Use the replay log if it exists
   GEODISCOVERER::core->getDebug()->replayTrace("replay.log");
 

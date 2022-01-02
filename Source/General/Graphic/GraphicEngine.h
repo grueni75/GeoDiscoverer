@@ -121,8 +121,8 @@ protected:
   // Default duration of a fade animation
   TimestampInMicroseconds fadeDuration;
 
-  // Duration of transition into ambient or widgetless mode
-  TimestampInMicroseconds modeTransitionDuration;
+  // Duration of transition into ambient mode
+  TimestampInMicroseconds ambientModeTransitionDuration;
 
   // Default duration of a blink animation
   TimestampInMicroseconds blinkDuration;

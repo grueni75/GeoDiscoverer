@@ -204,10 +204,15 @@ std::string Commander::execute(std::string cmd) {
     Int dY=lastTouchedY-y;
     core->getThread()->unlockMutex(accessMutex);
 
-    // First check if a widget was two fingure gestured
+    // Touch on widgets possible?
+    TimestampInMicroseconds duration;
     bool widgetTouched=false;
-    if (core->getDefaultWidgetEngine()->onTwoFingerGesture(t,dX,dY,atof(args[2].c_str()),atof(args[3].c_str()))) {
-      widgetTouched=true;
+    if ((!core->getDefaultGraphicEngine()->isAmbientMode(duration))&&(!core->getDefaultGraphicEngine()->isWidgetlessMode(duration))) {
+
+      // First check if a widget was two fingure gestured
+      if (core->getDefaultWidgetEngine()->onTwoFingerGesture(t,dX,dY,atof(args[2].c_str()),atof(args[3].c_str()))) {
+        widgetTouched=true;
+      }
     }
 
     // Then do the map scrolling
@@ -236,22 +241,27 @@ std::string Commander::execute(std::string cmd) {
     x=x-core->getDefaultScreen()->getWidth()/2;
     y=core->getDefaultScreen()->getHeight()/2-1-y;
 
-    // First check if a widget was touched
+    // Touch possible on widgets?
+    TimestampInMicroseconds duration;
     bool widgetTouched=false;
-    if ((cmdName=="touchDown")||(cmdName=="touchMove")) {
-      //DEBUG("touchDown(%d,%d)",x,y);
-      if (core->getDefaultWidgetEngine()->onTouchDown(t,x,y))
-        widgetTouched=true;
-    }
-    if (cmdName=="touchUp") {
-      //DEBUG("touchUp(%d,%d)",x,y);
-      if (core->getDefaultWidgetEngine()->onTouchUp(t,x,y))
-        widgetTouched=true;
-    }
-    if (cmdName=="touchCancel") {
-      //DEBUG("touchUp(%d,%d)",x,y);
-      if (core->getDefaultWidgetEngine()->onTouchUp(t,x,y,true))
-        widgetTouched=true;
+    if ((!core->getDefaultGraphicEngine()->isAmbientMode(duration))&&(!core->getDefaultGraphicEngine()->isWidgetlessMode(duration))) {
+
+      // First check if a widget was touched
+      if ((cmdName=="touchDown")||(cmdName=="touchMove")) {
+        //DEBUG("touchDown(%d,%d)",x,y);
+        if (core->getDefaultWidgetEngine()->onTouchDown(t,x,y))
+          widgetTouched=true;
+      }
+      if (cmdName=="touchUp") {
+        //DEBUG("touchUp(%d,%d)",x,y);
+        if (core->getDefaultWidgetEngine()->onTouchUp(t,x,y))
+          widgetTouched=true;
+      }
+      if (cmdName=="touchCancel") {
+        //DEBUG("touchUp(%d,%d)",x,y);
+        if (core->getDefaultWidgetEngine()->onTouchUp(t,x,y,true))
+          widgetTouched=true;
+      }
     }
 
     // Then do the map scrolling
@@ -285,7 +295,13 @@ std::string Commander::execute(std::string cmd) {
     core->getDefaultDevice()->setOrientation(orientation);
     core->getDefaultDevice()->setWidth(atoi(args[1].c_str()));
     core->getDefaultDevice()->setHeight(atoi(args[2].c_str()));
+    core->getMapEngine()->setWindow(0,0,atoi(args[1].c_str()),atoi(args[2].c_str()));
     core->getDefaultDevice()->reconfigure();
+    dispatch("mapChanged()");
+    cmdExecuted=true;
+  }
+  if (cmdName=="setMapWindow") {
+    core->getMapEngine()->setWindow(atoi(args[0].c_str()),atoi(args[1].c_str()),atoi(args[2].c_str()),atoi(args[3].c_str()));
     cmdExecuted=true;
   }
   if (cmdName=="graphicInvalidated") {
@@ -946,6 +962,7 @@ std::string Commander::execute(std::string cmd) {
     cmdExecuted=true;
   }
   if (cmdName=="setWidgetlessMode") {
+    //DEBUG("%s %s",cmdName.c_str(),args[0].c_str());
     core->getDefaultGraphicEngine()->setWidgetlessMode(atoi(args[0].c_str()));
     cmdExecuted=true;
   }

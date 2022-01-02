@@ -63,6 +63,8 @@ MapEngine::MapEngine() {
   isInitialized=false;
   forceMapRedownload=false;
   redownloadAllZoomLevels=false;
+  width=0;
+  height=0;
 }
 
 // Destructor
@@ -764,8 +766,8 @@ void MapEngine::updateMap() {
 
         // Compute the required display length
         //DEBUG("screenHeight=%d screenWidth=%d",core->getScreen()->getHeight(),core->getScreen()->getWidth());
-        double alpha=atan((double)core->getDefaultScreen()->getHeight()/(double)core->getDefaultScreen()->getWidth());
-        double screenLength=ceil(core->getDefaultScreen()->getHeight()/sin(alpha))*tileOffScreenFactor;
+        double alpha=atan((double)height/(double)width);
+        double screenLength=ceil(height/sin(alpha))*tileOffScreenFactor;
         //DEBUG("screenWidth=%d screenHeight=%d screenLength=%f",core->getDefaultScreen()->getWidth(),core->getDefaultScreen()->getHeight(),screenLength);
 
         // Compute the height and width to fill
@@ -898,7 +900,7 @@ void MapEngine::updateMap() {
           //PROFILE_ADD("tile list update");
 
           // If no tile has been found for whatever reason, reset the map
-          //DEBUG("tiles.size()=%d zoomedScreenWidth=%d",tiles.size(),zoomedScreenWidth);
+          DEBUG("tiles.size()=%d zoomedScreenWidth=%d",tiles.size(),zoomedScreenWidth);
           if ((!abortUpdate)&&(tiles.size()==0)) {
             DEBUG("resetting map",NULL);
             core->getConfigStore()->setStringValue("Map/LastPosition","folder","*unknown*",__FILE__, __LINE__);
@@ -984,9 +986,9 @@ void MapEngine::backup() {
 
 // Sets the maximum number of tiles to show
 void MapEngine::setMaxTiles() {
-  int len=core->getDefaultScreen()->getHeight();
-  if (core->getDefaultScreen()->getWidth()>len)
-    len=core->getDefaultScreen()->getWidth();
+  int len=height;
+  if (width>len)
+    len=width;
   maxTiles=ceil(((double)len)/((double)core->getMapSource()->getMapTileLength())*((double)core->getConfigStore()->getIntValue("Map","visibleTileLimit", __FILE__, __LINE__)));
   maxTiles=maxTiles*maxTiles;
 }

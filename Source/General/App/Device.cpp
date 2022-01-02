@@ -100,9 +100,9 @@ void Device::init() {
 }
 
 // Reconfigures the device based on the new dimension
-void Device::reconfigure() {
+void Device::reconfigure(bool updateWidgetEngine) {
   screen->init(orientation,width,height);
-  widgetEngine->updateWidgetPositions();
+  if (updateWidgetEngine) widgetEngine->updateWidgetPositions();
 }
 
 // Creates the graphic

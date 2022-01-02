@@ -209,8 +209,9 @@ class CoreMessageHandler(viewMap: ViewMap2) : Handler(Looper.getMainLooper()) {
           commandExecuted = true
         }
         if (commandFunction == "changeMapLayer") {
-          //viewMap.changeMapLayer()
-          viewMap.viewModel.openIntegratedList()
+          viewMap.viewModel.askForMapLayer() { selectedMapLayer ->
+            viewMap.coreObject!!.executeCoreCommand("selectMapLayer", selectedMapLayer)
+          }
           commandExecuted = true
         }
         if (commandFunction == "askForMapDownloadDetails") {
@@ -273,6 +274,10 @@ class CoreMessageHandler(viewMap: ViewMap2) : Handler(Looper.getMainLooper()) {
         }
         if (commandFunction == "setExitBusyText") {
           viewMap.setExitBusyText()
+          commandExecuted = true
+        }
+        if (commandFunction == "mapChanged") {
+          viewMap.viewModel.mapChanged(true)
           commandExecuted = true
         }
         if (!commandExecuted) {

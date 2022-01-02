@@ -28,6 +28,7 @@
 #include <FontEngine.h>
 #include <GraphicLine.h>
 #include <GraphicRectangleList.h>
+#include <MapEngine.h>
 
 namespace GEODISCOVERER {
 
@@ -81,7 +82,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   tileImageNotDownloaded.setColor(GraphicColor(255,255,255,0));
   tileImageDownloadErrorOccured.setColor(GraphicColor(255,255,255,0));
   fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration",__FILE__, __LINE__);
-  modeTransitionDuration=core->getConfigStore()->getIntValue("Graphic","modeTransitionDuration",__FILE__, __LINE__);
+  ambientModeTransitionDuration=core->getConfigStore()->getIntValue("Graphic","ambientModeTransitionDuration",__FILE__, __LINE__);
   blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration",__FILE__, __LINE__);
   mapReferenceDPI=core->getConfigStore()->getIntValue("Graphic","mapReferenceDotsPerInch",__FILE__,__LINE__);
   timeOffsetPeriod=core->getConfigStore()->getIntValue("Graphic","timeOffsetPeriod",__FILE__,__LINE__);
@@ -92,7 +93,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   widgetlessModeStartTime=0;
   widgetfullModeStartTime=0;
   currentTime=0;
-
+  
   // Init the dynamic data
   init();
 }
@@ -374,6 +375,10 @@ bool GraphicEngine::draw(bool forceRedraw) {
       // Check if we are in ambient mode
       double fadeScale=getAmbientFadeScale();
       if (fadeScale>0.0) {
+
+        // Set the map window position
+        screen->startObject();
+        if (map) screen->translate(map->getX(),map->getY(),0);
 
         // Start the map object
         screen->setAlphaScale(fadeScale);
@@ -703,13 +708,16 @@ bool GraphicEngine::draw(bool forceRedraw) {
         screen->setAlphaScale(1.0);
         //PROFILE_ADD("cursor drawing");
 
+        // Finish the map window translation
+        screen->endObject();
         //PROFILE_ADD("overlay drawing");
       }
     }
 
     // Get the fade scale depending on ambiet mode
     double fadeScale=getWidgetlessFadeScale();
-    screen->setAlphaScale(fadeScale);
+    if (fadeScale!=1.0)
+      screen->setAlphaScale(fadeScale);
     if (fadeScale>0) {
 
       // Draw all widgets
@@ -743,7 +751,8 @@ bool GraphicEngine::draw(bool forceRedraw) {
         }
       }      
     }
-    screen->setAlphaScale(1.0);
+    if (fadeScale!=1.0)
+      screen->setAlphaScale(1.0);
 
     // Finish the drawing
     screen->endScene();
@@ -858,7 +867,7 @@ void GraphicEngine::setAmbientModeStartTime(TimestampInMicroseconds offset) {
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   if ((ambientModeStartTime!=0)&&(t>=ambientModeStartTime)) 
     interactiveModeStartTime=t;
-  ambientModeStartTime=t+offset-modeTransitionDuration;
+  ambientModeStartTime=t+offset-ambientModeTransitionDuration;
 }
 
 // Returns the fade scale for the ambient transition
@@ -884,14 +893,14 @@ double GraphicEngine::getAmbientFadeScale() {
 // Checks if display is in no widgets mode
 bool GraphicEngine::isWidgetlessMode(TimestampInMicroseconds &duration) {
   duration=0;
-  //DEBUG("currentTime=%ld",currentTime);
   //DEBUG("ambientModeStartTime=%ld currentTime=%ld",ambientModeStartTime,currentTime);
   if ((widgetlessModeStartTime!=0)&&(currentTime>=widgetlessModeStartTime)) {
     duration=currentTime-widgetlessModeStartTime;
-    //DEBUG("duration=%ld",duration);
+    //DEBUG("Yes: duration=%ld",duration);
     return true;
   } else {
     duration=currentTime-widgetfullModeStartTime;
+    //DEBUG("No: duration=%ld",duration);
     return false;
   }
 }
@@ -900,9 +909,10 @@ bool GraphicEngine::isWidgetlessMode(TimestampInMicroseconds &duration) {
 void GraphicEngine::setWidgetlessMode(boolean mode) {
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   if (mode) {
-    widgetlessModeStartTime=t+modeTransitionDuration;
+    widgetlessModeStartTime=t;
   } else {
     widgetfullModeStartTime=t;
+    widgetlessModeStartTime=0;
   }
 }
 
@@ -913,14 +923,12 @@ double GraphicEngine::getWidgetlessFadeScale() {
   if (isWidgetlessMode(duration)) {
     if (duration<fadeDuration) {
       fadeScale=((double)(fadeDuration-duration))/((double)fadeDuration);
-      DEBUG("fadeScale=%f",fadeScale);
     } else {
       fadeScale=0.0;
     }
   } else {
     if (duration<fadeDuration) {
       fadeScale=((double)(duration))/((double)fadeDuration);
-      DEBUG("fadeScale=%f",fadeScale);
     }
   }
   return fadeScale;

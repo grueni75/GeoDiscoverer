@@ -64,6 +64,8 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
 
   // State
   var fixSurfaceViewBug: Boolean by mutableStateOf(false)
+  var mapChanged: Boolean by mutableStateOf(false)
+    private set
   var drawerStatus: DrawerValue by mutableStateOf(DrawerValue.Closed)
   var messages: String by mutableStateOf("")
   var splashVisible: Boolean by mutableStateOf(false)
@@ -120,9 +122,21 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   var pendingImportWaypointsDecisions = mutableListOf<PendingImportWaypointsDecision>()
   var integratedListVisible: Boolean by mutableStateOf(false)
     private set
-
+  var integratedListTitle: String by mutableStateOf("")
+    private set
+  var integratedListItems: MutableList<String> by mutableStateOf(mutableListOf<String>())
+    private set
+  var integratedListSelected: Int by mutableStateOf(-1)
+    private set
+  var integratedListSelectHandler: (String) -> Unit = {}
+    private set
 
   // Methods to modify the state
+  @Synchronized
+  fun mapChanged(changed: Boolean) {
+    mapChanged = changed
+  }
+
   @Synchronized
   fun toggleMessagesVisibility() {
     messagesVisible = !messagesVisible
@@ -429,6 +443,27 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
+  fun askForMapLayer(selectHandler: (String)->Unit) {
+    val layers: String = viewMap.coreObject!!.executeCoreCommand("getMapLayers")
+    val mapLayers = layers.split(",".toRegex()).toList()
+    val selectedLayer: String = viewMap.coreObject!!.executeCoreCommand("getSelectedMapLayer")
+    integratedListItems=mutableListOf<String>()
+    for (i in mapLayers.indices) {
+      integratedListItems.add(mapLayers.get(i))
+      if (mapLayers.get(i)==selectedLayer)
+        integratedListSelected=i
+    }
+    integratedListTitle=viewMap.getString(R.string.dialog_map_layer_selection_question)
+    integratedListSelectHandler=selectHandler
+    openIntegratedList()
+  }
+
+  @Synchronized
+  fun selectIntegratedListItem(selected: Int) {
+    integratedListSelected=selected
+  }
+
+  @Synchronized
   fun closeQuestion() {
     askEditTextValue = ""
     askEditTextValueChangeHandler = {}
@@ -443,6 +478,9 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     askSingleChoiceConfirmHandler = {}
     askMessage = ""
     askTitle = ""
+    integratedListItems = mutableListOf<String>()
+    integratedListSelected = -1
+    integratedListSelectHandler = {}
   }
 
   @Synchronized

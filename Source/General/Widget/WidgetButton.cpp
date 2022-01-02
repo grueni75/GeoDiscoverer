@@ -130,11 +130,13 @@ void WidgetButton::draw(TimestampInMicroseconds t) {
 
   // Get the fade scale depending on ambiet mode
   double fadeScale=widgetContainer->getWidgetEngine()->getGraphicEngine()->getAmbientFadeScale();
-  screen->setAlphaScale(fadeScale);
+  if (fadeScale!=1.0)
+    screen->setAlphaScale(fadeScale);
   if (fadeScale>0) {
     WidgetPrimitive::draw(t);
   }
-  screen->setAlphaScale(1.0);
+  if (fadeScale!=1.0)
+    screen->setAlphaScale(1.0);
 }
 
 }

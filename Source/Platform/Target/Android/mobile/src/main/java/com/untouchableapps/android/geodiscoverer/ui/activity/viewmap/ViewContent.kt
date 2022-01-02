@@ -27,7 +27,6 @@ import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.TextView
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
@@ -46,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import com.untouchableapps.android.geodiscoverer.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.ExpandMore
@@ -57,10 +57,12 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
@@ -71,6 +73,7 @@ import com.untouchableapps.android.geodiscoverer.ui.component.GDLinearProgressIn
 import com.untouchableapps.android.geodiscoverer.ui.component.GDSnackBar
 import com.untouchableapps.android.geodiscoverer.ui.component.GDTextField
 import kotlinx.coroutines.*
+import kotlin.math.roundToInt
 
 @ExperimentalMaterial3Api
 class ViewContent(viewMap: ViewMap2) {
@@ -81,7 +84,7 @@ class ViewContent(viewMap: ViewMap2) {
   // Layout parameters for the navigation drawer
   class LayoutParams() {
     val iconWidth = 60.dp
-    val itemHeight = 41.dp
+    val drawerItemHeight = 41.dp
     val titleIndent = 20.dp
     val drawerWidth = 250.dp
     val itemPadding = 5.dp
@@ -95,6 +98,7 @@ class ViewContent(viewMap: ViewMap2) {
     val dialogButonRowHeight = 200.dp
     val integratedListHeight = 300.dp
     val integratedListCloseRowHeight = 45.dp
+    val integratedListItemHeight = 60.dp
   }
   val layoutParams = LayoutParams()
 
@@ -148,7 +152,7 @@ class ViewContent(viewMap: ViewMap2) {
               }
             }
           ) {
-            screenContent(viewModel,contentBoxWithConstraintsScope.maxHeight)
+            screenContent(viewModel,contentBoxWithConstraintsScope.maxWidth,contentBoxWithConstraintsScope.maxHeight)
           }
         }
       )
@@ -460,7 +464,7 @@ class ViewContent(viewMap: ViewMap2) {
   // Main content on the screen
   @ExperimentalAnimationApi
   @Composable
-  private fun screenContent(viewModel: ViewModel, maxScreenHeight: Dp) {
+  private fun screenContent(viewModel: ViewModel, maxScreenWidth: Dp, maxScreenHeight: Dp) {
     val scope = rememberCoroutineScope()
     Box(
       modifier = Modifier
@@ -473,6 +477,23 @@ class ViewContent(viewMap: ViewMap2) {
             modifier = Modifier
               .fillMaxSize()
           ) {
+            with(LocalDensity.current) {
+              val listHeight=(layoutParams.integratedListHeight).toPx().roundToInt()
+              val screenHeight=(maxScreenHeight).toPx().roundToInt()
+              val mapHeight=
+                if (viewModel.integratedListVisible)
+                  screenHeight-listHeight
+                else
+                  screenHeight
+              val width=maxScreenWidth.toPx().roundToInt()
+              if (viewModel.integratedListVisible)
+                viewMap.coreObject!!.executeCoreCommand("setMapWindow","0", (listHeight/2).toString(), width.toString(), mapHeight.toString())
+              else
+                viewMap.coreObject!!.executeCoreCommand("setMapWindow","0", "0", width.toString(), mapHeight.toString())
+              if (viewModel.mapChanged) {
+                viewModel.mapChanged(false)
+              }
+            }
             Surface(
               modifier = Modifier
                 .fillMaxSize()
@@ -482,8 +503,8 @@ class ViewContent(viewMap: ViewMap2) {
             AnimatedVisibility(
               modifier = Modifier
                 .align(Alignment.BottomCenter),
-              enter = slideInVertically(initialOffsetY = { +it / 2 }),
-              exit = slideOutVertically(targetOffsetY = { +it / 2 }),
+              enter = slideInVertically(initialOffsetY = { +it }),
+              exit = slideOutVertically(targetOffsetY = { +it }),
               visible = viewModel.integratedListVisible
             ) {
               Surface(
@@ -516,10 +537,26 @@ class ViewContent(viewMap: ViewMap2) {
                       }
                     }
                   }
+                  val listState = rememberLazyListState()
+                  LaunchedEffect(viewModel.integratedListVisible) {
+                    listState.scrollToItem(viewModel.integratedListSelected)
+                  }
+                  Text(
+                    modifier = Modifier
+                      .padding(layoutParams.itemPadding)
+                      .fillMaxWidth(),
+                    text = viewModel.integratedListTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                  )
                   LazyColumn(
+                    state = listState,
                     modifier = Modifier
                       .fillMaxWidth()
                   ) {
+                    itemsIndexed(viewModel.integratedListItems) { index, item ->
+                      integratedListItem(index,item, viewModel)
+                    }
                   }
                 }
               }
@@ -735,7 +772,7 @@ class ViewContent(viewMap: ViewMap2) {
           Spacer(
             Modifier
               .width(0.dp)
-              .height(layoutParams.itemHeight)
+              .height(layoutParams.drawerItemHeight)
           )
           Column(
             modifier = Modifier
@@ -757,6 +794,56 @@ class ViewContent(viewMap: ViewMap2) {
             )
           }
         }
+      }
+    }
+  }
+
+  // Creates an item for the integrated list
+  @Composable
+  fun integratedListItem(index: Int, item: String, viewModel: ViewModel) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Box(
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(layoutParams.integratedListItemHeight)
+        .padding(layoutParams.itemPadding)
+        .clip(
+          shape =
+          if (index == viewModel.integratedListSelected)
+            RoundedCornerShape(layoutParams.drawerCornerRadius)
+          else
+            RectangleShape
+        )
+        .background(
+          if (index == viewModel.integratedListSelected)
+            MaterialTheme.colorScheme.surfaceVariant
+          else
+            MaterialTheme.colorScheme.surface
+        )
+        .selectable(
+          selected = index == viewModel.integratedListSelected,
+          onClick = {
+            viewModel.selectIntegratedListItem(index)
+            viewModel.integratedListSelectHandler(item)
+          },
+          interactionSource = interactionSource,
+          indication = rememberRipple(bounded = true)
+        )
+    ) {
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+      ) {
+        Text(
+          modifier = Modifier
+            .align(Alignment.Center),
+          style = MaterialTheme.typography.titleMedium,
+          color = if (index == viewModel.integratedListSelected)
+            MaterialTheme.colorScheme.primary
+          else
+            MaterialTheme.colorScheme.onSurface,
+          text = item
+        )
       }
     }
   }
