@@ -194,6 +194,12 @@
   <string name="dialog_config_reset_title">Config reset</string>
   <string name="dialog_show">Show</string>
   <string name="dialog_map_legend_selection_title">Map legend</string>
+  <string name="dialog_manage_address_points_title">Manage address points</string>
+  <string name="dialog_rename">Rename</string>
+  <string name="dialog_name_label">Name</string>
+  <string name="dialog_rename_address_point_title">Edit address point</string>
+  <string name="dialog_tag_label">Group</string>
+  <string name="dialog_update">Update</string>
   <string-array name="donation_google_catalog_values">
     <item>1 €</item>
     <item>2 €</item>

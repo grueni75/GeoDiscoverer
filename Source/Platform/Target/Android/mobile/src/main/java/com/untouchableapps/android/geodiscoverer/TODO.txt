@@ -16,3 +16,7 @@
 * Remove unused strings
 * Don't use Geo Discoverer title in non GDCore dialogs
 * Implement list in landscape orientation
+* Prevent scroll in map if integrated list is opened (use setMapWindow if screenChanged is called
+  in GDMapSurface)
+* Close dialogs on reconfiguration in both prefs and viewmap
+* Handle widgetless mode / integrated list on reconfiguration to landscape correctly

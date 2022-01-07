@@ -154,7 +154,7 @@ class IntentHandler(viewMap: ViewMap2) : CoroutineScope by MainScope() {
 
     // Handle the intent
     if (isAddress) {
-      viewMap.viewModel.askForAddress(subject,text) { address ->
+      viewMap.viewModel.askForAddress(subject,text) { address, _ ->
         viewMap.backgroundTask!!.getLocationFromAddress(
           name=subject,
           address=address,
@@ -251,7 +251,7 @@ class IntentHandler(viewMap: ViewMap2) : CoroutineScope by MainScope() {
       if (!gpxName!!.endsWith(".gpx")) {
         gpxName = gpxName + ".gpx"
       }
-      viewMap.viewModel.askForRouteName(gpxName) { name ->
+      viewMap.viewModel.askForRouteName(gpxName) { name, _ ->
         viewMap.backgroundTask!!.importRoute(
           name=name,
           uri=uri

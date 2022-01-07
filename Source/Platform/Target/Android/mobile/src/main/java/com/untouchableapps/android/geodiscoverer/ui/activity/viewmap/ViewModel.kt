@@ -22,19 +22,13 @@
 
 package com.untouchableapps.android.geodiscoverer.ui.activity.viewmap
 
-import android.content.*
-import android.os.*
-import androidx.compose.animation.*
-import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.unit.*
+import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
-import kotlinx.coroutines.*
 import java.io.File
 
 @ExperimentalMaterial3Api
@@ -93,21 +87,27 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     private set
   var askEditTextValue: String by mutableStateOf("")
     private set
+  var askEditTextTag: String by mutableStateOf("")
+    private set
+  var askEditTextTagLabel: String by mutableStateOf("")
+    private set
+  var askEditTextTagList = mutableStateListOf<String>()
+    private set
   var askEditTextValueChangeHandler: (String) -> Unit = {}
     private set
   var askEditTextHint: String by mutableStateOf("")
     private set
   var askEditTextError: String by mutableStateOf("")
     private set
-  var askMultipleChoiceList: MutableList<CheckboxItem> by mutableStateOf(mutableListOf<CheckboxItem>())
+  var askMultipleChoiceList = mutableStateListOf<CheckboxItem>()
     private set
-  var askSingleChoiceList: MutableList<String> by mutableStateOf(mutableListOf<String>())
+  var askSingleChoiceList = mutableStateListOf<String>()
     private set
   var askConfirmText: String by mutableStateOf("")
     private set
   var askDismissText: String by mutableStateOf("")
     private set
-  var askEditTextConfirmHandler: (String) -> Unit = {}
+  var askEditTextConfirmHandler: (String, String) -> Unit = {_,_ ->}
     private set
   var askQuestionConfirmHandler: () -> Unit = {}
     private set
@@ -124,11 +124,21 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     private set
   var integratedListTitle: String by mutableStateOf("")
     private set
-  var integratedListItems: MutableList<String> by mutableStateOf(mutableListOf<String>())
+  var integratedListItems = mutableStateListOf<String>()
     private set
-  var integratedListSelected: Int by mutableStateOf(-1)
+  var integratedListTabs = mutableStateListOf<String>()
     private set
-  var integratedListSelectHandler: (String) -> Unit = {}
+  var integratedListSelectedItem: Int by mutableStateOf(-1)
+    private set
+  var integratedListSelectedTab: Int by mutableStateOf(-1)
+    private set
+  var integratedListSelectItemHandler: (String) -> Unit = {}
+    private set
+  var integratedListDeleteItemHandler: (String) -> Unit = {}
+    private set
+  var integratedListEditItemHandler: (Int) -> Unit = {}
+    private set
+  var integratedListSelectTabHandler: (String) -> Unit = {}
     private set
 
   // Methods to modify the state
@@ -174,7 +184,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun askForAddress(subject: String, address: String, confirmHandler: (String) -> Unit) {
+  fun askForAddress(subject: String, address: String, confirmHandler: (String, String) -> Unit) {
     askEditTextValue = address
     askEditTextHint = viewMap.getString(R.string.dialog_address_input_hint)
     askConfirmText = viewMap.getString(R.string.dialog_lookup)
@@ -182,6 +192,20 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     askEditTextConfirmHandler = confirmHandler
     askMessage = viewMap.getString(R.string.dialog_address)
     askTitle = viewMap.getString(R.string.dialog_address_title)
+  }
+
+  @Synchronized
+  fun askForAddressPointEdit(pointName: String, selectedGroupName: String, groupNames: List<String>, confirmHandler: (String, String) -> Unit) {
+    askEditTextValue = pointName
+    askMessage = viewMap.getString(R.string.dialog_name_label)
+    askEditTextTag = selectedGroupName
+    askEditTextTagList.clear()
+    askEditTextTagList.addAll(groupNames)
+    askEditTextTagLabel = viewMap.getString(R.string.dialog_tag_label)
+    askConfirmText = viewMap.getString(R.string.dialog_update)
+    askDismissText = viewMap.getString(R.string.dialog_dismiss)
+    askEditTextConfirmHandler = confirmHandler
+    askTitle = viewMap.getString(R.string.dialog_rename_address_point_title)
   }
 
   @Synchronized
@@ -198,7 +222,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun askForRouteName(gpxName: String, confirmHandler: (String) -> Unit) {
+  fun askForRouteName(gpxName: String, confirmHandler: (String, String) -> Unit) {
     askEditTextValue = gpxName
     askEditTextValueChangeHandler = { value ->
       val dstFilename = GDCore.getHomeDirPath() + "/Route/" + value
@@ -241,7 +265,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     val mapLayers = result.split(",".toRegex()).toList()
     askConfirmText = viewMap.getString(R.string.dialog_download)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
-    askMultipleChoiceList = mutableListOf<CheckboxItem>()
+    askMultipleChoiceList.clear()
     mapLayers.forEach {
       askMultipleChoiceList.add(CheckboxItem(it))
     }
@@ -338,7 +362,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     // Create the dialog
     askConfirmText = viewMap.getString(R.string.dialog_copy)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
-    askMultipleChoiceList = mutableListOf<CheckboxItem>()
+    askMultipleChoiceList.clear()
     routes.forEach {
       askMultipleChoiceList.add(CheckboxItem(it))
     }
@@ -366,7 +390,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     // Create the dialog
     askConfirmText = viewMap.getString(R.string.dialog_delete)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
-    askMultipleChoiceList = mutableListOf<CheckboxItem>()
+    askMultipleChoiceList.clear()
     routes.forEach {
       askMultipleChoiceList.add(CheckboxItem(it))
     }
@@ -411,7 +435,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     // Create the dialog
     askConfirmText = viewMap.getString(R.string.dialog_send)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
-    askMultipleChoiceList = mutableListOf<CheckboxItem>()
+    askMultipleChoiceList.clear()
     logs.forEach {
       askMultipleChoiceList.add(CheckboxItem(it))
     }
@@ -433,7 +457,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   fun askForMapLegend(names: List<String>, confirmHandler: (String) -> Unit) {
     askConfirmText = ""
     askDismissText = ""
-    askSingleChoiceList = mutableListOf<String>()
+    askSingleChoiceList.clear()
     names.forEach {
       askSingleChoiceList.add(it)
     }
@@ -447,20 +471,139 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     val layers: String = viewMap.coreObject!!.executeCoreCommand("getMapLayers")
     val mapLayers = layers.split(",".toRegex()).toList()
     val selectedLayer: String = viewMap.coreObject!!.executeCoreCommand("getSelectedMapLayer")
-    integratedListItems=mutableListOf<String>()
+    integratedListItems.clear()
     for (i in mapLayers.indices) {
       integratedListItems.add(mapLayers.get(i))
       if (mapLayers.get(i)==selectedLayer)
-        integratedListSelected=i
+        integratedListSelectedItem=i
     }
     integratedListTitle=viewMap.getString(R.string.dialog_map_layer_selection_question)
-    integratedListSelectHandler=selectHandler
+    integratedListSelectItemHandler=selectHandler
+    openIntegratedList()
+  }
+
+  @Synchronized
+  fun addAddressPointGroup(name: String) {
+    var inserted=false
+    for (i in integratedListTabs.indices) {
+      if (name<integratedListTabs[i]) {
+        integratedListTabs.add(i,name)
+        inserted=true
+        break
+      }
+    }
+    if (!inserted) {
+      integratedListTabs.add(name)
+    }
+  }
+
+  @Synchronized
+  fun removeAddressPointGroup(name: String) {
+
+  }
+
+  @Synchronized
+  fun addAddressPoint(name: String) {
+    var inserted=false
+    for (i in integratedListItems.indices) {
+      if (name<integratedListItems[i]) {
+        integratedListItems.add(i,name)
+        inserted=true
+        break
+      }
+    }
+    if (!inserted) {
+      integratedListItems.add(name)
+    }
+  }
+
+  @Synchronized
+  fun removeAddressPoint(name: String) {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${integratedListItems.size}")
+    integratedListItems.remove(name)
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${integratedListItems.size}")
+  }
+
+  @Synchronized
+  fun fillAddressPoints(selectedGroupName: String, fillTabs: Boolean = false) {
+    val unsortedNames = viewMap.coreObject!!.configStoreGetAttributeValues("Navigation/AddressPoint", "name").toMutableList()
+    integratedListSelectedItem=-1
+    integratedListItems.clear()
+    if (fillTabs) {
+      integratedListSelectedTab=0
+      integratedListTabs.clear()
+    }
+    while (unsortedNames.size > 0) {
+      var newestName = unsortedNames.removeFirst()
+      val foreignRemovalRequest: String = viewMap.coreObject!!.configStoreGetStringValue(
+        "Navigation/AddressPoint[@name='$newestName']",
+        "foreignRemovalRequest"
+      )
+      val groupName: String = viewMap.coreObject!!.configStoreGetStringValue(
+        "Navigation/AddressPoint[@name='$newestName']",
+        "group"
+      )
+      if ((fillTabs)&&(!integratedListTabs.contains(groupName))) {
+        addAddressPointGroup(groupName);
+      }
+      if (groupName == selectedGroupName && foreignRemovalRequest != "1") {
+        addAddressPoint(newestName)
+      }
+    }
+    if (fillTabs) {
+      if (!integratedListTabs.contains(selectedGroupName)) {
+        addAddressPointGroup(selectedGroupName)
+      }
+      for (i in integratedListTabs.indices) {
+        if (integratedListTabs[i] == selectedGroupName) {
+          integratedListSelectedTab = i
+          break
+        }
+      }
+    }
+  }
+
+  @Synchronized
+  fun manageAddressPoints() {
+
+    // Fill the items and tabs
+    val selectedGroupName =
+      viewMap.coreObject!!.configStoreGetStringValue("Navigation", "selectedAddressPointGroup")
+    fillAddressPoints(selectedGroupName, true)
+
+    // Fill the remaining fields
+    integratedListTitle=viewMap.getString(R.string.dialog_manage_address_points_title)
+    integratedListSelectItemHandler= {
+      viewMap.coreObject!!.executeCoreCommand("setTargetAtAddressPoint", it)
+    }
+    integratedListSelectTabHandler= {
+      viewMap.coreObject!!.configStoreSetStringValue("Navigation", "selectedAddressPointGroup", it)
+      viewMap.coreObject!!.executeCoreCommand("addressPointGroupChanged")
+      fillAddressPoints(it)
+    }
+    integratedListDeleteItemHandler= {
+      viewMap.coreObject!!.executeCoreCommand("removeAddressPoint", it)
+      removeAddressPoint(it)
+    }
+    integratedListEditItemHandler= {
+      askForAddressPointEdit(integratedListItems[it],integratedListTabs[integratedListSelectedTab],integratedListTabs) {
+        name, group ->
+
+      }
+    }
+
+    // Open the list
     openIntegratedList()
   }
 
   @Synchronized
   fun selectIntegratedListItem(selected: Int) {
-    integratedListSelected=selected
+    integratedListSelectedItem=selected
+  }
+
+  @Synchronized
+  fun selectIntegratedListTab(selected: Int) {
+    integratedListSelectedTab=selected
   }
 
   @Synchronized
@@ -469,18 +612,17 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     askEditTextValueChangeHandler = {}
     askEditTextHint = ""
     askEditTextError = ""
+    askEditTextTag = ""
+    askEditTextTagList.clear()
     askQuestionConfirmHandler = {}
     askQuestionDismissHandler = {}
-    askMultipleChoiceList = mutableListOf<CheckboxItem>()
-    askSingleChoiceList = mutableListOf<String>()
+    askMultipleChoiceList.clear()
+    askSingleChoiceList.clear()
     askMultipleChoiceConfirmHandler = {}
     askMultipleChoiceCheckedHandler = {}
     askSingleChoiceConfirmHandler = {}
     askMessage = ""
     askTitle = ""
-    integratedListItems = mutableListOf<String>()
-    integratedListSelected = -1
-    integratedListSelectHandler = {}
   }
 
   @Synchronized
@@ -491,7 +633,14 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun closeIntegratedList() {
-    integratedListVisible=false
+    integratedListVisible = false
+    integratedListItems.clear()
+    integratedListSelectItemHandler = {}
+    integratedListDeleteItemHandler = {}
+    integratedListEditItemHandler = {}
+    integratedListTabs.clear()
+    integratedListSelectTabHandler = {}
+    integratedListTitle = ""
     viewMap.coreObject!!.executeCoreCommand("setWidgetlessMode","0")
   }
 

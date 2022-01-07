@@ -900,7 +900,7 @@ void MapEngine::updateMap() {
           //PROFILE_ADD("tile list update");
 
           // If no tile has been found for whatever reason, reset the map
-          DEBUG("tiles.size()=%d zoomedScreenWidth=%d",tiles.size(),zoomedScreenWidth);
+          //DEBUG("tiles.size()=%d zoomedScreenWidth=%d",tiles.size(),zoomedScreenWidth);
           if ((!abortUpdate)&&(tiles.size()==0)) {
             DEBUG("resetting map",NULL);
             core->getConfigStore()->setStringValue("Map/LastPosition","folder","*unknown*",__FILE__, __LINE__);

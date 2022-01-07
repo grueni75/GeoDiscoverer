@@ -122,7 +122,7 @@ class CoreMessageHandler(viewMap: ViewMap2) : Handler(Looper.getMainLooper()) {
         }
         if (commandFunction == "getLastKnownLocation") {
           if (viewMap.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (viewMap.coreObject != null) {
+            if ((viewMap.coreObject != null)&&(viewMap.locationManager != null)) {
               viewMap.coreObject!!.onLocationChanged(
                 viewMap.locationManager!!.getLastKnownLocation(
                   LocationManager.NETWORK_PROVIDER
@@ -157,8 +157,8 @@ class CoreMessageHandler(viewMap: ViewMap2) : Handler(Looper.getMainLooper()) {
           commandExecuted = true
         }
         if (commandFunction == "askForAddress") {
-          //viewMap.askForAddress(viewMap.getString(R.string.manually_entered_address), "")
-          //commandExecuted = true
+          viewMap.viewModel.manageAddressPoints()
+          commandExecuted = true
         }
         if (commandFunction == "exitActivity") {
           viewMap.exitRequested = true

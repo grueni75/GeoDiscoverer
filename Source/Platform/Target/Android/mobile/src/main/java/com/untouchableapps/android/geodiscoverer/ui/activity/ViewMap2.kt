@@ -39,6 +39,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.ui.tooling.preview.Preview
@@ -254,6 +255,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
   var coreMessageHandler = CoreMessageHandler(this)
 
   // Creates the activity
+  @ExperimentalMaterialApi
   @ExperimentalAnimationApi
   @ExperimentalMaterial3Api
   override fun onCreate(savedInstanceState: Bundle?) {

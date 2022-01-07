@@ -251,7 +251,7 @@ public:
         core->getClock()->getMicrosecondsSinceStart(),
         map->getX(),map->getY(),x,y,false,
         core->getDefaultGraphicEngine()->getFadeDuration(),
-        GraphicTranslateAnimationTypeLinear);
+        GraphicTranslateAnimationTypeAccelerated);
       core->getDefaultGraphicEngine()->unlockDrawing();
     }
   }

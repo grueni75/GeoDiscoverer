@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
+import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.ui.theme.Material2Theme
 
 // Missing component in material3
@@ -67,6 +68,7 @@ fun GDTextField(
     var colors = TextFieldDefaults.textFieldColors(
       textColor = MaterialTheme.colorScheme.onBackground
     )
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",colors.backgroundColor(true).value.toString())
     TextField(
       value = value,
       onValueChange = onValueChange,
