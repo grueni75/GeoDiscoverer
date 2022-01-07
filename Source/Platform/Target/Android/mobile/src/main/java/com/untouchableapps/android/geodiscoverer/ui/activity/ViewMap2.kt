@@ -56,10 +56,7 @@ import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
 import com.untouchableapps.android.geodiscoverer.logic.GDService
-import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.CoreMessageHandler
-import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.IntentHandler
-import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.ViewContent
-import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.ViewModel
+import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.*
 import com.untouchableapps.android.geodiscoverer.ui.component.GDDialog
 import kotlinx.coroutines.*
 import java.io.File
@@ -302,8 +299,8 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
 
     // Create the content for the navigation drawer
     val navigationItems = arrayOf(
-      ViewContent.NavigationItem(null, getString(R.string.map), { }),
-      ViewContent.NavigationItem(Icons.Outlined.Article, getString(R.string.show_legend)) {
+      ViewContentNavigationDrawer.NavigationItem(null, getString(R.string.map), { }),
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Article, getString(R.string.show_legend)) {
         if (coreObject!=null) {
           val namesString = coreObject!!.executeCoreCommand("getMapLegendNames")
           val names = namesString.split(",".toRegex()).toList()
@@ -316,7 +313,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           }
         }
       },
-      ViewContent.NavigationItem(Icons.Outlined.Download, getString(R.string.download_map)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Download, getString(R.string.download_map)) {
         viewModel.askForMapDownloadType(
           dismissHandler = {
             coreObject!!.executeAppCommand("askForMapDownloadDetails(\"\")")
@@ -326,7 +323,7 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           }
         )
       },
-      ViewContent.NavigationItem(Icons.Outlined.CleaningServices, getString(R.string.cleanup_map)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.CleaningServices, getString(R.string.cleanup_map)) {
         if (coreObject!=null) {
           viewModel.askForMapCleanup(
             confirmHandler = {
@@ -344,59 +341,59 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
           )
         }
       },
-      ViewContent.NavigationItem(null, getString(R.string.routes), { }),
-      ViewContent.NavigationItem(Icons.Outlined.AddCircle, getString(R.string.add_tracks_as_routes)) {
+      ViewContentNavigationDrawer.NavigationItem(null, getString(R.string.routes), { }),
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.AddCircle, getString(R.string.add_tracks_as_routes)) {
         viewModel.askForTracksAsRoutes() { selectedTracks ->
           if (selectedTracks.isNotEmpty()) {
             backgroundTask.copyTracksToRoutes(selectedTracks,this)
           }
         }
       },
-      ViewContent.NavigationItem(Icons.Outlined.RemoveCircle, getString(R.string.remove_routes)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.RemoveCircle, getString(R.string.remove_routes)) {
         viewModel.askForRemoveRoutes() { selectedRoutes ->
           if (selectedRoutes.isNotEmpty()) {
             backgroundTask.removeRoutes(selectedRoutes,this)
           }
         }
       },
-      ViewContent.NavigationItem(Icons.Outlined.SendToMobile, getString(R.string.export_selected_route)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.SendToMobile, getString(R.string.export_selected_route)) {
         if (coreObject!=null) {
           coreObject!!.executeCoreCommand("exportActiveRoute")
         }
       },
-      ViewContent.NavigationItem(Icons.Outlined.Directions, getString(R.string.brouter)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Directions, getString(R.string.brouter)) {
         val url = "http://localhost:8383/brouter-web/index.html"
         val i = Intent(Intent.ACTION_VIEW)
         i.data = Uri.parse(url)
         startActivity(i)
       },
-      ViewContent.NavigationItem(null, getString(R.string.general), { }),
-      ViewContent.NavigationItem(Icons.Outlined.Help, getString(R.string.help)) {
+      ViewContentNavigationDrawer.NavigationItem(null, getString(R.string.general), { }),
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Help, getString(R.string.help)) {
         intent = Intent(applicationContext, ShowHelp::class.java)
         startActivity(intent)
       },
-      ViewContent.NavigationItem(Icons.Outlined.Settings, getString(R.string.preferences)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Settings, getString(R.string.preferences)) {
         val myIntent = Intent(applicationContext, Preferences::class.java)
         startPreferencesForResult.launch(myIntent)
       },
-      ViewContent.NavigationItem(Icons.Outlined.Replay, getString(R.string.restart)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Replay, getString(R.string.restart)) {
         restartCore(false)
       },
-      ViewContent.NavigationItem(Icons.Outlined.Logout, getString(R.string.exit)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Logout, getString(R.string.exit)) {
         exitApp()
       },
-      ViewContent.NavigationItem(null, getString(R.string.debug), { }),
-      ViewContent.NavigationItem(Icons.Outlined.Message, getString(R.string.toggle_messages)) {
+      ViewContentNavigationDrawer.NavigationItem(null, getString(R.string.debug), { }),
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Message, getString(R.string.toggle_messages)) {
         viewModel.toggleMessagesVisibility()
       },
-      ViewContent.NavigationItem(Icons.Outlined.UploadFile, getString(R.string.send_logs)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.UploadFile, getString(R.string.send_logs)) {
         viewModel.askForSendLogs() { selectedLogs ->
           if (selectedLogs.isNotEmpty()) {
             backgroundTask.sendLogs(selectedLogs,this)
           }
         }
       },
-      ViewContent.NavigationItem(Icons.Outlined.Clear, getString(R.string.reset)) {
+      ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Clear, getString(R.string.reset)) {
         viewModel.askForConfigReset() {
           restartCore(true)
         }
