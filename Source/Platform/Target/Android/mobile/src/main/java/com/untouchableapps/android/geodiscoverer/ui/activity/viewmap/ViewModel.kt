@@ -26,6 +26,7 @@ import androidx.compose.material3.*
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
 import androidx.compose.runtime.*
+import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
 import java.io.File
@@ -137,6 +138,8 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     private set
   var integratedListEditItemHandler: (Int) -> Unit = {}
     private set
+  var integratedListAddItemHandler: () -> Unit = {}
+    private set
   var integratedListSelectTabHandler: (String) -> Unit = {}
     private set
 
@@ -183,24 +186,28 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun askForAddress(subject: String, address: String, confirmHandler: (String, String) -> Unit) {
+  private fun configureAddressPointTag() {
+    askEditTextTag = collectAddressPointGroups(askEditTextTagList)
+    askEditTextTagLabel = viewMap.getString(R.string.dialog_tag_label)
+  }
+
+  @Synchronized
+  fun askForAddressPointAdd(address: String, confirmHandler: (String, String) -> Unit) {
     askEditTextValue = address
     askEditTextHint = viewMap.getString(R.string.dialog_address_input_hint)
+    configureAddressPointTag()
     askConfirmText = viewMap.getString(R.string.dialog_lookup)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
     askEditTextConfirmHandler = confirmHandler
     askMessage = viewMap.getString(R.string.dialog_address)
-    askTitle = viewMap.getString(R.string.dialog_address_title)
+    askTitle = viewMap.getString(R.string.dialog_add_address_point_title)
   }
 
   @Synchronized
   fun askForAddressPointEdit(pointName: String, selectedGroupName: String, groupNames: List<String>, confirmHandler: (String, String) -> Unit) {
     askEditTextValue = pointName
     askMessage = viewMap.getString(R.string.dialog_name_label)
-    askEditTextTag = selectedGroupName
-    askEditTextTagList.clear()
-    askEditTextTagList.addAll(groupNames)
-    askEditTextTagLabel = viewMap.getString(R.string.dialog_tag_label)
+    configureAddressPointTag()
     askConfirmText = viewMap.getString(R.string.dialog_update)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
     askEditTextConfirmHandler = confirmHandler
@@ -522,14 +529,51 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun fillAddressPoints(selectedGroupName: String, fillTabs: Boolean = false) {
+  private fun collectAddressPointGroups(groups: MutableList<String>): String {
+    val selectedGroup = viewMap.coreObject!!.configStoreGetStringValue("Navigation", "selectedAddressPointGroup")
+    val names = viewMap.coreObject!!.configStoreGetAttributeValues("Navigation/AddressPoint", "name").toMutableList()
+    groups.clear()
+    names.forEach() {
+      val groupName: String = viewMap.coreObject!!.configStoreGetStringValue(
+        "Navigation/AddressPoint[@name='$it']",
+        "group"
+      )
+      if (!groups.contains(groupName)) {
+        groups.add(groupName)
+      }
+    }
+    if (!groups.contains(selectedGroup)) {
+      groups.add(selectedGroup)
+    }
+    groups.sort()
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","groups size in collectAddressPointGroups: ${groups.size}")
+    return selectedGroup
+  }
+
+  @Synchronized
+  fun fillAddressPoints(fillTabs: Boolean = false) {
+    val selectedGroupName = viewMap.coreObject!!.configStoreGetStringValue("Navigation", "selectedAddressPointGroup")
+    var selectedItem=""
+    if (integratedListSelectedItem!=-1) {
+      selectedItem=integratedListItems[integratedListSelectedItem]
+    }
+    if (fillTabs) {
+      integratedListTabs.clear()
+      integratedListSelectedTab=0
+      val groups = mutableListOf<String>()
+      collectAddressPointGroups(groups)
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","groups size in fillAddressPoints: ${groups.size}")
+      for (i in groups.indices) {
+        addAddressPointGroup(groups[i])
+        if (integratedListTabs[i] == selectedGroupName) {
+          integratedListSelectedTab = i
+        }
+      }
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","tab size in fillAddressPoints: ${integratedListTabs.size}")
+    }
     val unsortedNames = viewMap.coreObject!!.configStoreGetAttributeValues("Navigation/AddressPoint", "name").toMutableList()
     integratedListSelectedItem=-1
     integratedListItems.clear()
-    if (fillTabs) {
-      integratedListSelectedTab=0
-      integratedListTabs.clear()
-    }
     while (unsortedNames.size > 0) {
       var newestName = unsortedNames.removeFirst()
       val foreignRemovalRequest: String = viewMap.coreObject!!.configStoreGetStringValue(
@@ -540,20 +584,15 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
         "Navigation/AddressPoint[@name='$newestName']",
         "group"
       )
-      if ((fillTabs)&&(!integratedListTabs.contains(groupName))) {
-        addAddressPointGroup(groupName);
-      }
       if (groupName == selectedGroupName && foreignRemovalRequest != "1") {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","point: ${newestName}")
         addAddressPoint(newestName)
       }
     }
-    if (fillTabs) {
-      if (!integratedListTabs.contains(selectedGroupName)) {
-        addAddressPointGroup(selectedGroupName)
-      }
-      for (i in integratedListTabs.indices) {
-        if (integratedListTabs[i] == selectedGroupName) {
-          integratedListSelectedTab = i
+    if (selectedItem!="") {
+      for (i in integratedListItems.indices) {
+        if (integratedListItems[i]==selectedItem) {
+          integratedListSelectedItem=i
           break
         }
       }
@@ -564,9 +603,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   fun manageAddressPoints() {
 
     // Fill the items and tabs
-    val selectedGroupName =
-      viewMap.coreObject!!.configStoreGetStringValue("Navigation", "selectedAddressPointGroup")
-    fillAddressPoints(selectedGroupName, true)
+    fillAddressPoints(true)
 
     // Fill the remaining fields
     integratedListTitle=viewMap.getString(R.string.dialog_manage_address_points_title)
@@ -576,22 +613,29 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     integratedListSelectTabHandler= {
       viewMap.coreObject!!.configStoreSetStringValue("Navigation", "selectedAddressPointGroup", it)
       viewMap.coreObject!!.executeCoreCommand("addressPointGroupChanged")
-      fillAddressPoints(it)
+      fillAddressPoints()
     }
     integratedListDeleteItemHandler= {
       viewMap.coreObject!!.executeCoreCommand("removeAddressPoint", it)
       // Item is not removed from the list
     }
     integratedListEditItemHandler= {
-      askForAddressPointEdit(integratedListItems[it],integratedListTabs[integratedListSelectedTab],integratedListTabs) {
-        name, group ->
+      askForAddressPointEdit(
+        integratedListItems[it],
+        integratedListTabs[integratedListSelectedTab],
+        integratedListTabs
+      ) { name, group ->
 
         // Rename the address point if name has changed
         var changed = false
-        var newName=name
+        var newName = name
         if (newName != "" && newName != integratedListItems[it]) {
-          newName=viewMap.coreObject!!.executeCoreCommand("renameAddressPoint", integratedListItems[it], name)
-          changed=true
+          newName = viewMap.coreObject!!.executeCoreCommand(
+            "renameAddressPoint",
+            integratedListItems[it],
+            name
+          )
+          changed = true
         }
 
         // Change the group if another one is selected
@@ -600,18 +644,50 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
           val path = "Navigation/AddressPoint[@name='$newName']"
           viewMap.coreObject!!.configStoreSetStringValue(path, "group", group)
           viewMap.coreObject!!.executeCoreCommand("addressPointGroupChanged")
-          changed=true
-          fillTabs=true
+          changed = true
+          fillTabs = true
         }
 
         // Recreate the list (as there can be deleted one)
         if (changed)
-          fillAddressPoints(integratedListTabs[integratedListSelectedTab],fillTabs)
+          fillAddressPoints(fillTabs)
+      }
+    }
+    integratedListAddItemHandler = {
+      askForAddressPointAdd(
+        "",
+      ) { address, group ->
+
+        // Look up the coordinates
+        viewMap.backgroundTask!!.getLocationFromAddress(
+          name=address,
+          address=address,
+          group=group
+        ) { locationFound ->
+          informLocationLookupResult(address,locationFound)
+        }
+
+
+        /* Recreate the list (as there can be deleted one)
+        if (added)
+          fillAddressPoints(integratedListTabs[integratedListSelectedTab],fillTabs)*/
       }
     }
 
     // Open the list
     openIntegratedList()
+  }
+
+  @Synchronized
+  fun informLocationLookupResult(address: String, found: Boolean) {
+    if (integratedListVisible) {
+      fillAddressPoints(true)
+    }
+    if (!found) {
+      viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_not_found, address))
+    } else {
+      viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_added, address))
+    }
   }
 
   @Synchronized
@@ -656,6 +732,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     integratedListSelectItemHandler = {}
     integratedListDeleteItemHandler = {}
     integratedListEditItemHandler = {}
+    integratedListAddItemHandler = {}
     integratedListTabs.clear()
     integratedListSelectTabHandler = {}
     integratedListTitle = ""

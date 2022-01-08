@@ -71,7 +71,7 @@ class ViewContent(viewMap: ViewMap2) {
     val titleIndent = 20.dp
     val drawerWidth = 250.dp
     val itemPadding = 5.dp
-    val itemDistance = 10.dp
+    val itemDistance = 15.dp
     val hintIndent = 15.dp
     val drawerCornerRadius = 16.dp
     val snackbarHorizontalPadding = 20.dp
@@ -86,6 +86,7 @@ class ViewContent(viewMap: ViewMap2) {
     val integratedListItemHeight = 60.dp
     val integratedListTabHeight = 50.dp
     val integratedListTabWidth = 100.dp
+    val integratedListFABPadding = 20.dp
   }
   val layoutParams = LayoutParams()
 
@@ -113,7 +114,7 @@ class ViewContent(viewMap: ViewMap2) {
         content = { innerPadding ->
           val drawerState =
             rememberDrawerState(initialValue = viewModel.drawerStatus, confirmStateChange = {
-              GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "drawerState=$it")
+              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "drawerState=$it")
               viewModel.drawerStatus = it
               true
             })
@@ -242,75 +243,85 @@ class ViewContent(viewMap: ViewMap2) {
                   .fillMaxWidth()
                   .height(layoutParams.integratedListHeight),
               ) {
-                Column {
-                  Surface(
-                  ) {
-                    Column(
-                      modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                Box() {
+                  Column {
+                    Surface(
                     ) {
-                      Surface(
-                        shadowElevation = 6.dp
-                      ) {
-                        Box(
-                          modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .fillMaxWidth()
-                            .height(layoutParams.integratedListCloseRowHeight)
-                        ) {
-                          IconButton(
-                            modifier = Modifier
-                              .align(Alignment.Center),
-                            onClick = {
-                              viewModel.closeIntegratedList()
-                            }
-                          ) {
-                            Icon(
-                              imageVector = Icons.Default.ExpandMore,
-                              contentDescription = null
-                            )
-                          }
-                        }
-                      }
-                      Text(
+                      Column(
                         modifier = Modifier
-                          .padding(layoutParams.itemPadding)
-                          .fillMaxWidth(),
-                        text = viewModel.integratedListTitle,
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center
-                      )
-                      if (viewModel.integratedListTabs.size > 0) {
-                        val tabListState = rememberLazyListState()
-                        LaunchedEffect(viewModel.integratedListVisible) {
-                          if (viewModel.integratedListSelectedTab != -1)
-                            tabListState.scrollToItem(viewModel.integratedListSelectedTab)
-                        }
-                        LazyRow(
-                          state = tabListState,
-                          modifier = Modifier
-                            .fillMaxWidth()
+                          .background(MaterialTheme.colorScheme.surfaceVariant)
+                      ) {
+                        Surface(
+                          shadowElevation = 6.dp
                         ) {
-                          itemsIndexed(viewModel.integratedListTabs) { index, tab ->
-                            integratedListContent.tabContent(index, tab, viewModel)
+                          Box(
+                            modifier = Modifier
+                              .background(MaterialTheme.colorScheme.surfaceVariant)
+                              .fillMaxWidth()
+                              .height(layoutParams.integratedListCloseRowHeight)
+                          ) {
+                            IconButton(
+                              modifier = Modifier
+                                .align(Alignment.Center),
+                              onClick = {
+                                viewModel.closeIntegratedList()
+                              }
+                            ) {
+                              Icon(
+                                imageVector = Icons.Default.ExpandMore,
+                                contentDescription = null
+                              )
+                            }
+                          }
+                        }
+                        Text(
+                          modifier = Modifier
+                            .padding(layoutParams.itemPadding)
+                            .fillMaxWidth(),
+                          text = viewModel.integratedListTitle,
+                          style = MaterialTheme.typography.titleLarge,
+                          textAlign = TextAlign.Center
+                        )
+                        if (viewModel.integratedListTabs.size > 0) {
+                          val tabListState = rememberLazyListState()
+                          LaunchedEffect(viewModel.integratedListVisible) {
+                            if (viewModel.integratedListSelectedTab != -1)
+                              tabListState.scrollToItem(viewModel.integratedListSelectedTab)
+                          }
+                          LazyRow(
+                            state = tabListState,
+                            modifier = Modifier
+                              .fillMaxWidth()
+                          ) {
+                            itemsIndexed(viewModel.integratedListTabs) { index, tab ->
+                              integratedListContent.tabContent(index, tab, viewModel)
+                            }
                           }
                         }
                       }
                     }
-                  }
-                  val itemListState = rememberLazyListState()
-                  LaunchedEffect(viewModel.integratedListVisible) {
-                    if (viewModel.integratedListSelectedItem!=-1)
-                      itemListState.scrollToItem(viewModel.integratedListSelectedItem)
-                  }
-                  LazyColumn(
-                    state = itemListState,
-                    modifier = Modifier
-                      .fillMaxWidth()
-                  ) {
-                    itemsIndexed(viewModel.integratedListItems) { index, item ->
-                      integratedListContent.itemContainer(index, item, viewModel)
+                    val itemListState = rememberLazyListState()
+                    LaunchedEffect(viewModel.integratedListVisible) {
+                      if (viewModel.integratedListSelectedItem != -1)
+                        itemListState.scrollToItem(viewModel.integratedListSelectedItem)
                     }
+                    LazyColumn(
+                      state = itemListState,
+                      modifier = Modifier
+                        .fillMaxWidth()
+                    ) {
+                      itemsIndexed(viewModel.integratedListItems) { index, item ->
+                        integratedListContent.itemContainer(index, item, viewModel)
+                      }
+                    }
+                  }
+                  if (viewModel.integratedListTabs.isNotEmpty()) {
+                    integratedListContent.floatingActionButton(
+                      modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(layoutParams.integratedListFABPadding),
+                      viewModel = viewModel
+                    )
                   }
                 }
               }

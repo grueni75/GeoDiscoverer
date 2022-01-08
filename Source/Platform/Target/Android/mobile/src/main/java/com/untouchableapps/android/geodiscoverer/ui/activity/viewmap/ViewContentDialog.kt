@@ -121,7 +121,7 @@ class ViewContentDialog(viewContent: ViewContent) {
       )
     }
     if (viewModel.askTitle != "") {
-      if (viewModel.askEditTextValue != "") {
+      if ((viewModel.askEditTextValue != "")||(viewModel.askEditTextHint != "")) {
         val editTextValue = remember { mutableStateOf(viewModel.askEditTextValue) }
         val editTextTag = remember { mutableStateOf(viewModel.askEditTextTag) }
         askAlertDialog(
@@ -158,6 +158,21 @@ class ViewContentDialog(viewContent: ViewContent) {
                   }
                 }
               )
+              if (viewModel.askEditTextHint != "") {
+                Text(
+                  modifier = Modifier
+                    .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
+                  text = viewModel.askEditTextHint
+                )
+              }
+              if (viewModel.askEditTextError != "") {
+                Text(
+                  modifier = Modifier
+                    .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
+                  text = viewModel.askEditTextError,
+                  color = MaterialTheme.colorScheme.error
+                )
+              }
               if (viewModel.askEditTextTag != "") {
                 Spacer(Modifier.height(layoutParams.itemDistance))
                 val editTextTagListExpanded = remember { mutableStateOf(false) }
@@ -226,21 +241,6 @@ class ViewContentDialog(viewContent: ViewContent) {
                     }
                   }
                 }
-              }
-              if (viewModel.askEditTextHint != "") {
-                Text(
-                  modifier = Modifier
-                    .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
-                  text = viewModel.askEditTextHint
-                )
-              }
-              if (viewModel.askEditTextError != "") {
-                Text(
-                  modifier = Modifier
-                    .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
-                  text = viewModel.askEditTextError,
-                  color = MaterialTheme.colorScheme.error
-                )
               }
             }
           }

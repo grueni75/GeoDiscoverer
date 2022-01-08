@@ -68,7 +68,6 @@ fun GDTextField(
     var colors = TextFieldDefaults.textFieldColors(
       textColor = MaterialTheme.colorScheme.onBackground
     )
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",colors.backgroundColor(true).value.toString())
     TextField(
       value = value,
       onValueChange = onValueChange,

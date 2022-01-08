@@ -97,7 +97,7 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
       )
 
       // Reset the views if tab is switched
-      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${selectedTab.value} ${viewModel.integratedListSelectedTab}")
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${selectedTab.value} ${viewModel.integratedListSelectedTab}")
       LaunchedEffect(selectedTab.value,  viewModel.integratedListSelectedTab) {
         if (selectedTab.value != viewModel.integratedListSelectedTab) {
           animVisibilityState.targetState = true
@@ -222,7 +222,7 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
         )
         .background(
           if (index == viewModel.integratedListSelectedItem)
-            MaterialTheme.colorScheme.primary.copy(alpha = ContentAlpha.medium)
+            MaterialTheme.colorScheme.primary.copy(alpha=ContentAlpha.medium)
           else
             MaterialTheme.colorScheme.surface
         )
@@ -282,5 +282,19 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
       )
     }
   }
+
+  // Creates a floating action button
+  @Composable
+  fun floatingActionButton(modifier: Modifier, viewModel: ViewModel) {
+    FloatingActionButton(
+      modifier = modifier,
+      onClick = {
+        viewModel.integratedListAddItemHandler()
+      }
+    ) {
+      Icon(Icons.Default.Add, null)
+    }
+  }
+
 }
 

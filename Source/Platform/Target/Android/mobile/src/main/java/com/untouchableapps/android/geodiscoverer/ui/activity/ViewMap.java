@@ -551,7 +551,7 @@ public class ViewMap extends GDActivity {
 
     // Create the base dialog
     MaterialDialog.Builder builder = new MaterialDialog.Builder(this);
-    builder.title(R.string.dialog_address_title);
+    builder.title(R.string.dialog_add_address_point_title);
     builder.icon(getResources().getDrawable(android.R.drawable.ic_dialog_info));
     builder.positiveText(R.string.finished);
     builder.cancelable(true);

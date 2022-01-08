@@ -23,6 +23,7 @@
 package com.untouchableapps.android.geodiscoverer.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -53,7 +54,8 @@ fun AndroidTheme(content: @Composable() () -> Unit) {
   val darkColorScheme = darkColorScheme(
     primary = colorResource(id = R.color.gd_orange),
     surface = colorResource(id = R.color.gd_surface),
-    onPrimary = darkColorScheme().onBackground
+    onPrimary = darkColorScheme().onBackground,
+    primaryContainer = colorResource(id = R.color.gd_background_orange)
   )
   MaterialTheme(
     colorScheme = darkColorScheme,

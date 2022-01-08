@@ -58,7 +58,7 @@
   <string name="context_menu_title">Map actions</string>
   <string name="show_target">Show target</string>
   <string name="manually_entered_address">Manually entered address</string>
-  <string name="dialog_address_title">Add point of interest</string>
+  <string name="dialog_add_address_point_title">Add point of interest</string>
   <string name="dialog_address_input_hint">Alexanderplatz 1, Berlin (single line!)</string>
   <string name="dialog_dismiss">Dismiss</string>
   <string name="dialog_lookup">Lookup</string>

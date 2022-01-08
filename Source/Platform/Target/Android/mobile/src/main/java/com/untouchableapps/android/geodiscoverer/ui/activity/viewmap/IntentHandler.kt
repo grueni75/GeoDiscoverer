@@ -34,6 +34,7 @@ import android.os.*
 import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
@@ -154,17 +155,14 @@ class IntentHandler(viewMap: ViewMap2) : CoroutineScope by MainScope() {
 
     // Handle the intent
     if (isAddress) {
-      viewMap.viewModel.askForAddress(subject,text) { address, _ ->
+
+      viewMap.viewModel.askForAddressPointAdd(text) { address, group ->
         viewMap.backgroundTask!!.getLocationFromAddress(
           name=subject,
           address=address,
-          group="Default"
+          group=group
         ) { locationFound ->
-          if (!locationFound) {
-            viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_not_found, address))
-          } else {
-            viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_added, address))
-          }
+          viewMap.viewModel.informLocationLookupResult(address, locationFound)
         }
       }
     }
