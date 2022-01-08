@@ -20,3 +20,7 @@
   in GDMapSurface)
 * Close dialogs on reconfiguration in both prefs and viewmap
 * Handle widgetless mode / integrated list on reconfiguration to landscape correctly
+* Refresh integrated list content if new address point has been added from service or intent
+
+
+

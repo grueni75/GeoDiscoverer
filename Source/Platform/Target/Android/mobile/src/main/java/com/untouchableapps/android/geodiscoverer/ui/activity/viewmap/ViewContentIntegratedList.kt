@@ -23,6 +23,7 @@
 package com.untouchableapps.android.geodiscoverer.ui.activity.viewmap
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -72,84 +73,125 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
       itemContent(index, item, viewModel)
     } else {
       val selectedTab = remember { mutableStateOf(-1) }
+      val itemCount = remember { mutableStateOf(viewModel.integratedListItems.size ) }
+      val animVisibilityState = remember { MutableTransitionState<Boolean>(false) }
 
-      // Handle the dismiss state
+      // Handle the case if the edit is confirmed
       val dismissState = rememberDismissState(
         confirmStateChange = {
           if (it == DismissValue.DismissedToStart) {
-            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "delete confirmed for ${index}")
-            viewModel.integratedListDeleteItemHandler(item)
+            animVisibilityState.targetState = false
+            return@rememberDismissState true
           }
           if (it == DismissValue.DismissedToEnd) {
-            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "edit confirmed for ${index}")
+            GDApplication.addMessage(
+              GDApplication.DEBUG_MSG,
+              "GDApp",
+              "edit confirmed for ${index}"
+            )
             viewModel.integratedListEditItemHandler(index)
+            return@rememberDismissState false
           }
           false
         }
       )
 
       // Reset the views if tab is switched
-      LaunchedEffect(selectedTab.value != viewModel.integratedListSelectedTab) {
-        dismissState.reset()
-        selectedTab.value=viewModel.integratedListSelectedTab
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${selectedTab.value} ${viewModel.integratedListSelectedTab}")
+      LaunchedEffect(selectedTab.value,  viewModel.integratedListSelectedTab) {
+        if (selectedTab.value != viewModel.integratedListSelectedTab) {
+          animVisibilityState.targetState = true
+          dismissState.reset()
+          selectedTab.value = viewModel.integratedListSelectedTab
+        }
+      }
+
+      // Reset the views if items count is changed
+      LaunchedEffect(itemCount.value, viewModel.integratedListItems.size) {
+        if (itemCount.value != viewModel.integratedListItems.size) {
+          animVisibilityState.targetState = true
+          dismissState.reset()
+          itemCount.value = viewModel.integratedListItems.size
+        }
+      }
+
+      // Handle the event when the delete is confirmed and the item is not visible anymore
+      LaunchedEffect(animVisibilityState.targetState, animVisibilityState.currentState) {
+        if (!animVisibilityState.targetState && !animVisibilityState.currentState) {
+          if (dismissState.targetValue == DismissValue.DismissedToStart) {
+            GDApplication.addMessage(
+              GDApplication.DEBUG_MSG,
+              "GDApp",
+              "delete confirmed for ${index}"
+            )
+            dismissState.reset()
+            viewModel.integratedListDeleteItemHandler(item)
+          }
+        }
       }
 
       // Generate the content
-      GDSwipeToDismiss(
-        state = dismissState,
-        directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
-        dismissThresholds = { direction ->
-          if (direction == DismissDirection.StartToEnd)
-            return@GDSwipeToDismiss FractionalThreshold(0.15f)
-          else
-            return@GDSwipeToDismiss FractionalThreshold(0.15f)
-        },
-        background = {
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","updating background for ${index}")
-          val direction = dismissState.dismissDirection ?: return@GDSwipeToDismiss
-          val color by animateColorAsState(
-            when (dismissState.targetValue) {
-              DismissValue.Default -> MaterialTheme.colorScheme.surfaceVariant
-              DismissValue.DismissedToEnd -> Color.Green.copy(alpha = ContentAlpha.medium)
-              DismissValue.DismissedToStart -> Color.Red.copy(alpha = ContentAlpha.medium)
-            }
-          )
-          val alignment = when (direction) {
-            DismissDirection.StartToEnd -> Alignment.CenterStart
-            DismissDirection.EndToStart -> Alignment.CenterEnd
-          }
-          val icon = when (direction) {
-            DismissDirection.StartToEnd -> Icons.Default.Edit
-            DismissDirection.EndToStart -> Icons.Default.Delete
-          }
-          val scale by animateFloatAsState(
-            if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
-          )
-          Box(
-            Modifier
-              .fillMaxSize()
-              .background(color)
-              .padding(horizontal = 20.dp),
-            contentAlignment = alignment
-          ) {
-            Icon(
-              icon,
-              contentDescription = null,
-              modifier = Modifier.scale(scale)
+      AnimatedVisibility(
+        enter = EnterTransition.None,
+        exit = shrinkVertically() + fadeOut(),
+        visibleState = animVisibilityState
+      ) {
+        GDSwipeToDismiss(
+          state = dismissState,
+          directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
+          dismissThresholds = { direction ->
+            if (direction == DismissDirection.StartToEnd)
+              return@GDSwipeToDismiss FractionalThreshold(0.15f)
+            else
+              return@GDSwipeToDismiss FractionalThreshold(0.15f)
+          },
+          background = {
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","updating background for ${index}")
+            val direction = dismissState.dismissDirection ?: return@GDSwipeToDismiss
+            val color by animateColorAsState(
+              when (dismissState.targetValue) {
+                DismissValue.Default -> MaterialTheme.colorScheme.surfaceVariant
+                DismissValue.DismissedToEnd -> Color.Green.copy(alpha = ContentAlpha.medium)
+                DismissValue.DismissedToStart -> Color.Red.copy(alpha = ContentAlpha.medium)
+              }
             )
+            val alignment = when (direction) {
+              DismissDirection.StartToEnd -> Alignment.CenterStart
+              DismissDirection.EndToStart -> Alignment.CenterEnd
+            }
+            val icon = when (direction) {
+              DismissDirection.StartToEnd -> Icons.Default.Edit
+              DismissDirection.EndToStart -> Icons.Default.Delete
+            }
+            val scale by animateFloatAsState(
+              if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+            )
+            Box(
+              Modifier
+                .fillMaxSize()
+                .background(color)
+                .padding(horizontal = 20.dp),
+              contentAlignment = alignment
+            ) {
+              Icon(
+                icon,
+                contentDescription = null,
+                modifier = Modifier.scale(scale)
+              )
+            }
+          },
+          dismissContent = {
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","updating content for ${index}")
+            Surface(
+              shadowElevation = animateDpAsState(
+                if (dismissState.dismissDirection != null) 6.dp else 0.dp
+              ).value
+            ) {
+              itemContent(index, item, viewModel)
+            }
           }
-        },
-        dismissContent = {
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","updating content for ${index}")
-          Surface(
-            shadowElevation = animateDpAsState(
-              if (dismissState.dismissDirection != null) 6.dp else 0.dp
-            ).value
-          ) {
-            itemContent(index, item, viewModel)
-          }
-        }
-      )
+        )
+      }
     }
   }
 

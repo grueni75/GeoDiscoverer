@@ -26,7 +26,6 @@ import androidx.compose.material3.*
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
 import androidx.compose.runtime.*
-import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
 import java.io.File
@@ -519,9 +518,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun removeAddressPoint(name: String) {
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${integratedListItems.size}")
     integratedListItems.remove(name)
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${integratedListItems.size}")
   }
 
   @Synchronized
@@ -583,12 +580,33 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     }
     integratedListDeleteItemHandler= {
       viewMap.coreObject!!.executeCoreCommand("removeAddressPoint", it)
-      removeAddressPoint(it)
+      // Item is not removed from the list
     }
     integratedListEditItemHandler= {
       askForAddressPointEdit(integratedListItems[it],integratedListTabs[integratedListSelectedTab],integratedListTabs) {
         name, group ->
 
+        // Rename the address point if name has changed
+        var changed = false
+        var newName=name
+        if (newName != "" && newName != integratedListItems[it]) {
+          newName=viewMap.coreObject!!.executeCoreCommand("renameAddressPoint", integratedListItems[it], name)
+          changed=true
+        }
+
+        // Change the group if another one is selected
+        var fillTabs = false
+        if (group != integratedListTabs[integratedListSelectedTab]) {
+          val path = "Navigation/AddressPoint[@name='$newName']"
+          viewMap.coreObject!!.configStoreSetStringValue(path, "group", group)
+          viewMap.coreObject!!.executeCoreCommand("addressPointGroupChanged")
+          changed=true
+          fillTabs=true
+        }
+
+        // Recreate the list (as there can be deleted one)
+        if (changed)
+          fillAddressPoints(integratedListTabs[integratedListSelectedTab],fillTabs)
       }
     }
 

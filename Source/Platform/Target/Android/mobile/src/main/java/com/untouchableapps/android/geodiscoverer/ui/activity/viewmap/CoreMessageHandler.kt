@@ -122,14 +122,15 @@ class CoreMessageHandler(viewMap: ViewMap2) : Handler(Looper.getMainLooper()) {
         }
         if (commandFunction == "getLastKnownLocation") {
           if (viewMap.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if ((viewMap.coreObject != null)&&(viewMap.locationManager != null)) {
+            val locationManager=viewMap.locationManager
+            if ((viewMap.coreObject != null)&&(locationManager != null)) {
               viewMap.coreObject!!.onLocationChanged(
-                viewMap.locationManager!!.getLastKnownLocation(
+                locationManager!!.getLastKnownLocation(
                   LocationManager.NETWORK_PROVIDER
                 )!!
               )
               viewMap.coreObject!!.onLocationChanged(
-                viewMap.locationManager!!.getLastKnownLocation(
+                locationManager!!.getLastKnownLocation(
                   LocationManager.GPS_PROVIDER
                 )!!
               )
