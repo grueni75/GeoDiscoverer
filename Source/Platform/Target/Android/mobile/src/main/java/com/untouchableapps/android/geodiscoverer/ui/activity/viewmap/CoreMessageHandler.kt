@@ -161,6 +161,9 @@ class CoreMessageHandler(viewMap: ViewMap2) : Handler(Looper.getMainLooper()) {
           viewMap.viewModel.manageAddressPoints()
           commandExecuted = true
         }
+        if (commandFunction == "addressPointsUpdated") {
+          viewMap.viewModel.refreshAddressPoints()
+        }
         if (commandFunction == "exitActivity") {
           viewMap.exitRequested = true
           viewMap.stopService(Intent(viewMap, GDService::class.java))

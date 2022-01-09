@@ -95,7 +95,13 @@ class IntentHandler(viewMap: ViewMap2) : CoroutineScope by MainScope() {
     }
   }
 
-  // Processes the intent of the activity
+  // Clean up everything
+  fun onDestroy() {
+    if (downloadCompleteReceiver!=null)
+      viewMap.unregisterReceiver(downloadCompleteReceiver);
+  }
+
+    // Processes the intent of the activity
   @SuppressLint("Range")
   fun processIntent() {
 

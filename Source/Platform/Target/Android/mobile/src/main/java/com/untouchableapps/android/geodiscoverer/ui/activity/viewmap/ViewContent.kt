@@ -44,6 +44,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -82,11 +83,13 @@ class ViewContent(viewMap: ViewMap2) {
     val askMultipleChoiceMessageOffset = 15.dp
     val dialogButonRowHeight = 200.dp
     val integratedListHeight = 400.dp
+    val integratedListWidth = 400.dp
     val integratedListCloseRowHeight = 45.dp
     val integratedListItemHeight = 60.dp
     val integratedListTabHeight = 50.dp
     val integratedListTabWidth = 100.dp
     val integratedListFABPadding = 20.dp
+    val messageBackgroundColor = Color.Black.copy(alpha = 0.8f)
   }
   val layoutParams = LayoutParams()
 
@@ -124,7 +127,6 @@ class ViewContent(viewMap: ViewMap2) {
             if ((!drawerState.isOpen) && (viewModel.drawerStatus == DrawerValue.Open))
               drawerState.open()
           }
-          val density = LocalDensity.current
           val scope = rememberCoroutineScope()
           NavigationDrawer(
             drawerState = drawerState,
@@ -197,139 +199,163 @@ class ViewContent(viewMap: ViewMap2) {
   @Composable
   private fun screenContent(viewModel: ViewModel, maxScreenWidth: Dp, maxScreenHeight: Dp) {
     val scope = rememberCoroutineScope()
+    val configuration = LocalConfiguration.current
     Box(
       modifier = Modifier
         .fillMaxSize()
     ) {
-      val configuration = LocalConfiguration.current
-      when (configuration.orientation) {
-        Configuration.ORIENTATION_PORTRAIT -> {
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-          ) {
-            with(LocalDensity.current) {
-              val listHeight=(layoutParams.integratedListHeight).toPx().roundToInt()
-              val screenHeight=(maxScreenHeight).toPx().roundToInt()
-              val mapHeight=
-                if (viewModel.integratedListVisible)
-                  screenHeight-listHeight
-                else
-                  screenHeight
-              val width=maxScreenWidth.toPx().roundToInt()
-              if (viewModel.integratedListVisible)
-                viewMap.coreObject!!.executeCoreCommand("setMapWindow","0", (listHeight/2).toString(), width.toString(), mapHeight.toString())
+      with(LocalDensity.current) {
+        val listHeight=(layoutParams.integratedListHeight).toPx().roundToInt()
+        val listWidth=(layoutParams.integratedListWidth).toPx().roundToInt()
+        val screenHeight=(maxScreenHeight).toPx().roundToInt()
+        val screenWidth=(maxScreenWidth).toPx().roundToInt()
+        var mapHeight=screenHeight
+        var mapWidth=screenWidth
+        var mapX=0
+        var mapY=0
+        if (configuration.orientation==Configuration.ORIENTATION_LANDSCAPE) {
+          if (viewModel.integratedListVisible) {
+            mapWidth = screenWidth - listWidth
+            mapX = -listWidth/2
+          }
+        } else {
+          if (viewModel.integratedListVisible) {
+            mapHeight = screenHeight - listHeight
+            mapY = listHeight/2
+          }
+        }
+        if (viewModel.integratedListVisible)
+          viewMap.coreObject!!.executeCoreCommand("setMapWindow", mapX.toString(), mapY.toString(), mapWidth.toString(), mapHeight.toString())
+        else
+          viewMap.coreObject!!.executeCoreCommand("setMapWindow", mapX.toString(), mapY.toString(), mapWidth.toString(), mapHeight.toString())
+        if (viewModel.mapChanged) {
+          viewModel.mapChanged(false)
+        }
+      }
+      Surface(
+        modifier = Modifier
+          .fillMaxSize()
+      ) {
+        mapSurface()
+      }
+      AnimatedVisibility(
+        modifier = Modifier
+          .align(
+            if (configuration.orientation==Configuration.ORIENTATION_LANDSCAPE)
+              Alignment.CenterEnd
+            else
+              Alignment.BottomCenter
+          ),
+        enter = if (configuration.orientation==Configuration.ORIENTATION_LANDSCAPE)
+          slideInHorizontally(initialOffsetX = { +it })
+        else
+          slideInVertically(initialOffsetY = { +it }),
+        exit = if (configuration.orientation==Configuration.ORIENTATION_LANDSCAPE)
+          slideOutHorizontally(targetOffsetX = { +it })
+        else
+          slideOutVertically(targetOffsetY = { +it }),
+        visible = viewModel.integratedListVisible
+      ) {
+        Surface(
+          modifier = Modifier
+            .height(
+              if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+                maxScreenHeight
               else
-                viewMap.coreObject!!.executeCoreCommand("setMapWindow","0", "0", width.toString(), mapHeight.toString())
-              if (viewModel.mapChanged) {
-                viewModel.mapChanged(false)
-              }
-            }
-            Surface(
-              modifier = Modifier
-                .fillMaxSize()
-            ) {
-              mapSurface()
-            }
-            AnimatedVisibility(
-              modifier = Modifier
-                .align(Alignment.BottomCenter),
-              enter = slideInVertically(initialOffsetY = { +it }),
-              exit = slideOutVertically(targetOffsetY = { +it }),
-              visible = viewModel.integratedListVisible
-            ) {
+                layoutParams.integratedListHeight
+            )
+            .width(
+              if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+                layoutParams.integratedListWidth
+              else
+                maxScreenWidth
+            )
+        ) {
+          Box() {
+            Column {
               Surface(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .height(layoutParams.integratedListHeight),
               ) {
-                Box() {
-                  Column {
-                    Surface(
+                Column(
+                  modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                  Surface(
+                    shadowElevation = 6.dp
+                  ) {
+                    Box(
+                      modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .fillMaxWidth()
+                        .height(layoutParams.integratedListCloseRowHeight)
                     ) {
-                      Column(
+                      IconButton(
                         modifier = Modifier
-                          .background(MaterialTheme.colorScheme.surfaceVariant)
+                          .align(Alignment.Center),
+                        onClick = {
+                          viewModel.closeIntegratedList()
+                        }
                       ) {
-                        Surface(
-                          shadowElevation = 6.dp
-                        ) {
-                          Box(
-                            modifier = Modifier
-                              .background(MaterialTheme.colorScheme.surfaceVariant)
-                              .fillMaxWidth()
-                              .height(layoutParams.integratedListCloseRowHeight)
-                          ) {
-                            IconButton(
-                              modifier = Modifier
-                                .align(Alignment.Center),
-                              onClick = {
-                                viewModel.closeIntegratedList()
-                              }
-                            ) {
-                              Icon(
-                                imageVector = Icons.Default.ExpandMore,
-                                contentDescription = null
-                              )
-                            }
-                          }
-                        }
-                        Text(
-                          modifier = Modifier
-                            .padding(layoutParams.itemPadding)
-                            .fillMaxWidth(),
-                          text = viewModel.integratedListTitle,
-                          style = MaterialTheme.typography.titleLarge,
-                          textAlign = TextAlign.Center
+                        Icon(
+                          imageVector =
+                            if (configuration.orientation==Configuration.ORIENTATION_LANDSCAPE)
+                                Icons.Default.NavigateNext
+                              else
+                                Icons.Default.ExpandMore,
+                          contentDescription = null
                         )
-                        if (viewModel.integratedListTabs.size > 0) {
-                          val tabListState = rememberLazyListState()
-                          LaunchedEffect(viewModel.integratedListVisible) {
-                            if (viewModel.integratedListSelectedTab != -1)
-                              tabListState.scrollToItem(viewModel.integratedListSelectedTab)
-                          }
-                          LazyRow(
-                            state = tabListState,
-                            modifier = Modifier
-                              .fillMaxWidth()
-                          ) {
-                            itemsIndexed(viewModel.integratedListTabs) { index, tab ->
-                              integratedListContent.tabContent(index, tab, viewModel)
-                            }
-                          }
-                        }
                       }
                     }
-                    val itemListState = rememberLazyListState()
+                  }
+                  Text(
+                    modifier = Modifier
+                      .padding(layoutParams.itemPadding)
+                      .fillMaxWidth(),
+                    text = viewModel.integratedListTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                  )
+                  if (viewModel.integratedListTabs.size > 0) {
+                    val tabListState = rememberLazyListState()
                     LaunchedEffect(viewModel.integratedListVisible) {
-                      if (viewModel.integratedListSelectedItem != -1)
-                        itemListState.scrollToItem(viewModel.integratedListSelectedItem)
+                      if (viewModel.integratedListSelectedTab != -1)
+                        tabListState.scrollToItem(viewModel.integratedListSelectedTab)
                     }
-                    LazyColumn(
-                      state = itemListState,
+                    LazyRow(
+                      state = tabListState,
                       modifier = Modifier
                         .fillMaxWidth()
                     ) {
-                      itemsIndexed(viewModel.integratedListItems) { index, item ->
-                        integratedListContent.itemContainer(index, item, viewModel)
+                      itemsIndexed(viewModel.integratedListTabs) { index, tab ->
+                        integratedListContent.tabContent(index, tab, viewModel)
                       }
                     }
                   }
-                  if (viewModel.integratedListTabs.isNotEmpty()) {
-                    integratedListContent.floatingActionButton(
-                      modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(layoutParams.integratedListFABPadding),
-                      viewModel = viewModel
-                    )
-                  }
+                }
+              }
+              val itemListState = rememberLazyListState()
+              LaunchedEffect(viewModel.integratedListVisible) {
+                if (viewModel.integratedListSelectedItem != -1)
+                  itemListState.scrollToItem(viewModel.integratedListSelectedItem)
+              }
+              LazyColumn(
+                state = itemListState,
+                modifier = Modifier
+                  .fillMaxWidth()
+              ) {
+                itemsIndexed(viewModel.integratedListItems) { index, item ->
+                  integratedListContent.itemContainer(index, item, viewModel)
                 }
               }
             }
+            if (viewModel.integratedListTabs.isNotEmpty()) {
+              integratedListContent.floatingActionButton(
+                modifier = Modifier
+                  .align(Alignment.BottomEnd)
+                  .padding(layoutParams.integratedListFABPadding),
+                viewModel = viewModel
+              )
+            }
           }
-        }
-        else -> {
-          mapSurface()
         }
       }
       if (viewModel.fixSurfaceViewBug) {
@@ -343,45 +369,66 @@ class ViewContent(viewMap: ViewMap2) {
         }
       }
       if (viewModel.messagesVisible) {
-        Column(
-          modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.8f)),
-          horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-          if (viewModel.splashVisible) {
-            Image(
-              painter = painterResource(R.drawable.splash),
-              contentDescription = null
-            )
-            Text(
-              text = viewModel.busyText,
-              style = MaterialTheme.typography.headlineSmall,
-              color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(Modifier.height(20.dp))
-          }
-          AndroidView(
+        if (configuration.orientation==Configuration.ORIENTATION_LANDSCAPE) {
+          Row(
             modifier = Modifier
-              .fillMaxSize(),
-            factory = { context ->
-              TextView(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                  ViewGroup.LayoutParams.MATCH_PARENT,
-                  ViewGroup.LayoutParams.MATCH_PARENT,
-                )
-                gravity = Gravity.BOTTOM
-                typeface = Typeface.MONOSPACE
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 10.0f)
-              }
-            },
-            update = { view ->
-              view.text = viewModel.messages
-            }
-          )
+              .fillMaxSize()
+              .background(layoutParams.messageBackgroundColor),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            messageContent(viewModel)
+          }
+        } else {
+          Column(
+            modifier = Modifier
+              .fillMaxSize()
+              .background(layoutParams.messageBackgroundColor),
+            horizontalAlignment = Alignment.CenterHorizontally
+          ) {
+            messageContent(viewModel)
+          }
         }
       }
     }
+  }
+
+  // Defines the message view along with the splash icon
+  @Composable
+  private fun messageContent(viewModel: ViewModel) {
+    if (viewModel.splashVisible) {
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
+        Image(
+          painter = painterResource(R.drawable.splash),
+          contentDescription = null
+        )
+        Text(
+          text = viewModel.busyText,
+          style = MaterialTheme.typography.headlineSmall,
+          color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.height(20.dp))
+      }
+    }
+    AndroidView(
+      modifier = Modifier
+        .fillMaxSize(),
+      factory = { context ->
+        TextView(context).apply {
+          layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+          )
+          gravity = Gravity.BOTTOM
+          typeface = Typeface.MONOSPACE
+          setTextSize(TypedValue.COMPLEX_UNIT_SP, 10.0f)
+        }
+      },
+      update = { view ->
+        view.text = viewModel.messages
+      }
+    )
   }
 
   // Map surface view

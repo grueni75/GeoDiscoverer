@@ -40,6 +40,10 @@ import kotlinx.coroutines.*
 import org.acra.ACRA
 import java.io.*
 import java.lang.Exception
+import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
+
+
+
 
 class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
@@ -107,6 +111,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
           context.getString(R.string.address_point_added, name),
           Toast.LENGTH_LONG
         ).show()
+        coreObject!!.executeAppCommand("addressPointsUpdated()")
       }
     }
   }
@@ -198,7 +203,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
     }
   }
 
-  // Removes routes
+  // Send logs to the developer
   @ExperimentalMaterial3Api
   fun sendLogs(selectedLogs: List<String>, viewMap: ViewMap2) {
     launch() {
@@ -279,6 +284,78 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
       }
     }
   }
+
+  /* Imports *.gda files from external source
+  private class ImportMapArchivesTask : AsyncTask<Void?, Int?, Void?>() {
+    var progressDialog: MaterialDialog? = null
+    var srcFile: File? = null
+    var mapFolder: File? = null
+    var mapInfoFilename: String? = null
+    override fun onPreExecute() {
+
+      // Prepare the progress dialog
+      progressDialog = MaterialDialog.Builder(this@ViewMap)
+        .content(getString(R.string.importing_external_map_archives, srcFile!!.name))
+        .progress(true, 0)
+        .cancelable(false)
+        .show()
+    }
+
+    protected override fun doInBackground(vararg params: Void): Void? {
+
+      // Create the map folder
+      try {
+
+        // Find all gda files that have the pattern <name>.gda and <name>%d.gda
+        val basename: String = srcFile!!.name.replaceAll("(\\D*)\\d*\\.gda", "$1")
+        val archives: LinkedList<String> = LinkedList<String>()
+        val dir = File(srcFile!!.parent)
+        val dirListing = dir.listFiles()
+        if (dirListing != null) {
+          for (child in dirListing) {
+            if (child.name.matches("$basename\\d*\\.gda")) {
+              archives.add(child.absolutePath)
+            }
+          }
+        }
+
+        // Create the info file
+        mapFolder!!.mkdir()
+        val cache = File(mapFolder!!.path.toString() + "/cache.bin")
+        cache.delete()
+        val writer = PrintWriter(mapInfoFilename, "UTF-8")
+        writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+        writer.println("<GDS version=\"1.0\">")
+        writer.println("  <type>externalMapArchive</type>")
+        for (archive in archives) {
+          writer.println(String.format("  <mapArchivePath>%s</mapArchivePath>", archive))
+        }
+        writer.println("</GDS>")
+        writer.close()
+
+        // Set the new folder
+        coreObject.configStoreSetStringValue("Map", "folder", mapFolder!!.name)
+      } catch (e: IOException) {
+        errorDialog(
+          java.lang.String.format(
+            getString(R.string.cannot_create_map_folder),
+            mapFolder!!.name
+          )
+        )
+      }
+      return null
+    }
+
+    protected override fun onProgressUpdate(vararg progress: Int) {}
+    override fun onPostExecute(result: Void?) {
+
+      // Close the progress dialog
+      progressDialog!!.dismiss()
+
+      // Restart the core to load the new map folder
+      restartCore(false)
+    }
+  } */
 
 }
 

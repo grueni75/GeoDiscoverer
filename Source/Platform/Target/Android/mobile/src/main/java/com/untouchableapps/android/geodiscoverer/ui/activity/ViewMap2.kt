@@ -26,6 +26,7 @@ import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.*
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.LocationManager
@@ -188,6 +189,12 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     b.putBoolean("resetConfig", resetConfig)
     m.data = b
     coreObject!!.messageHandler.sendMessage(m)
+  }
+
+  // Called when a configuration change (e.g., caused by a screen rotation) has occured
+  override fun onConfigurationChanged(newConfig: Configuration) {
+    super.onConfigurationChanged(newConfig)
+    viewModel.closeQuestion()
   }
 
   // Ensure that double back press quits the app
@@ -433,15 +440,15 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
   @SuppressLint("Wakelock")
   override fun onDestroy() {
     super.onDestroy()
-    cancel() // Stop all coroutines
     GDApplication.addMessage(
       GDApplication.DEBUG_MSG,
       "GDApp",
       "onDestroy called by " + Thread.currentThread().name
     )
+    cancel() // Stop all coroutines
     (application as GDApplication).setActivity(null, null)
     if (backgroundTask != null) backgroundTask!!.onDestroy()
-    //if (wakeLock != null && wakeLock.isHeld()) wakeLock.release()
+    if (intentHandler!=null) intentHandler!!.onDestroy()
     //if (downloadCompleteReceiver != null) unregisterReceiver(downloadCompleteReceiver)
     if (exitRequested) System.exit(0)
     if (restartRequested) {
@@ -498,6 +505,9 @@ class ViewMap2 : ComponentActivity(), CoroutineScope by MainScope() {
     val intent = Intent(this, GDService::class.java)
     intent.action = "activityResumed"
     startService(intent)
+
+    // Synchronize google bookmarks
+    GDApplication.coreObject.executeCoreCommand("updateGoogleBookmarks");
 
     // Check for outdated routes
     if (coreObject!!.coreInitialized) {

@@ -545,6 +545,9 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
     if (!groups.contains(selectedGroup)) {
       groups.add(selectedGroup)
     }
+    if (!groups.contains("Default")) {
+      groups.add("Default")
+    }
     groups.sort()
     GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","groups size in collectAddressPointGroups: ${groups.size}")
     return selectedGroup
@@ -554,7 +557,7 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   fun fillAddressPoints(fillTabs: Boolean = false) {
     val selectedGroupName = viewMap.coreObject!!.configStoreGetStringValue("Navigation", "selectedAddressPointGroup")
     var selectedItem=""
-    if (integratedListSelectedItem!=-1) {
+    if ((integratedListSelectedItem!=-1)&&(integratedListItems.size>integratedListSelectedItem)) {
       selectedItem=integratedListItems[integratedListSelectedItem]
     }
     if (fillTabs) {
@@ -679,12 +682,16 @@ class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun informLocationLookupResult(address: String, found: Boolean) {
+  fun refreshAddressPoints() {
     if (integratedListVisible) {
       fillAddressPoints(true)
     }
+  }
+  @Synchronized
+  fun informLocationLookupResult(address: String, found: Boolean) {
     if (!found) {
       viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_not_found, address))
+      refreshAddressPoints()
     } else {
       viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_added, address))
     }
