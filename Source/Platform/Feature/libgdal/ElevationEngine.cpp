@@ -95,24 +95,26 @@ void ElevationEngine::deinit() {
   //DEBUG("waiting for all threads to finish",NULL);
   isInitialized=false;
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
-  while (true) {
-    bool threadActive=false;
-    for (int i=0;i<workerCount;i++) {
-      if (demDatasetBusy[i]) {
-        threadActive=true;
+  if (demDatasetBusy) {
+    while (true) {
+      bool threadActive=false;
+      for (int i=0;i<workerCount;i++) {
+        if (demDatasetBusy[i]) {
+          threadActive=true;
+          break;
+        }
+      }
+      if (!threadActive) {
         break;
+      } else {
+        //DEBUG("waiting for next thread finishing",NULL);
+        core->getThread()->unlockMutex(accessMutex);
+        core->getThread()->waitForSignal(demDatasetReadySignal);
+        core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
       }
     }
-    if (!threadActive) {
-      break;
-    } else {
-      //DEBUG("waiting for next thread finishing",NULL);
-      core->getThread()->unlockMutex(accessMutex);
-      core->getThread()->waitForSignal(demDatasetReadySignal);
-      core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
-    }
+    //DEBUG("no thread active anymore",NULL);
   }
-  //DEBUG("no thread active anymore",NULL);
 
   // Close the dem data
   if (demDatasetFullRes) {

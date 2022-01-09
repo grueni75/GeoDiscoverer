@@ -1,9 +1,0 @@
-* Check if wear app still works as expected
-* Add acknowledge for color picker jetpack component (https://github.com/godaddy/compose-color-picker)
-* Widget pref container looks strange
-* Check if Tandem Tracker can still send message to Geo Discoverer
-* Check if bluetooth address exchange works settings
-* Remove unused strings
-* Prevent scroll in map if integrated list is opened (use setMapWindow if screenChanged is called
-  in GDMapSurface)
-* Test if address from intent still works

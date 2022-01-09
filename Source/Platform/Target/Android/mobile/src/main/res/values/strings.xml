@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
   <string name="app_name">Geo Discoverer</string>
-  <string name="fatal_home_directory_creation">Could not create home directory!</string>
-  <string name="home_directory">GeoDiscoverer</string>
   <string name="button_label_exit">Exit</string>
-  <string name="fatal_gdcore_initialization">Could not initialize the native core!</string>
-  <string name="busy_waiting_for_external_storage">Waiting for mounted and writable external storage</string>
-  <string name="fatal_log_directory_creation">Could not create log directory!</string>
-  <string name="log_directory">GeoDiscoverer/log</string>
   <string name="button_label_ok">OK</string>
-  <string name="button_label_donate">Donate</string>
   <string name="button_label_help">Help</string>
-  <string name="button_label_do_not_show_again">Do not show again</string>
   <string name="preferences">Preferences</string>
   <string name="remove_routes">Remove routes</string>
   <string name="export_selected_route">Export selected route</string>
@@ -32,50 +24,22 @@
   <string name="dialog_yes">Yes</string>
   <string name="dialog_reset_question">Are you sure that you want to reset all preferences to their default values?</string>
   <string name="exit">Exit</string>
-  <string name="file_does_not_exist">File does not exist!</string>
   <string name="dialog_copy_route_question">Copy file &lt;%s&gt; to route directory?</string>
   <string name="dialog_overwrite_route_question">Overwrite file &lt;%s&gt; in route directory?</string>
-  <string name="copying_file">Copying file &lt;%s&gt; to route directory</string>
-  <string name="unsupported_path">The path &lt;%s&gt; is not supported!</string>
-  <string name="unsupported_host">The host &lt;%s&gt; is not supported!</string>
-  <string name="unsupported_scheme">The scheme &lt;%s&gt; is not supported!</string>
   <string name="unsupported_intent">This intent is not supported (has no stream)!</string>
-  <string name="unsupported_google_map_query">The Google Maps query is not supported!</string>
-  <string name="location_not_found">Can not find location &lt;%s&gt;</string>
   <string name="cannot_copy_file">Can not copy file &lt;%1$s&gt; to &lt;%2$s&gt;!</string>
   <string name="cannot_remove_file">Can not remove file &lt;%s&gt;!</string>
   <string name="notification_service_in_foreground_message">Taking care of your position.</string>
   <string name="notification_title">Geo Discoverer</string>
   <string name="notification_map_download_ongoing_message">%1$d tiles / %2$s</string>
   <string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
-  <string name="no_external_storage">Can not start Geo Discoverer because external storage is not available!</string>
-  <string name="show_messages">Show messages</string>
-  <string name="hide_messages">Hide messages</string>
   <string name="toggle_messages">Toggle messages</string>
-  <string name="set_target_at_map_center">Set target at map center</string>
-  <string name="set_target_at_location">Set target at location</string>
-  <string name="hide_target">Hide target</string>
-  <string name="context_menu_title">Map actions</string>
-  <string name="show_target">Show target</string>
-  <string name="manually_entered_address">Manually entered address</string>
   <string name="dialog_add_address_point_title">Add point of interest</string>
   <string name="dialog_address_input_hint">Alexanderplatz 1, Berlin (single line!)</string>
   <string name="dialog_dismiss">Dismiss</string>
   <string name="dialog_lookup">Lookup</string>
-  <string name="device_admin_description">Allows Geo Discoverer to turn off the display by locking it.</string>
-  <string name="device_admin_not_enabled">Device admin permission required to turn off display! Please grant it in the device settings.</string>
-  <string name="device_admin_info_dialog_title">Device admin permission disclosure</string>
-  <string name="device_admin_info_dialog_description">This app uses the device administrator permission. It is required to allow the app to switch off the display if the back button is pressed. This enables the user to save energy while navigating. You have to enable this feature in the settings.</string>
-  <string name="replace_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;? There exists already a map folder that will be replaced.</string>
-  <string name="create_map_folder_question">Create map folder &lt;%1$s&gt; that uses map archive &lt;%2$s&gt;?</string>
-  <string name="cannot_create_map_folder">Map folder &lt;%1$s&gt; could not be created!</string>
-  <string name="navigation_drawer_menu_entry_icon_description">Icon of the menu entry</string>
-  <string name="navigation_drawer_app_info_icon_description">Image showing the icon of the app</string>
-  <string name="navigation_drawer_header_background_description">Header background image showing mountains</string>
-  <string name="view_map_splash_image_description">Image showing the icon of the app</string>
   <string name="show_legend">Show legend</string>
   <string name="map_has_no_legend">Map &lt;%1$s&gt; has no legend!</string>
-  <string name="download_manager_not_available">Your Android version does not support the download manager. Please download the file manually.</string>
   <string name="downloading_gpx_to_route_directory">Downloading GPX to route directory of GeoDiscoverer.</string>
   <string name="skipping_download">Skipping download because there is already one ongoing.</string>
   <string name="download_failed">Downloading of file &lt;%1$s&gt; failed!</string>
@@ -83,11 +47,8 @@
   <string name="dialog_route_name_title">Import route</string>
   <string name="dialog_route_name_message">Name</string>
   <string name="route_exists">Existing route will be overwritten!</string>
-  <string name="importing_route">Importing route &lt;%1$s&gt;</string>
   <string name="cannot_import_route">Could not import route &lt;%1$s&gt; (I/O error)!</string>
-  <string name="import_map">Import map</string>
   <string name="nav_drawer_hint">Long press gray transparent circles at the bottom to show the menu.</string>
-  <string name="importing_external_map_archives">Importing all map archives related to &lt;%1$s&gt;</string>
   <string name="got_it">Got it!</string>
   <string name="duration">Duration</string>
   <string name="distance">Distance</string>
@@ -114,9 +75,6 @@
   <string name="crash_notification_title">Geo Discoverer has crashed!</string>
   <string name="crash_notification_text">Please touch to send a report.</string>
   <string name="crash_notification_channel">Geo Discoverer</string>
-  <string name="welcome_dialog_title">Welcome to Geo Discoverer!</string>
-  <string name="welcome_dialog_message">Geo Discoverer is a free navigation app. It comes with an extensive help that explains all features. If you like this app, please donate to support the development! </string>
-  <string name="support_geodiscoverer">Support Geo Discoverer!</string>
   <string name="opengles20_required">The app is not compatible to this device because it does not support OpenGL ES 2.0.</string>
   <string name="dialog_continue_or_new_track_question">Shall the current track be continued or shall a new track be started?</string>
   <string name="dialog_new_track">New track</string>
@@ -138,18 +96,13 @@
   <string name="download_map">Download map</string>
   <string name="dialog_download_job_no_level_selected_message">Please choose at least one map layer</string>
   <string name="dialog_download_job_estimating_size_message">Estimating storage usage of download job...</string>
-  <string name="heart_rate_unavailable_sound_muted">Muting hear rate sensor unavailable sound!</string>
   <string name="dialog_waypoint_import_title">Waypoints in route found</string>
   <string name="dialog_waypoint_import_message">Tour &lt;%2$s&gt; contains %1$s waypoints. Import them?</string>
   <string name="authenticate_google_bookmarks">Please authenticate Google Bookmarks</string>
-  <string name="synchronize_google_maps_bookmarks">Sync Google Bookmarks</string>
   <string name="dialog_route_remove_question">Shall the route be hidden only or deleted from storage?</string>
-  <string name="remove">Remove</string>
-  <string name="hide">Hide</string>
   <string name="restart">Restart</string>
   <string name="brouter">BRouter</string>
   <string name="routes_outdated">Restarting core (Routes outdated)</string>
-  <string name="get_google_map_place_list">Map Place List</string>
   <string name="notification_accessibility_service_not_enabled_title">Accessibility service is not enabled</string>
   <string name="notification_accessibility_service_not_enabled_text">Press here to change this!</string>
   <string name="notification_channel_accessibility_service_name">Accessibility service</string>
@@ -165,17 +118,12 @@
   <string name="back_button">Press again to exit!</string>
   <string name="title_activity_request_permissions">RequestPermissions</string>
   <string name="request_permissions_description">Please grant the required permissions!</string>
-  <string name="request_permissions_fail">Permission is mandatory!</string>
   <string name="request_permissions_wait_for_restart">Geo Discoverer will restart automatically</string>
   <string name="prefs_no_entries">No entries!</string>
   <string name="prefs_list">list</string>
   <string name="prefs_set_value">Set value of \"%1$s\"</string>
   <string name="prefs_not_ready">Preference values are not yet loaded!</string>
-  <string name="app_name2">Geo Discoverer 2</string>
   <string name="missing_system_service">System service missing!</string>
-  <string name="dialog_subject">"Subject: "</string>
-  <string name="dialog_address_message">Address</string>
-  <string name="dialog_finished">Finished</string>
   <string name="dialog_import">Import</string>
   <string name="dialog_address">Address</string>
   <string name="dialog_download">Download</string>
@@ -192,20 +140,10 @@
   <string name="dialog_send">Send</string>
   <string name="log_processing_message">Please wait until crash notification appears</string>
   <string name="dialog_config_reset_title">Config reset</string>
-  <string name="dialog_show">Show</string>
   <string name="dialog_map_legend_selection_title">Map legend</string>
   <string name="dialog_manage_address_points_title">Manage address points</string>
-  <string name="dialog_rename">Rename</string>
   <string name="dialog_name_label">Name</string>
   <string name="dialog_rename_address_point_title">Edit address point</string>
   <string name="dialog_tag_label">Group</string>
   <string name="dialog_update">Update</string>
-  <string-array name="donation_google_catalog_values">
-    <item>1 €</item>
-    <item>2 €</item>
-    <item>3 €</item>
-    <item>5 €</item>
-    <item>10 €</item>
-    <item>20 €</item>
-  </string-array>
 </resources>

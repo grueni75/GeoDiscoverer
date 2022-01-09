@@ -1,3 +1,3 @@
-gcloud config set project geo-discoverer 
+gcloud config set project geo-discoverer
 gcloud app deploy
 

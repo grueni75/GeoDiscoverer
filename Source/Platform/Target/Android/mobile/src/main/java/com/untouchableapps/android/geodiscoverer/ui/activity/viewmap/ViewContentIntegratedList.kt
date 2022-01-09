@@ -69,11 +69,12 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
   @ExperimentalMaterialApi
   @Composable
   fun itemContainer(index: Int, item: String, viewModel: ViewModel) {
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","$index: ${item}")
     if (viewModel.integratedListTabs.isEmpty()) {
       itemContent(index, item, viewModel)
     } else {
       val selectedTab = remember { mutableStateOf(-1) }
-      val itemCount = remember { mutableStateOf(viewModel.integratedListItems.size ) }
+      val updateCount = remember { mutableStateOf(-1) }
       val animVisibilityState = remember { MutableTransitionState<Boolean>(false) }
 
       // Handle the case if the edit is confirmed
@@ -97,22 +98,16 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
       )
 
       // Reset the views if tab is switched
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${selectedTab.value} ${viewModel.integratedListSelectedTab}")
-      LaunchedEffect(selectedTab.value,  viewModel.integratedListSelectedTab) {
-        if (selectedTab.value != viewModel.integratedListSelectedTab) {
-          animVisibilityState.targetState = true
+      // Reset the views if list has changed
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${viewModel.integratedListUpdateCount}")
+      if ((selectedTab.value != viewModel.integratedListSelectedTab)||(updateCount.value!=viewModel.integratedListUpdateCount)) {
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","resetting views")
+        animVisibilityState.targetState = true
+        LaunchedEffect(Unit) {
           dismissState.reset()
-          selectedTab.value = viewModel.integratedListSelectedTab
         }
-      }
-
-      // Reset the views if items count is changed
-      LaunchedEffect(itemCount.value, viewModel.integratedListItems.size) {
-        if (itemCount.value != viewModel.integratedListItems.size) {
-          animVisibilityState.targetState = true
-          dismissState.reset()
-          itemCount.value = viewModel.integratedListItems.size
-        }
+        selectedTab.value = viewModel.integratedListSelectedTab
+        updateCount.value = viewModel.integratedListUpdateCount
       }
 
       // Handle the event when the delete is confirmed and the item is not visible anymore

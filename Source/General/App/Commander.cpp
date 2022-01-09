@@ -295,9 +295,9 @@ std::string Commander::execute(std::string cmd) {
     core->getDefaultDevice()->setOrientation(orientation);
     core->getDefaultDevice()->setWidth(atoi(args[1].c_str()));
     core->getDefaultDevice()->setHeight(atoi(args[2].c_str()));
-    core->getMapEngine()->setWindow(0,0,atoi(args[1].c_str()),atoi(args[2].c_str()));
+    core->getMapEngine()->setWidth(atoi(args[1].c_str()));
+    core->getMapEngine()->setHeight(atoi(args[2].c_str()));
     core->getDefaultDevice()->reconfigure();
-    dispatch("mapChanged()");
     cmdExecuted=true;
   }
   if (cmdName=="setMapWindow") {

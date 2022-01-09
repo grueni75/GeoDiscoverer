@@ -226,9 +226,6 @@ class ViewContent(viewMap: ViewMap) {
           viewMap.coreObject!!.executeCoreCommand("setMapWindow", mapX.toString(), mapY.toString(), mapWidth.toString(), mapHeight.toString())
         else
           viewMap.coreObject!!.executeCoreCommand("setMapWindow", mapX.toString(), mapY.toString(), mapWidth.toString(), mapHeight.toString())
-        if (viewModel.mapChanged) {
-          viewModel.mapChanged(false)
-        }
       }
       Surface(
         modifier = Modifier

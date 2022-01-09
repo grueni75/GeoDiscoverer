@@ -240,10 +240,18 @@ public:
     setZoomLevelLock(!zoomLevelLock);
   }
 
+  void setWidth(Int width) {
+    this->width=width;
+  }
+
+  void setHeight(Int height) {
+    this->height=height;
+  }
+
   void setWindow(Int x, Int y, Int width, Int height) {
     core->getMapSource()->lockAccess(__FILE__,__LINE__);
-    this->width=width;
-    this->height=height; 
+    setWidth(width);
+    setHeight(height);
     core->getMapSource()->unlockAccess();    
     if (map) {
       core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);

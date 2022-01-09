@@ -10,9 +10,4 @@
   </style>
   <style name="GDStyle.NoTitleBar" parent="Base.V21.Theme.GDStyle.NoTitleBar">
   </style>
-  <style name="Base.V21.Theme.GDStyle.Dialog" parent="Base.V7.Theme.GDStyle.Dialog">
-    <item name="android:navigationBarColor">@color/gd_navbar_color</item>
-  </style>
-  <style name="GDStyle.Dialog" parent="Base.V21.Theme.GDStyle.Dialog">
-  </style>
 </resources>

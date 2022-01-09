@@ -58,8 +58,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   // State
   var fixSurfaceViewBug: Boolean by mutableStateOf(false)
-  var mapChanged: Boolean by mutableStateOf(false)
-    private set
   var drawerStatus: DrawerValue by mutableStateOf(DrawerValue.Closed)
   var messages: String by mutableStateOf("")
   var splashVisible: Boolean by mutableStateOf(false)
@@ -91,18 +89,15 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     private set
   var askEditTextTagLabel: String by mutableStateOf("")
     private set
-  var askEditTextTagList = mutableStateListOf<String>()
-    private set
+  val askEditTextTagList = mutableStateListOf<String>()
   var askEditTextValueChangeHandler: (String) -> Unit = {}
     private set
   var askEditTextHint: String by mutableStateOf("")
     private set
   var askEditTextError: String by mutableStateOf("")
     private set
-  var askMultipleChoiceList = mutableStateListOf<CheckboxItem>()
-    private set
-  var askSingleChoiceList = mutableStateListOf<String>()
-    private set
+  val askMultipleChoiceList = mutableStateListOf<CheckboxItem>()
+  val askSingleChoiceList = mutableStateListOf<String>()
   var askConfirmText: String by mutableStateOf("")
     private set
   var askDismissText: String by mutableStateOf("")
@@ -119,15 +114,14 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     private set
   var askMultipleChoiceCheckedHandler: () -> Unit = {}
     private set
-  var pendingImportWaypointsDecisions = mutableListOf<PendingImportWaypointsDecision>()
+  val pendingImportWaypointsDecisions = mutableListOf<PendingImportWaypointsDecision>()
   var integratedListVisible: Boolean by mutableStateOf(false)
     private set
   var integratedListTitle: String by mutableStateOf("")
     private set
-  var integratedListItems = mutableStateListOf<String>()
-    private set
-  var integratedListTabs = mutableStateListOf<String>()
-    private set
+  val integratedListItems = mutableStateListOf<String>()
+  val integratedListTabs = mutableStateListOf<String>()
+  var integratedListUpdateCount: Int by mutableStateOf(0)
   var integratedListSelectedItem: Int by mutableStateOf(-1)
     private set
   var integratedListSelectedTab: Int by mutableStateOf(-1)
@@ -142,12 +136,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     private set
   var integratedListSelectTabHandler: (String) -> Unit = {}
     private set
-
-  // Methods to modify the state
-  @Synchronized
-  fun mapChanged(changed: Boolean) {
-    mapChanged = changed
-  }
 
   @Synchronized
   fun toggleMessagesVisibility() {
@@ -204,7 +192,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun askForAddressPointEdit(pointName: String, selectedGroupName: String, groupNames: List<String>, confirmHandler: (String, String) -> Unit) {
+  fun askForAddressPointEdit(pointName: String, confirmHandler: (String, String) -> Unit) {
     askEditTextValue = pointName
     askMessage = viewMap.getString(R.string.dialog_name_label)
     configureAddressPointTag()
@@ -485,6 +473,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     }
     integratedListTitle=viewMap.getString(R.string.dialog_map_layer_selection_question)
     integratedListSelectItemHandler=selectHandler
+    integratedListUpdateCount++
     openIntegratedList()
   }
 
@@ -501,11 +490,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     if (!inserted) {
       integratedListTabs.add(name)
     }
-  }
-
-  @Synchronized
-  fun removeAddressPointGroup(name: String) {
-
   }
 
   @Synchronized
@@ -549,7 +533,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       groups.add("Default")
     }
     groups.sort()
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","groups size in collectAddressPointGroups: ${groups.size}")
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","groups size in collectAddressPointGroups: ${groups.size}")
     return selectedGroup
   }
 
@@ -565,14 +549,14 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       integratedListSelectedTab=0
       val groups = mutableListOf<String>()
       collectAddressPointGroups(groups)
-      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","groups size in fillAddressPoints: ${groups.size}")
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","groups size in fillAddressPoints: ${groups.size}")
       for (i in groups.indices) {
         addAddressPointGroup(groups[i])
         if (integratedListTabs[i] == selectedGroupName) {
           integratedListSelectedTab = i
         }
       }
-      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","tab size in fillAddressPoints: ${integratedListTabs.size}")
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","tab size in fillAddressPoints: ${integratedListTabs.size}")
     }
     val unsortedNames = viewMap.coreObject!!.configStoreGetAttributeValues("Navigation/AddressPoint", "name").toMutableList()
     integratedListSelectedItem=-1
@@ -588,7 +572,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         "group"
       )
       if (groupName == selectedGroupName && foreignRemovalRequest != "1") {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","point: ${newestName}")
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","point: ${newestName}")
         addAddressPoint(newestName)
       }
     }
@@ -600,6 +584,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         }
       }
     }
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","list updated")
+    integratedListUpdateCount++
   }
 
   @Synchronized
@@ -623,11 +609,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       // Item is not removed from the list
     }
     integratedListEditItemHandler= {
-      askForAddressPointEdit(
-        integratedListItems[it],
-        integratedListTabs[integratedListSelectedTab],
-        integratedListTabs
-      ) { name, group ->
+      askForAddressPointEdit(integratedListItems[it]) { name, group ->
 
         // Rename the address point if name has changed
         var changed = false
@@ -691,9 +673,9 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   fun informLocationLookupResult(address: String, found: Boolean) {
     if (!found) {
       viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_not_found, address))
-      refreshAddressPoints()
     } else {
       viewMap.viewModel.showSnackbar(viewMap.getString(R.string.address_point_added, address))
+      refreshAddressPoints()
     }
   }
 

@@ -274,10 +274,6 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
           viewMap.setExitBusyText()
           commandExecuted = true
         }
-        if (commandFunction == "mapChanged") {
-          viewMap.viewModel.mapChanged(true)
-          commandExecuted = true
-        }
         if (!commandExecuted) {
           GDApplication.addMessage(
             GDApplication.ERROR_MSG, "GDApp",
