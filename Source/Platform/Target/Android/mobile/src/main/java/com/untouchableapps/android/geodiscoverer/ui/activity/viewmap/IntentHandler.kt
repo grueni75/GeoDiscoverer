@@ -34,18 +34,17 @@ import android.os.*
 import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
-import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
+import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
 
 import kotlinx.coroutines.*
 import java.io.File
 import java.util.*
 
 @ExperimentalMaterial3Api
-class IntentHandler(viewMap: ViewMap2) : CoroutineScope by MainScope() {
+class IntentHandler(viewMap: ViewMap) : CoroutineScope by MainScope() {
 
   // References
   val viewMap = viewMap

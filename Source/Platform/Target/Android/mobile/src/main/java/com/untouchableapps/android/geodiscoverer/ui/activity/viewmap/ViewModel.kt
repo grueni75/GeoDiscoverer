@@ -28,11 +28,11 @@ import java.util.*
 import androidx.compose.runtime.*
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
-import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
+import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
 import java.io.File
 
 @ExperimentalMaterial3Api
-class ViewModel(viewMap: ViewMap2) : androidx.lifecycle.ViewModel() {
+class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   // Parameters
   val viewMap = viewMap

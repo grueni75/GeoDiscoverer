@@ -31,9 +31,9 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 
-import com.untouchableapps.android.geodiscoverer.ui.component.GDActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
-public class ShowBRouter extends GDActivity {
+public class ShowBRouter extends AppCompatActivity {
 
   // Web view showing the help
   WebView webview;

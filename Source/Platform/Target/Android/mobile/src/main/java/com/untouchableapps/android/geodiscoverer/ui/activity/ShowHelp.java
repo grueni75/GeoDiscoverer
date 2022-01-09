@@ -30,9 +30,10 @@ import android.os.Bundle;
 import android.webkit.WebView;
 
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
-import com.untouchableapps.android.geodiscoverer.ui.component.GDActivity;
 
-public class ShowHelp extends GDActivity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ShowHelp extends AppCompatActivity {
 
   // Web view showing the help
   WebView webview;

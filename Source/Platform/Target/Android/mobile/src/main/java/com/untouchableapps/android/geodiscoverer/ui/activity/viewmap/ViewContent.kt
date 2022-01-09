@@ -44,23 +44,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
-import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
-import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
+import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
 import com.untouchableapps.android.geodiscoverer.ui.component.*
 import kotlinx.coroutines.*
 import kotlin.math.roundToInt
 
 @ExperimentalMaterial3Api
-class ViewContent(viewMap: ViewMap2) {
+class ViewContent(viewMap: ViewMap) {
 
   // Parameters
   val viewMap=viewMap

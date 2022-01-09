@@ -1,25 +1,9 @@
-* Check if ACRA still works as expected
 * Check if wear app still works as expected
-* Remove unnecessary files
-** Icons
-** layouts
-** background picture
-* Test if preferences screen shows the correct title when changing hierarchy
 * Add acknowledge for color picker jetpack component (https://github.com/godaddy/compose-color-picker)
 * Widget pref container looks strange
 * Check if Tandem Tracker can still send message to Geo Discoverer
-* Limit the list view pref to the actual height if below max height
 * Check if bluetooth address exchange works settings
-* Remove showMessageBar from GDApplication
-* Implement ask for address in processIntent()
-* Implement all items in processIntent()
 * Remove unused strings
-* Don't use Geo Discoverer title in non GDCore dialogs
-* Implement list in landscape orientation
 * Prevent scroll in map if integrated list is opened (use setMapWindow if screenChanged is called
   in GDMapSurface)
-* Close dialogs on reconfiguration in both prefs and viewmap
-* Handle widgetless mode / integrated list on reconfiguration to landscape correctly
-* Refresh integrated list content if new address point has been added from service or intent
 * Test if address from intent still works
-

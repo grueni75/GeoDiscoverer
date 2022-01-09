@@ -13,7 +13,15 @@
         <entry key="../../../../../../../../layout/compose-model-1640856649857.xml" value="0.1414695945945946" />
         <entry key="../../../../../../../../layout/compose-model-1640859545695.xml" value="0.1" />
         <entry key="../../../../../../../../layout/compose-model-1640860017105.xml" value="0.11866554054054054" />
+        <entry key="mobile/src/main/res/drawable/actionbar_shadow.xml" value="0.19375" />
+        <entry key="mobile/src/main/res/layout/dialog_address.xml" value="0.17760416666666667" />
+        <entry key="mobile/src/main/res/layout/dialog_address_history_entry.xml" value="0.17760416666666667" />
+        <entry key="mobile/src/main/res/layout/dialog_address_history_group_entry.xml" value="0.17760416666666667" />
+        <entry key="mobile/src/main/res/layout/dialog_route_name.xml" value="0.17760416666666667" />
+        <entry key="mobile/src/main/res/layout/donate.xml" value="0.17760416666666667" />
+        <entry key="mobile/src/main/res/layout/nav_drawer_header.xml" value="0.17760416666666667" />
         <entry key="mobile/src/main/res/layout/view_map.xml" value="0.10260416666666666" />
+        <entry key="mobile/src/main/res/menu/view_map.xml" value="0.17760416666666667" />
         <entry key="mobile/src/main/res/xml/preferences.xml" value="0.15572916666666667" />
       </map>
     </option>

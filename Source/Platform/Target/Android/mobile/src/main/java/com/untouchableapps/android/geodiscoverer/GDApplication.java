@@ -78,6 +78,7 @@ import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 import com.untouchableapps.android.geodiscoverer.ui.activity.AuthenticateGoogleBookmarks;
 import com.untouchableapps.android.geodiscoverer.ui.activity.RequestPermissions;
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap;
+import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.CoreMessageHandler;
 
 /* Configuration of ACRA for reporting crashes */
 @AcraCore (
@@ -430,17 +431,6 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
   public static final long MESSAGE_BAR_DURATION_SHORT = 2000;
   public static final long MESSAGE_BAR_DURATION_LONG = 4000;
-  
-  /** Shows a toast */
-  public static void showMessageBar(Activity activity, String message, long duration) {
-    View v = activity.getWindow().getDecorView().findViewById(R.id.view_map_snackbar_position);
-    if (v==null) {
-      v = activity.getWindow().getDecorView().findViewById(android.R.id.content);
-    }
-    Snackbar
-    .make(v, message, Snackbar.LENGTH_LONG)
-    .show(); // Don’t forget to show!
-  }
 
   /** Sets the view map activity */
   public void setActivity(Activity activity, Handler messageHandler) {
@@ -597,7 +587,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
     }
     if (messageHandler != null) {
       Message m = Message.obtain(messageHandler);
-      m.what = ViewMap.EXECUTE_COMMAND;
+      m.what = 0;
       Bundle b = new Bundle();
       b.putString("command", cmd);
       m.setData(b);

@@ -33,9 +33,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.untouchableapps.android.geodiscoverer.GDApplication;
-import com.untouchableapps.android.geodiscoverer.ui.component.GDActivity;
 
-public class AuthenticateGoogleBookmarks extends GDActivity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class AuthenticateGoogleBookmarks extends AppCompatActivity {
 
   // Web view showing the help
   WebView webview;

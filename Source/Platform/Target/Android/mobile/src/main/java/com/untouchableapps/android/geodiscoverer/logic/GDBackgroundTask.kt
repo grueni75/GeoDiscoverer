@@ -25,24 +25,18 @@ package com.untouchableapps.android.geodiscoverer.logic
 import android.content.Context
 import android.location.Geocoder
 import android.net.Uri
-import android.os.AsyncTask
 import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.afollestad.materialdialogs.MaterialDialog
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
-import com.untouchableapps.android.geodiscoverer.core.GDAppInterface
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.core.GDTools
-import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
+import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
 
 import kotlinx.coroutines.*
 import org.acra.ACRA
 import java.io.*
 import java.lang.Exception
-import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
-
-
 
 
 class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
@@ -150,7 +144,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
   // Copies tracks as routes
   @ExperimentalMaterial3Api
-  fun copyTracksToRoutes(selectedTracks: List<String>, viewMap: ViewMap2) {
+  fun copyTracksToRoutes(selectedTracks: List<String>, viewMap: ViewMap) {
     launch() {
 
       // Open the progress dialog
@@ -178,7 +172,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
   // Removes routes
   @ExperimentalMaterial3Api
-  fun removeRoutes(selectedRoutes: List<String>, viewMap: ViewMap2) {
+  fun removeRoutes(selectedRoutes: List<String>, viewMap: ViewMap) {
     launch() {
 
       // Open the progress dialog
@@ -205,7 +199,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
   // Send logs to the developer
   @ExperimentalMaterial3Api
-  fun sendLogs(selectedLogs: List<String>, viewMap: ViewMap2) {
+  fun sendLogs(selectedLogs: List<String>, viewMap: ViewMap) {
     launch() {
 
       // Indicate operation to user
@@ -252,7 +246,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
   // Check for outdated routes
   @ExperimentalMaterial3Api
-  fun checkForOutdatedRoutes(viewMap: ViewMap2) {
+  fun checkForOutdatedRoutes(viewMap: ViewMap) {
     launch() {
 
       // Indicate operation to user

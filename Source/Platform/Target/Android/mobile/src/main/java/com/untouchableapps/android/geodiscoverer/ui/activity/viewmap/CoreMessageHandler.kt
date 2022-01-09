@@ -27,25 +27,19 @@ import android.content.*
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.*
-import androidx.compose.animation.*
-import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.unit.*
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.logic.GDService
 import com.untouchableapps.android.geodiscoverer.ui.activity.AuthenticateGoogleBookmarks
-import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap2
+import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
 import java.lang.ref.WeakReference
-import kotlinx.coroutines.*
 
 @ExperimentalMaterial3Api
-class CoreMessageHandler(viewMap: ViewMap2) : Handler(Looper.getMainLooper()) {
+class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
 
-  var weakViewMap: WeakReference<ViewMap2> = WeakReference(viewMap)
+  var weakViewMap: WeakReference<ViewMap> = WeakReference(viewMap)
 
   /** Called when the core has a message  */
   override fun handleMessage(msg: Message) {
