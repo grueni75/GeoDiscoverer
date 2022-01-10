@@ -5,6 +5,14 @@ independent C++ code. It uses an hardware abstraction such that only a few files
 be adapted to run it on a different platform. It currently supports Linux and Android 
 as a platform.   
 
+## Cloning the repro
+
+Ensure that you use ssh transport to allow uploads to the repro. The repro uses some
+sub modules that need to be initialized first. See below necessary commands:
+
+1. git clone git@github.com:grueni75/GeoDiscoverer
+2. git submodule update --init --recursive 
+
 ## Installation
 
 The source code is structured as follows:
