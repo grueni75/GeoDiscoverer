@@ -118,8 +118,8 @@ protected:
   // The start time of the last drawing operation
   TimestampInMicroseconds lastDrawingStartTime;
 
-  // Default duration of a fade animation
-  TimestampInMicroseconds fadeDuration;
+  // Default duration of an animation (e.g., fading, changing position)
+  TimestampInMicroseconds animDuration;
 
   // Duration of transition into ambient mode
   TimestampInMicroseconds ambientModeTransitionDuration;
@@ -217,8 +217,8 @@ public:
     return blinkDuration;
   }
 
-  TimestampInMicroseconds getFadeDuration() const {
-    return fadeDuration;
+  TimestampInMicroseconds getAnimDuration() const {
+    return animDuration;
   }
 
   bool getIsDrawing() const

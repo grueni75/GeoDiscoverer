@@ -227,7 +227,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       activeColor=normalColor;
       inactiveColor=inactiveColorBackup;
     }
-    setFadeAnimation(t,getColor(),getActiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
+    setFadeAnimation(t,getColor(),getActiveColor(),false,widgetContainer->getGraphicEngine()->getAnimDuration());
     remoteServerActive=core->getRemoteServerActive();
     //DEBUG("remoteServerActive=%d",remoteServerActive);
   }
@@ -298,7 +298,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       } else {
         endColor.setAlpha(255);
       }
-      touchModeIcon.setFadeAnimation(t,touchModeIcon.getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+      touchModeIcon.setFadeAnimation(t,touchModeIcon.getColor(),endColor,false,core->getDefaultGraphicEngine()->getAnimDuration());
     }
     prevTouchMode=touchMode;
     touchModeIcon.work(t);
@@ -314,14 +314,14 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       if (hideArrow) {
         GraphicColor endColor=arrowIcon.getColor();
         endColor.setAlpha(255);
-        arrowIcon.setFadeAnimation(t,arrowIcon.getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+        arrowIcon.setFadeAnimation(t,arrowIcon.getColor(),endColor,false,core->getDefaultGraphicEngine()->getAnimDuration());
       }
       hideArrow=false;
     } else {
       if (!hideArrow) {
         GraphicColor endColor=arrowIcon.getColor();
         endColor.setAlpha(0);
-        arrowIcon.setFadeAnimation(t,arrowIcon.getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+        arrowIcon.setFadeAnimation(t,arrowIcon.getColor(),endColor,false,core->getDefaultGraphicEngine()->getAnimDuration());
       }
       hideArrow=true;
     }
@@ -663,9 +663,9 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
     if (!widgetContainer->getWidgetEngine()->getWidgetsActive()) {
       if (activateWidget!=active) {
         if (activateWidget) {
-          setFadeAnimation(t,getColor(),getActiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,getColor(),getActiveColor(),false,widgetContainer->getGraphicEngine()->getAnimDuration());
         } else {
-          setFadeAnimation(t,getColor(),getInactiveColor(),false,widgetContainer->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(t,getColor(),getInactiveColor(),false,widgetContainer->getGraphicEngine()->getAnimDuration());
         }
         active=activateWidget;
       }

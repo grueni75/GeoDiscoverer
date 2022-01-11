@@ -89,12 +89,12 @@ bool WidgetContainer::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
   if (previousSelectedWidget!=selectedWidget) {
     if (previousSelectedWidget) {
       widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      previousSelectedWidget->setFadeAnimation(t,previousSelectedWidget->getColor(),previousSelectedWidget->getActiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+      previousSelectedWidget->setFadeAnimation(t,previousSelectedWidget->getColor(),previousSelectedWidget->getActiveColor(),false,widgetEngine->getGraphicEngine()->getAnimDuration());
       widgetEngine->getGraphicEngine()->unlockDrawing();
     }
     if (selectedWidget) {
       widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),getWidgetEngine()->getSelectedWidgetColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),getWidgetEngine()->getSelectedWidgetColor(),false,widgetEngine->getGraphicEngine()->getAnimDuration());
       widgetEngine->getGraphicEngine()->unlockDrawing();
     }
   }
@@ -137,7 +137,7 @@ void WidgetContainer::deselectWidget(TimestampInMicroseconds t) {
   if (!touchStartedOutside) {
     if (selectedWidget) {
       widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),selectedWidget->getActiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+      selectedWidget->setFadeAnimation(t,selectedWidget->getColor(),selectedWidget->getActiveColor(),false,widgetEngine->getGraphicEngine()->getAnimDuration());
       widgetEngine->getGraphicEngine()->unlockDrawing();
     }
     selectedWidget=NULL;

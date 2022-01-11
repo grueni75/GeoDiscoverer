@@ -114,11 +114,11 @@ bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
         if (activateWidget) {
           //DEBUG("activating widget",NULL);
           c.setAlpha(255);
-          setFadeAnimation(updateTimestamp,getColor(),c,false,widgetContainer->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(updateTimestamp,getColor(),c,false,widgetContainer->getGraphicEngine()->getAnimDuration());
         } else {
           //DEBUG("de-activating widget",NULL);
           c.setAlpha(0);
-          setFadeAnimation(updateTimestamp,getColor(),c,false,widgetContainer->getGraphicEngine()->getFadeDuration());
+          setFadeAnimation(updateTimestamp,getColor(),c,false,widgetContainer->getGraphicEngine()->getAnimDuration());
         }
         active=activateWidget;
       }

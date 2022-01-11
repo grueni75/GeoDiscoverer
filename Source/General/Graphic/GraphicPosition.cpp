@@ -29,6 +29,10 @@ namespace GEODISCOVERER {
 
 GraphicPosition::GraphicPosition() {
   set(0,0,1.0,0.0);
+  animStartTime=0;
+  animEndTime=0;
+  endX=valueX;
+  endY=valueY;
   lastUserModification=0;
 }
 
@@ -46,6 +50,7 @@ void GraphicPosition::rotate(double degree) {
     valueAngle=360.0+valueAngle;
   }
   //DEBUG("degree=%f valueAngle=%f",degree,valueAngle);
+  animStartTime=animEndTime;
   changed=true;
 }
 
@@ -56,6 +61,7 @@ void GraphicPosition::zoom(double scale) {
   //valueZoom+=FixedPoint(offset)*stepZoom;
   valueZoom*=scale;
   //DEBUG("valueZoom=%f",valueZoom);
+  animStartTime=animEndTime;
   changed=true;
 }
 
@@ -81,6 +87,7 @@ void GraphicPosition::pan(Int xi, Int yi) {
   //DEBUG("x=%d y=%d xt=%.4f yt=%.4f l=%.4f alpha=%.4f beta=%.4f gamma=%.4f",x,y,xt.toDouble(),yt.toDouble(),l.toDouble(),alpha.toDouble(),beta.toDouble(),gamma.toDouble());
   valueX += xt;
   valueY += yt;
+  animStartTime=animEndTime;
   changed=true;
   //DEBUG("valueX=%.2f valueY=%.2f",valueX,valueY);
 }
@@ -96,6 +103,7 @@ void GraphicPosition::set(Int valueX, Int valueY, double valueZoom, double value
   this->valueZoom=valueZoom;
   this->valueX=valueX;
   this->valueY=valueY;
+  animStartTime=animEndTime;
   changed=true;
 }
 
@@ -111,7 +119,51 @@ bool GraphicPosition::operator==(const GraphicPosition &rhs)
 bool GraphicPosition::operator!=(const GraphicPosition &rhs)
 {
   return (!(*this==rhs));
+}
 
+// Let the position work (for updating the animation)
+bool GraphicPosition::work(TimestampInMicroseconds currentTime) {
+  bool changed=false;
+  if ((animStartTime<=currentTime)&&(animStartTime!=animEndTime)) {
+    changed=true;
+    if (currentTime<=animEndTime) {
+      Int elapsedTime=currentTime-animStartTime;
+      Int duration=animEndTime-animStartTime;
+      double translateDiffX=endX-startX;
+      double translateDiffY=endY-startY;
+      double speedX,speedY,accelX,accelY;
+      accelX=translateDiffX/(((double)duration)*((double)duration)/4.0);
+      accelY=translateDiffY/(((double)duration)*((double)duration)/4.0);
+      speedX=accelX*((double)duration)/2;
+      speedY=accelY*((double)duration)/2;
+      if (elapsedTime<=duration/2) {
+        valueX=(Int)(startX+accelX*((double)elapsedTime)*((double)elapsedTime)/2);
+        valueY=(Int)(startY+accelY*((double)elapsedTime)*((double)elapsedTime)/2);
+      } else {
+        double t=((double)elapsedTime)-((double)duration)/2;
+        valueX=(Int)(startX+translateDiffX/2+speedX*t-accelX*t*t/2);
+        valueY=(Int)(startY+translateDiffY/2+speedY*t-accelY*t*t/2);
+      }
+      //DEBUG("targetX=%f targetY=%f currentX=%f currentY=%f",endX,endY,valueX,valueY);
+    } else {
+      valueX=endX;
+      valueY=endY;
+      animStartTime=animEndTime;
+      //DEBUG("currentX=%f currentY=%f",this->valueX,this->valueY);
+    }
+  }
+  return changed;
+}
+
+// Sets the position to reach by animation
+void GraphicPosition::setAnimated(Int valueX, Int valueY) {
+  animStartTime=core->getClock()->getMicrosecondsSinceStart();
+  animEndTime=animStartTime+core->getDefaultGraphicEngine()->getAnimDuration();
+  startX=this->valueX;
+  startY=this->valueY;
+  endX=valueX;
+  endY=valueY;
+  //DEBUG("targetX=%f targetY=%f",endX,endY);
 }
 
 }

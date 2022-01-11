@@ -258,7 +258,7 @@ public:
       map->setTranslateAnimation(
         core->getClock()->getMicrosecondsSinceStart(),
         map->getX(),map->getY(),x,y,false,
-        core->getDefaultGraphicEngine()->getFadeDuration(),
+        core->getDefaultGraphicEngine()->getAnimDuration(),
         GraphicTranslateAnimationTypeAccelerated);
       core->getDefaultGraphicEngine()->unlockDrawing();
     }

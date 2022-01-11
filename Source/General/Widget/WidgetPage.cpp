@@ -50,11 +50,11 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
         if (widgetsActive) {
           if (primitive==selectedWidget) {
             widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            primitive->setFadeAnimation(t,primitive->getColor(),getWidgetEngine()->getSelectedWidgetColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+            primitive->setFadeAnimation(t,primitive->getColor(),getWidgetEngine()->getSelectedWidgetColor(),false,widgetEngine->getGraphicEngine()->getAnimDuration());
             widgetEngine->getGraphicEngine()->unlockDrawing();
           } else {
             widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-            primitive->setFadeAnimation(t,primitive->getColor(),primitive->getActiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+            primitive->setFadeAnimation(t,primitive->getColor(),primitive->getActiveColor(),false,widgetEngine->getGraphicEngine()->getAnimDuration());
             //primitive->setColor(primitive->getActiveColor());
             widgetEngine->getGraphicEngine()->unlockDrawing();
           }
@@ -65,7 +65,7 @@ void WidgetPage::setWidgetsActive(TimestampInMicroseconds t, bool widgetsActive)
           }
         } else {
           widgetEngine->getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
-          primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor(),false,widgetEngine->getGraphicEngine()->getFadeDuration());
+          primitive->setFadeAnimation(t,primitive->getColor(),primitive->getInactiveColor(),false,widgetEngine->getGraphicEngine()->getAnimDuration());
           widgetEngine->getGraphicEngine()->unlockDrawing();
           //primitive->setColor(primitive->getInactiveColor());
           if ((primitive->getXHidden()!=0)||(primitive->getYHidden()!=0)) {

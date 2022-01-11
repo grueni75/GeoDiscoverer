@@ -90,7 +90,7 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
       if (!connected) {
         targetColor.setAlpha(0);
       }
-      setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getFadeDuration());
+      setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getAnimDuration());
     }
   
     // Update the content

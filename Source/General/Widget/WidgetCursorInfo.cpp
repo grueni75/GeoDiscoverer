@@ -108,8 +108,8 @@ bool WidgetCursorInfo::work(TimestampInMicroseconds t) {
     }
     if (fadeIn) {
       //DEBUG("fading in", NULL);
-      setFadeAnimation(t,color,this->activeColor,false,widgetContainer->getGraphicEngine()->getFadeDuration());
-      setScaleAnimation(t,scale,1.0,false,widgetContainer->getGraphicEngine()->getFadeDuration());
+      setFadeAnimation(t,color,this->activeColor,false,widgetContainer->getGraphicEngine()->getAnimDuration());
+      setScaleAnimation(t,scale,1.0,false,widgetContainer->getGraphicEngine()->getAnimDuration());
     }
     fadeIn=false;
   }
@@ -139,8 +139,8 @@ bool WidgetCursorInfo::work(TimestampInMicroseconds t) {
     }
     if (fadeOut) {
       //DEBUG("fading out", NULL);
-      setFadeAnimation(t,color,GraphicColor(255,255,255,0),false,widgetContainer->getGraphicEngine()->getFadeDuration());
-      setScaleAnimation(t,scale,0.0,false,widgetContainer->getGraphicEngine()->getFadeDuration());
+      setFadeAnimation(t,color,GraphicColor(255,255,255,0),false,widgetContainer->getGraphicEngine()->getAnimDuration());
+      setScaleAnimation(t,scale,0.0,false,widgetContainer->getGraphicEngine()->getAnimDuration());
     }
     fadeOut=false;
   }

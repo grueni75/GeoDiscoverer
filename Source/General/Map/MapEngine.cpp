@@ -635,9 +635,11 @@ void MapEngine::updateMap() {
         diffVisY=0;
       } else {
         visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
-        visPosRW->set(visPosRO.getX()+diffVisX,visPosRO.getY()+diffVisY,visPosRO.getZoom(),visPosRO.getAngle());
-        visPosRO=*visPosRW;
+        visPosRW->setAnimated(visPosRO.getX()+diffVisX,visPosRO.getY()+diffVisY);
+        //visPosRO=*visPosRW; => map repositioning is done automatically via the visPos anim updates in graphic engine
         core->getDefaultGraphicEngine()->unlockPos();
+        diffVisX=0;
+        diffVisY=0;
       }
       //DEBUG("diffVisX=%d diffVisY=%d lng=%f lat=%f forceMapRecreation=%d",diffVisX,diffVisY,mapPos.getLng(),mapPos.getLat(),forceMapRecreation);
       requestedMapPos.invalidate();

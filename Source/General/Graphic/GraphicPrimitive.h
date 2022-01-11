@@ -151,6 +151,9 @@ public:
   // Sets a new translate target
   void setTranslateAnimation(TimestampInMicroseconds startTime, Int startX, Int startY, Int endX, Int endY, bool infinite, TimestampInMicroseconds duration, GraphicTranslateAnimationType animationType);
 
+  // Stops any ongoing translate animation
+  void stopTranslateAnimation();
+
   // Let the primitive work
   // For example, animations are handled in this method
   virtual bool work(TimestampInMicroseconds currentTime);

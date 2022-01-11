@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <GraphicPrimitive.h>
 
 #ifndef GRAPHICPOSITION_H_
 #define GRAPHICPOSITION_H_
@@ -45,6 +46,11 @@ protected:
   // Indicates that the position has changed
   bool changed;
 
+  // Animation related
+  TimestampInMicroseconds animStartTime;
+  TimestampInMicroseconds animEndTime;
+  double startX, startY, endX, endY;
+
 public:
 
   // Constructor
@@ -68,6 +74,12 @@ public:
 
   // Sets the position
   void set(Int valueX, Int valueY, double valueZoom, double valueAngle);
+
+  // Sets the position to reach by animation
+  void setAnimated(Int valueX, Int valueY);    
+
+  // Let the position work (for updating the animation)
+  bool work(TimestampInMicroseconds currentTime);
 
   // Indicates that postion has changed
   bool hasChanged() const

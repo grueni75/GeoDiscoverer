@@ -54,7 +54,6 @@ GraphicEngine::GraphicEngine(Device *device) :
   navigationPoints=NULL;
   drawingMutex=core->getThread()->createMutex("graphic engine drawing mutex");
   posMutex=core->getThread()->createMutex("graphic engine pos mutex");
-  pos=GraphicPosition();
   debugMode=core->getConfigStore()->getIntValue("Graphic","debugMode",__FILE__, __LINE__);
   locationAccuracyBackgroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyBackgroundColor",__FILE__, __LINE__);
   locationAccuracyCircleColor=core->getConfigStore()->getGraphicColorValue("Graphic/LocationAccuracyCircleColor",__FILE__, __LINE__);
@@ -81,7 +80,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   tileImageNotCached.setColor(GraphicColor(255,255,255,0));
   tileImageNotDownloaded.setColor(GraphicColor(255,255,255,0));
   tileImageDownloadErrorOccured.setColor(GraphicColor(255,255,255,0));
-  fadeDuration=core->getConfigStore()->getIntValue("Graphic","fadeDuration",__FILE__, __LINE__);
+  animDuration=core->getConfigStore()->getIntValue("Graphic","animDuration",__FILE__, __LINE__);
   ambientModeTransitionDuration=core->getConfigStore()->getIntValue("Graphic","ambientModeTransitionDuration",__FILE__, __LINE__);
   blinkDuration=core->getConfigStore()->getIntValue("Graphic","blinkDuration",__FILE__, __LINE__);
   mapReferenceDPI=core->getConfigStore()->getIntValue("Graphic","mapReferenceDotsPerInch",__FILE__,__LINE__);
@@ -194,8 +193,11 @@ bool GraphicEngine::draw(bool forceRedraw) {
 #endif
   PROFILE_START;
 
-  // Copy the current position
+  // Let the position work and copy the result
   lockPos(__FILE__,__LINE__);
+  if (this->pos.work(currentTime)) {
+    redrawScene=true;
+  }
   pos=this->pos;
   unlockPos();
   //PROFILE_ADD("position copy");
@@ -254,7 +256,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
     TimestampInMicroseconds fadeStartTime=pos.getLastUserModification()+centerIconTimeout;
     if (fadeStartTime!=lastCenterIconFadeStartTime) {
       centerIcon.setColor(GraphicColor(255,255,255,255));
-      centerIcon.setFadeAnimation(fadeStartTime,centerIcon.getColor(),GraphicColor(255,255,255,0),false,getFadeDuration());
+      centerIcon.setFadeAnimation(fadeStartTime,centerIcon.getColor(),GraphicColor(255,255,255,0),false,getAnimDuration());
     }
     lastCenterIconFadeStartTime=fadeStartTime;
 
@@ -875,15 +877,15 @@ double GraphicEngine::getAmbientFadeScale() {
   double fadeScale=1.0;
   TimestampInMicroseconds duration;
   if (isAmbientMode(duration)) {
-    if (duration<fadeDuration) {
-      fadeScale=((double)(fadeDuration-duration))/((double)fadeDuration);
+    if (duration<animDuration) {
+      fadeScale=((double)(animDuration-duration))/((double)animDuration);
       //DEBUG("fadeScale=%f",fadeScale);
     } else {
       fadeScale=0.0;
     }
   } else {
-    if (duration<fadeDuration) {
-      fadeScale=((double)(duration))/((double)fadeDuration);
+    if (duration<animDuration) {
+      fadeScale=((double)(duration))/((double)animDuration);
       //DEBUG("fadeScale=%f",fadeScale);
     }
   }
@@ -921,14 +923,14 @@ double GraphicEngine::getWidgetlessFadeScale() {
   double fadeScale=1.0;
   TimestampInMicroseconds duration;
   if (isWidgetlessMode(duration)) {
-    if (duration<fadeDuration) {
-      fadeScale=((double)(fadeDuration-duration))/((double)fadeDuration);
+    if (duration<animDuration) {
+      fadeScale=((double)(animDuration-duration))/((double)animDuration);
     } else {
       fadeScale=0.0;
     }
   } else {
-    if (duration<fadeDuration) {
-      fadeScale=((double)(duration))/((double)fadeDuration);
+    if (duration<animDuration) {
+      fadeScale=((double)(duration))/((double)animDuration);
     }
   }
   return fadeScale;

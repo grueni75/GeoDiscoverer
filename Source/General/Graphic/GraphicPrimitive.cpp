@@ -142,6 +142,15 @@ void GraphicPrimitive::setTranslateAnimation(TimestampInMicroseconds startTime, 
   translateAnimationType=animationType;
 }
 
+// Stops any translate animation
+void GraphicPrimitive::stopTranslateAnimation() {
+  if (translateStartTime!=translateEndTime) {
+    translateEndTime=translateStartTime;
+    translateInfinite=false;
+    translateAnimationSequence.clear();
+  }
+}
+
 // Lets the primitive work (e.g., animation)
 bool GraphicPrimitive::work(TimestampInMicroseconds currentTime) {
   bool changed=false;

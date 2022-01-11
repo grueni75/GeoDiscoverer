@@ -417,7 +417,7 @@ void MapTile::setIsHidden(bool isHidden, const char *file, int line, bool fadeOu
     if ((isDrawn())&&(fadeOutAnimation)) {
       if (rectangle.getTexture()==endTexture) {
         rectangle.setFadeAnimationSequence(std::list<GraphicFadeAnimationParameter>());
-        rectangle.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),startColor,endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+        rectangle.setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),startColor,endColor,false,core->getDefaultGraphicEngine()->getAnimDuration());
         rectangle.setTextureAnimationSequence(std::list<GraphicTextureAnimationParameter>());
         rectangle.setTextureAnimation(core->getClock()->getMicrosecondsSinceStart(),endTexture,endTexture,false,0);
       } else {
@@ -427,7 +427,7 @@ void MapTile::setIsHidden(bool isHidden, const char *file, int line, bool fadeOu
         GraphicTextureAnimationParameter textureAnimationParameter;
         fadeAnimationParameter.setStartTime(core->getClock()->getMicrosecondsSinceStart());
         textureAnimationParameter.setStartTime(fadeAnimationParameter.getStartTime());
-        TimestampInMicroseconds duration=rectangle.getColor().getAlpha()*core->getDefaultGraphicEngine()->getFadeDuration()/255;
+        TimestampInMicroseconds duration=rectangle.getColor().getAlpha()*core->getDefaultGraphicEngine()->getAnimDuration()/255;
         fadeAnimationParameter.setDuration(duration);
         textureAnimationParameter.setDuration(duration);
         fadeAnimationParameter.setStartColor(rectangle.getColor());
@@ -439,7 +439,7 @@ void MapTile::setIsHidden(bool isHidden, const char *file, int line, bool fadeOu
         fadeAnimationParameter.setStartTime(fadeAnimationParameter.getStartTime()+duration);
         fadeAnimationParameter.setStartColor(startColor);
         fadeAnimationParameter.setEndColor(endColor);
-        fadeAnimationParameter.setDuration(core->getDefaultGraphicEngine()->getFadeDuration());
+        fadeAnimationParameter.setDuration(core->getDefaultGraphicEngine()->getAnimDuration());
         fadeAnimationSequence.push_back(fadeAnimationParameter);
         rectangle.setFadeAnimationSequence(fadeAnimationSequence);
         rectangle.setTextureAnimationSequence(textureAnimationSequence);

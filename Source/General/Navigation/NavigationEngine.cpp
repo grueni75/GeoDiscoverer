@@ -917,7 +917,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (!targetVisible) {
       GraphicColor endColor=targetIcon->getColor();
       endColor.setAlpha(255);
-      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getAnimDuration());
       targetIcon->setIsUpdated(true);
     }
     targetVisible=true;
@@ -925,7 +925,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (targetVisible) {
       GraphicColor endColor=targetIcon->getColor();
       endColor.setAlpha(0);
-      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+      targetIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),targetIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getAnimDuration());
       targetIcon->setIsUpdated(true);
       targetVisible=false;
     }
@@ -1048,7 +1048,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
     if (updateAnimation) {
       GraphicColor endColor=arrowIcon->getColor();
       endColor.setAlpha(255);
-      arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+      arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getAnimDuration());
       arrowIcon->setIsUpdated(true);
     }
     arrowVisible=true;
@@ -1057,7 +1057,7 @@ void NavigationEngine::updateScreenGraphic(bool scaleHasChanged) {
       if (updateAnimation) {
         GraphicColor endColor=arrowIcon->getColor();
         endColor.setAlpha(0);
-        arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getFadeDuration());
+        arrowIcon->setFadeAnimation(core->getClock()->getMicrosecondsSinceStart(),arrowIcon->getColor(),endColor,false,core->getDefaultGraphicEngine()->getAnimDuration());
         arrowIcon->setIsUpdated(true);
       }
       arrowVisible=false;
