@@ -22,13 +22,7 @@
 
 package com.untouchableapps.android.geodiscoverer.ui.component
 
-import android.R
-import android.app.Dialog
 import android.os.SystemClock
-import androidx.appcompat.app.AppCompatActivity
-import com.afollestad.materialdialogs.DialogAction
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.MaterialDialog.SingleButtonCallback
 import com.untouchableapps.android.geodiscoverer.GDApplication
 
 open class GDDialog(showSnackbar: (String) -> Unit, showDialog: (String, Boolean) -> Unit) {

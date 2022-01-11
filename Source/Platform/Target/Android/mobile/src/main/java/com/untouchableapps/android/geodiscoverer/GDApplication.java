@@ -56,8 +56,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
-import com.google.android.material.snackbar.Snackbar;
-
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
