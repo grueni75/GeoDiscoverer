@@ -29,7 +29,6 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.hardware.Sensor
 import android.hardware.SensorManager
-import android.location.LocationManager
 import android.net.Uri
 import android.os.*
 import android.view.WindowManager
@@ -47,6 +46,7 @@ import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.ui.theme.AndroidTheme
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.core.content.FileProvider
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
@@ -57,6 +57,7 @@ import com.untouchableapps.android.geodiscoverer.ui.component.GDDialog
 import kotlinx.coroutines.*
 import java.io.File
 
+@ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
 class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
@@ -104,7 +105,6 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   // Managers
   var sensorManager: SensorManager? = null
-  var locationManager: LocationManager? = null
 
   // Sets the screen time out
   @SuppressLint("Wakelock")
@@ -274,12 +274,6 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     // Get important handles
     sensorManager = this.getSystemService(SENSOR_SERVICE) as SensorManager
     if (sensorManager == null) {
-      Toast.makeText(this, getString(R.string.missing_system_service), Toast.LENGTH_LONG)
-      finish();
-      return
-    }
-    locationManager = this.getSystemService(LOCATION_SERVICE) as LocationManager
-    if (locationManager == null) {
       Toast.makeText(this, getString(R.string.missing_system_service), Toast.LENGTH_LONG)
       finish();
       return

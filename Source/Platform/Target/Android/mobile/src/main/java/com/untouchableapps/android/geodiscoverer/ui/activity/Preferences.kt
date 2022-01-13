@@ -62,6 +62,8 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.util.*
 
+@ExperimentalGraphicsApi
+@ExperimentalMaterial3Api
 class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
 
   // References
@@ -77,8 +79,6 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     }
   }
 
-  @ExperimentalGraphicsApi
-  @ExperimentalMaterial3Api
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -161,7 +161,6 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     }
 
     // Prepare some variables
-    val type = info.getString("type")
     var prettyName = info.getString("name")
     prettyName = (prettyName!!.substring(0, 1).lowercase() + prettyName.substring(1))
     val upperCaseCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -242,8 +241,6 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     return entries
   }
 
-  @ExperimentalGraphicsApi
-  @ExperimentalMaterial3Api
   @Composable
   fun content(title: String, path: String) {
 
@@ -292,7 +289,6 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     }
   }
 
-  @ExperimentalGraphicsApi
   @Composable
   fun inflatePreference(i: Int, info: Bundle, maxHeight: Dp, setExpertMode: (Boolean)->Unit) {
 
@@ -341,8 +337,8 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
               // Define a summary
               var summary = ""
               if (fullPath == "Navigation/Route") {
-                val value = coreObject.configStoreGetStringValue(key2, "visible")
-                summary = if (value.toInt() == 1) {
+                val value2 = coreObject.configStoreGetStringValue(key2, "visible")
+                summary = if (value2.toInt() == 1) {
                   stringResource(R.string.visible_on_map)
                 } else {
                   stringResource(R.string.hidden_on_map)
@@ -531,10 +527,10 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
             backgroundFill = true
           }
           else -> {
-            var i = 0
-            while (info.containsKey(i.toString())) {
-              values.add(info.getString(i.toString())!!)
-              i++
+            var j = 0
+            while (info.containsKey(j.toString())) {
+              values.add(info.getString(j.toString())!!)
+              j++
             }
           }
         }
@@ -547,49 +543,49 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
             withContext(Dispatchers.IO) {
 
               // Handle the different types
-              var values = mutableListOf<String>()
+              var values2 = mutableListOf<String>()
               var reverseSort=false
               when(fullPath) {
                 "Map/folder" -> {
                   val dir = File(coreObject.homePath + "/Map")
-                  for (file in dir.listFiles()) {
+                  dir.listFiles()?.forEach { file ->
                     if (file.isDirectory) {
-                      values.add(file.name)
+                      values2.add(file.name)
                     }
                   }
                 }
                 "Navigation/lastRecordedTrackFilename" -> {
                   var currentValueFound = false
                   val dir = File(coreObject.homePath + "/Track")
-                  val currentValue = coreObject.configStoreGetStringValue(parentPath, name)
-                  for (file in dir.listFiles()) {
+                  val currentValue2 = coreObject.configStoreGetStringValue(parentPath, name)
+                  dir.listFiles()?.forEach { file ->
                     if (!file.isDirectory
                       && file.name.substring(file.name.length - 1) != "~"
                       && file.name.substring(file.name.length - 4) != ".bin"
                     ) {
-                      values.add(file.name)
-                      if (file.name == currentValue) currentValueFound = true
+                      values2.add(file.name)
+                      if (file.name == currentValue2) currentValueFound = true
                     }
                   }
-                  if (!currentValueFound) values.add(currentValue)
+                  if (!currentValueFound) values2.add(currentValue2)
                   reverseSort=true
                 }
                 "Navigation/activeRoute" -> {
-                  values =
+                  values2 =
                     coreObject.configStoreGetAttributeValues("Navigation/Route", "name")
                       .toMutableList()
                 }
                 "HeartRateMonitor/bluetoothAddress" -> {
-                  values = GDHeartRateService.knownDeviceAddresses.toMutableList()
+                  values2 = GDHeartRateService.knownDeviceAddresses.toMutableList()
                 }
                 "EBikeMonitor/bluetoothAddress" -> {
-                  values = GDEBikeService.knownDeviceAddresses.toMutableList()
+                  values2 = GDEBikeService.knownDeviceAddresses.toMutableList()
                 }
               }
-              values.sort();
+              values2.sort();
               if (reverseSort)
-                values.reverse()
-              allValues.value=values;
+                values2.reverse()
+              allValues.value=values2;
               //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","background fill finished for $fullPath")
             }
           }

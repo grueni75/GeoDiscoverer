@@ -56,6 +56,7 @@ import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.ui.component.*
 import kotlinx.coroutines.*
 
+@ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
 class ViewContentIntegratedList(viewContent: ViewContent) {
 

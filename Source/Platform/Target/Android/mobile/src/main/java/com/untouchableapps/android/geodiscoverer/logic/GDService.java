@@ -22,6 +22,7 @@
 
 package com.untouchableapps.android.geodiscoverer.logic;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -32,6 +33,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.location.LocationManager;
 import android.os.Build;
@@ -286,16 +288,18 @@ public class GDService extends Service {
 
       // Start watching the location
       if (!locationWatchStarted) {
-        try {
-          locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, coreObject);
-        } catch (Exception e) {
+        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+          try {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, coreObject);
+          } catch (Exception e) {
+          }
+        };
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+          try {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, coreObject);
+          } catch (Exception e) {
+          }
         }
-        ;
-        try {
-          locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, coreObject);
-        } catch (Exception e) {
-        }
-        ;
         locationWatchStarted = true;
       }
 
@@ -516,6 +520,17 @@ public class GDService extends Service {
           intent.getStringExtra("name"),
           intent.getStringExtra("address"),
           intent.getStringExtra("group"));
+    }
+
+    // Handle location request
+    if (intent.getAction().equals("getLastKnownLocation")) {
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","getting current location");
+      if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        coreObject.onLocationChanged(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+      }
+      if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        coreObject.onLocationChanged(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+      }
     }
 
     return START_STICKY;

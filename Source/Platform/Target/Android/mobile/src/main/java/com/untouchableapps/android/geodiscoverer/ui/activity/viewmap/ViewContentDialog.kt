@@ -36,6 +36,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
@@ -43,6 +44,7 @@ import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.ui.component.*
 import com.untouchableapps.android.geodiscoverer.ui.theme.SurfaceColorAtElevation
 
+@ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
 class ViewContentDialog(viewContent: ViewContent) {
 

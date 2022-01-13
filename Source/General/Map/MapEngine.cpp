@@ -401,10 +401,16 @@ void MapEngine::fillGeographicAreaWithTiles(MapArea area, MapTile *preferredNeig
 // Checks if a map update is required
 bool MapEngine::mapUpdateIsRequired(GraphicPosition visPos, Int *diffVisX, Int *diffVisY, double *diffZoom, bool checkLocationPos) {
 
+  // Compute the offset to the previous position
+  Int tmpDiffVisX=(visPos.getX()-this->visPos.getX());
+  Int tmpDiffVisY=(visPos.getY()-this->visPos.getY());
+  double tmpDiffZoom=visPos.getZoom()/this->visPos.getZoom();
+  //DEBUG("diffVisX=%d diffVisY=%d tmpDiffZoom=%f",tmpDiffVisX,tmpDiffVisY,tmpDiffZoom);
+
   // Check if it is time to reset the visual position to the gps position
-  if ((checkLocationPos)&&(returnToLocation)) {
+  // Only do this if there is no change of the vis pos
+  if ((checkLocationPos)&&(returnToLocation)&&(tmpDiffVisX==0)&&(tmpDiffVisY==0)&&(tmpDiffZoom==1.0)&&(!visPos.isAnimating())) {
     TimestampInMicroseconds diff=core->getClock()->getMicrosecondsSinceStart()-visPos.getLastUserModification();
-    //DEBUG("locationPos2visPosOffsetValid=%d diff=%d returnToLocationTimeout=%d locationPos2visPosOffsetX=%d locationPos2visPosOffsetY=%d",locationPos2visPosOffsetValid,diff,returnToLocationTimeout,locationPos2visPosOffsetX,locationPos2visPosOffsetY);
     if ((diff>returnToLocationTimeout)||(returnToLocationOneTime)) {
       MapPosition newPos,oldPos;
       lockLocationPos(__FILE__, __LINE__);
@@ -418,22 +424,20 @@ bool MapEngine::mapUpdateIsRequired(GraphicPosition visPos, Int *diffVisX, Int *
           double diffX = floor(fabs(newPos.getLng()-oldPos.getLng()) * oldPos.getMapTile()->getLngScale());
           double diffY = floor(fabs(newPos.getLat()-oldPos.getLat()) * oldPos.getMapTile()->getLatScale());
           if ((diffX>=1)||(diffY>=1)) {
+            //DEBUG("oldPos=(%f,%f) newPos=(%f,%f) diff=(%f,%f)",oldPos.getLng(),oldPos.getLat(),newPos.getLng(),newPos.getLat(),diffX,diffY);
             setMapPos(locationPos);
           }
         } else {
           if ((newPos.getLat()!=oldPos.getLat())||(newPos.getLng()!=oldPos.getLng())) {
+            //DEBUG("oldPos=(%f,%f) newPos=(%f,%f)",oldPos.getLng(),oldPos.getLat(),newPos.getLng(),newPos.getLat());
             setMapPos(locationPos);
           }
         }
       }
+    } else {
+      //DEBUG("diff=%d returnToLocationTimeout=%d",diff,returnToLocationTimeout);
     }
   }
-
-  // Compute the offset to the previous position
-  Int tmpDiffVisX=(visPos.getX()-this->visPos.getX());
-  Int tmpDiffVisY=(visPos.getY()-this->visPos.getY());
-  double tmpDiffZoom=visPos.getZoom()/this->visPos.getZoom();
-  //DEBUG("diffVisX=%d diffVisY=%d",diffVisX,diffVisY);
 
   // Update the external variables
   if (diffVisX) *diffVisX=tmpDiffVisX;
@@ -636,7 +640,7 @@ void MapEngine::updateMap() {
       } else {
         visPosRW=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
         visPosRW->setAnimated(visPosRO.getX()+diffVisX,visPosRO.getY()+diffVisY);
-        //visPosRO=*visPosRW; => map repositioning is done automatically via the visPos anim updates in graphic engine
+        //visPosRO=*visPosRW; // => map repositioning is done automatically via the visPos anim updates in graphic engine
         core->getDefaultGraphicEngine()->unlockPos();
         diffVisX=0;
         diffVisY=0;

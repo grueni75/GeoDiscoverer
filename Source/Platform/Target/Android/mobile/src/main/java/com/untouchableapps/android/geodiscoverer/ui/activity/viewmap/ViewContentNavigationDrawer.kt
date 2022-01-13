@@ -50,6 +50,7 @@ import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.ui.component.*
 import kotlinx.coroutines.*
 
+@ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
 class ViewContentNavigationDrawer(viewContent: ViewContent) {
 

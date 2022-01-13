@@ -28,6 +28,7 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.*
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
 import com.untouchableapps.android.geodiscoverer.GDApplication
@@ -36,6 +37,7 @@ import com.untouchableapps.android.geodiscoverer.ui.activity.AuthenticateGoogleB
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
 import java.lang.ref.WeakReference
 
+@ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
 class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
 
@@ -112,24 +114,6 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
         }
         if (commandFunction == "closeProgressDialog") {
           viewMap.viewModel.closeProgress()
-          commandExecuted = true
-        }
-        if (commandFunction == "getLastKnownLocation") {
-          if (viewMap.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            val locationManager=viewMap.locationManager
-            if ((viewMap.coreObject != null)&&(locationManager != null)) {
-              viewMap.coreObject!!.onLocationChanged(
-                locationManager!!.getLastKnownLocation(
-                  LocationManager.NETWORK_PROVIDER
-                )!!
-              )
-              viewMap.coreObject!!.onLocationChanged(
-                locationManager!!.getLastKnownLocation(
-                  LocationManager.GPS_PROVIDER
-                )!!
-              )
-            }
-          }
           commandExecuted = true
         }
         if (commandFunction == "coreInitialized") {

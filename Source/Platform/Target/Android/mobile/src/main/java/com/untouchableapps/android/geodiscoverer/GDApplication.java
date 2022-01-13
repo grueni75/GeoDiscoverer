@@ -104,6 +104,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
   public static final String[] requiredPermissions = {
       Manifest.permission.READ_EXTERNAL_STORAGE,
       Manifest.permission.WRITE_EXTERNAL_STORAGE,
+      Manifest.permission.ACCESS_COARSE_LOCATION,
       Manifest.permission.ACCESS_FINE_LOCATION,
       Manifest.permission.WAKE_LOCK,
       Manifest.permission.INTERNET,

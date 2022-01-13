@@ -34,6 +34,7 @@ import android.os.*
 import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
@@ -43,6 +44,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.util.*
 
+@ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
 class IntentHandler(viewMap: ViewMap) : CoroutineScope by MainScope() {
 

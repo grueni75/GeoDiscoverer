@@ -47,6 +47,7 @@ protected:
   bool changed;
 
   // Animation related
+  double animSpeed;
   TimestampInMicroseconds animStartTime;
   TimestampInMicroseconds animEndTime;
   double startX, startY, endX, endY;
@@ -131,6 +132,14 @@ public:
   void updateLastUserModification()
   {
       this->lastUserModification = core->getClock()->getMicrosecondsSinceStart();
+  }
+
+  bool isAnimating() 
+  {
+    if (animStartTime!=animEndTime)
+        return true;
+    else 
+        return false;
   }
 };
 

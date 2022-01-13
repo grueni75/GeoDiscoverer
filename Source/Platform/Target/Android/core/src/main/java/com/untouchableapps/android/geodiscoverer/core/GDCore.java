@@ -871,6 +871,14 @@ public class GDCore implements
       }
       cmdExecuted=true;
     }
+    if (cmd.startsWith("getLastKnownLocation(")) {
+      Intent intent = appIf.createServiceIntent();
+      if (intent!=null) {
+        intent.setAction("getLastKnownLocation");
+        appIf.getApplication().startService(intent);
+      }
+      cmdExecuted=true;
+    }
 
     if (!cmdExecuted) {
       appIf.executeAppCommand(cmd);

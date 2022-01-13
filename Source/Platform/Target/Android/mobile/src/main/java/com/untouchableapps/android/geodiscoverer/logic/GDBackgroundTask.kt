@@ -27,6 +27,7 @@ import android.location.Geocoder
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
@@ -38,7 +39,8 @@ import org.acra.ACRA
 import java.io.*
 import java.lang.Exception
 
-
+@ExperimentalGraphicsApi
+@ExperimentalMaterial3Api
 class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
   // Arguments
@@ -216,7 +218,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
             var inputLine: String?
             inputLine = logReader.readLine()
             while (inputLine != null) {
-              logContents += inputLine!! + "\n"
+              logContents += inputLine + "\n"
               //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp",inputLine);
               inputLine = logReader.readLine()
             }
@@ -256,18 +258,19 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
         // Go through all route files
         val routeDir = File(coreObject!!.homePath + "/Route")
         val cacheDir = coreObject!!.homePath + "/Route/.cache"
-        for (routeFile in routeDir.listFiles()) {
+        val routeFiles = routeDir.listFiles()
+        routeFiles?.forEach { routeFile ->
           //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",routeFile.getName());
-          if (routeFile.isDirectory) continue
+          if (routeFile.isDirectory) return@forEach
           if (routeFile.name.endsWith(".gpx")) {
             val cacheFile = File(cacheDir + "/" + routeFile.name)
             if (!cacheFile.exists()) {
               routesOutdated = true
-              break
+              return@forEach
             }
             if (routeFile.lastModified() > cacheFile.lastModified()) {
               routesOutdated = true
-              break
+              return@forEach
             }
           }
         }

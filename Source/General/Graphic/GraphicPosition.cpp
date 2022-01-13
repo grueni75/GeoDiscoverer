@@ -34,6 +34,7 @@ GraphicPosition::GraphicPosition() {
   endX=valueX;
   endY=valueY;
   lastUserModification=0;
+  animSpeed=core->getConfigStore()->getDoubleValue("Graphic","animSpeed",__FILE__,__LINE__);
 }
 
 GraphicPosition::~GraphicPosition() {
@@ -144,12 +145,12 @@ bool GraphicPosition::work(TimestampInMicroseconds currentTime) {
         valueX=(Int)(startX+translateDiffX/2+speedX*t-accelX*t*t/2);
         valueY=(Int)(startY+translateDiffY/2+speedY*t-accelY*t*t/2);
       }
-      //DEBUG("targetX=%f targetY=%f currentX=%f currentY=%f",endX,endY,valueX,valueY);
+      //DEBUG("transitioning: targetX=%f targetY=%f currentX=%f currentY=%f",endX,endY,valueX,valueY);
     } else {
       valueX=endX;
       valueY=endY;
       animStartTime=animEndTime;
-      //DEBUG("currentX=%f currentY=%f",this->valueX,this->valueY);
+      //DEBUG("finished: currentX=%f currentY=%f",this->valueX,this->valueY);
     }
   }
   return changed;
@@ -157,13 +158,25 @@ bool GraphicPosition::work(TimestampInMicroseconds currentTime) {
 
 // Sets the position to reach by animation
 void GraphicPosition::setAnimated(Int valueX, Int valueY) {
+  //DEBUG("targetX=%d targetY=%d",valueX,valueY);
+
+  // Compute the remaining animation speed
+  double diffX=valueX-this->valueX;
+  double diffY=valueY-this->valueY;
+  double dist=sqrt(diffX*diffX+diffY*diffY);
+  Screen *screen=core->getDefaultScreen();  
+  double distInches=dist/(double)screen->getDPI();
+  double duration=distInches/animSpeed;
+  //DEBUG("dist=%d distInches=%f duration=%f",dist,distInches,duration);
+
+  // Set the animation
   animStartTime=core->getClock()->getMicrosecondsSinceStart();
-  animEndTime=animStartTime+core->getDefaultGraphicEngine()->getAnimDuration();
+  animEndTime=animStartTime+(TimestampInMicroseconds)round(duration*1000*1000);
   startX=this->valueX;
   startY=this->valueY;
   endX=valueX;
   endY=valueY;
-  //DEBUG("targetX=%f targetY=%f",endX,endY);
+
 }
 
 }

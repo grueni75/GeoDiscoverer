@@ -26,11 +26,13 @@ import androidx.compose.material3.*
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
 import java.io.File
 
+@ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
 class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 

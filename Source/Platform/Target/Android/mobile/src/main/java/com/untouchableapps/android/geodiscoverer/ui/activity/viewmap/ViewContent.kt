@@ -57,6 +57,7 @@ import com.untouchableapps.android.geodiscoverer.ui.component.*
 import kotlinx.coroutines.*
 import kotlin.math.roundToInt
 
+@ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
 class ViewContent(viewMap: ViewMap) {
 

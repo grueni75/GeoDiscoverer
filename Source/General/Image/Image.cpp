@@ -271,7 +271,7 @@ bool Image::hsvFilter(std::string pngFilename, double hOffset, double sOffset, d
     DEBUG("can not read <%s>",pngFilename.c_str());
     return false;		
   }
-	DEBUG("hOffset=%f sOffset=%f vOffset=%f",hOffset,sOffset,vOffset);
+	//DEBUG("hOffset=%f sOffset=%f vOffset=%f",hOffset,sOffset,vOffset);
 	hsvFilter(pixels,width,height,pixelSize,hOffset,sOffset,vOffset);
   writePNG(pixels,pngFilename,width,height,pixelSize,false);
   free(pixels);

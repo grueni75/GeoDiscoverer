@@ -179,7 +179,7 @@
                   <xsd:documentation>Port at which the server is listening.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="userScale" type="xsd:double" default="0.75" gd:upgrade="restore">
+              <xsd:element name="userScale" type="xsd:double" default="0.5" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>User defined map scale factor during Mapsforge rendering.</xsd:documentation>
                 </xsd:annotation>
@@ -1694,6 +1694,11 @@
               <xsd:element name="refreshRate" type="xsd:integer" default="61">
                 <xsd:annotation>
                   <xsd:documentation>Rate in Herz that the drawing should be refreshed at.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="animSpeed" type="xsd:double" default="2.0">
+                <xsd:annotation>
+                  <xsd:documentation>Speed in inches per seconds for calculating the time for the map repositioning animation.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="animDuration" type="xsd:integer" default="250000">

@@ -402,10 +402,6 @@ public class WatchFace extends Gles2WatchFaceService {
             // Nothing to do as of now
             commandExecuted=true;
           }
-          if (commandFunction.equals("getLastKnownLocation")) {
-            // Nothing to do as of now
-            commandExecuted=true;
-          }
           if (commandFunction.equals("setSplashVisibility")) {
             // Nothing to do as of now
             commandExecuted=true;
