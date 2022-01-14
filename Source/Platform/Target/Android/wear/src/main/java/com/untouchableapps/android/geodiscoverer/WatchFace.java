@@ -356,6 +356,7 @@ public class WatchFace extends Gles2WatchFaceService {
             commandExecuted=true;
           }
           if (commandFunction.equals("infoDialog")) {
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",commandArgs.get(0));
             watchFace.infoDialog(commandArgs.get(0));
             commandExecuted=true;
           }

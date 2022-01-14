@@ -205,7 +205,7 @@ public class GDCore implements
   private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
     @Override
     public boolean onScaleBegin(ScaleGestureDetector detector) {
-      //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale begins");
+      appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale begins");
       scaleGestureOccured=true;
       return true;
     }
@@ -215,6 +215,13 @@ public class GDCore implements
       //if (detector.getScaleFactor()!=1.0) appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("scale=%f",detector.getScaleFactor()));
       executeCoreCommand("zoom(" + String.valueOf(detector.getScaleFactor() + ")"));
       return true;
+    }
+
+    @Override
+    public void onScaleEnd(ScaleGestureDetector detector) {
+      super.onScaleEnd(detector);
+      appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale ends");
+      scaleGestureOccured=false;
     }
   }
   boolean zoomMode=false;
@@ -1460,7 +1467,6 @@ public class GDCore implements
         //appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", String.format("double tap event!"));
         executeCoreCommand("toggleZoomLevelLock()(");
       }
-      scaleGestureOccured=false;
       return true;
     } else {
       return false;

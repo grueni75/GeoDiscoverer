@@ -476,7 +476,7 @@ void MapEngine::setZoomLevelLock(bool zoomLevelLock, bool showInfo)
 {
   this->zoomLevelLock=zoomLevelLock;
   core->getConfigStore()->setIntValue("Map","zoomLevelLock",zoomLevelLock,__FILE__, __LINE__);
-  if ((showInfo)&&(!core->getDefaultDevice()->getIsWatch())) {
+  if (showInfo) {
     if (zoomLevelLock) {
       INFO("zoom level lock is enabled",NULL);
     } else {
