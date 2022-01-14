@@ -1,0 +1,8 @@
+# Android SDK setup
+NDK_PATH=~/Apps/android/android-sdk/ndk/21.1.6352462/
+export PATH=$PATH:$NDK_PATH
+export PATH=$PATH:~/Apps/android/android-sdk/tools:~/Apps/android/android-sdk/platform-tools
+export PATH=$PATH:$NDK_PATH/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/
+#export STUDIO_JDK=/home/grueni/Apps/android/jdk_1_7_0
+export ANDROID_SDK_ROOT=/home/grueni/Apps/android/android-sdk
+

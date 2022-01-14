@@ -1,0 +1,2 @@
+#!/bin/bash 
+gcloud compute instances create ubuntu-desktop --zone=europe-west1-c --machine-type=e2-standard-4 --image-family=ubuntu-minimal-2110 --image-project=ubuntu-os-cloud --boot-disk-size=32G

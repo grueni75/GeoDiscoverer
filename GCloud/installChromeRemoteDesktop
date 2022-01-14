@@ -1,0 +1,20 @@
+#!/bin/bash 
+function remote {
+  gcloud compute ssh ubuntu-desktop -- $*
+}
+remote sudo apt update
+remote sudo apt install --assume-yes wget 
+remote wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
+remote sudo apt-get install --assume-yes ./chrome-remote-desktop_current_amd64.deb
+remote sudo 'bash -c '\''echo "exec /etc/X11/Xsession /usr/bin/gnome-session" >/etc/chrome-remote-desktop-session'\'''
+echo "Enter a user password to use for your user"
+remote sudo passwd grueni
+remote sudo reboot
+echo
+echo "Open https://remotedesktop.google.com/headless and create a new computer connection"
+echo "Verify that chrome desktop is running by entering: sudo systemctl status chrome-remote-desktop@\$USER"
+echo "Afterwards you can connect to the computer via https://remotedesktop.google.com/access"
+echo "Waiting one minute until computer is rebooted"
+echo
+sleep 60
+remote 
