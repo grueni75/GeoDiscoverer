@@ -10,4 +10,4 @@ remote mkdir -p Apps/android/android-sdk
 remote 'cd Apps/android && wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip'
 remote 'cd Apps/android/android-sdk && unzip ../commandlinetools-linux-7583922_latest.zip'
 remote 'cd Apps/android/android-sdk && yes | cmdline-tools/bin/sdkmanager --sdk_root=. "ndk;21.1.6352462" "platforms;android-31" "build-tools;30.0.2"'
-
+remote 'mkdir Android && cd Android && ln -s ~/Apps/android/android-sdk Sdk'
