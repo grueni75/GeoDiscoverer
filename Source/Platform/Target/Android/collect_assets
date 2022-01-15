@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 ROOT="`pwd`/../../../../../../../"
 sh -c "cd $ROOT/Source && make android"
 sed -i 's/<xsd:documentation>Geo Discoverer Config schema.*<\/xsd:documentation>/<xsd:documentation>Geo Discoverer Config schema '`date +"%Y%m%d-%H%M%S"`'<\/xsd:documentation>/' assets/GeoDiscoverer/config.shipped.xsd
