@@ -1,0 +1,13 @@
+#!/bin/bash 
+set -e
+function remote {
+  gcloud compute ssh ubuntu-desktop -- $*
+}
+remote sudo apt --assume-yes install git openjdk-8-jre 
+remote 'mkdir -p Apps && mkdir -p Apps/android && cd Apps/android && wget https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2020.3.1.26/android-studio-2020.3.1.26-linux.tar.gz'
+remote 'cd Apps/android && tar zxf android-studio-2020.3.1.26-linux.tar.gz'
+remote mkdir -p Apps/android/android-sdk
+remote 'cd Apps/android && wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip'
+remote 'cd Apps/android/android-sdk && unzip ../commandlinetools-linux-7583922_latest.zip'
+remote 'cd Apps/android/android-sdk && yes | cmdline-tools/bin/sdkmanager --sdk_root=. "ndk;21.1.6352462" "platforms;android-31" "build-tools;30.0.2"'
+

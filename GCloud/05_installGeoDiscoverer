@@ -1,0 +1,19 @@
+#!/bin/bash 
+set -e
+function remote {
+  gcloud compute ssh ubuntu-desktop -- $*
+}
+remote 'cd Apps && git clone git@github.com:grueni75/GeoDiscoverer'
+remote 'ln -s ~/Apps/GeoDiscoverer/GCloud/.androidrc .'
+remote 'bash -c '\''echo "source ~/.androidrc" >>~/.bashrc'\'''
+remote 'cd Apps/GeoDiscoverer && git submodule update --init --recursive'
+remote sudo apt --assume-yes install openjdk-11-jre
+remote sudo update-java-alternatives -s java-1.11.0-openjdk-amd64
+remote 'source ~/.androidrc && cd Apps/GeoDiscoverer/ThirdParty/mapsforge && ./build.sh'
+remote sudo apt --assume-yes install maven 
+remote 'source ~/.androidrc && cd Apps/GeoDiscoverer/ThirdParty/brouter && ./build.sh'
+remote sudo apt --assume-yes install make rsync inkscape
+emote 'source ~/.androidrc && cd Apps/GeoDiscoverer/Source/Platform/Target/Android && ./gradlew assembleDebug'
+
+echo "You can start Android Studio by executing ~/Apps/android-studio/bin/studio.sh"
+

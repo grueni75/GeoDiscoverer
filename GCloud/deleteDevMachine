@@ -1,3 +1,4 @@
 #!/bin/bash
+set -e
 gcloud compute instances delete ubuntu-desktop
 

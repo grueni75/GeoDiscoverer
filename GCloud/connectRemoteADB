@@ -1,0 +1,9 @@
+#!/bin/bash 
+set -e
+function remote {
+  gcloud compute ssh ubuntu-desktop -- $*
+}
+echo "Configure Android Studio to use existing ADB port 9999 in Settings/Build.../Debugger/ADB Server Lifecycle Management"
+echo
+adb -a -P 9999 nodaemon server &
+gcloud compute  ssh --ssh-flag="-N -R 9999:localhost:9999" ubuntu-desktop
