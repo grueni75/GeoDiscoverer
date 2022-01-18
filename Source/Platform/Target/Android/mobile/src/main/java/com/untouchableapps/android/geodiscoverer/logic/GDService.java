@@ -67,9 +67,6 @@ public class GDService extends Service {
   // Receivers
   BroadcastReceiver userPresentReceiver = null;
 
-  // Background tasks
-  GDBackgroundTask backgroundTask = new GDBackgroundTask(this);
-
   // Flags
   boolean locationWatchStarted = false;
   boolean serviceInForeground = false;
@@ -157,9 +154,6 @@ public class GDService extends Service {
 
     // Get power manager
     powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-
-    // Create the background task handler
-    backgroundTask.onCreate(coreObject);
 
     // Register for user present events
     userPresentReceiver = new BroadcastReceiver() {
@@ -516,7 +510,8 @@ public class GDService extends Service {
     // Handle new address point
     if (intent.getAction().equals("addAddressPoint")) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","adding address point " + intent.getStringExtra("name"));
-      backgroundTask.getLocationFromAddress(
+      GDApplication.backgroundTask.getLocationFromAddress(
+          this,
           intent.getStringExtra("name"),
           intent.getStringExtra("address"),
           intent.getStringExtra("group"));
@@ -571,11 +566,5 @@ public class GDService extends Service {
     if (mapTileServer!=null) {
       mapTileServer.stop();
     }
-
-    // Stop the background tasks
-    backgroundTask.onDestroy();
   }
-  
-  
-  
 }

@@ -34,8 +34,6 @@
   <string name="notification_map_download_ongoing_message">%1$d tiles / %2$s</string>
   <string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
   <string name="toggle_messages">Toggle messages</string>
-  <string name="dialog_add_address_point_title">Add point of interest</string>
-  <string name="dialog_address_input_hint">Alexanderplatz 1, Berlin (single line!)</string>
   <string name="dialog_dismiss">Dismiss</string>
   <string name="dialog_lookup">Lookup</string>
   <string name="show_legend">Show legend</string>
@@ -125,7 +123,7 @@
   <string name="prefs_not_ready">Preference values are not yet loaded!</string>
   <string name="missing_system_service">System service missing!</string>
   <string name="dialog_import">Import</string>
-  <string name="dialog_address">Address</string>
+  <string name="dialog_address">Address or name</string>
   <string name="dialog_download">Download</string>
   <string name="dialog_track_treatment_title">Track treatment</string>
   <string name="dialog_map_download_type_title">Map download</string>
@@ -146,4 +144,9 @@
   <string name="dialog_rename_address_point_title">Edit address point</string>
   <string name="dialog_tag_label">Group</string>
   <string name="dialog_update">Update</string>
+  <string name="dialog_add_address_point_title">Add point of interest</string>
+  <string name="dialog_address_input_hint">Alexanderplatz 1, Berlin (single line!)</string>
+  <string name="dialog_poi_category_title">Category refinement</string>
+  <string name="dialog_poi_address_title">Nearby point of interest</string>
+  <string name="dialog_poi_address_title_error">Nearby point of interest (limit reached)</string>
 </resources>

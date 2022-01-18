@@ -68,6 +68,7 @@ import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask;
 import com.untouchableapps.android.geodiscoverer.logic.GDService;
 import com.untouchableapps.android.geodiscoverer.logic.cockpit.CockpitEngine;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
@@ -125,7 +126,10 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
   /** Interface to the native C++ core */
   public static GDCore coreObject=null;
-  
+
+  /** Background tasks */
+  public static GDBackgroundTask backgroundTask=new GDBackgroundTask();
+
   /** Message log */
   public static String messages = "";
   
@@ -211,7 +215,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
       }
       coreObject=new GDCore(this, homeDirPath);
     }
-    
+
     // Send any left over native crash reports
     File logDir = new File(homeDirPath + "/Log");
     File[] files = logDir.listFiles();
@@ -566,7 +570,9 @@ public class GDApplication extends Application implements GDAppInterface, Google
       Intent intent = new Intent(this, GDService.class);
       intent.setAction("earlyInitComplete");
       startService(intent);
-      return;
+
+      // Init the background task
+      backgroundTask.onCreate(coreObject);
     }
     if (cmd.equals("lateInitComplete()")) {
 
@@ -695,4 +701,5 @@ public class GDApplication extends Application implements GDAppInterface, Google
     }
     return true;
   }
+
 }

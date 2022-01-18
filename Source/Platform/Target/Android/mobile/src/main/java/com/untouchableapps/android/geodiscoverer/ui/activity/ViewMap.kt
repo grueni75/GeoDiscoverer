@@ -88,9 +88,6 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   // The intent handler
   val intentHandler = IntentHandler(this)
 
-  // Background tasks
-  var backgroundTask = GDBackgroundTask(this)
-
   // Activity content
   val viewContent = ViewContent(this)
   
@@ -287,10 +284,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     }
     (application as GDApplication).setActivity(this, coreMessageHandler)
 
-    // Create the background task
-    backgroundTask.onCreate(coreObject)
-
-    // Init the intent handler
+    // Init the child objects
     intentHandler.onCreate()
 
     // Create the content for the navigation drawer
@@ -341,14 +335,14 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
       ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.AddCircle, getString(R.string.add_tracks_as_routes)) {
         viewModel.askForTracksAsRoutes() { selectedTracks ->
           if (selectedTracks.isNotEmpty()) {
-            backgroundTask.copyTracksToRoutes(selectedTracks,this)
+            GDApplication.backgroundTask.copyTracksToRoutes(this,selectedTracks,this)
           }
         }
       },
       ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.RemoveCircle, getString(R.string.remove_routes)) {
         viewModel.askForRemoveRoutes() { selectedRoutes ->
           if (selectedRoutes.isNotEmpty()) {
-            backgroundTask.removeRoutes(selectedRoutes,this)
+            GDApplication.backgroundTask.removeRoutes(this,selectedRoutes,this)
           }
         }
       },
@@ -385,7 +379,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
       ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.UploadFile, getString(R.string.send_logs)) {
         viewModel.askForSendLogs() { selectedLogs ->
           if (selectedLogs.isNotEmpty()) {
-            backgroundTask.sendLogs(selectedLogs,this)
+            GDApplication.backgroundTask.sendLogs(selectedLogs,this)
           }
         }
       },
@@ -436,7 +430,6 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     )
     cancel() // Stop all coroutines
     (application as GDApplication).setActivity(null, null)
-    if (backgroundTask != null) backgroundTask!!.onDestroy()
     if (intentHandler!=null) intentHandler!!.onDestroy()
     //if (downloadCompleteReceiver != null) unregisterReceiver(downloadCompleteReceiver)
     if (exitRequested) System.exit(0)
@@ -500,7 +493,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
     // Check for outdated routes
     if (coreObject!!.coreInitialized) {
-      backgroundTask.checkForOutdatedRoutes(this)
+      GDApplication.backgroundTask.checkForOutdatedRoutes(this)
     }
 
     // Process intent only if geo discoverer is initialized

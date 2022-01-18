@@ -966,6 +966,14 @@ std::string Commander::execute(std::string cmd) {
     core->getDefaultGraphicEngine()->setWidgetlessMode(atoi(args[0].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="getMapPos") {
+    MapPosition *pos=core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
+    std::stringstream posStr;
+    posStr << pos->getLat() << "," << pos->getLng();
+    core->getMapEngine()->unlockMapPos();
+    result=posStr.str();
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

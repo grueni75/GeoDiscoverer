@@ -225,8 +225,11 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
     ) {
       Text(
         modifier = Modifier
-          .align(Alignment.Center),
+          .align(Alignment.Center)
+          .padding(horizontal = layoutParams.itemPadding),
         style = MaterialTheme.typography.titleMedium,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis,
         text = item
       )
     }

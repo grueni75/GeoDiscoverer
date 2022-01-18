@@ -73,6 +73,7 @@ class ViewContent(viewMap: ViewMap) {
     val itemPadding = 5.dp
     val itemDistance = 15.dp
     val hintIndent = 15.dp
+    val listIndent = 2.dp
     val drawerCornerRadius = 16.dp
     val snackbarHorizontalPadding = 20.dp
     val snackbarVerticalOffset = 40.dp
@@ -80,6 +81,7 @@ class ViewContent(viewMap: ViewMap) {
     val askMaxContentHeight = 140.dp
     val askMaxDropdownMenuHeight = 200.dp
     val askMultipleChoiceMessageOffset = 15.dp
+    val askRadiusWidth = 50.dp
     val dialogButonRowHeight = 200.dp
     val integratedListHeight = 400.dp
     val integratedListWidth = 400.dp
@@ -89,6 +91,7 @@ class ViewContent(viewMap: ViewMap) {
     val integratedListTabWidth = 100.dp
     val integratedListFABPadding = 20.dp
     val messageBackgroundColor = Color.Black.copy(alpha = 0.8f)
+    val rippleWaitTime = 300L
   }
   val layoutParams = LayoutParams()
 
@@ -314,7 +317,7 @@ class ViewContent(viewMap: ViewMap) {
                     val tabListState = rememberLazyListState()
                     LaunchedEffect(viewModel.integratedListVisible) {
                       if (viewModel.integratedListSelectedTab != -1)
-                        tabListState.scrollToItem(viewModel.integratedListSelectedTab)
+                        tabListState.animateScrollToItem(viewModel.integratedListSelectedTab)
                     }
                     LazyRow(
                       state = tabListState,
@@ -331,7 +334,7 @@ class ViewContent(viewMap: ViewMap) {
               val itemListState = rememberLazyListState()
               LaunchedEffect(viewModel.integratedListVisible) {
                 if (viewModel.integratedListSelectedItem != -1)
-                  itemListState.scrollToItem(viewModel.integratedListSelectedItem)
+                  itemListState.animateScrollToItem(viewModel.integratedListSelectedItem)
               }
               LazyColumn(
                 state = itemListState,

@@ -2537,6 +2537,21 @@
                   <xsd:documentation>Maximum distance in meters to an address point at which a user notification shall be generated.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>     
+              <xsd:element name="poiSearchDistance" type="xsd:integer" default="10000">
+                <xsd:annotation>
+                  <xsd:documentation>Distance in meters to search for a nearby point of interest.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>     
+              <xsd:element name="poiMaxSearchDistance" type="xsd:integer" default="50000">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum distance in meters the user can select to search for a nearby point of interest.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>     
+              <xsd:element name="poiMaxCount" type="xsd:integer" default="100">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum number of nearby point of interests to return per database.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>     
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>

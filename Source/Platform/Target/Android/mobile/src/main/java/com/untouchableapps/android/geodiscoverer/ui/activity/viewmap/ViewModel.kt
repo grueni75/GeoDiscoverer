@@ -29,6 +29,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
+import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
 import java.io.File
 
@@ -38,6 +39,13 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   // Parameters
   val viewMap = viewMap
+
+  // Called when the object is initialized
+  fun onCoreEarlyInitComplete() {
+    if (askEditTextRadius==0f)
+      askEditTextRadius=(viewMap.coreObject!!.configStoreGetStringValue("Navigation", "poiSearchDistance")).toFloat()/1000f
+    askEditTextMaxRadius=(viewMap.coreObject!!.configStoreGetStringValue("Navigation", "poiMaxSearchDistance")).toFloat()/1000f
+  }
 
   // Check box item
   inner class CheckboxItem(text: String) {
@@ -92,6 +100,20 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   var askEditTextTagLabel: String by mutableStateOf("")
     private set
   val askEditTextTagList = mutableStateListOf<String>()
+  val askEditTextCategoryPath = mutableStateListOf<String>()
+  val askEditTextCategoryList = mutableStateListOf<String>()
+  var askEditTextSelectedCategory: Int by mutableStateOf(-1)
+    private set
+  val askEditTextAddressList = mutableStateListOf<GDBackgroundTask.AddressPointItem>()
+  var askEditTextAddressListBusy: Boolean by mutableStateOf(false)
+    private set
+  var askEditTextAddressListOutdated = false
+  var askEditTextRadius: Float by mutableStateOf(0f)
+    private set
+  var askEditTextMaxRadius: Float by mutableStateOf(0f)
+    private set
+  var askEditTextSelectedAddress: Int by mutableStateOf(-1)
+    private set
   var askEditTextValueChangeHandler: (String) -> Unit = {}
     private set
   var askEditTextHint: String by mutableStateOf("")
@@ -105,6 +127,12 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   var askDismissText: String by mutableStateOf("")
     private set
   var askEditTextConfirmHandler: (String, String) -> Unit = {_,_ ->}
+    private set
+  var askEditTextCategoryHandler: (Int, String, Boolean) -> Unit = {_,_,_ ->}
+    private set
+  var askEditTextAddressHandler: (Int, GDBackgroundTask.AddressPointItem) -> Unit = {_,_ ->}
+    private set
+  var askEditTextRadiusHandler: (Float) -> Unit = {}
     private set
   var askQuestionConfirmHandler: () -> Unit = {}
     private set
@@ -182,30 +210,132 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
+  fun setRadius(radius: Float) {
+    askEditTextRadius = radius
+  }
+
+  @Synchronized
+  private fun fillAddressList() {
+    if (askEditTextAddressListBusy) {
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","poi search ongoing, deferring")
+      askEditTextAddressListOutdated = true
+      return
+    }
+    askEditTextAddressList.clear()
+    askEditTextAddressListBusy=true
+    askEditTextSelectedAddress=-1
+    GDApplication.backgroundTask.findPOIs(
+      askEditTextCategoryPath.toList(),
+      askEditTextRadius.toInt()*1000)
+    { result ->
+      askEditTextAddressListBusy = false
+      if (askEditTextAddressListOutdated) {
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","new poi search requested, restarting")
+        askEditTextAddressListOutdated = false
+        fillAddressList()
+      } else {
+        askEditTextAddressList.addAll(result)
+      }
+    }
+  }
+
+  @Synchronized
   fun askForAddressPointAdd(address: String, confirmHandler: (String, String) -> Unit) {
-    askEditTextValue = address
+    closeQuestion()
+    if (address!="")
+      askEditTextValue = address
     askEditTextHint = viewMap.getString(R.string.dialog_address_input_hint)
     configureAddressPointTag()
     askConfirmText = viewMap.getString(R.string.dialog_lookup)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
     askEditTextConfirmHandler = confirmHandler
+    askEditTextCategoryHandler = { index, category, skipDeselect ->
+
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","index=${index} selected=${askEditTextSelectedCategory} category=${category}")
+
+      // Decide on the path
+      if (category=="..") {
+        askEditTextCategoryPath.removeLast()
+      } else if (category!="") {
+        askEditTextCategoryPath.add(category)
+      } else {
+        askEditTextCategoryPath.clear()
+      }
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","before: askEditTextCategoryPath.size=${askEditTextCategoryPath.size}")
+
+      // In case this category was seleted already, deselect it
+      if ((index==askEditTextSelectedCategory)&&(category!="")&&(category!="..")&&(!skipDeselect)) {
+        askEditTextSelectedCategory = -1
+        askEditTextCategoryPath.removeLast()
+      }
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","after: askEditTextCategoryPath.size=${askEditTextCategoryPath.size}")
+
+      // Check if new categories exists at this path
+      val nextCategories = GDApplication.backgroundTask.fillPOICategories(askEditTextCategoryPath)
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","categories=${nextCategories.size}")
+
+      // Find the nearby point of interests with the selected category
+      fillAddressList()
+
+      // Fill the next categories if more exists
+      askEditTextSelectedCategory=-1
+      if (nextCategories.isNotEmpty()) {
+        askEditTextCategoryList.clear()
+        if (askEditTextCategoryPath.isNotEmpty()) {
+          askEditTextCategoryList.add("..")
+        }
+        askEditTextCategoryList.addAll(nextCategories)
+      } else {
+        if (askEditTextCategoryPath.isNotEmpty()) {
+          askEditTextCategoryPath.removeLast()
+          if (index==askEditTextSelectedCategory) {
+            askEditTextSelectedCategory=-1
+          } else {
+            askEditTextSelectedCategory=index
+          }
+        }
+      }
+    }
+    var selectedCategoryText=""
+    if (askEditTextSelectedCategory!=-1) {
+      if (askEditTextSelectedCategory<askEditTextCategoryList.size) {
+        selectedCategoryText=askEditTextCategoryList[askEditTextSelectedCategory]
+      } else {
+        askEditTextSelectedCategory=-1
+      }
+    } else {
+      if (askEditTextCategoryPath.size>0)
+        selectedCategoryText=askEditTextCategoryPath.removeLast()
+    }
+    askEditTextCategoryHandler(askEditTextSelectedCategory,selectedCategoryText,true)
+    askEditTextAddressHandler = { index, addressPoint ->
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${addressPoint.name} selected")
+      askEditTextSelectedAddress=index
+    }
+    askEditTextRadiusHandler = { radius ->
+      setRadius(radius)
+      fillAddressList()
+    }
     askMessage = viewMap.getString(R.string.dialog_address)
     askTitle = viewMap.getString(R.string.dialog_add_address_point_title)
   }
 
   @Synchronized
   fun askForAddressPointEdit(pointName: String, confirmHandler: (String, String) -> Unit) {
+    closeQuestion()
     askEditTextValue = pointName
     askMessage = viewMap.getString(R.string.dialog_name_label)
     configureAddressPointTag()
     askConfirmText = viewMap.getString(R.string.dialog_update)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
     askEditTextConfirmHandler = confirmHandler
+    askEditTextCategoryList.clear()
     askTitle = viewMap.getString(R.string.dialog_rename_address_point_title)
   }
 
   @Synchronized
   fun askForRouteDownload(name: String, dstFile: File, confirmHandler: () -> Unit) {
+    closeQuestion()
     var message: String = if (dstFile.exists())
       viewMap.getString(R.string.dialog_overwrite_route_question)
     else viewMap.getString(R.string.dialog_copy_route_question)
@@ -219,6 +349,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun askForRouteName(gpxName: String, confirmHandler: (String, String) -> Unit) {
+    closeQuestion()
     askEditTextValue = gpxName
     askEditTextValueChangeHandler = { value ->
       val dstFilename = GDCore.getHomeDirPath() + "/Route/" + value
@@ -231,12 +362,14 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     askConfirmText = viewMap.getString(R.string.dialog_import)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
     askEditTextConfirmHandler = confirmHandler
+    askEditTextCategoryList.clear()
     askMessage = viewMap.getString(R.string.dialog_route_name_message)
     askTitle = viewMap.getString(R.string.dialog_route_name_title)
   }
 
   @Synchronized
   fun askForTrackTreatment(confirmHandler: () -> Unit, dismissHandler: () -> Unit) {
+    closeQuestion()
     askMessage = viewMap.getString(R.string.dialog_continue_or_new_track_question)
     askConfirmText = viewMap.getString(R.string.dialog_new_track)
     askDismissText = viewMap.getString(R.string.dialog_contine_track)
@@ -247,6 +380,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun askForMapDownloadType(confirmHandler: () -> Unit, dismissHandler: () -> Unit) {
+    closeQuestion()
     askMessage = viewMap.getString(R.string.dialog_map_download_type_question)
     askConfirmText = viewMap.getString(R.string.dialog_map_download_type_option2)
     askDismissText = viewMap.getString(R.string.dialog_map_download_type_option1)
@@ -257,6 +391,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun askForMapDownloadDetails(routeName: String, confirmHandler: (List<String>) -> Unit) {
+    closeQuestion()
     val result = viewMap.coreObject!!.executeCoreCommand("getMapLayers()")
     val mapLayers = result.split(",".toRegex()).toList()
     askConfirmText = viewMap.getString(R.string.dialog_download)
@@ -275,12 +410,13 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun askForUpdateMessage(message: String) {
+  fun setMessage(message: String) {
     askMessage = message
   }
 
   @Synchronized
   private fun askForImportWaypointsDecision(question: PendingImportWaypointsDecision) {
+    closeQuestion()
     askMessage = viewMap.getString(
       R.string.dialog_waypoint_import_message,
       question.waypointCount,
@@ -315,6 +451,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     confirmHandler: () -> Unit,
     dismissHandler: () -> Unit
   ) {
+    closeQuestion()
     askMessage = viewMap.getString(R.string.dialog_route_remove_question)
     askConfirmText = viewMap.getString(R.string.dialog_hide)
     askDismissText = viewMap.getString(R.string.dialog_delete)
@@ -324,12 +461,13 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun askForImportWaypointsDecisionPending(): Boolean {
+  fun isImportWaypointsDecisionPending(): Boolean {
     return pendingImportWaypointsDecisions.isNotEmpty()
   }
 
   @Synchronized
   fun askForMapCleanup(confirmHandler: () -> Unit, dismissHandler: () -> Unit) {
+    closeQuestion()
     askMessage = viewMap.getString(R.string.dialog_map_cleanup_question)
     askConfirmText = viewMap.getString(R.string.dialog_map_cleanup_all_zoom_levels)
     askDismissText = viewMap.getString(R.string.dialog_map_cleanup_current_zoom_level)
@@ -340,6 +478,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun askForTracksAsRoutes(confirmHandler: (List<String>) -> Unit) {
+    closeQuestion()
 
     // Obtain the list of tracks in the folder
     val folderFile = File(viewMap.coreObject!!.homePath + "/Track")
@@ -369,6 +508,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun askForRemoveRoutes(confirmHandler: (List<String>) -> Unit) {
+    closeQuestion()
 
     // Obtain the list of file in the folder
     val folderFile = File(viewMap.coreObject!!.homePath + "/Route")
@@ -397,6 +537,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun askForSendLogs(confirmHandler: (List<String>) -> Unit) {
+    closeQuestion()
 
     // Obtain the list of file in the folder
     val folderFile: File = File(viewMap.coreObject!!.homePath + "/Log")
@@ -442,6 +583,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun askForConfigReset(confirmHandler: () -> Unit) {
+    closeQuestion()
     askMessage = viewMap.getString(R.string.dialog_reset_question)
     askConfirmText = viewMap.getString(R.string.dialog_yes)
     askDismissText = viewMap.getString(R.string.dialog_no)
@@ -451,6 +593,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun askForMapLegend(names: List<String>, confirmHandler: (String) -> Unit) {
+    closeQuestion()
     askConfirmText = ""
     askDismissText = ""
     askSingleChoiceList.clear()
@@ -464,6 +607,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun askForMapLayer(selectHandler: (String)->Unit) {
+    closeQuestion()
     val layers: String = viewMap.coreObject!!.executeCoreCommand("getMapLayers")
     val mapLayers = layers.split(",".toRegex()).toList()
     val selectedLayer: String = viewMap.coreObject!!.executeCoreCommand("getSelectedMapLayer")
@@ -645,15 +789,28 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         "",
       ) { address, group ->
 
-        // Look up the coordinates
-        viewMap.backgroundTask!!.getLocationFromAddress(
-          name=address,
-          address=address,
-          group=group
-        ) { locationFound ->
-          informLocationLookupResult(address,locationFound)
-        }
+        // Add POI directly if one is selected
+        if ((askEditTextSelectedAddress!=-1)&&(askEditTextSelectedAddress<askEditTextAddressList.size)) {
+          val addressPoint=askEditTextAddressList[askEditTextSelectedAddress]
+          viewMap.coreObject!!.executeCoreCommand(
+            "addAddressPoint",
+            address, addressPoint.name,
+            addressPoint.longitude.toString(), addressPoint.latitude.toString(),
+            group
+          )
+          refreshAddressPoints()
+        } else {
 
+          // Look up the coordinates
+          GDApplication.backgroundTask.getLocationFromAddress(
+            context=viewMap,
+            name=address,
+            address=address,
+            group=group
+          ) { locationFound ->
+            informLocationLookupResult(address,locationFound)
+          }
+        }
 
         /* Recreate the list (as there can be deleted one)
         if (added)
@@ -693,12 +850,16 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun closeQuestion() {
-    askEditTextValue = ""
     askEditTextValueChangeHandler = {}
+    askEditTextCategoryHandler = {_,_,_->}
+    askEditTextAddressHandler = {_,_->}
+    askEditTextRadiusHandler = {}
+    askEditTextConfirmHandler = {_,_->}
     askEditTextHint = ""
     askEditTextError = ""
-    askEditTextTag = ""
     askEditTextTagList.clear()
+    askEditTextAddressList.clear()
+    askEditTextAddressListBusy=false
     askQuestionConfirmHandler = {}
     askQuestionDismissHandler = {}
     askMultipleChoiceList.clear()

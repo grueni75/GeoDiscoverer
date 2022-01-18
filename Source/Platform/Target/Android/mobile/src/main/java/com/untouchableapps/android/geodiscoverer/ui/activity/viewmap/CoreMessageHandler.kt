@@ -22,10 +22,7 @@
 
 package com.untouchableapps.android.geodiscoverer.ui.activity.viewmap
 
-import android.Manifest
 import android.content.*
-import android.content.pm.PackageManager
-import android.location.LocationManager
 import android.os.*
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
@@ -160,6 +157,10 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
           }
           commandExecuted = true
         }
+        if (commandFunction == "earlyInitComplete") {
+          viewMap.viewModel.onCoreEarlyInitComplete()
+          commandExecuted = true
+        }
         if (commandFunction == "lateInitComplete") {
 
           // Process the latest intent (if any)
@@ -205,7 +206,7 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
           commandExecuted = true
         }
         if (commandFunction == "updateDownloadJobSize") {
-          viewMap.viewModel.askForUpdateMessage(
+          viewMap.viewModel.setMessage(
             viewMap.getString(
               R.string.dialog_download_job_estimated_size_message, commandArgs[0], commandArgs[1]
             )
@@ -223,14 +224,14 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
             confirmHandler = {
               val path = "Navigation/Route[@name='" + commandArgs[0] + "']"
               viewMap.coreObject!!.configStoreSetStringValue(path, "importWaypoints", "1")
-              if (!viewMap.viewModel.askForImportWaypointsDecisionPending()) {
+              if (!viewMap.viewModel.isImportWaypointsDecisionPending()) {
                 viewMap.restartCore(false)
               }
             },
             dismissHandler = {
               val path = "Navigation/Route[@name='" + commandArgs[0] + "']"
               viewMap.coreObject!!.configStoreSetStringValue(path, "importWaypoints", "2")
-              if (!viewMap.viewModel.askForImportWaypointsDecisionPending()) {
+              if (!viewMap.viewModel.isImportWaypointsDecisionPending()) {
                 viewMap.restartCore(false)
               }
             }

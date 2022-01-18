@@ -125,6 +125,7 @@ dependencies {
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-map-android/build/libs', include: ['*.jar'])
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-poi-android/build/libs', include: ['*.jar'])
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-poi/build/libs', include: ['*.jar'])
+    implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/sqlite-android/build/libs', include: ['*.jar'])
     implementation 'androidx.activity:activity-compose:1.4.0'
     implementation 'androidx.compose.animation:animation:1.0.5'
     implementation 'androidx.compose.ui:ui-tooling:1.0.5'

@@ -28,7 +28,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.ZeroCornerSize
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -38,11 +44,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
+import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.R
+import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
 import com.untouchableapps.android.geodiscoverer.ui.component.*
 import com.untouchableapps.android.geodiscoverer.ui.theme.SurfaceColorAtElevation
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
@@ -62,6 +74,7 @@ class ViewContentDialog(viewContent: ViewContent) {
     viewModel: ViewModel,
     height: Dp
   ) {
+    val scope = rememberCoroutineScope()
     if (viewModel.progressMax != -1) {
       AlertDialog(
         modifier = Modifier
@@ -87,41 +100,6 @@ class ViewContentDialog(viewContent: ViewContent) {
         }
       )
     }
-    if (viewModel.dialogMessage != "") {
-      AlertDialog(
-        modifier = Modifier
-          .wrapContentHeight(),
-        onDismissRequest = {
-          viewModel.setDialog("")
-        },
-        confirmButton = {
-          TextButton(
-            onClick = {
-              if (viewModel.dialogIsFatal)
-                viewMap.finish()
-              viewModel.setDialog("")
-            }
-          ) {
-            if (viewModel.dialogIsFatal)
-              Text(stringResource(id = R.string.button_label_exit))
-            else
-              Text(stringResource(id = R.string.button_label_ok))
-          }
-        },
-        icon = {
-          if (viewModel.dialogIsFatal)
-            Icon(Icons.Default.Error, contentDescription = null)
-          else
-            Icon(Icons.Default.Warning, contentDescription = null)
-        },
-        text = {
-          Text(
-            text = viewModel.dialogMessage,
-            style = MaterialTheme.typography.bodyLarge
-          )
-        }
-      )
-    }
     if (viewModel.askTitle != "") {
       if ((viewModel.askEditTextValue != "")||(viewModel.askEditTextHint != "")) {
         val editTextValue = remember { mutableStateOf(viewModel.askEditTextValue) }
@@ -134,12 +112,14 @@ class ViewContentDialog(viewContent: ViewContent) {
           content = {
             Column(
               modifier = Modifier
-                .wrapContentHeight()
+                .fillMaxWidth()
+                .heightIn(max = height - layoutParams.dialogButonRowHeight)
             ) {
               viewModel.askEditTextValueChangeHandler(editTextValue.value)
               GDTextField(
                 value = editTextValue.value,
                 textStyle = MaterialTheme.typography.bodyLarge,
+                singleLine = true,
                 label = {
                   Text(
                     text = viewModel.askMessage
@@ -167,7 +147,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                   text = viewModel.askEditTextHint
                 )
               }
-              if (viewModel.askEditTextError != "") {
+              AnimatedVisibility(visible = viewModel.askEditTextError!="") {
                 Text(
                   modifier = Modifier
                     .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
@@ -175,7 +155,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                   color = MaterialTheme.colorScheme.error
                 )
               }
-              if (viewModel.askEditTextTag != "") {
+              if (viewModel.askEditTextTagList.isNotEmpty()) {
                 Spacer(Modifier.height(layoutParams.itemDistance))
                 val editTextTagListExpanded = remember { mutableStateOf(false) }
                 val editTextTagListExpandIconAngle: Float by animateFloatAsState(
@@ -188,6 +168,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                     GDTextField(
                       value = editTextTag.value,
                       textStyle = MaterialTheme.typography.bodyLarge,
+                      singleLine = true,
                       label = {
                         Text(
                           text = viewModel.askEditTextTagLabel
@@ -226,7 +207,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                   GDDropdownMenu(
                     modifier = Modifier
                       .width(textFieldWidth.value)
-                      .heightIn(max=layoutParams.askMaxDropdownMenuHeight)
+                      .heightIn(max = layoutParams.askMaxDropdownMenuHeight)
                       .background(SurfaceColorAtElevation(6.dp)), // a hack since dialog background color not accessible
                     expanded = editTextTagListExpanded.value,
                     onDismissRequest = { editTextTagListExpanded.value = false }
@@ -239,6 +220,170 @@ class ViewContentDialog(viewContent: ViewContent) {
                         }
                       ) {
                         Text(tag)
+                      }
+                    }
+                  }
+                }
+              }
+              if (viewModel.askEditTextCategoryList.isNotEmpty()) {
+                Spacer(Modifier.height(layoutParams.itemDistance))
+                Column(
+                  modifier = Modifier
+                    .background(
+                      //color = MaterialTheme.colorScheme.onSurface.copy(alpha = TextFieldDefaults.BackgroundOpacity),
+                      color = if (viewModel.askEditTextAddressList.size >= GDApplication.backgroundTask.poiMaxCount)
+                        MaterialTheme.colorScheme.error.copy(alpha = TextFieldDefaults.BackgroundOpacity)
+                      else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = TextFieldDefaults.BackgroundOpacity),
+                      shape = androidx.compose.material.MaterialTheme.shapes.small
+                    )
+                    .weight(1.0f)
+                ) {
+                  Text(
+                    modifier = Modifier
+                      .padding(top = layoutParams.itemPadding, bottom = layoutParams.itemPadding, start = layoutParams.hintIndent),
+                    text = if (viewModel.askEditTextAddressList.size>=GDApplication.backgroundTask.poiMaxCount)
+                      stringResource(R.string.dialog_poi_address_title_error)
+                    else
+                      stringResource(R.string.dialog_poi_address_title),
+                  )
+                  val addressListState = rememberLazyListState()
+                  val addressLastListSize = remember { mutableStateOf(0) }
+                  LaunchedEffect(viewModel.askEditTextAddressList.size, addressLastListSize.value) {
+                    if (addressLastListSize.value!=viewModel.askEditTextAddressList.size) {
+                      addressListState.animateScrollToItem(0)
+                    }
+                  }
+                  LazyColumn(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .weight(1f),
+                    state = addressListState
+                  ) {
+                    itemsIndexed(viewModel.askEditTextAddressList) { index, item ->
+                      TextButton(
+                        modifier = Modifier
+                          .fillMaxWidth()
+                          .padding(horizontal = layoutParams.listIndent),
+                        onClick = {
+                          editTextValue.value=item.name
+                          viewModel.askEditTextAddressHandler(index, item)
+                        }
+                      ) {
+                        Row(
+                          modifier = Modifier
+                            .fillMaxWidth()
+                        ) {
+                          Text(
+                            modifier = Modifier
+                              .weight(1.0f),
+                            text = item.name,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (index == viewModel.askEditTextSelectedAddress)
+                              MaterialTheme.colorScheme.primary
+                            else
+                              MaterialTheme.colorScheme.onSurface
+                          )
+                          Spacer(
+                            modifier = Modifier
+                              .width(layoutParams.itemPadding)
+                          )
+                          Text(
+                            text = item.distanceFormatted,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = if (index == viewModel.askEditTextSelectedAddress)
+                              MaterialTheme.colorScheme.primary
+                            else
+                              MaterialTheme.colorScheme.onSurface
+                          )
+                        }
+                      }
+                    }
+                  }
+                  AnimatedVisibility(
+                    visible = viewModel.askEditTextAddressListBusy
+                  ) {
+                    GDLinearProgressIndicator(
+                      modifier = Modifier.fillMaxWidth(),
+                    )
+                  }
+                }
+                Row(
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Text(
+                    modifier = Modifier
+                      .width(layoutParams.askRadiusWidth),
+                    text = "${viewModel.askEditTextRadius.toInt().toString()} km",
+                  )
+                  GDSlider(
+                    modifier = Modifier
+                      .weight(1f),
+                    value = viewModel.askEditTextRadius,
+                    valueRange = 1f..viewModel.askEditTextMaxRadius,
+                    steps = viewModel.askEditTextMaxRadius.toInt(),
+                    onValueChange = {
+                      viewModel.askEditTextRadiusHandler(it)
+                    }
+                  )
+                }
+                Column(
+                  modifier = Modifier
+                    .background(
+                      color = MaterialTheme.colorScheme.onSurface.copy(alpha = TextFieldDefaults.BackgroundOpacity),
+                      shape = androidx.compose.material.MaterialTheme.shapes.small
+                    )
+                    .weight(1.0f)
+                ) {
+                  Text(
+                    modifier = Modifier
+                      .padding(top = layoutParams.itemPadding, bottom = layoutParams.itemPadding, start = layoutParams.hintIndent),
+                    text = stringResource(R.string.dialog_poi_category_title)
+                  )
+                  val categoryListState = rememberLazyListState()
+                  val categoryLastListSize = remember { mutableStateOf(0) }
+                  LaunchedEffect(viewModel.askEditTextCategoryList.size, categoryLastListSize.value) {
+                    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","size=${viewModel.askEditTextCategoryList.size}")
+                    if (categoryLastListSize.value!=viewModel.askEditTextCategoryList.size) {
+                      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","resetting scroll pos")
+                      var index=0
+                      if (viewModel.askEditTextSelectedCategory<viewModel.askEditTextCategoryList.size)
+                        index=viewModel.askEditTextSelectedCategory
+                      categoryListState.animateScrollToItem(index)
+                    }
+                  }
+                  LazyColumn(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .weight(1f),
+                    state = categoryListState
+                  ) {
+                    itemsIndexed(viewModel.askEditTextCategoryList) { index, item ->
+                      TextButton(
+                        modifier = Modifier
+                          .fillMaxWidth()
+                          .padding(horizontal = layoutParams.listIndent),
+                        onClick = {
+                          scope.launch {
+                            delay(layoutParams.rippleWaitTime) // ugly hack to avoid ripple continue after selecting an item
+                            viewModel.askEditTextCategoryHandler(index, item, false)
+                          }
+                        }
+                      ) {
+                        Text(
+                          modifier = Modifier
+                            .fillMaxWidth(),
+                          text = item,
+                          softWrap = false,
+                          overflow = TextOverflow.Ellipsis,
+                          style = MaterialTheme.typography.bodyLarge,
+                          color = if (index == viewModel.askEditTextSelectedCategory)
+                            MaterialTheme.colorScheme.primary
+                          else
+                            MaterialTheme.colorScheme.onSurface
+                        )
                       }
                     }
                   }
@@ -353,6 +498,41 @@ class ViewContentDialog(viewContent: ViewContent) {
       }
     } else {
       viewModel.allAskAlertDialogsClosed()
+    }
+    if (viewModel.dialogMessage != "") {
+      AlertDialog(
+        modifier = Modifier
+          .wrapContentHeight(),
+        onDismissRequest = {
+          viewModel.setDialog("")
+        },
+        confirmButton = {
+          TextButton(
+            onClick = {
+              if (viewModel.dialogIsFatal)
+                viewMap.finish()
+              viewModel.setDialog("")
+            }
+          ) {
+            if (viewModel.dialogIsFatal)
+              Text(stringResource(id = R.string.button_label_exit))
+            else
+              Text(stringResource(id = R.string.button_label_ok))
+          }
+        },
+        icon = {
+          if (viewModel.dialogIsFatal)
+            Icon(Icons.Default.Error, contentDescription = null)
+          else
+            Icon(Icons.Default.Warning, contentDescription = null)
+        },
+        text = {
+          Text(
+            text = viewModel.dialogMessage,
+            style = MaterialTheme.typography.bodyLarge
+          )
+        }
+      )
     }
   }
 

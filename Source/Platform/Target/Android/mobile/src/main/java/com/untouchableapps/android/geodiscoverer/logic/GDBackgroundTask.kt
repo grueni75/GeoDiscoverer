@@ -25,6 +25,7 @@ package com.untouchableapps.android.geodiscoverer.logic
 import android.content.Context
 import android.location.Geocoder
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
@@ -33,33 +34,94 @@ import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.core.GDTools
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
+import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.ViewModel
 
 import kotlinx.coroutines.*
 import org.acra.ACRA
+import org.mapsforge.core.model.LatLong
+import org.mapsforge.poi.android.storage.AndroidPoiPersistenceManagerFactory
+import org.mapsforge.poi.storage.*
 import java.io.*
 import java.lang.Exception
 
 @ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
-class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
+class GDBackgroundTask() : CoroutineScope by MainScope() {
 
   // Arguments
-  val context=context
   var coreObject: GDCore? = null
+
+  // POI search engine
+  val poiManagers = mutableListOf<PoiPersistenceManager>()
+  var poiInitComplete = false
+  var poiMaxCount = 0
+  var poiFindJob: Job? = null
+
+  // Address point item
+  class AddressPointItem(name: String, distanceRaw: Double, distanceFormatted: String, latitude: Double, longitude: Double) {
+    var name=name
+    var distanceRaw=distanceRaw
+    var distanceFormatted=distanceFormatted
+    val latitude=latitude
+    val longitude=longitude
+  }
 
   // Inits everything
   fun onCreate(coreObject: GDCore?) {
-    this.coreObject=coreObject
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "onCreate in GDBackgroundTask called")
+    // Store important references
+    this.coreObject = coreObject
+
+    // Read settings
+    poiMaxCount=coreObject!!.configStoreGetStringValue("Navigation", "poiMaxCount").toInt()
+
+    // Add all available POIs
+    launch() {
+      withContext(Dispatchers.IO) {
+        val mapsPath = coreObject!!.homePath + "/Server/Mapsforge/Map"
+        val mapsDir = File(mapsPath)
+        val children = mapsDir.listFiles()
+        val poiFiles = mutableListOf<File>()
+        if (children != null) {
+          for (child in children) {
+            if (child.isFile && child.path.endsWith(".poi")) {
+              poiFiles.add(child)
+            }
+          }
+        }
+        if (poiFiles.size == 0) {
+          coreObject.executeAppCommand("errorDialog(\"No POI databases installed in <$mapsPath>!\")")
+          return@withContext
+        } else {
+          for (poiFile in poiFiles) {
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", poiFile.name)
+            val poiManager = AndroidPoiPersistenceManagerFactory.getPoiPersistenceManager(
+              poiFile.absolutePath
+            )
+            poiManagers.add(poiManager)
+          }
+        }
+        poiInitComplete = true
+      }
+    }
   }
 
   // Stops all running threads
   fun onDestroy() {
+
+    // Cancel all runnings threads
     cancel()
+
+    // Free up all poi databases
+    for (poiManager in poiManagers) {
+      poiManager.close()
+    }
+    poiManagers.clear()
   }
 
   // Looksup an address
   fun getLocationFromAddress(
-    name: String, address: String, group: String, result: (Boolean)->Unit = {}
+    context: Context, name: String, address: String, group: String, result: (Boolean)->Unit = {}
   ) {
     launch() {
       var locationFound = false
@@ -92,9 +154,9 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
   // Looks up an address
   fun getLocationFromAddress(
-    name: String, address: String, group: String
+    context: Context, name: String, address: String, group: String
   ) {
-    getLocationFromAddress(name, address, group) { locationFound ->
+    getLocationFromAddress(context, name, address, group) { locationFound ->
       if (!locationFound) {
         Toast.makeText(
           context,
@@ -113,7 +175,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
   }
 
   // Imports a route
-  fun importRoute(name: String, uri: Uri, result: (Boolean, String)->Unit) {
+  fun importRoute(context: Context, name: String, uri: Uri, result: (Boolean, String)->Unit) {
     launch() {
       val dstFilename = GDCore.getHomeDirPath() + "/Route/" + name
       var success = true
@@ -146,7 +208,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
   // Copies tracks as routes
   @ExperimentalMaterial3Api
-  fun copyTracksToRoutes(selectedTracks: List<String>, viewMap: ViewMap) {
+  fun copyTracksToRoutes(context: Context, selectedTracks: List<String>, viewMap: ViewMap) {
     launch() {
 
       // Open the progress dialog
@@ -174,7 +236,7 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
 
   // Removes routes
   @ExperimentalMaterial3Api
-  fun removeRoutes(selectedRoutes: List<String>, viewMap: ViewMap) {
+  fun removeRoutes(context: Context, selectedRoutes: List<String>, viewMap: ViewMap) {
     launch() {
 
       // Open the progress dialog
@@ -280,6 +342,134 @@ class GDBackgroundTask(context: Context) : CoroutineScope by MainScope() {
         viewMap.restartCore(false)
       }
     }
+  }
+
+  // Returns the poi category for the given path
+  private fun findPOICategory(poiManager: PoiPersistenceManager, path: List<String>): PoiCategory? {
+    var allFound = true
+    var fullTitle = "* "
+    var poiCategory = poiManager.categoryManager.rootCategory
+    for (level in path) {
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","level=${level}")
+      var found = false
+      for (childPoiCategory in poiCategory.children) {
+        if (childPoiCategory.title == level) {
+          poiCategory = childPoiCategory
+          if (fullTitle != "* ")
+            fullTitle = "${fullTitle} -> "
+          fullTitle = "${fullTitle}${poiCategory.title}"
+          found = true
+          break
+        }
+      }
+      if (!found) {
+        allFound = false
+        break
+      }
+    }
+    if (allFound) {
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","category found: ${fullTitle} with ${poiCategory.children.size} entries")
+      return poiCategory
+    } else {
+      coreObject!!.executeAppCommand("errorDialog(\"Category <$fullTitle> can not be found!\")")
+      return null
+    }
+  }
+
+  // Adds all categories
+  fun fillPOICategories(categoryPath: List<String>): List<String> {
+    if (!poiInitComplete)
+      return emptyList()
+    val result = mutableListOf<String>()
+    for (poiManager in poiManagers) {
+      val poiCategory=findPOICategory(poiManager,categoryPath)
+      if (poiCategory!=null) {
+        for (childPoiCategory in poiCategory.children) {
+          if (!result.contains(childPoiCategory.title)) {
+            result.add(childPoiCategory.title)
+          }
+        }
+      }
+    }
+    result.sort()
+    return result.toList()
+  }
+
+  // Check for outdated routes
+  fun findPOIs(categoryPath: List<String>, searchRadius: Int, resultCallback: (List<AddressPointItem>)->Unit): Boolean {
+    val result = mutableListOf<AddressPointItem>()
+    if (!poiInitComplete) {
+      resultCallback(result)
+      return true
+    }
+    if (poiFindJob!=null) {
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","poi search job already running")
+      return false
+    }
+    poiFindJob = launch() {
+      withContext(Dispatchers.IO) {
+        var fullPath="* "
+        for (level in categoryPath) {
+          fullPath="${fullPath} -> ${level}"
+        }
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Searching in category path ${fullPath}")
+        val t=coreObject!!.executeCoreCommand("getMapPos")
+        val fields=t.split(",")
+        val currentPos=LatLong(fields[0].toDouble(),fields[1].toDouble())
+        for (poiManager in poiManagers) {
+          val poiCategory=findPOICategory(poiManager,categoryPath)
+          if (poiCategory!=null) {
+            var nearbyPOIs: Collection<PointOfInterest>? = null
+            try {
+              val categoryFilter: PoiCategoryFilter = WhitelistPoiCategoryFilter()
+              categoryFilter.addCategory(poiCategory)
+              nearbyPOIs=poiManager.findNearPosition(
+                currentPos,
+                searchRadius,
+                categoryFilter,
+                null,
+                poiMaxCount
+              )
+            } catch (t: Throwable) {
+              GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",t.message)
+            }
+            if (nearbyPOIs!=null) {
+              for (poi in nearbyPOIs) {
+                var name = poi.toString()
+                if (poi.name != null) {
+                  name = poi.name
+                } else {
+                  if (poi.category != null) {
+                    name = "${poi.category.title} (${poi.latitude},${poi.longitude})"
+                  }
+                }
+                var distance = currentPos.sphericalDistance(poi.latLong)
+                var item = AddressPointItem(
+                  name,
+                  distance,
+                  coreObject!!.executeCoreCommand("formatMeters", distance.toString()),
+                  poi.latitude,
+                  poi.longitude
+                )
+                var added = false
+                for (i in result.indices) {
+                  if (distance < result[i].distanceRaw) {
+                    result.add(i, item)
+                    added=true
+                    break
+                  }
+                }
+                if (!added)
+                  result.add(item)
+              }
+            }
+          }
+        }
+      }
+      poiFindJob=null
+      resultCallback(result)
+    }
+    return true
   }
 
   /* Imports *.gda files from external source
