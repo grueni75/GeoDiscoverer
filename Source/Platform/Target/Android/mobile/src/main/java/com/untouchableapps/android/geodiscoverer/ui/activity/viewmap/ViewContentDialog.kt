@@ -229,7 +229,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                   modifier = Modifier
                     .background(
                       //color = MaterialTheme.colorScheme.onSurface.copy(alpha = TextFieldDefaults.BackgroundOpacity),
-                      color = if (viewModel.askEditTextAddressList.size >= GDApplication.backgroundTask.poiMaxCount)
+                      color = if (viewModel.askEditTextAddressListLimitReached)
                         MaterialTheme.colorScheme.error.copy(alpha = TextFieldDefaults.BackgroundOpacity)
                       else
                         MaterialTheme.colorScheme.onSurface.copy(alpha = TextFieldDefaults.BackgroundOpacity),
@@ -264,7 +264,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                           .fillMaxWidth()
                           .padding(horizontal = layoutParams.listIndent),
                         onClick = {
-                          viewModel.setEditTextValue(item.name)
+                          viewModel.setEditTextValue(item.nameUniquified)
                           viewModel.askEditTextAddressHandler(index, item)
                         }
                       ) {
@@ -275,7 +275,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                           Text(
                             modifier = Modifier
                               .weight(1.0f),
-                            text = item.name,
+                            text = item.nameUniquified,
                             softWrap = false,
                             overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodyLarge,

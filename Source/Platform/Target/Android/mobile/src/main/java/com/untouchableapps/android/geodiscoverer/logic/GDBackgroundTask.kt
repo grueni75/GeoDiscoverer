@@ -58,8 +58,9 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
   var poiFindJob: Job? = null
 
   // Address point item
-  class AddressPointItem(name: String, distanceRaw: Double, distanceFormatted: String, latitude: Double, longitude: Double) {
-    var name=name
+  class AddressPointItem(nameOriginal: String, nameUniquified: String, distanceRaw: Double, distanceFormatted: String, latitude: Double, longitude: Double) {
+    var nameOriginal=nameOriginal
+    var nameUniquified=nameUniquified
     var distanceRaw=distanceRaw
     var distanceFormatted=distanceFormatted
     val latitude=latitude
@@ -396,10 +397,12 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
   }
 
   // Check for outdated routes
-  fun findPOIs(categoryPath: List<String>, searchRadius: Int, resultCallback: (List<AddressPointItem>)->Unit): Boolean {
+  fun findPOIs(categoryPath: List<String>, searchRadius: Int, resultCallback: (List<AddressPointItem>,Boolean)->Unit): Boolean {
+
+    // Only start working if initialized and no job running already
     val result = mutableListOf<AddressPointItem>()
     if (!poiInitComplete) {
-      resultCallback(result)
+      resultCallback(result,false)
       return true
     }
     if (poiFindJob!=null) {
@@ -407,7 +410,10 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
       return false
     }
     poiFindJob = launch() {
+      var limitReached=false
       withContext(Dispatchers.IO) {
+
+        // Decode the parameters
         var fullPath="* "
         for (level in categoryPath) {
           fullPath="${fullPath} -> ${level}"
@@ -416,11 +422,15 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
         val t=coreObject!!.executeCoreCommand("getMapPos")
         val fields=t.split(",")
         val currentPos=LatLong(fields[0].toDouble(),fields[1].toDouble())
+
+        // Go through all available POI databases
         for (poiManager in poiManagers) {
           val poiCategory=findPOICategory(poiManager,categoryPath)
           if (poiCategory!=null) {
             var nearbyPOIs: Collection<PointOfInterest>? = null
             try {
+
+              // Search within the radius and selected category
               val categoryFilter: PoiCategoryFilter = WhitelistPoiCategoryFilter()
               categoryFilter.addCategory(poiCategory)
               nearbyPOIs=poiManager.findNearPosition(
@@ -434,7 +444,15 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
               GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",t.message)
             }
             if (nearbyPOIs!=null) {
+
+              // Did we hit the search limit?
+              if (nearbyPOIs.size>=poiMaxCount)
+                limitReached=true
+
+              // Add the found POIs incl. duplicate handling
               for (poi in nearbyPOIs) {
+
+                // Decide on the POI details
                 var name = poi.toString()
                 if (poi.name != null) {
                   name = poi.name
@@ -444,8 +462,43 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
                   }
                 }
                 var distance = currentPos.sphericalDistance(poi.latLong)
+
+                // Check for duplicates
+                var duplicate=false
+                for (point in result) {
+                  if (point.nameOriginal == name) {
+                    if ((point.latitude==poi.latitude)&&(point.longitude==poi.longitude)) {
+                      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","POI ${name} already exists in search result")
+                      duplicate=true
+                      break
+                    }
+                  }
+                }
+                if (duplicate)
+                  continue
+
+                // Uniquify the name
+                var uniqueName = name
+                var nameIsUnique = false
+                var count = 1
+                while (!nameIsUnique) {
+                  nameIsUnique = true
+                  for (point in result) {
+                    if (point.nameUniquified == uniqueName) {
+                      uniqueName = "${name} ${count}"
+                      count++
+                      break
+                    }
+                  }
+                }
+                /*if (count>1) {
+                  GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","POI ${name} uniquified to ${uniqueName}")
+                }*/
+
+                // Add the entry
                 var item = AddressPointItem(
                   name,
+                  uniqueName,
                   distance,
                   coreObject!!.executeCoreCommand("formatMeters", distance.toString()),
                   poi.latitude,
@@ -467,7 +520,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
         }
       }
       poiFindJob=null
-      resultCallback(result)
+      resultCallback(result,limitReached)
     }
     return true
   }

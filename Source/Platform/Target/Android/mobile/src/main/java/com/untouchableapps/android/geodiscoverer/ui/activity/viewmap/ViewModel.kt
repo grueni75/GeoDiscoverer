@@ -110,6 +110,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   var askEditTextAddressListBusy: Boolean by mutableStateOf(false)
     private set
   var askEditTextAddressListOutdated = false
+  var askEditTextAddressListLimitReached: Boolean by mutableStateOf(false)
+    private set
   var askEditTextRadius: Float by mutableStateOf(0f)
     private set
   var askEditTextMaxRadius: Float by mutableStateOf(0f)
@@ -239,7 +241,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     GDApplication.backgroundTask.findPOIs(
       askEditTextCategoryPath.toList(),
       askEditTextRadius.toInt()*1000)
-    { result ->
+    { result, limitReached ->
       askEditTextAddressListBusy = false
       if (askEditTextAddressListOutdated) {
         //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","new poi search requested, restarting")
@@ -247,6 +249,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         fillAddressList()
       } else {
         askEditTextAddressList.addAll(result)
+        askEditTextAddressListLimitReached=limitReached
       }
     }
   }
@@ -325,7 +328,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       }
       askEditTextCategoryHandler(askEditTextSelectedCategory, selectedCategoryText, true)
       askEditTextAddressHandler = { index, addressPoint ->
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "${addressPoint.name} selected")
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "${addressPoint.nameUniquified} selected")
         askEditTextSelectedAddress = index
       }
       askEditTextRadiusHandler = { radius ->
@@ -814,7 +817,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
           val addressPoint=askEditTextAddressList[askEditTextSelectedAddress]
           viewMap.coreObject!!.executeCoreCommand(
             "addAddressPoint",
-            address, addressPoint.name,
+            address, addressPoint.nameUniquified,
             addressPoint.longitude.toString(), addressPoint.latitude.toString(),
             group
           )
