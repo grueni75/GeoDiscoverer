@@ -101,13 +101,11 @@ class ViewContentDialog(viewContent: ViewContent) {
       )
     }
     if (viewModel.askTitle != "") {
-      if ((viewModel.askEditTextValue != "")||(viewModel.askEditTextHint != "")) {
-        val editTextValue = remember { mutableStateOf(viewModel.askEditTextValue) }
-        val editTextTag = remember { mutableStateOf(viewModel.askEditTextTag) }
+      if (viewModel.askEditTextEnabled) {
         askAlertDialog(
           viewModel = viewModel,
           confirmHandler = {
-            viewModel.askEditTextConfirmHandler(editTextValue.value, editTextTag.value)
+            viewModel.askEditTextConfirmHandler(viewModel.askEditTextValue, viewModel.askEditTextTag)
           },
           content = {
             Column(
@@ -115,9 +113,9 @@ class ViewContentDialog(viewContent: ViewContent) {
                 .fillMaxWidth()
                 .heightIn(max = height - layoutParams.dialogButonRowHeight)
             ) {
-              viewModel.askEditTextValueChangeHandler(editTextValue.value)
+              viewModel.askEditTextValueChangeHandler(viewModel.askEditTextValue)
               GDTextField(
-                value = editTextValue.value,
+                value = viewModel.askEditTextValue,
                 textStyle = MaterialTheme.typography.bodyLarge,
                 singleLine = true,
                 label = {
@@ -126,12 +124,12 @@ class ViewContentDialog(viewContent: ViewContent) {
                   )
                 },
                 onValueChange = {
-                  editTextValue.value = it
+                  viewModel.setEditTextValue(it)
                   viewModel.askEditTextValueChangeHandler(it)
                 },
                 trailingIcon = {
                   IconButton(
-                    onClick = { editTextValue.value="" }
+                    onClick = { viewModel.setEditTextValue("") }
                   ) {
                     Icon(
                       imageVector = Icons.Default.Clear,
@@ -166,7 +164,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                   BoxWithConstraints() {
                     textFieldWidth.value=this.maxWidth
                     GDTextField(
-                      value = editTextTag.value,
+                      value = viewModel.askEditTextTag,
                       textStyle = MaterialTheme.typography.bodyLarge,
                       singleLine = true,
                       label = {
@@ -175,7 +173,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                         )
                       },
                       onValueChange = {
-                        editTextTag.value = it
+                        viewModel.setEditTextTag(it)
                       },
                       trailingIcon = {
                         Row(
@@ -183,7 +181,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                             .align(Alignment.CenterEnd),
                         ) {
                           IconButton(
-                            onClick = { editTextTag.value="" }
+                            onClick = { viewModel.setEditTextTag("") }
                           ) {
                             Icon(
                               imageVector = Icons.Default.Clear,
@@ -215,7 +213,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                     for (tag in viewModel.askEditTextTagList) {
                       GDDropdownMenuItem(
                         onClick = {
-                          editTextTag.value=tag
+                          viewModel.setEditTextTag(tag)
                           editTextTagListExpanded.value = false
                         }
                       ) {
@@ -266,7 +264,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                           .fillMaxWidth()
                           .padding(horizontal = layoutParams.listIndent),
                         onClick = {
-                          editTextValue.value=item.name
+                          viewModel.setEditTextValue(item.name)
                           viewModel.askEditTextAddressHandler(index, item)
                         }
                       ) {

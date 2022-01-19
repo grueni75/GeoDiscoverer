@@ -93,6 +93,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     private set
   var askMessage: String by mutableStateOf("")
     private set
+  var askEditTextEnabled: Boolean by mutableStateOf(false)
+    private set
   var askEditTextValue: String by mutableStateOf("")
     private set
   var askEditTextTag: String by mutableStateOf("")
@@ -215,6 +217,16 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
+  fun setEditTextValue(value: String) {
+    askEditTextValue=value
+  }
+
+  @Synchronized
+  fun setEditTextTag(tag: String) {
+    askEditTextTag=tag
+  }
+
+  @Synchronized
   private fun fillAddressList() {
     if (askEditTextAddressListBusy) {
       //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","poi search ongoing, deferring")
@@ -240,8 +252,9 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun askForAddressPointAdd(address: String, confirmHandler: (String, String) -> Unit) {
+  fun askForAddressPointAdd(address: String, enablePOISearch: Boolean, confirmHandler: (String, String) -> Unit) {
     closeQuestion()
+    askEditTextEnabled=true
     if (address!="")
       askEditTextValue = address
     askEditTextHint = viewMap.getString(R.string.dialog_address_input_hint)
@@ -249,72 +262,76 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     askConfirmText = viewMap.getString(R.string.dialog_lookup)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
     askEditTextConfirmHandler = confirmHandler
-    askEditTextCategoryHandler = { index, category, skipDeselect ->
+    if (!enablePOISearch) {
+      askEditTextCategoryList.clear()
+    } else {
+      askEditTextCategoryHandler = { index, category, skipDeselect ->
 
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","index=${index} selected=${askEditTextSelectedCategory} category=${category}")
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","index=${index} selected=${askEditTextSelectedCategory} category=${category}")
 
-      // Decide on the path
-      if (category=="..") {
-        askEditTextCategoryPath.removeLast()
-      } else if (category!="") {
-        askEditTextCategoryPath.add(category)
-      } else {
-        askEditTextCategoryPath.clear()
-      }
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","before: askEditTextCategoryPath.size=${askEditTextCategoryPath.size}")
-
-      // In case this category was seleted already, deselect it
-      if ((index==askEditTextSelectedCategory)&&(category!="")&&(category!="..")&&(!skipDeselect)) {
-        askEditTextSelectedCategory = -1
-        askEditTextCategoryPath.removeLast()
-      }
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","after: askEditTextCategoryPath.size=${askEditTextCategoryPath.size}")
-
-      // Check if new categories exists at this path
-      val nextCategories = GDApplication.backgroundTask.fillPOICategories(askEditTextCategoryPath)
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","categories=${nextCategories.size}")
-
-      // Find the nearby point of interests with the selected category
-      fillAddressList()
-
-      // Fill the next categories if more exists
-      askEditTextSelectedCategory=-1
-      if (nextCategories.isNotEmpty()) {
-        askEditTextCategoryList.clear()
-        if (askEditTextCategoryPath.isNotEmpty()) {
-          askEditTextCategoryList.add("..")
-        }
-        askEditTextCategoryList.addAll(nextCategories)
-      } else {
-        if (askEditTextCategoryPath.isNotEmpty()) {
+        // Decide on the path
+        if (category == "..") {
           askEditTextCategoryPath.removeLast()
-          if (index==askEditTextSelectedCategory) {
-            askEditTextSelectedCategory=-1
-          } else {
-            askEditTextSelectedCategory=index
+        } else if (category != "") {
+          askEditTextCategoryPath.add(category)
+        } else {
+          askEditTextCategoryPath.clear()
+        }
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","before: askEditTextCategoryPath.size=${askEditTextCategoryPath.size}")
+
+        // In case this category was seleted already, deselect it
+        if ((index == askEditTextSelectedCategory) && (category != "") && (category != "..") && (!skipDeselect)) {
+          askEditTextSelectedCategory = -1
+          askEditTextCategoryPath.removeLast()
+        }
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","after: askEditTextCategoryPath.size=${askEditTextCategoryPath.size}")
+
+        // Check if new categories exists at this path
+        val nextCategories = GDApplication.backgroundTask.fillPOICategories(askEditTextCategoryPath)
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","categories=${nextCategories.size}")
+
+        // Find the nearby point of interests with the selected category
+        fillAddressList()
+
+        // Fill the next categories if more exists
+        askEditTextSelectedCategory = -1
+        if (nextCategories.isNotEmpty()) {
+          askEditTextCategoryList.clear()
+          if (askEditTextCategoryPath.isNotEmpty()) {
+            askEditTextCategoryList.add("..")
+          }
+          askEditTextCategoryList.addAll(nextCategories)
+        } else {
+          if (askEditTextCategoryPath.isNotEmpty()) {
+            askEditTextCategoryPath.removeLast()
+            if (index == askEditTextSelectedCategory) {
+              askEditTextSelectedCategory = -1
+            } else {
+              askEditTextSelectedCategory = index
+            }
           }
         }
       }
-    }
-    var selectedCategoryText=""
-    if (askEditTextSelectedCategory!=-1) {
-      if (askEditTextSelectedCategory<askEditTextCategoryList.size) {
-        selectedCategoryText=askEditTextCategoryList[askEditTextSelectedCategory]
+      var selectedCategoryText = ""
+      if (askEditTextSelectedCategory != -1) {
+        if (askEditTextSelectedCategory < askEditTextCategoryList.size) {
+          selectedCategoryText = askEditTextCategoryList[askEditTextSelectedCategory]
+        } else {
+          askEditTextSelectedCategory = -1
+        }
       } else {
-        askEditTextSelectedCategory=-1
+        if (askEditTextCategoryPath.size > 0)
+          selectedCategoryText = askEditTextCategoryPath.removeLast()
       }
-    } else {
-      if (askEditTextCategoryPath.size>0)
-        selectedCategoryText=askEditTextCategoryPath.removeLast()
-    }
-    askEditTextCategoryHandler(askEditTextSelectedCategory,selectedCategoryText,true)
-    askEditTextAddressHandler = { index, addressPoint ->
-      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${addressPoint.name} selected")
-      askEditTextSelectedAddress=index
-    }
-    askEditTextRadiusHandler = { radius ->
-      setRadius(radius)
-      fillAddressList()
+      askEditTextCategoryHandler(askEditTextSelectedCategory, selectedCategoryText, true)
+      askEditTextAddressHandler = { index, addressPoint ->
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "${addressPoint.name} selected")
+        askEditTextSelectedAddress = index
+      }
+      askEditTextRadiusHandler = { radius ->
+        setRadius(radius)
+        fillAddressList()
+      }
     }
     askMessage = viewMap.getString(R.string.dialog_address)
     askTitle = viewMap.getString(R.string.dialog_add_address_point_title)
@@ -323,6 +340,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   @Synchronized
   fun askForAddressPointEdit(pointName: String, confirmHandler: (String, String) -> Unit) {
     closeQuestion()
+    askEditTextEnabled=true
     askEditTextValue = pointName
     askMessage = viewMap.getString(R.string.dialog_name_label)
     configureAddressPointTag()
@@ -350,6 +368,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   @Synchronized
   fun askForRouteName(gpxName: String, confirmHandler: (String, String) -> Unit) {
     closeQuestion()
+    askEditTextEnabled=true
     askEditTextValue = gpxName
     askEditTextValueChangeHandler = { value ->
       val dstFilename = GDCore.getHomeDirPath() + "/Route/" + value
@@ -787,6 +806,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     integratedListAddItemHandler = {
       askForAddressPointAdd(
         "",
+        true
       ) { address, group ->
 
         // Add POI directly if one is selected
@@ -850,6 +870,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun closeQuestion() {
+    askEditTextEnabled=false
     askEditTextValueChangeHandler = {}
     askEditTextCategoryHandler = {_,_,_->}
     askEditTextAddressHandler = {_,_->}
@@ -875,6 +896,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   fun openIntegratedList() {
     integratedListVisible=true
     viewMap.coreObject!!.executeCoreCommand("setWidgetlessMode","1")
+    setEditTextValue("")
   }
 
   @Synchronized

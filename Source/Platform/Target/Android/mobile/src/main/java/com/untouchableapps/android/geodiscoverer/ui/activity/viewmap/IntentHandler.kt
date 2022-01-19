@@ -163,7 +163,7 @@ class IntentHandler(viewMap: ViewMap) : CoroutineScope by MainScope() {
     // Handle the intent
     if (isAddress) {
 
-      viewMap.viewModel.askForAddressPointAdd(text) { address, group ->
+      viewMap.viewModel.askForAddressPointAdd(text,false) { address, group ->
         GDApplication.backgroundTask.getLocationFromAddress(
           context=viewMap,
           name=subject,
