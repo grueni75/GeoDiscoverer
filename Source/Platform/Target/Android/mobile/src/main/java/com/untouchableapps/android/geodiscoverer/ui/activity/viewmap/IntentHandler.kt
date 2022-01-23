@@ -239,7 +239,7 @@ class IntentHandler(viewMap: ViewMap) : CoroutineScope by MainScope() {
 */
     }
     if (isGPXFromWeb) {
-      if (uri!=null) downloadRoute(uri!!)
+      if (uri!=null) downloadRoute(uri)
     }
     if (isGPXFromFile) {
 

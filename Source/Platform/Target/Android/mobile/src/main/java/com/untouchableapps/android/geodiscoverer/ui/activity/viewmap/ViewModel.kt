@@ -481,12 +481,15 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     // Obtain the list of tracks in the folder
     val folderFile = File(viewMap.coreObject!!.homePath + "/Track")
     val routes = mutableListOf<String>()
-    for (file in folderFile.listFiles()) {
-      if (!file.isDirectory
-        && file.name.substring(file.name.length - 1) != "~"
-        && file.name.substring(file.name.length - 4) != ".bin"
-      ) {
-        routes.add(file.name)
+    val files = folderFile.listFiles()
+    if (files!=null) {
+      for (file in files) {
+        if (!file.isDirectory
+          && file.name.substring(file.name.length - 1) != "~"
+          && file.name.substring(file.name.length - 4) != ".bin"
+        ) {
+          routes.add(file.name)
+        }
       }
     }
     routes.sort()
@@ -511,12 +514,15 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     // Obtain the list of file in the folder
     val folderFile = File(viewMap.coreObject!!.homePath + "/Route")
     val routes = mutableListOf<String>()
-    for (file in folderFile.listFiles()) {
-      if (!file.isDirectory
-        && file.name.substring(file.name.length - 1) != "~"
-        && file.name.substring(file.name.length - 4) != ".bin"
-      ) {
-        routes.add(file.name)
+    val files = folderFile.listFiles()
+    if (files!=null) {
+      for (file in files) {
+        if (!file.isDirectory
+          && file.name.substring(file.name.length - 1) != "~"
+          && file.name.substring(file.name.length - 4) != ".bin"
+        ) {
+          routes.add(file.name)
+        }
       }
     }
     routes.sort()
@@ -540,29 +546,32 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     // Obtain the list of file in the folder
     val folderFile: File = File(viewMap.coreObject!!.homePath + "/Log")
     val logs = mutableListOf<String>()
-    for (file in folderFile.listFiles()) {
-      if (!file.isDirectory
-        && file.name.substring(file.name.length - 1) != "~"
-        && file.name != "send.log"
-        && !file.name.endsWith(".dmp")
-      ) {
-        logs.add(file.name)
+    val files = folderFile.listFiles()
+    if (files!=null) {
+      for (file in files) {
+        if (!file.isDirectory
+          && file.name.substring(file.name.length - 1) != "~"
+          && file.name != "send.log"
+          && !file.name.endsWith(".dmp")
+        ) {
+          logs.add(file.name)
+        }
       }
     }
     logs.sortWith(
       object : Comparator<String> {
         var stringComparator = Collections.reverseOrder<String>()
         override fun compare(lhs: String, rhs: String): Int {
-          var lhs = lhs
-          var rhs = rhs
+          var lhs2 = lhs
+          var rhs2 = rhs
           val pattern = Regex("^(.*)-(\\d\\d\\d\\d\\d\\d\\d\\d-\\d\\d\\d\\d\\d\\d)\\.log$")
           if (lhs.matches(pattern)) {
-            lhs = lhs.replace(pattern, "$2-$1.log")
+            lhs2 = lhs.replace(pattern, "$2-$1.log")
           }
           if (rhs.matches(pattern)) {
-            rhs = rhs.replace(pattern, "$2-$1.log")
+            rhs2 = rhs.replace(pattern, "$2-$1.log")
           }
-          return stringComparator.compare(lhs, rhs)
+          return stringComparator.compare(lhs2, rhs2)
         }
       }
     )
@@ -667,6 +676,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun fillAddressPoints(fillTabs: Boolean = false) {
+    integratedListTitle=viewMap.getString(R.string.dialog_manage_address_points_title)
     integratedListPOIItems.clear()
     setPOIFilterEnabled(false)
     val selectedGroupName = viewMap.coreObject!!.configStoreGetStringValue("Navigation", "selectedAddressPointGroup")
@@ -691,7 +701,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       }
       //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","tab size in fillAddressPoints: ${integratedListTabs.size}")
     }
-    val unsortedNames = viewMap.coreObject!!.configStoreGetAttributeValues("Navigation/AddressPoint", "name").toMutableList()
     integratedListSelectedItem=-1
     integratedListItems.clear()
     val addressPoints = GDApplication.backgroundTask.fillAddressPoints()
@@ -714,6 +723,14 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   private fun fillPOIs() {
+
+    // Set the title
+    if (integratedListPOICategoryPath.isEmpty())
+      integratedListTitle=viewMap.getString(R.string.dialog_manage_address_points_title)
+    else {
+      integratedListTitle=integratedListPOICategoryPath.last()
+    }
+
 
     // Do not continue if search already running
     integratedListItems.clear()
@@ -759,7 +776,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     fillAddressPoints(true)
 
     // Fill the remaining fields
-    integratedListTitle=viewMap.getString(R.string.dialog_manage_address_points_title)
     integratedListSelectItemHandler={
       if (integratedListSelectedTab==integratedListTabs.size-1) {
         viewMap.coreObject!!.executeCoreCommand("setTargetAtGeographicCoordinate",
@@ -796,11 +812,10 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       }
     }
     integratedListDeleteItemHandler={
-      var name=""
-      if (integratedListSelectedTab==integratedListTabs.size-1)
-        name=integratedListPOIItems[it].left
+      var name=if (integratedListSelectedTab==integratedListTabs.size-1)
+        integratedListPOIItems[it].left
       else
-        name=integratedListItems[it].left
+        integratedListItems[it].left
       viewMap.coreObject!!.executeCoreCommand("removeAddressPoint", name)
       // Item is not removed from the list
     }

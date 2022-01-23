@@ -61,7 +61,7 @@ class ViewContentDialog(viewContent: ViewContent) {
     viewModel: ViewModel,
     height: Dp
   ) {
-    val scope = rememberCoroutineScope()
+    //val scope = rememberCoroutineScope()
     if (viewModel.progressMax != -1) {
       AlertDialog(
         modifier = Modifier
@@ -236,7 +236,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                 modifier = Modifier
                   .fillMaxWidth()
               ) {
-                itemsIndexed(viewModel.askMultipleChoiceList) { index, item ->
+                itemsIndexed(viewModel.askMultipleChoiceList) { _, item ->
                   val checked = remember { mutableStateOf(item.checked) }
                   Row(
                     modifier = Modifier
@@ -284,7 +284,7 @@ class ViewContentDialog(viewContent: ViewContent) {
                 modifier = Modifier
                   .fillMaxWidth(),
               ) {
-                itemsIndexed(viewModel.askSingleChoiceList) { index, item ->
+                itemsIndexed(viewModel.askSingleChoiceList) { _, item ->
                   TextButton(
                     onClick = {
                       viewModel.askSingleChoiceConfirmHandler(item)

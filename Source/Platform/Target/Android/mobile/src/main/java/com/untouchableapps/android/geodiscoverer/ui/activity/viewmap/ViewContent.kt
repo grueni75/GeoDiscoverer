@@ -198,7 +198,7 @@ class ViewContent(viewMap: ViewMap) {
   @ExperimentalMaterialApi
   @Composable
   private fun screenContent(viewModel: ViewModel, maxScreenWidth: Dp, maxScreenHeight: Dp) {
-    val scope = rememberCoroutineScope()
+    //val scope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
     Box(
       modifier = Modifier

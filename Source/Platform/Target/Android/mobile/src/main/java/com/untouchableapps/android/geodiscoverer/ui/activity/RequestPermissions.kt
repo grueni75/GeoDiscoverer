@@ -43,6 +43,7 @@ import com.untouchableapps.android.geodiscoverer.ui.theme.AndroidTheme
 import java.util.*
 import kotlin.system.exitProcess
 
+@ExperimentalMaterial3Api
 class RequestPermissions : ComponentActivity() {
 
   val requestPermissionLauncher = registerForActivityResult(
@@ -53,7 +54,6 @@ class RequestPermissions : ComponentActivity() {
     }
   }
 
-  @ExperimentalMaterial3Api
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
@@ -93,7 +93,7 @@ class RequestPermissions : ComponentActivity() {
           title = { Text(stringResource(id = R.string.app_name)) }
         )
       },
-      content = { innerPadding ->
+      content = { _ ->
         Column(
           modifier = Modifier
             .padding(10.dp)

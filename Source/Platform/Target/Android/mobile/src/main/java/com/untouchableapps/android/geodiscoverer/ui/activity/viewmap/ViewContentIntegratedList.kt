@@ -240,8 +240,7 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
                           delay(layoutParams.rippleWaitTime) // ugly hack to avoid ripple continue after selecting an item
                           viewModel.integratedListPOICategoryHandler(index, item)
                         }
-                      },
-                      viewModel = viewModel
+                      }
                     ) { modifier ->
                       Text(
                         modifier = modifier,
@@ -285,7 +284,9 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
                     .fillMaxWidth(),
                   text = viewModel.integratedListTitle,
                   style = MaterialTheme.typography.titleLarge,
-                  textAlign = TextAlign.Center
+                  textAlign = TextAlign.Center,
+                  softWrap = false,
+                  overflow = TextOverflow.Ellipsis
                 )
                 if (viewModel.integratedListTabs.size > 0) {
                   val tabListState = rememberLazyListState()
@@ -390,8 +391,7 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
         selectHandler = {
           viewModel.selectIntegratedListItem(index)
           viewModel.integratedListSelectItemHandler(index)
-        },
-        viewModel = viewModel
+        }
       ) { modifier ->
         itemText(modifier, item, viewModel)
       }
@@ -465,8 +465,7 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
                 selectHandler = {
                   viewModel.selectIntegratedListItem(index)
                   viewModel.integratedListSelectItemHandler(index)
-                },
-                viewModel = viewModel
+                }
               ) { modifier ->
                 itemText(modifier,item,viewModel)
               }
@@ -480,7 +479,7 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
   // Creates the content for an item for the integrated list
   @ExperimentalMaterialApi
   @Composable
-  fun itemContent(index: Int, selected: Boolean, viewModel: ViewModel, selectHandler: (Int)->Unit, text: @Composable (Modifier)->Unit) {
+  fun itemContent(index: Int, selected: Boolean, selectHandler: (Int)->Unit, text: @Composable (Modifier)->Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     Box(
       modifier = Modifier

@@ -257,9 +257,6 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   var coreMessageHandler = CoreMessageHandler(this)
 
   // Creates the activity
-  @ExperimentalMaterialApi
-  @ExperimentalAnimationApi
-  @ExperimentalMaterial3Api
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
@@ -457,7 +454,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     )
     cancel() // Stop all coroutines
     (application as GDApplication).setActivity(null, null)
-    if (intentHandler!=null) intentHandler!!.onDestroy()
+    intentHandler.onDestroy()
     //if (downloadCompleteReceiver != null) unregisterReceiver(downloadCompleteReceiver)
     if (exitRequested) System.exit(0)
     if (restartRequested) {

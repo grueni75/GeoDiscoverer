@@ -83,7 +83,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
     // Add all available POIs
     launch() {
       withContext(Dispatchers.IO) {
-        val mapsPath = coreObject!!.homePath + "/Server/Mapsforge/Map"
+        val mapsPath = coreObject.homePath + "/Server/Mapsforge/Map"
         val mapsDir = File(mapsPath)
         val children = mapsDir.listFiles()
         val poiFiles = mutableListOf<File>()
