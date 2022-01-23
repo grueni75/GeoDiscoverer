@@ -381,6 +381,64 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
     }
   }
 
+  // Adds all current address points
+  fun fillAddressPoints(): List<AddressPointItem> {
+
+    // Get all address points for the currently selected address group
+    var result = mutableListOf<AddressPointItem>()
+    val selectedGroupName = coreObject!!.configStoreGetStringValue("Navigation", "selectedAddressPointGroup")
+    val unsortedNames = coreObject!!.configStoreGetAttributeValues("Navigation/AddressPoint", "name").toMutableList()
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","selectedGroupName=${selectedGroupName} size=${unsortedNames.size}")
+    while (unsortedNames.size > 0) {
+      var newestName = unsortedNames.removeFirst()
+      val foreignRemovalRequest: String = coreObject!!.configStoreGetStringValue(
+        "Navigation/AddressPoint[@name='$newestName']",
+        "foreignRemovalRequest"
+      )
+      val groupName: String = coreObject!!.configStoreGetStringValue(
+        "Navigation/AddressPoint[@name='$newestName']",
+        "group"
+      )
+      if (groupName == selectedGroupName && foreignRemovalRequest != "1") {
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","newestName=${newestName} foreignRemovalRequest=${foreignRemovalRequest} groupName=${groupName}")
+
+        // Create the address point
+        val latitude: String = coreObject!!.configStoreGetStringValue(
+          "Navigation/AddressPoint[@name='$newestName']",
+          "lat"
+        )
+        val longitude: String = coreObject!!.configStoreGetStringValue(
+          "Navigation/AddressPoint[@name='$newestName']",
+          "lng"
+        )
+        val distanceInfo = coreObject!!.executeCoreCommand("computeDistanceToAddressPoint",newestName)
+        val distanceFields = distanceInfo.split(";")
+        val ap=AddressPointItem(
+          nameOriginal = newestName,
+          nameUniquified = newestName,
+          distanceRaw = distanceFields[0].toDouble(),
+          distanceFormatted = distanceFields[1],
+          latitude = latitude.toDouble(),
+          longitude = longitude.toDouble()
+        )
+
+        // Sort it into the list according how far away it is
+        var inserted=false
+        for (i in result.indices) {
+          if (ap.distanceRaw<result[i].distanceRaw) {
+            result.add(i, ap)
+            inserted=true
+            break
+          }
+        }
+        if (!inserted) {
+          result.add(ap)
+        }
+      }
+    }
+    return result
+  }
+
   // Adds all categories
   fun fillPOICategories(categoryPath: List<String>): List<String> {
     if (!poiInitComplete)

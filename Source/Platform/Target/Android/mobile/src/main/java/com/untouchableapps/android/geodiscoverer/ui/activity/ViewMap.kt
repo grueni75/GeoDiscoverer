@@ -51,11 +51,15 @@ import androidx.core.content.FileProvider
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
+import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask.AddressPointItem
 import com.untouchableapps.android.geodiscoverer.logic.GDService
 import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.*
 import com.untouchableapps.android.geodiscoverer.ui.component.GDDialog
 import kotlinx.coroutines.*
+import org.mapsforge.core.model.LatLong
 import java.io.File
+import java.lang.Exception
+import java.net.URI
 
 @ExperimentalGraphicsApi
 @ExperimentalMaterialApi
@@ -357,9 +361,27 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
         }
       },
       ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Directions, getString(R.string.brouter)) {
-        val url = "http://localhost:8383/brouter-web/index.html"
+
+        // Hand over all currently available address points
+        val t=coreObject!!.executeCoreCommand("getMapPos")
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "t=$t")
+        val currentPos=t.split(",")
+        val zoomLevel=coreObject!!.executeCoreCommand("getMapServerZoomLevel")
+        var path = "http://localhost:8383/brouter-web/index.html#map=${zoomLevel}/${currentPos[0]}/${currentPos[1]}/GeoDiscoverer"
+        var pois = ""
+        val addressPoints = GDApplication.backgroundTask.fillAddressPoints()
+        for (ap in addressPoints) {
+          if (pois != "") pois += ";"
+          pois += "${ap.longitude},${ap.latitude},${Uri.encode(ap.nameUniquified)}"
+        }
+        if (pois != "") {
+          path += "&pois=$pois"
+        }
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "path=$path")
+
+        // Load the brouter
         val i = Intent(Intent.ACTION_VIEW)
-        i.data = Uri.parse(url)
+        i.data = Uri.parse(path)
         startActivity(i)
       },
       ViewContentNavigationDrawer.NavigationItem(null, getString(R.string.general), { }),

@@ -732,8 +732,10 @@ std::string Commander::execute(std::string cmd) {
       double distance=pos->computeDistance(target);
       core->getMapEngine()->unlockMapPos();
       std::string value,unit;
-      core->getUnitConverter()->formatMeters(distance,value,unit);
-      result=value+" "+unit;
+      core->getUnitConverter()->formatMeters(distance,value,unit);      
+      std::stringstream resultStream;
+      resultStream<<distance<<";"<<value<<" "<<unit;
+      result=resultStream.str();
     }
     cmdExecuted=true;
   }
@@ -990,6 +992,12 @@ std::string Commander::execute(std::string cmd) {
     posStr << pos->getLat() << "," << pos->getLng();
     core->getMapEngine()->unlockMapPos();
     result=posStr.str();
+    cmdExecuted=true;
+  }
+  if (cmdName=="getMapServerZoomLevel") {
+    std::stringstream resultStream;
+    resultStream<<core->getMapSource()->getServerZoomLevel(core->getMapEngine()->getZoomLevel());
+    result=resultStream.str();
     cmdExecuted=true;
   }
 

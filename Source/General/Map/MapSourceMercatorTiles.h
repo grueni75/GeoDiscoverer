@@ -136,6 +136,9 @@ public:
   // Returns the map tile for the given mercator coordinates
   MapTile *fetchMapTile(Int z, Int x, Int y);
 
+  // Returns the zoom level of the server
+  virtual Int getServerZoomLevel(Int mapZoomLevel);
+
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {
     core->getThread()->lockMutex(accessMutex, file, line);
@@ -172,6 +175,7 @@ public:
   Int getMinZoomLevel() const {
     return minZoomLevel;
   }
+
 };
 
 } /* namespace GEODISCOVERER */

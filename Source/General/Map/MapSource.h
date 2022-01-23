@@ -340,6 +340,10 @@ public:
   MapSourceType getType() {
     return type;
   }
+
+  virtual Int getServerZoomLevel(Int mapZoomLevel) {
+    return mapZoomLevel;
+  }
 };
 
 }

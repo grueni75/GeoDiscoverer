@@ -1185,4 +1185,20 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(Int z, Int x, Int y) {
   return fetchMapTile(pos,zMap);
 }
 
+// Returns the zoom level of the server
+Int MapSourceMercatorTiles::getServerZoomLevel(Int mapZoomLevel) {
+  Int serverZoomLevel=mapZoomLevel;
+  std::list<MapTileServer*> *tileServers=mapDownloader->getTileServers();
+  for (std::list<MapTileServer*>::iterator j=tileServers->begin();j!=tileServers->end();j++) {
+    MapTileServer *tileServer=*j;
+    //DEBUG("minZoomLevelServer=%d maxZoomLevelServer=%d minZoomLevelMap=%d",tileServer->getMinZoomLevelServer(),tileServer->getMaxZoomLevelServer(),tileServer->getMinZoomLevelMap());
+    if ((mapZoomLevel>=tileServer->getMinZoomLevelMap())&&(mapZoomLevel<=tileServer->getMaxZoomLevelMap())) {
+      serverZoomLevel=tileServer->getMinZoomLevelServer()+mapZoomLevel-tileServer->getMinZoomLevelMap();
+      break;
+    }
+  }
+  return serverZoomLevel;
+}
+
+
 } /* namespace GEODISCOVERER */

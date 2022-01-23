@@ -641,31 +641,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   }
 
   @Synchronized
-  fun addAddressPoint(name: String, distance: String) {
-    var inserted=false
-    for (i in integratedListItems.indices) {
-      if (name<integratedListItems[i].left) {
-        integratedListItems.add(i, IntegratedListItem(
-          left=name,
-          right=distance,
-          index=-1, // index need to be set later
-          isPOI=false
-        ))
-        inserted=true
-        break
-      }
-    }
-    if (!inserted) {
-      integratedListItems.add(IntegratedListItem(
-        left=name,
-        right=distance,
-        index=-1,
-        isPOI=false
-      ))
-    }
-  }
-
-  @Synchronized
   private fun collectAddressPointGroups(groups: MutableList<String>): String {
     val selectedGroup = viewMap.coreObject!!.configStoreGetStringValue("Navigation", "selectedAddressPointGroup")
     val names = viewMap.coreObject!!.configStoreGetAttributeValues("Navigation/AddressPoint", "name").toMutableList()
@@ -719,27 +694,19 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     val unsortedNames = viewMap.coreObject!!.configStoreGetAttributeValues("Navigation/AddressPoint", "name").toMutableList()
     integratedListSelectedItem=-1
     integratedListItems.clear()
-    while (unsortedNames.size > 0) {
-      var newestName = unsortedNames.removeFirst()
-      val foreignRemovalRequest: String = viewMap.coreObject!!.configStoreGetStringValue(
-        "Navigation/AddressPoint[@name='$newestName']",
-        "foreignRemovalRequest"
-      )
-      val groupName: String = viewMap.coreObject!!.configStoreGetStringValue(
-        "Navigation/AddressPoint[@name='$newestName']",
-        "group"
-      )
-      if (groupName == selectedGroupName && foreignRemovalRequest != "1") {
-        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","point: ${newestName}")
-        val distance = viewMap.coreObject!!.executeCoreCommand("computeDistanceToAddressPoint",newestName)
-        addAddressPoint(newestName, distance)
-      }
-    }
-    for (i in integratedListItems.indices) {
-      integratedListItems[i].index=i
+    val addressPoints = GDApplication.backgroundTask.fillAddressPoints()
+    for (i in addressPoints.indices) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","adding ${addressPoints[i].nameUniquified}")
+      integratedListItems.add(IntegratedListItem(
+        left=addressPoints[i].nameUniquified,
+        right=addressPoints[i].distanceFormatted,
+        isPOI=false,
+        index=i,
+        longitude=addressPoints[i].longitude,
+        latitude=addressPoints[i].latitude
+      ))
       if ((selectedItem!="")&&(integratedListItems[i].left==selectedItem)) {
         integratedListSelectedItem=i
-        break
       }
     }
     //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","list updated")
