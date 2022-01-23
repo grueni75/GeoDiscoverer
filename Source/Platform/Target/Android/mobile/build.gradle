@@ -132,6 +132,7 @@ dependencies {
     implementation "androidx.compose.material3:material3:1.0.0-alpha02"
     implementation "androidx.compose.material:material-icons-extended:1.0.5"
     implementation 'com.godaddy.android.colorpicker:compose-color-picker:0.2.1'
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.24.0-alpha"
     // for brouter
     implementation 'net.sf.kxml:kxml2:2.3.0'
     implementation 'com.caverock:androidsvg:1.4'

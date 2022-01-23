@@ -33,6 +33,8 @@ import android.net.Uri
 import android.os.*
 import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
@@ -46,6 +48,8 @@ import java.util.*
 
 @ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
 class IntentHandler(viewMap: ViewMap) : CoroutineScope by MainScope() {
 
   // References
@@ -163,7 +167,7 @@ class IntentHandler(viewMap: ViewMap) : CoroutineScope by MainScope() {
     // Handle the intent
     if (isAddress) {
 
-      viewMap.viewModel.askForAddressPointAdd(text,false) { address, group ->
+      viewMap.viewModel.askForAddressPointAdd(text) { address, group ->
         GDApplication.backgroundTask.getLocationFromAddress(
           context=viewMap,
           name=subject,

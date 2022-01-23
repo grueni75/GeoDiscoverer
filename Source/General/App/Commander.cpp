@@ -719,6 +719,24 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="computeDistanceToAddressPoint") {
+    NavigationPoint point;
+    bool found=true;
+    point.setName(args[0]);
+    result="";
+    if (point.readFromConfig("Navigation/AddressPoint")) {
+      MapPosition target;
+      target.setLat(point.getLat());
+      target.setLng(point.getLng());
+      MapPosition *pos=core->getMapEngine()->lockMapPos(__FILE__,__LINE__);
+      double distance=pos->computeDistance(target);
+      core->getMapEngine()->unlockMapPos();
+      std::string value,unit;
+      core->getUnitConverter()->formatMeters(distance,value,unit);
+      result=value+" "+unit;
+    }
+    cmdExecuted=true;
+  }
   if (cmdName=="formatMeters") {
     std::string value,unit;
     core->getUnitConverter()->formatMeters(atof(args[0].c_str()),value,unit);

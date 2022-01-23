@@ -37,6 +37,17 @@ GraphicObject::GraphicObject(Screen *screen, bool deletePrimitivesOnDestruct) : 
 
 }
 
+// Returns the key for the given primitive
+GraphicPrimitiveKey GraphicObject::getPrimitiveKey(GraphicPrimitive *primitive) {
+  GraphicPrimitiveMap::iterator i;
+  for(i = primitiveMap.begin(); i!=primitiveMap.end(); i++) {
+    if (i->second==primitive) {
+      return i->first;
+    }
+  }
+  return 0;
+}
+
 // Adds a primitive
 GraphicPrimitiveKey GraphicObject::addPrimitive(GraphicPrimitive *primitive)
 {

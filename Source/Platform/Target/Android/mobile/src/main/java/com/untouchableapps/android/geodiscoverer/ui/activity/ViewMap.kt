@@ -58,7 +58,9 @@ import kotlinx.coroutines.*
 import java.io.File
 
 @ExperimentalGraphicsApi
+@ExperimentalMaterialApi
 @ExperimentalMaterial3Api
+@ExperimentalAnimationApi
 class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   // Callback when a called activity finishes
@@ -286,6 +288,9 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
     // Init the child objects
     intentHandler.onCreate()
+    if (coreObject!!.coreEarlyInitComplete) {
+      viewModel.onCoreEarlyInitComplete()
+    }
 
     // Create the content for the navigation drawer
     val navigationItems = arrayOf(

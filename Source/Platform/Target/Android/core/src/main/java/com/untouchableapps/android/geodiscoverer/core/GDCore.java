@@ -120,6 +120,9 @@ public class GDCore implements
   /** Indicates if the core is initialized */
   public boolean coreInitialized = false;
 
+  /** Indicates if the core has finished its early initialization */
+  public boolean coreEarlyInitComplete = false;
+
   /** Indicates if the core has finished its late initialization */
   public boolean coreLateInitComplete = false;
 
@@ -604,6 +607,7 @@ public class GDCore implements
     coreLifeCycleOngoing=true;
     coreStopped=true;
     coreInitialized=false;
+    coreEarlyInitComplete=false;
     coreLateInitComplete=false;
     coreLock.unlock();
 
@@ -789,6 +793,12 @@ public class GDCore implements
       if (isWatch) {
         appIf.sendWearCommand("setWearDeviceAlive(1)");
       }
+      cmdExecuted=false; // forward message to activity
+    }
+    if (cmd.equals("earlyInitComplete()")) {
+      coreLock.lock();
+      coreEarlyInitComplete=true;
+      coreLock.unlock();
       cmdExecuted=false; // forward message to activity
     }
     if (cmd.startsWith("setFormattedNavigationInfo(")) {

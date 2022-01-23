@@ -32,12 +32,7 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -47,9 +42,9 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
+import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
@@ -57,8 +52,10 @@ import com.untouchableapps.android.geodiscoverer.ui.component.*
 import kotlinx.coroutines.*
 import kotlin.math.roundToInt
 
+@ExperimentalAnimationApi
 @ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
+@ExperimentalMaterialApi
 class ViewContent(viewMap: ViewMap) {
 
   // Parameters
@@ -81,9 +78,9 @@ class ViewContent(viewMap: ViewMap) {
     val askMaxContentHeight = 140.dp
     val askMaxDropdownMenuHeight = 200.dp
     val askMultipleChoiceMessageOffset = 15.dp
-    val askRadiusWidth = 50.dp
-    val dialogButonRowHeight = 200.dp
-    val integratedListHeight = 400.dp
+    val poiSearchRadiusWidth = 120.dp
+    val dialogButtonRowHeight = 200.dp
+    val integratedListHeight = 450.dp
     val integratedListWidth = 400.dp
     val integratedListCloseRowHeight = 45.dp
     val integratedListItemHeight = 60.dp
@@ -92,6 +89,7 @@ class ViewContent(viewMap: ViewMap) {
     val integratedListFABPadding = 20.dp
     val messageBackgroundColor = Color.Black.copy(alpha = 0.8f)
     val rippleWaitTime = 300L
+    val progressIndicatorHeight = 7.dp
   }
   val layoutParams = LayoutParams()
 
@@ -255,107 +253,7 @@ class ViewContent(viewMap: ViewMap) {
           slideOutVertically(targetOffsetY = { +it }),
         visible = viewModel.integratedListVisible
       ) {
-        Surface(
-          modifier = Modifier
-            .height(
-              if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                maxScreenHeight
-              else
-                layoutParams.integratedListHeight
-            )
-            .width(
-              if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                layoutParams.integratedListWidth
-              else
-                maxScreenWidth
-            )
-        ) {
-          Box() {
-            Column {
-              Surface(
-              ) {
-                Column(
-                  modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                  Surface(
-                    shadowElevation = 6.dp
-                  ) {
-                    Box(
-                      modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .fillMaxWidth()
-                        .height(layoutParams.integratedListCloseRowHeight)
-                    ) {
-                      IconButton(
-                        modifier = Modifier
-                          .align(Alignment.Center),
-                        onClick = {
-                          viewModel.closeIntegratedList()
-                        }
-                      ) {
-                        Icon(
-                          imageVector =
-                            if (configuration.orientation==Configuration.ORIENTATION_LANDSCAPE)
-                                Icons.Default.NavigateNext
-                              else
-                                Icons.Default.ExpandMore,
-                          contentDescription = null
-                        )
-                      }
-                    }
-                  }
-                  Text(
-                    modifier = Modifier
-                      .padding(layoutParams.itemPadding)
-                      .fillMaxWidth(),
-                    text = viewModel.integratedListTitle,
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
-                  )
-                  if (viewModel.integratedListTabs.size > 0) {
-                    val tabListState = rememberLazyListState()
-                    LaunchedEffect(viewModel.integratedListVisible) {
-                      if (viewModel.integratedListSelectedTab != -1)
-                        tabListState.animateScrollToItem(viewModel.integratedListSelectedTab)
-                    }
-                    LazyRow(
-                      state = tabListState,
-                      modifier = Modifier
-                        .fillMaxWidth()
-                    ) {
-                      itemsIndexed(viewModel.integratedListTabs) { index, tab ->
-                        integratedListContent.tabContent(index, tab, viewModel)
-                      }
-                    }
-                  }
-                }
-              }
-              val itemListState = rememberLazyListState()
-              LaunchedEffect(viewModel.integratedListVisible) {
-                if (viewModel.integratedListSelectedItem != -1)
-                  itemListState.animateScrollToItem(viewModel.integratedListSelectedItem)
-              }
-              LazyColumn(
-                state = itemListState,
-                modifier = Modifier
-                  .fillMaxWidth()
-              ) {
-                itemsIndexed(viewModel.integratedListItems) { index, item ->
-                  integratedListContent.itemContainer(index, item, viewModel)
-                }
-              }
-            }
-            if (viewModel.integratedListTabs.isNotEmpty()) {
-              integratedListContent.floatingActionButton(
-                modifier = Modifier
-                  .align(Alignment.BottomEnd)
-                  .padding(layoutParams.integratedListFABPadding),
-                viewModel = viewModel
-              )
-            }
-          }
-        }
+        integratedListContent.content(configuration,maxScreenWidth,maxScreenHeight,viewMap.viewModel)
       }
       if (viewModel.fixSurfaceViewBug) {
         Box(

@@ -581,22 +581,37 @@ bool GraphicEngine::draw(bool forceRedraw) {
         // Draw all navigation points
         if (navigationPoints) {
           std::list<GraphicPrimitive*> *drawList=navigationPoints->getDrawList();
+          std::list<GraphicPrimitive*> eraseList;
           screen->startObject();
           screen->setColor(navigationPointIcon.getColor().getRed(),navigationPointIcon.getColor().getGreen(),navigationPointIcon.getColor().getBlue(),navigationPointIcon.getColor().getAlpha());
           for(std::list<GraphicPrimitive *>::const_iterator i=drawList->begin(); i != drawList->end(); i++) {
             GraphicRectangle *r = (GraphicRectangle*) *i;
-            screen->startObject();
-            screen->translate(r->getX(),r->getY(),0);
-            screen->rotate(-pos.getAngle(),0,0,1);
-            screen->scale(backScale,backScale,1.0);
-            x1=-r->getIconWidth()/2;
-            y1=-r->getIconHeight()/2;
-            x2=x1+r->getWidth();
-            y2=y1+r->getHeight();
-            screen->drawRectangle(x1,y1,x2,y2,r->getTexture(),true);
-            screen->endObject();
+
+            // If point is scaled down to 0, remove it from the drawing
+            if (r->getScale()==0.0) {
+              eraseList.push_back(*i);
+            } else {
+
+              // Draw the point
+              screen->startObject();
+              screen->translate(r->getX(),r->getY(),0);
+              screen->rotate(-pos.getAngle(),0,0,1);
+              screen->scale(backScale,backScale,1.0);
+              screen->scale(r->getScale(),r->getScale(),1.0);
+              x1=-r->getIconWidth()/2;
+              y1=-r->getIconHeight()/2;
+              x2=x1+r->getWidth();
+              y2=y1+r->getHeight();
+              screen->drawRectangle(x1,y1,x2,y2,r->getTexture(),true);
+              screen->endObject();
+            }
           }
           screen->endObject();
+
+          // Execute the removal of invisible points
+          for(std::list<GraphicPrimitive *>::const_iterator i=eraseList.begin(); i != eraseList.end(); i++) {
+            navigationPoints->removePrimitive(navigationPoints->getPrimitiveKey(*i),true);
+          }
         }
 
         //PROFILE_ADD("address points drawing");

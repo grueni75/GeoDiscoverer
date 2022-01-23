@@ -82,6 +82,9 @@ public:
   // Returns a drawing list with no graphic objects inside
   std::list<GraphicPrimitive*> getFlattenDrawList();
 
+  // Returns the key for the given primitive
+  GraphicPrimitiveKey getPrimitiveKey(GraphicPrimitive *primitive);
+
   // Getters and setters
   GraphicPrimitiveMap *getPrimitiveMap()
   {

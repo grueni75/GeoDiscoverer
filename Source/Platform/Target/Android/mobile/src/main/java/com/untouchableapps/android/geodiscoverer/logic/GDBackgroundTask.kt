@@ -27,6 +27,8 @@ import android.location.Geocoder
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
@@ -45,7 +47,9 @@ import java.io.*
 import java.lang.Exception
 
 @ExperimentalGraphicsApi
+@ExperimentalMaterialApi
 @ExperimentalMaterial3Api
+@ExperimentalAnimationApi
 class GDBackgroundTask() : CoroutineScope by MainScope() {
 
   // Arguments
@@ -372,7 +376,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
       //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","category found: ${fullTitle} with ${poiCategory.children.size} entries")
       return poiCategory
     } else {
-      coreObject!!.executeAppCommand("errorDialog(\"Category <$fullTitle> can not be found!\")")
+      //coreObject!!.executeAppCommand("errorDialog(\"Category <$fullTitle> can not be found!\")")
       return null
     }
   }

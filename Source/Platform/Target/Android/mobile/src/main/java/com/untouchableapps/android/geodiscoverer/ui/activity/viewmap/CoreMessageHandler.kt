@@ -24,6 +24,8 @@ package com.untouchableapps.android.geodiscoverer.ui.activity.viewmap
 
 import android.content.*
 import android.os.*
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
@@ -36,6 +38,8 @@ import java.lang.ref.WeakReference
 
 @ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
 class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
 
   var weakViewMap: WeakReference<ViewMap> = WeakReference(viewMap)
@@ -192,8 +196,8 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
           commandExecuted = true
         }
         if (commandFunction == "changeMapLayer") {
-          viewMap.viewModel.askForMapLayer() { selectedMapLayer ->
-            viewMap.coreObject!!.executeCoreCommand("selectMapLayer", selectedMapLayer)
+          viewMap.viewModel.askForMapLayer() { index ->
+            viewMap.coreObject!!.executeCoreCommand("selectMapLayer", viewMap.viewModel.integratedListItems[index].left)
           }
           commandExecuted = true
         }

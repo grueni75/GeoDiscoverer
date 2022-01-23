@@ -146,7 +146,11 @@
   <string name="dialog_update">Update</string>
   <string name="dialog_add_address_point_title">Add point of interest</string>
   <string name="dialog_address_input_hint">Alexanderplatz 1, Berlin (single line!)</string>
-  <string name="dialog_poi_category_title">Category refinement</string>
+  <string name="dialog_poi_category_title">Refine category</string>
   <string name="dialog_poi_address_title">Nearby point of interest</string>
   <string name="dialog_poi_address_title_error">Nearby point of interest (limit reached)</string>
+  <string name="dialog_finished">Finished</string>
+  <string name="search_radius">Radius:</string>
+  <string name="dialog_fatal">Fatal</string>
+  <string name="dialog_error">Error</string>
 </resources>

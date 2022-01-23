@@ -1765,8 +1765,8 @@ void NavigationEngine::removeAddressPoint(std::string name) {
   std::string path = "Navigation/AddressPoint[@name='" + name + "']";
   NavigationPoint p;
   p.setName(name);
-  if (!p.readFromConfig("Navigation/AddressPoint")) 
-    FATAL("can not read existing address point",NULL);
+  if (!p.readFromConfig("Navigation/AddressPoint"))
+    return;
   if (p.getForeignTimestamp()!="0") {
     p.setForeignRemovalRequest(true);
     p.writeToConfig("Navigation/AddressPoint");
@@ -1843,11 +1843,14 @@ void NavigationEngine::initAddressPoints() {
   }
 
   // Remove outdated address points
+  TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   for (std::list<NavigationPoint>::iterator i=removeAddressPoints.begin();i!=removeAddressPoints.end();i++) {
     for (std::list<NavigationPointVisualization>::iterator j=navigationPointsVisualization.begin();j!=navigationPointsVisualization.end();j++) {
-      if ((j->getVisualizationType()==NavigationPointVisualizationTypePoint)&&(j->getName()==i->getName())) {
+      if ((j->getVisualizationType()==NavigationPointVisualizationTypePoint)&&(j->getName()==i->getName())) {        
         core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
-        navigationPointsGraphicObject.removePrimitive(j->getGraphicPrimitiveKey(),true);
+        GraphicPrimitive *primitive=navigationPointsGraphicObject.getPrimitive(j->getGraphicPrimitiveKey());
+        if (primitive!=NULL) 
+          primitive->setScaleAnimation(t,1.0,0.0,false,core->getDefaultGraphicEngine()->getAnimDuration());
         core->getDefaultGraphicEngine()->unlockDrawing();
         navigationPointsVisualization.erase(j);
         break;

@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
@@ -52,6 +53,8 @@ import kotlinx.coroutines.*
 
 @ExperimentalGraphicsApi
 @ExperimentalMaterial3Api
+@ExperimentalMaterialApi
+@ExperimentalAnimationApi
 class ViewContentNavigationDrawer(viewContent: ViewContent) {
 
   // Parameters
