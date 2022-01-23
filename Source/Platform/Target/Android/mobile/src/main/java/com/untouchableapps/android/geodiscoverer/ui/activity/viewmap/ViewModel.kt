@@ -23,16 +23,15 @@
 package com.untouchableapps.android.geodiscoverer.ui.activity.viewmap
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.material.DismissState
+import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
-import androidx.compose.ui.res.stringResource
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
@@ -56,19 +55,80 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   }
 
   // Check box item
-  data class CheckboxItem(
+  class CheckboxItem(
     var text: String,
     var checked: Boolean = false
   )
 
   // Address point item
-  data class IntegratedListItem(
+  inner class IntegratedListItem(
     var left: String,
-    var right: String=""
-  )
+    var right: String="",
+    var isPOI: Boolean,
+    var index: Int,
+    var longitude: Double=0.0,
+    var latitude: Double=0.0
+  ) {
+    var visibilityState = MutableTransitionState<Boolean>(true)
+    var dismissState=DismissState(
+      initialValue = DismissValue.Default,
+      confirmStateChange = {
+        if (it == DismissValue.DismissedToStart) {
+          if (isPOI) {
+            GDApplication.addMessage(
+              GDApplication.DEBUG_MSG,
+              "GDApp",
+              "POI: delete confirmed for ${index}"
+            )
+            integratedListDeleteItemHandler(index)
+          } else {
+            GDApplication.addMessage(
+              GDApplication.DEBUG_MSG,
+              "GDApp",
+              "AP: starting hide animation for ${index}"
+            )
+            visibilityState.targetState = false
+            return@DismissState true
+          }
+        }
+        if (it == DismissValue.DismissedToEnd) {
+          if (isPOI) {
+            GDApplication.addMessage(
+              GDApplication.DEBUG_MSG,
+              "GDApp",
+              "export confirmed for ${index}"
+            )
+            integratedListPOIImportHandler(index)
+            return@DismissState false
+          } else {
+            GDApplication.addMessage(
+              GDApplication.DEBUG_MSG,
+              "GDApp",
+              "edit confirmed for ${index}"
+            )
+            integratedListEditItemHandler(index)
+            return@DismissState false
+          }
+        }
+        false
+      }
+    )
+    fun checkDismissState() {
+      if (!visibilityState.targetState && !visibilityState.currentState) {
+        if (dismissState.targetValue == DismissValue.DismissedToStart) {
+          GDApplication.addMessage(
+            GDApplication.DEBUG_MSG,
+            "GDApp",
+            "AP: delete confirmed for ${index}"
+          )
+          integratedListDeleteItemHandler(index)
+        }
+      }
+    }
+  }
 
   // Pending waypoint import questions
-  data class PendingImportWaypointsDecision(
+  class PendingImportWaypointsDecision(
     val gpxFilename: String,
     val waypointCount: String,
     val confirmHandler: () -> Unit = {},
@@ -148,7 +208,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     private set
   val integratedListItems = mutableStateListOf<IntegratedListItem>()
   val integratedListTabs = mutableStateListOf<String>()
-  var integratedListUpdateCount: Int by mutableStateOf(0)
   var integratedListSelectedItem: Int by mutableStateOf(-1)
     private set
   var integratedListSelectedTab: Int by mutableStateOf(-1)
@@ -181,7 +240,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     private set
   var integratedListPOISearchRadiusMax: Float by mutableStateOf(1f)
     private set
-  val integratedListPOIItems = mutableStateListOf<GDBackgroundTask.AddressPointItem>()
+  val integratedListPOIItems = mutableStateListOf<IntegratedListItem>()
   var integratedListCenterItem: Boolean by mutableStateOf(false)
     private set
 
@@ -552,13 +611,16 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     val selectedLayer: String = viewMap.coreObject!!.executeCoreCommand("getSelectedMapLayer")
     integratedListItems.clear()
     for (i in mapLayers.indices) {
-      integratedListItems.add(IntegratedListItem(mapLayers.get(i)))
+      integratedListItems.add(IntegratedListItem(
+        left=mapLayers.get(i),
+        isPOI=false,
+        index=i
+      ))
       if (mapLayers.get(i)==selectedLayer)
         integratedListSelectedItem=i
     }
     integratedListTitle=viewMap.getString(R.string.dialog_map_layer_selection_question)
     integratedListSelectItemHandler=selectHandler
-    integratedListUpdateCount++
     integratedListCenterItem=true
     openIntegratedList()
   }
@@ -583,13 +645,23 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     var inserted=false
     for (i in integratedListItems.indices) {
       if (name<integratedListItems[i].left) {
-        integratedListItems.add(i, IntegratedListItem(name,distance))
+        integratedListItems.add(i, IntegratedListItem(
+          left=name,
+          right=distance,
+          index=-1, // index need to be set later
+          isPOI=false
+        ))
         inserted=true
         break
       }
     }
     if (!inserted) {
-      integratedListItems.add(IntegratedListItem(name,distance))
+      integratedListItems.add(IntegratedListItem(
+        left=name,
+        right=distance,
+        index=-1,
+        isPOI=false
+      ))
     }
   }
 
@@ -663,16 +735,14 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         addAddressPoint(newestName, distance)
       }
     }
-    if (selectedItem!="") {
-      for (i in integratedListItems.indices) {
-        if (integratedListItems[i].left==selectedItem) {
-          integratedListSelectedItem=i
-          break
-        }
+    for (i in integratedListItems.indices) {
+      integratedListItems[i].index=i
+      if ((selectedItem!="")&&(integratedListItems[i].left==selectedItem)) {
+        integratedListSelectedItem=i
+        break
       }
     }
     //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","list updated")
-    integratedListUpdateCount++
   }
 
   @Synchronized
@@ -700,11 +770,19 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         integratedListOutdated = false
         fillPOIs()
       } else {
-        integratedListPOIItems.addAll(result)
+        for (i in result.indices) {
+          integratedListPOIItems.add(IntegratedListItem(
+            left=result[i].nameUniquified,
+            right=result[i].distanceFormatted,
+            isPOI=true,
+            index=i,
+            longitude=result[i].longitude,
+            latitude=result[i].latitude
+          ))
+        }
         integratedListLimitReached=limitReached
       }
     }
-    integratedListUpdateCount++
   }
 
   @Synchronized
@@ -753,7 +831,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     integratedListDeleteItemHandler={
       var name=""
       if (integratedListSelectedTab==integratedListTabs.size-1)
-        name=integratedListPOIItems[it].nameUniquified
+        name=integratedListPOIItems[it].left
       else
         name=integratedListItems[it].left
       viewMap.coreObject!!.executeCoreCommand("removeAddressPoint", name)
@@ -810,7 +888,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       val group=viewMap.coreObject!!.configStoreGetStringValue("Navigation", "selectedAddressPointGroup")
       viewMap.coreObject!!.executeCoreCommand(
         "addAddressPoint",
-        addressPoint.nameUniquified, "(${addressPoint.longitude},${addressPoint.latitude})",
+        addressPoint.left, "(${addressPoint.longitude},${addressPoint.latitude})",
         addressPoint.longitude.toString(), addressPoint.latitude.toString(),
         group
       )

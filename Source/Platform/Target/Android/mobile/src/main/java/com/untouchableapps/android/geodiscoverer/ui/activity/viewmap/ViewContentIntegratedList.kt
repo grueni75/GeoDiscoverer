@@ -24,10 +24,8 @@ package com.untouchableapps.android.geodiscoverer.ui.activity.viewmap
 
 import android.content.res.Configuration
 import androidx.compose.animation.*
-import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -42,8 +40,6 @@ import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
-import androidx.compose.material.rememberDismissState
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.ripple.rememberRipple
@@ -53,7 +49,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,11 +61,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.R
-import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
 import com.untouchableapps.android.geodiscoverer.ui.component.*
-import com.untouchableapps.android.geodiscoverer.ui.theme.Material2Theme
 import kotlinx.coroutines.*
 
 @ExperimentalAnimationApi
@@ -333,15 +325,10 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
                     .fillMaxSize(),
                 ) {
                   itemsIndexed(viewModel.integratedListItems) { index, item ->
-                    itemContainer(index, item, false, viewModel)
+                    itemContainer(index, item, viewModel)
                   }
                   itemsIndexed(viewModel.integratedListPOIItems) { index, item ->
-                    itemContainer(
-                      index,
-                      ViewModel.IntegratedListItem(item.nameUniquified, item.distanceFormatted),
-                      true,
-                      viewModel
-                    )
+                    itemContainer(index, item, viewModel)
                   }
                 }
               }
@@ -394,7 +381,7 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
 
   // Creates an item for the integrated list
   @Composable
-  fun itemContainer(index: Int, item: ViewModel.IntegratedListItem, isPOI: Boolean, viewModel: ViewModel) {
+  fun itemContainer(index: Int, item: ViewModel.IntegratedListItem, viewModel: ViewModel) {
     //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","$index: ${item}")
     if (viewModel.integratedListTabs.isEmpty()) {
       itemContent(
@@ -409,86 +396,20 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
         itemText(modifier, item, viewModel)
       }
     } else {
-      val selectedTab = remember { mutableStateOf(-1) }
-      val updateCount = remember { mutableStateOf(-1) }
-      val animVisibilityState = remember { MutableTransitionState<Boolean>(false) }
-
-      // Handle the case if the edit is confirmed
-      val dismissState = rememberDismissState(
-        confirmStateChange = {
-          if (it == DismissValue.DismissedToStart) {
-            if (isPOI) {
-              GDApplication.addMessage(
-                GDApplication.DEBUG_MSG,
-                "GDApp",
-                "POI: delete confirmed for ${index}"
-              )
-              viewModel.integratedListDeleteItemHandler(index)
-            } else {
-              animVisibilityState.targetState = false
-              return@rememberDismissState true
-            }
-          }
-          if (it == DismissValue.DismissedToEnd) {
-            if (isPOI) {
-              GDApplication.addMessage(
-                GDApplication.DEBUG_MSG,
-                "GDApp",
-                "export confirmed for ${index}"
-              )
-              viewModel.integratedListPOIImportHandler(index)
-              return@rememberDismissState false
-            } else {
-              GDApplication.addMessage(
-                GDApplication.DEBUG_MSG,
-                "GDApp",
-                "edit confirmed for ${index}"
-              )
-              viewModel.integratedListEditItemHandler(index)
-              return@rememberDismissState false
-            }
-          }
-          false
-        }
-      )
-
-      // Reset the views if tab is switched
-      // Reset the views if list has changed
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","${viewModel.integratedListUpdateCount}")
-      if ((selectedTab.value != viewModel.integratedListSelectedTab) || (updateCount.value != viewModel.integratedListUpdateCount)) {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","resetting views for ${index} (${updateCount.value} ${viewModel.integratedListUpdateCount})")
-        animVisibilityState.targetState = true
-        LaunchedEffect(viewModel.integratedListUpdateCount, viewModel.integratedListSelectedTab) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","resetting dismiss state")
-          dismissState.reset()
-        }
-        selectedTab.value = viewModel.integratedListSelectedTab
-        updateCount.value = viewModel.integratedListUpdateCount
-      }
 
       // Handle the event when the delete is confirmed and the item is not visible anymore
-      LaunchedEffect(animVisibilityState.targetState, animVisibilityState.currentState) {
-        if (!animVisibilityState.targetState && !animVisibilityState.currentState) {
-          if (dismissState.targetValue == DismissValue.DismissedToStart) {
-            GDApplication.addMessage(
-              GDApplication.DEBUG_MSG,
-              "GDApp",
-              "AP: delete confirmed for ${index}"
-            )
-            dismissState.reset()
-            viewModel.integratedListDeleteItemHandler(index)
-          }
-        }
+      LaunchedEffect(item.visibilityState.targetState, item.visibilityState.currentState) {
+        item.checkDismissState()
       }
 
       // Generate the content
       AnimatedVisibility(
         enter = EnterTransition.None,
         exit = shrinkVertically() + fadeOut(),
-        visibleState = animVisibilityState
+        visibleState = item.visibilityState
       ) {
         GDSwipeToDismiss(
-          state = dismissState,
+          state = item.dismissState,
           directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
           dismissThresholds = { direction ->
             if (direction == DismissDirection.StartToEnd)
@@ -498,9 +419,9 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
           },
           background = {
             //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","updating background for ${index}")
-            val direction = dismissState.dismissDirection ?: return@GDSwipeToDismiss
+            val direction = item.dismissState.dismissDirection ?: return@GDSwipeToDismiss
             val color by animateColorAsState(
-              when (dismissState.targetValue) {
+              when (item.dismissState.targetValue) {
                 DismissValue.Default -> MaterialTheme.colorScheme.surfaceVariant
                 DismissValue.DismissedToEnd -> Color.Green.copy(alpha = ContentAlpha.medium)
                 DismissValue.DismissedToStart -> Color.Red.copy(alpha = ContentAlpha.medium)
@@ -511,11 +432,11 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
               DismissDirection.EndToStart -> Alignment.CenterEnd
             }
             val icon = when (direction) {
-              DismissDirection.StartToEnd -> if (isPOI) Icons.Default.Add else Icons.Default.Edit
+              DismissDirection.StartToEnd -> if (item.isPOI) Icons.Default.Add else Icons.Default.Edit
               DismissDirection.EndToStart -> Icons.Default.Delete
             }
             val scale by animateFloatAsState(
-              if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f
+              if (item.dismissState.targetValue == DismissValue.Default) 0.75f else 1f
             )
             Box(
               Modifier
