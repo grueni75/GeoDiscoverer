@@ -25,7 +25,6 @@ package com.untouchableapps.android.geodiscoverer.logic
 import android.content.Context
 import android.location.Geocoder
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
@@ -36,7 +35,6 @@ import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.core.GDTools
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
-import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.ViewModel
 
 import kotlinx.coroutines.*
 import org.acra.ACRA
@@ -381,6 +379,19 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
     }
   }
 
+  // Safe conversion to double
+  private fun toDoubleOrZero(valueStr: String): Double {
+    val valueNumber=valueStr.toDoubleOrNull()
+    if (valueNumber==null) {
+      coreObject!!.executeAppCommand(
+        "errorDialog(String <${valueStr}> can not be converted to double!)"
+      )
+      return 0.0
+    } else {
+      return valueNumber
+    }
+  }
+
   // Adds all current address points
   fun fillAddressPoints(): List<AddressPointItem> {
 
@@ -413,13 +424,25 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
         )
         val distanceInfo = coreObject!!.executeCoreCommand("computeDistanceToAddressPoint",newestName)
         val distanceFields = distanceInfo.split(";")
+        val distanceRaw: Double
+        try {
+          distanceRaw=distanceFields[0].toDouble()
+        }
+        catch (e: Exception) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",
+            "distance <%s> can not be converted to double (${e.message})"
+          )
+          coreObject!!.executeAppCommand(
+            "errorDialog(Problem reading AP <$newestName> (check log))"
+          )
+        }
         val ap=AddressPointItem(
           nameOriginal = newestName,
           nameUniquified = newestName,
-          distanceRaw = distanceFields[0].toDouble(),
+          distanceRaw = toDoubleOrZero(distanceFields[0]),
           distanceFormatted = distanceFields[1],
-          latitude = latitude.toDouble(),
-          longitude = longitude.toDouble()
+          latitude = toDoubleOrZero(latitude),
+          longitude = toDoubleOrZero(longitude)
         )
 
         // Sort it into the list according how far away it is

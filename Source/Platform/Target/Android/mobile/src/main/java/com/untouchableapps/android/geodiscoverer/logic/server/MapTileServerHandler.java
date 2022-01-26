@@ -301,6 +301,7 @@ public class MapTileServerHandler extends NanoHTTPD {
 
       // Ask the core to do the rendering
       String hillshadeTileFilepath=coreObject.homePath+"/Server/Hillshade/hillshade_"+fileNr+"_"+z+"_"+y+"_"+x+".png";
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"MapTileServer","request rendering of "+hillshadeTileFilepath);
       coreObject.executeCoreCommand("renderHillshadeTile",String.valueOf(z),String.valueOf(y),String.valueOf(x),hillshadeTileFilepath);
 
       // Read the png and return it to the caller
