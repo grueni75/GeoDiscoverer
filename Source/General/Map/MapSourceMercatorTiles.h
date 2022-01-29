@@ -139,6 +139,9 @@ public:
   // Returns the zoom level of the server
   virtual Int getServerZoomLevel(Int mapZoomLevel);
 
+  // Fetches a map tile and returns its image data
+  virtual UByte *fetchMapTile(Int z, Int x, Int y, double saturationOffset, double brightnessOffset, UInt &imageSize);
+
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {
     core->getThread()->lockMutex(accessMutex, file, line);

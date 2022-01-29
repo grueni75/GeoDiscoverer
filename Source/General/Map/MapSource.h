@@ -171,6 +171,9 @@ public:
   // Closes the progress bar
   void closeProgress();
 
+  // Fetches a map tile and returns its image data
+  virtual UByte *fetchMapTile(Int z, Int x, Int y, double saturationOffset, double brightnessOffset, UInt &imageSize);
+
   // Creates the required type of map source object
   static MapSource *newMapSource();
 

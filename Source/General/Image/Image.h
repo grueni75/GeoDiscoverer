@@ -125,7 +125,7 @@ public:
   void hsvFilter(ImagePixel *image, Int width, Int height, UInt pixelSize, double hOffset, double sOffset, double vOffset);
 
   // Changes the hsv components of the given PNG file by the given values
-  bool hsvFilter(std::string pngFilename, double hOffset, double sOffset, double vOffset);
+  UByte *hsvFilter(UByte *pngData, UInt &pngSize, double hOffset, double sOffset, double vOffset);
 
   // Getters and setters
   static UInt getRGBPixelSize()

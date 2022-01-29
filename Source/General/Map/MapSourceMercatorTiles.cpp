@@ -1200,5 +1200,48 @@ Int MapSourceMercatorTiles::getServerZoomLevel(Int mapZoomLevel) {
   return serverZoomLevel;
 }
 
+// Fetches a map tile and returns its image data
+UByte *MapSourceMercatorTiles::fetchMapTile(Int z, Int x, Int y, double saturationOffset, double brightnessOffset, UInt &imageSize) {
+  DEBUG("z=%d x=%d y=%d",z,x,y);
+  imageSize=0;
+  UByte *imageData=NULL;
+  lockAccess(__FILE__,__LINE__);
+  if (getIsInitialized()) {
+    MapSourceMercatorTiles *mapSource=(MapSourceMercatorTiles*)core->getMapSource();
+    MapTile *mapTile=mapSource->fetchMapTile(z,x,y);
+    if (mapTile!=NULL) {
+      while (!mapTile->getParentMapContainer()->getDownloadComplete()) {          
+        unlockAccess();
+        usleep(1000);
+        lockAccess(__FILE__,__LINE__);
+      }
+      if (!mapTile->getParentMapContainer()->getDownloadErrorOccured()) {
+        ZipArchive *mapArchive = new ZipArchive(mapTile->getParentMapContainer()->getArchiveFileFolder(),mapTile->getParentMapContainer()->getArchiveFileName());
+        if ((mapArchive==NULL)||(!mapArchive->init()))
+          FATAL("can not create zip archive object",NULL);
+        Int size=0;
+        imageData=mapArchive->exportEntry(mapTile->getParentMapContainer()->getImageFilePath(),size);
+        delete mapArchive;
+        if (size>0) {
+          imageSize=(UInt)size;
+          if ((saturationOffset!=0)||(brightnessOffset!=0)) {
+            UByte *imageData2=core->getImage()->hsvFilter(imageData,imageSize,0,saturationOffset,brightnessOffset);
+            free(imageData);
+            imageData=imageData2;
+          }
+        }
+        //DEBUG("result=%s",result.c_str());*/
+      } else {
+        DEBUG("download error for tile (%d,%d,%d)",z,x,y);
+      }
+    } else {
+      DEBUG("no map tile found at (%d,%d,%d)",z,x,y);
+    }
+  } else {
+    ERROR("map source is not initialized",NULL);
+  }
+  unlockAccess();
+  return imageData;
+}
 
 } /* namespace GEODISCOVERER */

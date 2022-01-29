@@ -263,19 +263,19 @@ void Image::hsvFilter(ImagePixel *image, Int width, Int height, UInt pixelSize, 
 }
 
 // Changes the hsv components of the given PNG file by the given values
-bool Image::hsvFilter(std::string pngFilename, double hOffset, double sOffset, double vOffset) {
+UByte *Image::hsvFilter(UByte *pngData, UInt &pngSize, double hOffset, double sOffset, double vOffset) {
 	Int width,height;
 	UInt pixelSize;
-  ImagePixel *pixels=loadPNG(pngFilename,width,height,pixelSize,false);
+  ImagePixel *pixels=loadPNG(pngData,pngSize,width,height,pixelSize,false);
   if (!pixels) {
-    DEBUG("can not read <%s>",pngFilename.c_str());
-    return false;		
+    DEBUG("can not read png image data",NULL);
+    return NULL;		
   }
 	//DEBUG("hOffset=%f sOffset=%f vOffset=%f",hOffset,sOffset,vOffset);
 	hsvFilter(pixels,width,height,pixelSize,hOffset,sOffset,vOffset);
-  writePNG(pixels,pngFilename,width,height,pixelSize,false);
+  UByte *pngData2=writePNG(pixels,width,height,pixelSize,pngSize,false);
   free(pixels);
-	return true;
+	return pngData2;
 }
 
 // Changes the brightness of the given PNG file

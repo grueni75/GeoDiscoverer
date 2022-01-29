@@ -41,6 +41,7 @@ protected:
   DEMDataset **demDatasetLowRes;                  // Dataset to use (low resoultion version)
   bool *demDatasetBusy;                           // Indicates if the given dataset is in use
   ThreadSignalInfo *demDatasetReadySignal;        // Indicates that one of the datasets is not busy anymore
+  Int tileNumber;                                 // Continous number for creating a unique filename for hillshading
 
   // Converts a tile y number into latitude
   double tiley2lat(Int y, Int worldRes);
@@ -64,7 +65,7 @@ public:
   void deinit();
 
   // Creates a hillshading for the given map area
-  bool renderHillshadeTile(Int z, Int y, Int x, std::string imageFilename);
+  UByte *renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize);
 
   // Getters and setters
   bool getIsInitialized() const

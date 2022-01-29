@@ -157,11 +157,11 @@ void ElevationEngine::resetDemDatasetBusy(Int workerNr) {
 }
 
 // Creates a hillshading for the given map area
-bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string imageFilename) {
+UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize) {
 
   // Do not work if not initialized anymore
   if (!isInitialized)
-    return false;
+    return NULL;
 
   // Get the dataset to use
   DEMDataset *demDatasetFullRes;
@@ -190,11 +190,15 @@ bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string image
       core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
     }
   }
-  core->getThread()->unlockMutex(accessMutex);
 
-  // Set the warp file name
+  // Decide on the filenames
+  std::stringstream timageFilenameStream;
+  timageFilenameStream<<demFolderPath<<"/hillshade_" << tileNumber << "_" << z << "_" << y << "_" << x <<".png";
+  std::string imageFilename=timageFilenameStream.str();
   std::stringstream warpFilename;
-  warpFilename << demFolderPath << "/warp_" << z << "_" << y << "_" << x << ".tif";
+  warpFilename << demFolderPath << "/warp_" << tileNumber << "_" << z << "_" << y << "_" << x << ".tif";
+  tileNumber++;
+  core->getThread()->unlockMutex(accessMutex);
 
   // Delete the output file
   remove(warpFilename.str().c_str());
@@ -271,7 +275,7 @@ bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string image
   if (warpOptions==NULL) {
     FATAL("can not create warp options",NULL);
     resetDemDatasetBusy(workerNr);
-    return false;
+    return NULL;
   }
 
   // Decide which data source to use
@@ -286,7 +290,7 @@ bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string image
   if ((usageError)||(warpDS==NULL)) {
     DEBUG("gdal warp operation failed",NULL);
     resetDemDatasetBusy(workerNr);
-    return false;
+    return NULL;
   }
 
   // Create the options for the hillshading
@@ -308,7 +312,7 @@ bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string image
   if (hillshadeOptions==NULL) {
     FATAL("can not create hillshade options",NULL);
     resetDemDatasetBusy(workerNr);
-    return false;
+    return NULL;
   }
 
   // Render the hillshade
@@ -319,7 +323,7 @@ bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string image
   if ((usageError)||(hillshadeDS==NULL)) {
     DEBUG("gdal hillshade operation failed",NULL);
     resetDemDatasetBusy(workerNr);
-    return false;
+    return NULL;
   }
   GDALClose(hillshadeDS);
 
@@ -329,7 +333,7 @@ bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string image
   if ((!hillshadePixels)||(pixelSize!=Image::getRGBPixelSize())) {
     FATAL("can not read <%s>",imageFilename.c_str());
     resetDemDatasetBusy(workerNr);
-    return false;
+    return NULL;
   }
   //DEBUG("renderWidth=%d renderHeight=%d pixelSize=%d",renderWidth,renderHeight,pixelSize);
 
@@ -339,7 +343,7 @@ bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string image
   if (!filterPixels) {
     FATAL("can not reserve memory",NULL);
     resetDemDatasetBusy(workerNr);
-    return false;
+    return NULL;
   }
   for (Int i=0;i<renderWidth*renderHeight;i++) {
 
@@ -367,7 +371,7 @@ bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string image
   if (!imagePixels) {
     FATAL("can not reserve memory",NULL);
     resetDemDatasetBusy(workerNr);
-    return false;
+    return NULL;
   }
   Int t=0;
   //DEBUG("cropX1=%d cropX2=%d cropY1=%d cropY2=%d",cropX1,cropX2,cropY1,cropY2);
@@ -384,13 +388,14 @@ bool ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, std::string image
   //DEBUG("t=%d",t);
 
   // Store the final image
-  core->getImage()->writePNG(imagePixels,imageFilename,imageWidth,imageHeight,Image::getRGBAPixelSize(),false);
+  imageSize=0;
+  UByte *pngPixels=core->getImage()->writePNG(imagePixels,imageWidth,imageHeight,Image::getRGBAPixelSize(),imageSize,false);
   free(imagePixels);
 
   // Clean up
   //core->getThread()->unlockMutex(accessMutex);
   resetDemDatasetBusy(workerNr);
-  return true;
+  return pngPixels;
 }
 
 }

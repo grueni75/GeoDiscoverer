@@ -35,6 +35,7 @@ ElevationEngine::ElevationEngine() {
   workerCount=core->getConfigStore()->getIntValue("MapTileServer","workerCount",__FILE__,__LINE__);
   accessMutex=core->getThread()->createMutex("elevation engine access mutex");
   demDatasetReadySignal=core->getThread()->createSignal();
+  tileNumber=0;
   
   // Create the DEM directory (if it does not exist)
   struct stat st;

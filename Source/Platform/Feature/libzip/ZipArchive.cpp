@@ -178,6 +178,26 @@ bool ZipArchive::exportEntry(std::string entryFilename, std::string diskFilename
   }
 }
 
+// Reads the entry into memory
+UByte *ZipArchive::exportEntry(std::string entryFilename, Int &size) {
+  UByte *buffer=NULL;
+  size=0;
+  ZipArchiveEntry entry = openEntry(entryFilename);
+  if (entry) {
+    size=getEntrySize(entryFilename);
+    DEBUG("size=%d",size);
+    if (!(buffer=(UByte*)malloc(size))) {
+      FATAL("can not create buffer of length %l",size);
+      return NULL;
+    }
+    readEntry(entry,buffer,size);
+    closeEntry(entry);
+  } else {
+    DEBUG("entry %s not found",entryFilename.c_str());
+  }
+  return buffer;
+}
+
 // Checks if the complete archive can be read
 bool ZipArchive::checkIntegrity() {
   const Int buffer_size=16384;

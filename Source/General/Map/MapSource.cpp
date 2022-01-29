@@ -1898,4 +1898,11 @@ void MapSource::addPathAnimator(GraphicPrimitiveKey primitiveKey) {
   retrievedPathAnimators.push_back(primitiveKey);
 }
 
+// Fetches a map tile and returns its image data
+UByte *MapSource::fetchMapTile(Int z, Int x, Int y, double saturationOffset, double brightnessOffset, UInt &imageSize) {
+  DEBUG("not yet implemented",NULL);
+  imageSize=0;
+  return NULL;
+}
+
 }

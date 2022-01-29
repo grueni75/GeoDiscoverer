@@ -29,6 +29,9 @@
 #include <client/linux/handler/exception_handler.h>
 #include <string.h>
 #include <Commander.h>
+#include <MapEngine.h>
+#include <ElevationEngine.h>
+#include <ZipArchive.h>
 
 // Prototypes
 std::string GDApp_executeAppCommand(std::string command);
@@ -535,6 +538,42 @@ JNIEXPORT void JNICALL Java_com_untouchableapps_android_geodiscoverer_core_GDCor
   }
   GEODISCOVERER::core->getConfigStore()->removePath(pathCStr);
   env->ReleaseStringUTFChars(path,pathCStr);
+}
+
+// Fetches a map tile
+JNIEXPORT jbyteArray JNICALL Java_com_untouchableapps_android_geodiscoverer_core_GDCore_fetchMapTile
+  (JNIEnv *env, jobject thiz, jint z, jint x, jint y, jfloat saturationOffset, jfloat brightnessOffset)
+{
+  unsigned int imageSize=0;
+  GEODISCOVERER::MapSource *mapSource=GEODISCOVERER::core->getMapSource();
+  unsigned char *imageData=NULL;
+  if (mapSource) {
+    imageData=mapSource->fetchMapTile(z,x,y,saturationOffset,brightnessOffset,imageSize);
+  }
+  jbyteArray result = env->NewByteArray(imageSize);
+  if (imageSize>0) {
+    env->SetByteArrayRegion(result, 0, imageSize, (jbyte*)imageData);
+    free(imageData);
+  }
+  return result;
+}
+
+// Renders a hillshade tile
+JNIEXPORT jbyteArray JNICALL Java_com_untouchableapps_android_geodiscoverer_core_GDCore_renderHillshadeTile
+  (JNIEnv *env, jobject thiz, jint z, jint x, jint y, jfloat saturationOffset, jfloat brightnessOffset)
+{
+  unsigned int imageSize=0;
+  GEODISCOVERER::ElevationEngine *elevationEngine=GEODISCOVERER::core->getElevationEngine();
+  unsigned char *imageData=NULL;
+  if (elevationEngine) {
+    imageData=elevationEngine->renderHillshadeTile(z,x,y,imageSize);
+  }
+  jbyteArray result = env->NewByteArray(imageSize);
+  if (imageSize>0) {
+    env->SetByteArrayRegion(result, 0, imageSize, (jbyte*)imageData);
+    free(imageData);
+  }
+  return result;
 }
 
 #ifdef __cplusplus

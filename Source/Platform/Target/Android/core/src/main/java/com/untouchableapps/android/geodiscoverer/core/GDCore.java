@@ -684,6 +684,12 @@ public class GDCore implements
   /** Returns information about the given node in the config */
   public native Bundle configStoreGetNodeInfo(String path);
 
+  /** Fetches map tile and returns the resulting image */
+  public native byte[] fetchMapTile(int z, int x, int y, float saturationOffset, float brightnessOffset);
+
+  /** Renders a hillshade tile and returns the resulting image */
+  public native byte[] renderHillshadeTile(int z, int x, int y);
+
   /** Constructs a command from the given arguments */
   private String constructCoreCommand(String cmd, String [] args) {
     String cmdInt = cmd + "(";

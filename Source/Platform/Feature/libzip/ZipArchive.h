@@ -75,6 +75,9 @@ public:
   // Writes the entry into a file
   bool exportEntry(std::string entryFilename, std::string diskFilename);
 
+  // Reads the entry into memory
+  UByte *exportEntry(std::string entryFilename, Int &size);
+
   // Writes any changes within the archive to disk
   bool writeChanges();
 

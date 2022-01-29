@@ -56,7 +56,6 @@ public class MapTileServerHandler extends NanoHTTPD {
   protected String loopbackPath=null;
   protected String brouterWebPath=null;
   private static final Pattern P = Pattern.compile("/(.+)/(\\d+)/(\\d+)/(\\d+)\\.(.*)");
-  protected int hilllshadeTileNr=0;
 
   protected class RuntimeMeasurement {
     String function;
@@ -151,6 +150,14 @@ public class MapTileServerHandler extends NanoHTTPD {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     InputStream fis = new ByteArrayInputStream(image);
     addRuntime(uri,function,z,startTime);
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"MapTileServer",filepath + ": " + image.length);
+    return newFixedLengthResponse(Response.Status.OK, "image/png", fis, image.length);
+  }
+
+  // Returns the image in the given array to the caller
+  protected Response serveImage(String uri, String function, int z, long startTime, byte[] image) {
+    addRuntime(uri,function,z,startTime);
+    InputStream fis = new ByteArrayInputStream(image);
     //GDApplication.addMessage(GDApplication.DEBUG_MSG,"MapTileServer",filepath + ": " + image.length);
     return newFixedLengthResponse(Response.Status.OK, "image/png", fis, image.length);
   }
@@ -292,27 +299,16 @@ public class MapTileServerHandler extends NanoHTTPD {
     }
     if (type.equals("hillshade")) {
 
-      // Assign a unique number to prevent file conflicts
-      int fileNr=0;
-      synchronized (this) {
-        fileNr=this.hilllshadeTileNr;
-        this.hilllshadeTileNr++;
-      }
-
       // Ask the core to do the rendering
-      String hillshadeTileFilepath=coreObject.homePath+"/Server/Hillshade/hillshade_"+fileNr+"_"+z+"_"+y+"_"+x+".png";
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"MapTileServer","request rendering of "+hillshadeTileFilepath);
-      coreObject.executeCoreCommand("renderHillshadeTile",String.valueOf(z),String.valueOf(y),String.valueOf(x),hillshadeTileFilepath);
-
-      // Read the png and return it to the caller
-      return serveImage(uri,"hillshade",z,startTime,hillshadeTileFilepath);
+      byte[] imageData=coreObject.renderHillshadeTile(z,y,x);
+      return serveImage(uri,"hillshade",z,startTime,imageData);
     }
     if (type.equals("geodiscoverer")) {
 
       // Get the tile from the core
-      String tileFilename=coreObject.executeCoreCommand("fetchMapTile",String.valueOf(z),String.valueOf(x),String.valueOf(y),String.valueOf(saturationOffset),String.valueOf(brightnessOffset),loopbackPath);
-      addRuntime(uri,"geodiscoverer",z,startTime);
-      return serveImage(uri,"geodiscoverer",z,startTime,tileFilename);
+      long t=System.currentTimeMillis();
+      byte[] imageData=coreObject.fetchMapTile(z,x,y,saturationOffset,brightnessOffset);
+      return serveImage(uri,"geodiscoverer",z,startTime,imageData);
     }
     if (type.equals("brouter-web")) {
       String path=uri.substring("brouter-web/".length());
