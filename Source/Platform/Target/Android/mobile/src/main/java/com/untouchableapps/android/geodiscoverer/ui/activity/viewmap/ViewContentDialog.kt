@@ -34,12 +34,14 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.window.DialogProperties
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.ui.component.*
 import com.untouchableapps.android.geodiscoverer.ui.theme.SurfaceColorAtElevation
@@ -48,6 +50,7 @@ import com.untouchableapps.android.geodiscoverer.ui.theme.SurfaceColorAtElevatio
 @ExperimentalMaterial3Api
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
+@ExperimentalComposeUiApi
 class ViewContentDialog(viewContent: ViewContent) {
 
   // Parameters
@@ -137,7 +140,26 @@ class ViewContentDialog(viewContent: ViewContent) {
                   modifier = Modifier
                     .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
                   text = viewModel.askEditTextError,
-                  color = MaterialTheme.colorScheme.error
+                  color = MaterialTheme.colorScheme.error,
+                  softWrap = false,
+                  overflow = TextOverflow.Ellipsis
+                )
+              }
+              val heightBugFixVisible = remember { mutableStateOf(true) }
+              LaunchedEffect(heightBugFixVisible.value) {
+                heightBugFixVisible.value = false
+              }
+              AnimatedVisibility(
+                visible = heightBugFixVisible.value,
+                exit = ExitTransition.None
+              ) {
+                Text(
+                  modifier = Modifier
+                    .padding(top = layoutParams.itemPadding, start = layoutParams.hintIndent),
+                  text = "Work around the bug that the height does not changing dynamically with content in AlertDialog",
+                  color = MaterialTheme.colorScheme.error,
+                  softWrap = false,
+                  overflow = TextOverflow.Ellipsis
                 )
               }
               if (viewModel.askEditTextTagList.isNotEmpty()) {

@@ -27,6 +27,7 @@ import android.os.*
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
@@ -40,6 +41,7 @@ import java.lang.ref.WeakReference
 @ExperimentalMaterial3Api
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
+@ExperimentalComposeUiApi
 class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
 
   var weakViewMap: WeakReference<ViewMap> = WeakReference(viewMap)

@@ -31,6 +31,7 @@ import androidx.compose.material3.*
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
@@ -42,6 +43,7 @@ import java.io.File
 @ExperimentalMaterial3Api
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
+@ExperimentalComposeUiApi
 class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   // Parameters

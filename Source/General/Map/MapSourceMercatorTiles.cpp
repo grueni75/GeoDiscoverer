@@ -1202,7 +1202,6 @@ Int MapSourceMercatorTiles::getServerZoomLevel(Int mapZoomLevel) {
 
 // Fetches a map tile and returns its image data
 UByte *MapSourceMercatorTiles::fetchMapTile(Int z, Int x, Int y, double saturationOffset, double brightnessOffset, UInt &imageSize) {
-  DEBUG("z=%d x=%d y=%d",z,x,y);
   imageSize=0;
   UByte *imageData=NULL;
   lockAccess(__FILE__,__LINE__);

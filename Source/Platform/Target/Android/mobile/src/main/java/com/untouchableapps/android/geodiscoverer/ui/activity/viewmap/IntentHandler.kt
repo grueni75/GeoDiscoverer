@@ -36,6 +36,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
@@ -50,6 +51,7 @@ import java.util.*
 @ExperimentalMaterial3Api
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
+@ExperimentalComposeUiApi
 class IntentHandler(viewMap: ViewMap) : CoroutineScope by MainScope() {
 
   // References
