@@ -26,6 +26,7 @@
 #include <Core.h>
 #include <Commander.h>
 #include <Screen.h>
+#include <ElevationEngine.h>
 
 // Indicates if the main thread as exited
 bool mainThreadHasExited=false;
@@ -116,6 +117,13 @@ void *debugThread(void *args) {
     sleep(10);
     GEODISCOVERER::core->getCommander()->execute("setMapWindow(0,0,960,1536)");
   }*/
+
+  /* Render a hill shade
+  //http://oneplus7pro:8383/geodiscoverer/8/125/98.png
+  GEODISCOVERER::UInt imageSize=0;
+  GEODISCOVERER::UByte *imageData=GEODISCOVERER::core->getElevationEngine()->renderHillshadeTile(8,125,98,imageSize);
+  printf("imageSize=%d\n",imageSize);
+  if (imageData!=NULL) free(imageData);*/
 
   // Use the replay log if it exists
   GEODISCOVERER::core->getDebug()->replayTrace("replay.log");

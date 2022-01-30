@@ -192,18 +192,13 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   }
 
   // Decide on the filenames
-  std::stringstream timageFilenameStream;
-  timageFilenameStream<<demFolderPath<<"/hillshade_" << tileNumber << "_" << z << "_" << y << "_" << x <<".png";
-  std::string imageFilename=timageFilenameStream.str();
+  std::stringstream imageFilenameStream;
+  imageFilenameStream << "/vsimem/hillshade_" << tileNumber << "_" << z << "_" << y << "_" << x <<".png";
+  std::string imageFilename=imageFilenameStream.str();
   std::stringstream warpFilename;
-  warpFilename << demFolderPath << "/warp_" << tileNumber << "_" << z << "_" << y << "_" << x << ".tif";
+  warpFilename << "/vsimem/warp_" << tileNumber << "_" << z << "_" << y << "_" << x << ".tif";
   tileNumber++;
   core->getThread()->unlockMutex(accessMutex);
-
-  // Delete the output file
-  remove(warpFilename.str().c_str());
-  remove(imageFilename.c_str());
-  remove((imageFilename+".aux.xml").c_str());
 
   // Calculate the bounding box
   double worldRes = pow(2.0, z);
@@ -319,7 +314,7 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   GDALDatasetH hillshadeDS=GDALDEMProcessing(imageFilename.c_str(),warpDS,"hillshade",NULL,hillshadeOptions,&usageError);
   GDALDEMProcessingOptionsFree(hillshadeOptions);
   GDALClose(warpDS);
-  remove(warpFilename.str().c_str());
+  VSIUnlink(warpFilename.str().c_str());
   if ((usageError)||(hillshadeDS==NULL)) {
     DEBUG("gdal hillshade operation failed",NULL);
     resetDemDatasetBusy(workerNr);
@@ -328,8 +323,11 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   GDALClose(hillshadeDS);
 
   // Load the png image
+  vsi_l_offset size;
+  GByte *data=VSIGetMemFileBuffer(imageFilename.c_str(), &size, true);  
   UInt pixelSize;
-  ImagePixel *hillshadePixels=core->getImage()->loadPNG(imageFilename,renderWidth,renderHeight,pixelSize,false);
+  ImagePixel *hillshadePixels=core->getImage()->loadPNG((UByte*)data,size,renderWidth,renderHeight,pixelSize,false);
+  VSIFree(data);
   if ((!hillshadePixels)||(pixelSize!=Image::getRGBPixelSize())) {
     FATAL("can not read <%s>",imageFilename.c_str());
     resetDemDatasetBusy(workerNr);
