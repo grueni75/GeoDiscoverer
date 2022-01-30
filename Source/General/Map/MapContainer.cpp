@@ -393,24 +393,30 @@ bool MapContainer::readCalibrationFile(std::string fileFolder, std::string fileB
   }
 
   // Extract the image
-  std::string tempImageFilePath = core->getMapSource()->getFolderPath() + "/tile.bin";
   std::list<ZipArchive*> *mapArchives = core->getMapSource()->lockMapArchives(__FILE__, __LINE__);
+  UByte *imageData;
+  Int imageSize;
   for (std::list<ZipArchive*>::iterator i=mapArchives->begin();i!=mapArchives->end();i++) {
     if ((*i)->getEntrySize(imageFilePath)>0) {
-      (*i)->exportEntry(imageFilePath,tempImageFilePath);
+      imageData=(*i)->exportEntry(imageFilePath,imageSize);
+      break;
     }
   }
   core->getMapSource()->unlockMapArchives();
+  if (imageData==NULL)
+    return false;
 
   // Check the type and dimension of the image
-  if (core->getImage()->queryPNG(tempImageFilePath,imageWidth,imageHeight)) {
+  if (core->getImage()->queryPNG(imageData,imageSize,imageWidth,imageHeight)) {
     imageType=ImageTypePNG;
-  } else if (core->getImage()->queryJPEG(tempImageFilePath,imageWidth,imageHeight)) {
+  } else if (core->getImage()->queryJPEG(imageData,imageSize,imageWidth,imageHeight)) {
     imageType=ImageTypeJPEG;
   } else {
     ERROR("file format of image <%s> not supported",imageFilePath);
+    free(imageData);
     return false;
   }
+  free(imageData);
 
   // Find out how many number of tiles are required to hold this image
   Int tileCountX=imageWidth/tileWidth;

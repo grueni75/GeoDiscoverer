@@ -1565,18 +1565,19 @@ void MapSource::remoteServer() {
           WARNING("can not open <%s/%s>",archiveFileFolder.c_str(),archiveFileName.c_str());
           continue;
         }
-        std::string imageExtension = imageFilePath.substr(imageFilePath.find_last_of(".")+1);
-        std::string imageTempFilepath = workPath + "/remoteTile." + imageExtension;
-        if (!mapArchive->exportEntry(imageFilePath,imageTempFilepath)) {
+        UByte *imageData;
+        Int imageSize=0;
+        if (!(imageData=mapArchive->exportEntry(imageFilePath,imageSize))) {
           delete mapArchive;
-          WARNING("can not extract to file <%s>",imageTempFilepath.c_str());
+          WARNING("can not extract file <%s>",imageFilePath.c_str());
           continue;
         }
-        std::string calibrationExtension = calibrationFilePath.substr(calibrationFilePath.find_last_of(".")+1);
-        std::string calibrationTempFilepath = workPath + "/remoteTile." + calibrationExtension;
-        if (!mapArchive->exportEntry(calibrationFilePath,calibrationTempFilepath)) {
+        UByte *calibrationData;
+        Int calibrationSize=0;
+        if (!(calibrationData=mapArchive->exportEntry(calibrationFilePath,calibrationSize))) {
           delete mapArchive;
-          WARNING("can not write to file <%s>",calibrationTempFilepath.c_str());
+          free(imageData);
+          WARNING("can not extract file <%s>",calibrationFilePath.c_str());
           continue;
         }
         delete mapArchive;
@@ -1591,12 +1592,13 @@ void MapSource::remoteServer() {
           continue;
         }
         mapArchive->init();
-        if (!mapArchive->addEntry(imageFilePath,imageTempFilepath)) {
+        if (!mapArchive->addEntry(imageFilePath,imageData,imageSize)) {
           delete mapArchive;
+          free(calibrationData);
           WARNING("can not add entry to remote tile archive",NULL);
           continue;
         }
-        if (!mapArchive->addEntry(calibrationFilePath,calibrationTempFilepath)) {
+        if (!mapArchive->addEntry(calibrationFilePath,calibrationData,calibrationSize)) {
           delete mapArchive;
           WARNING("can not add entry to remote tile archive",NULL);
           continue;
@@ -1607,8 +1609,6 @@ void MapSource::remoteServer() {
           continue;
         }
         delete mapArchive;
-        remove(imageTempFilepath.c_str());
-        remove(calibrationTempFilepath.c_str());
 
         // Ask the app to transfer it to the remote side
         //DEBUG("sending %s to remote side",remoteTileFilename.str().c_str());

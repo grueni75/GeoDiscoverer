@@ -185,7 +185,7 @@ UByte *ZipArchive::exportEntry(std::string entryFilename, Int &size) {
   ZipArchiveEntry entry = openEntry(entryFilename);
   if (entry) {
     size=getEntrySize(entryFilename);
-    DEBUG("size=%d",size);
+    //DEBUG("size=%d",size);
     if (!(buffer=(UByte*)malloc(size))) {
       FATAL("can not create buffer of length %l",size);
       return NULL;

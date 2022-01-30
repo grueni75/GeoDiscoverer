@@ -246,21 +246,27 @@ void MapCache::updateMapTileImages() {
       if (mapArchive) {
 
         // Create a temporary file that contains the image data
-        std::string tempImageFilePath = core->getMapSource()->getFolderPath() + "/tile.bin";
-        mapArchive->exportEntry(currentContainer->getImageFilePath(),tempImageFilePath);
+        UByte *imageData;
+        Int imageSize;
+        imageData=mapArchive->exportEntry(currentContainer->getImageFilePath(),imageSize);
+        if (imageData==NULL) {
+          currentImage=NULL; 
+        } else {
 
-        // Get the image from the temporary file
-        switch(currentContainer->getImageType()) {
-          case ImageTypeJPEG:
-            currentImage=core->getImage()->loadJPEG(tempImageFilePath,currentImageWidth,currentImageHeight,currentImagePixelSize,true);
-            break;
-          case ImageTypePNG:
-            currentImage=core->getImage()->loadPNG(tempImageFilePath,currentImageWidth,currentImageHeight,currentImagePixelSize,true);
-            break;
-          default:
-            FATAL("unsupported image type",NULL);
-            currentImage=NULL;
-            break;
+          // Get the image from the temporary file
+          switch(currentContainer->getImageType()) {
+            case ImageTypeJPEG:
+              currentImage=core->getImage()->loadJPEG(imageData,imageSize,currentImageWidth,currentImageHeight,currentImagePixelSize,true);
+              break;
+            case ImageTypePNG:
+              currentImage=core->getImage()->loadPNG(imageData,imageSize,currentImageWidth,currentImageHeight,currentImagePixelSize,true);
+              break;
+            default:
+              FATAL("unsupported image type",NULL);
+              currentImage=NULL;
+              break;
+          }
+          free(imageData);
         }
       }
       core->getMapSource()->unlockMapArchives();
