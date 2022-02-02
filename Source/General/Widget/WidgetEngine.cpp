@@ -961,11 +961,15 @@ void WidgetEngine::createGraphic() {
         config.addPosition(position);
         config.setActiveColor(GraphicColor(255,255,255,255));
         config.setInactiveColor(GraphicColor(255,255,255,100));
+        config.setSafetyColor(GraphicColor(255,255,255,150));
         config.setParameter("iconFilename","scale");
         config.setParameter("updateInterval","1000000");
-        config.setParameter("tickLabelOffsetX","0");
-        config.setParameter("mapLabelOffsetY","125.0");
-        config.setParameter("layerLabelOffsetY","40.0");
+        config.setParameter("topLabelOffsetY","+150.0");
+        config.setParameter("bottomLabelOffsetY","-130.0");
+        config.setParameter("width","70");
+        config.setParameter("height","480");
+        config.setParameter("alpha","150");
+        config.setParameter("altitudeIconFilename","mountain");
         addWidgetToPage(config);
         config.setPageName("Finger Menu");
         config.clearPositions();
@@ -1759,10 +1763,13 @@ void WidgetEngine::createGraphic() {
         meter->setUnitY(c->getDoubleValue(widgetPath,"unitY",__FILE__, __LINE__)*meter->getIconHeight()/100.0);
       }
       if (widgetType=="scale") {
+        scale->setBackgroundWidth(c->getDoubleValue(widgetPath,"width",__FILE__, __LINE__)*scale->getIconWidth()/100.0);
+        scale->setBackgroundHeight(c->getDoubleValue(widgetPath,"height",__FILE__, __LINE__)*scale->getIconHeight()/100.0);
+        scale->setBackgroundAlpha(c->getIntValue(widgetPath,"alpha",__FILE__, __LINE__));
         scale->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));
-        scale->setTickLabelOffsetX(c->getDoubleValue(widgetPath,"tickLabelOffsetX",__FILE__, __LINE__)*scale->getIconWidth()/100.0);
-        scale->setMapLabelOffsetY(c->getDoubleValue(widgetPath,"mapLabelOffsetY",__FILE__, __LINE__)*scale->getIconHeight()/100.0);
-        scale->setLayerLabelOffsetY(c->getDoubleValue(widgetPath,"layerLabelOffsetY",__FILE__, __LINE__)*scale->getIconHeight()/100.0);
+        scale->setTopLabelOffsetY(c->getDoubleValue(widgetPath,"topLabelOffsetY",__FILE__, __LINE__)*scale->getIconHeight()/100.0);
+        scale->setBottomLabelOffsetY(c->getDoubleValue(widgetPath,"bottomLabelOffsetY",__FILE__, __LINE__)*scale->getIconHeight()/100.0);        
+        scale->getAltitudeIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"altitudeIconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="status") {
         status->setUpdateInterval(c->getIntValue(widgetPath,"updateInterval",__FILE__, __LINE__));

@@ -35,38 +35,82 @@ bool ElevationEngine::init() {
   GDALAllRegister();
 
   // Reserve memories for the arrays
-  if (!(demDatasetBusy=(bool*)malloc(workerCount*sizeof(demDatasetBusy)))) {
+  if (!(demDatasetBusy=(bool*)malloc((workerCount+1)*sizeof(demDatasetBusy)))) {
     FATAL("no memory",NULL);
     return false;
   }
-  memset(demDatasetBusy,0,workerCount*sizeof(demDatasetFullRes));
-  if (!(demDatasetFullRes=(DEMDataset**)malloc(workerCount*sizeof(demDatasetFullRes)))) {
+  memset(demDatasetBusy,0,(workerCount+1)*sizeof(demDatasetFullRes));
+  if (!(demDatasetFullRes=(DEMDataset**)malloc((workerCount+1)*sizeof(demDatasetFullRes)))) {
     FATAL("no memory",NULL);
     return false;
   }
-  memset(demDatasetFullRes,0,workerCount*sizeof(demDatasetFullRes));
+  memset(demDatasetFullRes,0,(workerCount+1)*sizeof(demDatasetFullRes));
   if (!(demDatasetLowRes=(DEMDataset**)malloc(workerCount*sizeof(demDatasetLowRes)))) {
     FATAL("no memory",NULL);
     return false;
   }
   memset(demDatasetLowRes,0,workerCount*sizeof(demDatasetLowRes));
 
+  // Configure GDAL
+  CPLSetConfigOption("GDAL_CACHEMAX", core->getConfigStore()->getStringValue("General","gdalMaxCacheSize",__FILE__,__LINE__).c_str());
+
   // Try to open the DEM data
   std::string demFilePathFullRes=demFolderPath+"/index.vrt";
   std::string demFilePathLowRes=demFolderPath+"/lowres.tif";
   for (Int i=0;i<workerCount;i++) {
-    demDatasetFullRes[i] = (DEMDataset *) GDALOpen(demFilePathFullRes.c_str(), GA_ReadOnly);
-    if (demDatasetFullRes==NULL) {
-      WARNING("please install full resolution elevation data into <%s>",demFilePathFullRes.c_str());
-      return true;
-    }
     demDatasetLowRes[i] = (DEMDataset *) GDALOpen(demFilePathLowRes.c_str(), GA_ReadOnly);
     if (demDatasetFullRes==NULL) {
       WARNING("please install low resolution elevation data into <%s>",demFilePathLowRes.c_str());
       return true;
     }
   }
+  for (Int i=0;i<workerCount+1;i++) {
+    demDatasetFullRes[i] = (DEMDataset *) GDALOpen(demFilePathFullRes.c_str(), GA_ReadOnly);
+    if (demDatasetFullRes==NULL) {
+      WARNING("please install full resolution elevation data into <%s>",demFilePathFullRes.c_str());
+      return true;
+    }
+  }
 
+  // Setup the source SRS for WGS84
+  CPLErrorReset();
+  OGRSpatialReferenceH hSRS = OSRNewSpatialReference( nullptr );
+  pszSourceSRS = nullptr;
+  if( OSRSetFromUserInput( hSRS, "WGS84" ) == OGRERR_NONE ) {
+    OSRExportToWkt( hSRS, &pszSourceSRS );
+  } else {
+    FATAL("source SRS cannot be set",NULL);
+    return false;
+  }
+  OSRDestroySpatialReference( hSRS );
+
+  // Setup coordinate transformation
+  hSrcSRS = OSRNewSpatialReference( pszSourceSRS );
+  OSRSetAxisMappingStrategy(hSrcSRS, OAMS_TRADITIONAL_GIS_ORDER);
+  auto hTrgSRS = GDALGetSpatialRef( demDatasetFullRes[workerCount] );
+  if (!hTrgSRS) {
+    FATAL("cannot create spatial reference ",NULL);
+    return false;
+  }
+  hCT = OCTNewCoordinateTransformation( hSrcSRS, hTrgSRS );
+  if (!hCT) {
+    FATAL("cannot create coordinate transformator",NULL);
+    return false;
+  }
+  if (GDALGetGeoTransform(demDatasetFullRes[workerCount], adfGeoTransform) != CE_None) {
+    FATAL("cannot create geo transformation",NULL);
+    return false;
+  }
+  if (!GDALInvGeoTransform(adfGeoTransform, adfInvGeoTransform)) {
+    FATAL("cannot create inverse geo transformation",NULL);
+    return false;
+  }
+  hBand = GDALGetRasterBand( demDatasetFullRes[workerCount], 1);
+  if (!hBand) {
+    FATAL("cannot find hBand in DEM dataset",NULL);
+    return false;
+  }
+  
   // We are ready
   isInitialized=true;
 
@@ -96,6 +140,7 @@ void ElevationEngine::deinit() {
   isInitialized=false;
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   if (demDatasetBusy) {
+    //DEBUG("requesting all render threads to quit",NULL);
     while (true) {
       bool threadActive=false;
       for (int i=0;i<workerCount;i++) {
@@ -114,11 +159,34 @@ void ElevationEngine::deinit() {
       }
     }
     //DEBUG("no thread active anymore",NULL);
+
+    // Wait for any thread getting alitutde information
+    //DEBUG("waiting for thread using the DEM dataset for altitude calculation",NULL);
+    while (demDatasetBusy[workerCount]) {
+      core->getThread()->unlockMutex(accessMutex);
+      usleep(1000);
+      core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+    }
+  }  
+
+  // Close the stuff needed for coordinate transformation
+  if (hSrcSRS) {
+    OSRDestroySpatialReference(hSrcSRS);
+    hSrcSRS=NULL;
+  }
+  if (hCT) {
+    OCTDestroyCoordinateTransformation(hCT);
+    hCT=NULL;
+  }
+  // Blocks under Android for unknown reasons
+  if (pszSourceSRS) {
+    CPLFree(pszSourceSRS);
+    pszSourceSRS=NULL;
   }
 
   // Close the dem data
   if (demDatasetFullRes) {
-    for (Int i=0;i<workerCount;i++) {
+    for (Int i=0;i<workerCount+1;i++) {
       GDALClose(demDatasetFullRes[i]);
     }
     free(demDatasetFullRes);
@@ -328,6 +396,7 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   UInt pixelSize;
   ImagePixel *hillshadePixels=core->getImage()->loadPNG((UByte*)data,size,renderWidth,renderHeight,pixelSize,false);
   VSIFree(data);
+  VSIUnlink((imageFilename+".aux.xml").c_str());
   if ((!hillshadePixels)||(pixelSize!=Image::getRGBPixelSize())) {
     FATAL("can not read <%s>",imageFilename.c_str());
     resetDemDatasetBusy(workerNr);
@@ -394,6 +463,74 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   //core->getThread()->unlockMutex(accessMutex);
   resetDemDatasetBusy(workerNr);
   return pngPixels;
+}
+
+// Returns the altitude of the given position
+bool ElevationEngine::getElevation(MapPosition *pos) {
+
+  // Only work if initialized
+  pos->setHasAltitude(false);
+  if (!isInitialized) {
+    DEBUG("DEM dataset not yet initialized",NULL);
+    return false;
+  }
+  if (demDatasetBusy[workerCount]) {
+    DEBUG("DEM dataset is already used by another thread",NULL);
+    return false;
+  }
+
+  // Indicate that we are working
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  demDatasetBusy[workerCount]=true;
+  core->getThread()->unlockMutex(accessMutex);
+
+  // Turn the location into a pixel and line location
+  double lng=pos->getLng();
+  double lat=pos->getLat();
+  int iPixel, iLine;
+  if (hCT) {
+    if (!OCTTransform(hCT, 1, &lng, &lat, nullptr)) {
+      DEBUG("cannot transform coordinates (%f,%f)",lng,lat);
+      core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+      demDatasetBusy[workerCount]=false;
+      core->getThread()->unlockMutex(accessMutex);
+      return false;
+    }
+  }
+  iPixel = static_cast<int>(floor(
+    adfInvGeoTransform[0]
+    + adfInvGeoTransform[1] * lng
+    + adfInvGeoTransform[2] * lat));
+  iLine = static_cast<int>(floor(
+    adfInvGeoTransform[3]
+    + adfInvGeoTransform[4] * lng
+    + adfInvGeoTransform[5] * lat));
+  if(iPixel < 0 || iLine < 0
+     || iPixel >= GDALGetRasterXSize(demDatasetFullRes[workerCount])
+     || iLine  >= GDALGetRasterYSize(demDatasetFullRes[workerCount])) {
+    DEBUG("coordinate (%f,%f) is outside the DEM dataset",pos->getLng(),pos->getLat());
+    core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+    demDatasetBusy[workerCount]=false;
+    core->getThread()->unlockMutex(accessMutex);
+    return false;
+  }
+
+  // Query the altitude from the DEM dataset
+  double adfPixel[2];
+  bool result=false;
+  if (GDALRasterIO(hBand, GF_Read, iPixel, iLine, 1, 1, adfPixel, 1, 1, GDT_CFloat64, 0, 0) == CE_None) {
+    pos->setAltitude(adfPixel[0]);
+    pos->setHasAltitude(true);
+    //pos->setIsWGS84Altitude(true);
+    //pos->toMSLHeight();
+    //DEBUG("MSL altitude at (%f,%f) is %f",pos->getLat(),pos->getLng(),pos->getAltitude());
+    result=true;
+  }
+  core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
+  demDatasetBusy[workerCount]=false;
+  core->getThread()->unlockMutex(accessMutex);
+
+  return result;
 }
 
 }

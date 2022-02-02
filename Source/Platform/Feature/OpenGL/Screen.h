@@ -244,6 +244,9 @@ public:
   // Draws an half ellipse
   void drawHalfEllipse(bool filled);
 
+  // Draws a rounded rectangle
+  void drawRoundedRectangle(Int width, Int height);
+
   // Finished the drawing of the scene
   void endScene();
 

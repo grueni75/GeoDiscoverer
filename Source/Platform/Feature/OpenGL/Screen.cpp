@@ -1129,4 +1129,25 @@ void Screen::setTimeColoringMode(bool enable, GraphicBufferInfo buffer) {
   }
 }
 
+// Draws a rounded rectangle
+void Screen::drawRoundedRectangle(Int width, Int height) {
+  Int x1=-width/2;
+  Int y1=-height/2;
+  Int x2=x1+width;
+  Int y2=y1+height;
+  drawRectangle(x1,y1,x2,y2,Screen::getTextureNotDefined(),true);
+  startObject();
+  translate(x1,y1+height/2,0);
+  rotate(+90,0,0,1);
+  scale(height/2,height/2,0);      
+  drawHalfEllipse(true);
+  endObject();
+  startObject();
+  translate(x2,y1+height/2,0);
+  rotate(-90,0,0,1);
+  scale(height/2,height/2,0);
+  drawHalfEllipse(true);
+  endObject();
+}
+
 }

@@ -111,6 +111,11 @@
                   <xsd:documentation>Maximum number of config backups to keep.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>                            
+              <xsd:element name="gdalMaxCacheSize" type="xsd:integer" default="8">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum memory to use in MB for caching raster files in GDAL.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>                            
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
@@ -961,19 +966,19 @@
                                           <xsd:documentation>Vertical position of the unit in percent of the widget height.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
-                                      <xsd:element name="tickLabelOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                      <xsd:element name="topLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
-                                          <xsd:documentation>Horizontal offset for the scale values in percent of the widget width.</xsd:documentation>
+                                          <xsd:documentation>Vertical offset for the top label in percent of the widget height.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
-                                      <xsd:element name="mapLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                      <xsd:element name="bottomLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
-                                          <xsd:documentation>Vertical offset for the map label in percent of the widget height.</xsd:documentation>
+                                          <xsd:documentation>Vertical offset for the bottom label in percent of the widget height.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
-                                      <xsd:element name="layerLabelOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                      <xsd:element name="altitudeIconFilename" type="xsd:string" default="unknown" minOccurs="0">
                                         <xsd:annotation>
-                                          <xsd:documentation>Vertical offset for the layer label in percent of the widget height.</xsd:documentation>
+                                          <xsd:documentation>Filename of the altitude icon.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
                                       <xsd:element name="labelWidth" type="xsd:double" default="0" minOccurs="0">
@@ -1459,6 +1464,11 @@
                                       <xsd:element name="batteryGaugeTipHeight" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Height of the battery gauge tip in inch.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="alpha" type="xsd:integer" default="255">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Alpha component [0-255] to be used in colors</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
                                       <xsd:element name="TurnColor">

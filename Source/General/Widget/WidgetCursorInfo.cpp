@@ -194,26 +194,8 @@ void WidgetCursorInfo::draw(TimestampInMicroseconds t) {
       } else {
         w=width-widthScale*(width-infoFontString->getIconWidth());
       }
-      //DEBUG("w=%d widthScale=%f",w,widthScale);
-      Int x1=-w/2;
-      Int y1=-height/2;
-      Int x2=x1+w;
-      Int y2=y1+height;
-      //DEBUG("scale=%f x1=%d x2=%d y1=%d y2=%d",scale,x1,y1,x2,y2);
       screen->setColor(getColor().getRed(),getColor().getGreen(),getColor().getBlue(),color.getAlpha()*getInactiveColor().getAlpha()/255);
-      screen->drawRectangle(x1,y1,x2,y2,Screen::getTextureNotDefined(),true);
-      screen->startObject();
-      screen->translate(x1,y1+height/2,0);
-      screen->rotate(+90,0,0,1);
-      screen->scale(height/2,height/2,0);      
-      screen->drawHalfEllipse(true);
-      screen->endObject();
-      screen->startObject();
-      screen->translate(x2,y1+height/2,0);
-      screen->rotate(-90,0,0,1);
-      screen->scale(height/2,height/2,0);
-      screen->drawHalfEllipse(true);
-      screen->endObject();
+      screen->drawRoundedRectangle(w,height);
       infoFontString->setColor(color);
       infoFontString->draw(t);
       screen->endObject();

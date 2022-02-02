@@ -30,35 +30,40 @@
 #include <GraphicEngine.h>
 #include <MapEngine.h>
 #include <UnitConverter.h>
+#include <ElevationEngine.h>
+#include <GraphicRectangle.h>
 
 namespace GEODISCOVERER {
 
 // Constructor
-WidgetScale::WidgetScale(WidgetContainer *widgetContainer) : WidgetPrimitive(widgetContainer) {
+WidgetScale::WidgetScale(WidgetContainer *widgetContainer) : 
+    WidgetPrimitive(widgetContainer),
+    altitudeIcon(widgetContainer->getScreen())
+ {
   widgetType=WidgetTypeScale;
   updateInterval=1000000;
   nextUpdateTime=0;
-  tickLabelOffsetX=0;
-  mapLabelOffsetY=0;
-  layerLabelOffsetY=0;
-  mapNameFontString=NULL;
-  layerNameFontString=NULL;
-  scaledNumberFontString=std::vector<FontString*>(4);
-  for(Int i=0;i<4;i++) {
-    scaledNumberFontString[i]=NULL;
-  }
+  topLabelOffsetY=0;
+  bottomLabelOffsetY=0;
+  backgroundWidth=0;
+  backgroundHeight=0;
+  backgroundAlpha=0;
+  topLabelFontString=NULL;
+  bottomLabelLeftFontString=NULL;
+  bottomLabelRightFontString=NULL;
+  altitudeIconScale=1.0;
+  altitudeIconX=0;
+  altitudeIconY=0;
 }
 
 // Destructor
 WidgetScale::~WidgetScale() {
-  widgetContainer->getFontEngine()->lockFont("sansNormal",__FILE__, __LINE__);
-  if (mapNameFontString) widgetContainer->getFontEngine()->destroyString(mapNameFontString);
-  for(Int i=0;i<4;i++) {
-    if (scaledNumberFontString[i]) widgetContainer->getFontEngine()->destroyString(scaledNumberFontString[i]);
-  }
+  widgetContainer->getFontEngine()->lockFont("sansSmall",__FILE__, __LINE__);
+  if (bottomLabelLeftFontString) widgetContainer->getFontEngine()->destroyString(bottomLabelLeftFontString);
+  if (bottomLabelRightFontString) widgetContainer->getFontEngine()->destroyString(bottomLabelRightFontString);
   widgetContainer->getFontEngine()->unlockFont();
   widgetContainer->getFontEngine()->lockFont("sansTiny",__FILE__, __LINE__);
-  if (layerNameFontString) widgetContainer->getFontEngine()->destroyString(layerNameFontString);
+  if (topLabelFontString) widgetContainer->getFontEngine()->destroyString(topLabelFontString);
   widgetContainer->getFontEngine()->unlockFont();
 }
 
@@ -78,10 +83,6 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
   //DEBUG("t=%ld nextUpdateTime=%ld",t,nextUpdateTime);
   if (t>=nextUpdateTime) {
 
-    // Get the map and layer name
-    mapName=core->getMapSource()->getFolder();
-    layerName=core->getMapSource()->getMapLayerName(core->getMapEngine()->getZoomLevel());
-
     // Compute the scale in meters
     GraphicPosition *visPos=widgetContainer->getGraphicEngine()->lockPos(__FILE__, __LINE__);
     double angle=visPos->getAngleRad();
@@ -91,6 +92,7 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     core->getMapEngine()->unlockMapPos();
     MapCalibrator *calibrator=NULL;
     //DEBUG("%s %f 0x%08x",layerName.c_str(),pos.getLngScale(),pos.getMapTile());
+    double metersPerTick;
     if ((pos.getLngScale()>0)&&(pos.getMapTile())&&(pos.getMapTile()->getParentMapContainer())&&((calibrator=pos.getMapTile()->getParentMapContainer()->getMapCalibrator())!=NULL)) {
       //DEBUG("angle=%f zoom=%f",angle,zoom);
       MapPosition pos2=pos;
@@ -109,38 +111,47 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     }
     changed=true;
 
-    // Lock the used font
-    fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
-
-    // Compute the scale numbers
-    textY=y-fontEngine->getFontHeight();
-    std::string lockedUnit="";
-    for (Int i=0;i<4;i++) {
-      meters=i*metersPerTick;
-      textX=x+i*iconWidth/3+tickLabelOffsetX;
-      core->getUnitConverter()->formatMeters(meters,value,unit,0,lockedUnit);
-      if (i==1) {
-        lockedUnit=unit;
-      }
-      FontString *t=scaledNumberFontString[i];
-      fontEngine->updateString(&t,value);
-      textX -= t->getIconWidth()/2;
-      t->setX(textX);
-      t->setY(textY);
-      scaledNumberFontString[i]=t;
+    // Compute the bottom label
+    fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
+    std::stringstream bottomLabel;
+    meters=3*metersPerTick;
+    if (meters>0) {
+      core->getUnitConverter()->formatMeters(meters,value,unit,0);
+      bottomLabel << value << " " << unit;
+    } else {
+      bottomLabel << "?";
     }
-
-    // Compute the map name
-    std::string mapNamePostfix=" (" + unit + ")";
-    fontEngine->updateString(&mapNameFontString,mapName + mapNamePostfix,getIconWidth(),mapNamePostfix.length());
-    textY=y+iconHeight+mapLabelOffsetY;
-    textX=x+(iconWidth-mapNameFontString->getIconWidth())/2;
-    mapNameFontString->setX(textX);
-    mapNameFontString->setY(textY);
+    bottomLabel << " (";
+    fontEngine->updateString(&bottomLabelLeftFontString,bottomLabel.str());
+    bottomLabel.str(" ");
+    core->getElevationEngine()->getElevation(&pos);
+    if (pos.getHasAltitude()) {
+      core->getUnitConverter()->formatMeters(pos.getAltitude(),value,unit,0,"m");
+      bottomLabel << value << " " << unit;
+    } else {
+      bottomLabel << "?";
+    }
+    bottomLabel << ")";
+    fontEngine->updateString(&bottomLabelRightFontString,bottomLabel.str());
+    bottomLabelLeftFontString->setY(y+bottomLabelOffsetY);
+    altitudeIcon.setY(0);
+    altitudeIconY=y+bottomLabelOffsetY;
+    altitudeIconScale=((double)bottomLabelLeftFontString->getIconHeight()+bottomLabelLeftFontString->getBaselineOffsetY())/((double)altitudeIcon.getIconHeight());
+    Int altitudeIconWidth=altitudeIcon.getIconWidth()*altitudeIconScale;
+    bottomLabelRightFontString->setY(y+bottomLabelOffsetY);
+    Int totalWidth=bottomLabelLeftFontString->getIconWidth()+bottomLabelRightFontString->getIconWidth()+altitudeIconWidth;
+    Int startX=x+iconWidth/2-totalWidth/2;
+    bottomLabelLeftFontString->setX(startX);
+    startX+=bottomLabelLeftFontString->getIconWidth();
+    altitudeIcon.setX(0);
+    altitudeIconX=startX;
+    startX+=altitudeIconWidth;
+    bottomLabelRightFontString->setX(startX);
     fontEngine->unlockFont();
 
-    // Compute the layer name
+    // Compute the top label
     fontEngine->lockFont("sansTiny",__FILE__, __LINE__);
+    std::string layerName=core->getMapSource()->getMapLayerName(core->getMapEngine()->getZoomLevel());
     std::size_t i=layerName.find_last_of(" ");
     Int keepEndCharCount=-1;
     if (i!=std::string::npos) {
@@ -148,19 +159,14 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
       //DEBUG("layerNamePostfix=%s",layerNamePostfix.c_str());
       keepEndCharCount=layerNamePostfix.length();
     }
-    fontEngine->updateString(&layerNameFontString,layerName,getIconWidth(),keepEndCharCount);
-    textY=y+iconHeight+layerLabelOffsetY;
-    textX=x+(iconWidth-layerNameFontString->getIconWidth())/2;
-    layerNameFontString->setX(textX);
-    layerNameFontString->setY(textY);
-
-    // Unlock the used font
+    fontEngine->updateString(&topLabelFontString,layerName,getIconWidth(),keepEndCharCount);
+    topLabelFontString->setX(x+iconWidth/2-topLabelFontString->getIconWidth()/2);
+    topLabelFontString->setY(y+topLabelOffsetY);
     fontEngine->unlockFont();
 
     // Set the next update time
     nextUpdateTime=t+updateInterval;
     //DEBUG("nextUpdateTime=%ld",nextUpdateTime);
-
   }
 
   // Return result
@@ -170,29 +176,33 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
 // Executed every time the graphic engine needs to draw
 void WidgetScale::draw(TimestampInMicroseconds t) {
 
-  // Let the primitive draw the background
+  // Draw the background
+  screen->startObject();
+  screen->translate(x+iconWidth/2,y+iconHeight/2,0);
+  screen->setColor(getColor().getRed(),getColor().getGreen(),getColor().getBlue(),color.getAlpha()*backgroundAlpha/255);
+  screen->drawRoundedRectangle(backgroundWidth,backgroundHeight);
+  screen->endObject();
+
+  // Let the primitive draw the scale icon
   WidgetPrimitive::draw(t);
 
-  // Draw the scale numbers
-  for (Int i=0;i<4;i++) {
-    if (scaledNumberFontString[i]) {
-      scaledNumberFontString[i]->setColor(color);
-      scaledNumberFontString[i]->draw(t);
-    }
+  // Draw all labels and icons
+  if (topLabelFontString) {
+    topLabelFontString->setColor(color);
+    topLabelFontString->draw(t);
   }
-
-  // Draw the map name
-  if (mapNameFontString) {
-    mapNameFontString->setColor(color);
-    mapNameFontString->draw(t);
+  if (bottomLabelLeftFontString) {
+    bottomLabelLeftFontString->setColor(color);
+    bottomLabelLeftFontString->draw(t);
+    screen->startObject();
+    screen->translate(altitudeIconX,altitudeIconY,altitudeIcon.getZ());
+    screen->scale(altitudeIconScale,altitudeIconScale,1.0);
+    altitudeIcon.setColor(color);
+    altitudeIcon.draw(t);
+    screen->endObject();
+    bottomLabelRightFontString->setColor(color);
+    bottomLabelRightFontString->draw(t);
   }
-
-  // Draw the layer name
-  if (layerNameFontString) {
-    layerNameFontString->setColor(color);
-    layerNameFontString->draw(t);
-  }
-
 }
 
 // Called when the widget has changed its position

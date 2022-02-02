@@ -31,7 +31,7 @@ ElevationEngine::ElevationEngine() {
   demFolderPath=core->getHomePath() + "/DEM";
   demDatasetFullRes=NULL;
   demDatasetLowRes=NULL;
-  demDatasetBusy=NULL;
+  demDatasetBusy=NULL;  
   workerCount=core->getConfigStore()->getIntValue("MapTileServer","workerCount",__FILE__,__LINE__);
   accessMutex=core->getThread()->createMutex("elevation engine access mutex");
   demDatasetReadySignal=core->getThread()->createSignal();

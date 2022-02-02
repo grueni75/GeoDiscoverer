@@ -30,6 +30,8 @@
 namespace GEODISCOVERER {
 
 typedef GDALDataset DEMDataset;
+typedef OGRSpatialReferenceH DEMSpatialReference;
+typedef OGRCoordinateTransformationH DEMCoordinateTransformation;
 
 }
 

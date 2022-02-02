@@ -43,6 +43,14 @@ protected:
   ThreadSignalInfo *demDatasetReadySignal;        // Indicates that one of the datasets is not busy anymore
   Int tileNumber;                                 // Continous number for creating a unique filename for hillshading
 
+  // For querying altitude from a coordinate
+  char *pszSourceSRS;
+  DEMSpatialReference hSrcSRS;
+  DEMCoordinateTransformation hCT;
+  double adfGeoTransform[6] = {};
+  double adfInvGeoTransform[6] = {};
+  GDALRasterBandH hBand;
+
   // Converts a tile y number into latitude
   double tiley2lat(Int y, Int worldRes);
 
@@ -66,6 +74,9 @@ public:
 
   // Creates a hillshading for the given map area
   UByte *renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize);
+
+  // Returns the altitude of the given position
+  bool getElevation(MapPosition *pos);
 
   // Getters and setters
   bool getIsInitialized() const

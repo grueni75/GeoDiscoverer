@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GDS version="1.0">
   <MapSourceRef>
-    <name>Hike Bike Map</name>
-    <layerGroupName>Hike Bike Map Cycling</layerGroupName>
+    <name>Open Street Map</name>
+    <layerGroupName>Open Street Map</layerGroupName>
   </MapSourceRef>
   <MapSourceRef>
     <name>Waymarked Trails for Cycling</name>
     <layerGroupName>Hike Bike Map Cycling</layerGroupName>
-  </MapSourceRef>
-  <MapSourceRef>
-    <name>Hike Bike Map</name>
-    <layerGroupName>Hike Bike Map Hiking</layerGroupName>
-  </MapSourceRef>
-  <MapSourceRef>
-    <name>Waymarked Trails for Hiking</name>
-    <layerGroupName>Hike Bike Map Hiking</layerGroupName>
   </MapSourceRef>
 </GDS>
 

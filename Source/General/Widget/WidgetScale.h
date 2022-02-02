@@ -38,28 +38,31 @@ protected:
   // Next timestamp when to update the widget
   TimestampInMicroseconds nextUpdateTime;
 
-  // Current meters per tick of the scale icon
-  double metersPerTick;
+  // Vertical offset to use for the scale label
+  Int topLabelOffsetY;
 
-  // Current map name
-  std::string mapName;
+  // Vertical offset to use for the altitude label
+  Int bottomLabelOffsetY;
 
-  // Current layer name
-  std::string layerName;
+  // Width of the background
+  Int backgroundWidth;
 
-  // Horizontal offset to use for the scale values
-  Int tickLabelOffsetX;
+  // Height of the background
+  Int backgroundHeight;
 
-  // Vertical offset to use for the map label
-  Int mapLabelOffsetY;
+  // Alpha color component of the background
+  Int backgroundAlpha;
 
-  // Vertical offset to use for the layer label
-  Int layerLabelOffsetY;
-  
   // Font string objects for drawing
-  std::vector<FontString*> scaledNumberFontString;
-  FontString *mapNameFontString;
-  FontString *layerNameFontString;
+  FontString *topLabelFontString;
+  FontString *bottomLabelLeftFontString;
+  FontString *bottomLabelRightFontString;
+
+  // Graphic indicating the altitude
+  GraphicRectangle altitudeIcon;
+  double altitudeIconScale;
+  Int altitudeIconX;
+  Int altitudeIconY;
 
 public:
 
@@ -83,18 +86,33 @@ public:
     this->updateInterval=updateInterval;
   }
 
-  void setTickLabelOffsetX(Int tickLabelOffsetX)
+  void setTopLabelOffsetY(Int topLabelOffsetY)
   {
-      this->tickLabelOffsetX = tickLabelOffsetX;
+      this->topLabelOffsetY = topLabelOffsetY;
   }
 
-  void setMapLabelOffsetY(Int mapLabelOffsetY)
+  void setBottomLabelOffsetY(Int bottomLabelOffsetY)
   {
-      this->mapLabelOffsetY = mapLabelOffsetY;
+      this->bottomLabelOffsetY = bottomLabelOffsetY;
   }
 
-  void setLayerLabelOffsetY(Int layerLabelOffsetY) {
-    this->layerLabelOffsetY = layerLabelOffsetY;
+  void setBackgroundWidth(Int width)
+  {
+      this->backgroundWidth = width;
+  }
+
+  void setBackgroundHeight(Int height)
+  {
+      this->backgroundHeight = height;
+  }
+
+  void setBackgroundAlpha(Int alpha)
+  {
+      this->backgroundAlpha = alpha;
+  }
+
+  GraphicRectangle *getAltitudeIcon() {
+    return &altitudeIcon;
   }
 };
 
