@@ -123,7 +123,8 @@ bool WidgetScale::work(TimestampInMicroseconds t) {
     }
     bottomLabel << " (";
     fontEngine->updateString(&bottomLabelLeftFontString,bottomLabel.str());
-    bottomLabel.str(" ");
+    bottomLabel.str("");
+    bottomLabel<<" ";
     core->getElevationEngine()->getElevation(&pos);
     if (pos.getHasAltitude()) {
       core->getUnitConverter()->formatMeters(pos.getAltitude(),value,unit,0,"m");

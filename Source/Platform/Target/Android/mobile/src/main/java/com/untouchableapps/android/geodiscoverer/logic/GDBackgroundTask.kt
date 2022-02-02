@@ -29,6 +29,7 @@ import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.GDApplication
@@ -48,6 +49,7 @@ import java.lang.Exception
 @ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 @ExperimentalAnimationApi
+@ExperimentalComposeUiApi
 class GDBackgroundTask() : CoroutineScope by MainScope() {
 
   // Arguments

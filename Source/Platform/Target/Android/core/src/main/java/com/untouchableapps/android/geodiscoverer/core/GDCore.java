@@ -208,7 +208,7 @@ public class GDCore implements
   private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
     @Override
     public boolean onScaleBegin(ScaleGestureDetector detector) {
-      appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale begins");
+      //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale begins");
       scaleGestureOccured=true;
       return true;
     }
@@ -216,14 +216,14 @@ public class GDCore implements
     @Override
     public boolean onScale(ScaleGestureDetector detector) {
       //if (detector.getScaleFactor()!=1.0) appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("scale=%f",detector.getScaleFactor()));
-      executeCoreCommand("zoom(" + String.valueOf(detector.getScaleFactor() + ")"));
+      if (zoomMode) executeCoreCommand("zoom(" + String.valueOf(detector.getScaleFactor() + ")"));
       return true;
     }
 
     @Override
     public void onScaleEnd(ScaleGestureDetector detector) {
       super.onScaleEnd(detector);
-      appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale ends");
+      //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","scale ends");
       scaleGestureOccured=false;
     }
   }
@@ -1404,7 +1404,6 @@ public class GDCore implements
         updateTwoFingerGesture(event, false);
       }
     }
-
     return true;
   }
 
@@ -1468,7 +1467,7 @@ public class GDCore implements
 
   @Override
   public boolean onDoubleTap(MotionEvent e) {
-    appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("double tap!"));
+    //appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp",String.format("double tap!"));
     zoomMode=true;
     /*zoomStartX=e.getX();
     zoomStartY=e.getY();

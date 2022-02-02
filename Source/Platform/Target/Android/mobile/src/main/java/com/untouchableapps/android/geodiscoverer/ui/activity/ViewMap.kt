@@ -46,6 +46,7 @@ import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.ui.theme.AndroidTheme
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import androidx.core.content.FileProvider
 import com.untouchableapps.android.geodiscoverer.GDApplication
@@ -65,6 +66,7 @@ import java.net.URI
 @ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 @ExperimentalAnimationApi
+@ExperimentalComposeUiApi
 class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   // Callback when a called activity finishes
