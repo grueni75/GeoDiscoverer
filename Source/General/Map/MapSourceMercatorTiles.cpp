@@ -102,8 +102,9 @@ bool MapSourceMercatorTiles::init() {
   // Remove the Tiles dir if the gds info is newer than the tiles
   cleanMapFolder(getFolderPath() + "/Tiles",NULL,false);
   if (lastGDSModification>lastGDMModification) {
-    DEBUG("GDS information is newer than map tiles; removing all tiles",NULL);
+    DialogKey key=core->getDialog()->createProgress("Removing all tiles (GDS info newer)",0);
     cleanMapFolder(getFolderPath() + "/Tiles",NULL,false,true);
+    core->getDialog()->closeProgress(key);
   }
 
   // We always need the default tiles.gda file
@@ -1165,7 +1166,7 @@ bool MapSourceMercatorTiles::hasDownloadJobs() {
 MapTile *MapSourceMercatorTiles::fetchMapTile(Int z, Int x, Int y) {
 
   // First find out the zoom level to use
-  Int zMap;
+  Int zMap=-1;
   std::list<MapTileServer*> *tileServers=mapDownloader->getTileServers();
   for (std::list<MapTileServer*>::iterator j=tileServers->begin();j!=tileServers->end();j++) {
     MapTileServer *tileServer=*j;
@@ -1175,6 +1176,8 @@ MapTile *MapSourceMercatorTiles::fetchMapTile(Int z, Int x, Int y) {
       break;
     }
   }
+  if (zMap==-1)
+    return NULL;
   //DEBUG("zServer=%d zMap=%d",z,zMap);
 
   // Compute the position from the found zoom level

@@ -6,7 +6,6 @@
     <themePath>Elevate.xml</themePath>
     <themeStyle>elv-hiking</themeStyle>
     <themeOverlays></themeOverlays>
-    <minZoomLevel>7</minZoomLevel>
   </MapSourceRef>
   <MapSourceRef>
     <name>Hillshade</name>

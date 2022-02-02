@@ -241,7 +241,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
       @Override
       public void run() {
         coreObject.setThreadPriority(2);
-        long lastUpdate=0;
+        long lastNavigationInfoUpdate=0;
         boolean prevSendMessageForced=false;
         while (true) {
           try {
@@ -260,10 +260,13 @@ public class GDApplication extends Application implements GDAppInterface, Google
               // Handle navigation infos
               if (command.startsWith("setAllNavigationInfo")) {
 
-                // If wear device is inactive, check if message needs to be sent
-                if (wearDeviceSleeping) {
+                  // If wear device is inactive, check if message needs to be sent
+                if (!wearDeviceSleeping) {
+                  lastNavigationInfoUpdate=t;
+                } else {
 
                   // Always send message if off route or target approaching
+                  sendMessage=false;
                   String infosAsString = command.substring(command.indexOf("("), command.indexOf(")") + 1);
                   CockpitInfos infos = CockpitEngine.createCockpitInfo(infosAsString);
                   if ((!infos.turnDistance.equals("-")) || (infos.offRoute)) {
@@ -276,15 +279,16 @@ public class GDApplication extends Application implements GDAppInterface, Google
                       sendMessage = true;
                     else {
 
-                      /* Always update the watch face every minute
-                      if ((t-lastUpdate)>60*1000) {
+                      // Always update the watch face every minute
+                      if ((t-lastNavigationInfoUpdate)>30*1000) {
+                        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","setAllNavigationInfo outdated");
                         sendMessage = true;
-                      } else {
-                        sendMessage = false;
-                      }*/
-                      sendMessage=false;
+                      }
                     }
                     prevSendMessageForced = false;
+                  }
+                  if (sendMessage) {
+                    lastNavigationInfoUpdate = t;
                   }
                 }
               }
@@ -292,8 +296,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
               // Send command
               if (sendMessage) {
-                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
-                lastUpdate = t;
+                GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
                 NodeApi.GetConnectedNodesResult nodes =
                     Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
                         TimeUnit.MILLISECONDS);
