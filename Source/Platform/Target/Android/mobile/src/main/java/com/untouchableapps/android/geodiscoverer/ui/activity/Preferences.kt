@@ -69,6 +69,12 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
   // References
   var coreObject: GDCore = GDApplication.coreObject;
 
+  // Activity title
+  var activityTitle=""
+
+  // Preference path this activity handles
+  var path=""
+
   // Callback when a called activity finishes
   val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
   { result: ActivityResult ->
@@ -76,6 +82,11 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     if (result.resultCode == 1) {
       // Then this one also need to indicate this
       setResult(1)
+      setContent {
+        AndroidTheme {
+          content(activityTitle, path)
+        }
+      }
     }
   }
 
@@ -83,14 +94,14 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     super.onCreate(savedInstanceState)
 
     // Get the path to use
-    var path: String = ""
+    path=""
     if (intent.hasExtra("path")) {
       if (intent.getStringExtra("path") != null)
         path = intent.getStringExtra("path")!!
     }
 
     // Rename the preference screen
-    var activityTitle: String = getString(R.string.preferences)
+    activityTitle=getString(R.string.preferences)
     if (path != "") {
       var prettyPath = path
       var pos = prettyPath.lastIndexOf('/')
