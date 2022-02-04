@@ -519,12 +519,14 @@ bool ElevationEngine::getElevation(MapPosition *pos) {
   double adfPixel[2];
   bool result=false;
   if (GDALRasterIO(hBand, GF_Read, iPixel, iLine, 1, 1, adfPixel, 1, 1, GDT_CFloat64, 0, 0) == CE_None) {
-    pos->setAltitude(adfPixel[0]);
-    pos->setHasAltitude(true);
-    //pos->setIsWGS84Altitude(true);
-    //pos->toMSLHeight();
-    //DEBUG("MSL altitude at (%f,%f) is %f",pos->getLat(),pos->getLng(),pos->getAltitude());
-    result=true;
+    if (adfPixel[0]!=-32768) {
+      pos->setAltitude(adfPixel[0]);
+      pos->setHasAltitude(true);
+      //pos->setIsWGS84Altitude(true);
+      //pos->toMSLHeight();
+      //DEBUG("MSL altitude at (%f,%f) is %f",pos->getLat(),pos->getLng(),pos->getAltitude());
+      result=true;
+    }
   }
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   demDatasetBusy[workerCount]=false;
