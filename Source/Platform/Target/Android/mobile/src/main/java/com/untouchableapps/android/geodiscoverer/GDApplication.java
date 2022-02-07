@@ -296,7 +296,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
               // Send command
               if (sendMessage) {
-                GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
+                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
                 NodeApi.GetConnectedNodesResult nodes =
                     Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
                         TimeUnit.MILLISECONDS);

@@ -690,6 +690,39 @@ public class GDCore implements
   /** Renders a hillshade tile and returns the resulting image */
   public native byte[] renderHillshadeTile(int z, int x, int y);
 
+  /** Sets the category path in the config */
+  public void configStoreSetStringList(String path, List<String> value) {
+    configStoreRemovePath(path);
+    for (int i=0;i<value.size();i++) {
+     String p=path+"[@index='"+i+"']";
+     appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","p="+path);
+     configStoreSetStringValue(p,"name",value.get(i));
+    }
+  }
+
+  /** Returns the category path in the config */
+  public List<String> configStoreGetStringList(String path) {
+    LinkedList<String> result=new LinkedList<String>();
+    String[] indices=configStoreGetAttributeValues(path,"index");
+    int i=0;
+    while (true) {
+      boolean found=false;
+      for (int j=0;j<indices.length;j++) {
+        if (indices[j].equals(String.valueOf(i))) {
+          found=true;
+          break;
+        }
+      }
+      if (!found)
+        break;
+      String p=path+"[@index='"+i+"']";
+      result.push(configStoreGetStringValue(p,"name"));
+      appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","i="+i+" name="+result.get(i));
+      i++;
+    }
+    return result;
+  }
+
   /** Constructs a command from the given arguments */
   private String constructCoreCommand(String cmd, String [] args) {
     String cmdInt = cmd + "(";
@@ -898,6 +931,18 @@ public class GDCore implements
       Intent intent = appIf.createServiceIntent();
       if (intent!=null) {
         intent.setAction("getLastKnownLocation");
+        appIf.getApplication().startService(intent);
+      }
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("updateNearestPOI(")) {
+      String infos = cmd.substring(cmd.indexOf("(") + 1, cmd.indexOf(")"));
+      String[] args=infos.split(",");
+      Intent intent = appIf.createServiceIntent();
+      if (intent!=null) {
+        intent.setAction("updateNearestPOI");
+        intent.putExtra("lat",Double.valueOf(args[0]));
+        intent.putExtra("lng",Double.valueOf(args[1]));
         appIf.getApplication().startService(intent);
       }
       cmdExecuted=true;

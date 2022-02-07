@@ -328,7 +328,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     askConfirmText = viewMap.getString(R.string.dialog_update)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
     askEditTextConfirmHandler = confirmHandler
-    integratedListPOICategoryList.clear()
     askTitle = viewMap.getString(R.string.dialog_rename_address_point_title)
   }
 
@@ -362,7 +361,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     askConfirmText = viewMap.getString(R.string.dialog_import)
     askDismissText = viewMap.getString(R.string.dialog_dismiss)
     askEditTextConfirmHandler = confirmHandler
-    integratedListPOICategoryList.clear()
     askMessage = viewMap.getString(R.string.dialog_route_name_message)
     askTitle = viewMap.getString(R.string.dialog_route_name_title)
   }
@@ -707,7 +705,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     integratedListItems.clear()
     val addressPoints = GDApplication.backgroundTask.fillAddressPoints()
     for (i in addressPoints.indices) {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","adding ${addressPoints[i].nameUniquified}")
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","adding ${addressPoints[i].nameUniquified}")
       integratedListItems.add(IntegratedListItem(
         left=addressPoints[i].nameUniquified,
         right=addressPoints[i].distanceFormatted,
@@ -747,8 +745,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     integratedListBusy=true
     integratedListSelectedItem=-1
     GDApplication.backgroundTask.findPOIs(
-      integratedListPOICategoryPath.toList(),
-      integratedListPOISearchRadius.toInt()*1000)
+      categoryPath=integratedListPOICategoryPath.toList(),
+      searchRadius=integratedListPOISearchRadius.toInt()*1000)
     { result, limitReached ->
       integratedListBusy = false
       if (integratedListOutdated) {

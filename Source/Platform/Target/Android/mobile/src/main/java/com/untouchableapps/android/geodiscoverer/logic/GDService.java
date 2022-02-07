@@ -42,6 +42,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.provider.Settings;
 import androidx.core.app.NotificationCompat;
+import kotlin.Unit;
 
 import android.text.TextUtils;
 
@@ -56,6 +57,7 @@ import com.untouchableapps.android.geodiscoverer.logic.server.BRouterServer;
 import com.untouchableapps.android.geodiscoverer.logic.server.MapTileServer;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class GDService extends Service {
   
@@ -499,7 +501,7 @@ public class GDService extends Service {
       handleActivityStatus(true);
 
       if (coreObject.coreInitialized) {
-        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","updateFLStats intent received!");
+        //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","updateFLStats intent received!");
         coreObject.configStoreSetStringValue("Forumslader", "connected", "1");
         coreObject.configStoreSetStringValue("Forumslader", "batteryLevel", String.valueOf(intent.getStringExtra("batteryLevel")));
         coreObject.configStoreSetStringValue("Forumslader", "powerDrawLevel", String.valueOf(intent.getStringExtra("powerDrawLevel")));
@@ -528,6 +530,28 @@ public class GDService extends Service {
       }
     }
 
+    // Handle nearest POI update request
+    if (intent.getAction().equals("updateNearestPOI")) {
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","updating nearest POI");
+      String t=coreObject.configStoreGetStringValue("Navigation/NearestPointOfInterest","categoryPath");
+      String path[]=t.split(";");
+      double radius= Double.valueOf(coreObject.configStoreGetStringValue("Navigation/NearestPointOfInterest","searchRadius"))*1000.0;
+      GDApplication.backgroundTask.findPOIs(
+          Arrays.asList(path),
+          intent.getDoubleExtra("lat",0),intent.getDoubleExtra("lng",0),
+          (int)radius,(result, limitReached) -> {
+        if (result.size()>0) {
+          GDBackgroundTask.AddressPointItem item=result.get(0);
+          coreObject.executeCoreCommand(
+              "setNearestPOI",
+              item.getNameOriginal(),
+              String.valueOf(item.getLatitude()),
+              String.valueOf(item.getLongitude())
+          );
+        }
+        return Unit.INSTANCE;
+      });
+    }
     return START_STICKY;
   }
   

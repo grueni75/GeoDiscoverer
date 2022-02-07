@@ -30,6 +30,7 @@
 #include <NavigationEngine.h>
 #include <UnitConverter.h>
 #include <GraphicEngine.h>
+#include <Commander.h>
 
 namespace GEODISCOVERER {
 
@@ -43,6 +44,12 @@ WidgetAddressPoint::WidgetAddressPoint(WidgetContainer *widgetContainer) : Widge
   lastClockUpdate=0;
   active=true;
   hideIfNoAddressPointNear=(widgetContainer->getWidgetEngine()->getDevice()->getName()=="Default");
+  poiUpdateRadius=core->getConfigStore()->getDoubleValue("Navigation/NearestPointOfInterest","updateRadius",__FILE__,__LINE__)*1000;
+  poiUpdatePos.invalidate();
+  poiPos.invalidate();
+  poiName="";
+  poiDistance=-1;
+  locationPos.invalidate();
 }
 
 // Destructor
@@ -78,32 +85,52 @@ bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
     NavigationPoint navigationPoint;
     bool alarm;
     bool found=core->getNavigationEngine()->getNearestAddressPoint(navigationPoint,distance,updateTimestamp,alarm);
+    std::stringstream addressPointLine;
+    std::stringstream clockLine;
+    TimestampInSeconds t2=core->getClock()->getSecondsSinceEpoch();
+    bool shortTime=false;
+    bool useClock=true;
+    bool updated=false;
+    std::string value,unit;
     if ((found)&&(alarm)) {
-      std::stringstream status;
-      std::string value,unit;
       core->getUnitConverter()->formatMeters(distance,value,unit);
-      status << "In " << value << " " << unit << ": " << navigationPoint.getName();
+      addressPointLine << "In " << value << " " << unit << ": " << navigationPoint.getName();
       nearestAddressPointName=navigationPoint.getName();
+      updated=true;
+      activateWidget=true;
+      useClock=false;
+    } else {
+      nearestAddressPointName="";
+      if (poiName!="") {
+        core->getUnitConverter()->formatMeters(poiDistance,value,unit);
+        addressPointLine << " ― " << poiName;
+        if (poiDistance!=-1)        
+          addressPointLine << " (" << value << " " << unit << ")";
+        updated=true;
+        shortTime=true;
+      }
+    }
+    if ((t2/60!=lastClockUpdate/60)||(firstRun)||(updated)) {
+      if (!shortTime)
+        clockLine << core->getClock()->getFormattedDate(t2,"%A ― %H:%M ― %Y-%m-%d",true);
+      else
+        clockLine << core->getClock()->getFormattedDate(t2,"%A ― %H:%M",true);
+      lastClockUpdate=t2;
+      updated=true;
+    }
+    if (updated) {
+      std::stringstream line;
+      if (useClock) {
+        line << clockLine.str() << addressPointLine.str();
+      } else {
+        line << addressPointLine.str();
+      }
       fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
-      fontEngine->updateString(&statusFontString,status.str(),iconWidth*0.95);
+      fontEngine->updateString(&statusFontString,line.str(),iconWidth*0.95);
       fontEngine->unlockFont();
       statusFontString->setX(x+(iconWidth-statusFontString->getIconWidth())/2);
       statusFontString->setY(y+(iconHeight-statusFontString->getIconHeight())/2-statusFontString->getBaselineOffsetY());
       changed=true;
-      activateWidget=true;
-    } else {
-      TimestampInSeconds t2=core->getClock()->getSecondsSinceEpoch();
-      nearestAddressPointName="";
-      if ((t2/60!=lastClockUpdate/60)||(firstRun)) {
-        fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
-        fontEngine->updateString(&statusFontString,core->getClock()->getFormattedDate(t2,"%A -- %H:%M -- %Y-%m-%d",true));
-        //fontEngine->updateString(&statusFontString,core->getClock()->getFormattedDate(t2,"%c",true));
-        fontEngine->unlockFont();
-        lastClockUpdate=t2;
-        statusFontString->setX(x+(iconWidth-statusFontString->getIconWidth())/2);
-        statusFontString->setY(y+(iconHeight-statusFontString->getIconHeight())/2-statusFontString->getBaselineOffsetY());
-        changed=true;
-      }
     }
 
     // Activate widget if not already
@@ -164,7 +191,42 @@ void WidgetAddressPoint::updatePosition(Int x, Int y, Int z) {
 
 // Called when some data has changed
 void WidgetAddressPoint::onDataChange() {
+
+  // Check if the nearest POI has changed
+  std::string name=core->getConfigStore()->getStringValue("Navigation/NearestPointOfInterest","name",__FILE__,__LINE__);
+  double lat=core->getConfigStore()->getDoubleValue("Navigation/NearestPointOfInterest","lat",__FILE__,__LINE__);
+  double lng=core->getConfigStore()->getDoubleValue("Navigation/NearestPointOfInterest","lng",__FILE__,__LINE__);
+  if ((name!=poiName)||(lat!=poiPos.getLat())||(lng!=poiPos.getLng())) {
+    poiName=name;
+    poiPos.setLat(lat);
+    poiPos.setLng(lng);
+    if (locationPos.isValid())
+      poiDistance=locationPos.computeDistance(poiPos);
+    else
+      poiDistance=-1;
+    DEBUG("nearest POI has changed to %s",poiName.c_str());
+  }
   nextUpdateTime=0;
+}
+
+// Called when the location changes
+void WidgetAddressPoint::onLocationChange(bool widgetVisible, MapPosition pos) {
+
+  // Skip if pos is not valid
+  if (!pos.isValid())
+    return;
+
+  // Do we need to search for a new nearest POI?
+  if ((!poiUpdatePos.isValid())||(poiUpdatePos.computeDistance(pos)>=poiUpdateRadius)) {
+    std::stringstream cmd;
+    cmd << "updateNearestPOI(" << pos.getLat() << "," << pos.getLng() << ")";
+    core->getCommander()->dispatch(cmd.str().c_str());
+    poiUpdatePos=pos;
+  }
+  locationPos=pos;
+  if (poiPos.isValid()) {
+    poiDistance=pos.computeDistance(poiPos);
+  }
 }
 
 }

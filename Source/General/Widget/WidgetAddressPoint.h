@@ -22,6 +22,7 @@
 
 #include <WidgetPrimitive.h>
 #include <FontString.h>
+#include <MapPosition.h>
 
 #ifndef WIDGETADDRESSPOINT_H_
 #define WIDGETADDRESSPOINT_H_
@@ -56,6 +57,20 @@ protected:
   // Name of the nearby address point
   std::string nearestAddressPointName;
 
+  // Last known location
+  MapPosition locationPos;
+
+  // Last position used for getting the nearest POI
+  MapPosition poiUpdatePos;
+
+  // Mininum distance to update the POI
+  double poiUpdateRadius;
+
+  // Identifies the nearest POI
+  std::string poiName;
+  MapPosition poiPos;
+  double poiDistance;
+
 public:
 
   // Constructor
@@ -75,6 +90,9 @@ public:
 
   // Called when some data has changed
   virtual void onDataChange();
+
+  // Called when the location changes
+  virtual void onLocationChange(bool widgetVisible, MapPosition pos);
 
   // Getters and setters
 };

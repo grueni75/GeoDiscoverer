@@ -947,6 +947,13 @@ std::string Commander::execute(std::string cmd) {
     result=resultStream.str();
     cmdExecuted=true;
   }
+  if (cmdName=="setNearestPOI") {
+    core->getConfigStore()->setStringValue("Navigation/NearestPointOfInterest","name",args[0],__FILE__,__LINE__);
+    core->getConfigStore()->setDoubleValue("Navigation/NearestPointOfInterest","lat",atof(args[1].c_str()),__FILE__,__LINE__);
+    core->getConfigStore()->setDoubleValue("Navigation/NearestPointOfInterest","lng",atof(args[2].c_str()),__FILE__,__LINE__);
+    core->onDataChange();
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

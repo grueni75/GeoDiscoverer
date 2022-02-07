@@ -426,18 +426,6 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
         )
         val distanceInfo = coreObject!!.executeCoreCommand("computeDistanceToAddressPoint",newestName)
         val distanceFields = distanceInfo.split(";")
-        val distanceRaw: Double
-        try {
-          distanceRaw=distanceFields[0].toDouble()
-        }
-        catch (e: Exception) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",
-            "distance <%s> can not be converted to double (${e.message})"
-          )
-          coreObject!!.executeAppCommand(
-            "errorDialog(Problem reading AP <$newestName> (check log))"
-          )
-        }
         val ap=AddressPointItem(
           nameOriginal = newestName,
           nameUniquified = newestName,
@@ -484,7 +472,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
   }
 
   // Check for outdated routes
-  fun findPOIs(categoryPath: List<String>, searchRadius: Int, resultCallback: (List<AddressPointItem>,Boolean)->Unit): Boolean {
+  fun findPOIs(categoryPath: List<String>, lat: Double=Double.NaN, lng: Double=Double.NaN, searchRadius: Int, resultCallback: (List<AddressPointItem>,Boolean)->Unit): Boolean {
 
     // Only start working if initialized and no job running already
     val result = mutableListOf<AddressPointItem>()
@@ -506,9 +494,14 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
           fullPath="${fullPath} -> ${level}"
         }
         //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Searching in category path ${fullPath}")
-        val t=coreObject!!.executeCoreCommand("getMapPos")
-        val fields=t.split(",")
-        val currentPos=LatLong(fields[0].toDouble(),fields[1].toDouble())
+        val currentPos: LatLong
+        if (lng.isNaN()||lat.isNaN()) {
+          val t = coreObject!!.executeCoreCommand("getMapPos")
+          val fields = t.split(",")
+          currentPos = LatLong(fields[0].toDouble(),fields[1].toDouble())
+        } else {
+          currentPos = LatLong(lat, lng)
+        }
 
         // Go through all available POI databases
         for (poiManager in poiManagers) {

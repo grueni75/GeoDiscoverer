@@ -2562,6 +2562,45 @@
                   <xsd:documentation>Maximum number of nearby point of interests to return per database.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>     
+              <xsd:element name="NearestPointOfInterest">
+                <xsd:annotation>
+                  <xsd:documentation>Preferences related to showing the nearest POI.</xsd:documentation>
+                </xsd:annotation>
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="categoryPath" type="xsd:string" default="260: Cities,Towns,Villages / Städte,Orte,Dörfer;City / Großstadt" gd:upgrade="restore">
+                      <xsd:annotation>
+                        <xsd:documentation>Category path to use for showing the nearest POI.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="updateRadius" type="xsd:string" default="0.5">
+                      <xsd:annotation>
+                        <xsd:documentation>Min distance to current location before updating the nearest POI.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="searchRadius" type="xsd:string" default="5">
+                      <xsd:annotation>
+                        <xsd:documentation>Search radius in km to use for showing the nearest POI.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="name" type="xsd:string" default="">
+                      <xsd:annotation>
+                        <xsd:documentation>Name of the current nearest POI.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="lat" type="xsd:double" default="0">
+                      <xsd:annotation>
+                        <xsd:documentation>Latitude of the current nearest POI.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="lng" type="xsd:double" default="0">
+                      <xsd:annotation>
+                        <xsd:documentation>Longitude of the current nearest POI.</xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:element>
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
