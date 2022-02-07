@@ -289,8 +289,13 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
             modifier = Modifier
               .padding(innerPadding)
           ) {
+            var lastEnryWasDivider=false
             itemsIndexed(entries) { index, entry ->
-              inflatePreference(index, entry, contentBoxWithConstraintsScope.maxHeight) {
+              if (index==0)
+                entry.putBoolean("skipDivider",true)
+              else
+                entry.putBoolean("skipDivider", lastEnryWasDivider)
+              lastEnryWasDivider=inflatePreference(index, entry, contentBoxWithConstraintsScope.maxHeight) {
                 expertMode.value = it
               }
             }
@@ -301,18 +306,19 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
   }
 
   @Composable
-  fun inflatePreference(i: Int, info: Bundle, maxHeight: Dp, setExpertMode: (Boolean)->Unit) {
+  fun inflatePreference(i: Int, info: Bundle, maxHeight: Dp, setExpertMode: (Boolean)->Unit): Boolean {
 
     // Process the type of info
     val parentPath: String = info.getString("parentPath")!!
     val fullPath: String = info.getString("fullPath")!!
     val name: String = info.getString("name")!!
+    var itemIsDivider = false
     when (info.getString("type")) {
 
       // Section title
       "section" -> {
         sectionTitle(
-          skipDivider = i == 0,
+          skipDivider = info.getBoolean("skipDivider"),
           title = info.getString("name")!!
         )
       }
@@ -325,7 +331,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
 
           // Add a section title
           sectionTitle(
-            skipDivider = i == 0,
+            skipDivider = info.getBoolean("skipDivider"),
             title = info.getString("prettyName") + " " + stringResource(id = R.string.prefs_list)
           )
 
@@ -335,7 +341,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
             info.getString("isUnbounded")
           )
           if (values.isEmpty()) {
-            containerItem(
+            item(
               title = stringResource(id = R.string.prefs_no_entries),
             )
           } else {
@@ -357,7 +363,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
               }
 
               // Add the component to show the details
-              containerItem(
+              item(
                 title = value,
                 summary = summary,
                 onClick = {
@@ -369,10 +375,14 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
             }
           }
 
+          // Add another separator
+          sectionDivider();
+          itemIsDivider=true
+
         } else {
 
           // Just create the entry for the sub preference
-          containerItem(
+          item(
             title = info.getString("prettyName")!!,
             summary = info.getString("documentation")!!,
             onClick = {
@@ -401,7 +411,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
         // Create the entry
         val openDialog = remember { mutableStateOf(false) }
         val newColor = remember { mutableStateOf(currentColor.value) }
-        containerItem(
+        item(
           title = info.getString("prettyName")!!,
           summary = info.getString("documentation")!!,
           colorValue = currentColor.value,
@@ -462,7 +472,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
         // Create the entry
         val openDialog = remember { mutableStateOf(false) }
         val newValue = remember { mutableStateOf(currentValue.value) }
-        containerItem(
+        item(
           title = info.getString("prettyName")!!,
           summary = info.getString("documentation")!!,
           stringValue = currentValue.value,
@@ -500,7 +510,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
         val currentValue = remember { mutableStateOf(value) }
 
         // Create the entry
-        containerItem(
+        item(
           title = info.getString("prettyName")!!,
           summary = info.getString("documentation")!!,
           booleanValue = currentValue.value,
@@ -605,7 +615,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
         // Create the entry
         val openDialog = remember { mutableStateOf(false) }
         val newValue = remember { mutableStateOf(currentValue.value) }
-        containerItem(
+        item(
           title = info.getString("prettyName")!!,
           summary = info.getString("documentation")!!,
           stringValue = currentValue.value,
@@ -622,7 +632,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
           content = {
             LazyColumn(
               modifier = Modifier
-                .heightIn(max=maxHeight-250.dp)
+                .heightIn(max = maxHeight - 250.dp)
                 .fillMaxWidth()
             ) {
               items(allValues.value) {
@@ -666,18 +676,25 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
         )
       }
     }
+    return itemIsDivider
+  }
+
+  // Creates a divider
+  @Composable
+  fun sectionDivider() {
+    Box(
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(1.dp)
+        .background(MaterialTheme.colorScheme.outline)
+    )
   }
 
   // Creates a section title
   @Composable
   fun sectionTitle(skipDivider: Boolean, title: String) {
     if (!skipDivider) {
-      Box(
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(1.dp)
-          .background(MaterialTheme.colorScheme.outline)
-      )
+      sectionDivider()
     }
     Row(
       modifier = Modifier
@@ -699,9 +716,9 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     }
   }
 
-  // Creates a preference item that opens a new preference screen
+  // Creates a preference item
   @Composable
-  fun containerItem(
+  fun item(
     title: String, summary: String = "",
     colorValue: Color? = null,
     stringValue: String? = null,
