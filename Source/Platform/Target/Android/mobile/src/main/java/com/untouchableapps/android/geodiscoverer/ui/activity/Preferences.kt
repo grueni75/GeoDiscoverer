@@ -135,12 +135,14 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
   }
 
   // Creates a preference section
-  fun definePreferenceSection(title: String): Bundle {
+  fun definePreferenceSection(title: String, skipDivider: Boolean=false): Bundle {
     val info = Bundle()
     info.putString("type","section")
     info.putString("name", title)
     info.putString("parentPath", "")
     info.putString("fullPath", "")
+    if (skipDivider)
+      info.putBoolean("skipDivider", true)
     return info
   }
 
@@ -197,17 +199,15 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     // Get all entries for this path
     var entries: MutableList<Bundle> = mutableListOf()
     if ((!expertMode)&&(path=="")) {
-      entries.add(definePreferenceSection("General"))
+      entries.add(definePreferenceSection("General",true))
       entries.add(definePreferenceEntry("General","unitSystem")!!)
       entries.add(definePreferenceEntry("General","wakeLock")!!)
       entries.add(definePreferenceEntry("","expertMode")!!)
-      entries.add(definePreferenceSection("Finger Menu"))
-      entries.add(definePreferenceEntry("Graphic/Widget/FingerMenu","enable")!!)
       entries.add(definePreferenceSection("Map"))
       entries.add(definePreferenceEntry("Map","folder")!!)
       entries.add(definePreferenceEntry("Map","downloadAreaLength")!!)
       entries.add(definePreferenceEntry("Navigation","Route")!!)
-      entries.add(definePreferenceSection("Map Tile Server"))
+      entries.add(definePreferenceSection("Map Tile Server",true))
       entries.add(definePreferenceEntry("MapTileServer","userScale")!!)
       entries.add(definePreferenceEntry("MapTileServer","textScale")!!)
       entries.add(definePreferenceEntry("MapTileServer","language")!!)
@@ -244,9 +244,15 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     } else {
       val names = coreObject.configStoreGetNodeNames(path)
       Arrays.sort(names)
+      var i=0
+      var lastEntryWasDivider=true
       for (name in names) {
         var entry: Bundle? = definePreferenceEntry(path, name)
-        if (entry != null) entries.add(entry)
+        if (entry != null) {
+          if (lastEntryWasDivider) entry.putBoolean("skipDivider",true)
+          lastEntryWasDivider = (entry.getString("type")=="container")&&(entry.containsKey("isUnbounded"))
+          entries.add(entry)
+        }
       }
     }
     return entries
@@ -291,11 +297,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
           ) {
             var lastEnryWasDivider=false
             itemsIndexed(entries) { index, entry ->
-              if (index==0)
-                entry.putBoolean("skipDivider",true)
-              else
-                entry.putBoolean("skipDivider", lastEnryWasDivider)
-              lastEnryWasDivider=inflatePreference(index, entry, contentBoxWithConstraintsScope.maxHeight) {
+              inflatePreference(index, entry, contentBoxWithConstraintsScope.maxHeight) {
                 expertMode.value = it
               }
             }
@@ -306,13 +308,12 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
   }
 
   @Composable
-  fun inflatePreference(i: Int, info: Bundle, maxHeight: Dp, setExpertMode: (Boolean)->Unit): Boolean {
+  fun inflatePreference(i: Int, info: Bundle, maxHeight: Dp, setExpertMode: (Boolean)->Unit) {
 
     // Process the type of info
     val parentPath: String = info.getString("parentPath")!!
     val fullPath: String = info.getString("fullPath")!!
     val name: String = info.getString("name")!!
-    var itemIsDivider = false
     when (info.getString("type")) {
 
       // Section title
@@ -376,8 +377,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
           }
 
           // Add another separator
-          sectionDivider();
-          itemIsDivider=true
+          sectionDivider()
 
         } else {
 
@@ -676,7 +676,6 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
         )
       }
     }
-    return itemIsDivider
   }
 
   // Creates a divider

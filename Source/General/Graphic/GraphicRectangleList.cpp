@@ -28,7 +28,7 @@ namespace GEODISCOVERER {
 // Constructor
 GraphicRectangleList::GraphicRectangleList(Screen *screen, Int numberOfRectangles, bool enableTimeColoring) : GraphicPrimitive(screen) {
   type=GraphicTypeRectangleList;
-  this->numberOfRectanglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","rectangleListNumberOfRectanglesOtherSegemnts",__FILE__, __LINE__);
+  this->numberOfRectanglesOtherSegments=4*core->getConfigStore()->getIntValue("Graphic","rectangleListNumberOfRectanglesOtherSegments",__FILE__, __LINE__);
   this->enableTimeColoring=enableTimeColoring;
   if (numberOfRectangles==0) {
     numberOfRectangles=numberOfRectanglesOtherSegments;

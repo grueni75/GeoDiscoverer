@@ -1958,12 +1958,12 @@
                   <xsd:documentation>Duration in microseconds of the naviation point appearance animation.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="lineNumberOfStrokesOtherSegemnts" type="xsd:integer" default="32">
+              <xsd:element name="lineNumberOfStrokesOtherSegments" type="xsd:integer" default="32">
                 <xsd:annotation>
                   <xsd:documentation>Number of strokes to reserve if current segment has no strokes left anymore.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="rectangleListNumberOfRectanglesOtherSegemnts" type="xsd:integer" default="4">
+              <xsd:element name="rectangleListNumberOfRectanglesOtherSegments" type="xsd:integer" default="4">
                 <xsd:annotation>
                   <xsd:documentation>Number of rectangles to reserve if current segment has no rectangles left anymore.</xsd:documentation>
                 </xsd:annotation>

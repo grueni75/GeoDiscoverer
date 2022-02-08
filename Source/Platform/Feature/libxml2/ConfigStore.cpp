@@ -538,7 +538,7 @@ std::string ConfigStore::getStringValue(std::string path, std::string name, cons
     // Find the schema node
     schemaNodes=findSchemaNodes(xpath);
     if (schemaNodes.size()!=1) {
-      FATAL("could not find path <%s/%s> in schema",path.c_str(),name.c_str());
+      FATAL("could not find path <%s/%s> in schema (called from %s/%d)",path.c_str(),name.c_str(),file,line);
       core->getThread()->unlockMutex(accessMutex);
       return "";
     }
