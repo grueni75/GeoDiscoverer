@@ -113,7 +113,7 @@ dependencies {
     implementation files("../../../../../ThirdParty/brouter/brouter-util/target/brouter-util-${brouterVersion}.jar")
     wearApp project(':wear')
     implementation project(':core')
-    implementation 'com.google.android.gms:play-services-wearable:11.8.0'
+    implementation 'com.google.android.gms:play-services-wearable:17.1.0'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
     def acraVersion = '5.2.1'
     implementation "ch.acra:acra-mail:$acraVersion"

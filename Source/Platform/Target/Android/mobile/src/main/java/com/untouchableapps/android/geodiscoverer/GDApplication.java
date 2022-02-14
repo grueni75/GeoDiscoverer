@@ -260,7 +260,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
               // Handle navigation infos
               if (command.startsWith("setAllNavigationInfo")) {
 
-                  // If wear device is inactive, check if message needs to be sent
+                // If wear device is inactive, check if message needs to be sent
                 if (!wearDeviceSleeping) {
                   lastNavigationInfoUpdate=t;
                 } else {
@@ -280,7 +280,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
                     else {
 
                       // Always update the watch face every minute
-                      if ((t-lastNavigationInfoUpdate)>30*1000) {
+                      if ((t-lastNavigationInfoUpdate)>60*1000) {
                         //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","setAllNavigationInfo outdated");
                         sendMessage = true;
                       }
@@ -646,6 +646,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
   // Informs the application about the wear sleep state
   public void setWearDeviceSleeping(boolean state) {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","wear device sleeping state is "+state);
     if (wearDeviceSleeping&&!state) {
       sendWearCommand("setRemoteBattery(" + coreObject.batteryStatus + ")");
     }
@@ -657,6 +658,7 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
   // Informs the application about the wear sleep state
   public void setWearDeviceAlive(boolean state) {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","wear device alive state is "+state);
     wearDeviceAlive=state;
     if (wearDeviceAlive) {
       coreObject.executeCoreCommand("remoteMapInit");

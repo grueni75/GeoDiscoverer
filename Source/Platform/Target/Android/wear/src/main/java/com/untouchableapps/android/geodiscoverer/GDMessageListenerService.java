@@ -25,6 +25,7 @@ package com.untouchableapps.android.geodiscoverer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
+import android.support.wearable.watchface.IWatchFaceService;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Channel;
@@ -130,6 +131,7 @@ public class GDMessageListenerService extends WearableListenerService {
         cmdExecuted=true;
       }
       if (cmd.startsWith("setAllNavigationInfo")) {
+        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","new navigation info received from remote server");
         String args1 = cmd.substring(cmd.indexOf("("), cmd.indexOf(")")+1);
         coreObject.executeAppCommand("setFormattedNavigationInfo" + args1);
         cmd = cmd.substring(cmd.indexOf(")") + 1);
@@ -145,7 +147,7 @@ public class GDMessageListenerService extends WearableListenerService {
         cmdExecuted=true;
       }
       if (cmd.equals("getWearDeviceAlive()")) {
-        coreObject.executeAppCommand("setWearDeviceAlive(1)");
+        coreObject.executeAppCommand(cmd);
         cmdExecuted=true;
       }
       if (cmd.startsWith("setNewRemoteMap")) {

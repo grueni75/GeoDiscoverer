@@ -756,6 +756,7 @@ void MapTile::retrieveOverlayGraphics(char *&data, Int &size) {
       rectangleList->setAnimator(animator);
       Storage::retrieveInt(data,size,temp);
       rectangleList->setZ(temp);
+      //DEBUG("pathDirectionIcon.texture=%u",core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
       rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
       rectangleList->setDestroyTexture(false);
       rectangleList->setCutEnabled(true);
@@ -805,6 +806,7 @@ void MapTile::createGraphic() {
     case GraphicTypeLine:
       break;
     case GraphicTypeRectangleList:
+      DEBUG("pathDirectionIcon.texture=%u",core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
       ((GraphicRectangleList*)p)->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
       break;
     default:

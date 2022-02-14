@@ -778,12 +778,12 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     // Fill the remaining fields
     integratedListSelectItemHandler={
       if (integratedListSelectedTab==integratedListTabs.size-1) {
-        viewMap.coreObject!!.executeCoreCommand("setTargetAtGeographicCoordinate",
+        viewMap.coreObject?.executeCoreCommand("setTargetAtGeographicCoordinate",
           integratedListPOIItems[it].longitude.toString(),
           integratedListPOIItems[it].latitude.toString()
         )
       } else {
-        viewMap.coreObject!!.executeCoreCommand("setTargetAtAddressPoint",
+        viewMap.coreObject?.executeCoreCommand("setTargetAtAddressPoint",
           integratedListItems[it].left
         )
       }
@@ -807,7 +807,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
           "selectedAddressPointGroup",
           integratedListTabs[it]
         )
-        viewMap.coreObject!!.executeCoreCommand("addressPointGroupChanged")
+        viewMap.coreObject?.executeCoreCommand("addressPointGroupChanged")
         fillAddressPoints()
       }
     }
@@ -816,7 +816,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         integratedListPOIItems[it].left
       else
         integratedListItems[it].left
-      viewMap.coreObject!!.executeCoreCommand("removeAddressPoint", name)
+      viewMap.coreObject?.executeCoreCommand("removeAddressPoint", name)
       // Item is not removed from the list
     }
     integratedListEditItemHandler={
@@ -838,8 +838,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         var fillTabs = false
         if (group != integratedListTabs[integratedListSelectedTab]) {
           val path = "Navigation/AddressPoint[@name='$newName']"
-          viewMap.coreObject!!.configStoreSetStringValue(path, "group", group)
-          viewMap.coreObject!!.executeCoreCommand("addressPointGroupChanged")
+          viewMap.coreObject?.configStoreSetStringValue(path, "group", group)
+          viewMap.coreObject?.executeCoreCommand("addressPointGroupChanged")
           changed = true
           fillTabs = true
         }

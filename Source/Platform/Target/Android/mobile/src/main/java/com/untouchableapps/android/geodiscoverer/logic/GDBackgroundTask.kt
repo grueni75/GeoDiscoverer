@@ -136,7 +136,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
           val addresses = geocoder.getFromLocationName(address, 1)
           locationFound = if (addresses.size > 0) {
             val a = addresses[0]
-            coreObject!!.executeCoreCommand(
+            coreObject?.executeCoreCommand(
               "addAddressPoint",
               name, address, a.longitude.toString(), a.latitude.toString(),
               group
@@ -174,7 +174,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
           context.getString(R.string.address_point_added, name),
           Toast.LENGTH_LONG
         ).show()
-        coreObject!!.executeAppCommand("addressPointsUpdated()")
+        coreObject?.executeAppCommand("addressPointsUpdated()")
       }
     }
   }
@@ -385,7 +385,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
   private fun toDoubleOrZero(valueStr: String): Double {
     val valueNumber=valueStr.toDoubleOrNull()
     if (valueNumber==null) {
-      coreObject!!.executeAppCommand(
+      coreObject?.executeAppCommand(
         "errorDialog(String <${valueStr}> can not be converted to double!)"
       )
       return 0.0

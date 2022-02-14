@@ -130,14 +130,14 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   @Synchronized
   fun startWatchingCompass() {
     if (coreObject != null && !compassWatchStarted) {
-      sensorManager!!.registerListener(
+      sensorManager?.registerListener(
         coreObject,
-        sensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+        sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
         SensorManager.SENSOR_DELAY_NORMAL
       )
-      sensorManager!!.registerListener(
+      sensorManager?.registerListener(
         coreObject,
-        sensorManager!!.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+        sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
         SensorManager.SENSOR_DELAY_NORMAL
       )
       compassWatchStarted = true
@@ -148,7 +148,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   @Synchronized
   fun stopWatchingCompass() {
     if (compassWatchStarted) {
-      sensorManager!!.unregisterListener(coreObject)
+      sensorManager?.unregisterListener(coreObject)
       compassWatchStarted = false
     }
   }
@@ -163,7 +163,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     if (isVisible) {
       viewModel.splashVisible = true
       viewModel.messagesVisible = true
-      if (coreObject != null) coreObject!!.setSplashIsVisible(true)
+      if (coreObject != null) coreObject?.setSplashIsVisible(true)
     } else {
       viewModel.splashVisible = false
       viewModel.messagesVisible = false
@@ -224,7 +224,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     for (i in selectedMapLayers.indices) {
       args[i + 2] = selectedMapLayers[i]
     }
-    coreObject!!.executeCoreCommand("addDownloadJob", *args)
+    coreObject?.executeCoreCommand("addDownloadJob", *args)
   }
 
   // Shows the legend with the given name
@@ -235,7 +235,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
       dialogHandler.errorDialog(
         getString(
           R.string.map_has_no_legend,
-          coreObject!!.executeCoreCommand("getMapFolder")
+          coreObject?.executeCoreCommand("getMapFolder")
         )
       )
     } else {
@@ -314,10 +314,10 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
       ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Download, getString(R.string.download_map)) {
         viewModel.askForMapDownloadType(
           dismissHandler = {
-            coreObject!!.executeAppCommand("askForMapDownloadDetails(\"\")")
+            coreObject?.executeAppCommand("askForMapDownloadDetails(\"\")")
           },
           confirmHandler = {
-            coreObject!!.executeCoreCommand("downloadActiveRoute")
+            coreObject?.executeCoreCommand("downloadActiveRoute")
           }
         )
       },
@@ -325,13 +325,13 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
         if (coreObject!=null) {
           viewModel.askForMapCleanup(
             confirmHandler = {
-              coreObject!!.executeCoreCommand(
+              coreObject?.executeCoreCommand(
                 "forceMapRedownload",
                 "1"
               )
             },
             dismissHandler = {
-              coreObject!!.executeCoreCommand(
+              coreObject?.executeCoreCommand(
                 "forceMapRedownload",
                 "0"
               )
@@ -356,7 +356,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
       },
       ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.SendToMobile, getString(R.string.export_selected_route)) {
         if (coreObject!=null) {
-          coreObject!!.executeCoreCommand("exportActiveRoute")
+          coreObject?.executeCoreCommand("exportActiveRoute")
         }
       },
       ViewContentNavigationDrawer.NavigationItem(Icons.Outlined.Directions, getString(R.string.brouter)) {

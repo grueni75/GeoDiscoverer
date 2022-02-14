@@ -112,6 +112,7 @@ void GraphicEngine::createGraphic() {
   centerIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","centerIconFilename",__FILE__, __LINE__));
   locationIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","locationIconFilename",__FILE__, __LINE__));
   pathDirectionIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","pathDirectionIconFilename",__FILE__, __LINE__));
+  //DEBUG("pathDirectionIcon.texture=%u",pathDirectionIcon.getTexture())
   pathStartFlagIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","pathStartFlagIconFilename",__FILE__, __LINE__));
   pathEndFlagIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","pathEndFlagIconFilename",__FILE__, __LINE__));
   compassConeIcon.setTextureFromIcon(device->getScreen(),core->getConfigStore()->getStringValue("Graphic","compassConeFilename",__FILE__, __LINE__));

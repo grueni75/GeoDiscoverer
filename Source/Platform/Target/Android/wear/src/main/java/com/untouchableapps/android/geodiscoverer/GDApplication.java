@@ -22,7 +22,6 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
@@ -32,9 +31,7 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
@@ -42,7 +39,6 @@ import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitEngine;
 
-import java.io.File;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -53,7 +49,7 @@ public class GDApplication extends Application implements GDAppInterface {
   public static GDCore coreObject=null;
 
   /** Reference to the message handler of the watch face */
-  WatchFace.CoreMessageHandler messageHandler = null;
+  GDWatchFaceService.CoreMessageHandler messageHandler = null;
 
   /** Cockpit engine */
   CockpitEngine cockpitEngine = null;
@@ -140,7 +136,7 @@ public class GDApplication extends Application implements GDAppInterface {
   }
 
   /** Sets the message handler */
-  public void setMessageHandler(WatchFace.CoreMessageHandler messageHandler) {
+  public void setMessageHandler(GDWatchFaceService.CoreMessageHandler messageHandler) {
     this.messageHandler = messageHandler;
   }
 
@@ -197,7 +193,7 @@ public class GDApplication extends Application implements GDAppInterface {
   public void executeAppCommand(String cmd) {
     if (messageHandler != null) {
       Message m = Message.obtain(messageHandler);
-      m.what = WatchFace.EXECUTE_COMMAND;
+      m.what = 0;
       Bundle b = new Bundle();
       b.putString("command", cmd);
       m.setData(b);

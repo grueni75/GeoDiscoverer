@@ -357,6 +357,10 @@ public class GDCore implements
           break;
         case STOP_CORE:
           coreObject.stop();
+          if (coreObject.isWatch) {
+            coreObject.appIf.addAppMessage(coreObject.appIf.DEBUG_MSG, "GDApp", "Core stop: setWearDeviceAlive(0)");
+            coreObject.appIf.sendWearCommand("setWearDeviceAlive(0)");
+          }
           coreObject.executeAppCommand("exitActivity()");
           break;
         default:
@@ -830,9 +834,19 @@ public class GDCore implements
       coreLateInitComplete=true;
       coreLock.unlock();
       if (isWatch) {
+        appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", "earlyInitComplete: setWearDeviceAlive(1)");
         appIf.sendWearCommand("setWearDeviceAlive(1)");
       }
       cmdExecuted=false; // forward message to activity
+    }
+    if (cmd.equals("getWearDeviceAlive()")) {
+      if (coreLateInitComplete) {
+        appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", "getWearDeviceAlive(): setWearDeviceAlive(1)");
+        appIf.sendWearCommand("setWearDeviceAlive(1)");
+      } else {
+        appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", "getWearDeviceAlive(): setWearDeviceAlive(0)");
+        appIf.sendWearCommand("setWearDeviceAlive(0)");
+      }
     }
     if (cmd.equals("earlyInitComplete()")) {
       coreLock.lock();
@@ -1134,8 +1148,6 @@ public class GDCore implements
   public void onProviderDisabled(String provider) {
   }
   public void onProviderEnabled(String provider) {
-  }
-  public void onStatusChanged(String provider, int status, Bundle extras) {
   }
 
   /** Called when a the orientation sensor has changed */

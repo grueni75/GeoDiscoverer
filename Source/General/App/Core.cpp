@@ -114,6 +114,7 @@ Core::Core(std::string homePath, Int screenDPI, double screenDiagonal) {
   remoteBatteryCharging=false;
   remoteBatteryLevel=0;
   dashboardDevicesReadAccessCount=0;
+  graphicInitialized=false;
 
   // Create core objects that are required early
   if (!(thread=new Thread())) {
@@ -681,6 +682,16 @@ void Core::lateInit() {
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundHigh);
 
+  // Wait until the graphic is initialized
+  if (!graphicInitialized) {
+    DEBUG("waiting for graphic initialization before starting late init",NULL);
+    while (!graphicInitialized) {
+      usleep(1000);
+      if (quitCore)
+        return;
+    }
+  }
+
   // Take care that the map update and screen update thread detects that objects are not initialized
   bool wait=true;
   while (wait) {
@@ -839,6 +850,15 @@ void Core::tileTextureAvailable(const char *file, int line) {
 // Called if the textures or buffers have been lost or must be recreated
 void Core::updateGraphic(bool graphicInvalidated, bool destroyOnly) {
 
+  // If graphic has already been created and we are still initializing
+  // Wait for end of init
+  if (graphicInitialized) {
+    DEBUG("update graphic during init requested; Please check if works correctly",NULL);
+    while (!isInitialized) {
+      usleep(1000);
+    }
+  }
+
   // Ensure that the core is not currently being initialized
   thread->lockMutex(isInitializedMutex, __FILE__, __LINE__);
 
@@ -910,6 +930,7 @@ void Core::updateGraphic(bool graphicInvalidated, bool destroyOnly) {
   continueMapUpdate();
 
   // Let the init continue
+  graphicInitialized=true;
   thread->unlockMutex(isInitializedMutex);
 }
 

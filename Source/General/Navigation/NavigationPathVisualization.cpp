@@ -111,6 +111,7 @@ void NavigationPathVisualization::createGraphic() {
     NavigationPathTileInfo *tileInfo=i->second;
     GraphicRectangleList *rectangleList=tileInfo->getPathArrowList();
     if (rectangleList) {
+      //DEBUG("pathDirectionIcon.texture=%u",core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
       rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
     }
   }

@@ -244,7 +244,6 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
     } else {
       val names = coreObject.configStoreGetNodeNames(path)
       Arrays.sort(names)
-      var i=0
       var lastEntryWasDivider=true
       for (name in names) {
         var entry: Bundle? = definePreferenceEntry(path, name)
@@ -295,9 +294,8 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
             modifier = Modifier
               .padding(innerPadding)
           ) {
-            var lastEnryWasDivider=false
-            itemsIndexed(entries) { index, entry ->
-              inflatePreference(index, entry, contentBoxWithConstraintsScope.maxHeight) {
+            itemsIndexed(entries) { _, entry ->
+              inflatePreference(entry, contentBoxWithConstraintsScope.maxHeight) {
                 expertMode.value = it
               }
             }
@@ -308,7 +306,7 @@ class Preferences : ComponentActivity(), CoroutineScope by MainScope() {
   }
 
   @Composable
-  fun inflatePreference(i: Int, info: Bundle, maxHeight: Dp, setExpertMode: (Boolean)->Unit) {
+  fun inflatePreference(info: Bundle, maxHeight: Dp, setExpertMode: (Boolean)->Unit) {
 
     // Process the type of info
     val parentPath: String = info.getString("parentPath")!!

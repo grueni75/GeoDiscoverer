@@ -222,6 +222,7 @@ void NavigationPath::updateTileVisualization(std::list<MapContainer*> *mapContai
               }
               rectangleList->setAnimator(&animator);
               rectangleList->setZ(2); // ensure that arrow is drawn after line texture
+              //DEBUG("pathDirectionIcon.texture=%u",core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
               rectangleList->setTexture(core->getDefaultGraphicEngine()->getPathDirectionIcon()->getTexture());
               rectangleList->setDestroyTexture(false);
               rectangleList->setCutEnabled(true);

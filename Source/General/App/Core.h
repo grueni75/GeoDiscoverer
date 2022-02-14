@@ -188,6 +188,9 @@ protected:
   Int fileAccessRetries;
   TimestampInMicroseconds fileAccessWaitTime;
 
+  // Indicates if the graphic has already been initialized
+  bool graphicInitialized;
+
   // Components
   Debug *debug;
   ProfileEngine *profileEngine;

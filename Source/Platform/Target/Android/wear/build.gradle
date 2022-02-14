@@ -1,4 +1,7 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
 
 def computeVersionName() {
     def date = new Date()
@@ -10,10 +13,15 @@ android {
     buildToolsVersion "30.0.2"
     ndkVersion "21.1.6352462"
 
+    buildFeatures {
+        // Enables Jetpack Compose for this module
+        compose true
+    }
+
     defaultConfig {
         applicationId "com.untouchableapps.android.geodiscoverer"
-        minSdkVersion 23
-        targetSdkVersion 23
+        minSdkVersion 26
+        targetSdkVersion 26
         versionCode 28
         versionName computeVersionName()
     }
@@ -43,14 +51,28 @@ android {
             universalApk false
         }
     }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+        useIR = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.0.5'
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.wear:wear:1.0.0'
-    implementation 'com.google.android.support:wearable:2.2.0'
-    compileOnly 'com.google.android.wearable:wearable:2.2.0'
-    implementation 'com.google.android.gms:play-services-wearable:11.8.0'
+    implementation "androidx.compose.runtime:runtime:1.1.0"
+    implementation "androidx.activity:activity-compose:1.4.0"
+    implementation "androidx.compose.ui:ui-tooling-preview:1.1.0"
+    implementation "androidx.wear.compose:compose-material:1.0.0-alpha16"
+    implementation "androidx.compose.material:material-icons-extended:1.1.0"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
+    implementation "androidx.wear:wear:1.2.0"
+    implementation "androidx.wear.watchface:watchface:1.0.1"
+    implementation 'com.google.android.gms:play-services-wearable:17.1.0'
     implementation project(':core')
 }
 
