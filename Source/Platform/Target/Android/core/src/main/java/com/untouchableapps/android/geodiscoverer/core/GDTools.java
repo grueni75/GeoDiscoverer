@@ -29,14 +29,20 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.google.android.gms.wearable.Node;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
+import java.util.Set;
 
 public class GDTools {
+
+  /** Geodiscoverer capability for search for wear nodes */
+  public final static String WEAR_CAPABILITY_NAME = "geodiscoverer";
 
   /** Copies a source file to a destination file */
   public static void copyFile(String srcFilename, String dstFilename) throws IOException {
@@ -80,4 +86,17 @@ public class GDTools {
       }
     }
   }
+
+  /** Picks the best wear node to send the message to */
+  public static String pickBestWearNodeId(Set<Node> nodes) {
+    String bestNodeId = null;
+    for (Node node : nodes) {
+      if (node.isNearby()) {
+        return node.getId();
+      }
+      bestNodeId = node.getId();
+    }
+    return bestNodeId;
+  }
+
 }

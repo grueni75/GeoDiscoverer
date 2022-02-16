@@ -31,16 +31,19 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.tasks.Tasks;
+import com.google.android.gms.wearable.CapabilityClient;
+import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.core.GDTools;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitEngine;
 
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /* Main application class */
 public class GDApplication extends Application implements GDAppInterface {
@@ -53,9 +56,6 @@ public class GDApplication extends Application implements GDAppInterface {
 
   /** Cockpit engine */
   CockpitEngine cockpitEngine = null;
-
-  /** Time to wait for a connection */
-  final static long WEAR_CONNECTION_TIME_OUT_MS = 1000;
 
   /** List of commands to send to wear */
   LinkedBlockingQueue<String> wearCommands = new LinkedBlockingQueue<String>();
@@ -89,18 +89,21 @@ public class GDApplication extends Application implements GDAppInterface {
             //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","processing wear command: " + command);
 
             // Send command
-            NodeApi.GetConnectedNodesResult nodes =
-                Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
-                    TimeUnit.MILLISECONDS);
-            if (nodes != null) {
-              for (Node node : nodes.getNodes()) {
-                MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                    coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer",
-                    command.getBytes()).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-              }
+            CapabilityInfo capabilityInfo = Tasks.await(
+                Wearable.getCapabilityClient(getApplicationContext()).getCapability(
+                    GDTools.WEAR_CAPABILITY_NAME, CapabilityClient.FILTER_REACHABLE));
+            String nodeId = GDTools.pickBestWearNodeId(capabilityInfo.getNodes());
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "found node id: " + nodeId);
+            if (nodeId!=null) {
+              Wearable.getMessageClient(getApplicationContext()).sendMessage(
+                  nodeId, "/com.untouchableapps.android.geodiscoverer", command.getBytes()
+              );
             }
           }
           catch (InterruptedException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
+          catch (ExecutionException e) {
             GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
           }
         }

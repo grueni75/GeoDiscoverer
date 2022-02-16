@@ -22,6 +22,7 @@
 
 package com.untouchableapps.android.geodiscoverer.core;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -50,11 +51,11 @@ import android.os.Message;
 import android.os.Process;
 import androidx.core.view.ScaleGestureDetectorCompat;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.BufferedReader;
@@ -181,10 +182,7 @@ public class GDCore implements
   boolean isWatch = false;
 
   // Stores the mapping of channel names to file names
-  public Hashtable channelPathToFilePath = new Hashtable<String, Bundle>();
-
-  // Handle to the google API
-  public GoogleApiClient googleApiClient;
+  public Hashtable<String, Bundle> channelPathToFilePath = new Hashtable<String, Bundle>();
 
   /** ID of the pointer that touched the screen first */
   int firstPointerID=-1;
@@ -270,10 +268,6 @@ public class GDCore implements
     // Get infos about the screen
     setDisplayMetrics(appIf.getApplication().getResources().getDisplayMetrics());
 
-    // Init the message api to communicate with wear device
-    googleApiClient = new GoogleApiClient.Builder(appIf.getContext()).addApi(Wearable.API).build();
-    googleApiClient.connect();
-
     // Start the thread that handles the starting and stopping
     thread = new Thread(this);
     thread.start(); 
@@ -335,9 +329,10 @@ public class GDCore implements
   // Message handler
   public static class AppMessageHandler extends Handler {
     
-    protected final WeakReference<GDCore> weakCoreObject; 
-    
-    AppMessageHandler(GDCore coreObject) {
+    protected final WeakReference<GDCore> weakCoreObject;
+
+    AppMessageHandler(Looper looper, GDCore coreObject) {
+      super(looper);
       this.weakCoreObject = new WeakReference<GDCore>(coreObject);
     }
     
@@ -387,7 +382,7 @@ public class GDCore implements
 
     // Process messages
     Looper.prepare();
-    messageHandler = new AppMessageHandler(this);
+    messageHandler = new AppMessageHandler(Looper.myLooper(),this);
     threadInitialized.signal();
     coreLock.unlock();
     Looper.loop();
@@ -990,6 +985,7 @@ public class GDCore implements
   }
 
   /** Returns the path of the home dir */
+  @SuppressWarnings("deprecation")
   public static String getHomeDirPath() {
 
     // Create the home directory if necessary
@@ -1006,7 +1002,6 @@ public class GDCore implements
       }
     }
     return homeDir.getAbsolutePath();
-
   }
 
   //

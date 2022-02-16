@@ -22,8 +22,13 @@
 
 package com.untouchableapps.android.geodiscoverer.core.cockpit;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorManager;
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppInterface;
@@ -35,15 +40,26 @@ public class CockpitAppVibration implements CockpitAppInterface {
   
   // Vibrator system service
   Vibrator vibrator;
-  
+
+  /** Gets the vibrator in legacy way */
+  @SuppressWarnings("deprecation")
+  private Vibrator getLegacyVibrator() {
+    return (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+  }
+
   /** Constructor */
   public CockpitAppVibration(Context context) {
     super();
     
     // Remember important variables
     this.context = context;
-    vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
+    // Set the vibrator
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      vibrator =  ((VibratorManager)context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE)).getDefaultVibrator();
+    } else {
+      vibrator = getLegacyVibrator();
+    }
   }
 
   /** Starts the app */
@@ -56,13 +72,23 @@ public class CockpitAppVibration implements CockpitAppInterface {
   
   /** Shows the latest info */
   public void inform() {
-  }  
+  }
+
+  /** Legacy vibrate function */
+  @SuppressWarnings("deprecation")
+  public void legacyVibrate(long[] pattern) {
+    vibrator.vibrate(pattern, -1);
+  }
 
   /** Inform the user via vibration */
   public void alert(AlertType type, boolean repeated) {
     long[] pattern = { 0, 500, 500, 500 };
-    vibrator.vibrate(pattern, -1);
-  }  
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1));
+    } else {
+      legacyVibrate(pattern);
+    }
+  }
   
   /** Updates the latest info */
   public void update(CockpitInfos infos) {

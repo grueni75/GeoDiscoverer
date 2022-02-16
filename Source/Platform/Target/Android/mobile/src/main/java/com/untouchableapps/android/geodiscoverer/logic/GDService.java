@@ -262,6 +262,7 @@ public class GDService extends Service {
 
   /** Starts the view map activity if needed */
   void launchActivityIfNeeded() {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","activityRunning="+activityRunning+" startActivity="+startActivity);
     if ((!activityRunning)&&(startActivity)) {
       Intent startViewMapIntent = new Intent(GDService.this, ViewMap.class);
       startViewMapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -309,7 +310,7 @@ public class GDService extends Service {
       // Indicate that the activity must be started if the user is present
       if ((forceStart)&&(!activityStarted)) {
         startActivity = true;
-        if (powerManager.isScreenOn()) {
+        if (powerManager.isInteractive()) {
           launchActivityIfNeeded();
         }
       }

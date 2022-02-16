@@ -305,6 +305,12 @@ class GDWatchFaceService : androidx.wear.watchface.WatchFaceService() {
   }
   var coreMessageHandler = CoreMessageHandler(this)
 
+  /** Gets the vibrator in legacy way  */
+  @SuppressLint("deprecation")
+  private fun getLegacyVibrator(): Vibrator? {
+    return getSystemService(VIBRATOR_SERVICE) as Vibrator;
+  }
+
   // Init everything
   override fun onCreate() {
     super.onCreate()
@@ -315,7 +321,11 @@ class GDWatchFaceService : androidx.wear.watchface.WatchFaceService() {
 
     // Get the managers
     powerManager = getSystemService(POWER_SERVICE) as PowerManager
-    vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
+    vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      (getSystemService(VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+    } else {
+      getLegacyVibrator()
+    }
 
     // Get a wake lock
     wakeLockCore = powerManager?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "GDApp: Active core");

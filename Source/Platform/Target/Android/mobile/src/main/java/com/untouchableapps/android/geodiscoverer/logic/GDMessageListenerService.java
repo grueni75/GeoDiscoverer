@@ -22,14 +22,9 @@
 
 package com.untouchableapps.android.geodiscoverer.logic;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.untouchableapps.android.geodiscoverer.GDApplication;
-import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
-
-import java.util.HashMap;
 
 public class GDMessageListenerService extends WearableListenerService {
 

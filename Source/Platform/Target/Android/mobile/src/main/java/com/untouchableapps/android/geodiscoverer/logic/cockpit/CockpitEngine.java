@@ -172,25 +172,6 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
   NsdManager.DiscoveryListener dashboardServiceDiscoveryListener=null;
   String DASHBOARD_SERVICE_TYPE = "_geodashboard._tcp.";
 
-  /**
-   * Returns the IP4 address of the wlan interface
-   */
-  @SuppressWarnings("unchecked")
-  InetAddress getWifiInetAddress() {
-    int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
-    if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
-      ipAddress = Integer.reverseBytes(ipAddress);
-    }
-    byte[] ipByteArray = BigInteger.valueOf(ipAddress).toByteArray();
-    InetAddress inetAddress=null;
-    try {
-      inetAddress = InetAddress.getByAddress(ipByteArray);
-    } catch (UnknownHostException e) {
-      app.addMessage(app.DEBUG_MSG, "GDApp", e.getMessage());
-    }
-    return inetAddress;
-  }
-
   /** Constructor */
   public CockpitEngine(GDApplication app) {
 

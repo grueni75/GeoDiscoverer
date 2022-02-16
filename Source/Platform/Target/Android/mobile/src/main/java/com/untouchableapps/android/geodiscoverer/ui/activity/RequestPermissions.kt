@@ -22,7 +22,10 @@
 
 package com.untouchableapps.android.geodiscoverer.ui.activity
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -38,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.R
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface
 import com.untouchableapps.android.geodiscoverer.ui.theme.AndroidTheme
 
 import java.util.*
@@ -67,6 +71,16 @@ class RequestPermissions : ComponentActivity() {
     super.onResume()
     if (!GDApplication.checkPermissions(this)) {
       requestPermissionLauncher.launch(GDApplication.requiredPermissions)
+      if (!Settings.canDrawOverlays(applicationContext)) {
+        val packageName = applicationContext.packageName
+        val t = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+        Toast.makeText(
+          this,
+          getString(R.string.request_permissions_overlay_instructions),
+          Toast.LENGTH_LONG
+        ).show()
+        startActivity(t)
+      }
     } else {
       Toast.makeText(
         this,

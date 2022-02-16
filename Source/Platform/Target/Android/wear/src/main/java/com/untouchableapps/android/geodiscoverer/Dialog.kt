@@ -46,6 +46,10 @@ import androidx.wear.compose.material.*
 import com.untouchableapps.android.geodiscoverer.theme.WearAppTheme
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface
+import android.transition.Explode
+import android.transition.Fade
+import android.view.Window
+
 
 class Dialog : ComponentActivity() {
 
@@ -79,6 +83,9 @@ class Dialog : ComponentActivity() {
   // Called when the activity is created
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    // Prevent animation when closed
+    window.setWindowAnimations(0)
 
     // Set the content
     viewModel.message=getString(R.string.permission_instructions)

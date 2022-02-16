@@ -102,15 +102,15 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
       long diffToLastUpdate = t - lastAlert;
       if ((!repeated)||(diffToLastUpdate>minDurationBetweenOffRouteAlerts)) {
         GDApplication.coreObject.audioWakeup();
-        textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
-        textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);
+        textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null, null);
+        textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null, null);
         lastAlert=t;
       }
     }
     if (type==AlertType.newTurn) {
       GDApplication.coreObject.audioWakeup();
-      textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null);
-      textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null);      
+      textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null, null);
+      textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null, null);
     }
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("t(alert)=%d", System.currentTimeMillis() / 1000));
   }

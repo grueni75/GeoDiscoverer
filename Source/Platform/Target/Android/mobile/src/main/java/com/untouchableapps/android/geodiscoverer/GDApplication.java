@@ -22,26 +22,6 @@
 
 package com.untouchableapps.android.geodiscoverer;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
-import org.acra.*;
-import org.acra.annotation.*;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -55,29 +35,51 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-
+import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Channel;
-import com.google.android.gms.wearable.ChannelApi;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.android.gms.wearable.CapabilityClient;
+import com.google.android.gms.wearable.CapabilityInfo;
+import com.google.android.gms.wearable.ChannelClient;
 import com.google.android.gms.wearable.Wearable;
+import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
+import com.untouchableapps.android.geodiscoverer.core.GDCore;
+import com.untouchableapps.android.geodiscoverer.core.GDTools;
+import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask;
 import com.untouchableapps.android.geodiscoverer.logic.GDService;
 import com.untouchableapps.android.geodiscoverer.logic.cockpit.CockpitEngine;
-import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
-import com.untouchableapps.android.geodiscoverer.core.GDCore;
-import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitInfos;
 import com.untouchableapps.android.geodiscoverer.ui.activity.AuthenticateGoogleBookmarks;
 import com.untouchableapps.android.geodiscoverer.ui.activity.RequestPermissions;
-import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap;
-import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.CoreMessageHandler;
+
+import org.acra.ACRA;
+import org.acra.annotation.AcraCore;
+import org.acra.annotation.AcraMailSender;
+import org.acra.annotation.AcraNotification;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import androidx.annotation.NonNull;
 
 /* Configuration of ACRA for reporting crashes */
 @AcraCore (
@@ -95,7 +97,7 @@ import com.untouchableapps.android.geodiscoverer.ui.activity.viewmap.CoreMessage
 )
 
 /* Main application class */
-public class GDApplication extends Application implements GDAppInterface, GoogleApiClient.ConnectionCallbacks, ChannelApi.ChannelListener {
+public class GDApplication extends Application implements GDAppInterface {
 
   // Notification IDs
   static public final int NOTIFICATION_STATUS_ID=1;
@@ -233,9 +235,6 @@ public class GDApplication extends Application implements GDAppInterface, Google
       }
     }
 
-    // Init the message api to communicate with wear device
-    Wearable.ChannelApi.addListener(coreObject.googleApiClient, this);
-
     // Start the thread that handles the wear messages
     wearMessageThread = new Thread(new Runnable() {
       @Override
@@ -296,17 +295,17 @@ public class GDApplication extends Application implements GDAppInterface, Google
 
               // Send command
               if (sendMessage) {
-                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
-                NodeApi.GetConnectedNodesResult nodes =
-                    Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS,
-                        TimeUnit.MILLISECONDS);
-                if (nodes != null) {
-                  for (Node node : nodes.getNodes()) {
-                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                        coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer",
-                        command.getBytes()).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-                  }
+                CapabilityInfo capabilityInfo = Tasks.await(
+                    Wearable.getCapabilityClient(getApplicationContext()).getCapability(
+                        GDTools.WEAR_CAPABILITY_NAME, CapabilityClient.FILTER_REACHABLE));
+                String nodeId = GDTools.pickBestWearNodeId(capabilityInfo.getNodes());
+                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "found node id: " + nodeId);
+                if (nodeId!=null) {
+                  Wearable.getMessageClient(getApplicationContext()).sendMessage(
+                      nodeId, "/com.untouchableapps.android.geodiscoverer", command.getBytes()
+                  );
                 }
+                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "command=" + command);
                 wearLastCommand="";
               } else {
                 wearLastCommand=command;
@@ -317,10 +316,29 @@ public class GDApplication extends Application implements GDAppInterface, Google
           catch (InterruptedException e) {
             GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
           }
+          catch (ExecutionException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
         }
       }
     });
     wearMessageThread.start();
+
+    // Install a callback when the output is closed (file is received at other side)
+    Wearable.getChannelClient(getApplicationContext()).registerChannelCallback(new ChannelClient.ChannelCallback() {
+      @Override
+      public void onOutputClosed(@NonNull ChannelClient.Channel channel, int i, int i1) {
+        super.onOutputClosed(channel, i, i1);
+        if (attachment!=null) {
+          Wearable.getChannelClient(getApplicationContext()).close(channel);
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel has been closed");
+          synchronized (attachment) {
+            attachmentSent=true;
+            attachment.notifyAll();
+          }
+        }
+      }
+    });
 
     // Start the thread that handles the wear file transfers
     wearFileThread = new Thread(new Runnable() {
@@ -364,22 +382,29 @@ public class GDApplication extends Application implements GDAppInterface, Google
             path = path.substring(path.indexOf("/Map"));
 
             // Send file
-            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(coreObject.googleApiClient).await(WEAR_CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-            if (nodes != null) {
-              for (Node node : nodes.getNodes()) {
-                ChannelApi.OpenChannelResult result = Wearable.ChannelApi.openChannel(coreObject.googleApiClient, node.getId(), "/com.untouchableapps.android.geodiscoverer/" + postfix + path).await();
-                Channel channel = result.getChannel();
-                attachmentSent=false;
-                channel.sendFile(coreObject.googleApiClient, Uri.fromFile(attachment));
-                synchronized (attachment) {
-                  while (!attachmentSent)
-                    attachment.wait();
+            CapabilityInfo capabilityInfo = Tasks.await(
+                Wearable.getCapabilityClient(getApplicationContext()).getCapability(
+                    GDTools.WEAR_CAPABILITY_NAME, CapabilityClient.FILTER_REACHABLE));
+            String nodeId = GDTools.pickBestWearNodeId(capabilityInfo.getNodes());
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "found node id: " + nodeId);
+            attachmentSent=false;
+            if (nodeId!=null) {
+              Task<ChannelClient.Channel> openChannelTask=Wearable.getChannelClient(getApplicationContext()).openChannel(nodeId,"/com.untouchableapps.android.geodiscoverer/" + postfix + path);
+              openChannelTask.addOnCompleteListener(new OnCompleteListener<ChannelClient.Channel>() {
+                @Override
+                public void onComplete(@NonNull Task<ChannelClient.Channel> task) {
+                  //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel has been opened");
+                  Wearable.getChannelClient(getApplicationContext()).sendFile(task.getResult(), Uri.fromFile(attachment));
                 }
-                GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "file " + attachment.getAbsolutePath() + " sent to remote device");
-                synchronized (attachment) {
-                  attachment=null;
-                }
-              }
+              });
+            }
+            synchronized (attachment) {
+              while (!attachmentSent)
+                attachment.wait();
+            }
+            GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "file " + attachment.getAbsolutePath() + " sent to remote device");
+            synchronized (attachment) {
+              attachment=null;
             }
 
             // Inform core that transfer is over after some delay
@@ -395,21 +420,14 @@ public class GDApplication extends Application implements GDAppInterface, Google
           catch (InterruptedException e) {
             GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
           }
+          catch (ExecutionException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
         }
       }
     });
     wearFileThread.start();
 
-  }
-
-  /** Called when a connection to a wear device has been established */
-  @Override
-  public void onConnected(Bundle bundle) {
-  }
-
-  /** Called when a connection to a wear device has been shut down */
-  @Override
-  public void onConnectionSuspended(int cause) {
   }
 
   /** Adds a message to the log */
@@ -667,36 +685,6 @@ public class GDApplication extends Application implements GDAppInterface, Google
     }
   }
 
-  // Called if a channel to a wear device is opened
-  @Override
-  public void onChannelOpened(Channel channel) {
-  }
-
-  // Called if a channel to a wear device is closed
-  @Override
-  public void onChannelClosed(Channel channel, int closeReason, int appSpecificErrorCode) {
-
-  }
-
-  // Called if an input from a wear device is closed
-  @Override
-  public void onInputClosed(Channel channel, int closeReason, int appSpecificErrorCode) {
-
-  }
-
-  // Called if an output from a wear device is closed
-  @Override
-  public void onOutputClosed(Channel channel, int closeReason, int appSpecificErrorCode) {
-    if (attachment!=null) {
-      channel.close(coreObject.googleApiClient);
-      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel has been closed");
-      synchronized (attachment) {
-        attachmentSent=true;
-        attachment.notifyAll();
-      }
-    }
-  }
-
   // Checks if all required permissions are available
   public static boolean checkPermissions(Context context) {
     for (int i = 0; i < requiredPermissions.length; i++) {
@@ -704,7 +692,11 @@ public class GDApplication extends Application implements GDAppInterface, Google
         return false;
       }
     }
+    if (!Settings.canDrawOverlays(context)) {
+      return false;
+    }
     return true;
   }
+
 
 }

@@ -24,7 +24,6 @@ package com.untouchableapps.android.geodiscoverer.logic.ble;
 
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -32,18 +31,24 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.os.Build;
-import androidx.annotation.RequiresApi;
+import android.os.ParcelUuid;
 
 import com.untouchableapps.android.geodiscoverer.GDApplication;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -58,6 +63,7 @@ public class GDHeartRateService {
   private BluetoothManager bluetoothManager;
   private GDCore coreObject;
   private BluetoothGatt bluetoothGatt=null;
+  private BluetoothLeScanner bluetoothScanner=null;
 
   // Constants for finding heart rate services and measurements
   private final static UUID UUID_HEART_RATE_SERVICE = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
@@ -101,7 +107,6 @@ public class GDHeartRateService {
   private final Lock connectionNotificationLock = new ReentrantLock();
 
   /** Extracts the heart rate from a characteristics */
-  @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
   private void updateHeartRate(BluetoothGattCharacteristic characteristic) {
     int flag = characteristic.getProperties();
     int format = -1;
@@ -119,7 +124,6 @@ public class GDHeartRateService {
 
     /** Called when connection to the device has changed */
     @Override
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
       super.onConnectionStateChange(gatt,status,newState);
       String intentAction;
@@ -137,7 +141,6 @@ public class GDHeartRateService {
     }
 
     /** Called when new services are discovered */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
       super.onServicesDiscovered(gatt,status);
@@ -172,7 +175,6 @@ public class GDHeartRateService {
 
     // Result of a characteristic read operation
     @Override
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,
                                      int status) {
       super.onCharacteristicRead(gatt, characteristic, status);
@@ -184,7 +186,6 @@ public class GDHeartRateService {
     }
 
     // Result of a characteristic update operation
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
       super.onCharacteristicChanged(gatt, characteristic);
@@ -195,28 +196,30 @@ public class GDHeartRateService {
   };
 
   /** Callback for bluetooth devices discoveries  */
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-  private BluetoothAdapter.LeScanCallback scanCallback = new BluetoothAdapter.LeScanCallback() {
+  private ScanCallback scanCallback = new ScanCallback() {
 
     @Override
-    public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+    public void onScanResult(int callbackType, ScanResult result) {
+      super.onScanResult(callbackType, result);
+      if (result==null)
+        return;
       if (knownDeviceAddresses!=null) {
         boolean found=false;
         for (String knownDeviceAddress : knownDeviceAddresses) {
-          if (knownDeviceAddress.equals(device.getAddress())) {
+          if (knownDeviceAddress.equals(result.getDevice().getAddress())) {
             found=true;
           }
         }
         if (!found) {
-          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR", String.format("new bluetooth le device <%s> discovered!",device.getAddress()));
-          knownDeviceAddresses.add(device.getAddress());
+          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR", String.format("new bluetooth le device <%s> discovered!",result.getDevice().getAddress()));
+          knownDeviceAddresses.add(result.getDevice().getAddress());
         }
       }
-      if (device.getAddress().equals(deviceAddress)) {
+      if (result.getDevice().getAddress().equals(deviceAddress)) {
         if (state==SCANNING) {
-          bluetoothGatt = device.connectGatt(context, true, gattCallback);
+          bluetoothGatt = result.getDevice().connectGatt(context, true, gattCallback);
           state=CONNECTING;
-          bluetoothAdapter.stopLeScan(scanCallback);
+          bluetoothScanner.stopScan(this);
         }
       }
     }
@@ -224,19 +227,26 @@ public class GDHeartRateService {
 
   /** Checks if bluetooth le is supported on this device */
   static public boolean isSupported(Context context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-        return true;
-      } else {
-        return false;
-      }
+    if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+      return true;
     } else {
       return false;
     }
   }
 
+  /** Creates a filter list for scanning */
+  private List<ScanFilter> createScanFilterList(UUID[] uuids) {
+    List<ScanFilter> filterList = new ArrayList<>();
+    for (UUID uuid : uuids) {
+      ScanFilter filter = new ScanFilter.Builder()
+          .setServiceUuid(new ParcelUuid(uuid))
+          .build();
+      filterList.add(filter);
+    };
+    return filterList;
+  }
+
   /** Constructor */
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
   public GDHeartRateService(Context context, GDCore coreObject) {
 
     // Store important references
@@ -257,10 +267,12 @@ public class GDHeartRateService {
     bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
     bluetoothAdapter = bluetoothManager.getAdapter();
     final UUID[] uuids = {UUID_HEART_RATE_SERVICE};
-    bluetoothAdapter.startLeScan(uuids,scanCallback);
-    /*BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
-    bluetoothGatt = device.connectGatt(context, true, gattCallback);
-    state=CONNECTING;*/
+    List<ScanFilter> filterList = createScanFilterList(uuids);
+    ScanSettings settings = new ScanSettings.Builder()
+        .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+        .build();
+    bluetoothScanner = bluetoothAdapter.getBluetoothLeScanner();
+    bluetoothScanner.startScan(filterList,settings,scanCallback);
 
     // Start alarm thread
     alarmThread = new Thread(new Runnable() {
@@ -429,7 +441,6 @@ public class GDHeartRateService {
     });
     alarmThread.start();
     GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR","alarm thread started");
-
   }
 
   private void signalConnectionChange(String soundFile) {
@@ -485,7 +496,9 @@ public class GDHeartRateService {
   /** Stops all services */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
   public void deinit() {
-    bluetoothAdapter.stopLeScan(scanCallback);
+    if (bluetoothScanner !=null) {
+      bluetoothScanner.stopScan(scanCallback);
+    }
     if (bluetoothGatt!=null) {
       bluetoothGatt.close();
       bluetoothGatt=null;

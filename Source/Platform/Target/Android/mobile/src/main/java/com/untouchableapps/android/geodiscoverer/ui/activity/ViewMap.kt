@@ -261,6 +261,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   // Creates the activity
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","ViewMap activity started")
 
     // Check for OpenGL ES 2.00
     val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager

@@ -25,11 +25,7 @@ package com.untouchableapps.android.geodiscoverer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
-import android.support.wearable.watchface.IWatchFaceService;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Channel;
-import com.google.android.gms.wearable.ChannelApi;
 import com.google.android.gms.wearable.ChannelClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
@@ -39,17 +35,14 @@ import com.untouchableapps.android.geodiscoverer.core.GDCore;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.HashMap;
-import java.util.Hashtable;
 
 public class GDMessageListenerService extends WearableListenerService {
 
   /** Called when a channel is opened */
   @Override
-  public void onChannelOpened(Channel channel) {
+  public void onChannelOpened(ChannelClient.Channel channel) {
     super.onChannelOpened(channel);
-    GDCore coreObject = ((GDApplication) getApplication()).coreObject;
+    GDCore coreObject = GDApplication.coreObject;
     if (coreObject == null)
       return;
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel opened: " + channel.getPath());
@@ -76,21 +69,22 @@ public class GDMessageListenerService extends WearableListenerService {
     Bundle params = new Bundle();
     params.putString("path",path);
     params.putString("hash",hash);
-    coreObject.channelPathToFilePath.put(new String(channel.getPath()), params);
-    channel.receiveFile(coreObject.googleApiClient, Uri.fromFile(f), false);
+    coreObject.channelPathToFilePath.put(channel.getPath(), params);
+    Wearable.getChannelClient(this).receiveFile(channel,Uri.fromFile(f), false);
     coreObject.executeCoreCommand("setRemoteServerActive","1");
   }
 
   /** Called when a channel is closed */
   @Override
-  public void onChannelClosed(Channel channel, int closeReason, int appSpecificErrorCode) {
+  public void onChannelClosed(ChannelClient.Channel channel, int closeReason, int appSpecificErrorCode) {
     super.onChannelClosed(channel, closeReason, appSpecificErrorCode);
-    GDCore coreObject = ((GDApplication) getApplication()).coreObject;
+    GDCore coreObject = GDApplication.coreObject;
     if (coreObject == null)
       return;
     Bundle params = (Bundle) coreObject.channelPathToFilePath.get(channel.getPath());
     if (params != null) {
-      if (closeReason == ChannelApi.ChannelListener.CLOSE_REASON_REMOTE_CLOSE) {
+      if (closeReason == ChannelClient.ChannelCallback.CLOSE_REASON_REMOTE_CLOSE) {
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "file <" + params.getString("path") + "> received");
         if (channel.getPath().startsWith("/com.untouchableapps.android.geodiscoverer/mapArchive/")) {
           coreObject.executeCoreCommand("addMapArchive",params.getString("path"),params.getString("hash"));
         }

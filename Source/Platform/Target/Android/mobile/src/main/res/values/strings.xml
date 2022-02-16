@@ -153,4 +153,5 @@
   <string name="search_radius">Radius:</string>
   <string name="dialog_fatal">Fatal</string>
   <string name="dialog_error">Error</string>
+  <string name="request_permissions_overlay_instructions">Please enable overlay permission</string>
 </resources>
