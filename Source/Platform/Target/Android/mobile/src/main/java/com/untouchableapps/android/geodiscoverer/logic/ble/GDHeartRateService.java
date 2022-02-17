@@ -250,10 +250,12 @@ public class GDHeartRateService {
   public GDHeartRateService(Context context, GDCore coreObject) {
 
     // Store important references
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR","starting service");
     this.context = context;
     this.coreObject = coreObject;
     deviceAddress = coreObject.configStoreGetStringValue("HeartRateMonitor", "bluetoothAddress");
-    knownDeviceAddresses.add(deviceAddress);
+    if (!knownDeviceAddresses.contains(deviceAddress))
+      knownDeviceAddresses.add(deviceAddress);
     maxHeartRate = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "maxHeartRate"));
     startHeartRateZoneTwo = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneTwo"));
     startHeartRateZoneThree = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneThree"));
@@ -496,6 +498,7 @@ public class GDHeartRateService {
   /** Stops all services */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
   public void deinit() {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR","stopping service");
     if (bluetoothScanner !=null) {
       bluetoothScanner.stopScan(scanCallback);
     }

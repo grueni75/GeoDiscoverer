@@ -127,6 +127,14 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
             GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.getMessage());
           }
         }
+        if (networkServerSocket!=null) {
+          try {
+            networkServerSocket.close();
+          }
+          catch (IOException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
+        }
       }
 
     });

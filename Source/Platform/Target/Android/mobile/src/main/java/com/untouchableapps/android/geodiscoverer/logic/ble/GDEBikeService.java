@@ -238,10 +238,12 @@ public class GDEBikeService {
   public GDEBikeService(Context context, GDCore coreObject) {
 
     // Store important references
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppEB","starting service");
     this.context = context;
     this.coreObject = coreObject;
     deviceAddress = coreObject.configStoreGetStringValue("EBikeMonitor", "bluetoothAddress");
-    knownDeviceAddresses.add(deviceAddress);
+    if (!knownDeviceAddresses.contains(deviceAddress))
+      knownDeviceAddresses.add(deviceAddress);
 
     // Setup bluetooth low energy
     bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -257,6 +259,7 @@ public class GDEBikeService {
 
   /** Stops all services */
   public void deinit() {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppEB","stopping service");
     if (bluetoothScanner!=null) {
       bluetoothScanner.stopScan(scanCallback);
     }

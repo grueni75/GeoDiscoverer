@@ -83,7 +83,7 @@ public class GDService extends Service {
   MapTileServer mapTileServer = null;
 
   /** Reference to the brouter server */
-  BRouterServer brouterServer = null;
+  static BRouterServer brouterServer = null;
 
   // The notification that is displayed in the status bar
   PendingIntent pendingIntent = null;
@@ -391,21 +391,17 @@ public class GDService extends Service {
       // Start the brouter server
       GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","starting brouter server");
       System.err.println("Test");
-      if (brouterServer!=null) {
-        brouterServer.stop();
-      } else {
+      if (brouterServer==null) {
         brouterServer = new BRouterServer(coreObject);
+        brouterServer.start();
       }
-      brouterServer.start();
 
       // Start the map tile server
       GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","starting map tile server");
-      if (mapTileServer!=null) {
-        mapTileServer.stop();
-      } else {
+      if (mapTileServer==null) {
         mapTileServer = new MapTileServer((GDApplication)getApplication(),coreObject);
+        mapTileServer.start();
       }
-      mapTileServer.start();
     }
 
     // Handle initialization of core
@@ -487,12 +483,10 @@ public class GDService extends Service {
     // Handle start of the mapsforge server
     if (intent.getAction().equals("startMapTileServer")) {
       GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","starting map tile server");
-      if (mapTileServer!=null) {
-        mapTileServer.stop();
-      } else {
+      if (mapTileServer==null) {
         mapTileServer = new MapTileServer((GDApplication)getApplication(),coreObject);
+        mapTileServer.start();
       }
-      mapTileServer.start();
     }
 
     // Handle updates from the tandem tracker
@@ -559,6 +553,7 @@ public class GDService extends Service {
   /** Called when the service is stopped */
   @Override
   public void onDestroy() {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","service is beeing destroyed");
 
     // Stop the user present receiver
     if (userPresentReceiver!=null) {
@@ -582,10 +577,13 @@ public class GDService extends Service {
     // Stop watching location
     locationManager.removeUpdates(coreObject);
 
-    // Stop the brouter
+    /* Stop the brouter
     if (brouterServer!=null) {
       brouterServer.stop();
-    }
+      BRouter can not be stopped correctly
+      So we keep it running the whole app lifetime
+      As it needs no config, it's not an issue
+    }*/
 
     // Stop the mapsforge server
     if (mapTileServer!=null) {
