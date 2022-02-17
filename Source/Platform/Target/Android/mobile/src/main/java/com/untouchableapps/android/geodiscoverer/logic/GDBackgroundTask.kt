@@ -302,13 +302,13 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
       } else {
 
         // Add the log to the ACRA report
-        ACRA.getErrorReporter().putCustomData("userLogContents", logContents)
+        ACRA.errorReporter.putCustomData("userLogContents", logContents)
 
         // Send report via ACRA
 
         // Send report via ACRA
         val e = Exception("User has sent logs")
-        ACRA.getErrorReporter().handleException(e, false)
+        ACRA.errorReporter.handleException(e, false)
       }
     }
   }

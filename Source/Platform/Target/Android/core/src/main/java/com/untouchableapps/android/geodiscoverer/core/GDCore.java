@@ -49,14 +49,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import androidx.core.view.ScaleGestureDetectorCompat;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-
-import com.google.android.gms.wearable.Wearable;
 
 import java.io.BufferedReader;
 import java.io.File;

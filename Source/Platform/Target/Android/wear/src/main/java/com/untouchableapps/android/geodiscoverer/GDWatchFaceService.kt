@@ -306,7 +306,7 @@ class GDWatchFaceService : androidx.wear.watchface.WatchFaceService() {
   var coreMessageHandler = CoreMessageHandler(this)
 
   /** Gets the vibrator in legacy way  */
-  @SuppressLint("deprecation")
+  @Suppress("deprecation")
   private fun getLegacyVibrator(): Vibrator? {
     return getSystemService(VIBRATOR_SERVICE) as Vibrator;
   }

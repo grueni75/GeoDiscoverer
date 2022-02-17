@@ -77,6 +77,7 @@ class WatchFaceRenderer(
   val sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
 
   // Wake locks
+  @Suppress("deprecation")
   val wakeLockApp = powerManager.newWakeLock(
     PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
     "GDApp: Active app");

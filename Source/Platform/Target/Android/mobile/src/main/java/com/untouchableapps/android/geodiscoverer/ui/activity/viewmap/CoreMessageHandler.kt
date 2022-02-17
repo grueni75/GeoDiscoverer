@@ -36,6 +36,7 @@ import com.untouchableapps.android.geodiscoverer.logic.GDService
 import com.untouchableapps.android.geodiscoverer.ui.activity.AuthenticateGoogleBookmarks
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
 import java.lang.ref.WeakReference
+import kotlin.random.Random.Default.nextBoolean
 
 @ExperimentalGraphicsApi
 @ExperimentalMaterial3Api

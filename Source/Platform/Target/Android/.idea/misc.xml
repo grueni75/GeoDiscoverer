@@ -31,6 +31,7 @@
         <entry key="mobile/src/main/res/menu/view_map.xml" value="0.17760416666666667" />
         <entry key="mobile/src/main/res/xml/preferences.xml" value="0.15572916666666667" />
         <entry key="wear/src/main/res/drawable/background.xml" value="0.5392857142857143" />
+        <entry key="wear/src/main/res/drawable/progress_bar.xml" value="1.2964285714285715" />
         <entry key="wear/src/main/res/layout/activity_dialog.xml" value="0.9071428571428571" />
       </map>
     </option>

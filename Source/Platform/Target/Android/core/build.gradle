@@ -40,8 +40,11 @@ android {
     }
 }
 
+configurations {
+    externalLibs
+}
+
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.13.1'
     implementation 'com.google.android.gms:play-services-wearable:17.1.0'
 }

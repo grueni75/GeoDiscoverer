@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <style name="Base.V7.Theme.GDStyle" parent="Theme.AppCompat">
+  <style name="Base.V7.Theme.GDStyle" parent="Theme.MaterialComponents">
     <item name="colorAccent">@color/gd_orange</item>
     <item name="android:windowContentOverlay">@drawable/actionbar_shadow</item>
   </style>

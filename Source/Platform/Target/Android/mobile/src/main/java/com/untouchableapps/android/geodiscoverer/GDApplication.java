@@ -58,9 +58,9 @@ import com.untouchableapps.android.geodiscoverer.ui.activity.AuthenticateGoogleB
 import com.untouchableapps.android.geodiscoverer.ui.activity.RequestPermissions;
 
 import org.acra.ACRA;
-import org.acra.annotation.AcraCore;
-import org.acra.annotation.AcraMailSender;
-import org.acra.annotation.AcraNotification;
+import org.acra.config.CoreConfigurationBuilder;
+import org.acra.config.MailSenderConfigurationBuilder;
+import org.acra.config.NotificationConfigurationBuilder;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -81,21 +81,6 @@ import java.util.zip.ZipOutputStream;
 
 import androidx.annotation.NonNull;
 
-/* Configuration of ACRA for reporting crashes */
-@AcraCore (
-    buildConfigClass = BuildConfig.class
-)
-@AcraMailSender(
-    mailTo = "matthias.gruenewald@gmail.com",
-    resSubject = R.string.crash_mail_subject
-)
-@AcraNotification(
-    resTickerText = R.string.crash_notification_ticker_text,
-    resTitle = R.string.crash_notification_title,
-    resText = R.string.crash_notification_text,
-    resChannelName = R.string.crash_notification_channel
-)
-
 /* Main application class */
 public class GDApplication extends Application implements GDAppInterface {
 
@@ -115,16 +100,6 @@ public class GDApplication extends Application implements GDAppInterface {
       Manifest.permission.BLUETOOTH,
       Manifest.permission.BLUETOOTH_ADMIN
   };
-
-  /*
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-      Manifest.permission.BLUETOOTH,
-      Manifest.permission.BLUETOOTH_ADMIN
-  */
 
   /** Interface to the native C++ core */
   public static GDCore coreObject=null;
@@ -181,8 +156,21 @@ public class GDApplication extends Application implements GDAppInterface {
   protected void attachBaseContext(Context base) {
     super.attachBaseContext(base);
 
-    // The following line triggers the initialization of ACRA
-    ACRA.init(this);
+    // Init ACRA
+    CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this);
+    builder
+        .withBuildConfigClass(BuildConfig.class);
+    builder.getPluginConfigurationBuilder(NotificationConfigurationBuilder.class)
+        .withResTickerText(R.string.crash_notification_ticker_text)
+        .withResTitle(R.string.crash_notification_title)
+        .withResText(R.string.crash_notification_text)
+        .withResChannelName(R.string.crash_notification_channel)
+        .withEnabled(true);
+    builder.getPluginConfigurationBuilder(MailSenderConfigurationBuilder.class)
+        .withMailTo("matthias.gruenewald@gmail.com")
+        .withResSubject(R.string.crash_mail_subject)
+        .withEnabled(true);
+    ACRA.init(this, builder);
   }
 
   /** Called when the application starts */

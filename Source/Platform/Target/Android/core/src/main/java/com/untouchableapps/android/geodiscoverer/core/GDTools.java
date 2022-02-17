@@ -22,13 +22,6 @@
 
 package com.untouchableapps.android.geodiscoverer.core;
 
-import android.content.res.AssetFileDescriptor;
-import android.media.MediaPlayer;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-
 import com.google.android.gms.wearable.Node;
 
 import java.io.File;

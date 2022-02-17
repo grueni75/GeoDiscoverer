@@ -103,7 +103,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation files("../../../../../ThirdParty/brouter/brouter-server/target/brouter-server-${brouterVersion}.jar")
     implementation files("../../../../../ThirdParty/brouter/brouter-core/target/brouter-core-${brouterVersion}.jar")
     implementation files("../../../../../ThirdParty/brouter/brouter-mapaccess/target/brouter-mapaccess-${brouterVersion}.jar")
@@ -111,11 +110,13 @@ dependencies {
     implementation files("../../../../../ThirdParty/brouter/brouter-expressions/target/brouter-expressions-${brouterVersion}.jar")
     implementation files("../../../../../ThirdParty/brouter/brouter-map-creator/target/brouter-map-creator-${brouterVersion}.jar")
     implementation files("../../../../../ThirdParty/brouter/brouter-util/target/brouter-util-${brouterVersion}.jar")
+    implementation 'net.sf.kxml:kxml2:2.3.0'
+    implementation 'com.caverock:androidsvg:1.4'
     wearApp project(':wear')
     implementation project(':core')
     implementation 'com.google.android.gms:play-services-wearable:17.1.0'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
-    def acraVersion = '5.2.1'
+    def acraVersion = '5.8.4'
     implementation "ch.acra:acra-mail:$acraVersion"
     implementation "ch.acra:acra-notification:$acraVersion"
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-core/build/libs', include: ['*.jar'])
@@ -126,16 +127,15 @@ dependencies {
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-poi-android/build/libs', include: ['*.jar'])
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-poi/build/libs', include: ['*.jar'])
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/sqlite-android/build/libs', include: ['*.jar'])
+    implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation "androidx.compose.material:material:1.1.0"
     implementation 'androidx.compose.animation:animation:1.0.5'
     implementation 'androidx.compose.ui:ui-tooling:1.0.5'
     implementation "androidx.compose.material3:material3:1.0.0-alpha02"
     implementation "androidx.compose.material:material-icons-extended:1.0.5"
     implementation 'com.godaddy.android.colorpicker:compose-color-picker:0.2.1'
     implementation "com.google.accompanist:accompanist-swiperefresh:0.24.0-alpha"
-    // for brouter
-    implementation 'net.sf.kxml:kxml2:2.3.0'
-    implementation 'com.caverock:androidsvg:1.4'
 }
 
 task collectAssets(type: Exec) {
