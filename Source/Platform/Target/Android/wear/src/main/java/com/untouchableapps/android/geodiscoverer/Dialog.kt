@@ -49,6 +49,8 @@ import com.untouchableapps.android.geodiscoverer.core.GDAppInterface
 import android.transition.Explode
 import android.transition.Fade
 import android.view.Window
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 
 
 class Dialog : ComponentActivity() {
@@ -101,6 +103,13 @@ class Dialog : ComponentActivity() {
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
 
+    // Message update?
+    if (intent.hasExtra(Extras.TEXT)) {
+      viewModel.message=intent.getStringExtra(Extras.TEXT)!!
+      viewModel.progressMax=-1
+      viewModel.kind=-1
+    }
+
     // Shall permissions be granted?
     if (intent.hasExtra(Extras.GET_PERMISSIONS)) {
 
@@ -125,11 +134,6 @@ class Dialog : ComponentActivity() {
       }
     }
 
-    // Message update?
-    if (intent.hasExtra(Extras.TEXT)) {
-      viewModel.message=intent.getStringExtra(Extras.TEXT)!!
-    }
-
     // Max value for progress dialog?
     if (intent.hasExtra(Extras.MAX)) {
       viewModel.progressMax = intent.getIntExtra(Extras.MAX, 0)
@@ -149,9 +153,6 @@ class Dialog : ComponentActivity() {
 
     // Shall we close?
     if (intent.hasExtra(Extras.CLOSE)) {
-      viewModel.progressMax=-1
-      viewModel.message=""
-      viewModel.kind=-1
       window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
       finish()
     }
@@ -192,6 +193,13 @@ class Dialog : ComponentActivity() {
             Icon(
               imageVector = Icons.Default.Warning,
               contentDescription = null,
+            )
+          } else {
+            Image(
+              modifier = Modifier
+                .size(40.dp),
+              painter = painterResource(R.mipmap.ic_launcher),
+              contentDescription = null
             )
           }
           if (viewModel.message != "") {

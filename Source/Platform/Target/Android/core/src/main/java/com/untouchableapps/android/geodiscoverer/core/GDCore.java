@@ -282,7 +282,6 @@ public class GDCore implements
     }
 
     // Register for battery updates
-    IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
     batteryStatusReceiver = new BroadcastReceiver() {
       @Override
       public void onReceive(Context context, Intent intent) {
@@ -296,9 +295,6 @@ public class GDCore implements
         executeCoreCommand("setBattery",String.valueOf(percentage), (isCharging ? "1" : "0"));
       }
     };
-    Intent batteryStatus=appIf.getContext().registerReceiver(batteryStatusReceiver, ifilter);
-    if (batteryStatus!=null)
-      batteryStatusReceiver.onReceive(appIf.getContext(),batteryStatus);
 
     // Install gesture detectors
     gestureDetector = new GestureDetector(appIf.getContext(),this);
@@ -584,6 +580,16 @@ public class GDCore implements
     }
     coreLifeCycleOngoing=false;
     coreLock.unlock();
+
+    // Update battery
+    if (initialized) {
+      Intent batteryStatus = appIf.getContext().registerReceiver(batteryStatusReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+      if (batteryStatus != null) {
+        batteryStatusReceiver.onReceive(appIf.getContext(), batteryStatus);
+      } else {
+        appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", "can not get battery stats");
+      }
+    }
   } 
 
   /** Deinits the core */
@@ -761,7 +767,7 @@ public class GDCore implements
   public void scheduleCoreCommand(String cmd, String ... args)
   {
     String cmdInt = constructCoreCommand(cmd, args);
-    if (coreInitialized) {
+    if (coreLateInitComplete) {
       executeCoreCommandInt(cmdInt);
     } else {
       coreLock.lock();
@@ -840,6 +846,8 @@ public class GDCore implements
       }
     }
     if (cmd.equals("earlyInitComplete()")) {
+
+      // Update flags
       coreLock.lock();
       coreEarlyInitComplete=true;
       coreLock.unlock();

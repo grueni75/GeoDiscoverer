@@ -1415,7 +1415,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("textRowFourthOffsetY","28");
       config.setParameter("clockOffsetY","10");
       config.setParameter("statusTextRadius","43.0");
-      config.setParameter("statusTextWidthLimit","24.0");
+      config.setParameter("statusTextWidthLimit","30.0");
       config.setParameter("statusTextAngleOffset","3.25");
       config.setParameter("clockRadius","36.0");
       config.setParameter("touchModeRadius","34.5");

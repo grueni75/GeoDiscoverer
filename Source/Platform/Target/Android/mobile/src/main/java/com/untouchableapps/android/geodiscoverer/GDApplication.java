@@ -668,6 +668,7 @@ public class GDApplication extends Application implements GDAppInterface {
     wearDeviceAlive=state;
     if (wearDeviceAlive) {
       coreObject.executeCoreCommand("remoteMapInit");
+      sendWearCommand("setRemoteBattery(" + coreObject.batteryStatus + ")");
     } else {
       wearDeviceSleeping=true;
     }
