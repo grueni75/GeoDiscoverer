@@ -1,0 +1,9 @@
+#!/bin/bash 
+set -e
+function remote {
+  gcloud compute ssh ubuntu-desktop -- $*
+}
+remote sudo apt --assume-yes install make vim tilix
+remote sudo snap install --classic code
+
+
