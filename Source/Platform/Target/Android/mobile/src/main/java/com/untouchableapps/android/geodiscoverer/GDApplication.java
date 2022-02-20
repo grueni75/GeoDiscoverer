@@ -76,6 +76,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -285,7 +287,8 @@ public class GDApplication extends Application implements GDAppInterface {
               if (sendMessage) {
                 CapabilityInfo capabilityInfo = Tasks.await(
                     Wearable.getCapabilityClient(getApplicationContext()).getCapability(
-                        GDTools.WEAR_CAPABILITY_NAME, CapabilityClient.FILTER_REACHABLE));
+                        GDTools.WEAR_CAPABILITY_NAME, CapabilityClient.FILTER_REACHABLE),
+                    GDTools.wearTransmissionTimout, TimeUnit.MILLISECONDS);
                 String nodeId = GDTools.pickBestWearNodeId(capabilityInfo.getNodes());
                 //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "found node id: " + nodeId);
                 if (nodeId!=null) {
@@ -306,6 +309,9 @@ public class GDApplication extends Application implements GDAppInterface {
           }
           catch (ExecutionException e) {
             GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
+          catch (TimeoutException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","watch not reachable");
           }
         }
       }
@@ -372,7 +378,8 @@ public class GDApplication extends Application implements GDAppInterface {
             // Send file
             CapabilityInfo capabilityInfo = Tasks.await(
                 Wearable.getCapabilityClient(getApplicationContext()).getCapability(
-                    GDTools.WEAR_CAPABILITY_NAME, CapabilityClient.FILTER_REACHABLE));
+                    GDTools.WEAR_CAPABILITY_NAME, CapabilityClient.FILTER_REACHABLE),
+                GDTools.wearTransmissionTimout, TimeUnit.MILLISECONDS);
             String nodeId = GDTools.pickBestWearNodeId(capabilityInfo.getNodes());
             //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "found node id: " + nodeId);
             attachmentSent=false;
@@ -410,6 +417,9 @@ public class GDApplication extends Application implements GDAppInterface {
           }
           catch (ExecutionException e) {
             GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
+          catch (TimeoutException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","watch not reachable");
           }
         }
       }

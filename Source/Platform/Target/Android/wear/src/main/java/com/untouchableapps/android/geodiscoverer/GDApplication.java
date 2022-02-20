@@ -44,6 +44,8 @@ import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitEngine;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /* Main application class */
 public class GDApplication extends Application implements GDAppInterface {
@@ -91,7 +93,8 @@ public class GDApplication extends Application implements GDAppInterface {
             // Send command
             CapabilityInfo capabilityInfo = Tasks.await(
                 Wearable.getCapabilityClient(getApplicationContext()).getCapability(
-                    GDTools.WEAR_CAPABILITY_NAME, CapabilityClient.FILTER_REACHABLE));
+                    GDTools.WEAR_CAPABILITY_NAME, CapabilityClient.FILTER_REACHABLE),
+                GDTools.wearTransmissionTimout, TimeUnit.MILLISECONDS);
             String nodeId = GDTools.pickBestWearNodeId(capabilityInfo.getNodes());
             //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "found node id: " + nodeId);
             if (nodeId!=null) {
@@ -105,6 +108,9 @@ public class GDApplication extends Application implements GDAppInterface {
           }
           catch (ExecutionException e) {
             GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",e.getMessage());
+          }
+          catch (TimeoutException e) {
+            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","phone not reachable");
           }
         }
       }

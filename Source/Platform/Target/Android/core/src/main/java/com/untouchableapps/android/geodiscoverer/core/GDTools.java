@@ -36,6 +36,7 @@ public class GDTools {
 
   /** Geodiscoverer capability for search for wear nodes */
   public final static String WEAR_CAPABILITY_NAME = "geodiscoverer";
+  public final static int wearTransmissionTimout = 10000;
 
   /** Copies a source file to a destination file */
   public static void copyFile(String srcFilename, String dstFilename) throws IOException {
