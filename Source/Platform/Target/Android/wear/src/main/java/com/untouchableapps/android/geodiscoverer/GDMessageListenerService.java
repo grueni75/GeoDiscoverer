@@ -205,6 +205,9 @@ public class GDMessageListenerService extends WearableListenerService {
         }
         cmdExecuted=true;
       }
+      if (cmd.startsWith("setRemoteBattery")) {
+        coreObject.updateBatteryStatus(false);
+      }
 
       // Forward all other commands
       if (!cmdExecuted) {

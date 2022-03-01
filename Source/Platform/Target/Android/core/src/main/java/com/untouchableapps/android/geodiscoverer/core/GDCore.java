@@ -193,7 +193,7 @@ public class GDCore implements
   float prevDistance=0;
 
   // Items for receiving battery changes
-  BroadcastReceiver batteryStatusReceiver;
+  BatteryManager batteryManager;
   public String batteryStatus;
 
   /** Gesture detectors */
@@ -245,6 +245,20 @@ public class GDCore implements
     System.loadLibrary("gdgdal");
     System.loadLibrary("gdcore");
   }
+
+  /** Updates the battery status */
+  public void updateBatteryStatus(boolean force) {
+    Intent intent  = appIf.getContext().registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+    boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
+    int percentage = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+    String args = String.valueOf(percentage) + "," + (isCharging ? "1" : "0");
+    //appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp",args);
+    if (coreInitialized&&(force||(!args.equals(batteryStatus)))) {
+      batteryStatus = args;
+      executeCoreCommand("setBattery", batteryStatus);
+    }
+  }
   
   /** Constructor */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -281,20 +295,8 @@ public class GDCore implements
       coreLock.unlock();
     }
 
-    // Register for battery updates
-    batteryStatusReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-        boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL;
-        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        int percentage = 100*level/scale;
-        String args = String.valueOf(percentage) + "," + (isCharging ? "1" : "0");
-        batteryStatus=args;
-        executeCoreCommand("setBattery",String.valueOf(percentage), (isCharging ? "1" : "0"));
-      }
-    };
+    // Read the battery status
+    batteryManager = (BatteryManager) appIf.getContext().getSystemService(Context.BATTERY_SERVICE);
 
     // Install gesture detectors
     gestureDetector = new GestureDetector(appIf.getContext(),this);
@@ -304,9 +306,6 @@ public class GDCore implements
   /** Destructor */
   protected void finalize() throws Throwable
   {
-    // Unregister the battery receiver
-    appIf.getContext().unregisterReceiver(batteryStatusReceiver);
-
     // Clean up the C++ part
     stop();
     
@@ -583,12 +582,7 @@ public class GDCore implements
 
     // Update battery
     if (initialized) {
-      Intent batteryStatus = appIf.getContext().registerReceiver(batteryStatusReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-      if (batteryStatus != null) {
-        batteryStatusReceiver.onReceive(appIf.getContext(), batteryStatus);
-      } else {
-        appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", "can not get battery stats");
-      }
+      updateBatteryStatus(true);
     }
   } 
 
@@ -1101,6 +1095,7 @@ public class GDCore implements
 
   /** Called when a new fix is available */  
   public void onLocationChanged(Location location) {
+    updateBatteryStatus(false);
     if (replayTraceActive)
       return;
     if (location!=null) {
