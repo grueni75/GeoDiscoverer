@@ -928,6 +928,10 @@ std::string Commander::execute(std::string cmd) {
     core->getDefaultGraphicEngine()->setAmbientModeStartTime(atol(args[0].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="setAmbientMode") {
+    core->getDefaultGraphicEngine()->setAmbientMode(atoi(args[0].c_str()));
+    cmdExecuted=true;
+  }
   if (cmdName=="setWidgetlessMode") {
     //DEBUG("%s %s",cmdName.c_str(),args[0].c_str());
     core->getDefaultGraphicEngine()->setWidgetlessMode(atoi(args[0].c_str()));

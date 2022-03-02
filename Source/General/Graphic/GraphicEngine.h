@@ -159,6 +159,9 @@ protected:
   TimestampInMicroseconds targetDrawingTime;
   bool drawingTooSlow;
 
+  // Indicates if ambient transition is ongoing
+  bool ambientTransitionActive;
+
 public:
 
   // Constructors and destructor
@@ -191,6 +194,9 @@ public:
 
   // Sets the stat time of the ambient mode
   void setAmbientModeStartTime(TimestampInMicroseconds offset);
+
+  // Enables or disables the ambient mode
+  void setAmbientMode(boolean enabled);
 
   // Returns the fade scale for the ambient transition
   double getAmbientFadeScale();

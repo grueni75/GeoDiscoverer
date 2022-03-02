@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <Commander.h>
 #include <GraphicEngine.h>
 #include <Device.h>
 #include <ProfileEngine.h>
@@ -92,6 +93,7 @@ GraphicEngine::GraphicEngine(Device *device) :
   widgetlessModeStartTime=0;
   widgetfullModeStartTime=0;
   currentTime=0;
+  ambientTransitionActive=false;
   
   // Init the dynamic data
   init();
@@ -378,6 +380,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
       // Check if we are in ambient mode
       double fadeScale=getAmbientFadeScale();
       if (fadeScale>0.0) {
+        ambientTransitionActive=true;
 
         // Set the map window position
         screen->startObject();
@@ -729,6 +732,12 @@ bool GraphicEngine::draw(bool forceRedraw) {
         // Finish the map window translation
         screen->endObject();
         //PROFILE_ADD("overlay drawing");
+      } else {
+        if (ambientTransitionActive) {
+          //DEBUG("ambient transition over",NULL);
+          core->getCommander()->dispatch("ambientTransitionFinished()");
+          ambientTransitionActive=false;
+        }
       }
     }
 
@@ -886,6 +895,17 @@ void GraphicEngine::setAmbientModeStartTime(TimestampInMicroseconds offset) {
   if ((ambientModeStartTime!=0)&&(t>=ambientModeStartTime)) 
     interactiveModeStartTime=t;
   ambientModeStartTime=t+offset-ambientModeTransitionDuration;
+}
+
+// Enables or disables the ambient mode
+void GraphicEngine::setAmbientMode(boolean enabled) {
+  TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
+  if (enabled) 
+    ambientModeStartTime=t;
+  else {
+    ambientModeStartTime=0;
+    interactiveModeStartTime=t;
+  }
 }
 
 // Returns the fade scale for the ambient transition

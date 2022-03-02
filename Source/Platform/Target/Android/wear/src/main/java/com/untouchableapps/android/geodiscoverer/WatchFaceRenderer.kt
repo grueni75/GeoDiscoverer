@@ -71,7 +71,6 @@ class WatchFaceRenderer(
 ), CoroutineScope by MainScope(), WatchFace.TapListener {
 
   // Managers
-  val alarmManager = context.getSystemService(ALARM_SERVICE) as AlarmManager
   val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
   val windowManager = context.getSystemService(WINDOW_SERVICE) as WindowManager
   val sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
@@ -120,43 +119,8 @@ class WatchFaceRenderer(
   var zoomPos = 0
 
   // Variables to control fast rendering in ambient mode
-  var ambientModeStartTime=0L
   var isAmbient=false
-  /*var lastRenderTime=0L
-  val drawInAmbientPendingIntent = PendingIntent.getBroadcast(
-    context,
-    0,
-    Intent(AMBIENT_UPDATE_ACTION),
-    PendingIntent.FLAG_IMMUTABLE
-  )
-  inner class DrawInAmbientBroadcastReceiver : BroadcastReceiver() {
-    override fun onReceive(p0: Context?, p1: Intent?) {
-      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","invalidating")
-      postInvalidate()
-      alarmManager.setAlarmClock(
-        AlarmClockInfo(
-          lastRenderTime+FRAME_PERIOD_MS_DEFAULT,
-          drawInAmbientPendingIntent
-        ),
-        drawInAmbientPendingIntent
-      )
-      /*runBlocking {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","start of draw")
-        runUiThreadGlCommands {
-          draw()
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","end of draw")
-        }
-      }
-      try {
-        Thread.sleep(15)
-      }
-      catch (e: Exception) {
-      }
-      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","end of onReceive")*/
-    }
-  }
-  val drawInAmbientBroadcastReceiver = DrawInAmbientBroadcastReceiver()
-  var drawInAmbientFilterRegistered = false*/
+  var isTransitioningToAmbient=false
 
   // Initializes everything
   init {
@@ -169,6 +133,7 @@ class WatchFaceRenderer(
     }
 
     // Get display timeout
+    // use watchDisplayTimeout from config instead of system timeout
     try {
       displayTimeout =
         Settings.System.getInt(context.contentResolver, Settings.System.SCREEN_OFF_TIMEOUT).toLong()
@@ -280,7 +245,7 @@ class WatchFaceRenderer(
       }
     }, displayTimeout)
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "ambient mode start time pushed out")
-    coreObject?.executeCoreCommand("setAmbientModeStartTime", (displayTimeout * 1000).toString())
+    //coreObject?.executeCoreCommand("setAmbientModeStartTime", (displayTimeout * 1000).toString())
   }
 
   // Handles visibility changes
@@ -342,13 +307,6 @@ class WatchFaceRenderer(
       context.startActivity(intent)
     } else {
 
-      /* Register the broadcast receiver
-      if (!drawInAmbientFilterRegistered) {
-        val filter = IntentFilter(AMBIENT_UPDATE_ACTION)
-        context.registerReceiver(drawInAmbientBroadcastReceiver, filter)
-        drawInAmbientFilterRegistered = true
-      }*/
-
       // Set the surface info
       if ((glWidth!=width)||(glHeight!=height)) {
         coreObject?.onSurfaceCreated(null, null);
@@ -373,55 +331,38 @@ class WatchFaceRenderer(
       result=true
       forceAnimate=false
     }
-    return result
-    /*
     if (watchState.isAmbient.value!=null) {
       if (watchState.isAmbient.value!!) {
         if (!isAmbient) {
-          Log.d("GDApp","staring ambient at ${System.currentTimeMillis()}")
-          coreObject?.executeCoreCommand("setAmbientModeStartTime", "500000");
-          ambientModeStartTime=System.currentTimeMillis()
+          //Log.d("GDApp","staring ambient at ${System.currentTimeMillis()}")
+          coreObject?.executeCoreCommand("setAmbientMode", "1");
+          isTransitioningToAmbient = true
         }
         isAmbient = true
-        if ((System.currentTimeMillis()-ambientModeStartTime)<10000) {
-          Log.d("GDApp","continuing drawing at ${System.currentTimeMillis()}")
-          return true
-        } else {
-          Log.d("GDApp","returning default at ${System.currentTimeMillis()}")
-          return default
+        if (isTransitioningToAmbient) {
+          //Log.d("GDApp","continuing drawing at ${System.currentTimeMillis()}")
+          result = true
         }
-        //invalidate()
       } else {
         if (isAmbient) {
-          Log.d("GDApp","stopping ambient at ${System.currentTimeMillis()}")
+          //Log.d("GDApp","stopping ambient at ${System.currentTimeMillis()}")
+          coreObject?.executeCoreCommand("setAmbientMode", "0");
+          isTransitioningToAmbient = false
         }
         isAmbient = false
-        coreObject?.executeCoreCommand("setAmbientModeStartTime", "1000000");
       }
     }
-    return default
-    */
+    return result
   }
 
   // Does the drawing of the main content
   override fun render(zonedDateTime: ZonedDateTime) {
     if (renderParameters.drawMode==DrawMode.AMBIENT) {
-      if (visible)
-        coreObject?.executeCoreCommand("setAmbientModeStartTime", "0");
       handleVisibility(false)
     } else {
       handleVisibility(true)
     }
-    /*if (isAmbient) {
-      Log.d("GDApp","transitioning to ambient at ${System.currentTimeMillis()}")
-    }
-    if (renderParameters.drawMode==DrawMode.AMBIENT) {
-      Log.d("GDApp","in ambient at ${System.currentTimeMillis()}")
-    }*/
-    /*GLES20.glClearColor(Random.nextInt(from=0,until=255).toFloat()/255.0f, Random.nextInt(from=0,until=255).toFloat()/255.0f, Random.nextInt(from=0,until=255).toFloat()/255.0f, 1.0f);
-    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);*/
     coreObject?.onDrawFrame(null);
-    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","finish drawing at ${System.currentTimeMillis()}")
   }
 
   // Renders additional info above the main content
@@ -443,6 +384,9 @@ class WatchFaceRenderer(
     if (keepDisplayOnActive) {
       windowManager.removeView(keepDisplayOnView)
       keepDisplayOnActive = false
+    }
+    synchronized(activeRenderers) {
+      activeRenderers.remove(this)
     }
   }
 

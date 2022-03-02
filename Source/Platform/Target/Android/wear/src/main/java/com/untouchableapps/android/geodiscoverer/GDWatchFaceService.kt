@@ -32,30 +32,20 @@ import java.lang.ref.WeakReference
 import java.util.*
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import android.annotation.SuppressLint
-import android.app.AlarmManager
-import android.hardware.SensorManager
 import android.os.*
-import android.view.WindowManager
 import android.os.Build
-
-import android.content.pm.ConfigurationInfo
 
 import android.app.ActivityManager
 
 import android.os.PowerManager
 
-import android.app.NotificationManager
-
 import android.os.Vibrator
-
-import android.view.LayoutInflater
-
-
-
-
 
 // Minimum distance between two toasts in milliseconds  */
 const val TOAST_DISTANCE = 5000
+
+// All active renderers
+var activeRenderers = mutableListOf<WatchFaceRenderer>()
 
 class GDWatchFaceService : androidx.wear.watchface.WatchFaceService() {
 
@@ -65,9 +55,6 @@ class GDWatchFaceService : androidx.wear.watchface.WatchFaceService() {
 
   // Reference to the core object
   var coreObject: GDCore? = null
-
-  // The last renderer created
-  var lastRenderer: WatchFaceRenderer? = null
 
   // Indicates if the dialog is open
   var dialogVisible = false
@@ -271,9 +258,10 @@ class GDWatchFaceService : androidx.wear.watchface.WatchFaceService() {
             commandExecuted = true
           }
           if (commandFunction == "updateScreen") {
-            if (watchFaceService.lastRenderer != null) {
-              //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","invalidating screen");
-              watchFaceService.lastRenderer?.forceRedraw()
+            synchronized(activeRenderers) {
+              activeRenderers.forEach() {
+                it.forceRedraw()
+              }
             }
             commandExecuted = true
           }
@@ -289,8 +277,20 @@ class GDWatchFaceService : androidx.wear.watchface.WatchFaceService() {
             commandExecuted = true
           }
           if (commandFunction == "deactivateSwipes") {
-            watchFaceService.lastRenderer?.setTouchHandlerEnabled(false)
+            synchronized(activeRenderers) {
+              activeRenderers.forEach() {
+                it.setTouchHandlerEnabled(false)
+              }
+            }
             watchFaceService.vibrate()
+            commandExecuted = true
+          }
+          if (commandFunction == "ambientTransitionFinished") {
+            synchronized(activeRenderers) {
+              activeRenderers.forEach() {
+                it.isTransitioningToAmbient = false
+              }
+            }
             commandExecuted = true
           }
           if (!commandExecuted) {
@@ -355,20 +355,23 @@ class GDWatchFaceService : androidx.wear.watchface.WatchFaceService() {
     GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","createWatchFace called")
 
     // Creates class that renders the watch face.
-    lastRenderer = WatchFaceRenderer(
+    val renderer = WatchFaceRenderer(
       context = applicationContext,
       coreObject = coreObject,
       surfaceHolder = surfaceHolder,
       watchState = watchState,
       currentUserStyleRepository = currentUserStyleRepository
     )
+    synchronized(activeRenderers) {
+      activeRenderers.add(renderer)
+    }
 
     // Creates the watch face.
     val watchFace = WatchFace(
       watchFaceType = WatchFaceType.DIGITAL,
-      renderer = lastRenderer!!
+      renderer = renderer
     )
-    watchFace.setTapListener(lastRenderer)
+    watchFace.setTapListener(renderer)
     return watchFace
   }
 
