@@ -256,7 +256,7 @@ public class GDCore implements
     //appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp",args);
     if (coreInitialized&&(force||(!args.equals(batteryStatus)))) {
       batteryStatus = args;
-      executeCoreCommand("setBattery", batteryStatus);
+      executeCoreCommandRaw("setBattery("+batteryStatus+")");
     }
   }
   
