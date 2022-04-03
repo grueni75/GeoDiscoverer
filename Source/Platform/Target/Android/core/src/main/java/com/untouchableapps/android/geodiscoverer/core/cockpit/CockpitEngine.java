@@ -180,13 +180,17 @@ public class CockpitEngine {
 
               // Skip the vibrate if the current speed is below the threshold
               //coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("locationSpeed=%f",locationSpeed));
-              if (locationSpeed<minSpeedToAlert)
+              if (locationSpeed<minSpeedToAlert) {
+                coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("Skipping alert because user is not moving (locationSpeed=%f)",locationSpeed));
                 break;
+              }
 
               // Skip vibrate if we are not off route anymore 
               // and this is is not the first vibrate
-              if (((!currentOffRoute)||(!currentTurnDistance.equals("-")))&&(fastVibrateCount>1))
+              if (((!currentOffRoute)||(!currentTurnDistance.equals("-")))&&(fastVibrateCount>1)) {
+                coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("Skipping alert (currentOffRoute=%d, currentTurnDistance=%s, fastVibrateCount=%d)",currentOffRoute,currentTurnDistance,fastVibrateCount));
                 break;
+              }
               
               // Alert the user of all registered cockpit apps
               //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "vibrateThread: currentOffRoute=" + Boolean.toString(currentOffRoute));
@@ -201,7 +205,7 @@ public class CockpitEngine {
               // Vibrate fast at the beginning, slow afterwards
               // Quit if a new vibrate is requested or we are on route again
               if ((currentOffRoute)&&(currentTurnDistance.equals("-"))) {
-                //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "repeating alert");
+                coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", "repeating alert");
                 int offRouteVibratePeriod;
                 if (fastVibrateCount>offRouteAlertFastCount) {
                   offRouteVibratePeriod=offRouteAlertSlowPeriod;
@@ -211,8 +215,14 @@ public class CockpitEngine {
                 }
                 for (int i=0;i<offRouteVibratePeriod/1000;i++) {
                   Thread.sleep(1000);
-                  if ((!currentOffRoute)||(!currentTurnDistance.equals("-"))||(currentVibrateCount<expectedAlertCount-1))
+                  if (locationSpeed<minSpeedToAlert) {
+                    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("Skipping repeat because user is not moving (locationSpeed=%f)",locationSpeed));
                     break;
+                  }
+                  if ((!currentOffRoute)||(!currentTurnDistance.equals("-"))||(currentVibrateCount<expectedAlertCount-1)) {
+                    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("Skipping repeat (currentOffRoute=%d, currentTurnDistance=%s, currentVibrateCount=%d, expectedAlertCount=%d)",currentOffRoute,currentTurnDistance,currentVibrateCount,expectedAlertCount));
+                    break;
+                  }
                 }
               }
               if (quitVibrateThread)
@@ -220,7 +230,7 @@ public class CockpitEngine {
             }
             while ((currentOffRoute)&&(currentTurnDistance.equals("-"))&&(currentVibrateCount==expectedAlertCount-1));
             currentVibrateCount++;
-            //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("currentVibrateCount=%d expectedVibrateCount=%d",currentVibrateCount,expectedAlertCount));
+            coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("currentVibrateCount=%d expectedVibrateCount=%d",currentVibrateCount,expectedAlertCount));
             fastVibrateCount=1;
           }
           catch(InterruptedException e) {
