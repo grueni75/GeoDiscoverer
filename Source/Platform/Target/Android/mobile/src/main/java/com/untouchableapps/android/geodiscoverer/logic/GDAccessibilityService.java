@@ -114,6 +114,8 @@ public class GDAccessibilityService extends AccessibilityService {
 
   // Tries to find places in the current view
   private void findPlace(AccessibilityNodeInfo info, int indentLevel) {
+    if (info==null)
+      return;
     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
 
       /* Output debug infos
