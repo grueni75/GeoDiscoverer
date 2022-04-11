@@ -188,7 +188,7 @@ public class CockpitEngine {
               // Skip vibrate if we are not off route anymore 
               // and this is is not the first vibrate
               if (((!currentOffRoute)||(!currentTurnDistance.equals("-")))&&(fastVibrateCount>1)) {
-                coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("Skipping alert (currentOffRoute=%d, currentTurnDistance=%s, fastVibrateCount=%d)",currentOffRoute,currentTurnDistance,fastVibrateCount));
+                coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("Skipping alert (currentOffRoute=%s, currentTurnDistance=%s, fastVibrateCount=%d)",Boolean.toString(currentOffRoute),currentTurnDistance,fastVibrateCount));
                 break;
               }
               
@@ -220,7 +220,7 @@ public class CockpitEngine {
                     break;
                   }
                   if ((!currentOffRoute)||(!currentTurnDistance.equals("-"))||(currentVibrateCount<expectedAlertCount-1)) {
-                    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("Skipping repeat (currentOffRoute=%d, currentTurnDistance=%s, currentVibrateCount=%d, expectedAlertCount=%d)",currentOffRoute,currentTurnDistance,currentVibrateCount,expectedAlertCount));
+                    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("Skipping repeat (currentOffRoute=%s, currentTurnDistance=%s, currentVibrateCount=%d, expectedAlertCount=%d)",Boolean.toString(currentOffRoute),currentTurnDistance,currentVibrateCount,expectedAlertCount));
                     break;
                   }
                 }
