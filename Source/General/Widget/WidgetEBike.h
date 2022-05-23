@@ -180,6 +180,12 @@ public:
   void setBatteryLevelForegroundWidth(Int width) {
     this->batteryLevelForegroundWidth=width;
   }
+
+  virtual void setIsHidden(bool isHidden) {
+    DEBUG("isHidden=%d",isHidden);
+    this->isHidden = isHidden;
+  }
+
 };
 
 }

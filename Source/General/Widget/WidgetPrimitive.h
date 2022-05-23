@@ -141,7 +141,7 @@ public:
     return isHidden;
   }
 
-  void setIsHidden(bool isHidden) {
+  virtual void setIsHidden(bool isHidden) {
     this->isHidden = isHidden;
   }
 

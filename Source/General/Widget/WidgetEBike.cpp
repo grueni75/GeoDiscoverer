@@ -78,7 +78,6 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
     // Is ebike connected?
     boolean prevConnected=connected;
     connected=configStore->getIntValue("EBikeMonitor","connected",__FILE__,__LINE__);
-    //DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
     
     // Update the widget visibility
     if (firstRun) {
@@ -86,6 +85,7 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
       firstRun=false;
     }
     if (connected!=prevConnected) {
+      DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
       GraphicColor targetColor=getActiveColor();
       if (!connected) {
         targetColor.setAlpha(0);
@@ -180,8 +180,10 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
     if (!getIsHidden())
       setIsHidden(true);
   } else {
-    if (getIsHidden())
+    if (getIsHidden()) {
+      DEBUG("enabling widget (alpha=%d, connected=%d)",getColor().getAlpha(),connected);
       setIsHidden(false);
+    }
   }
 
   // Return result
