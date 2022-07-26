@@ -683,6 +683,9 @@ void Core::lateInit() {
   core->getThread()->setThreadPriority(threadPriorityBackgroundHigh);
 
   // Wait until the graphic is initialized
+  if (defaultDevice->getIsWatch()) {
+    defaultDevice->getScreen()->setWakeLock(true,__FILE__,__LINE__);
+  }
   if (!graphicInitialized) {
     DEBUG("waiting for graphic initialization before starting late init",NULL);
     while (!graphicInitialized) {
@@ -690,6 +693,9 @@ void Core::lateInit() {
       if (quitCore)
         return;
     }
+  }
+  if (defaultDevice->getIsWatch()) {
+    defaultDevice->getScreen()->setWakeLock(false,__FILE__,__LINE__);
   }
 
   // Take care that the map update and screen update thread detects that objects are not initialized
