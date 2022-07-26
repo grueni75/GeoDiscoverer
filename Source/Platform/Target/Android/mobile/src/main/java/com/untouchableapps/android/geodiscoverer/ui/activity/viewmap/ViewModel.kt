@@ -245,6 +245,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   val integratedListPOIItems = mutableStateListOf<IntegratedListItem>()
   var integratedListCenterItem: Boolean by mutableStateOf(false)
     private set
+  var restartCoreAfterNoPendingWaypointsDecision = false
 
   @Synchronized
   fun toggleMessagesVisibility() {
@@ -438,6 +439,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       gpxFilename, waypointCount, confirmHandler, dismissHandler
     )
     if (askTitle != "") {
+      if (pendingImportWaypointsDecisions.isEmpty())
+        restartCoreAfterNoPendingWaypointsDecision=false
       pendingImportWaypointsDecisions.add(decision)
     } else {
       askForImportWaypointsDecision(decision)

@@ -233,13 +233,18 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
               viewMap.coreObject!!.configStoreSetStringValue(path, "importWaypoints", "1")
               if (!viewMap.viewModel.isImportWaypointsDecisionPending()) {
                 viewMap.restartCore(false)
+              } else {
+                viewMap.viewModel.restartCoreAfterNoPendingWaypointsDecision=true
               }
             },
             dismissHandler = {
               val path = "Navigation/Route[@name='" + commandArgs[0] + "']"
               viewMap.coreObject!!.configStoreSetStringValue(path, "importWaypoints", "2")
               if (!viewMap.viewModel.isImportWaypointsDecisionPending()) {
-                viewMap.restartCore(false)
+
+                // We only need to restart in case yes was selected in other decisions
+                if (viewMap.viewModel.restartCoreAfterNoPendingWaypointsDecision)
+                  viewMap.restartCore(false)
               }
             }
           )
