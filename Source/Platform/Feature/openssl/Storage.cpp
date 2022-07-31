@@ -21,16 +21,17 @@
 //============================================================================
 
 #include <Core.h>
-#include <openssl/md5.h>
+#include <openssl/evp.h>
 #include <Storage.h>
 
 namespace GEODISCOVERER {
 
 // Computes a hash of a file
 std::string Storage::computeMD5(std::string filepath) {
-  unsigned char c[MD5_DIGEST_LENGTH];
+  unsigned char *md5_digest;
+  unsigned int md5_digest_len = EVP_MD_size(EVP_md5());
   int i;
-  MD5_CTX mdContext;
+  EVP_MD_CTX *mdContext;
   int bytes;
   unsigned char data[1024];
 
@@ -42,22 +43,26 @@ std::string Storage::computeMD5(std::string filepath) {
   }
 
   // Compute the checksum
-  MD5_Init (&mdContext);
+  mdContext = EVP_MD_CTX_new();
+  EVP_DigestInit_ex(mdContext, EVP_md5(), NULL);
   while ((bytes = fread (data, 1, 1024, inFile)) != 0) {
-      MD5_Update (&mdContext, data, bytes);
+      EVP_DigestUpdate(mdContext, data, bytes);
       std::stringstream s;
       for (int i=0;i<bytes;i++) {
         s << std::setfill('0') << std::setw(2) << std::hex << (int)data[i] << " ";
       }
   }
-  MD5_Final (c,&mdContext);
+  md5_digest = (unsigned char *)OPENSSL_malloc(md5_digest_len);
+  EVP_DigestFinal_ex(mdContext, md5_digest, &md5_digest_len);
   fclose (inFile);
 
   // Store the result
   std::stringstream result;
-  for(i = 0; i < MD5_DIGEST_LENGTH; i++) {
-    result << std::setfill('0') << std::setw(2) << std::hex << (Int)c[i];
+  for(i = 0; i < md5_digest_len; i++) {
+    result << std::setfill('0') << std::setw(2) << std::hex << (Int)md5_digest[i];
   }
+  OPENSSL_free(md5_digest);
+  EVP_MD_CTX_free(mdContext);
   return result.str();
 }
 
