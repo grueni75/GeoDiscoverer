@@ -161,7 +161,14 @@ void MapCache::removeTile(MapTile *tile) {
     core->getThread()->unlockMutex(accessMutex);
   } else {
     if (!tile->getIsCached()) {
-      FATAL("tile found in cached list but not marked as cached",NULL);
+      std::stringstream name;
+      for (std::list<std::string>::iterator i=tile->getVisName().begin();i!=tile->getVisName().end();i++) {
+        name<<(*i);
+      }
+      if (name.str()=="") {
+        name<<"unknown";
+      }
+      ERROR("tile %s found in cached list but not marked as cached",name.str().c_str());
     }
     core->getThread()->unlockMutex(accessMutex);
     core->getDefaultGraphicEngine()->lockDrawing(__FILE__, __LINE__);

@@ -25,8 +25,7 @@
 #ifndef MAPCALIBRATORPROJ_H_
 #define MAPCALIBRATORPROJ_H_
 
-#define ACCEPT_USE_OF_DEPRECATED_PROJ_API_H
-#include <proj_api.h>
+#include <proj.h> 
 
 namespace GEODISCOVERER {
 
@@ -34,7 +33,7 @@ class MapCalibratorProj : public MapCalibrator {
 
 protected:
 
-  projPJ projState; // Pointer to the proj4 state
+  PJ *projState; // Pointer to the proj6 state
 
   // Convert the geographic longitude / latitude coordinates to cartesian X / Y coordinates
   void convertGeographicToCartesian(MapPosition &pos);

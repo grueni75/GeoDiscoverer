@@ -37,38 +37,38 @@ MapCalibratorProj::~MapCalibratorProj() {
 // Inits the calibrator
 void MapCalibratorProj::init() {
   MapCalibrator::init();
-  if (!(projState=pj_init_plus(args))) {
+  if (!(projState=proj_create(PJ_DEFAULT_CTX,args))) {
     ERROR("could not initialize map projection with arguments = \"%s\"", args);
   }
 }
 
 // Frees the calibrator
 void MapCalibratorProj::deinit() {
-  pj_free(projState);
+  proj_destroy(projState);
   MapCalibrator::deinit();
 }
 
 
 // Convert the geographic longitude / latitude coordinates to cartesian X / Y coordinates
 void MapCalibratorProj::convertGeographicToCartesian(MapPosition &pos) {
-  projUV p;
-  p.u=pos.getLngRad();
-  p.v=pos.getLatRad();
-  p = pj_fwd(p, projState);
-  //DEBUG("x=%f y=%f",p.u,p.v);
-  pos.setCartesianX(p.u);
-  pos.setCartesianY(p.v);
+  PJ_COORD p;
+  p.uv.u=pos.getLngRad();
+  p.uv.v=pos.getLatRad();
+  p = proj_trans(projState,PJ_FWD,p);
+  //DEBUG("x=%f y=%f",p.uv.u,p.uv.v);
+  pos.setCartesianX(p.uv.u);
+  pos.setCartesianY(p.uv.v);
 }
 
 // Convert the cartesian X / Y coordinates to geographic longitude / latitude coordinates
 void MapCalibratorProj::convertCartesianToGeographic(MapPosition &pos) {
-  projUV p;
-  p.u=pos.getCartesianX();
-  p.v=pos.getCartesianY();
-  p = pj_inv(p, projState);
-  //DEBUG("x=%f y=%f",p.u,p.v);
-  pos.setLng(FloatingPoint::rad2degree(p.u));
-  pos.setLat(FloatingPoint::rad2degree(p.v));
+  PJ_COORD p;
+  p.uv.u=pos.getCartesianX();
+  p.uv.v=pos.getCartesianY();
+  p = proj_trans(projState,PJ_INV,p);
+  //DEBUG("x=%f y=%f",p.uv.u,p.uv.v);
+  pos.setLng(FloatingPoint::rad2degree(p.uv.u));
+  pos.setLat(FloatingPoint::rad2degree(p.uv.v));
 }
 
 } /* namespace GEODISCOVERER */
