@@ -292,7 +292,7 @@ void WidgetCursorInfo::onDataChange() {
     if (name=="") 
       name="Nothing nearby";
   }
-  DEBUG("info=%s name=%s",info.c_str(),name.c_str());
+  //DEBUG("info=%s name=%s",info.c_str(),name.c_str());
   if ((info=="")&&(name!="")) {
     info=name;
     fadeIn=true;
