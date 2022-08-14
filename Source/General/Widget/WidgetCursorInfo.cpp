@@ -176,32 +176,40 @@ void WidgetCursorInfo::draw(TimestampInMicroseconds t) {
   if (getIsHidden())
     return;
 
-  // Draw the status
-  if (color.getAlpha()!=0) {
-    if (infoFontString) {
-      screen->startObject();
-      screen->translate(x,y,0);
-      screen->scale(scale,scale,1.0);
-      Int w;
-      double widthScale;
-      if ((t>=translateStartTime)&&(t<translateEndTime)&&(translateEndY!=translateStartY)) {
-        widthScale = 1.0-fabs(((double)(translateEndY-y))/((double)(translateEndY-translateStartY)));
-        //DEBUG("info=%s fadeIn=%d fadeOut=%d updateInfo=%d permanentVisible=%d maxPathDistance=%f pathNearby=%d infoKeepEndCharCount=%d infoFontString=0x%08x",info.c_str(),fadeIn,fadeOut,updateInfo,permanentVisible,maxPathDistance,pathNearby,infoKeepEndCharCount,infoFontString);
-      } else
-        widthScale = 1.0;
-      if (permanentVisible) {
-        w=infoFontString->getIconWidth()+widthScale*(width-infoFontString->getIconWidth());        
-      } else {
-        w=width-widthScale*(width-infoFontString->getIconWidth());
+ // Get the fade scale depending on ambiet mode
+  double fadeScale=widgetContainer->getWidgetEngine()->getGraphicEngine()->getAmbientFadeScale();
+  if (fadeScale!=1.0)
+    screen->setAlphaScale(fadeScale);
+  if (fadeScale>0) {
+
+    // Draw the status
+    if (color.getAlpha()!=0) {
+      if (infoFontString) {
+        screen->startObject();
+        screen->translate(x,y,0);
+        screen->scale(scale,scale,1.0);
+        Int w;
+        double widthScale;
+        if ((t>=translateStartTime)&&(t<translateEndTime)&&(translateEndY!=translateStartY)) {
+          widthScale = 1.0-fabs(((double)(translateEndY-y))/((double)(translateEndY-translateStartY)));
+          //DEBUG("info=%s fadeIn=%d fadeOut=%d updateInfo=%d permanentVisible=%d maxPathDistance=%f pathNearby=%d infoKeepEndCharCount=%d infoFontString=0x%08x",info.c_str(),fadeIn,fadeOut,updateInfo,permanentVisible,maxPathDistance,pathNearby,infoKeepEndCharCount,infoFontString);
+        } else
+          widthScale = 1.0;
+        if (permanentVisible) {
+          w=infoFontString->getIconWidth()+widthScale*(width-infoFontString->getIconWidth());        
+        } else {
+          w=width-widthScale*(width-infoFontString->getIconWidth());
+        }
+        screen->setColor(getColor().getRed(),getColor().getGreen(),getColor().getBlue(),color.getAlpha()*getInactiveColor().getAlpha()/255);
+        screen->drawRoundedRectangle(w,height);
+        infoFontString->setColor(color);
+        infoFontString->draw(t);
+        screen->endObject();
       }
-      screen->setColor(getColor().getRed(),getColor().getGreen(),getColor().getBlue(),color.getAlpha()*getInactiveColor().getAlpha()/255);
-      screen->drawRoundedRectangle(w,height);
-      infoFontString->setColor(color);
-      infoFontString->draw(t);
-      screen->endObject();
     }
   }
-
+  if (fadeScale!=1.0)
+    screen->setAlphaScale(1.0);
 }
 
 // Called when the widget has changed its position
@@ -284,7 +292,7 @@ void WidgetCursorInfo::onDataChange() {
     if (name=="") 
       name="Nothing nearby";
   }
-  //DEBUG("info=%s name=%s",info.c_str(),name.c_str());
+  DEBUG("info=%s name=%s",info.c_str(),name.c_str());
   if ((info=="")&&(name!="")) {
     info=name;
     fadeIn=true;

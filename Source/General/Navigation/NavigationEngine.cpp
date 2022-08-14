@@ -20,7 +20,6 @@
 //
 //============================================================================
 
-
 #include <Core.h>
 #include <cstring>
 #include <NavigationEngine.h>
@@ -1912,16 +1911,22 @@ bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &
     //DEBUG("r.getX()=%d r.getY()=%d",r->getX(),r->getY());
     if (distance < r->getIconHeight()/8) {
       name=r->getName().front();
-      //DEBUG("result=%s",result.c_str());
+      //DEBUG("name=%s",name.c_str());
       break;
     }
   }
   if (name!="") {
-    for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
-      if (i->getName()==name) {
-        result=*i;
-        success=true;
-        break;
+    if (core->getDefaultDevice()->getIsWatch()) {
+      // Watch has no address points, but at least we can return the name
+      result.setName(name);
+      success=true;
+    } else {
+      for (std::list<NavigationPoint>::iterator i=addressPoints.begin();i!=addressPoints.end();i++) {
+        if (i->getName()==name) {
+          result=*i;
+          success=true;
+          break;
+        }
       }
     }
   }

@@ -463,6 +463,49 @@ void WidgetEngine::createGraphic() {
       // ---------------------------------------------------------
     }
     if ((deviceName=="Default")||(deviceName=="Watch")) {
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
+      config.setName("Cursor Info");
+      config.setType(WidgetTypeCursorInfo);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(4.0);
+      position.setPortraitX(50.0);
+      if (deviceName=="Watch") {  
+        position.setPortraitY(31.0);
+      } else {
+        position.setPortraitY(45.0);
+      }
+      position.setPortraitZ(0.5);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(41.0);
+      position.setLandscapeZ(0.5);
+      config.addPosition(position);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(7.0);
+      position.setPortraitX(50.0);
+      position.setPortraitY(47.0);
+      position.setPortraitZ(0.5);
+      position.setLandscapeX(50.0);
+      position.setLandscapeY(45.0);
+      position.setLandscapeZ(0.5);
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,150));
+      if (deviceName=="Watch") {  
+        config.setParameter("width","0.7");
+      } else {
+        config.setParameter("width","2.0");
+      }
+      config.setParameter("height","0.2");
+      addWidgetToPage(config);
+      if (deviceName=="Default") {
+        config.setPageName("Path Tools");
+        addWidgetToPage(config);
+        config.setPageName("Finger Menu");
+        addWidgetToPage(config);
+      }
+      // ---------------------------------------------------------
       config=WidgetConfig();
       config.setPageName("Default");
       config.setName("Return To Location");
@@ -982,38 +1025,6 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeY(78.0);
         position.setLandscapeZ(0);      
         config.addPosition(position);
-        addWidgetToPage(config);
-        // ---------------------------------------------------------
-        config=WidgetConfig();
-        config.setPageName("Default");
-        config.setName("Cursor Info");
-        config.setType(WidgetTypeCursorInfo);
-        position=WidgetPosition();
-        position.setRefScreenDiagonal(4.0);
-        position.setPortraitX(50.0);
-        position.setPortraitY(45.0);
-        position.setPortraitZ(1);
-        position.setLandscapeX(50.0);
-        position.setLandscapeY(41.0);
-        position.setLandscapeZ(1);
-        config.addPosition(position);
-        position=WidgetPosition();
-        position.setRefScreenDiagonal(7.0);
-        position.setPortraitX(50.0);
-        position.setPortraitY(47.0);
-        position.setPortraitZ(1);
-        position.setLandscapeX(50.0);
-        position.setLandscapeY(45.0);
-        position.setLandscapeZ(1);
-        config.addPosition(position);
-        config.setActiveColor(GraphicColor(255,255,255,255));
-        config.setInactiveColor(GraphicColor(255,255,255,150));
-        config.setParameter("width","2.0");
-        config.setParameter("height","0.2");
-        addWidgetToPage(config);
-        config.setPageName("Path Tools");
-        addWidgetToPage(config);
-        config.setPageName("Finger Menu");
         addWidgetToPage(config);
       }
       // ---------------------------------------------------------

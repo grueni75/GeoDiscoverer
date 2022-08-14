@@ -31,6 +31,7 @@
 #include <WidgetPathInfo.h>
 #include <UnitConverter.h>
 #include <NavigationPath.h>
+#include <NavigationEngine.h>
 #include <ElevationEngine.h>
 #include <MapSourceMercatorTiles.h>
 #include <ZipArchive.h>
@@ -804,6 +805,10 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="remoteMapInit") {
     core->getMapSource()->remoteMapInit();
+    cmdExecuted=true;
+  }
+  if (cmdName=="triggerNavigationInfoUpdate") {
+    core->getNavigationEngine()->triggerNavigationInfoUpdate();
     cmdExecuted=true;
   }
   if (cmdName=="findRemoteMapTileByGeographicCoordinate") {

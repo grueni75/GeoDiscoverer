@@ -204,9 +204,6 @@ protected:
   // Time delta to use between two arrow color animation
   double colorOffsetDelta;                        
 
-  // Forces an update of the navigation infos
-  void triggerNavigationInfoUpdate();
-
   // Reads the address points from disk
   void initAddressPoints();
 
@@ -282,6 +279,9 @@ public:
 
   // Saves the recorded track if required
   void backup();
+
+  // Forces an update of the navigation infos
+  void triggerNavigationInfoUpdate();
 
   // Creates a new track
   void createNewTrack();
