@@ -155,11 +155,11 @@ class WatchFaceRenderer(
         var startZoom = false
         var zoomValue = "1.0"
         if (motionEvent.getAxisValue(MotionEvent.AXIS_SCROLL) == 1f) {
-          zoomValue = "0.98"
+          zoomValue = "0.96"
           startZoom = true
         }
         if (motionEvent.getAxisValue(MotionEvent.AXIS_SCROLL) == -1f) {
-          zoomValue = "1.02"
+          zoomValue = "1.04"
           startZoom = true
         }
         if (startZoom) {
