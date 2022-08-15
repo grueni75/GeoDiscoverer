@@ -27,6 +27,7 @@
 #include <MapArea.h>
 #include <MapCache.h>
 #include <MapSource.h>
+#include <WidgetEngine.h>
 
 #ifndef MAPENGINE_H_
 #define MAPENGINE_H_
@@ -74,7 +75,7 @@ protected:
   bool returnToLocationOneTime;                   // Return immediately to the current location the next time
   bool isInitialized;                             // Indicates if the map source is initialized
   std::list<MapTile*> centerMapTiles;             // All tiles around the neighborhood of the map center
-  Int width,height;                               // Position of the map on the screen
+  Int x,y,width,height;                           // Position of the map on the screen
 
   // Does all action to remove a tile from the map
   void deinitTile(MapTile *t, const char *file, int line);
@@ -248,10 +249,20 @@ public:
     this->height=height;
   }
 
+  void setX(Int x) {
+    this->x=x;
+  }
+
+  void setY(Int y) {
+    this->y=y;
+  }
+
   void setWindow(Int x, Int y, Int width, Int height) {
     core->getMapSource()->lockAccess(__FILE__,__LINE__);
     setWidth(width);
     setHeight(height);
+    setX(x);
+    setY(y);
     core->getMapSource()->unlockAccess();    
     if (map) {
       core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
@@ -262,6 +273,7 @@ public:
         GraphicTranslateAnimationTypeAccelerated);
       core->getDefaultGraphicEngine()->unlockDrawing();
     }
+    core->getDefaultWidgetEngine()->setWindow(x,y,width,height);
   }
 
   Int getWidth() const {
@@ -270,6 +282,14 @@ public:
 
   Int getHeight() const {
     return height;
+  }
+
+  Int getX() const {
+    return x;
+  }
+
+  Int getY() const {
+    return y;
   }
 
 };

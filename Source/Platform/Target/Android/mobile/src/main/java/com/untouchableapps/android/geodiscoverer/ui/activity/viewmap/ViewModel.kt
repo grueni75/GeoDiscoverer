@@ -208,6 +208,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     private set
   var integratedListTitle: String by mutableStateOf("")
     private set
+  var integratedListPrevWidgetPage = "Default"
   val integratedListItems = mutableStateListOf<IntegratedListItem>()
   val integratedListTabs = mutableStateListOf<String>()
   var integratedListSelectedItem: Int by mutableStateOf(-1)
@@ -1001,7 +1002,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   fun openIntegratedList() {
     integratedListPOIFilerEnabled=false
     integratedListVisible=true
-    viewMap.coreObject!!.executeCoreCommand("setWidgetlessMode","1")
+    integratedListPrevWidgetPage=viewMap.coreObject!!.executeCoreCommand("getPage")
+    viewMap.coreObject!!.executeCoreCommand("setPage","Empty","2")
     setEditTextValue("")
   }
 
@@ -1024,7 +1026,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     integratedListTitle = ""
     integratedListBusy=false
     integratedListCenterItem=false
-    viewMap.coreObject!!.executeCoreCommand("setWidgetlessMode","0")
+    viewMap.coreObject!!.executeCoreCommand("setPage",integratedListPrevWidgetPage,"-2")
+    viewMap.coreObject!!.executeCoreCommand("openFingerMenu")
   }
 
   @Synchronized

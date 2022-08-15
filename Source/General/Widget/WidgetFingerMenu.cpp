@@ -25,6 +25,8 @@
 #include <FloatingPoint.h>
 #include <WidgetEngine.h>
 #include <FontEngine.h>
+#include <MapEngine.h>
+#include <Device.h>
 
 namespace GEODISCOVERER {
 
@@ -148,8 +150,7 @@ void WidgetFingerMenu::open() {
   positionWidgetOnRow(t, &pathRowWidgets, 0, rowOffsetY, rowDistance);
   positionWidgetOnRow(t, &addressPointRowWidgets, 0, rowOffsetY, rowDistance);
   if (cursorInfo) {
-    cursorInfo->setX(0);
-    cursorInfo->changeState(cursorInfoOpenedOffsetY,true,animationDuration);
+    cursorInfo->changeState(0,cursorInfoOpenedOffsetY,true,animationDuration);
   }
   closeTimestamp=core->getClock()->getMicrosecondsSinceStart()+closeTimeout;
   opened=true;
@@ -179,7 +180,9 @@ void WidgetFingerMenu::close() {
       animationDuration);
   }
   if (cursorInfo) {
-    cursorInfo->changeState(cursorInfoClosedOffsetY,false,animationDuration);
+    Int x=core->getMapEngine()->getX();
+    Int y=core->getMapEngine()->getY()+cursorInfoClosedOffsetY;
+    cursorInfo->changeState(x,y,false,animationDuration);
   }
   opened=false;
 }

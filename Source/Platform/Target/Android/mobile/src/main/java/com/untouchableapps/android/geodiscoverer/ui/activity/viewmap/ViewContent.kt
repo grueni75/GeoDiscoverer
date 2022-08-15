@@ -226,10 +226,24 @@ class ViewContent(viewMap: ViewMap) {
             mapY = listHeight/2
           }
         }
-        if (viewModel.integratedListVisible)
-          viewMap.coreObject!!.executeCoreCommand("setMapWindow", mapX.toString(), mapY.toString(), mapWidth.toString(), mapHeight.toString())
-        else
-          viewMap.coreObject!!.executeCoreCommand("setMapWindow", mapX.toString(), mapY.toString(), mapWidth.toString(), mapHeight.toString())
+        if (viewModel.integratedListVisible) {
+          viewMap.coreObject!!.executeCoreCommand(
+            "setMapWindow",
+            mapX.toString(),
+            mapY.toString(),
+            mapWidth.toString(),
+            mapHeight.toString()
+          )
+          viewMap.coreObject!!.executeCoreCommand("closeFingerMenu")
+        } else {
+          viewMap.coreObject!!.executeCoreCommand(
+            "setMapWindow",
+            mapX.toString(),
+            mapY.toString(),
+            mapWidth.toString(),
+            mapHeight.toString()
+          )
+        }
       }
       Surface(
         modifier = Modifier

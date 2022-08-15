@@ -192,6 +192,10 @@ std::string Commander::execute(std::string cmd) {
     core->getDefaultWidgetEngine()->setPage(args[0],atoi(args[1].c_str()));
     cmdExecuted=true;
   }
+  if (cmdName=="getPage") {
+    result=core->getConfigStore()->getStringValue("Graphic/Widget/Device[@name='" + core->getDefaultDevice()->getName() + "']","selectedPage",__FILE__, __LINE__);
+    cmdExecuted=true;
+  }
   if (cmdName=="twoFingerGesture") {
 
     // Convert the coordinates

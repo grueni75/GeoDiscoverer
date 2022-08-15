@@ -79,6 +79,9 @@ protected:
   // Waits until all read accesses are over
   void lockAccessAfterReadComplete(const char *file, int line);
 
+  // Updates the positions of widgets with the given dimension
+  void updateWidgetPositions(Int x, Int y, Int width, Int height, bool onlyWindowWidgets);
+
 public:
 
   // Constructors and destructor
@@ -147,6 +150,9 @@ public:
 
   // Sets the widgets of the current page active
   void setWidgetsActive(bool widgetsActive);
+
+  // Updates the positions of widgets that shall be positioned relative to a window
+  void setWindow(Int x, Int y, Int width, Int height);
 
   // Getters and setters
   GraphicColor getSelectedWidgetColor() const

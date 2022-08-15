@@ -1569,6 +1569,7 @@ void WidgetEngine::createGraphic() {
 
   // Create the widgets from the config
   pageNames=c->getAttributeValues("Graphic/Widget/Device[@name='" + deviceName + "']/Page","name",__FILE__, __LINE__);
+  pageNames.push_back("Empty");
   std::list<std::string>::iterator i;
   std::vector<WidgetPrimitive*> fingerMenuCircleEntries;
   fingerMenuCircleEntries.resize(7);
@@ -1924,6 +1925,7 @@ void WidgetEngine::createGraphic() {
         if (*j=="Menu Left")                { fingerMenu->addWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }
       }
       if (!skipPageAdd) {
+        //DEBUG("pageName=%s widgetName=%s",page->getName().c_str(),primitive->getName().front().c_str());
         page->addWidget(primitive);
       }
       /*if ((((widgetType=="checkbox")||(widgetType=="button")))&&(primitive->getName().front().find("Page")==std::string::npos)&&(device==core->getDefaultDevice())) {
@@ -1993,12 +1995,23 @@ void WidgetEngine::createGraphic() {
 
 // Updates the positions of the widgets in dependence of the current device->getScreen() dimension
 void WidgetEngine::updateWidgetPositions() {
+  closeFingerMenu();
+  Int width=device->getScreen()->getWidth();
+  Int height=device->getScreen()->getHeight();
+  updateWidgetPositions(0,0,width,height,false);
+}
+
+// Updates the positions of widgets that shall be positioned relative to a window
+void WidgetEngine::setWindow(Int x, Int y, Int width, Int height) {
+  //DEBUG("window: x=%d y=%d width=%d height=%d",x,y,width,height);
+  updateWidgetPositions(x,y,width,height,true);
+}
+
+// Updates the positions of widgets with the given dimension
+void WidgetEngine::updateWidgetPositions(Int x, Int y, Int width, Int height, bool onlyWindowWidgets) {
 
   // Only one thread please
   lockAccessAfterReadComplete(__FILE__,__LINE__);
-
-  // CLose the finger menu
-  closeFingerMenu();
 
   // Find out the orientation for which we need to update the positioning
   std::string orientation="Unknown";
@@ -2007,13 +2020,7 @@ void WidgetEngine::updateWidgetPositions() {
     case GraphicScreenOrientationProtrait: orientation="Portrait"; break;
   }
   //DEBUG("orientation=%s",orientation.c_str());
-  Int width=device->getScreen()->getWidth();
-  Int height=device->getScreen()->getHeight();
   double diagonal=device->getScreen()->getDiagonal();
-  //DEBUG("width=%d height=%d diagonal=%f",width,height,diagonal);
-
-  // Set global variables that depend on the device->getScreen() configuration
-  changePageOvershoot=(Int)(core->getConfigStore()->getDoubleValue("Graphic/Widget","changePageOvershoot",__FILE__, __LINE__)*device->getScreen()->getWidth()/100.0);
 
   // Go through all pages and the cursor info  
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
@@ -2027,6 +2034,7 @@ void WidgetEngine::updateWidgetPositions() {
   std::list<WidgetContainer*>::iterator i;
   for(i=containers.begin();i!=containers.end();i++) {
     WidgetContainer *container=*i;
+    //DEBUG("container=%s",container->getName().c_str());
 
     // Go through all widgets
     std::list<WidgetPrimitive*> primitives;
@@ -2035,42 +2043,55 @@ void WidgetEngine::updateWidgetPositions() {
     GraphicPrimitiveMap::iterator j;
     for(j=widgetMap->begin();j!=widgetMap->end();j++) {
       WidgetPrimitive *primitive=(WidgetPrimitive*)j->second;
-      std::string path="Graphic/Widget/Device[@name='" + device->getName() + "']/Page[@name='" + container->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']/Position";
 
-      // Find the position that is closest to the reference device->getScreen() diagonal
-      std::list<std::string> refScreenDiagonals = c->getAttributeValues(path,"refScreenDiagonal",__FILE__,__LINE__);
-      double nearestValue = std::numeric_limits<double>::max();
-      std::string nearestString;
-      double smallestDiagonal = std::numeric_limits<double>::max();
-      std::string smallestString;
-      for (std::list<std::string>::iterator k=refScreenDiagonals.begin();k!=refScreenDiagonals.end();k++) {
-        double currentDiagonal = atof(k->c_str());
-        if (diagonal>currentDiagonal) {
-          double value = fabs(diagonal - currentDiagonal);
-          if (value<nearestValue) {
-            nearestValue=value;
-            nearestString=*k;
+      // Check if widget needs to be processed
+      boolean changePosition=true;
+      std::string path="Graphic/Widget/Device[@name='" + device->getName() + "']/Page[@name='" + container->getName() + "']/Primitive[@name='" + primitive->getName().front() + "']";
+      if (onlyWindowWidgets) {
+        //DEBUG("path=%s",path.c_str());
+        if (c->getIntValue(path,"relativeToWindow",__FILE__, __LINE__)==0)
+          changePosition=false;
+        //else
+        //  DEBUG("name=%s",primitive->getName().front().c_str());
+      }
+      path+="/Position";
+      if (changePosition) {
+
+        // Find the position that is closest to the reference device->getScreen() diagonal
+        std::list<std::string> refScreenDiagonals = c->getAttributeValues(path,"refScreenDiagonal",__FILE__,__LINE__);
+        double nearestValue = std::numeric_limits<double>::max();
+        std::string nearestString;
+        double smallestDiagonal = std::numeric_limits<double>::max();
+        std::string smallestString;
+        for (std::list<std::string>::iterator k=refScreenDiagonals.begin();k!=refScreenDiagonals.end();k++) {
+          double currentDiagonal = atof(k->c_str());
+          if (diagonal>currentDiagonal) {
+            double value = fabs(diagonal - currentDiagonal);
+            if (value<nearestValue) {
+              nearestValue=value;
+              nearestString=*k;
+            }
+          }
+          if (currentDiagonal<smallestDiagonal) {
+            smallestDiagonal=currentDiagonal;
+            smallestString=*k;
           }
         }
-        if (currentDiagonal<smallestDiagonal) {
-          smallestDiagonal=currentDiagonal;
-          smallestString=*k;
+        if (nearestValue==std::numeric_limits<double>::max()) {
+          nearestString=smallestString;
         }
-      }
-      if (nearestValue==std::numeric_limits<double>::max()) {
-        nearestString=smallestString;
-      }
-      path=path + "[@refScreenDiagonal='" + nearestString + "']/" + orientation;
-      //DEBUG("path=%s",path.c_str());
-      //DEBUG("x=%f y=%f",c->getDoubleValue(path,"x",__FILE__, __LINE__),c->getDoubleValue(path,"y",__FILE__, __LINE__));
+        path=path + "[@refScreenDiagonal='" + nearestString + "']/" + orientation;
+        //DEBUG("path=%s",path.c_str());
+        //DEBUG("x=%f y=%f",c->getDoubleValue(path,"x",__FILE__, __LINE__),c->getDoubleValue(path,"y",__FILE__, __LINE__));
 
-      // Update the position
-      primitive->updatePosition(width*c->getDoubleValue(path,"x",__FILE__, __LINE__)/100.0-width/2-primitive->getIconWidth()/2,height*c->getDoubleValue(path,"y",__FILE__, __LINE__)/100.0-height/2-primitive->getIconHeight()/2,c->getIntValue(path,"z",__FILE__, __LINE__));
-      double xHiddenPercent=c->getDoubleValue(path,"xHidden",__FILE__, __LINE__);
-      double yHiddenPercent=c->getDoubleValue(path,"yHidden",__FILE__, __LINE__);
-      if ((xHiddenPercent!=0.0)||(yHiddenPercent!=0.0)) {
-        primitive->setXHidden(width*xHiddenPercent/100.0-width/2-primitive->getIconWidth()/2);
-        primitive->setYHidden(height*yHiddenPercent/100.0-height/2-primitive->getIconHeight()/2);
+        // Update the position
+        primitive->updatePosition(x+width*c->getDoubleValue(path,"x",__FILE__, __LINE__)/100.0-width/2-primitive->getIconWidth()/2,y+height*c->getDoubleValue(path,"y",__FILE__, __LINE__)/100.0-height/2-primitive->getIconHeight()/2,c->getIntValue(path,"z",__FILE__, __LINE__));
+        double xHiddenPercent=c->getDoubleValue(path,"xHidden",__FILE__, __LINE__);
+        double yHiddenPercent=c->getDoubleValue(path,"yHidden",__FILE__, __LINE__);
+        if ((xHiddenPercent!=0.0)||(yHiddenPercent!=0.0)) {
+          primitive->setXHidden(x+width*xHiddenPercent/100.0-width/2-primitive->getIconWidth()/2);
+          primitive->setYHidden(y+height*yHiddenPercent/100.0-height/2-primitive->getIconHeight()/2);
+        }
       }
       primitives.push_back(primitive);
     }
@@ -2240,6 +2261,7 @@ void WidgetEngine::setPage(std::string name, Int direction) {
 
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
   Int width = device->getScreen()->getWidth();
+  Int height = device->getScreen()->getHeight();
 
   // Check if the requested page exists
   if (pageMap.find(name)==pageMap.end()) {
@@ -2264,8 +2286,18 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   translateParameter.setStartTime(t);
   translateParameter.setStartX(0);
   translateParameter.setStartY(0);
-  translateParameter.setEndX(direction*(width+changePageOvershoot));
-  translateParameter.setEndY(0);
+  if (abs(direction)==2) {
+    if (device->getScreen()->getOrientation()==GraphicScreenOrientationProtrait) {
+      translateParameter.setEndX(0);
+      translateParameter.setEndY(direction/2*height);
+    } else {
+      translateParameter.setEndX(-direction/2*width);
+      translateParameter.setEndY(0);
+    }
+  } else {
+    translateParameter.setEndX(direction*(width+changePageOvershoot));
+    translateParameter.setEndY(0);
+  }
   translateParameter.setDuration(changePageDurationStep1);
   translateParameter.setInfinite(false);
   translateParameter.setAnimationType(GraphicTranslateAnimationTypeAccelerated);
@@ -2279,23 +2311,39 @@ void WidgetEngine::setPage(std::string name, Int direction) {
   translateAnimationSequence.clear();
   GraphicObject *nextPageGraphicObject=nextPage->getGraphicObject();
   translateParameter.setStartTime(t);
-  translateParameter.setStartX(-1*direction*(width));
-  translateParameter.setStartY(0);
-  translateParameter.setEndX(+1*direction*(changePageOvershoot));
-  translateParameter.setEndY(0);
+  if (abs(direction)==2) {
+    if (device->getScreen()->getOrientation()==GraphicScreenOrientationProtrait) {
+      translateParameter.setStartX(0);
+      translateParameter.setStartY(-direction/2*height);
+      translateParameter.setEndX(0);
+      translateParameter.setEndY(0);
+    } else {
+      translateParameter.setStartX(direction/2*width);
+      translateParameter.setStartY(0);
+      translateParameter.setEndX(0);
+      translateParameter.setEndY(0);
+    }
+  } else {
+    translateParameter.setStartX(-1*direction*(width));
+    translateParameter.setStartY(0);
+    translateParameter.setEndX(+1*direction*(changePageOvershoot));
+    translateParameter.setEndY(0);
+  }
   translateParameter.setDuration(changePageDurationStep1);
   translateParameter.setInfinite(false);
   translateParameter.setAnimationType(GraphicTranslateAnimationTypeAccelerated);
   translateAnimationSequence.push_back(translateParameter);
-  translateParameter.setStartTime(t+changePageDurationStep1);
-  translateParameter.setStartX(+1*direction*(changePageOvershoot));
-  translateParameter.setStartY(0);
-  translateParameter.setEndX(0);
-  translateParameter.setEndY(0);
-  translateParameter.setDuration(changePageDurationStep2);
-  translateParameter.setInfinite(false);
-  translateParameter.setAnimationType(GraphicTranslateAnimationTypeAccelerated);
-  translateAnimationSequence.push_back(translateParameter);
+  if (abs(direction)==1) {
+    translateParameter.setStartTime(t+changePageDurationStep1);
+    translateParameter.setStartX(+1*direction*(changePageOvershoot));
+    translateParameter.setStartY(0);
+    translateParameter.setEndX(0);
+    translateParameter.setEndY(0);
+    translateParameter.setDuration(changePageDurationStep2);
+    translateParameter.setInfinite(false);
+    translateParameter.setAnimationType(GraphicTranslateAnimationTypeAccelerated);
+    translateAnimationSequence.push_back(translateParameter);
+  }
   nextPageGraphicObject->setTranslateAnimationSequence(translateAnimationSequence);
   nextPageGraphicObject->setLifeEnd(0);
   getGraphicEngine()->lockDrawing(__FILE__, __LINE__);
@@ -2502,6 +2550,7 @@ void WidgetEngine::openFingerMenu() {
 
 // Closes the finger menu
 void WidgetEngine::closeFingerMenu() {
+  //DEBUG("close finger menu called",NULL);
   if (!enableFingerMenu)
     return;
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);

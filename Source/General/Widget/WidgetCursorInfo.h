@@ -85,7 +85,7 @@ public:
   virtual void onDataChange();
 
   // Changes the state of the widget
-  void changeState(Int y, bool permanentVisible, TimestampInMicroseconds animationDuration);
+  void changeState(Int x, Int y, bool permanentVisible, TimestampInMicroseconds animationDuration);
 
   // Getters and setters
   bool getPathNearby() {

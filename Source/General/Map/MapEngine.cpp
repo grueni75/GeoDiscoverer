@@ -63,6 +63,8 @@ MapEngine::MapEngine() {
   isInitialized=false;
   forceMapRedownload=false;
   redownloadAllZoomLevels=false;
+  x=0;
+  y=0;
   width=0;
   height=0;
 }

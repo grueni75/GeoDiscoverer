@@ -879,6 +879,11 @@
                                           </xsd:sequence>
                                         </xsd:complexType>
                                       </xsd:element>
+                                      <xsd:element name="relativeToWindow" type="xsd:integer" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Indicates if the widget shall be positioned relative within a window.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
                                       <xsd:element name="iconFilename" type="xsd:string" default="unknown" minOccurs="0">
                                         <xsd:annotation>
                                           <xsd:documentation>Filename of the background image.</xsd:documentation>

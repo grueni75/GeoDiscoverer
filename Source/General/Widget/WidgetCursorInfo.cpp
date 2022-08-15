@@ -312,7 +312,7 @@ void WidgetCursorInfo::onDataChange() {
 }
 
 // Changes the state of the widget
-void WidgetCursorInfo::changeState(Int y, bool permanentVisible, TimestampInMicroseconds animationDuration) {
+void WidgetCursorInfo::changeState(Int x, Int y, bool permanentVisible, TimestampInMicroseconds animationDuration) {
 
   // Ensure that we are not drawing
 
@@ -320,7 +320,7 @@ void WidgetCursorInfo::changeState(Int y, bool permanentVisible, TimestampInMicr
   widgetContainer->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   this->permanentVisible=permanentVisible;
   TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
-  setTranslateAnimation(t,getX(),getY(),getX(),y,false,animationDuration,GraphicTranslateAnimationTypeAccelerated);
+  setTranslateAnimation(t,getX(),getY(),x,y,false,animationDuration,GraphicTranslateAnimationTypeAccelerated);
   widgetContainer->getGraphicEngine()->unlockDrawing();
 
   // Update the fields

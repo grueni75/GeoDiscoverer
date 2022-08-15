@@ -182,7 +182,6 @@ public:
   }
 
   virtual void setIsHidden(bool isHidden) {
-    DEBUG("isHidden=%d",isHidden);
     this->isHidden = isHidden;
   }
 
