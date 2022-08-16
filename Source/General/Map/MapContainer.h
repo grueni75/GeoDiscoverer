@@ -23,6 +23,7 @@
 #include <MapCalibrator.h>
 #include <MapTile.h>
 #include <ZipArchive.h>
+#include <MapPosition.h>
 
 #ifndef MAPCONTAINER_H_
 #define MAPCONTAINER_H_
@@ -304,6 +305,13 @@ public:
 
   double getLngCenter() const {
     return lngWest + (lngEast - lngWest) / 2;
+  }
+
+  MapPosition getMapPosCenter() const {
+    MapPosition pos;
+    pos.setLat(getLatCenter());
+    pos.setLng(getLngCenter());
+    return pos;
   }
 
   Int getTileCount() const {

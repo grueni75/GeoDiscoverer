@@ -369,18 +369,28 @@ void MapDownloader::downloadMapImages(Int threadNr) {
       core->getThread()->lockMutex(accessMutex,__FILE__, __LINE__);
       if (!downloadQueue.empty()) {
 
-        // Prefer visible map containers
+        // Prefer visible map containers that are the nearest to the map center
+        MapPosition mapPos=*(core->getMapEngine()->lockMapPos(__FILE__,__LINE__));
+        core->getMapEngine()->unlockMapPos();
+        double minDistance=std::numeric_limits<double>::max();
+        std::list<MapContainer*>::iterator erasePos;
         for (std::list<MapContainer*>::iterator i=downloadQueue.begin();i!=downloadQueue.end();i++) {
           MapContainer *c=*i;
           if (c->isDrawn()) {
-            mapContainer=c;
-            downloadQueue.erase(i);
-            break;
+            double d=mapPos.computeDistance(c->getMapPosCenter());
+            if (d<minDistance) {
+              minDistance=d;
+              mapContainer=c;
+              erasePos=i;
+            }
           }
         }
         if (!mapContainer) {
           mapContainer=downloadQueue.front();
           downloadQueue.pop_front();
+        } else {
+          //DEBUG("selected nearest map container: %s (%f m)",mapContainer->getArchiveFileName().c_str(),minDistance);
+          downloadQueue.erase(erasePos);
         }
       }
       if (!mapContainer) {
