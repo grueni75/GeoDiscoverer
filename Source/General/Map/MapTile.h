@@ -361,7 +361,7 @@ public:
       return parent;
   }
 
-  MapPosition getMapCenterPosition(void);
+  MapPosition getMapPosCenter(void);
 
   bool getIsHidden() const
   {

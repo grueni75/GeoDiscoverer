@@ -187,7 +187,7 @@ void MapTile::init() {
 }
 
 // Returns a map position object of the center
-MapPosition MapTile::getMapCenterPosition() {
+MapPosition MapTile::getMapPosCenter() {
   MapPosition pos;
   pos.setLat(getLatCenter());
   pos.setLatScale(latScale);
