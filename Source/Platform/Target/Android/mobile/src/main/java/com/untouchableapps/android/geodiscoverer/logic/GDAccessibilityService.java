@@ -33,6 +33,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
+
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -46,6 +47,13 @@ public class GDAccessibilityService extends AccessibilityService {
 
   // Managers
   NotificationManager notificationManager;
+
+  // State
+  enum ScanState {
+    NORMAL,
+    NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS
+  }
+  ScanState bookingScanState = ScanState.NORMAL;
 
   // Regular expressions
   Pattern plusCodePattern = Pattern.compile("^[A-Z0-9]+\\+[A-Z0-9]+");
@@ -145,6 +153,10 @@ public class GDAccessibilityService extends AccessibilityService {
       if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.google.android.apps.maps:id/title")==0)) {
         currentAddressPoint.name=info.getText().toString();
       }
+      if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/hotel_name")==0)) {
+        currentAddressPoint.name=info.getText().toString();
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "name="+currentAddressPoint.name);
+      }
 
       // Plus code detected?
       if (info.getText()!=null) {
@@ -160,6 +172,21 @@ public class GDAccessibilityService extends AccessibilityService {
         if (info.getContentDescription().toString().startsWith("Adresse:")) {
           currentAddressPoint.address=info.getContentDescription().toString().substring(9);
         }
+      }
+      if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/titleTextView")==0)) {
+        if (info.getText().toString().compareTo("Adresse der Unterkunft")==0) {
+          bookingScanState = ScanState.NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS;
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "next description text view is address");
+        } else {
+          bookingScanState = ScanState.NORMAL;
+        }
+      }
+      if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/descriptionTextView")==0)) {
+        if (bookingScanState == ScanState.NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS) {
+          currentAddressPoint.address=info.getText().toString();
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "address="+currentAddressPoint.address);
+        }
+        bookingScanState = ScanState.NORMAL;
       }
 
       // Go through all children recursively
