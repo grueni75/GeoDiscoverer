@@ -154,4 +154,6 @@
   <string name="dialog_fatal">Fatal</string>
   <string name="dialog_error">Error</string>
   <string name="request_permissions_overlay_instructions">Please enable overlay permission</string>
+  <string name="address_point_grabbing_gmap_address_tag">Adresse:</string>
+  <string name="address_point_grabbing_booking_address_tag">Adresse der Unterkunft</string>
 </resources>

@@ -169,12 +169,12 @@ public class GDAccessibilityService extends AccessibilityService {
 
       // Address detected?
       if (info.getContentDescription()!=null) {
-        if (info.getContentDescription().toString().startsWith("Adresse:")) {
+        if (info.getContentDescription().toString().startsWith(getString(R.string.address_point_grabbing_gmap_address_tag))) {
           currentAddressPoint.address=info.getContentDescription().toString().substring(9);
         }
       }
       if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/titleTextView")==0)) {
-        if (info.getText().toString().compareTo("Adresse der Unterkunft")==0) {
+        if (info.getText().toString().compareTo(getString(R.string.address_point_grabbing_booking_address_tag))==0) {
           bookingScanState = ScanState.NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS;
           //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "next description text view is address");
         } else {
