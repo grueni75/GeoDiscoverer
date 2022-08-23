@@ -47,7 +47,7 @@ ElevationEngine::ElevationEngine() {
     }
   }
 
-  // Read all the additional tilesX.gda files
+  // Remove left over files
   struct dirent *dp;
   DIR *dfd;
   dfd=core->openDir(demFolderPath);

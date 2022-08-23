@@ -82,6 +82,7 @@ protected:
   double maxAltitudeFilterDistance;               // Maximum distance in meters to still include a previous path point into altitude averaging
   double trackRecordingMinDistance;               // Required minimum navigationDistance in meter to the last track point such that the point is added to the track
   NavigationPatImportWaypointsType importWaypoints; // Decides if the waypoints contained in the route shall be imported
+  bool calculateAltitudeGainsFromDEM;             // Decides if track/route altitude is ignored and DEM data is used instead to calculate altitude gains
 
   // Information about the path
   double length;                                  // Current length of the track in meters

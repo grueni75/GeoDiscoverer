@@ -474,9 +474,9 @@ bool ElevationEngine::getElevation(MapPosition *pos) {
     DEBUG("DEM dataset not yet initialized",NULL);
     return false;
   }
-  if (demDatasetBusy[workerCount]) {
-    DEBUG("DEM dataset is already used by another thread",NULL);
-    return false;
+  while (demDatasetBusy[workerCount]) {
+    DEBUG("waiting for DEM dataset availability",NULL);
+    usleep(1000);
   }
 
   // Indicate that we are working

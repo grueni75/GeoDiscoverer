@@ -53,6 +53,7 @@ NavigationPath::NavigationPath() : animator(core->getDefaultScreen()) {
   maxAltitudeFilterDistance=core->getConfigStore()->getDoubleValue("Navigation","maxAltitudeFilterDistance", __FILE__, __LINE__);
   averageTravelSpeed=core->getConfigStore()->getDoubleValue("Navigation","averageTravelSpeed", __FILE__, __LINE__);
   trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance", __FILE__, __LINE__);
+  calculateAltitudeGainsFromDEM=core->getConfigStore()->getDoubleValue("Navigation","calculateAltitudeGainsFromDEM", __FILE__, __LINE__);
   isInit=false;
   reverse=false;
   lastValidAltiudeMeters=NAN;
@@ -967,7 +968,10 @@ void NavigationPath::updateMetrics(MapPosition prevPoint, MapPosition curPoint) 
     length+=prevPoint.computeDistance(curPoint);
     MapPosition demPos=curPoint;
     demPos.setHasAltitude(false);
-    if ((core->getElevationEngine()->getElevation(&demPos))||(curPoint.getHasAltitude())) {
+    if (calculateAltitudeGainsFromDEM) {
+      core->getElevationEngine()->getElevation(&demPos);
+    }
+    if ((demPos.getHasAltitude())||(curPoint.getHasAltitude())) {
         
       // Update the altitude filter
       addToAltitudeFilter(curPoint);

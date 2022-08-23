@@ -2611,6 +2611,11 @@
                   </xsd:sequence>
                 </xsd:complexType>
               </xsd:element>
+              <xsd:element name="calculateAltitudeGainsFromDEM" type="xsd:boolean" default="1">
+                <xsd:annotation>
+                  <xsd:documentation>Decides if track/route altitude is ignored and DEM data is used instead to calculate altitude gains.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>     
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>
