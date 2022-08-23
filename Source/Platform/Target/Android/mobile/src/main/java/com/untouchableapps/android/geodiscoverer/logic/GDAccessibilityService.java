@@ -158,7 +158,7 @@ public class GDAccessibilityService extends AccessibilityService {
         //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "name="+currentAddressPoint.name);
       }
 
-      // Plus code detected?
+      // Plus code detected?y
       if (info.getText()!=null) {
         String potentialPlusCode=info.getText().toString();
         Matcher m = plusCodePattern.matcher(potentialPlusCode);

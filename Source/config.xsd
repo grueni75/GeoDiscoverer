@@ -2488,9 +2488,14 @@
                   <xsd:documentation>Maximum distance in meters to still include a previous path point into altitude averaging.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="minAltitudeChange" type="xsd:double" default="5">
+              <xsd:element name="minAltitudeChange" type="xsd:double" default="10">
                 <xsd:annotation>
                   <xsd:documentation>Minimum change of altitude required to update altitude meters.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="minDistanceToCalculateAltitude" type="xsd:double" default="10">
+                <xsd:annotation>
+                  <xsd:documentation>Minimum distance to last position to calculate the altitude.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="AddressPoint" maxOccurs="unbounded">

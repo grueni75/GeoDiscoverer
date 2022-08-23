@@ -55,6 +55,7 @@ protected:
   MapPosition secondLastPoint;                    // The point added before the last point
   bool hasSecondLastPoint;                        // Indicates if the path already has its second last point
   double lastValidAltiudeMeters;                  // The last (filtered) altitude that was used for altitude meter computation
+  MapPosition lastValidAltiudePos;                // The last position that was used for altitude meter computation
   bool blinkMode;                                 // Indicates if the path shall blink
   GraphicColor normalColor;                       // Normal color of the path
   GraphicColor highlightColor;                    // Highlight color of the path
@@ -77,6 +78,7 @@ protected:
   double minDistanceToBeOffRoute;                 // Minimum distance from nearest route point such that navigation considers location to be off route
   double averageTravelSpeed;                      // Speed in meters per second to use for calculating the duration of a route
   double minAltitudeChange;                       // Minimum change of altitude required to update altitude meters
+  double minDistanceToCalculateAltitude;          // Minimum distance to last position to calculate the altitude
   double maxAltitudeFilterDistance;               // Maximum distance in meters to still include a previous path point into altitude averaging
   double trackRecordingMinDistance;               // Required minimum navigationDistance in meter to the last track point such that the point is added to the track
   NavigationPatImportWaypointsType importWaypoints; // Decides if the waypoints contained in the route shall be imported
