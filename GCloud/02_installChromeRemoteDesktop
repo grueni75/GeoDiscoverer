@@ -4,7 +4,7 @@ function remote {
   gcloud compute ssh ubuntu-desktop -- $*
 }
 remote sudo apt update
-remote sudo apt install --assume-yes wget 
+remote sudo apt install --assume-yes wget ubuntu-gnome-desktop
 remote wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
 remote sudo apt-get install --assume-yes ./chrome-remote-desktop_current_amd64.deb
 gcloud compute scp --recurse etc/* root@ubuntu-desktop:/etc/
