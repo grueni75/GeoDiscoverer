@@ -146,6 +146,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   var busyText: String by mutableStateOf("")
   var snackbarText: String by mutableStateOf("")
     private set
+  var snackbarVisible: Boolean by mutableStateOf(false)
+    private set
   var snackbarActionText: String by mutableStateOf("")
     private set
   var snackbarActionHandler: () -> Unit = {}
@@ -282,6 +284,12 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     snackbarActionHandler = actionHandler
     snackbarActionText = actionText
     snackbarText = text
+    snackbarVisible = true
+  }
+
+  @Synchronized
+  fun hideSnackbar() {
+    snackbarVisible = false
   }
 
   @Synchronized

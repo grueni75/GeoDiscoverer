@@ -153,7 +153,7 @@ class ViewContent(viewMap: ViewMap) {
           .align(Alignment.BottomCenter),
         enter = fadeIn() + slideInVertically(initialOffsetY = { +it / 2 }),
         exit = fadeOut() + slideOutVertically(targetOffsetY = { +it / 2 }),
-        visible = viewModel.snackbarText != ""
+        visible = viewModel.snackbarVisible
       ) {
         GDSnackBar(
           modifier = Modifier
@@ -185,10 +185,10 @@ class ViewContent(viewMap: ViewMap) {
             }
           }
         }
-        LaunchedEffect(viewModel.snackbarText) {
-          if (viewModel.snackbarText != "") {
+        LaunchedEffect(viewModel.snackbarVisible,viewModel.snackbarText,viewModel.snackbarActionText) {
+          if (viewModel.snackbarVisible) {
             delay(3000)
-            viewModel.showSnackbar("")
+            viewModel.hideSnackbar()
           }
         }
       }
