@@ -1,4 +1,4 @@
-5.0
+5.1
 
 Elevate themes read me:
 ***********************
@@ -108,6 +108,11 @@ Manuelle Installation (fortgeschritten):
 -------------------------------------------------------------------------
 CHANGELOG
 -------------------------------------------------------------------------
+
+5.1 07/06/22
+- added: tracktype=grade1 to emphasized paved ways options,  low zoom emphasized paved cycle ways rendering (cycling), man_made=breakwater, amenity=bicycle_repair_station, amenity=public_bookcase
+- changed rendering of: man_made=groyne, waterway=weir, low zoom waymarks colored routes (hiking)
+- removed: mtbnetwork=umn (MTB)
 
 5.0 05/12/21
 - made for next OAM map generation based on mapsforge maps V5, starting December 2021
