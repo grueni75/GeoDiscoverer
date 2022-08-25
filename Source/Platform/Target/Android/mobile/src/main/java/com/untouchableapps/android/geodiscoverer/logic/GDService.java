@@ -141,7 +141,12 @@ public class GDService extends Service {
   public void onCreate() {
    
     super.onCreate();
-    
+    GDApplication.addMessage(
+        GDApplication.DEBUG_MSG,
+        "GDApp",
+        "GDService.onCreate called by " + Thread.currentThread().getName()
+    );
+
     // Get the core object
     coreObject=GDApplication.coreObject;
     if (coreObject==null) {
@@ -202,6 +207,11 @@ public class GDService extends Service {
     stopHeartRateUnavailableSoundAction = new NotificationCompat.Action.Builder(
         R.drawable.mute, "No Heartrate", pendingStopHeartRateUnavailableSoundIntent
     ).build();
+    GDApplication.addMessage(
+        GDApplication.DEBUG_MSG,
+        "GDApp",
+        "notification created"
+    );
 
     // Check if accessibility service is enabled
     if (!isAccessibilityEnabled()) {
@@ -218,6 +228,12 @@ public class GDService extends Service {
           .setPriority(NotificationCompat.PRIORITY_HIGH);
       notificationManager.notify(GDApplication.NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID, builder.build());
     }
+
+    GDApplication.addMessage(
+        GDApplication.DEBUG_MSG,
+        "GDApp",
+        "GDService.onCreate finished"
+    );
   }
   
   /** No binding supported */
@@ -302,6 +318,7 @@ public class GDService extends Service {
 
       // Start the core if it is not already running
       if (coreObject.coreStopped) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","starting core");
         Message m=Message.obtain(coreObject.messageHandler);
         m.what = GDCore.START_CORE;
         coreObject.messageHandler.sendMessage(m);
@@ -351,6 +368,12 @@ public class GDService extends Service {
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
 
+    GDApplication.addMessage(
+        GDApplication.DEBUG_MSG,
+        "GDApp",
+        "GDService.onStartCommand called by " + Thread.currentThread().getName()
+    );
+
     // Is this a service restart?
     if ((intent!=null)&&(intent.getAction().equals("scheduledRestart"))) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "scheduled restart happened");
@@ -369,7 +392,7 @@ public class GDService extends Service {
       if (intent.getAction()==null)
         return START_STICKY;
     }
-    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",intent.getAction());
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",intent.getAction());
 
     // Handle activity start / stop actions
     if (intent.getAction().equals("activityResumed")) {
@@ -547,6 +570,12 @@ public class GDService extends Service {
         return Unit.INSTANCE;
       });
     }
+
+    GDApplication.addMessage(
+        GDApplication.DEBUG_MSG,
+        "GDApp",
+        "GDService.onStartCommand finished"
+    );
     return START_STICKY;
   }
   
