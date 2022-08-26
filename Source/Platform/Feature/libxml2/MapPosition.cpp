@@ -22,6 +22,7 @@
 
 #include <Core.h>
 #include <MapPosition.h>
+#include <ElevationEngine.h>
 
 namespace GEODISCOVERER {
 
@@ -207,6 +208,12 @@ bool MapPosition::readGPX(XMLNode wptNode, std::string &error) {
         extensionsNode=node;
       }
     }
+  }
+
+  // If no elevation was available, check if the DEM source has it
+  //DEBUG("lng=%f lst=%f hasAltitude=%d",lng,lat,hasAltitude);
+  if ((isValid())&&(!hasAltitude)) {
+    core->getElevationEngine()->getElevation(this);
   }
 
   // Extensions node available?

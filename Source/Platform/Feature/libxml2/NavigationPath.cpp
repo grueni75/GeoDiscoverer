@@ -317,7 +317,6 @@ bool NavigationPath::readGPXFile() {
   std::list<XMLNode> waypointNodes;
   bool loadTrack=false;
   bool loadRoute=false;
-  MapPosition pos;
   bool result=false;
   std::list<std::string> status;
   std::stringstream progress;
@@ -484,6 +483,7 @@ bool NavigationPath::readGPXFile() {
           for(std::list<XMLNode>::iterator j=nodes.begin();j!=nodes.end();j++) {
             XMLNode node=*j;
             std::string error;
+            MapPosition pos;
             if (pos.readGPX(node,error)) {
               addEndPosition(pos);
             } else {
@@ -529,6 +529,7 @@ bool NavigationPath::readGPXFile() {
         for(std::list<XMLNode>::iterator j=nodes.begin();j!=nodes.end();j++) {
           XMLNode node=*j;
           std::string error;
+          MapPosition pos;
           if (pos.readGPX(node,error)) {
             addEndPosition(pos);
           } else {
