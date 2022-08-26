@@ -538,6 +538,7 @@ public class GDCore implements
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   synchronized void start()
   {
+    appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","GDCore.start(): 1");
     coreLock.lock();
     if (coreInitialized) {
       coreLock.unlock();
@@ -549,11 +550,13 @@ public class GDCore implements
     }
     coreLifeCycleOngoing=true;
     coreLock.unlock();
-    
+    appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","GDCore.start(): 2");
+
     // Check if home dir is available
     boolean initialized=false;
 
     // Copy the assets files
+    appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","GDCore.start(): 3");
     if (!updateHome()) {
       coreLock.lock();
       coreLifeCycleOngoing=false;
@@ -562,10 +565,12 @@ public class GDCore implements
     }
 
     // Init the core
+    appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","GDCore.start(): 4");
     initCore(homePath,screenDPI,screenDiagonal);
     initialized=true;
 
     // Ensure that the screen is recreated
+    appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","GDCore.start(): 5");
     coreLock.lock();
     if (initialized) {
       coreInitialized=true;
@@ -581,9 +586,11 @@ public class GDCore implements
     coreLock.unlock();
 
     // Update battery
+    appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","GDCore.start(): 6");
     if (initialized) {
       updateBatteryStatus(true);
     }
+    appIf.addAppMessage(appIf.DEBUG_MSG,"GDApp","GDCore.start(): 7");
   } 
 
   /** Deinits the core */
