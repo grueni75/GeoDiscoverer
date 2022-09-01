@@ -52,6 +52,12 @@ protected:
   GraphicColor gaugeFillgroundColor;
   GraphicColor gaugeForegroundColor;
 
+  // Graphic showing the charging icon
+  GraphicRectangle batteryChargingIcon;
+  double batteryChargingIconScale;
+  Int batteryChargingIconX;
+  Int batteryChargingIconY;
+
   // Indicates that the widget must be updated
   bool updateRequired;
 
@@ -79,6 +85,7 @@ protected:
   Int batteryGaugeForegroundWidth;
   Int batteryGaugeTipWidth;
   Int batteryGaugeTipHeight;
+  bool batteryCharging;
   
   // Draws a battery symbol
   void drawBattery(TimestampInMicroseconds t, Int offsetX, Int batteryGaugeCurrentHeight, FontString *label, FontString *level);
@@ -104,6 +111,10 @@ public:
   virtual void onDataChange();
 
   // Getters and setters
+  GraphicRectangle *getBatteryChargingIcon() {
+    return &batteryChargingIcon;
+  }
+
   void setGaugeBackgroundColor(GraphicColor gaugeBackgroundColor) {
     this->gaugeBackgroundColor = gaugeBackgroundColor;
   }

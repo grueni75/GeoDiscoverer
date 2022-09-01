@@ -34,7 +34,8 @@ WidgetForumslader::WidgetForumslader(WidgetContainer *widgetContainer) :
   WidgetPrimitive(widgetContainer),
   powerDrawGaugeBackground(widgetContainer->getScreen()),
   powerDrawGaugeFillground(widgetContainer->getScreen()),
-  powerDrawGaugeForeground(widgetContainer->getScreen())
+  powerDrawGaugeForeground(widgetContainer->getScreen()),
+  batteryChargingIcon(widgetContainer->getScreen())
 {
   phBatteryLevelFontString=NULL;
   flBatteryLevelFontString=NULL;
@@ -44,6 +45,10 @@ WidgetForumslader::WidgetForumslader(WidgetContainer *widgetContainer) :
   firstRun=true;  
   updateRequired=true;  
   connected=false;
+  batteryCharging=false;
+  batteryChargingIconScale=1.0;
+  batteryChargingIconX=0;
+  batteryChargingIconY=0;
   core->getConfigStore()->setIntValue("Forumslader","connected",0,__FILE__,__LINE__);
 }
 
@@ -138,8 +143,22 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
       fontEngine->lockFont("sansNormal",__FILE__, __LINE__);
       fontEngine->updateString(&phBatteryLevelFontString,s.str());
       fontEngine->unlockFont();
-      phBatteryLevelFontString->setX(x+getIconWidth()/2+batteryGaugeOffsetX-phBatteryLevelFontString->getIconWidth()/2);
       phBatteryLevelFontString->setY(y+batteryLevelOffsetY);
+      if (core->getBatteryCharging()) {
+        batteryCharging=true;
+        batteryChargingIconScale=((double)phBatteryLevelFontString->getIconHeight()+phBatteryLevelFontString->getBaselineOffsetY())/((double)batteryChargingIcon.getIconHeight());
+        batteryChargingIconY=phBatteryLevelFontString->getY();
+        batteryChargingIcon.setY(0);
+        Int batteryChargingIconWidth=batteryChargingIcon.getIconWidth()*batteryChargingIconScale;
+        Int startX=x+iconWidth/2+batteryGaugeOffsetX-phBatteryLevelFontString->getIconWidth()/2-batteryChargingIconWidth;
+        batteryChargingIcon.setX(0);
+        batteryChargingIconX=startX;
+        startX+=batteryChargingIconWidth;
+        phBatteryLevelFontString->setX(startX);
+      } else {
+        batteryCharging=false;
+        phBatteryLevelFontString->setX(x+getIconWidth()/2+batteryGaugeOffsetX-phBatteryLevelFontString->getIconWidth()/2);
+      }
       double powerDrawLevel;
       value=configStore->getStringValue("Forumslader","powerDrawLevel",__FILE__,__LINE__);
       s.str("");
@@ -266,6 +285,14 @@ void WidgetForumslader::drawBattery(TimestampInMicroseconds t, Int offsetX, Int 
     label->draw(t);
   }
   if (level) {
+    if (batteryCharging) {
+      screen->startObject();
+      screen->translate(batteryChargingIconX,batteryChargingIconY,batteryChargingIcon.getZ());
+      screen->scale(batteryChargingIconScale,batteryChargingIconScale,1.0);
+      batteryChargingIcon.setColor(color);
+      batteryChargingIcon.draw(t);
+      screen->endObject();
+    }
     level->setColor(color);
     level->draw(t);
   }

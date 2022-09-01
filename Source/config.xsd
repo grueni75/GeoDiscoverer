@@ -1078,12 +1078,12 @@
                                       </xsd:element>
                                       <xsd:element name="batteryIconChargingFilename" type="xsd:string" default="unknown" minOccurs="0">
                                         <xsd:annotation>
-                                          <xsd:documentation>Filename of the image showing the a battery dot that is charging.</xsd:documentation>
+                                          <xsd:documentation>Filename of the image showing a battery dot that is charging.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
                                       <xsd:element name="batteryIconFullFilename" type="xsd:string" default="unknown" minOccurs="0">
                                         <xsd:annotation>
-                                          <xsd:documentation>Filename of the image showing the a battery dot that is full.</xsd:documentation>
+                                          <xsd:documentation>Filename of the image showing a battery dot that is full.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
                                       <xsd:element name="batteryIconEmptyFilename" type="xsd:string" default="unknown" minOccurs="0">

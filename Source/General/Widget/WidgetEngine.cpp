@@ -856,6 +856,7 @@ void WidgetEngine::createGraphic() {
       config.setParameter("batteryGaugeForegroundWidth","0.09");
       config.setParameter("batteryGaugeTipWidth","0.08");
       config.setParameter("batteryGaugeTipHeight","0.05");
+      config.setParameter("batteryIconChargingFilename","charging");
       addWidgetToPage(config);
       // ---------------------------------------------------------
       config=WidgetConfig();
@@ -1901,6 +1902,7 @@ void WidgetEngine::createGraphic() {
         forumslader->setBatteryGaugeForegroundWidth(c->getDoubleValue(widgetPath,"batteryGaugeForegroundWidth",__FILE__,__LINE__)*getScreen()->getDPI());
         forumslader->setBatteryGaugeTipWidth(c->getDoubleValue(widgetPath,"batteryGaugeTipWidth",__FILE__,__LINE__)*getScreen()->getDPI());
         forumslader->setBatteryGaugeTipHeight(c->getDoubleValue(widgetPath,"batteryGaugeTipHeight",__FILE__,__LINE__)*getScreen()->getDPI());
+        forumslader->getBatteryChargingIcon()->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"batteryIconChargingFilename",__FILE__, __LINE__));
       }
 
       // Add the widget to the page
