@@ -148,6 +148,7 @@ class ViewContent(viewMap: ViewMap) {
         }
       )
       dialogContent.content(viewModel,contentBoxWithConstraintsScope.maxHeight)
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "snackbarVisible=${viewModel.snackbarVisible}")
       AnimatedVisibility(
         modifier = Modifier
           .align(Alignment.BottomCenter),
@@ -174,7 +175,7 @@ class ViewContent(viewMap: ViewMap) {
               TextButton(
                 onClick = {
                   viewModel.snackbarActionHandler()
-                  viewModel.showSnackbar("")
+                  viewModel.hideSnackbar()
                 }
               ) {
                 Text(
