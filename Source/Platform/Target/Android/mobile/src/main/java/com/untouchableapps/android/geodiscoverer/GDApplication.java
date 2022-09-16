@@ -321,8 +321,8 @@ public class GDApplication extends Application implements GDAppInterface {
     // Install a callback when the output is closed (file is received at other side)
     Wearable.getChannelClient(getApplicationContext()).registerChannelCallback(new ChannelClient.ChannelCallback() {
       @Override
-      public void onOutputClosed(@NonNull ChannelClient.Channel channel, int i, int i1) {
-        super.onOutputClosed(channel, i, i1);
+      public void onOutputClosed(@NonNull ChannelClient.Channel channel, int closeReason, int appSpecificErrorCode) {
+        super.onOutputClosed(channel, closeReason, appSpecificErrorCode);
         if (attachment!=null) {
           Wearable.getChannelClient(getApplicationContext()).close(channel);
           //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel has been closed");
@@ -331,6 +331,15 @@ public class GDApplication extends Application implements GDAppInterface {
             attachment.notifyAll();
           }
         }
+      }
+
+      @Override
+      public void onInputClosed(@NonNull ChannelClient.Channel channel, int closeReason, int appSpecificErrorCode) {
+        super.onInputClosed(channel,closeReason,appSpecificErrorCode);
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel input closed for "+channel.getPath());
+        /*File f = new File(channel.getPath());
+        if (f.exists())
+          f.delete();*/
       }
     });
 
@@ -383,8 +392,9 @@ public class GDApplication extends Application implements GDAppInterface {
             String nodeId = GDTools.pickBestWearNodeId(capabilityInfo.getNodes());
             //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "found node id: " + nodeId);
             attachmentSent=false;
+            Task<ChannelClient.Channel> openChannelTask=null;
             if (nodeId!=null) {
-              Task<ChannelClient.Channel> openChannelTask=Wearable.getChannelClient(getApplicationContext()).openChannel(nodeId,"/com.untouchableapps.android.geodiscoverer/" + postfix + path);
+              openChannelTask=Wearable.getChannelClient(getApplicationContext()).openChannel(nodeId,"/com.untouchableapps.android.geodiscoverer/" + postfix + path);
               openChannelTask.addOnCompleteListener(new OnCompleteListener<ChannelClient.Channel>() {
                 @Override
                 public void onComplete(@NonNull Task<ChannelClient.Channel> task) {
@@ -398,8 +408,21 @@ public class GDApplication extends Application implements GDAppInterface {
                 attachment.wait();
             }
             GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "file " + attachment.getAbsolutePath() + " sent to remote device");
+            final File attachmentFile = new File(attachment.getAbsolutePath());
             synchronized (attachment) {
               attachment=null;
+            }
+            if (openChannelTask!=null) {
+              Wearable.getChannelClient(getApplicationContext()).close(openChannelTask.getResult());
+              openChannelTask.addOnCompleteListener(new OnCompleteListener<ChannelClient.Channel>() {
+                @Override
+                public void onComplete(@NonNull Task<ChannelClient.Channel> task) {
+                  if ((attachmentFile.exists())&&(!attachmentFile.getName().equals("navigationEngine.gdo"))) {
+                    //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "deleting file " + attachmentFile.getPath());
+                    attachmentFile.delete();
+                  }
+                }
+              });
             }
 
             // Inform core that transfer is over after some delay
@@ -409,6 +432,7 @@ public class GDApplication extends Application implements GDAppInterface {
               @Override
               public void run() {
                 coreObject.executeCoreCommand(delayedAcknowledgeCmd,delayedAcknowledgeID);
+                //attachmentFile.delete();
               }
             }, 1000);
           }

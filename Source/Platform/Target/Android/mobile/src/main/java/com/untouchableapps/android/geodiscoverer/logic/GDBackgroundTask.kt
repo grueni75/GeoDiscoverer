@@ -73,7 +73,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
 
   // Inits everything
   fun onCreate(coreObject: GDCore?) {
-    GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "onCreate in GDBackgroundTask called")
+
     // Store important references
     this.coreObject = coreObject
 
