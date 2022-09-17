@@ -1203,55 +1203,9 @@ void MapSource::remoteServer() {
   // Set the priority
   core->getThread()->setThreadPriority(threadPriorityBackgroundHigh);
 
-  // Delete any left over remote tiles
-  Int tileNr=0;
-  struct dirent *dp;
-  DIR *dfd;
-  dfd=core->openDir(workPath);
-  if (dfd==NULL) {
-    FATAL("can not read directory <%s>",workPath.c_str());
-    return;
-  }
-  std::list<std::string> leftoverRemoteTiles;
-  while ((dp = readdir(dfd)) != NULL)
-  {
-    if (sscanf(dp->d_name,"remoteTile%d.gda",&tileNr)==1) {
-      leftoverRemoteTiles.push_back(dp->d_name);
-    }
-  }
-  closedir(dfd);
-  tileNr=0;
-  for (std::list<std::string>::iterator i=leftoverRemoteTiles.begin();i!=leftoverRemoteTiles.end();i++) {
-    std::string path = workPath + "/" + *i;
-    remove(path.c_str());
-  }
-
-  // Delete any left over remote overlays
-  Int overlayNr=0;
-  Int x,y;
-  dfd=core->openDir(workPath);
-  if (dfd==NULL) {
-    FATAL("can not read directory <%s>",workPath.c_str());
-    return;
-  }
-  std::list<std::string> leftoverRemoteOverlays;
-  while ((dp = readdir(dfd)) != NULL)
-  {
-    if (sscanf(dp->d_name,"remoteOverlay%d.gdo",&overlayNr)==1) {
-      leftoverRemoteOverlays.push_back(dp->d_name);
-    }
-  }
-  closedir(dfd);
-  overlayNr=0;
-  for (std::list<std::string>::iterator i=leftoverRemoteOverlays.begin();i!=leftoverRemoteOverlays.end();i++) {
-    std::string path = workPath + "/" + *i;
-    remove(path.c_str());
-  }
-
-  // Delete any left over navigation engine overlay
-  remove((workPath + "/navigationEngine.gdo").c_str());
-
   // Do an endless loop
+  Int tileNr=0;
+  Int overlayNr=0;
   while (1) {
 
     // Wait for trigger

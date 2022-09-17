@@ -100,9 +100,11 @@ bool MapSourceMercatorTiles::init() {
     return false;
 
   // Remove the Tiles dir if the gds info is newer than the tiles
+  DialogKey key=core->getDialog()->createProgress("Checking if map tiles are outdated",0);
   cleanMapFolder(getFolderPath() + "/Tiles",NULL,false);
+  core->getDialog()->closeProgress(key);
   if (lastGDSModification>lastGDMModification) {
-    DialogKey key=core->getDialog()->createProgress("Removing all tiles (GDS info newer)",0);
+    key=core->getDialog()->createProgress("Removing all tiles (GDS info newer)",0);
     cleanMapFolder(getFolderPath() + "/Tiles",NULL,false,true);
     core->getDialog()->closeProgress(key);
   }
