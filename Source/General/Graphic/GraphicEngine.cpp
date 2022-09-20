@@ -153,6 +153,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
   GraphicPosition pos;
   TimestampInMicroseconds idleTime,drawingTime;
   bool redrawScene=false;
+  bool dataHasChanged=false;
   Int x1,y1,x2,y2,x,y;
   bool isDefaultScreen = core->getDefaultScreen() == screen;
   double scale,backScale;
@@ -296,7 +297,7 @@ bool GraphicEngine::draw(bool forceRedraw) {
       if (navigationPoints->work(currentTime)) {
         //DEBUG("requesting scene redraw due to navigation points work result",NULL);
         redrawScene=true;
-        core->onDataChange();
+        dataHasChanged=true;
       }
     }
 
@@ -832,6 +833,11 @@ bool GraphicEngine::draw(bool forceRedraw) {
     core->getProfileEngine()->outputResult(__PRETTY_FUNCTION__,true);
   }
 #endif
+
+  // Has data changed?
+  if (dataHasChanged) {
+    core->onDataChange();
+  }
 
   // Enforce a frame rate by waiting the rest of the time
   TimestampInMicroseconds currentDrawingTime = core->getClock()->getMicrosecondsSinceStart() - currentTime;

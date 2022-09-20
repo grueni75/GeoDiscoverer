@@ -5,6 +5,8 @@ function remote {
 }
 remote 'ssh-keygen -t ed25519 -C "matthias.gruenewald@gmail.com"'
 remote 'cat ~/.ssh/id_ed25519.pub'
+remote 'git config --global user.email "matthias.gruenewald@gmail.com"'
+remote 'git config --global user.name "Gruenewald, Matthias"'
 echo "Please install above public key into gitlab before checking out any repro"
 echo "See https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account for a description how to do"
 
