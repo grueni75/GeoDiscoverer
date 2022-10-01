@@ -308,7 +308,7 @@ public class GDService extends Service {
       // Start the core if it is not already running
       if (coreObject.coreStopped) {
         GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","starting core");
-        Message m=Message.obtain(coreObject.messageHandler);  
+        Message m=Message.obtain(coreObject.messageHandler);
         m.what = GDCore.START_CORE;
         coreObject.messageHandler.sendMessage(m);
       }

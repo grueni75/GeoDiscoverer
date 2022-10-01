@@ -70,7 +70,7 @@ dependencies {
     implementation "androidx.compose.material:material-icons-extended:1.1.0"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
     implementation "androidx.wear:wear:1.2.0"
-    implementation "androidx.wear.watchface:watchface:1.0.1"
+    implementation "androidx.wear.watchface:watchface:1.1.1"
     implementation 'com.google.android.gms:play-services-wearable:17.1.0'
     implementation project(':core')
 }
