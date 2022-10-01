@@ -23,6 +23,7 @@
 #include <Dialog.h>
 #include <MapDownloader.h>
 #include <MapContainer.h>
+#include <MapArchiveFile.h>
 
 #ifndef MAPSOURCE_H_
 #define MAPSOURCE_H_
@@ -64,6 +65,8 @@ protected:
   ThreadSignalInfo *remoteServerStartSignal;      // Signal for starting the remote server thread
   std::list<std::string> remoteServerCommandQueue; // Holds the commands that the remote server shall process
   bool resetRemoteServerThread;                   // Indicates if the remote server thread shall forget everything about the remote side
+  std::list<MapArchiveFile> mapArchiveFiles;      // List of map archive files in the map folder
+  bool recreateMapArchiveFiles;                   // Indicates that the map archive files shall be re-filled
 
   // Path animators loaded from overlay archives
   std::list<GraphicPrimitiveKey> retrievedPathAnimators;
@@ -250,6 +253,9 @@ public:
 
   // Finds the path animator with the given name
   void addPathAnimator(GraphicPrimitiveKey primitiveKey);
+
+  // Inserts the new map archive file into the file list
+  virtual void updateMapArchiveFiles(std::string filePath);
 
   // Getters and setters
   Int getMapTileLength() const {

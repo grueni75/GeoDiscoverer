@@ -2103,9 +2103,14 @@
               </xsd:element>
               <xsd:element name="mapArchiveCacheSize" type="xsd:integer" default="1024">
                 <xsd:annotation>
-                  <xsd:documentation>Number of map archives to store if the source is using a disk cache.</xsd:documentation>
+                  <xsd:documentation>Number of map archives to store if the source is using a disk cache (used in MapSourceRemote).</xsd:documentation>
                 </xsd:annotation>
-              </xsd:element>              
+              </xsd:element>      
+              <xsd:element name="mapFolderMaxSize" type="xsd:integer" default="512">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum size of the map folder in MB to maintain if the source is using a disk cache (used in MapSourceMercatorTiles).</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>      
               <xsd:element name="downloadErrorWaitTime" type="xsd:integer" default="1">
                 <xsd:annotation>
                   <xsd:documentation>Time in seconds to wait after a download error before starting a new download.</xsd:documentation>

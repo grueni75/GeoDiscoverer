@@ -651,6 +651,7 @@ void MapDownloader::writeImages() {
         //DEBUG("writing calibration data",NULL);
         image.mapContainer->writeCalibrationFile(mapArchive);
         mapArchive->writeChanges();
+        mapSource->updateMapArchiveFiles(mapArchive->getArchiveFolder()+"/"+mapArchive->getArchiveName());
         delete mapArchive;
         mapArchive=NULL;
       } else {

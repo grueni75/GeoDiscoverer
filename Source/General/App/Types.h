@@ -28,14 +28,14 @@
 namespace GEODISCOVERER {
 
 // Simple types
-typedef char Byte;
-typedef unsigned char UByte;
-typedef int Int;
-typedef unsigned int UInt;
-typedef short Short;
-typedef unsigned short UShort;
-typedef long Long;
-typedef unsigned long ULong;
+typedef int8_t Byte;
+typedef uint8_t UByte;
+typedef int32_t Int;
+typedef uint32_t UInt;
+typedef int16_t Short;
+typedef uint16_t UShort;
+typedef int64_t Long;
+typedef uint64_t ULong;
 typedef float Float;
 
 // Direction enum for searching

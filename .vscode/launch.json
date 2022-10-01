@@ -18,7 +18,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/Source/Platform/Target/Linux/GeoDiscoverer",
             "args": [],
-            "stopAtEntry": false,
+            "stopAtEntry": true,
             "cwd": "${workspaceFolder}/Source/Platform/Target/Linux",
             "environment": [],
             "externalConsole": false,

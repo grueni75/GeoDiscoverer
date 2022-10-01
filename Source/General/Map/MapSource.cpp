@@ -70,6 +70,7 @@ MapSource::MapSource() {
   remoteServerStartSignal=NULL;
   remoteServerThreadInfo=NULL;
   resetRemoteServerThread=false;
+  recreateMapArchiveFiles=true;
 }
 
 MapSource::~MapSource() {
@@ -1858,5 +1859,10 @@ UByte *MapSource::fetchMapTile(Int z, Int x, Int y, double saturationOffset, dou
   imageSize=0;
   return NULL;
 }
+
+// Inserts the new map archive file into the file list
+void MapSource::updateMapArchiveFiles(std::string filePath) {  
+}
+
 
 }

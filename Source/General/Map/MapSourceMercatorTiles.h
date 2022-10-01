@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <MapSource.h>
+#include <MapArchiveFile.h>
 
 #ifndef MAPSOURCEMERCATORTILES_H_
 #define MAPSOURCEMERCATORTILES_H_
@@ -48,7 +49,8 @@ protected:
   Int unqueuedDownloadTileCount;                    // Number of tiles that are not yet queued but must be downloaded
   TimestampInSeconds lastGDSModification;           // Time when the GDS for this map was last modified
   TimestampInSeconds lastGDMModification;           // Time when the newest GDM for this map was last modified
-
+  Long mapFolderDiskUsage;                          // Current size of the map folder in bytes
+  Long mapFolderMaxSize;                            // Maximum size of the map folder in Bytes to maintain
 
   // Fetches the map tile in which the given position lies from disk or server
   MapTile *fetchMapTile(MapPosition pos, Int zoomLevel);
@@ -63,7 +65,7 @@ protected:
   bool parseGDSInfo();
 
   // Clears the given map directory
-  void cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels, bool removeAll=false);
+  void cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels, bool removeAll=false, bool updateFileList=false);
 
   // Computes the mercator x and y ranges for the given area and zoom level
   void computeMercatorBounds(MapArea *displayArea,Int zMap,Int &zServer,Int &startX,Int &endX,Int &startY,Int &endY);
@@ -141,6 +143,9 @@ public:
 
   // Fetches a map tile and returns its image data
   virtual UByte *fetchMapTile(Int z, Int x, Int y, double saturationOffset, double brightnessOffset, UInt &imageSize);
+
+  // Inserts the new map archive file into the file list
+  virtual void updateMapArchiveFiles(std::string filePath);
 
   // Getters and setters
   virtual void lockAccess(const char *file, int line) {

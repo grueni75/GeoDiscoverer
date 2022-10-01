@@ -52,6 +52,8 @@ MapSourceMercatorTiles::MapSourceMercatorTiles(TimestampInSeconds lastGDSModific
   mapContainerCacheSize=core->getConfigStore()->getIntValue("Map","mapContainerCacheSize",__FILE__, __LINE__);
   downloadAreaLength=core->getConfigStore()->getIntValue("Map","downloadAreaLength",__FILE__, __LINE__) * 1000;
   downloadAreaMinDistance=core->getConfigStore()->getIntValue("Map","downloadAreaMinDistance",__FILE__, __LINE__) * 1000;
+  mapFolderDiskUsage=0;
+  mapFolderMaxSize=((Long)core->getConfigStore()->getIntValue("Map","mapFolderMaxSize",__FILE__, __LINE__))*1024LL*1024LL;
   mapTileLength=256;
   accessMutex=core->getThread()->createMutex("map source mercator tiles access mutex");
   errorOccured=false;
@@ -98,16 +100,6 @@ bool MapSourceMercatorTiles::init() {
   // Read the information from the config file
   if (!parseGDSInfo())
     return false;
-
-  // Remove the Tiles dir if the gds info is newer than the tiles
-  DialogKey key=core->getDialog()->createProgress("Checking if map tiles are outdated",0);
-  cleanMapFolder(getFolderPath() + "/Tiles",NULL,false);
-  core->getDialog()->closeProgress(key);
-  if (lastGDSModification>lastGDMModification) {
-    key=core->getDialog()->createProgress("Removing all tiles (GDS info newer)",0);
-    cleanMapFolder(getFolderPath() + "/Tiles",NULL,false,true);
-    core->getDialog()->closeProgress(key);
-  }
 
   // We always need the default tiles.gda file
   lockMapArchives(__FILE__, __LINE__);
@@ -503,7 +495,7 @@ void MapSourceMercatorTiles::computeMercatorBounds(MapArea *displayArea,Int zMap
 }
 
 // Clears the given map directory
-void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels,bool removeAll) {
+void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *displayArea,bool allZoomLevels,bool removeAll, bool updateFileList) {
 
   // Go through the directory list
   DIR *dfd;
@@ -522,7 +514,7 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
     std::string entryPath = dirPath + "/" + entry;
     if (dp->d_type == DT_DIR) {
       if ((entry!=".")&&(entry!=".."))
-        cleanMapFolder(entryPath,displayArea,allZoomLevels,removeAll);
+        cleanMapFolder(entryPath,displayArea,allZoomLevels,removeAll,updateFileList);
     } else {
 
       // Is this left over from a write trial
@@ -553,6 +545,16 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
         }
         if (stats.st_mtime>lastGDMModification) 
           lastGDMModification=stats.st_mtime;
+        //DEBUG("stats.st_size=%d",stats.st_size);
+
+        // Shall we update the file list?
+        if (updateFileList) {
+          lockAccess(__FILE__,__LINE__);
+          MapArchiveFile::updateFiles(&mapArchiveFiles,MapArchiveFile(entryPath,stats.st_mtime,stats.st_size));
+          mapFolderDiskUsage+=stats.st_size;
+          //DEBUG("adding map archive <%s> to file list (disk usage is %ld Bytes)",entryPath.c_str(),mapFolderDiskUsage);
+          unlockAccess();
+        }
 
         // Shall we remove it?
         if (displayArea) {
@@ -576,12 +578,15 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
               }
             }
           }
+          recreateMapArchiveFiles=true;
         }
       }
 
       // Shall we remove everything?
       if (removeAll) {
+        //DEBUG("deleting %s",entryPath.c_str());
         remove(entryPath.c_str());
+        recreateMapArchiveFiles=true;
       }
     }
   }
@@ -589,6 +594,7 @@ void MapSourceMercatorTiles::cleanMapFolder(std::string dirPath,MapArea *display
 
   // Shall we delete the directory?
   if (removeAll) {
+    //DEBUG("deleting all",NULL);
     remove(dirPath.c_str());
   }
 }
@@ -623,10 +629,67 @@ void MapSourceMercatorTiles::removeObsoleteMapContainers(MapArea *displayArea, b
 // Performs maintenance (e.g., recreate degraded search tree)
 void MapSourceMercatorTiles::maintenance() {
 
+  // Check the size of the map folder
+  if (recreateMapArchiveFiles) {
+    lockAccess(__FILE__,__LINE__);
+    mapArchiveFiles.clear();
+    mapFolderDiskUsage=0;
+    unlockAccess();
+  }
+  cleanMapFolder(getFolderPath() + "/Tiles",NULL,false,false,recreateMapArchiveFiles);
+  recreateMapArchiveFiles=false;
+
+  // Remove the Tiles dir if the gds info is newer than the tiles
+  DEBUG("map folder clean up started",NULL);
+  if (lastGDSModification>lastGDMModification) {
+    DialogKey key=core->getDialog()->createProgress("Removing all tiles (GDS info newer)",0);
+    cleanMapFolder(getFolderPath() + "/Tiles",NULL,false,true);
+    core->getDialog()->closeProgress(key);
+  } else {
+
+    // Reduce the folder size if necessary
+    bool mapArchiveCandidatesLeft=true;
+    while ((mapArchiveCandidatesLeft)&&(mapFolderDiskUsage>mapFolderMaxSize)&&(!core->getQuitCore())) {
+      //DEBUG("mapArchiveFiles.size()=%d",mapArchiveFiles.size());
+      std::list<MapArchiveFile>::iterator i;
+      for (i=mapArchiveFiles.begin();i!=mapArchiveFiles.end();i++) {
+        MapArchiveFile mapArchiveFile=*i;
+        //DEBUG("mapArchiveFile=%s",mapArchiveFile.getFilePath().c_str());
+
+        // Delete the oldest file unless it is in use
+        lockAccess(__FILE__,__LINE__);
+        bool mapArchiveFileInUse=false;
+        for (std::vector<MapContainer*>::iterator j=mapContainers.begin();j!=mapContainers.end();j++) {
+          MapContainer *mapContainer=*j;
+          if (mapContainer->getArchiveFilePath()==mapArchiveFile.getFilePath()) {
+            //DEBUG("map archive file <%s> is in use!",mapContainer->getArchiveFilePath().c_str());
+            mapArchiveFileInUse=true;
+            break;
+          }
+        }
+        if (!mapArchiveFileInUse) {
+          unlink(mapArchiveFile.getFilePath().c_str());
+          mapFolderDiskUsage-=mapArchiveFile.getDiskUsage();
+          //DEBUG("removed map archive <%s> (new disk usage: %d MB)",mapArchiveFile.getFilePath().c_str(),mapFolderDiskUsage/1024/1024);
+        }
+        unlockAccess();
+        if (!mapArchiveFileInUse) {
+          mapArchiveFiles.erase(i);
+          break;
+        }
+      }
+      if (i==mapArchiveFiles.end()) {
+        //DEBUG("no further map folder size reduction possible, aborting",NULL);
+        mapArchiveCandidatesLeft=false;
+      }
+    }
+  }
+  DEBUG("map folder cleanup finished (size: %ld MB)",mapFolderDiskUsage/1024/1024);
+
   // Was the source modified?
   if (contentsChanged) {
 
-    // Remove map containers from list until cache size is reached again
+    // Remove map containers from the memory list until cache size is reached again
     lockAccess(__FILE__, __LINE__);
     for(std::vector<MapContainer*>::iterator i=mapContainers.begin();i!=mapContainers.end();) {
       if (mapContainers.size()>mapContainerCacheSize) {
@@ -653,7 +716,6 @@ void MapSourceMercatorTiles::maintenance() {
 
   // Reset the download warning message
   downloadWarningOccured=false;
-
 }
 
 // Finds the calibrator for the given position
@@ -1247,5 +1309,20 @@ UByte *MapSourceMercatorTiles::fetchMapTile(Int z, Int x, Int y, double saturati
   unlockAccess();
   return imageData;
 }
+
+// Inserts the new map archive file into the file list
+void MapSourceMercatorTiles::updateMapArchiveFiles(std::string filePath) {
+  lockAccess(__FILE__,__LINE__);
+  struct stat stats;
+  if (stat(filePath.c_str(),&stats)!=0) {
+    FATAL("can not read timestamp of <%s>",filePath.c_str());
+  }
+  //DEBUG("stats.st_size=%d",stats.st_size);
+  MapArchiveFile::updateFiles(&mapArchiveFiles,MapArchiveFile(filePath,stats.st_mtime,stats.st_size));  
+  mapFolderDiskUsage+=stats.st_size;
+  //DEBUG("adding map archive <%s> to file list (disk usage is %ld Bytes)",filePath.c_str(),mapFolderDiskUsage);
+  unlockAccess();
+}
+
 
 } /* namespace GEODISCOVERER */

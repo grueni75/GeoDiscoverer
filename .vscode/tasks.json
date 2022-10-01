@@ -30,7 +30,7 @@
         {
             "label": "run",
             "type": "shell",
-            "command": "./GeoDiscoverer",
+            "command": "pwd && ./GeoDiscoverer",
             "problemMatcher": [],
             "options": {
                 "cwd": "${workspaceFolder}/Source/Platform/Target/Linux"
