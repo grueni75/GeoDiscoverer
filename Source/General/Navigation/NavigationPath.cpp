@@ -641,8 +641,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
   // Init variables
   std::vector<MapPosition> mapPositions=getSelectedPoints();
-  double distanceToRoute=std::numeric_limits<double>::max();
-  std::vector<MapPosition>::iterator nearestIterator;
+  std::vector<MapPosition>::iterator nearestIterator,fallbackNearestIterator;
   Int startIndex, endIndex;
   startIndex=reverse ? mapPositions.size()-1 : 0;
   endIndex=reverse ? 0 : mapPositions.size()-1;
@@ -651,30 +650,25 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
   // We can safely unlock the general access to the path object
   unlockAccess();
 
-  // Find the nearest point on the route
-  for (Int i=startIndex; reverse?i>=endIndex:i<=endIndex;reverse?i--:i++) {
-    MapPosition curPoint = mapPositions[i];
-    double distance = curPoint.computeDistance(locationPos);
-    if (distance<distanceToRoute)  {
-      distanceToRoute=distance;
-      nearestIterator=mapPositions.begin()+i;
-    }
-  }
-  //DEBUG("minDistance=%.2f index=%d",minDistance,nearestIterator-mapPositions.begin());
-
-  // Check if we are already on route
+  // Search for the nearest point on the route
+  // In case we have location bearing, use the one that lies most close to the bearing
+  // Otherwise, use the one most close to the route
   bool offRoute=true;
-  if (distanceToRoute<minDistanceToBeOffRoute)
-    offRoute=false;
-
-  // In case there are multiple points on the route,
-  // take the one that lies closest to the bearing of the location
   bool firstPos=true;
   double routeBearing=0;
   double minBearingDiff=std::numeric_limits<double>::max();
-  std::vector<MapPosition>::iterator iterator,prevIterator,newNearestIterator=nearestIterator;
+  double distanceToRoute=std::numeric_limits<double>::max();
+  double fallbackDistanceToRoute=std::numeric_limits<double>::max();
+  std::vector<MapPosition>::iterator iterator,prevIterator;
   iterator=mapPositions.begin()+startIndex;
   while (true) {
+
+    // Compute the fallback distance in case the normal distance calculation doesn't find a point
+    double distance = (*iterator).computeDistance(locationPos);
+    if (distance<fallbackDistanceToRoute)  {
+      fallbackDistanceToRoute=distance;
+      fallbackNearestIterator=iterator;
+    }
 
     // Compute the current bearing of the route
     if (!firstPos) {
@@ -682,15 +676,21 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
       // If the route point is around the nearest found point,
       // remember the one that is closest to the location bearing
-      double distance=(*iterator).computeNormalDistance(*prevIterator,locationPos,0,true);
+      double distance=(*iterator).computeNormalDistance(*prevIterator,locationPos,0,true,false);
       if (distance<minDistanceToBeOffRoute) {
         offRoute=false; // in case the nearest point is too far away due to route with minimized points
         double bearingDiff;
         if (locationPos.getHasBearing()) {
           bearingDiff=fabs(routeBearing-locationPos.getBearing());
           if (bearingDiff<minBearingDiff) {
-            newNearestIterator=iterator;
+            nearestIterator=iterator;
             minBearingDiff=bearingDiff;
+            distanceToRoute=distance;
+          }
+        } else {
+          if (distance<distanceToRoute)  {
+            nearestIterator=iterator;
+            distanceToRoute=distance;
           }
         }
       }
@@ -708,7 +708,11 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
       iterator++;
     }
   }
-  nearestIterator=newNearestIterator;
+  if (distanceToRoute==std::numeric_limits<double>::max()) {
+    distanceToRoute=fallbackDistanceToRoute;
+    nearestIterator=fallbackNearestIterator;
+  }
+  //DEBUG("distanceToRoute=%f",distanceToRoute);
   /*if (offRoute) {
     DEBUG("off route: minDistance=%.2f index=%d",minDistance,nearestIterator-mapPositions.begin());
   } else {
