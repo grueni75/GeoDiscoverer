@@ -105,7 +105,7 @@ class ViewContentNavigationDrawer(viewContent: ViewContent) {
               horizontalAlignment = Alignment.CenterHorizontally
             ) {
               Image(
-                painter = painterResource(R.mipmap.ic_launcher),
+                painter = painterResource(R.mipmap.ic_launcher_foreground),
                 contentDescription = null
               )
             }

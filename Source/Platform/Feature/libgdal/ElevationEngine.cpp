@@ -59,14 +59,14 @@ bool ElevationEngine::init() {
   std::string demFilePathLowRes=demFolderPath+"/lowres.tif";
   for (Int i=0;i<workerCount;i++) {
     demDatasetLowRes[i] = (DEMDataset *) GDALOpen(demFilePathLowRes.c_str(), GA_ReadOnly);
-    if (demDatasetFullRes==NULL) {
+    if (demDatasetLowRes[i]==NULL) {
       WARNING("please install low resolution elevation data into <%s>",demFilePathLowRes.c_str());
       return true;
     }
   }
   for (Int i=0;i<workerCount+1;i++) {
     demDatasetFullRes[i] = (DEMDataset *) GDALOpen(demFilePathFullRes.c_str(), GA_ReadOnly);
-    if (demDatasetFullRes==NULL) {
+    if (demDatasetFullRes[i]==NULL) {
       WARNING("please install full resolution elevation data into <%s>",demFilePathFullRes.c_str());
       return true;
     }
@@ -471,7 +471,7 @@ bool ElevationEngine::getElevation(MapPosition *pos) {
   // Only work if initialized
   pos->setHasAltitude(false);
   if (!isInitialized) {
-    DEBUG("DEM dataset not yet initialized",NULL);
+    //DEBUG("DEM dataset not yet initialized",NULL);
     return false;
   }
   while (demDatasetBusy[workerCount]) {

@@ -214,9 +214,12 @@ public class GDEBikeService {
   };
 
   /** Checks if bluetooth le is supported on this device */
-  static public boolean isSupported(Context context) {
+  static public boolean isSupported(Context context, GDCore coreObject) {
     if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-      return true;
+      if (Integer.parseInt(coreObject.configStoreGetStringValue("EBikeMonitor", "active"))!=0)
+        return true;
+      else
+        return false;
     } else {
       return false;
     }

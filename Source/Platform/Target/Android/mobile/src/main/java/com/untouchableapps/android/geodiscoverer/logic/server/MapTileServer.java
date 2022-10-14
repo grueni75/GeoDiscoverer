@@ -62,7 +62,7 @@ public class MapTileServer {
       }
     }
     if (mapFiles.size()==0) {
-      coreObject.executeAppCommand("errorDialog(\"No maps installed in <" + mapsPath + ">!\")");
+      coreObject.executeAppCommand("warningDialog(\"No maps installed in <" + mapsPath + ">!\")");
       return false;
     }
 

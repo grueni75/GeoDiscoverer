@@ -66,7 +66,7 @@ class ViewContent(viewMap: ViewMap) {
   // Layout parameters for the navigation drawer
   class LayoutParams() {
     val iconWidth = 60.dp
-    val drawerItemHeight = 41.dp
+    val drawerItemHeight = 45.5.dp
     val titleIndent = 20.dp
     val drawerWidth = 250.dp
     val itemPadding = 5.dp

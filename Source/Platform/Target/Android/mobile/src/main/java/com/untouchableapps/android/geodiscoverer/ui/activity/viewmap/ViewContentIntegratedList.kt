@@ -94,7 +94,7 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
         //.animateContentSize()
     ) {
       val width: Dp by animateDpAsState(
-        if (viewModel.integratedListPOIFilerEnabled)
+        if ((viewModel.integratedListPOIFilerEnabled)||(configuration.orientation==Configuration.ORIENTATION_PORTRAIT))
           maxScreenWidth
         else
           layoutParams.integratedListWidth

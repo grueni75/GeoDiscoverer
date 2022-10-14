@@ -49,7 +49,7 @@ android {
     defaultConfig {
         applicationId "com.untouchableapps.android.geodiscoverer"
         minSdkVersion 23
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 28
         versionName computeVersionName()
         vectorDrawables {

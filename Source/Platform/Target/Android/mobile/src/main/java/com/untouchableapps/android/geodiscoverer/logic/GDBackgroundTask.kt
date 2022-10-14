@@ -95,7 +95,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
           }
         }
         if (poiFiles.size == 0) {
-          coreObject.executeAppCommand("errorDialog(\"No POI databases installed in <$mapsPath>!\")")
+          coreObject.executeAppCommand("warningDialog(\"No POI databases installed in <$mapsPath>!\")")
           return@withContext
         } else {
           for (poiFile in poiFiles) {

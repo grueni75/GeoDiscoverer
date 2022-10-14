@@ -226,9 +226,12 @@ public class GDHeartRateService {
   };
 
   /** Checks if bluetooth le is supported on this device */
-  static public boolean isSupported(Context context) {
+  static public boolean isSupported(Context context, GDCore coreObject) {
     if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-      return true;
+      if (Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "active"))!=0)
+        return true;
+      else
+        return false;
     } else {
       return false;
     }

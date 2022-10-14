@@ -36,6 +36,10 @@ ElevationEngine::ElevationEngine() {
   accessMutex=core->getThread()->createMutex("elevation engine access mutex");
   demDatasetReadySignal=core->getThread()->createSignal();
   tileNumber=0;
+  pszSourceSRS=NULL;
+  hSrcSRS=NULL;
+  hCT=NULL;
+  hBand=NULL;
   
   // Create the DEM directory (if it does not exist)
   struct stat st;

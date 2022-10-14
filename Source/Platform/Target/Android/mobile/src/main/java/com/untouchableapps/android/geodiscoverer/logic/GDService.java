@@ -219,7 +219,7 @@ public class GDService extends Service {
           .setSmallIcon(R.drawable.notification_running)
           .setDefaults(Notification.DEFAULT_ALL)
           .setAutoCancel(true)
-          .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+          //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
           .setPriority(NotificationCompat.PRIORITY_HIGH);
       notificationManager.notify(GDApplication.NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID, builder.build());
     }
@@ -243,7 +243,8 @@ public class GDService extends Service {
           .setContentText(getText(R.string.notification_service_in_foreground_message))
           .setSmallIcon(R.drawable.notification_running)
           .setContentIntent(pendingIntent)
-          .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+          //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+          .setOngoing(true)
           .addAction(exitAction);
     } else {
       /*Drawable notificationDownloadingDrawble= ResourcesCompat.getDrawable(getResources(),
@@ -254,12 +255,13 @@ public class GDService extends Service {
           .setContentText(getString(R.string.notification_map_download_ongoing_message, tilesLeft, timeLeft))
           .setSmallIcon(R.drawable.notification_downloading)
           .setContentIntent(pendingIntent)
-          .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+          //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+          .setOngoing(true)
           .setProgress(tilesTotal, tilesDone, false)
           .addAction(exitAction)
           .addAction(stopDownloadAction);
     }
-    if ((heartRateService==null)||(heartRateService.heartRateUnavailableSound))
+    if ((heartRateService!=null)&&(heartRateService.heartRateUnavailableSound))
       builder.addAction(stopHeartRateUnavailableSoundAction);
     notification=builder.build();
     return notification;
@@ -422,12 +424,14 @@ public class GDService extends Service {
       }
 
       // Start all bluetooth services
-      if (GDHeartRateService.isSupported(this)) {
+      if (GDHeartRateService.isSupported(this, coreObject)) {
         heartRateService = new GDHeartRateService(this, coreObject);
+        notification = updateNotification();
+        notificationManager.notify(GDApplication.NOTIFICATION_STATUS_ID, notification);
       }
 
       // Start the ebike monitor (if supported)
-      if (GDEBikeService.isSupported(this)) {
+      if (GDEBikeService.isSupported(this, coreObject)) {
         eBikeService = new GDEBikeService(this, coreObject);
       }
     }
