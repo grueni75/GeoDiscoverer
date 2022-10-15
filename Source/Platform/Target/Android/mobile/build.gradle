@@ -48,7 +48,7 @@ android {
 
     defaultConfig {
         applicationId "com.untouchableapps.android.geodiscoverer"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 24
         versionCode 28
         versionName computeVersionName()
@@ -60,7 +60,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            project.ext.set('releaseAppABI', 'all32')
+            project.ext.set('releaseAppABI', 'all64')
         }
         debug {
             project.ext.set('debugAppABI', 'arm64-v8a')
@@ -82,7 +82,7 @@ android {
         abi {
             enable gradle.startParameter.taskNames.any { it.contains("Debug") }
             reset()
-            include 'armeabi-v7a'
+            include 'arm64-v8a'
             universalApk false
         }
     }

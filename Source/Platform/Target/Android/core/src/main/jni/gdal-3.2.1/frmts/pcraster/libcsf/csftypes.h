@@ -139,6 +139,14 @@ typedef double              REAL8; /* IEEE-754 64-bit */
 #  define CPU_LITTLE_ENDIAN
 #endif
 
+#ifdef __aarch64__
+#  ifdef __ARMEB__
+#    define CPU_BIG_ENDIAN
+#  else
+#    define CPU_LITTLE_ENDIAN
+#  endif
+#endif
+
 #ifdef __i386__
 /* linux/gcc defines this on intel 80x86 platform */
 #  define CPU_LITTLE_ENDIAN

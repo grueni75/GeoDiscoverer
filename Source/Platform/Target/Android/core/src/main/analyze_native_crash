@@ -26,8 +26,10 @@ if ($report !~ m/.dmp$/) {
 }
 
 # Translate the cpu architecture
-#print $arch . "\n";
-if ($arch eq 'armeabi-v7a') {
+print $arch . "\n";
+if ($arch eq 'arm64-v8a') {
+  $arch='arm64-v8a';
+} elsif ($arch eq 'armeabi-v7a') {
   $arch='arm-v7a';
 } elsif ($arch eq 'armeabi') {
   $arch='arm';
