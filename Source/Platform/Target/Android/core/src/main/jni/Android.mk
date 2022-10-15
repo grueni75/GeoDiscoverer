@@ -1226,9 +1226,9 @@ include $(BUILD_SHARED_LIBRARY)
 # Build google breakpad client
 include $(CLEAR_VARS)
 LOCAL_MODULE := gdbreakpad
-MY_BREAKPAD_PATH := google-breakpad-20180304
+MY_BREAKPAD_PATH := google-breakpad-20221015
 LOCAL_CPP_EXTENSION := .cc
-LOCAL_ARM_MODE := arm
+#LOCAL_ARM_MODE := arm
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/crash_generation/crash_generation_client.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/dump_writer_common/thread_info.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/dump_writer_common/ucontext_reader.cc)
@@ -1239,11 +1239,12 @@ LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/microdump_w
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/linux_dumper.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/linux_ptrace_dumper.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/minidump_writer.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/linux/minidump_writer/pe_file.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/client/minidump_file_writer.cc)
-LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/android/breakpad_getcontext.S)
-LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/convert_UTF.c)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/convert_UTF.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/md5.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/string_conversion.cc)
+LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/breakpad_getcontext.S)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/elfutils.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/file_id.cc)
 LOCAL_SRC_FILES += $(addprefix $(MY_BREAKPAD_PATH)/,src/common/linux/guid_creator.cc)
