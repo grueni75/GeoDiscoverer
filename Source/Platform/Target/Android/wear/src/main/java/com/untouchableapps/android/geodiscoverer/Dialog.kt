@@ -197,8 +197,8 @@ class Dialog : ComponentActivity() {
           } else {
             Image(
               modifier = Modifier
-                .size(40.dp),
-              painter = painterResource(R.mipmap.ic_launcher),
+                .size(60.dp),
+              painter = painterResource(R.mipmap.ic_launcher_foreground),
               contentDescription = null
             )
           }

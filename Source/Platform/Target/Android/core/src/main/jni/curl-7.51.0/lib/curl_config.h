@@ -881,25 +881,55 @@
 #define SIZEOF_INT 4
 
 /* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG 8
+#ifdef __aarch64__
+#  define SIZEOF_LONG 8
+#elif __arm__
+#  define SIZEOF_LONG 4
+#else
+#  error "SIZEOF_LONG can not be determined"
+#endif
 
 /* The size of `long long', as computed by sizeof. */
 /* #undef SIZEOF_LONG_LONG */
 
 /* The size of `off_t', as computed by sizeof. */
-#define SIZEOF_OFF_T 8
+#ifdef __aarch64__
+#  define SIZEOF_OFF_T 8
+#elif __arm__
+#  define SIZEOF_OFF_T 4
+#else
+#  error "SIZEOF_OFF_T can not be determined"
+#endif
 
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
 
 /* The size of `size_t', as computed by sizeof. */
-#define SIZEOF_SIZE_T 8
+#ifdef __aarch64__
+#  define SIZEOF_SIZE_T 8
+#elif __arm__
+#  define SIZEOF_SIZE_T 4
+#else
+#  error "SIZEOF_SIZE_T can not be determined"
+#endif
 
 /* The size of `time_t', as computed by sizeof. */
-#define SIZEOF_TIME_T 8
+#ifdef __aarch64__
+#  define SIZEOF_TIME_T 8
+#elif __arm__
+#  define SIZEOF_TIME_T 4
+#else
+#  error "SIZEOF_TIME_T can not be determined"
+#endif
 
 /* The size of `void*', as computed by sizeof. */
-#define SIZEOF_VOIDP 8
+#ifdef __aarch64__
+#  define SIZEOF_VOIDP 8
+#elif __arm__
+#  define SIZEOF_VOIDP 4
+#else
+#  error "SIZEOF_VOIDP can not be determined"
+#endif
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1

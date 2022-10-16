@@ -160,7 +160,13 @@
 #endif
 
 /* The size of `long', as computed by sizeof. */
-#define CURL_SIZEOF_LONG 8
+#ifdef __aarch64__
+#  define CURL_SIZEOF_LONG 8
+#elif __arm__
+#  define CURL_SIZEOF_LONG 4
+#else
+#  error "CURL_SIZEOF_LONG can not be determined"
+#endif
 
 /* Integral data type used for curl_socklen_t. */
 #define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
@@ -178,21 +184,62 @@ typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
 typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
 
 /* curl_off_t formatting string directive without "%" conversion specifier. */
-#define CURL_FORMAT_CURL_OFF_T "ld"
+#ifdef __aarch64__
+#  define CURL_FORMAT_CURL_OFF_T "ld"
+#elif __arm__
+#  define CURL_FORMAT_CURL_OFF_T "d"
+#else
+#  error "CURL_FORMAT_CURL_OFF_T can not be determined"
+#endif
 
 /* unsigned curl_off_t formatting string without "%" conversion specifier. */
-#define CURL_FORMAT_CURL_OFF_TU "lu"
+#ifdef __aarch64__
+#  define CURL_FORMAT_CURL_OFF_TU "lu"
+#elif __arm__
+#  define CURL_FORMAT_CURL_OFF_TU "u"
+#else
+#  error "CURL_FORMAT_CURL_OFF_TU can not be determined"
+#endif
+
 
 /* curl_off_t formatting string directive with "%" conversion specifier. */
-#define CURL_FORMAT_OFF_T "%ld"
+#ifdef __aarch64__
+#  define CURL_FORMAT_OFF_T "%ld"
+#elif __arm__
+#  define CURL_FORMAT_OFF_T "%d"
+#else
+#  error "CURL_FORMAT_OFF_T can not be determined"
+#endif
+
 
 /* The size of `curl_off_t', as computed by sizeof. */
-#define CURL_SIZEOF_CURL_OFF_T 8
+#ifdef __aarch64__
+#  define CURL_SIZEOF_CURL_OFF_T 8
+#elif __arm__
+#  define CURL_SIZEOF_CURL_OFF_T 4
+#else
+#  error "CURL_SIZEOF_CURL_OFF_T can not be determined"
+#endif
+
 
 /* curl_off_t constant suffix. */
-#define CURL_SUFFIX_CURL_OFF_T L
+#ifdef __aarch64__
+#  define CURL_SUFFIX_CURL_OFF_T L
+#elif __arm__
+#  define CURL_SUFFIX_CURL_OFF_T 
+#else
+#  error "CURL_SUFFIX_CURL_OFF_T can not be determined"
+#endif
+
 
 /* unsigned curl_off_t constant suffix. */
-#define CURL_SUFFIX_CURL_OFF_TU UL
+#ifdef __aarch64__
+#  define CURL_SUFFIX_CURL_OFF_TU UL 
+#elif __arm__
+#  define CURL_SUFFIX_CURL_OFF_TU U 
+#else
+#  error "CURL_SUFFIX_CURL_OFF_TU can not be determined"
+#endif
+
 
 #endif /* __CURL_CURLBUILD_H */
