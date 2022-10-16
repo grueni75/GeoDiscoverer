@@ -124,19 +124,29 @@ class IntentHandler(viewMap: ViewMap) : CoroutineScope by MainScope() {
     if (intent != null) {
       if (Intent.ACTION_SEND == intent.action) {
         val extras = intent.extras
-        if (extras!!.containsKey(Intent.EXTRA_STREAM)) {
-          uri = extras.getParcelable<Parcelable>(Intent.EXTRA_STREAM) as Uri?
-          if (uri!!.scheme == "http" || uri.scheme == "https") {
-            isGPXFromWeb = true
+        if (extras!=null) {
+          if (extras!!.containsKey(Intent.EXTRA_STREAM)) {
+            uri = extras.getParcelable<Parcelable>(Intent.EXTRA_STREAM) as Uri?
+          } else if (extras.containsKey(Intent.EXTRA_TEXT)) {
+            subject = extras.getString(Intent.EXTRA_SUBJECT)!!
+            text = extras.getString(Intent.EXTRA_TEXT)!!
+            isAddress = true
           } else {
-            isGPXFromFile = true
+            viewMap.dialogHandler.warningDialog(viewMap.getString(R.string.unsupported_intent))
           }
-        } else if (extras.containsKey(Intent.EXTRA_TEXT)) {
-          subject = extras.getString(Intent.EXTRA_SUBJECT)!!
-          text = extras.getString(Intent.EXTRA_TEXT)!!
-          isAddress = true
         } else {
-          viewMap.dialogHandler.warningDialog(viewMap.getString(R.string.unsupported_intent))
+          if (intent.data!=null) {
+            uri = intent.data
+          } else {
+            viewMap.dialogHandler.warningDialog(viewMap.getString(R.string.unsupported_intent))
+          }
+        }
+      }
+      if (uri != null) {
+        if (uri!!.scheme == "http" || uri.scheme == "https") {
+          isGPXFromWeb = true
+        } else {
+          isGPXFromFile = true
         }
       }
       if (Intent.ACTION_VIEW == intent.action) {
