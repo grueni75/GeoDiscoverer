@@ -176,7 +176,7 @@ public class GDService extends Service {
       notificationManager.createNotificationChannel(channel);
       channel = new NotificationChannel("status",
           getString(R.string.notification_channel_status_name),
-          NotificationManager.IMPORTANCE_DEFAULT);
+          NotificationManager.IMPORTANCE_LOW);
       channel.setDescription(getString(R.string.notification_channel_status_description));
       notificationManager.createNotificationChannel(channel);
     }
