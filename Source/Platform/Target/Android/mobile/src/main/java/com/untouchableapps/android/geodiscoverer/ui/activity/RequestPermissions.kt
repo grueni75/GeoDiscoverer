@@ -71,7 +71,7 @@ class RequestPermissions : ComponentActivity() {
     super.onResume()
     if (!GDApplication.checkPermissions(this)) {
       requestPermissionLauncher.launch(GDApplication.requiredPermissions)
-      if (!Settings.canDrawOverlays(applicationContext)) {
+      /*if (!Settings.canDrawOverlays(applicationContext)) {
         val packageName = applicationContext.packageName
         val t = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
         Toast.makeText(
@@ -80,7 +80,7 @@ class RequestPermissions : ComponentActivity() {
           Toast.LENGTH_LONG
         ).show()
         startActivity(t)
-      }
+      }*/
     } else {
       Toast.makeText(
         this,

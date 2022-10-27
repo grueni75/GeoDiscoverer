@@ -720,9 +720,9 @@ public class GDApplication extends Application implements GDAppInterface {
         return false;
       }
     }
-    if (!Settings.canDrawOverlays(context)) {
+    /*if (!Settings.canDrawOverlays(context)) {
       return false;
-    }
+    }*/
     return true;
   }
 
