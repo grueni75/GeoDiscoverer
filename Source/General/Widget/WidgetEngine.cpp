@@ -2382,7 +2382,7 @@ void WidgetEngine::updateNearestPath(MapPosition mapPos, std::list<MapTile*> *ce
     nearbyPathSegments=(*j)->getCrossingNavigationPathSegments();
     for(std::list<NavigationPathSegment*>::iterator i=nearbyPathSegments.begin();i!=nearbyPathSegments.end();i++) {
       NavigationPathSegment *s=*i;
-      s->getPath()->lockAccess(__FILE__, __LINE__);
+      core->getMapSource()->lockAccess(__FILE__, __LINE__);
       MapPosition prevVisPos=NavigationPath::getPathInterruptedPos();
       Int startIndex=s->getStartIndex();
       if (startIndex>0) startIndex--;
@@ -2407,7 +2407,7 @@ void WidgetEngine::updateNearestPath(MapPosition mapPos, std::list<MapTile*> *ce
         }
         prevVisPos=visPos;
       }
-      s->getPath()->unlockAccess();
+      core->getMapSource()->unlockAccess();
     }
   }
 

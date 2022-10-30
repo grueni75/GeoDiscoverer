@@ -343,7 +343,7 @@ void WidgetPathInfo::draw(TimestampInMicroseconds t) {
 void WidgetPathInfo::resetPathVisibility(bool widgetVisible) {
   NavigationPath *path=currentPath;
   if (path) {
-    path->lockAccess(__FILE__, __LINE__);
+    core->getMapSource()->lockAccess(__FILE__, __LINE__);
     if (path->getReverse()) {
       startIndex=0;
       endIndex=path->getSelectedSize()-2;
@@ -354,7 +354,7 @@ void WidgetPathInfo::resetPathVisibility(bool widgetVisible) {
     maxEndIndex=path->getSelectedSize()-1;
     indexLen=endIndex-startIndex;
     currentPathName=path->getGpxFilename();
-    path->unlockAccess();
+    core->getMapSource()->unlockAccess();
     core->getConfigStore()->setStringValue("Navigation","pathInfoName",currentPathName,__FILE__, __LINE__);
   }
   core->getThread()->issueSignal(updateVisualizationSignal);
@@ -414,11 +414,11 @@ void WidgetPathInfo::onPathChange(bool widgetVisible, NavigationPath *path, Navi
       case NavigationPathChangeTypeEndPositionAdded:
 
         // If the user has zoomed in, keep the zoom
-        path->lockAccess(__FILE__, __LINE__);
+        core->getMapSource()->lockAccess(__FILE__, __LINE__);
         newEndIndex=path->getSelectedSize()-1;
         reversed=path->getReverse();
         maxEndIndex=path->getSelectedSize()-1;
-        path->unlockAccess();
+        core->getMapSource()->unlockAccess();
         if (newEndIndex>1) {
           if (reversed) {
             if ((startIndex==0)&&(endIndex==newEndIndex-2)) {
@@ -462,7 +462,7 @@ void WidgetPathInfo::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int d
     indexLen=maxEndIndex+1;
   Int indexLenDiff = indexLen - (endIndex-startIndex+1);
   //DEBUG("scaleDiff=%f indexLenDiff=%d",scaleDiff,indexLenDiff);
-  currentPath->lockAccess(__FILE__, __LINE__);
+  core->getMapSource()->lockAccess(__FILE__, __LINE__);
   if (currentPath->getReverse()) {
     newEndIndex=endIndex+indexLenDiff/2;
     if (newEndIndex>maxEndIndex-1)
@@ -489,7 +489,7 @@ void WidgetPathInfo::onTwoFingerGesture(TimestampInMicroseconds t, Int dX, Int d
   endIndex=newEndIndex;
   startIndex=newStartIndex;
   firstTouchDown=true;
-  currentPath->unlockAccess();
+  core->getMapSource()->unlockAccess();
   core->getThread()->issueSignal(updateVisualizationSignal);
 }
 
@@ -500,7 +500,7 @@ void WidgetPathInfo::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
     if (!currentPath)
       return;
     Int dX=x-prevX;
-    currentPath->lockAccess(__FILE__, __LINE__);
+    core->getMapSource()->lockAccess(__FILE__, __LINE__);
     if (currentPath->getReverse()) {
       dX=-dX;
       if ((startIndex-dX>=0)&&(endIndex-dX<=maxEndIndex-1)) {
@@ -513,7 +513,7 @@ void WidgetPathInfo::onTouchDown(TimestampInMicroseconds t, Int x, Int y) {
         endIndex=endIndex-dX;
       }
     }
-    currentPath->unlockAccess();
+    core->getMapSource()->unlockAccess();
     core->getThread()->issueSignal(updateVisualizationSignal);
   }
   prevX=x;
@@ -573,7 +573,7 @@ void WidgetPathInfo::updateVisualization() {
     if (currentPath) {
 
       // Get infos from path
-      currentPath->lockAccess(__FILE__, __LINE__);
+      core->getMapSource()->lockAccess(__FILE__, __LINE__);
       std::string pathName=currentPath->getGpxFilename();
       double pathLength=currentPath->getLength();
       double pathDuration=currentPath->getDuration();
@@ -600,7 +600,7 @@ void WidgetPathInfo::updateVisualization() {
       if (pathStartIndex<0) {
         pathStartIndex=0;
       }
-      currentPath->unlockAccess();
+      core->getMapSource()->unlockAccess();
       //PROFILE_ADD("get path info");
 
       // Get navigation point infos

@@ -61,7 +61,7 @@ void NavigationPath::writeGPXFile(bool forceStorage, bool skipBackup, bool onlyS
   }
 
   // Copy all the data needed such that we do not need to lock the path too long
-  lockAccess(__FILE__, __LINE__);
+  core->getMapSource()->lockAccess(__FILE__, __LINE__);
   if (name=="")
     name=this->name;
   std::string description=this->description;
@@ -76,7 +76,7 @@ void NavigationPath::writeGPXFile(bool forceStorage, bool skipBackup, bool onlyS
   } else {
     mapPositions=this->mapPositions;
   }
-  unlockAccess();
+  core->getMapSource()->unlockAccess();
 
   // Backup the previous file
   if (!skipBackup) {
@@ -227,11 +227,11 @@ void NavigationPath::writeGPXFile(bool forceStorage, bool skipBackup, bool onlyS
   // Cleanup
   xmlFreeDoc(doc);
   if (!errorOccured) {
-    lockAccess(__FILE__, __LINE__);
+    core->getMapSource()->lockAccess(__FILE__, __LINE__);
     if (this->mapPositions.size()==mapPositions.size()) {
       isStored=true;
     }
-    unlockAccess();
+    core->getMapSource()->unlockAccess();
   }
 }
 
@@ -450,15 +450,15 @@ bool NavigationPath::readGPXFile() {
     // Extract data from the metadata section if it exists
     if (GPX11) {
       nodes=findNodes(doc,xpathCtx,"/gpx:gpx/gpx:metadata/*");
-      lockAccess(__FILE__, __LINE__);
+      core->getMapSource()->lockAccess(__FILE__, __LINE__);
       extractInformation(nodes);
-      unlockAccess();
+      core->getMapSource()->unlockAccess();
     }
     if (GPX10) {
       nodes=findNodes(doc,xpathCtx,"/gpx:gpx/*");
-      lockAccess(__FILE__, __LINE__);
+      core->getMapSource()->lockAccess(__FILE__, __LINE__);
       extractInformation(nodes);
-      unlockAccess();
+      core->getMapSource()->unlockAccess();
     }
 
     // Load the points of the path
@@ -620,11 +620,11 @@ bool NavigationPath::readGPXFile() {
 cleanup:
   if (xpathCtx) xmlXPathFreeContext(xpathCtx);
   if (doc) xmlFreeDoc(doc);
-  lockAccess(__FILE__, __LINE__);
+  core->getMapSource()->lockAccess(__FILE__, __LINE__);
   isStored=true;
   hasChanged=true;
   hasBeenLoaded=true;
-  unlockAccess();
+  core->getMapSource()->unlockAccess();
   status.clear();
   core->getNavigationEngine()->setStatus(status, __FILE__, __LINE__);
   return result;

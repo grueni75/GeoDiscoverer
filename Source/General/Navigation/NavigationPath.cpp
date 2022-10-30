@@ -37,7 +37,6 @@ namespace GEODISCOVERER {
 NavigationPath::NavigationPath() : animator(core->getDefaultScreen()) {
 
   // Init variables
-  accessMutex=core->getThread()->createMutex("navigation path access mutex");
   setGpxFilefolder(core->getNavigationEngine()->getTrackPath());
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength", __FILE__, __LINE__);
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance", __FILE__, __LINE__);
@@ -79,9 +78,6 @@ NavigationPath::~NavigationPath() {
   GraphicObject *pathAnimators=core->getDefaultGraphicEngine()->lockPathAnimators(__FILE__, __LINE__);
   pathAnimators->removePrimitive(animatorKey,false);
   core->getDefaultGraphicEngine()->unlockPathAnimators();
-
-  // Free variables
-  core->getThread()->destroyMutex(accessMutex);
 }
 
 // Updates the visualization of the tile (path line and arrows)
@@ -342,7 +338,7 @@ void NavigationPath::updateCrossingTileSegments(std::list<MapContainer*> *mapCon
 void NavigationPath::addEndPosition(MapPosition pos) {
   
   // Decide whether to add a new point or use the last one
-  lockAccess(__FILE__, __LINE__);
+  core->getMapSource()->lockAccess(__FILE__, __LINE__);
   if (!hasLastPoint) {
     hasLastPoint=true;
   } else {
@@ -363,7 +359,7 @@ void NavigationPath::addEndPosition(MapPosition pos) {
   // Path was modified
   hasChanged=true;
   isStored=false;
-  unlockAccess();
+  core->getMapSource()->unlockAccess();
 
   // Update the visualization for each zoom level
   for(std::vector<NavigationPathVisualization*>::iterator i=zoomLevelVisualizations.begin();i!=zoomLevelVisualizations.end();i++) {
@@ -631,11 +627,11 @@ void NavigationPath::removeVisualization(MapContainer* mapContainer) {
 void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition &wayPoint, NavigationInfo &navigationInfo) {
 
   // Lock the path until we have enough information
-  lockAccess(__FILE__, __LINE__);
+  core->getMapSource()->lockAccess(__FILE__, __LINE__);
 
   // Do not calculate if path is not initialized
   if (!isInit) {
-    unlockAccess();
+    core->getMapSource()->unlockAccess();
     return;
   }
 
@@ -648,7 +644,7 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
 
   // All code after this point is using local variables or read-only class members
   // We can safely unlock the general access to the path object
-  unlockAccess();
+  core->getMapSource()->unlockAccess();
 
   // Search for the nearest point on the route
   // In case we have location bearing, use the one that lies most close to the bearing
@@ -1067,7 +1063,7 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
   //DEBUG("%s: index=%d",getGpxFilename().c_str(),index);
 
   // Path may only be changed by one thread
-  lockAccess(file,line);
+  core->getMapSource()->lockAccess(file,line);
 
   // Shall the start flag be hidden?
   if (index==-1) {
@@ -1121,7 +1117,7 @@ void NavigationPath::setStartFlag(Int index, const char *file, int line) {
   updateMetrics();
 
   // Path can be used again
-  unlockAccess();
+  core->getMapSource()->unlockAccess();
 
   // Inform the widget engine
   core->onPathChange(this, NavigationPathChangeTypeFlagSet);
@@ -1133,7 +1129,7 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
   //DEBUG("%s: index=%d",getGpxFilename().c_str(),index);
 
   // Path may only be changed by one thread
-  lockAccess(file, line);
+  core->getMapSource()->lockAccess(file, line);
 
   // Shall the end flag be hidden?
   if (index==-1) {
@@ -1187,7 +1183,7 @@ void NavigationPath::setEndFlag(Int index, const char *file, int line) {
   updateMetrics();
 
   // Path can be used again
-  unlockAccess();
+  core->getMapSource()->unlockAccess();
 
   // Inform the widget engine
   core->onPathChange(this, NavigationPathChangeTypeFlagSet);

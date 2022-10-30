@@ -599,7 +599,7 @@ void NavigationEngine::updateTrack() {
   //DEBUG("before recorded track update",NULL);
 
   // If the track was just loaded, we need to add this point as a stable one
-  recordedTrack->lockAccess(__FILE__, __LINE__);
+  core->getMapSource()->lockAccess(__FILE__, __LINE__);
   if (recordedTrack->getHasBeenLoaded()) {
     pointMeetsCriterias=true;
     recordedTrack->setHasBeenLoaded(false);
@@ -619,7 +619,7 @@ void NavigationEngine::updateTrack() {
       pointMeetsCriterias=true;
     }
   }
-  recordedTrack->unlockAccess();
+  core->getMapSource()->unlockAccess();
 
   // Add the new point if it meets the criterias
   if (pointMeetsCriterias) {
@@ -647,14 +647,14 @@ bool NavigationEngine::setRecordTrack(bool recordTrack, bool ignoreIsInit, bool 
 
   // Interrupt the track if there is a previous point
   if ((recordTrack)&&(!this->recordTrack)) {
-    recordedTrack->lockAccess(__FILE__, __LINE__);
+    core->getMapSource()->lockAccess(__FILE__, __LINE__);
     bool addPathInterruptedPos=false;
     if (recordedTrack->getHasLastPoint()) {
       if (recordedTrack->getLastPoint()!=NavigationPath::getPathInterruptedPos()) {
         addPathInterruptedPos=true;
       }
     }
-    recordedTrack->unlockAccess();
+    core->getMapSource()->unlockAccess();
     if (addPathInterruptedPos)
       recordedTrack->addEndPosition(NavigationPath::getPathInterruptedPos());
   }
@@ -681,11 +681,11 @@ void NavigationEngine::createNewTrack() {
     return;
   }
   recordedTrack->writeGPXFile(); // locking is handled within writeGPXFile
-  recordedTrack->lockAccess(__FILE__, __LINE__);
+  core->getMapSource()->lockAccess(__FILE__, __LINE__);
   recordedTrack->deinit();
   recordedTrack->init();
   recordedTrack->setIsInit(true);
-  recordedTrack->unlockAccess();
+  core->getMapSource()->unlockAccess();
   lockRecordedTrack(__FILE__, __LINE__);
   core->getConfigStore()->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename(), __FILE__, __LINE__);
   unlockRecordedTrack();
@@ -1417,17 +1417,17 @@ void NavigationEngine::setActiveRoute(NavigationPath *route) {
     return;
   }
   if (activeRoute!=NULL) {
-    activeRoute->lockAccess(__FILE__, __LINE__);
+    core->getMapSource()->lockAccess(__FILE__, __LINE__);
     activeRoute->setBlinkMode(false, __FILE__, __LINE__);
-    activeRoute->unlockAccess();
+    core->getMapSource()->unlockAccess();
   }
   core->getThread()->lockMutex(activeRouteMutex, __FILE__, __LINE__);
   activeRoute=route;
   core->getThread()->unlockMutex(activeRouteMutex);
   if (activeRoute) {
-    activeRoute->lockAccess(__FILE__, __LINE__);
+    core->getMapSource()->lockAccess(__FILE__, __LINE__);
     activeRoute->setBlinkMode(true, __FILE__, __LINE__);
-    activeRoute->unlockAccess();
+    core->getMapSource()->unlockAccess();
     core->getConfigStore()->setStringValue("Navigation","activeRoute",activeRoute->getGpxFilename(),__FILE__, __LINE__);
   } else {
     core->getConfigStore()->setStringValue("Navigation","activeRoute","none",__FILE__, __LINE__);
@@ -1937,10 +1937,10 @@ bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &
 // Exports the active route inclusive selection as an GPX file
 void NavigationEngine::exportActiveRoute() {
   if (activeRoute!=NULL) {
-    activeRoute->lockAccess(__FILE__,__LINE__);
+    core->getMapSource()->lockAccess(__FILE__,__LINE__);
     std::string name = activeRoute->getGpxFilename() + " " + core->getClock()->getFormattedDate();
     std::string filepath = getExportRoutePath() + "/" + name + ".gpx";
-    activeRoute->unlockAccess();
+    core->getMapSource()->unlockAccess();
     activeRoute->writeGPXFile(true,true,true,true,name,filepath);
     INFO("exported to %s",getExportRoutePath().c_str());
 

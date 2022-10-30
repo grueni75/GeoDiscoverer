@@ -44,7 +44,6 @@ protected:
   std::vector<MapPosition> mapPositions;          // List of map positions the path consists of
   Int startIndex;                                 // Current start in mapPosition list
   Int endIndex;                                   // Current end in mapPosition list
-  ThreadMutexInfo *accessMutex;                   // Mutex for accessing the path
   std::string name;                               // The name of the path
   std::string description;                        // The description of this path
   std::string gpxFilefolder;                      // Folder where the gpx file is stored
@@ -345,14 +344,6 @@ public:
 
   double getMinAltitude() const {
     return minAltitude;
-  }
-
-  void lockAccess(const char *file, int line) {
-    core->getThread()->lockMutex(accessMutex, file, line);
-  }
-
-  void unlockAccess() {
-    core->getThread()->unlockMutex(accessMutex);
   }
 
   Int getSelectedSize() const {
