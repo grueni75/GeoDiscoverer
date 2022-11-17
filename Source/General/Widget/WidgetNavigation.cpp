@@ -333,7 +333,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
   if ((*navigationInfo!=prevNavigationInfo)||(firstRun)) {
 
     // Is a turn coming?
-    bool activateWidget = false;
     /*navigationInfo->setTurnDistance(100.0);
     navigationInfo->setTurnAngle(90.0);*/
     if (navigationInfo->getTurnDistance()!=NavigationInfo::getUnknownDistance()) {
@@ -344,7 +343,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       else
         fontEngine->lockFont("sansSmall",__FILE__, __LINE__);
       showTurn=true;
-      activateWidget=true;
       unitConverter->formatMeters(navigationInfo->getTurnDistance(),value,unit);
       infos.str("");
       infos << value << " " << unit;
@@ -440,7 +438,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&durationValueFontString,infos.str(),statusTextWidthLimit);
-        activateWidget=true;
       }
       if (navigationInfo->getAltitude()!=NavigationInfo::getUnknownDistance()) {
         std::string lockedUnit = unitConverter->getUnitSystem()==ImperialSystem ? "mi" : "m";
@@ -448,7 +445,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&altitudeValueFontString,infos.str(),statusTextWidthLimit);
-        activateWidget=true;
       } else {
         fontEngine->updateString(&altitudeValueFontString,"unknown",statusTextWidthLimit);
       }
@@ -457,7 +453,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&trackLengthValueFontString,infos.str(),statusTextWidthLimit);
-        activateWidget=true;
       } else {
         fontEngine->updateString(&trackLengthValueFontString,"unknown",statusTextWidthLimit);
       }
@@ -466,7 +461,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&speedValueFontString,infos.str(),statusTextWidthLimit);
-        activateWidget=true;
       } else {
         fontEngine->updateString(&speedValueFontString,"unknown",statusTextWidthLimit);
       }
@@ -481,7 +475,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         infos.str("");
         infos << value << " " << unit;
         fontEngine->updateString(&distanceValueFontString,infos.str(),isWatch ? -1 : statusTextWidthLimit);
-        activateWidget=true;
       } else {
         fontEngine->updateString(&distanceValueFontString,"unknown",isWatch ? -1 : statusTextWidthLimit);
       }
@@ -590,7 +583,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
         } else {
           compassObject.setAngle(navigationInfo->getLocationBearing());
         }
-        activateWidget=true;
         hideCompass=false;
       }
     }
@@ -613,7 +605,6 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
           targetObject.setAngle(navigationInfo->getTargetBearing());
         }
         hideTarget=false;
-        activateWidget=true;
       }
     }
     if (prevNavigationInfo.getNearestNavigationPointBearing()!=navigationInfo->getNearestNavigationPointBearing()) {
@@ -636,13 +627,13 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
           navigationPointObject.setAngle(navigationInfo->getNearestNavigationPointBearing());
         }
         hideNavigationPoint=false;
-        activateWidget=true;
       }
     }
     prevNavigationInfo=*navigationInfo;
     navigationEngine->unlockNavigationInfo();
 
     // Depending on the navigation type, widget may or may not be activated
+    bool activateWidget=true;
     switch(navigationInfo->getType()) {
       case NavigationInfoTypeTarget:
         // Always show widget
@@ -658,6 +649,7 @@ bool WidgetNavigation::work(TimestampInMicroseconds t) {
       default:
         FATAL("unsupported navigation info type",NULL);
     }
+    activateWidget=false;
 
     // Activate widget if not already
     if (!widgetContainer->getWidgetEngine()->getWidgetsActive()) {

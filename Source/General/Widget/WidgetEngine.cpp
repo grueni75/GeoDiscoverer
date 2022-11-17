@@ -1446,7 +1446,7 @@ void WidgetEngine::createGraphic() {
       position.setLandscapeY(82.0);
       position.setLandscapeZ(0);
       config.addPosition(position);
-      config.setInactiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setParameter("iconFilename","navigationBackground");
       config.setParameter("directionIconFilename","navigationDirection");
       config.setParameter("separatorIconFilename","navigationSeparator");
