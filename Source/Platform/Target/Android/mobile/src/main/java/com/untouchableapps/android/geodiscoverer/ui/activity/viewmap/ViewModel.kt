@@ -705,7 +705,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       for (i in groups.indices) {
         addAddressPointGroup(groups[i])
       }
-      addAddressPointGroup("POIs")
+      integratedListTabs.add("POIs")
       for (i in integratedListTabs.indices) {
         if (integratedListTabs[i] == selectedGroupName) {
           integratedListSelectedTab = i
