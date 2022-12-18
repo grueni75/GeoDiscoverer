@@ -557,6 +557,13 @@ public class GDService extends Service {
         return Unit.INSTANCE;
       });
     }
+
+    // Handle heading update
+    if (intent.getAction().equals("overrideCompassBearing")) {
+      //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","overriding heading");
+      coreObject.overrideCompassBearing(intent.getIntExtra("bearing",0));
+    }
+
     return START_STICKY;
   }
   

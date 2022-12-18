@@ -116,6 +116,11 @@
                   <xsd:documentation>Maximum memory to use in MB for caching raster files in GDAL.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>                            
+              <xsd:element name="ignoreCompassSensorTimeout" type="xsd:integer" default="30">
+                <xsd:annotation>
+                  <xsd:documentation>Timeout in seconds after built-in composs sensor is used again.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>

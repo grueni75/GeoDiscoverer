@@ -196,6 +196,10 @@ public class GDCore implements
   BatteryManager batteryManager;
   public String batteryStatus;
 
+  /** Timestamp after the compass sensor is used again */
+  long ignoreCompassSensorEnd=0;
+  long ignoreCompassSensorTimeout=0;
+
   /** Gesture detectors */
   GestureDetector gestureDetector;
   ScaleGestureDetector scaleGestureDetector;
@@ -851,6 +855,7 @@ public class GDCore implements
       coreLock.lock();
       coreEarlyInitComplete=true;
       coreLock.unlock();
+      ignoreCompassSensorTimeout = Integer.parseInt(configStoreGetStringValue("General", "ignoreCompassSensorTimeout"))*1000;
       cmdExecuted=false; // forward message to activity
     }
     if (cmd.startsWith("setFormattedNavigationInfo(")) {
@@ -1173,7 +1178,7 @@ public class GDCore implements
     }
     
     // Compute the orientation corrected by the screen rotation
-    if ((lastMagneticField!=null) && (lastAcceleration!=null) && (coreInitialized)) {
+    if ((lastMagneticField!=null) && (lastAcceleration!=null) && (coreInitialized) && (System.currentTimeMillis()>=ignoreCompassSensorEnd)) {
       SensorManager.getRotationMatrix(R, I, lastAcceleration, lastMagneticField);
       SensorManager.remapCoordinateSystem(R,SensorManager.AXIS_X,SensorManager.AXIS_Z, correctedR);
       SensorManager.getOrientation(correctedR, orientation);
@@ -1183,6 +1188,14 @@ public class GDCore implements
       executeCoreCommand("compassBearingChanged",String.valueOf(orientation[0]));
     }
     
+  }
+
+  /** Called when a the orientation sensor has changed */
+  public void overrideCompassBearing(float value) {
+    ignoreCompassSensorEnd=System.currentTimeMillis()+ignoreCompassSensorTimeout;
+    if (coreInitialized) {
+      executeCoreCommand("compassBearingChanged", String.valueOf(value));
+    }
   }
 
   // Other calls back from the sensor manager
