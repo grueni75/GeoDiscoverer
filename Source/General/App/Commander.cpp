@@ -656,6 +656,7 @@ std::string Commander::execute(std::string cmd) {
   }
   if (cmdName=="decideContinueOrNewTrack") {
     dispatch(cmd);
+    result="false";
     cmdExecuted=true;
   }
   if (cmdName=="changeMapLayer") {

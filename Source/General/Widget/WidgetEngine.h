@@ -25,6 +25,7 @@
 #include <MapPosition.h>
 #include <WidgetContainer.h>
 #include <WidgetConfig.h>
+#include <WidgetCheckbox.h>
 
 #ifndef WIDGETENGINE_H_
 #define WIDGETENGINE_H_
@@ -33,6 +34,7 @@ namespace GEODISCOVERER {
 
 typedef std::map<std::string, WidgetPage*> WidgetPageMap;
 typedef std::pair<std::string, WidgetPage*> WidgetPagePair;
+typedef std::pair<std::string, WidgetCheckbox*> WidgetCommandPair;
 
 class WidgetEngine {
 
@@ -60,6 +62,7 @@ protected:
   bool enableFingerMenu;                                // Indicates if finger menu is enabled
   Int maxPathDistance;                                  // Maximum distance in pixels to a path to show it to the user
   int readAccessCount;                                  // Number of read accesses to this object
+  std::list<WidgetCommandPair> queuedCommands;          // List of commands to execute
 
   // Adds a widget to a page
   void addWidgetToPage(WidgetConfig config);
@@ -153,6 +156,12 @@ public:
 
   // Updates the positions of widgets that shall be positioned relative to a window
   void setWindow(Int x, Int y, Int width, Int height);
+
+  // Schedules a command to execute after graphic operation is done
+  void queueCommand(std::string command, WidgetCheckbox *checkbox);
+
+  // Executes all queued commands
+  void executeCommands();
 
   // Getters and setters
   GraphicColor getSelectedWidgetColor() const

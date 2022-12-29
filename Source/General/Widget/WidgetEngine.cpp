@@ -22,6 +22,7 @@
 
 
 #include <Core.h>
+#include <Commander.h>
 #include <WidgetEngine.h>
 #include <Device.h>
 #include <WidgetButton.h>
@@ -2599,5 +2600,24 @@ void WidgetEngine::lockAccessAfterReadComplete(const char *file, int line) {
   } 
 }
 
+// Schedules a command to execute after graphic operation is done
+void WidgetEngine::queueCommand(std::string command, WidgetCheckbox *checkbox) {
+  queuedCommands.push_back(WidgetCommandPair(command,checkbox));
+}
+
+// Execizes all scheduled commands
+void WidgetEngine::executeCommands() {
+  for (std::list<WidgetCommandPair>::iterator i=queuedCommands.begin();i!=queuedCommands.end();i++) {
+    std::string result=core->getCommander()->execute(i->first);
+    if (i->second!=NULL) {
+      if (result!="false") {
+        device->getGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+        i->second->updateCheckedState();
+        device->getGraphicEngine()->unlockDrawing();
+      }
+    }
+  }
+  queuedCommands.clear();
+}
 
 }

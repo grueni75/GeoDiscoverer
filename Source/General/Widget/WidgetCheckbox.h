@@ -42,7 +42,7 @@ protected:
   TimestampInMicroseconds nextUpdateTime;   // Next timestamp when to update the widget
 
   // Updates the state of the check box
-  bool update(bool checked, bool executeCommand);
+  void update(bool checked, bool executeCommand);
 
 public:
 
@@ -103,6 +103,11 @@ public:
   void setUpdateInterval(TimestampInMicroseconds updateInterval) {
     this->updateInterval = updateInterval;
   }
+
+  void updateCheckedState() {
+    nextUpdateTime=0;
+  }
+
 };
 
 }

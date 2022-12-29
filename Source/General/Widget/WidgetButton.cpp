@@ -86,13 +86,13 @@ bool WidgetButton::work(TimestampInMicroseconds t) {
 
     // Repeat the command if the initial delay is over
     if ((repeat)&&(t>=nextDispatchTime)) {
-      core->getCommander()->execute(command);
+      widgetContainer->getWidgetEngine()->queueCommand(command,NULL);
       nextDispatchTime=t+widgetContainer->getWidgetEngine()->getButtonRepeatPeriod();
     }
 
     // Execute the long press command if delay is long enough
     if ((longPressTime!=0)&&(t>=longPressTime)) {
-      core->getCommander()->execute(longPressCommand);
+      widgetContainer->getWidgetEngine()->queueCommand(longPressCommand,NULL);
       skipCommand=true;
     }
     
@@ -119,7 +119,7 @@ void WidgetButton::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool cance
 
     // Execute the command only if the repeating dispatching has not yet started
     if ((!skipCommand)&&((!repeat)||(t<nextDispatchTime))) {
-      core->getCommander()->execute(command);
+      widgetContainer->getWidgetEngine()->queueCommand(command,NULL);
     }
     skipCommand=false;
   }

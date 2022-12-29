@@ -58,6 +58,7 @@ bool WidgetCheckbox::work(TimestampInMicroseconds t) {
   bool changed=WidgetPrimitive::work(t);
   if (t>nextUpdateTime) {
     Int checked=core->getConfigStore()->getIntValue(stateConfigPath,stateConfigName,__FILE__, __LINE__);
+    //DEBUG("%s=%d",stateConfigName.c_str(),checked);
     update(checked,false);
     nextUpdateTime=t+updateInterval;
   }
@@ -65,26 +66,23 @@ bool WidgetCheckbox::work(TimestampInMicroseconds t) {
 }
 
 // Updates the state of the check box
-bool WidgetCheckbox::update(bool checked, bool executeCommand) {
+void WidgetCheckbox::update(bool checked, bool executeCommand) {
   if (!checked) {
     if (executeCommand) {
-      std::string result=core->getCommander()->execute(uncheckedCommand);
-      if (result=="false")
-        return false;
+      widgetContainer->getWidgetEngine()->queueCommand(uncheckedCommand,this);
+    } else {
+      texture=uncheckedTexture;
     }
-    texture=uncheckedTexture;
     //DEBUG("executing unchecked command",NULL);
   } else {
     //DEBUG("executing checked command",NULL);
     if (executeCommand) {
-      std::string result=core->getCommander()->execute(checkedCommand);
-      if (result=="false")
-        return false;
+      widgetContainer->getWidgetEngine()->queueCommand(checkedCommand,this);
+    } else {
+      texture=checkedTexture;
     }
-    texture=checkedTexture;
   }
   isUpdated=true;
-  return true;
 }
 
 // Executed if the widget has been untouched
@@ -92,8 +90,7 @@ void WidgetCheckbox::onTouchUp(TimestampInMicroseconds t, Int x, Int y, bool can
   WidgetPrimitive::onTouchUp(t,x,y,cancel);
   if (getIsHit()) {
     Int checked=core->getConfigStore()->getIntValue(stateConfigPath,stateConfigName,__FILE__, __LINE__);
-    if (update(1-checked,true))
-      checked=1-checked;
+    update(1-checked,true);
   }
 }
 

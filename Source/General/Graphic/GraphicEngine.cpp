@@ -839,6 +839,9 @@ bool GraphicEngine::draw(bool forceRedraw) {
     core->onDataChange();
   }
 
+  // Executes commands (if any)
+  device->getWidgetEngine()->executeCommands();
+
   // Enforce a frame rate by waiting the rest of the time
   TimestampInMicroseconds currentDrawingTime = core->getClock()->getMicrosecondsSinceStart() - currentTime;
   if (targetDrawingTime>currentDrawingTime) {
