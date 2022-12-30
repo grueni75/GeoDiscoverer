@@ -464,7 +464,17 @@
                 <xsd:annotation>
                   <xsd:documentation>Minimum speed required to trigger an alert.</xsd:documentation>
                 </xsd:annotation>
-              </xsd:element>            
+              </xsd:element>
+              <xsd:element name="networkServerEnabled" type="xsd:boolean" default="1">
+                <xsd:annotation>
+                  <xsd:documentation>Indicates if the network server is enabled.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="networkServerPort" type="xsd:integer" default="2222">
+                <xsd:annotation>
+                  <xsd:documentation>Port number of the network server.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
             </xsd:sequence>
           </xsd:complexType>
         </xsd:element>

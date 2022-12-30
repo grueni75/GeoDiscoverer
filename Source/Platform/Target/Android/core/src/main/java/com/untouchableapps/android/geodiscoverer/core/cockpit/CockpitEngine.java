@@ -23,11 +23,22 @@
 package com.untouchableapps.android.geodiscoverer.core.cockpit;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
+import android.os.Message;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitAppInterface.AlertType;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Condition;
@@ -51,6 +62,9 @@ public class CockpitEngine {
   
   // Last infos used for updating
   String lastInfosAsSSV = "";
+
+  // Current cockpit infos
+  CockpitInfos cockpitInfos=null;
   
   // Distance to turn
   String currentTurnDistance="-";
@@ -72,6 +86,12 @@ public class CockpitEngine {
   int fastVibrateCount = 1;
   boolean quitVibrateThread = false;
   Thread vibrateThread = null;
+
+  // Thread that manages network communication
+  boolean networkServerEnabled = false;
+  boolean quitNetworkServerThread = false;
+  Thread networkServerThread = null;
+  int networkServerPort = -1;
 
   // Minimum speed required to trigger an alert
   float minSpeedToAlert;
@@ -139,6 +159,8 @@ public class CockpitEngine {
     offRouteAlertFastCount = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertFastCount"));
     offRouteAlertSlowPeriod = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertSlowPeriod"));
     minSpeedToAlert = Float.parseFloat(coreObject.configStoreGetStringValue("Cockpit", "minSpeedToAlert"));
+    networkServerEnabled = (Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "networkServerEnabled"))!=0);
+    networkServerPort = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "networkServerPort"));
 
     // Add all activated apps
     if (Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit/App/Vibration", "active"))>0) {
@@ -148,6 +170,101 @@ public class CockpitEngine {
   
   /** Starts the cockpit apps */
   public void start() {
+
+    // Start the vibrate thread
+    startVibrateThread();
+
+    // Start the network server thread
+    if (networkServerEnabled)
+      startNetworkServerThread();
+
+    // Inform metawatch about this app
+    for (CockpitAppInterface app : apps) {
+      app.start();
+    }
+    lastUpdate = 0;
+    update(null,true);
+    lastUpdate = 0;
+  }
+
+  /** Starts the vibrate thread */
+  public void startNetworkServerThread() {
+
+    // Stop the currently running network server thread
+    if ((networkServerThread!=null)&&(networkServerThread.isAlive())) {
+      quitNetworkServerThread();
+    }
+    quitNetworkServerThread=false;
+
+    // Open server socket
+    final ServerSocket serverSocket;
+    try {
+      serverSocket = new ServerSocket();
+      serverSocket.setReuseAddress(true);
+      serverSocket.bind(new InetSocketAddress(networkServerPort));
+    }
+    catch (IOException e) {
+      coreObject.executeAppCommand(
+          "errorDialog(Cannot create server socket for CockpitEngine!)"
+      );
+      return;
+    }
+
+    // Run network communication
+    networkServerThread = new Thread(new Runnable() {
+      public void run() {
+        coreObject.setThreadPriority(2);
+        while (!quitNetworkServerThread) {
+          try {
+            Socket client = serverSocket.accept();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            if (cockpitInfos!=null) {
+              baos.write((cockpitInfos.locationBearing + "\n").getBytes());
+              baos.write((cockpitInfos.locationSpeed + "\n").getBytes());
+              baos.write((cockpitInfos.trackLength + "\n").getBytes());
+              baos.write((cockpitInfos.targetBearing + "\n").getBytes());
+              baos.write((cockpitInfos.targetDistance + "\n").getBytes());
+              baos.write((cockpitInfos.targetDuration + "\n").getBytes());
+              baos.write((cockpitInfos.turnDistance + "\n").getBytes());
+              baos.write((cockpitInfos.turnAngle + "\n").getBytes());
+              baos.write((cockpitInfos.offRoute ? "true\n" : "false\n").getBytes());
+              baos.write((cockpitInfos.routeDistance + "\n").getBytes());
+              baos.write((cockpitInfos.nearestNavigationPointBearing + "\n").getBytes());
+              baos.write((cockpitInfos.nearestNavigationPointDistance + "\n").getBytes());
+            }
+            client.getOutputStream().write(baos.toByteArray());
+            client.getOutputStream().close();
+            client.close();
+          }
+          catch (IOException e) {
+            ; // repeat
+          }
+          coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","cockpit infos served");
+        }
+      }
+    });
+    networkServerThread.start();y
+  }
+
+  /** Stops the network server thread */
+  void quitNetworkServerThread() {
+    boolean repeat=true;
+    while(repeat) {
+      repeat=false;
+      try {
+        quitNetworkServerThread=true;
+        networkServerThread.interrupt();
+        networkServerThread.join();
+      }
+      catch(InterruptedException e) {
+        repeat=true;
+      }
+    }
+    networkServerThread=null;
+  }
+
+  /** Starts the vibrate thread */
+  public void startVibrateThread() {
 
     // Start the vibrate thread
     if ((vibrateThread!=null)&&(vibrateThread.isAlive())) {
@@ -185,13 +302,13 @@ public class CockpitEngine {
                 break;
               }
 
-              // Skip vibrate if we are not off route anymore 
+              // Skip vibrate if we are not off route anymore
               // and this is is not the first vibrate
               if (((!currentOffRoute)||(!currentTurnDistance.equals("-")))&&(fastVibrateCount>1)) {
                 coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG, "GDApp", String.format("Skipping alert (currentOffRoute=%s, currentTurnDistance=%s, fastVibrateCount=%d)",Boolean.toString(currentOffRoute),currentTurnDistance,fastVibrateCount));
                 break;
               }
-              
+
               // Alert the user of all registered cockpit apps
               //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "vibrateThread: currentOffRoute=" + Boolean.toString(currentOffRoute));
               for (CockpitAppInterface app : apps) {
@@ -200,8 +317,8 @@ public class CockpitEngine {
                 else
                   app.alert(AlertType.offRoute,fastVibrateCount>1);
               }
-              
-              // Repeat if off route 
+
+              // Repeat if off route
               // Vibrate fast at the beginning, slow afterwards
               // Quit if a new vibrate is requested or we are on route again
               if ((currentOffRoute)&&(currentTurnDistance.equals("-"))) {
@@ -238,16 +355,8 @@ public class CockpitEngine {
           }
         }
       }
-    });   
+    });
     vibrateThread.start();
-    
-    // Inform metawatch about this app
-    for (CockpitAppInterface app : apps) {
-      app.start();
-    }
-    lastUpdate = 0;
-    update(null,true);
-    lastUpdate = 0;
   }
 
   /** Stops the vibrate thread */
@@ -276,15 +385,16 @@ public class CockpitEngine {
     String[] infosAsArray = infos.split(";");
     cockpitInfos.locationBearing = infosAsArray[0];
     cockpitInfos.locationSpeed = infosAsArray[1];
-    cockpitInfos.targetBearing = infosAsArray[2];
-    cockpitInfos.targetDistance = infosAsArray[3];
-    cockpitInfos.targetDuration = infosAsArray[4];
-    cockpitInfos.turnAngle = infosAsArray[5];
-    cockpitInfos.turnDistance = infosAsArray[6];
-    cockpitInfos.offRoute = infosAsArray[7].equals("off route");
-    cockpitInfos.routeDistance = infosAsArray[8];
-    cockpitInfos.nearestNavigationPointBearing = infosAsArray[9];
-    cockpitInfos.nearestNavigationPointDistance = infosAsArray[10];
+    cockpitInfos.trackLength = infosAsArray[2];
+    cockpitInfos.targetBearing = infosAsArray[3];
+    cockpitInfos.targetDistance = infosAsArray[4];
+    cockpitInfos.targetDuration = infosAsArray[5];
+    cockpitInfos.turnAngle = infosAsArray[6];
+    cockpitInfos.turnDistance = infosAsArray[7];
+    cockpitInfos.offRoute = infosAsArray[8].equals("off route");
+    cockpitInfos.routeDistance = infosAsArray[9];
+    cockpitInfos.nearestNavigationPointBearing = infosAsArray[10];
+    cockpitInfos.nearestNavigationPointDistance = infosAsArray[11];
     return cockpitInfos;
   }
 
@@ -300,7 +410,19 @@ public class CockpitEngine {
     // Obtain the dashboard infos
     if (infosAsSSV.equals(""))
       return;
-    CockpitInfos cockpitInfos = createCockpitInfo(infosAsSSV);
+    cockpitInfos = createCockpitInfo(infosAsSSV);
+    /*coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","locationBearing="+cockpitInfos.locationBearing);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","locationSpeed="+cockpitInfos.locationSpeed);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","trackLength="+cockpitInfos.trackLength);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","targetBearing="+cockpitInfos.targetBearing);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","targetDistance="+cockpitInfos.targetDistance);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","targetDuration="+cockpitInfos.targetDuration);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","turnAngle="+cockpitInfos.turnAngle);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","turnDistance="+cockpitInfos.turnDistance);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","offRoute="+cockpitInfos.offRoute);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","routeDistance="+cockpitInfos.routeDistance);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","nearestNavigationPointBearing="+cockpitInfos.nearestNavigationPointBearing);
+    coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","nearestNavigationPointDistance="+cockpitInfos.nearestNavigationPointDistance);*/
     currentTurnDistance = cockpitInfos.turnDistance;
     currentOffRoute = cockpitInfos.offRoute;
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "update: currentOffRoute=" + Boolean.toString(currentOffRoute));
@@ -375,6 +497,10 @@ public class CockpitEngine {
 
     // Stop the vibration thread
     quitVibrateThread();
+
+    // Stop the network server thread
+    if (networkServerEnabled)
+      quitNetworkServerThread();
 
     // Stop all apps
     for (CockpitAppInterface app : apps) {

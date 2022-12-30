@@ -32,6 +32,9 @@ public class CockpitInfos {
   /** Current speed in m/s */
   public String locationSpeed;
 
+  /** Track length in m */
+  public String trackLength;
+
   /** Bearing towards the given target */
   public String targetBearing;
 

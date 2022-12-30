@@ -1628,6 +1628,8 @@ void NavigationEngine::computeNavigationInfo() {
       infos << ";" << value << " " << unit;
     } else
       infos << ";-";
+    core->getUnitConverter()->formatMeters(navigationInfo.getTrackLength(),value,unit);
+    infos << ";" << value << " " << unit;
     if (navigationInfo.getTargetBearing()!=NavigationInfo::getUnknownAngle())
       infos << ";" << navigationInfo.getTargetBearing();
     else
