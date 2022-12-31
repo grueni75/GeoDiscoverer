@@ -237,13 +237,13 @@ public class CockpitEngine {
             client.close();
           }
           catch (IOException e) {
-            ; // repeat
+            coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","network server thread interrupted");
           }
           coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","cockpit infos served");
         }
       }
     });
-    networkServerThread.start();y
+    networkServerThread.start();
   }
 
   /** Stops the network server thread */
@@ -253,8 +253,12 @@ public class CockpitEngine {
       repeat=false;
       try {
         quitNetworkServerThread=true;
-        networkServerThread.interrupt();
+        Socket clientSocket = new Socket("localhost",networkServerPort);
+        clientSocket.close();
         networkServerThread.join();
+      }
+      catch(IOException e) {
+        repeat=true;
       }
       catch(InterruptedException e) {
         repeat=true;

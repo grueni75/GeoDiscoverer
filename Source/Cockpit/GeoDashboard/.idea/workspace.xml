@@ -14,13 +14,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c9e79f9a-25b2-4976-9b88-f17693dc2c08" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../General/Navigation/NavigationEngine.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../General/Navigation/NavigationEngine.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/cockpit/CockpitEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/cockpit/CockpitEngine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/cockpit/CockpitInfos.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/cockpit/CockpitInfos.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../config.xsd" beforeDir="false" afterPath="$PROJECT_DIR$/../../config.xsd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/export/debug/GeoDiscovererMobileDebug20221230.apk" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/export/debug/GeoDiscovererMobileDebug20221230.apk" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
