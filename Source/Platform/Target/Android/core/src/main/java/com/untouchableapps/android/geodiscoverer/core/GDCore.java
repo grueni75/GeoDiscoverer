@@ -175,7 +175,7 @@ public class GDCore implements
   public GDAppInterface appIf = null;
 
   // Indicates if core is running on a watch
-  boolean isWatch = false;
+  public boolean isWatch = false;
 
   // Stores the mapping of channel names to file names
   public Hashtable<String, Bundle> channelPathToFilePath = new Hashtable<String, Bundle>();

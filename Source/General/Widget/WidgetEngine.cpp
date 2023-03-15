@@ -1401,6 +1401,8 @@ void WidgetEngine::createGraphic() {
       position.setLandscapeZ(0);
       config.addPosition(position);
       config.setInactiveColor(GraphicColor(255,255,255,100));
+    } else {
+      config.setInactiveColor(GraphicColor(255,255,255,255));
     }
     if (deviceName=="Watch") {
       position=WidgetPosition();
@@ -1412,7 +1414,6 @@ void WidgetEngine::createGraphic() {
       position.setLandscapeY(0.0);
       position.setLandscapeZ(0);
       config.addPosition(position);
-      config.setInactiveColor(GraphicColor(255,255,255,255));
       config.setParameter("iconFilename","navigationWatchBackground");
       config.setParameter("directionIconFilename","navigationWatchDirection");
       config.setParameter("arrowIconFilename","navigationWatchArrow");
@@ -1447,7 +1448,6 @@ void WidgetEngine::createGraphic() {
       position.setLandscapeY(82.0);
       position.setLandscapeZ(0);
       config.addPosition(position);
-      config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setParameter("iconFilename","navigationBackground");
       config.setParameter("directionIconFilename","navigationDirection");
       config.setParameter("separatorIconFilename","navigationSeparator");

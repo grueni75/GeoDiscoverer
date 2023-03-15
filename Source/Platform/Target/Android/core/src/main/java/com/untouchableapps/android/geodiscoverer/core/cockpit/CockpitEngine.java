@@ -160,6 +160,7 @@ public class CockpitEngine {
     offRouteAlertSlowPeriod = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertSlowPeriod"));
     minSpeedToAlert = Float.parseFloat(coreObject.configStoreGetStringValue("Cockpit", "minSpeedToAlert"));
     networkServerEnabled = (Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "networkServerEnabled"))!=0);
+    if (coreObject.isWatch) networkServerEnabled=false;
     networkServerPort = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "networkServerPort"));
 
     // Add all activated apps
