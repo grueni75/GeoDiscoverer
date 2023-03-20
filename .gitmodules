@@ -11,3 +11,6 @@
 	path = ThirdParty/jmdns
 	url = git@github.com:grueni75/jmdns
 
+[submodule "ThirdParty/acra"]
+	path = ThirdParty/acra
+	url = ../acra
