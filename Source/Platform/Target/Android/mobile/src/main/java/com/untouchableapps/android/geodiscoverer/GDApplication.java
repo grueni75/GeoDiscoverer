@@ -159,20 +159,22 @@ public class GDApplication extends Application implements GDAppInterface {
     super.attachBaseContext(base);
 
     // Init ACRA
-    CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this);
-    builder
-        .withBuildConfigClass(BuildConfig.class);
-    builder.getPluginConfigurationBuilder(NotificationConfigurationBuilder.class)
-        .withResTickerText(R.string.crash_notification_ticker_text)
-        .withResTitle(R.string.crash_notification_title)
-        .withResText(R.string.crash_notification_text)
-        .withResChannelName(R.string.crash_notification_channel)
-        .withEnabled(true);
-    builder.getPluginConfigurationBuilder(MailSenderConfigurationBuilder.class)
-        .withMailTo("matthias.gruenewald@gmail.com")
-        .withResSubject(R.string.crash_mail_subject)
-        .withEnabled(true);
-    ACRA.init(this, builder);
+    ACRA.init(this, new CoreConfigurationBuilder()
+      .withBuildConfigClass(BuildConfig.class)
+      .withPluginConfigurations(
+        new MailSenderConfigurationBuilder()
+          .withMailTo("matthias.gruenewald@gmail.com")
+          .withSubject(getString(R.string.crash_mail_subject))
+          .withBody(getString(R.string.crash_mail_body))
+          .build(),
+        new NotificationConfigurationBuilder()
+          .withTickerText(getString(R.string.crash_notification_ticker_text))
+          .withTitle(getString(R.string.crash_notification_title))
+          .withText(getString(R.string.crash_notification_text))
+          .withChannelName(getString(R.string.crash_notification_channel))
+          .build()
+      )
+    );
   }
 
   /** Called when the application starts */

@@ -68,9 +68,10 @@
   <string name="help">Help</string>
   <string name="send_logs">Send logs</string>
   <string name="send_logs_failed">Send logs failed: %1$s</string>
-  <string name="crash_mail_subject">Geo Discoverer has crashed</string>
+  <string name="crash_mail_subject">Geo Discoverer crashed</string>
+  <string name="crash_mail_body">See attachment for details</string>
   <string name="crash_notification_ticker_text">Crash reports available for Geo Discoverer!</string>
-  <string name="crash_notification_title">Geo Discoverer has crashed!</string>
+  <string name="crash_notification_title">Geo Discover crashed!</string>
   <string name="crash_notification_text">Please touch to send a report.</string>
   <string name="crash_notification_channel">Geo Discoverer</string>
   <string name="opengles20_required">The app is not compatible to this device because it does not support OpenGL ES 2.0.</string>

@@ -10,8 +10,7 @@ ext {
 }
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.2"
+    compileSdkVersion 33
     ndkVersion "21.1.6352462"
 
     defaultConfig {
@@ -38,6 +37,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+  namespace 'com.untouchableapps.android.geodiscoverer.core'
 }
 
 configurations {

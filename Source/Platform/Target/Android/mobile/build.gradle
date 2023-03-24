@@ -36,8 +36,7 @@ allprojects {
 }
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.2"
+    compileSdkVersion 33
     ndkVersion "21.1.6352462"
     useLibrary 'org.apache.http.legacy'
 
@@ -89,17 +88,17 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
-        useIR = true
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.0.5'
+        kotlinCompilerExtensionVersion '1.4.3'
     }
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    namespace 'com.untouchableapps.android.geodiscoverer'
 }
 
 dependencies {
@@ -116,9 +115,12 @@ dependencies {
     implementation project(':core')
     implementation 'com.google.android.gms:play-services-wearable:17.1.0'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
-    def acraVersion = '5.8.4'
-    implementation "ch.acra:acra-mail:$acraVersion"
-    implementation "ch.acra:acra-notification:$acraVersion"
+    def acraVersion = '5.9.7'
+    //implementation "ch.acra:acra-mail:$acraVersion"
+    //implementation "ch.acra:acra-notification:$acraVersion"
+    implementation files('../../../../../ThirdParty/acra/acra-core/build/outputs/aar/acra-core-release.aar')
+    implementation files('../../../../../ThirdParty/acra/acra-mail/build/outputs/aar/acra-mail-release.aar')
+    implementation files('../../../../../ThirdParty/acra/acra-notification/build/outputs/aar/acra-notification-release.aar')
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-core/build/libs', include: ['*.jar'])
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-map/build/libs', include: ['*.jar'])
     implementation fileTree(dir: '../../../../../ThirdParty/mapsforge/mapsforge-map-reader/build/libs', include: ['*.jar'])
@@ -175,7 +177,7 @@ android.applicationVariants.all { variant ->
             def assembleTaskName = "assemble${taskSuffix}"
             if (tasks.findByName(assembleTaskName)) {
                 def copyAPKTask = tasks.create(name: "publish${taskSuffix}", type: Copy) {
-                    from "${rootDir}/mobile/build/outputs/apk/debug/${output.outputFile.name}"
+                    from "${output.outputFile.parent}/${output.outputFile.name}"
                     into "${rootDir}/export/debug"
                     onlyIf {
                         if (inputs.sourceFiles.empty) {

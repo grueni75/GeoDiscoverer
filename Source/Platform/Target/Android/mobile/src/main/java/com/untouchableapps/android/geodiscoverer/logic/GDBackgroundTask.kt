@@ -134,8 +134,8 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
         val geocoder = Geocoder(context)
         try {
           val addresses = geocoder.getFromLocationName(address, 1)
-          locationFound = if (addresses.size > 0) {
-            val a = addresses[0]
+          locationFound = if (addresses!!.size > 0) {
+            val a = addresses[0]!!
             coreObject?.executeCoreCommand(
               "addAddressPoint",
               name, address, a.longitude.toString(), a.latitude.toString(),

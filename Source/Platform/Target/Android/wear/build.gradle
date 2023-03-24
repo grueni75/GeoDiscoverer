@@ -9,8 +9,7 @@ def computeVersionName() {
 }
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.2"
+    compileSdkVersion 33
     ndkVersion "21.1.6352462"
 
     buildFeatures {
@@ -58,12 +57,12 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
-        useIR = true
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.0.5'
+        kotlinCompilerExtensionVersion '1.4.3'
     }
+  namespace 'com.untouchableapps.android.geodiscoverer'
 }
 
 dependencies {
@@ -115,7 +114,7 @@ android.applicationVariants.all { variant ->
             def assembleTaskName = "assemble${taskSuffix}"
             if (tasks.findByName(assembleTaskName)) {
                 def copyAPKTask = tasks.create(name: "publish${taskSuffix}", type: Copy) {
-                    from "${rootDir}/wear/build/outputs/apk/debug/${output.outputFile.name}"
+                    from "${output.outputFile.parent}/${output.outputFile.name}"
                     into "${rootDir}/export/debug"
                     onlyIf {
                         if (inputs.sourceFiles.empty) {

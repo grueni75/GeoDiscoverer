@@ -377,7 +377,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
         if (pois != "") {
           path += "&pois=$pois"
         }
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "path=$path")
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "path=$path")
 
         // Load the brouter
         val i = Intent(Intent.ACTION_VIEW)
