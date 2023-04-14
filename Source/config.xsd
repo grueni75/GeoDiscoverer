@@ -427,6 +427,20 @@
                         </xsd:sequence>
                       </xsd:complexType>
                     </xsd:element>
+                    <xsd:element name="TandemTracker">
+                      <xsd:annotation>
+                        <xsd:documentation>Sends the navigation info to the TandemTracker for further display on the bike.</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="active" type="xsd:boolean" default="0" gd:upgrade="restore">
+                            <xsd:annotation>
+                              <xsd:documentation>Enables the tandem tracker cockpit app.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
                   </xsd:sequence>
                 </xsd:complexType>
               </xsd:element>  
@@ -463,16 +477,6 @@
               <xsd:element name="minSpeedToAlert" type="xsd:double" default="0.2">
                 <xsd:annotation>
                   <xsd:documentation>Minimum speed required to trigger an alert.</xsd:documentation>
-                </xsd:annotation>
-              </xsd:element>
-              <xsd:element name="networkServerEnabled" type="xsd:boolean" default="1">
-                <xsd:annotation>
-                  <xsd:documentation>Indicates if the network server is enabled.</xsd:documentation>
-                </xsd:annotation>
-              </xsd:element>
-              <xsd:element name="networkServerPort" type="xsd:integer" default="2222">
-                <xsd:annotation>
-                  <xsd:documentation>Port number of the network server.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
             </xsd:sequence>

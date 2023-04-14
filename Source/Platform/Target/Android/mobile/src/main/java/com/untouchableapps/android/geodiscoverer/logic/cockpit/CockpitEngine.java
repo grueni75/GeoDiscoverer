@@ -200,6 +200,9 @@ public class CockpitEngine extends com.untouchableapps.android.geodiscoverer.cor
     if (Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "active"))>0) {
       apps.add(new CockpitAppVoice(app.getContext(),this));
     }
+    if (Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/TandemTracker", "active"))>0) {
+      apps.add(new CockpitAppTandemTracker(app.getContext(),this));
+    }
   }
   
   /** Starts the cockpit apps */

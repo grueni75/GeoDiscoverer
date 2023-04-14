@@ -87,12 +87,6 @@ public class CockpitEngine {
   boolean quitVibrateThread = false;
   Thread vibrateThread = null;
 
-  // Thread that manages network communication
-  boolean networkServerEnabled = false;
-  boolean quitNetworkServerThread = false;
-  Thread networkServerThread = null;
-  int networkServerPort = -1;
-
   // Minimum speed required to trigger an alert
   float minSpeedToAlert;
 
@@ -159,9 +153,6 @@ public class CockpitEngine {
     offRouteAlertFastCount = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertFastCount"));
     offRouteAlertSlowPeriod = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "offRouteAlertSlowPeriod"));
     minSpeedToAlert = Float.parseFloat(coreObject.configStoreGetStringValue("Cockpit", "minSpeedToAlert"));
-    networkServerEnabled = (Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "networkServerEnabled"))!=0);
-    if (coreObject.isWatch) networkServerEnabled=false;
-    networkServerPort = Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit", "networkServerPort"));
 
     // Add all activated apps
     if (Integer.parseInt(coreObject.configStoreGetStringValue("Cockpit/App/Vibration", "active"))>0) {
@@ -175,10 +166,6 @@ public class CockpitEngine {
     // Start the vibrate thread
     startVibrateThread();
 
-    // Start the network server thread
-    if (networkServerEnabled)
-      startNetworkServerThread();
-
     // Inform metawatch about this app
     for (CockpitAppInterface app : apps) {
       app.start();
@@ -186,86 +173,6 @@ public class CockpitEngine {
     lastUpdate = 0;
     update(null,true);
     lastUpdate = 0;
-  }
-
-  /** Starts the vibrate thread */
-  public void startNetworkServerThread() {
-
-    // Stop the currently running network server thread
-    if ((networkServerThread!=null)&&(networkServerThread.isAlive())) {
-      quitNetworkServerThread();
-    }
-    quitNetworkServerThread=false;
-
-    // Open server socket
-    final ServerSocket serverSocket;
-    try {
-      serverSocket = new ServerSocket();
-      serverSocket.setReuseAddress(true);
-      serverSocket.bind(new InetSocketAddress(networkServerPort));
-    }
-    catch (IOException e) {
-      coreObject.executeAppCommand(
-          "errorDialog(Cannot create server socket for CockpitEngine!)"
-      );
-      return;
-    }
-
-    // Run network communication
-    networkServerThread = new Thread(new Runnable() {
-      public void run() {
-        coreObject.setThreadPriority(2);
-        while (!quitNetworkServerThread) {
-          try {
-            Socket client = serverSocket.accept();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            if (cockpitInfos!=null) {
-              baos.write((cockpitInfos.locationBearing + "\n").getBytes());
-              baos.write((cockpitInfos.locationSpeed + "\n").getBytes());
-              baos.write((cockpitInfos.trackLength + "\n").getBytes());
-              baos.write((cockpitInfos.targetBearing + "\n").getBytes());
-              baos.write((cockpitInfos.targetDistance + "\n").getBytes());
-              baos.write((cockpitInfos.targetDuration + "\n").getBytes());
-              baos.write((cockpitInfos.turnDistance + "\n").getBytes());
-              baos.write((cockpitInfos.turnAngle + "\n").getBytes());
-              baos.write((cockpitInfos.offRoute ? "true\n" : "false\n").getBytes());
-              baos.write((cockpitInfos.routeDistance + "\n").getBytes());
-              baos.write((cockpitInfos.nearestNavigationPointBearing + "\n").getBytes());
-              baos.write((cockpitInfos.nearestNavigationPointDistance + "\n").getBytes());
-            }
-            client.getOutputStream().write(baos.toByteArray());
-            client.getOutputStream().close();
-            client.close();
-          }
-          catch (IOException e) {
-            coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","network server thread interrupted");
-          }
-          coreObject.appIf.addAppMessage(GDAppInterface.DEBUG_MSG,"GDApp","cockpit infos served");
-        }
-      }
-    });
-    networkServerThread.start();
-  }
-
-  /** Stops the network server thread */
-  void quitNetworkServerThread() {
-    boolean repeat=true;
-    while(repeat) {
-      repeat=false;
-      try {
-        quitNetworkServerThread=true;
-        Socket clientSocket = new Socket("localhost",networkServerPort);
-        clientSocket.close();
-        networkServerThread.join();
-      }
-      catch(IOException e) {
-        repeat=true;
-      }
-      catch(InterruptedException e) {
-        repeat=true;
-      }
-    }
-    networkServerThread=null;
   }
 
   /** Starts the vibrate thread */
@@ -502,10 +409,6 @@ public class CockpitEngine {
 
     // Stop the vibration thread
     quitVibrateThread();
-
-    // Stop the network server thread
-    if (networkServerEnabled)
-      quitNetworkServerThread();
 
     // Stop all apps
     for (CockpitAppInterface app : apps) {

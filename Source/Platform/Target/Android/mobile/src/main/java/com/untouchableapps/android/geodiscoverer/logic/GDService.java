@@ -75,6 +75,7 @@ public class GDService extends Service {
   boolean activityRunning = false;
   boolean activityStarted = false;
   boolean startActivity = false;
+  boolean accessibilityChecked = false;
 
   /** Reference to the core object */
   GDCore coreObject = null;
@@ -207,22 +208,6 @@ public class GDService extends Service {
         "GDApp",
         "notification created"
     );
-
-    // Check if accessibility service is enabled
-    if (!isAccessibilityEnabled()) {
-      notificationIntent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-      PendingIntent pi = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-      NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "accessibilityService")
-          .setContentTitle(getText(R.string.notification_accessibility_service_not_enabled_title))
-          .setContentText(getString(R.string.notification_accessibility_service_not_enabled_text))
-          .setContentIntent(pi)
-          .setSmallIcon(R.drawable.notification_running)
-          .setDefaults(Notification.DEFAULT_ALL)
-          .setAutoCancel(true)
-          //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-          .setPriority(NotificationCompat.PRIORITY_HIGH);
-      notificationManager.notify(GDApplication.NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID, builder.build());
-    }
   }
   
   /** No binding supported */
@@ -278,7 +263,7 @@ public class GDService extends Service {
   }
 
   /** Updates the state depending on the activity status */
-  private void handleActivityStatus(boolean forceStart) {
+  private void handleActivityStatus(boolean forceStart, boolean stopImmideately) {
 
     // Now act depending if activity is running or not
     if ((activityRunning)||(forceStart)) {
@@ -288,6 +273,13 @@ public class GDService extends Service {
         notification = updateNotification();
         startForeground(GDApplication.NOTIFICATION_STATUS_ID, notification);
         serviceInForeground = true;
+      }
+
+      // Immideately stop if requested
+      if (stopImmideately) {
+        stopForeground(true);
+        serviceInForeground = false;
+        return;
       }
 
       // Start watching the location
@@ -370,7 +362,7 @@ public class GDService extends Service {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "service has been restarted due to low memory situation");
 
       // Start the core if the service is re-created
-      handleActivityStatus(true);
+      handleActivityStatus(true, false);
       return START_STICKY;
 
     } else {
@@ -384,13 +376,30 @@ public class GDService extends Service {
       activityRunning=true;
       activityStarted=true;
       startActivity=false;
-      handleActivityStatus(false);
+      handleActivityStatus(false, false);
     }
     if (intent.getAction().equals("activityPaused")) {
       activityRunning=false;
-      handleActivityStatus(false);
+      handleActivityStatus(false, false);
       if (coreObject!=null)
         coreObject.executeCoreCommand("maintenance");
+    }
+
+    // Check if accessibility service is enabled
+    if ((serviceInForeground)&&(!accessibilityChecked)&&(!isAccessibilityEnabled())) {
+      Intent notificationIntent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+      PendingIntent pi = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+      NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "accessibilityService")
+          .setContentTitle(getText(R.string.notification_accessibility_service_not_enabled_title))
+          .setContentText(getString(R.string.notification_accessibility_service_not_enabled_text))
+          .setContentIntent(pi)
+          .setSmallIcon(R.drawable.notification_running)
+          .setDefaults(Notification.DEFAULT_ALL)
+          .setAutoCancel(true)
+          //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+          .setPriority(NotificationCompat.PRIORITY_HIGH);
+      notificationManager.notify(GDApplication.NOTIFICATION_ACCESSIBILITY_SERVICE_NOT_ENABLED_ID, builder.build());
+      accessibilityChecked=true;
     }
 
     // Handle early init of the core
@@ -440,7 +449,7 @@ public class GDService extends Service {
     if (intent.getAction().equals("lateInitComplete")) {
 
       // Update depending on the activity status
-      handleActivityStatus(false);
+      handleActivityStatus(false, false);
 
       // Replay the trace if it exists
       File replayLog = new File(coreObject.homePath + "/replay.log");
@@ -502,15 +511,19 @@ public class GDService extends Service {
     // Handle updates from the tandem tracker
     if (intent.getAction().equals("updateFLStats")) {
 
-      // Start the core (if it's not already)
-      handleActivityStatus(true);
-
-      if (coreObject.coreInitialized) {
-        //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","updateFLStats intent received!");
-        coreObject.configStoreSetStringValue("Forumslader", "connected", "1");
-        coreObject.configStoreSetStringValue("Forumslader", "batteryLevel", String.valueOf(intent.getStringExtra("batteryLevel")));
-        coreObject.configStoreSetStringValue("Forumslader", "powerDrawLevel", String.valueOf(intent.getStringExtra("powerDrawLevel")));
-        coreObject.executeCoreCommand("dataChanged");
+      // Do nothing if app not active
+      if (!serviceInForeground) {
+        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","ignoring updateFLStats (GD not running)");
+        handleActivityStatus(true,true);
+        return START_STICKY;
+      } else {
+        if (coreObject.coreInitialized) {
+          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","updateFLStats intent received!");
+          coreObject.configStoreSetStringValue("Forumslader", "connected", "1");
+          coreObject.configStoreSetStringValue("Forumslader", "batteryLevel", String.valueOf(intent.getStringExtra("batteryLevel")));
+          coreObject.configStoreSetStringValue("Forumslader", "powerDrawLevel", String.valueOf(intent.getStringExtra("powerDrawLevel")));
+          coreObject.executeCoreCommand("dataChanged");
+        }
       }
     }
 
