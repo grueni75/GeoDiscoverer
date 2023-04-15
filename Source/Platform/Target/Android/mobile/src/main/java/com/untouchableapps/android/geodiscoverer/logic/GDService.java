@@ -127,7 +127,7 @@ public class GDService extends Service {
           String accessabilityService = splitter.next();
           //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Setting: " + accessabilityService);
           if (accessabilityService.equalsIgnoreCase(ACCESSIBILITY_SERVICE_NAME)){
-            GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","We've found the correct setting - accessibility is switched on!");
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","We've found the correct setting - accessibility is switched on!");
             return true;
           }
         }
