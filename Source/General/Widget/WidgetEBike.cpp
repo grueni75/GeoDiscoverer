@@ -26,6 +26,7 @@
 #include <FontEngine.h>
 #include <GraphicEngine.h>
 #include <FloatingPoint.h>
+#include <WidgetPage.h>
 
 namespace GEODISCOVERER {
 
@@ -47,6 +48,7 @@ WidgetEBike::WidgetEBike(WidgetContainer *widgetContainer) :
   connected=false;
   firstRun=true;  
   updateRequired=true;  
+  setIsHidden(true);
 }
 
 // Destructor
@@ -72,6 +74,15 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
   // Do the inherited stuff
   bool changed=WidgetPrimitive::work(t);
 
+  /* Debug showing and hiding
+  int coin=rand();
+  if (coin>2140000000) {
+    connected=configStore->getIntValue("EBikeMonitor","connected",__FILE__,__LINE__);
+    configStore->setIntValue("EBikeMonitor","connected",!connected,__FILE__,__LINE__);
+    updateRequired=true;
+    DEBUG("coin=%d connected=%d",coin,connected);
+  }*/
+
   // Only update the info at given update interval
   if (updateRequired) {
     
@@ -85,12 +96,18 @@ bool WidgetEBike::work(TimestampInMicroseconds t) {
       firstRun=false;
     }
     if (connected!=prevConnected) {
-      DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
+      WidgetPage *page=(WidgetPage*)widgetContainer;      
       GraphicColor targetColor=getActiveColor();
-      if (!connected) {
+      if (!connected) {        
+        //DEBUG("hiding widget",NULL);
         targetColor.setAlpha(0);
+        setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getAnimDuration());
+      } else {
+        //DEBUG("showing widget",NULL);
+        setIsHidden(false);
+        setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getAnimDuration());
+        page->setWidgetsActive(t,true);
       }
-      setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getAnimDuration());
     }
   
     // Update the content

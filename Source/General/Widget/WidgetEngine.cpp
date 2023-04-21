@@ -776,7 +776,7 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeZ(1);
         config.addPosition(position);
       }
-      config.setInactiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setGaugeBackgroundColor(GraphicColor(255,127,0,255));
       config.setGaugeForegroundColor(GraphicColor(255,190,127,255));
@@ -838,7 +838,7 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeZ(1);
         config.addPosition(position);
       }
-      config.setInactiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setGaugeBackgroundColor(GraphicColor(255,127,0,255));
       config.setGaugeFillgroundColor(GraphicColor(0.9*255,0.9*127,0,255));

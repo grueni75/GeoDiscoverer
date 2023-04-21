@@ -73,7 +73,7 @@
   <string name="crash_notification_ticker_text">Crash reports available for Geo Discoverer!</string>
   <string name="crash_notification_title">Geo Discover crashed!</string>
   <string name="crash_notification_text">Please touch to send a report.</string>
-  <string name="crash_notification_channel">Geo Discoverer</string>
+  <string name="crash_notification_channel">Crashes</string>
   <string name="opengles20_required">The app is not compatible to this device because it does not support OpenGL ES 2.0.</string>
   <string name="dialog_continue_or_new_track_question">Shall the current track be continued or shall a new track be started?</string>
   <string name="dialog_new_track">New track</string>

@@ -26,6 +26,7 @@
 #include <FontEngine.h>
 #include <GraphicEngine.h>
 #include <FloatingPoint.h>
+#include <WidgetPage.h>
 
 namespace GEODISCOVERER {
 
@@ -49,6 +50,7 @@ WidgetForumslader::WidgetForumslader(WidgetContainer *widgetContainer) :
   batteryChargingIconScale=1.0;
   batteryChargingIconX=0;
   batteryChargingIconY=0;
+  setIsHidden(true);
   core->getConfigStore()->setIntValue("Forumslader","connected",0,__FILE__,__LINE__);
 }
 
@@ -79,13 +81,21 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
   // Do the inherited stuff
   bool changed=WidgetPrimitive::work(t);
 
+  /* Debug showing and hiding
+  int coin=rand();
+  if (coin>2140000000) {
+    connected=configStore->getIntValue("Forumslader","connected",__FILE__,__LINE__);
+    configStore->setIntValue("Forumslader","connected",!connected,__FILE__,__LINE__);
+    updateRequired=true;
+    DEBUG("coin=%d connected=%d",coin,connected);
+  }*/
+
   // Only update the info at given update interval
   if (updateRequired) {
     
     // Is ebike connected?
     boolean prevConnected=connected;
     connected=configStore->getIntValue("Forumslader","connected",__FILE__,__LINE__);
-    //connected=true;
     //core->getConfigStore()->setIntValue("Forumslader","powerDrawLevel",-10,__FILE__,__LINE__);
     //DEBUG("prevConnected=%d connected=%d",prevConnected,connected);
     
@@ -95,11 +105,18 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
       firstRun=false;
     }
     if (connected!=prevConnected) {
+      WidgetPage *page=(WidgetPage*)widgetContainer;      
       GraphicColor targetColor=getActiveColor();
-      if (!connected) {
+      if (!connected) {        
+        //DEBUG("hiding widget",NULL);
         targetColor.setAlpha(0);
+        setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getAnimDuration());
+      } else {
+        //DEBUG("showing widget",NULL);
+        setIsHidden(false);
+        setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getAnimDuration());
+        page->setWidgetsActive(t,true);
       }
-      setFadeAnimation(t,getColor(),targetColor,false,widgetContainer->getGraphicEngine()->getAnimDuration());
     }
   
     // Update the content
