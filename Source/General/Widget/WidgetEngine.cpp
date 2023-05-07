@@ -764,8 +764,8 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeY(tabletLandscapeMeterGridY);
         position.setLandscapeZ(1);
         config.addPosition(position);
-      }
-      if (deviceName!="Default") {
+        config.setInactiveColor(GraphicColor(255,255,255,100));
+      } else {
         position=WidgetPosition();
         position.setRefScreenDiagonal(0.0);
         position.setPortraitX(0.0);
@@ -775,8 +775,8 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeY(87.0);
         position.setLandscapeZ(1);
         config.addPosition(position);
+        config.setInactiveColor(GraphicColor(255,255,255,255));
       }
-      config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setGaugeBackgroundColor(GraphicColor(255,127,0,255));
       config.setGaugeForegroundColor(GraphicColor(255,190,127,255));
@@ -825,8 +825,8 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeY(78.0);
         position.setLandscapeZ(0);
         config.addPosition(position);
-      }
-      if (deviceName!="Default") {
+        config.setInactiveColor(GraphicColor(255,255,255,100));
+      } else {
         config.setPageName("Default");
         position=WidgetPosition();
         position.setRefScreenDiagonal(0.0);
@@ -837,8 +837,8 @@ void WidgetEngine::createGraphic() {
         position.setLandscapeY(87.0);
         position.setLandscapeZ(1);
         config.addPosition(position);
+        config.setInactiveColor(GraphicColor(255,255,255,255));
       }
-      config.setInactiveColor(GraphicColor(255,255,255,100));
       config.setActiveColor(GraphicColor(255,255,255,255));
       config.setGaugeBackgroundColor(GraphicColor(255,127,0,255));
       config.setGaugeFillgroundColor(GraphicColor(0.9*255,0.9*127,0,255));
