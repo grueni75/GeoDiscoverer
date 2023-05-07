@@ -517,7 +517,7 @@ noscript {display:none;} /* Fixes a feature in Firefox 1.5.0.2 where print previ
 </div></div>
 <!--POST-SHADOWAREA-->
 <div id="storeArea">
-<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="202201091231" changecount="180">
+<div title="About" creator="Matthias" modifier="Matthias" created="201412061714" modified="202305040602" changecount="183">
 <pre>! Copyright (C) Matthias Grünewald - All Rights Reserved
 Geo Discoverer has been developed by Matthias Grünewald. He owns the copyright for the application, this help and all the media used. The app uses also many libraries and media from others. See [[Acknowledgements|About##Acknowledgements]]. 
 ! License
@@ -600,7 +600,7 @@ Map archives are stored in the ZIP format. Reading and writing ZIP files are han
 !! PROJ.4
 Converting picture coordinates to geographic coordinates and vice versa for different map projections are done by the PROJ.4 library. See License-PROJ4 for more information.
 !! Color Picker
-All color selection in the preferences is done via a color picker jetpack compose component. It's maintaned on github ~GoDaddy, The work is under the MIT License. See License-MIT-GoDaddy for more information.
+All color selection in the preferences is done via a color picker jetpack compose component. It's maintaned on github ~GoDaddy, The work is under the MIT License. See License-MIT for more information.
 !! ~UndoBar
 Most notifications are shown by using the ~UndoBar library. The copyright of this library is owned by Liao Kai. He has licensed his work under the Apache License V2.0. See License-Apache-V20 for more information.
 !! Application Crash Reporting for Android
@@ -631,6 +631,8 @@ The rendering of hillshades and the reading of bitmaps with altitude information
 The C code implementation of a Gaussian blur filter is copied from the single-header-file C libraries from Stephan Soller. It is licensed under the License-MIT.
 !! ~BRouter
 The app is hosting the well-known server ~BRouter for routing bicycle paths. As a GUI front end ~BRouter-Web is as well integrated. Both components are licensed under the License-MIT.
+!! CRC
+The app is calculating ~CRC8 values for transferring navigation infos. Rob Tillaart's library is used for this purpose (ported from Arduino). It is licensed under the License-MIT.
 </pre>
 </div>
 <div title="AppPreferences" creator="Matthias" modifier="Matthias" created="201412221203" changecount="1">
@@ -3390,37 +3392,10 @@ Public License instead of this License.  But first, please read
 &lt;http://www.gnu.org/philosophy/why-not-lgpl.html&gt;.
 </pre>
 </div>
-<div title="License-MIT" creator="Matthias" modifier="Matthias" created="202103140918" modified="202103140918" changecount="2">
-<pre>{{{
-The MIT License (MIT)
-
-Copyright (c) 2016 arkanis
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the &quot;Software&quot;), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-}}}</pre>
-</div>
-<div title="License-MIT-GoDaddy" creator="Matthias" modifier="Matthias" created="202201091230" changecount="1">
+<div title="License-MIT" creator="Matthias" modifier="Matthias" created="202201091230" modified="202305040603" changecount="3">
 <pre>{{{
 
 The MIT License (MIT)
-
-Copyright (c) 2021GoDaddy Operating Company, LLC.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the &quot;Software&quot;), to deal
@@ -5476,8 +5451,9 @@ var Drag = {
 };
 //}}}</pre>
 </div>
-<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="202201091224" changecount="61">
+<div title="RevisionHistory" creator="Matthias" modifier="Matthias" created="201412131344" modified="202305040604" changecount="62">
 <pre>|!Date |!Changes |
+|2023-05-04|Added copyright notices for Rob Tillaart's CRC library to [[About]]|
 |2022-01-09|Added copyright notices for Godaddy's color picker to [[About]]|
 |2021-05-29|Added copyright notices for ~BRouter server and its web frontend brouter-web to [[About]]|
 |2021-03-11|Added copyright notices for rendering map tiles with mapsforge and gdal to [[About]]|

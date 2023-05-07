@@ -75,7 +75,7 @@ public class CockpitEngine {
   boolean lastOffRoute=false;
 
   // References to the outside world
-  protected GDCore coreObject;
+  public GDCore coreObject;
   protected Context context;
 
   // Thread that manages vibrations

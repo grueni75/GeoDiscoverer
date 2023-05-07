@@ -82,7 +82,8 @@ public class CockpitAppTandemTracker implements CockpitAppInterface {
     value+=cockpitInfos.offRoute ? "true;" : "false;";
     value+=cockpitInfos.routeDistance + ";";
     value+=cockpitInfos.nearestNavigationPointBearing + ";";
-    value+=cockpitInfos.nearestNavigationPointDistance;
+    value+=cockpitInfos.nearestNavigationPointDistance + ";";
+    value+=cockpitEngine.coreObject.executeCoreCommand("computeCRC",value);
 
     // And send it
     Intent result = new Intent();

@@ -20,6 +20,7 @@
 //
 //============================================================================
 
+#include <CRC16.h>
 
 #ifndef COMMANDER_H_
 #define COMMANDER_H_
@@ -39,6 +40,9 @@ protected:
 
   // Current number for the map tile
   Int mapTileNr;
+
+  // CRC calculation
+  CRC16 crc;
 
 public:
 

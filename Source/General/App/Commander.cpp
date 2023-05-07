@@ -35,6 +35,7 @@
 #include <ElevationEngine.h>
 #include <MapSourceMercatorTiles.h>
 #include <ZipArchive.h>
+#include <CRC16.h>
 
 namespace GEODISCOVERER {
 
@@ -966,6 +967,14 @@ std::string Commander::execute(std::string cmd) {
     core->getConfigStore()->setDoubleValue("Navigation/NearestPointOfInterest","lat",atof(args[1].c_str()),__FILE__,__LINE__);
     core->getConfigStore()->setDoubleValue("Navigation/NearestPointOfInterest","lng",atof(args[2].c_str()),__FILE__,__LINE__);
     core->onDataChange();
+    cmdExecuted=true;
+  }
+  if (cmdName=="computeCRC") {
+    crc.reset();
+    crc.add((uint8_t*)args[0].c_str(),args[0].length());
+    std::stringstream resultStream;
+    resultStream << crc.getCRC();
+    result=resultStream.str();
     cmdExecuted=true;
   }
 
