@@ -1,3 +1,3 @@
 #!/bin/bash 
 set -e
-gcloud compute instances create ubuntu-desktop --zone=europe-west1-c --machine-type=e2-standard-4 --image-family=ubuntu-minimal-2204-lts --image-project=ubuntu-os-cloud --boot-disk-size=32G
+gcloud compute instances create ubuntu-desktop --zone=europe-west1-c --machine-type=e2-standard-4 --image-family=ubuntu-minimal-2204-lts --image-project=ubuntu-os-cloud --boot-disk-size=64G

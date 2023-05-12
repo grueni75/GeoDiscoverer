@@ -3,4 +3,4 @@ set -e
 function remote {
   gcloud compute ssh ubuntu-desktop -- $*
 }
-remote systemctl restart chrome-remote-desktop@$USER
+remote sudo systemctl restart chrome-remote-desktop@$USER

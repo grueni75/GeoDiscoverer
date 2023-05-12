@@ -1,0 +1,9 @@
+#!/bin/bash 
+set -e
+function remote {
+  gcloud compute ssh ubuntu-desktop -- $*
+}
+gcloud compute scp --recurse ~/Apps/TandemTracker $USER@ubuntu-desktop:Apps/
+remote 'source ~/.androidrc && cd Apps/TandemTracker && ./build.sh'
+echo "You can start Android Studio by executing ~/Apps/android-studio/bin/studio.sh"
+

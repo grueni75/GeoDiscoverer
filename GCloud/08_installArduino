@@ -1,0 +1,10 @@
+#!/bin/bash 
+set -e
+function remote {
+  gcloud compute ssh ubuntu-desktop -- $*
+}
+cd ~/Apps && tar zcf Arduino.tar.gz Arduino
+gcloud compute scp --recurse ~/Apps/Arduino.tar.gz $USER@ubuntu-desktop:Apps/
+remote 'cd Apps/ && tar zxf Arduino.tar.gz'
+remote 'cd Apps/Arduino/Sketchbook/TandemTracker && make'
+

@@ -3,6 +3,7 @@ set -e
 function remote {
   gcloud compute ssh ubuntu-desktop -- $*
 }
+remote sudo apt install --assume-yes git 
 remote 'ssh-keygen -t ed25519 -C "matthias.gruenewald@gmail.com"'
 remote 'cat ~/.ssh/id_ed25519.pub'
 remote 'git config --global user.email "matthias.gruenewald@gmail.com"'
