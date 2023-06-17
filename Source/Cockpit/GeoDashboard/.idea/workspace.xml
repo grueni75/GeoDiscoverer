@@ -14,9 +14,37 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c9e79f9a-25b2-4976-9b88-f17693dc2c08" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.androidTest.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.main.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.unitTest.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle____local_jars____home_grueni_Apps_GeoDiscoverer_Source_Cockpit_GeoDashboard_app_libs_slf4j_android_1_6_1_RC1_jar_unspecified_jar.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__slf4j_android_1_6_1_RC1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/cockpit/CockpitEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/core/src/main/java/com/untouchableapps/android/geodiscoverer/core/cockpit/CockpitEngine.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/export/debug/GeoDiscovererMobileDebug20221230.apk" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/export/debug/GeoDiscovererMobileDebug20221230.apk" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GeoDashboard.iml" beforeDir="false" afterPath="$PROJECT_DIR$/GeoDashboard.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/libs/slf4j-android-1.6.1-RC1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/untouchableapps/android/geodashboard/ViewDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/untouchableapps/android/geodashboard/ViewDashboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/view_dashboard.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/view_dashboard.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/view_dashboard_actions.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/view_dashboard_actions.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/export/GeoDashboard20150526.apk" beforeDir="false" afterPath="$PROJECT_DIR$/export/release/GeoDashboard20150526.apk" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/export/GeoDashboard20150527.apk" beforeDir="false" afterPath="$PROJECT_DIR$/export/release/GeoDashboard20150527.apk" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/export/GeoDashboard20161230.apk" beforeDir="false" afterPath="$PROJECT_DIR$/export/release/GeoDashboard20161230.apk" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/export/GeoDashboard20200612.apk" beforeDir="false" afterPath="$PROJECT_DIR$/export/release/GeoDashboard20200612.apk" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,35 +82,29 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
   </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
   <component name="ProjectId" id="1d1fdqyPnfLqOPw79DzdGd9O3kJ" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="ApkExportedModule" value="app" />
-    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="VirtualDevicePath@/home/grueni/.android/avd/7_WSVGA_Tablet_API_28.avd" />
-    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2021-08-14T17:01:05.307433Z" />
-    <property name="ExportApk.ApkPath" value="$PROJECT_DIR$/export" />
-    <property name="ExportApk.BuildType" value="release" />
-    <property name="ExportApk.BuildVariants" value="release" />
-    <property name="ExportApk.Flavors" value="" />
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="android.project.structure.last.selected" value="app" />
-    <property name="android.project.structure.proportion" value="0.15" />
-    <property name="android.sdk.path" value="$PROJECT_DIR$/../../../../android/android-sdk" />
-    <property name="cidr.known.project.marker" value="true" />
-    <property name="device.picker.selection" value="ICIL201412000342" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="Build Variants" />
-    <property name="project.structure.proportion" value="0.17" />
-    <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
-  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/grueni/Apps/GeoDiscoverer/Source/Cockpit/GeoDashboard&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;
+  }
+}</component>
   <component name="PsdUISettings">
     <option name="MODULE_TAB" value="Signing Configs" />
     <option name="LAST_EDITED_BUILD_TYPE" value="debug" />
@@ -176,11 +198,8 @@
       <listeners />
       <method />
     </configuration>
-    <configuration name="&lt;template&gt;" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" default="true" selected="false">
-      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
-    </configuration>
-    <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
-      <module name="app" />
+    <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
+      <module name="GeoDashboard.app.main" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
       <option name="DEPLOY_AS_INSTANT" value="false" />
@@ -188,13 +207,14 @@
       <option name="PM_INSTALL_OPTIONS" value="" />
       <option name="ALL_USERS" value="false" />
       <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="CLEAR_APP_STORAGE" value="false" />
       <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
       <option name="ACTIVITY_EXTRA_FLAGS" value="" />
       <option name="MODE" value="default_activity" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
       <option name="INSPECTION_WITHOUT_ACTIVITY_RESTART" value="false" />
-      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
       <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
       <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
       <option name="DEBUGGER_TYPE" value="Auto" />
@@ -224,7 +244,7 @@
         <option name="ADVANCED_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
-        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
         <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
         <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
       </Profilers>
@@ -259,6 +279,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file enabled="true" id="idea.log" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
@@ -284,49 +313,5 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="652" y="266" width="291" height="404" key="AndroidCreateXmlResourceDialog" timestamp="1628965586870">
-      <screen x="0" y="27" width="1600" height="873" />
-    </state>
-    <state x="652" y="266" width="291" height="404" key="AndroidCreateXmlResourceDialog/0.27.1600.873@0.27.1600.873" timestamp="1628965586870" />
-    <state width="1874" height="221" key="GridCell.Tab.0.bottom" timestamp="1634054548615">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state width="1554" height="162" key="GridCell.Tab.0.bottom/1920.0.1920.1080/0.27.1600.873@0.27.1600.873" timestamp="1633886716437" />
-    <state width="1874" height="221" key="GridCell.Tab.0.bottom/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1634054548615" />
-    <state width="1874" height="221" key="GridCell.Tab.0.center" timestamp="1634054548615">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state width="1554" height="162" key="GridCell.Tab.0.center/1920.0.1920.1080/0.27.1600.873@0.27.1600.873" timestamp="1633886716436" />
-    <state width="1874" height="221" key="GridCell.Tab.0.center/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1634054548615" />
-    <state width="1874" height="221" key="GridCell.Tab.0.left" timestamp="1634054548615">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state width="1554" height="162" key="GridCell.Tab.0.left/1920.0.1920.1080/0.27.1600.873@0.27.1600.873" timestamp="1633886716436" />
-    <state width="1874" height="221" key="GridCell.Tab.0.left/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1634054548615" />
-    <state width="1874" height="221" key="GridCell.Tab.0.right" timestamp="1634054548615">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state width="1554" height="162" key="GridCell.Tab.0.right/1920.0.1920.1080/0.27.1600.873@0.27.1600.873" timestamp="1633886716437" />
-    <state width="1874" height="221" key="GridCell.Tab.0.right/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1634054548615" />
-    <state x="2669" y="465" width="418" height="186" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1634053627614">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state x="2669" y="465" width="418" height="186" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1634053627614" />
-    <state width="300" height="59" key="javadoc.popup.new" timestamp="1634053696277">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state width="300" height="48" key="javadoc.popup.new/1920.0.1920.1080/0.27.1600.873@0.27.1600.873" timestamp="1633887033183" />
-    <state width="300" height="59" key="javadoc.popup.new/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1634053696277" />
-    <state x="464" y="203" key="run.anything.popup" timestamp="1628964768382">
-      <screen x="0" y="27" width="1600" height="873" />
-    </state>
-    <state x="464" y="203" key="run.anything.popup/0.27.1600.873@0.27.1600.873" timestamp="1628964768382" />
-    <state x="463" y="209" width="672" height="678" key="search.everywhere.popup" timestamp="1628962215496">
-      <screen x="0" y="27" width="1600" height="873" />
-    </state>
-    <state x="463" y="209" width="672" height="678" key="search.everywhere.popup/0.27.1600.873@0.27.1600.873" timestamp="1628962215496" />
   </component>
 </project>

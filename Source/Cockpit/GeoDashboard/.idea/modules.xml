@@ -2,9 +2,14 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GeoDashboard.iml" filepath="$PROJECT_DIR$/GeoDashboard.iml" group="GeoDashboard" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="GeoDashboard/app" />
-      <module fileurl="file://$PROJECT_DIR$/../../../ThirdParty/jmdns/jmDNS.iml" filepath="$PROJECT_DIR$/../../../ThirdParty/jmdns/jmDNS.iml" group="GeoDashboard/jmDNS" />
+      <module fileurl="file://$PROJECT_DIR$/GeoDashboard.iml" filepath="$PROJECT_DIR$/GeoDashboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.iml" filepath="$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.test.iml" filepath="$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.test.iml" />
     </modules>
   </component>
 </project>

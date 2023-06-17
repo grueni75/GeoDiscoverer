@@ -41,12 +41,12 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Enumeration;
 
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceInfo;
-
+import android.accessibilityservice.AccessibilityService;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -61,6 +61,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.net.Uri;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
@@ -71,6 +73,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -85,13 +88,15 @@ import android.widget.Toast;
 
 import com.untouchableapps.android.geodashboard.util.SystemUiHider;
 
+import static android.os.PowerManager.SCREEN_BRIGHT_WAKE_LOCK;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  *
  * @see SystemUiHider
  */
-public class ViewDashboard extends Activity {
+public class ViewDashboard extends Activity implements NsdManager.RegistrationListener {
 
   /**
    * Whether or not the system UI should be auto-hidden after
@@ -184,14 +189,20 @@ public class ViewDashboard extends Activity {
   MulticastLock multicastLock;
 
   /**
-   * The JmDNS object
+   * The NSD Manager
    */
-  JmDNS jmDNS;
+  NsdManager nsdManager;
 
   /**
    * WiFi system service
    */
   WifiManager wifiManager;
+
+
+  /**
+   * Broadcast receiver for WiFi Connected
+   */
+  BroadcastReceiver wifiConnectedReceiver;
 
   /**
    * Port to listen to
@@ -202,6 +213,16 @@ public class ViewDashboard extends Activity {
    * Internet address of last client
    */
   String lastClientAddress = null;
+
+  /*
+   * Power Manager system service
+   */
+  PowerManager powerManager;
+
+  /*
+   * Wakelock
+   */
+  PowerManager.WakeLock wakeLock;
 
   /**
    * Bitmap to display
@@ -218,6 +239,35 @@ public class ViewDashboard extends Activity {
   static final int NET_CMD_PLAY_SOUND_DOG = 3;
   static final int NET_CMD_PLAY_SOUND_SHIP = 4;
   static final int NET_CMD_PLAY_SOUND_CAR = 5;
+
+  // Checks if accessibility service is enabled
+  public boolean isAccessibilityEnabled() {
+    int accessibilityEnabled = 0;
+    final String ACCESSIBILITY_SERVICE_NAME = "com.untouchableapps.android.geodashboard/com.untouchableapps.android.geodashboard.GDAccessibilityService";
+    try {
+      accessibilityEnabled = Settings.Secure.getInt(this.getContentResolver(),android.provider.Settings.Secure.ACCESSIBILITY_ENABLED);
+    } catch (Settings.SettingNotFoundException e) {
+      Log.d("GeoDashboard","Error finding accessibility service setting: " + e.getMessage());
+    }
+    TextUtils.SimpleStringSplitter stringColonSplitter = new TextUtils.SimpleStringSplitter(':');
+    if (accessibilityEnabled==1) {
+      String settingValue = Settings.Secure.getString(getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+      //Log.d("GeoDashboard","Setting: " + settingValue);
+      if (settingValue != null) {
+        TextUtils.SimpleStringSplitter splitter = stringColonSplitter;
+        splitter.setString(settingValue);
+        while (splitter.hasNext()) {
+          String accessabilityService = splitter.next();
+          //Log.d("GeoDashboard","Setting: " + accessabilityService);
+          if (accessabilityService.equalsIgnoreCase(ACCESSIBILITY_SERVICE_NAME)){
+            //Log.d("GeoDashboard","We've found the correct setting - accessibility is switched on!");
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 
   // Executes a command after an image view has drawn the image
   String command=null;
@@ -240,7 +290,7 @@ public class ViewDashboard extends Activity {
           //su.waitFor();
         } catch (IOException e) {
           Log.d("GeoDashboard", e.getMessage());
-        }/* catch (InterruptedException e) {
+        } /*catch (InterruptedException e) {
           Log.d("GeoDashboard", e.getMessage());
         }*/
       }
@@ -252,21 +302,38 @@ public class ViewDashboard extends Activity {
    */
   private boolean registerService(int port) {
 
-    ServiceInfo serviceInfo = ServiceInfo.create(
-        "_geodashboard._tcp.",
-        "GeoDashboard", port,
-        "Displays dashboard images from Geo Discoverer"
-    );
-    try {
-      jmDNS.registerService(serviceInfo);
-    }
-    catch (IOException e) {
-      Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
-      msg.sendToTarget();
-      return false;
-    }
+    NsdServiceInfo serviceInfo  = new NsdServiceInfo();
+    serviceInfo.setPort(port);
+    serviceInfo.setServiceName("GeoDashboard");
+    serviceInfo.setServiceType("_geodashboard._tcp.");
+    serviceInfo.setPort(port);
+    nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, this);
     return true;
   }
+
+  /**
+   * Called when the network service can not be registered
+   */
+  @Override
+  public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+    Toast.makeText(this,"nsd registration failed", Toast.LENGTH_LONG).show();
+  }
+
+  @Override
+  public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+    Toast.makeText(this,"nsd unregistration failed", Toast.LENGTH_LONG).show();
+  }
+
+  @Override
+  public void onServiceRegistered(NsdServiceInfo serviceInfo) {
+    //Toast.makeText(this,"nsd registration succeeded", Toast.LENGTH_LONG).show();
+  }
+
+  @Override
+  public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
+    //Toast.makeText(this,"nsd unregistration succeeded", Toast.LENGTH_LONG).show();
+  }
+
 
   /**
    * Returns the IP4 address of the wlan interface
@@ -317,7 +384,7 @@ public class ViewDashboard extends Activity {
 
     // Read the sys entry to get the current led brightness
     final int brightnessLevel;
-    File file = new File("/sys/devices/platform/mxc_msp430_fl.0/backlight/mxc_msp430_fl.0/actual_brightness");
+    File file = new File("/sys/devices/platform/ntx_bl/backlight/mxc_msp430.0/brightness");
     int t=0;
     try {
       BufferedReader br = new BufferedReader(new FileReader(file));
@@ -340,7 +407,6 @@ public class ViewDashboard extends Activity {
       }
     });
   }
-
 
   /**
    * Sends a message to the client
@@ -402,19 +468,10 @@ public class ViewDashboard extends Activity {
           }
         }
 
-        // Create the JmDNS object
+        // Get the wlan IP address
         InetAddress address = getWifiInetAddress();
         if (address==null) {
           Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,getString(R.string.no_wlan_address));
-          msg.sendToTarget();
-          displayTextBitmap(getString(R.string.server_down));
-          return;
-        }
-        try {
-          jmDNS = JmDNS.create(address);
-        }
-        catch (IOException e) {
-          Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_TOAST,e.getMessage());
           msg.sendToTarget();
           displayTextBitmap(getString(R.string.server_down));
           return;
@@ -469,13 +526,7 @@ public class ViewDashboard extends Activity {
         }
 
         // Unregister the service
-        jmDNS.unregisterAllServices();
-        try {
-          jmDNS.close();
-        }
-        catch (IOException e) {
-          Toast.makeText(ViewDashboard.this, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        nsdManager.unregisterService(ViewDashboard.this);
         displayTextBitmap(getString(R.string.server_down));
 
       }
@@ -577,6 +628,9 @@ public class ViewDashboard extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    // Get importand handles
+    nsdManager = (NsdManager)getSystemService(NSD_SERVICE);
+
     // Set the content
     setContentView(R.layout.view_dashboard);
     dashboardView = (ImageView)findViewById(R.id.fullscreen_content);
@@ -584,7 +638,7 @@ public class ViewDashboard extends Activity {
     backlightIndicatorView = (ImageView)findViewById(R.id.backlight_indicator);
 
     // Keep the screen on
-    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     // Set up an instance of SystemUiHider to control the system UI for
     // this activity.
@@ -668,7 +722,7 @@ public class ViewDashboard extends Activity {
     // Get notifications if WLAN changes
     IntentFilter intentFilter = new IntentFilter();
     intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-    registerReceiver(new BroadcastReceiver() {
+    wifiConnectedReceiver = new BroadcastReceiver() {
       @Override
       public void onReceive(Context context, Intent intent) {
         //Log.d("GeoDashboard","WLAN state has changed!");
@@ -679,8 +733,8 @@ public class ViewDashboard extends Activity {
           wlanActive = false;
         }
       }
-
-    }, intentFilter);
+    };
+    registerReceiver(wifiConnectedReceiver, intentFilter);
 
     // Start thread that handles wlan and backlight changes
     wifiManager = (android.net.wifi.WifiManager) getSystemService(android.content.Context.WIFI_SERVICE);
@@ -725,6 +779,10 @@ public class ViewDashboard extends Activity {
       }
     });
     monitorThread.start();
+
+    // Let the screen keep on
+    powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+    wakeLock = powerManager.newWakeLock(SCREEN_BRIGHT_WAKE_LOCK,"GeoDashboard");
 
     // Service is down
     displayTextBitmap(getString(R.string.server_down));
@@ -775,10 +833,14 @@ public class ViewDashboard extends Activity {
   protected void onResume() {
     super.onResume();
 
-    // Enable multicast on WLAN
-    multicastLock = wifiManager.createMulticastLock("Geo Dashboard lock for JmDNS");
-    multicastLock.setReferenceCounted(true);
-    multicastLock.acquire();
+    // Check if accessibility service is enabled
+    if (!isAccessibilityEnabled()) {
+      Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+      startActivity(intent);
+    }
+
+    // Keep the screen on
+    wakeLock.acquire();
 
     // App is available
     appActive=true;
@@ -793,6 +855,9 @@ public class ViewDashboard extends Activity {
 
     // App is not available
     appActive=false;
+
+    // Release the screen
+    wakeLock.release();
 
     // Release the multicast lock
     if (multicastLock!=null)
@@ -812,15 +877,17 @@ public class ViewDashboard extends Activity {
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
-      case R.id.action_reboot:
-        command="reboot";
+      case R.id.action_power_menu:
+        /*command="powerMenu";
         dashboardView.addOnLayoutChangeListener(executeCommandAfterDrawingListener);
-        dashboardView.setImageResource(R.drawable.poweroff);
+        dashboardView.setImageResource(R.drawable.poweroff);*/
+        Intent intent = new Intent();
+        intent.setClass(getApplicationContext(),GDAccessibilityService.class);
+        intent.setAction("showPowerMenu");
+        startService(intent);
         return true;
-      case R.id.action_shutdown:
-        command="reboot -p";
-        dashboardView.addOnLayoutChangeListener(executeCommandAfterDrawingListener);
-        dashboardView.setImageResource(R.drawable.poweroff);
+      case R.id.action_exit:
+        finish();
         return true;
       case R.id.action_refresh:
         restartService();
@@ -847,6 +914,7 @@ public class ViewDashboard extends Activity {
   /** Close the socket on destroy */
   @Override
   protected void onDestroy() {
+    unregisterReceiver(wifiConnectedReceiver);
     quitThreads=true;
     if (monitorThread!=null) {
       try {

@@ -6,13 +6,12 @@ def computeVersionName() {
 }
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 21
 
     defaultConfig {
         applicationId "com.untouchableapps.android.geodashboard"
-        minSdkVersion 17
-        targetSdkVersion 17
+        minSdkVersion 21
+        targetSdkVersion 21
         versionCode 4
         versionName computeVersionName()
     }
@@ -25,17 +24,35 @@ android {
     }
 
     applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            if (variant.name == "release") {
-                output.outputFile = new File(
-                        output.outputFile.parent,
-                        "GeoDashboard${variant.versionName}.apk")
-            }
+        variant.outputs.all {
+            outputFileName = "GeoDashboard${variant.name.capitalize()}${variant.versionName}.apk";
         }
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':jmDNS')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+android.applicationVariants.all { variant ->
+    if (variant.buildType.name == 'debug') {
+        variant.outputs.each { output ->
+            def taskSuffix = variant.name.capitalize()
+            def assembleTaskName = "assemble${taskSuffix}"
+            if (tasks.findByName(assembleTaskName)) {
+                def copyAPKTask = tasks.create(name: "publish${taskSuffix}", type: Copy) {
+                    from "${output.outputFile.parent}/${output.outputFile.name}"
+                    into "${rootDir}/export/debug"
+                    onlyIf {
+                        if (inputs.sourceFiles.empty) {
+                            ant.fail("Cannot find APK ${output.outputFile.name} to publish!")
+                            return false;
+                        } else
+                            return true;
+                    }
+                }
+                tasks[assembleTaskName].finalizedBy = [copyAPKTask]
+            }
+        }
+    }
 }

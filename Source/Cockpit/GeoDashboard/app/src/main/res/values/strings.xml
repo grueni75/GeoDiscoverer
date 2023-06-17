@@ -37,5 +37,7 @@
     <string name="quit_message">Geo Dashboard is destroyed!</string>
     <string name="reboot">Reboot</string>
     <string name="shutdown">Shutdown</string>
+    <string name="power_menu">Power Menu</string>
+    <string name="exit">Exit</string>
 
 </resources>

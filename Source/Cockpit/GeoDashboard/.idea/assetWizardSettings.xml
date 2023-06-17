@@ -24,7 +24,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="/tmp/baseline_flip_camera_android_24.xml" />
+                                                <entry key="imagePath" value="/tmp/baseline_exit_to_app_24.xml" />
                                                 <entry key="opacityPercent" value="80" />
                                               </map>
                                             </option>
@@ -36,7 +36,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="jar:file:/home/grueni/Apps/android/android-studio/plugins/android/lib/android.jar!/images/material/icons/materialicons/flip_camera_android/baseline_flip_camera_android_24.xml" />
+                                                <entry key="url" value="file:$PROJECT_DIR$/../../../../android/android-sdk/icons/material/materialicons/exit_to_app/baseline_exit_to_app_24.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -80,7 +80,7 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="outputName" value="restart" />
+                                      <entry key="outputName" value="exit" />
                                       <entry key="theme" value="CUSTOM" />
                                       <entry key="themeColor" value="ffffff" />
                                     </map>
