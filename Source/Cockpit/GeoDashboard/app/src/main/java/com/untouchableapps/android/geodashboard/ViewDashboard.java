@@ -76,17 +76,17 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
-import com.untouchableapps.android.geodashboard.util.SystemUiHider;
 
 import static android.os.PowerManager.SCREEN_BRIGHT_WAKE_LOCK;
 
@@ -97,29 +97,6 @@ import static android.os.PowerManager.SCREEN_BRIGHT_WAKE_LOCK;
  * @see SystemUiHider
  */
 public class ViewDashboard extends Activity implements NsdManager.RegistrationListener {
-
-  /**
-   * Whether or not the system UI should be auto-hidden after
-   * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-   */
-  private static final boolean AUTO_HIDE = true;
-
-  /**
-   * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after user
-   * interaction before hiding the system UI.
-   */
-  private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-  /**
-   * If set, will toggle the system UI visibility upon interaction. Otherwise,
-   * will show the system UI visibility upon interaction.
-   */
-  private static final boolean TOGGLE_ON_CLICK = true;
-
-  /**
-   * The flags to pass to {@link SystemUiHider#getInstance}.
-   */
-  private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
 
   // Infos about the screen
   private int orientation = 1;  // from Screen.h in Geo Discoverer
@@ -228,6 +205,7 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
    * Bitmap to display
    */
   Bitmap dashboardBitmap = null;
+  Bitmap dashboardPrevBitmap = null;
 
   // Actions for message handling
   static final int ACTION_DISPLAY_BITMAP = 0;
@@ -619,10 +597,57 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
    */
   private Thread serverThread = null;
 
-  /**
-   * The instance of the {@link SystemUiHider} for this activity.
-   */
-  private SystemUiHider mSystemUiHider;
+  public void setActionBarVisibility(boolean visible){
+
+    // The UI options currently enabled are represented by a bitfield.
+    // getSystemUiVisibility() gives us that bitfield.
+    int uiOptions = getWindow().getDecorView().getSystemUiVisibility();
+    int newUiOptions = uiOptions;
+    // END_INCLUDE (get_current_ui_flags)
+    // BEGIN_INCLUDE (toggle_ui_flags)
+    boolean isImmersiveModeEnabled =
+        ((uiOptions | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) == uiOptions);
+    if (isImmersiveModeEnabled) {
+      if (!visible) return;
+      Log.i("GeoDashboard", "Turning immersive mode mode off. ");
+    } else {
+      if (visible) return;
+      Log.i("GeoDashboard", "Turning immersive mode mode on.");
+    }
+
+    // Navigation bar hiding:  Backwards compatible to ICS.
+    if (Build.VERSION.SDK_INT >= 14) {
+      newUiOptions ^= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+    }
+
+    // Status bar hiding: Backwards compatible to Jellybean
+    if (Build.VERSION.SDK_INT >= 16) {
+      newUiOptions ^= View.SYSTEM_UI_FLAG_FULLSCREEN;
+    }
+
+    // Immersive mode: Backward compatible to KitKat.
+    // Note that this flag doesn't do anything by itself, it only augments the behavior
+    // of HIDE_NAVIGATION and FLAG_FULLSCREEN.  For the purposes of this sample
+    // all three flags are being toggled together.
+    // Note that there are two immersive mode UI flags, one of which is referred to as "sticky".
+    // Sticky immersive mode differs in that it makes the navigation and status bars
+    // semi-transparent, and the UI flag does not get cleared when the user interacts with
+    // the screen.
+    if (Build.VERSION.SDK_INT >= 18) {
+      newUiOptions ^= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+    }
+    //newUiOptions ^= View.SYSTEM_UI_FLAG_FULLSCREEN;
+    getWindow().getDecorView().setSystemUiVisibility(newUiOptions);
+
+    if (isImmersiveModeEnabled) {
+      getActionBar().show();
+      soundButtonsView.setVisibility(View.VISIBLE);
+      delayedHide(5000);
+    } else {
+      getActionBar().hide();
+      soundButtonsView.setVisibility(View.INVISIBLE);
+    }
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -640,34 +665,12 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
     // Keep the screen on
     //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-    // Set up an instance of SystemUiHider to control the system UI for
-    // this activity.
-    mSystemUiHider = SystemUiHider.getInstance(this, dashboardView, HIDER_FLAGS);
-    mSystemUiHider.setup();
-    mSystemUiHider
-        .setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
-
-          @Override
-          @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-          public void onVisibilityChange(boolean visible) {
-
-            if (visible && AUTO_HIDE) {
-              // Schedule a hide().
-              delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            soundButtonsView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-          }
-        });
-
     // Set up the user interaction to manually show or hide the system UI.
     dashboardView.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        if (TOGGLE_ON_CLICK) {
-          mSystemUiHider.toggle();
-        } else {
-          mSystemUiHider.show();
-        }
+        boolean visible = !getActionBar().isShowing();
+        setActionBarVisibility(visible);
       }
     });
 
@@ -683,6 +686,7 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
     serverThreadHandler = new Handler(Looper.getMainLooper()) {
       @Override
       public void handleMessage(Message inputMessage) {
+        final Handler handler = new Handler(Looper.getMainLooper());
         switch(inputMessage.what) {
           case ViewDashboard.ACTION_DISPLAY_BITMAP:
             if (command!=null)
@@ -699,8 +703,8 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
               updateCount=0;
               delay=100;
             }
-            final Handler handler = new Handler(Looper.getMainLooper());
             final Bitmap bitmap = dashboardBitmap;
+            dashboardPrevBitmap = dashboardBitmap;
             dashboardBitmap = null;
             if (bitmap!=null) {
               handler.postDelayed(new Runnable() {
@@ -802,10 +806,6 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
   @Override
   protected void onPostCreate(Bundle savedInstanceState) {
     super.onPostCreate(savedInstanceState);
-
-    // Trigger the initial hide() shortly after the activity has been
-    // created, to briefly hint to the user that UI controls
-    // are available.
     delayedHide(100);
   }
 
@@ -813,7 +813,7 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
   Runnable mHideRunnable = new Runnable() {
     @Override
     public void run() {
-      mSystemUiHider.hide();
+      setActionBarVisibility(false);
     }
   };
 
@@ -943,4 +943,23 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
     super.onDestroy();
   }
 
+  /** Reacts to key presses */
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    Log.d("GeoDashboard","keyCode="+keyCode);
+    boolean refreshScreen=false;
+    switch(keyCode) {
+      case 19:
+      case 20:
+        refreshScreen=true;
+        break;
+    }
+    if (refreshScreen) {
+      updateCount=FULL_REFRESH_UPDATE_COUNT;
+      dashboardBitmap = dashboardPrevBitmap;
+      Message msg = serverThreadHandler.obtainMessage(ACTION_DISPLAY_BITMAP);
+      msg.sendToTarget();
+    }
+    return super.onKeyDown(keyCode, event);
+  }
 }

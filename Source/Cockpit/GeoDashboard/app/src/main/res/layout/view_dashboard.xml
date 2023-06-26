@@ -13,6 +13,7 @@
         android:gravity="center"
         android:keepScreenOn="true"
         android:background="@android:color/white"
+        android:focusable="false"
         android:contentDescription="@string/fullscreen_content_description" />
 
     <ImageView
@@ -23,6 +24,7 @@
         android:layout_marginLeft="15dp"
         android:layout_gravity="top|left"
         android:visibility="invisible"
+        android:focusable="false"
         android:src="@drawable/light" />
 
     <LinearLayout
