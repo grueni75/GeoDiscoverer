@@ -1,4 +1,4 @@
-5.1
+5.2
 
 Elevate themes read me:
 ***********************
@@ -22,92 +22,48 @@ ENGLISH:
 OruxMaps:
 ---------
 
-Quick install (recommended):
-- Open http://www.openandromaps.org/en/legend/elevate-mountain-hike-theme in a browser on your android device
-- Press on "OruxMaps" in the column "Install in Android" below "Downloads" in the "Elevate 4" table
+As the apps change their user interface from time to time I only describe the basic steps that are necessary. For more detailed steps please use the help of the app.
+
+Quick install (recommended for supported apps):
+- Open http://www.openandromaps.org/en/legend/elevate-mountain-hike-theme in a browser on your android device.
+- Touch the name of your app in the column "Install in Android" below "Downloads" in the "Elevate 5" table.
 
 Choose map style (essential):
-- Make sure in OruxMaps settings that "User interface", "Miscellaneous UI", "No Navigation Drawer" is not checked
-- Open navigation drawer by swiping from the left border, tap on "Mapsforge theme", tap on the the theme you like to use (Elevate or Elements)
-- Use the cog wheel next to "Mapsforge theme" in the navigation drawer to choose the map style (hiking, cycling, city, mountainbike) and (de-)select overlays
-- There are other ways like the old style action bar or on screen buttons, use the OruxMaps manual on how to use this
+- It's not enough to install the map style, it is also necessary to select it in the app.
+- Please look in the app help how this is done exactly.
+- Most apps also support the map style options menu, that allows to choose the different maps styles like hiking, cycling, MTB and city, as well as individual options for tweaking the map style.
+- Elevate is the right choice for most maps; Elements is made for sparsely populated/mapped areas or countries, mostly backcountry usage, e.g. the outback of Australia, Iceland outside of the cities etc.
 
 Manual install (advanced):
-- Please make sure you downloaded "Elevate.zip"
-- If it's an update of existing Elevate map themes: remove all old files and folders
-- Unzip Elevate.zip with an Android file explorer to "../oruxmaps/mapstyles/" on your SD-Card or internal memory (depending on your device)
-- You can choose your own path for theme files in OruxMaps via "...", "Global settings", "Maps", "Mapsforge settings" and "Mapsforge themes"
-- Choose map style as above
-
-
-Locus:
-------
-
-Quick install (recommended):
-- Open http://www.openandromaps.org/en/legend/elevate-mountain-hike-theme in a browser on your android device
-- Press on "Locus" in the column "Install in Android" below "Downloads" in the "Elevate 4" table
-
-Choose map style (essential):
-- For choosing the map theme in Locus use the blue button on the bottom left side of the map for "Map content" and press "Map themes" (if not available open settings, "Maps", "Panels & Buttons", "Left Actions Panel", check "Map content") 
-- Touch the name of the map theme (if necessary hit "Show more" below "Internal themes")
-- For choosing map styles (hiking, cycling, city, mountainbike) and overlays, a menu pops up when choosing the map theme. To change again later, just use "Map themes" again.
-- There are other ways to do this, use the Locus manual for reference
-
-Manual install (advanced):
-- Please make sure you downloaded "Elevate.zip"
-- If it's an update of existing Elevate map theme files: remove all old files and folders
-- Unzip Elevate.zip with an Android file explorer into a subfolder of "../Locus/mapsVector/_themes/" on your SD-Card or internal memory (depending on your device)
-- Choose map style as above
-
+- If it's an update of existing Elevate map themes: remove all old files and folders.
+- Unzip Elevate.zip with an Android file explorer to the mapstyle folder specified by the app.
 
 -------------------------------------------------------------------------
 
 DEUTSCH:
 ********
 
-OruxMaps:
----------
+Da die Apps immer wieder ihre Oberfläche ändern werden hier nur die grundsätzlichen Schritte beschrieben, die notwendig sind. Bitte für genaueres Vorgehen die Hilfe der App nutzen.
 
-Schnellinstallation (empfohlen):
-- Öffne http://www.openandromaps.org/kartenlegende/elevation-hike-theme in einem Browser auf dem Android Gerät
-- Drücke auf "OruxMaps" in der Spalte "Installieren unter Android" unterhalb von "Downloads" in der "Elevate 4" Tabelle
+Schnellinstallation (empfohlen für unterstützte Apps):
+- Öffne http://www.openandromaps.org/kartenlegende/elevation-hike-theme in einem Browser auf dem Android Gerät.
+- Drücke auf den Namen deiner App in der Spalte "Schnellinstallation unter Android" unterhalb von "Downloads" in der "Elevate 5" Tabelle.
 
-Kartenstil wählen (wichtig):
-- Stelle sicher, das in den OruxMaps Einstellungen unter "Benutzeroberfläche", "Verschiedenes" kein Haken bei "App-Navigation ausblenden" gesetzt ist
-- Öffne die App-Navagation durch das Wischen vom linken Rand, berühre "Mapsforge-Thema" und berühre den gewünschten Theme (Elevate oder Elements)
-- Benutze das Zahnrad neben "Mapsforge theme" in der App Navigation um den Kartenstil auszuwählen und Overlays an- oder abzuschalten
-- Es gibt andere Wege hierzu wie die alte Menüleiste oder die Buttons auf dem Bildschirm, wie das geht bitte im OruxMaps Handbuch nachlesen
-
-Manuelle Installation (fortgeschritten):
-- Bitte darauf achten, dass die heruntergeladene Datei "Elevate.zip" heißen sollte
-- Wenn es ein Update von bisherigen Elevate Kartenthemen ist: lösche alle alten Dateien und Ordner
-- Entpacke Elevate.zip mit einem Android Datei Explorer nach "../oruxmaps/mapstyles/" auf der SD-Karte oder im internen Speicher (kommt auf das Gerät an)
-- Man kann selbst in OruxMaps auch den Pfad zu den Kartenthemen festlegen, via "Menü", "Globale Einstellungen", "Karten", "Mapsforge-Einstellungen" und "Mapsforge-Themen"
-- Kartenstil wählen siehe oben
-
-Locus:
-------
-
-Schnellinstallation (empfohlen):
-- Öffne http://www.openandromaps.org/kartenlegende/elevation-hike-theme in einem Browser auf dem Android Gerät
-- Drücke auf "Locus" in der Spalte "Installieren unter Android" unterhalb von "Downloads" in der "Elevate 4" Tabelle
-
-Kartenstil wählen (wichtig):
-- Um den Kartenstil auszuwählen benutze in Locus den blauen Button für "Karteninhalt" unten links bei der Karte und drücke auf "Thema der Karte" (wenn nicht vorhanden öffne die Einstellungen, "Karten", "Bedienleisten & Knöpfe", "Aktivitätenliste", Haken bei "Karteninhalt" setzen)
-- Wähle dann den Namen des Kartenthemas (wenn nötig, berühre "mehr..." am Ende von "Interne Themen")
-- Um Kartenstile und Overlays zu ändern erscheint ein weiteres Menü wenn das Kartenthema ausgewählt wird. Um diese später zu ändern, einfach wieder "Thema der Karte" benutzen. 
-- Es gibt andere Wege hierzu, wie das geht bitte im Locus Handbuch nachlesen
+Kartenstil auswählen (wichtig):
+- Es reicht nicht aus, den Kartenstil zu installieren, er muss auch noch in der App ausgewählt werden. 
+- Wie genau das geht bitte in der App Hilfe nachschlagen.
+- Die meisten Apps unterstüzten auch noch das Kartenstil Options Menü, in dem die verschiedenen Kartenstile wie Wandern, Fahrrad, MTB oder Stadt ausgewählt werden können, sowie einzelne Optionen um den Kartenstil zu ändern.
+- Elevate ist für die meisten Karte die richtige Wahl; Elements ist für spärlich bewohnte/kartografierte Gebiete oder Länder, also in erster Linie Hinterland, geeignet, z.B. das Outback von Australien, Island außerhalb der Städte etc.
 
 Manuelle Installation (fortgeschritten):
-- Bitte darauf achten dass die heruntergeladene Datei "Elevate.zip" heißen sollte (oder die L/XL Varianten, für die gilt das unten Stehende entsprechend)
-- Wenn es ein Update von bisherigen Elevate Kartenthemen ist: lösche alle alten Dateien und Ordner
-- Entpacke Elevate.zip mit einem Android Datei Explorer in einen Unterordner von "../Locus/mapsVector/_themes/" auf der SD-Karte oder im internen Speicher (kommt auf das Gerät an)
-- Kartenstil wählen siehe oben
-
-
--------------------------------------------------------------------------
+- Wenn es ein Update von bisherigen Elevate Kartenthemen ist: lösche alle alten Dateien und Ordner.
+- Entpacke die Zip-Datei mit einem Android Datei Explorer in den durch die App festgelegten Kartenstil-Ordner.-------------------------------------------------------------------------
 CHANGELOG
 -------------------------------------------------------------------------
+
+5.2 06/11/22
+- added crags for UK maps, smaller symbols for parking lane/street side, amenity=parking_entrance, natural=sinkhole, natural=crater for nodes, highway=busway, names for various landuses to all map styles, mtb_role=forward/backward, landuse=plant_nursery, barrier=toll_booth, railway=train_station_entrance, railway=subway_entrance
+- changed areas of touristic attractions, walls, parking zoom levels, non-route refs for smaller highways
 
 5.1 07/06/22
 - added: tracktype=grade1 to emphasized paved ways options,  low zoom emphasized paved cycle ways rendering (cycling), man_made=breakwater, amenity=bicycle_repair_station, amenity=public_bookcase

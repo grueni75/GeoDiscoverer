@@ -14,7 +14,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c9e79f9a-25b2-4976-9b88-f17693dc2c08" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/ele-res/.nomedia" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/ele-res/p_plant_nursery.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/ele-res/s_parking_entrance.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/ele-res/s_parking_fee_entrance.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/ele-res/s_parking_private_entrance.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/ele-res/s_pt_rail_entrance.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/ele-res/s_pt_subway_entrance.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/ele-res/s_toll_booth.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/Elements.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/Elements.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/Elevate.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/Elevate.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/read_me_elevate.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/Theme/read_me_elevate.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/legend.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/../../Platform/Target/Android/mobile/src/main/assets/GeoDiscoverer/Server/Mapsforge/legend.pdf" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,7 +35,7 @@
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[/home/grueni/.android/avd/Wear_OS_Round_API_30.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[28291FDH3002YZ]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
