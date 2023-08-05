@@ -1337,6 +1337,8 @@ void NavigationEngine::setTargetPos(double lng, double lat) {
 
 // Updates the flags of a route
 void NavigationEngine::updateFlagVisualization(NavigationPath *path) {
+  if (path->getSelectedSize()==0)
+    return;
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
   std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
   MapPosition startFlagPos=path->getStartFlagPos();

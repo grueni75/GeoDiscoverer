@@ -443,7 +443,7 @@ bool NavigationPath::readGPXFile() {
       if (routeNodes.size()>0) {
         loadRoute=true;
       } else {
-        ERROR("file <%s> does neither contain a route nor a track",gpxFilename.c_str());
+        WARNING("file <%s> contains waypoints only",gpxFilename.c_str());
       }
     }
 

@@ -347,6 +347,8 @@ public:
   }
 
   Int getSelectedSize() const {
+    if (mapPositions.size()==0)
+      return 0;
     Int startIndex=0;
     Int endIndex=mapPositions.size()-1;
     if (this->reverse) {
