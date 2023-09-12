@@ -73,6 +73,8 @@ bool WidgetAddressPoint::work(TimestampInMicroseconds t) {
   // Only update the info at given update interval
   if ((firstRun)||(t>=nextUpdateTime)) {
 
+    //DEBUG("updating address point widget (alpha=%d)",color.getAlpha());
+
     // Hide the widget on the first run
     if ((hideIfNoAddressPointNear)&&(firstRun)) {
       color.setAlpha(0);
@@ -186,7 +188,7 @@ void WidgetAddressPoint::draw(TimestampInMicroseconds t) {
 void WidgetAddressPoint::updatePosition(Int x, Int y, Int z) {
   WidgetPrimitive::updatePosition(x,y,z);
   nextUpdateTime=0;
-  firstRun=true;
+  //firstRun=true;
 }
 
 // Called when some data has changed
