@@ -16,5 +16,5 @@ remote 'source ~/.androidrc && cd Apps/GeoDiscoverer/ThirdParty/brouter && ./bui
 remote sudo apt --assume-yes install make rsync inkscape
 remote 'source ~/.androidrc && cd Apps/GeoDiscoverer/Source/Platform/Target/Android && ./gradlew assembleDebug'
 
-echo "You can start Android Studio by executing ~/Apps/android-studio/bin/studio.sh"
+echo "You can start Android Studio by executing ~/Apps/android/android-studio/bin/studio.sh"
 

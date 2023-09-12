@@ -6,5 +6,6 @@ function remote {
 cd ~/Apps && tar zcf Arduino.tar.gz Arduino
 gcloud compute scp --recurse ~/Apps/Arduino.tar.gz $USER@ubuntu-desktop:Apps/
 remote 'cd Apps/ && tar zxf Arduino.tar.gz'
-remote 'cd Apps/Arduino/Sketchbook/TandemTracker && make'
-
+remote 'ln -s ~/Apps/Arduino/Platform ~/.arduino15'
+remote 'cd Apps/Arduino/Sketchbook/TandemTracker && make clean && make'
+echo "You may need to adapt the paths in ~/.arduino15/preferences.txt (especially sketchbook.path)"
