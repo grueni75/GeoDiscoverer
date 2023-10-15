@@ -90,7 +90,7 @@ class Dialog : ComponentActivity() {
     window.setWindowAnimations(0)
 
     // Set the content
-    viewModel.message=getString(R.string.permission_instructions)
+    viewModel.message=getString(R.string.general_permission_instructions)
     setContent{
       content()
     }
@@ -123,14 +123,12 @@ class Dialog : ComponentActivity() {
       )
       if (!Settings.canDrawOverlays(applicationContext)) {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "Requesting overlay permission")
+        viewModel.message=getString(R.string.overlay_permission_instructions)
         GDApplication.showMessageBar(
           applicationContext,
-          resources.getString(R.string.overlay_instructions),
+          resources.getString(R.string.overlay_permission_toast),
           GDApplication.MESSAGE_BAR_DURATION_LONG
         )
-        val packageName = applicationContext.packageName
-        val t = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
-        startActivity(t)
       }
     }
 
@@ -195,12 +193,14 @@ class Dialog : ComponentActivity() {
               contentDescription = null,
             )
           } else {
-            Image(
-              modifier = Modifier
-                .size(60.dp),
-              painter = painterResource(R.mipmap.ic_launcher_foreground),
-              contentDescription = null
-            )
+            if (viewModel.message!=getString(R.string.overlay_permission_instructions)) {
+              Image(
+                modifier = Modifier
+                  .size(60.dp),
+                painter = painterResource(R.mipmap.ic_launcher_foreground),
+                contentDescription = null
+              )
+            }
           }
           if (viewModel.message != "") {
             Text(

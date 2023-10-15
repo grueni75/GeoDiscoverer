@@ -101,6 +101,9 @@ GraphicEngine::GraphicEngine(Device *device) :
 
 // Inits dynamic data
 void GraphicEngine::init() {
+  if (device->getIsWatch()) {
+    WARNING("Disable ambient leave delay once Samsung fixes the WearOS 4.0 bug",NULL);
+  }
 }
 
 // Clears all graphic
@@ -913,7 +916,7 @@ void GraphicEngine::setAmbientMode(boolean enabled) {
     ambientModeStartTime=t;
   else {
     ambientModeStartTime=0;
-    interactiveModeStartTime=t;
+    interactiveModeStartTime=t+200000; // bug in current Samsung WearOS 4.0 requires delayed exit
   }
 }
 

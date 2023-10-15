@@ -3,7 +3,8 @@
     <string name="no_home_dir">Home directory &lt;%s&gt; can not be created!</string>
     <string name="opengles20_required">App requires OpenGL ES 2.0!</string>
     <string name="title_activity_dialog">Dialog</string>
-    <string name="permission_instructions">Please grant required permissions and re-open watch face</string>
-    <string name="overlay_instructions">Please enable overlay permission</string>
-  <string name="no_wake_lock">Can not obtain wake lock!</string>
+    <string name="general_permission_instructions">Please grant required permissions and re-open watch face</string>
+    <string name="overlay_permission_instructions">adb shell pm grant com.untouchableapps.android.geodiscoverer android.permission.SYSTEM_ALERT_WINDOW</string>
+    <string name="overlay_permission_toast">Please grant overlay permission with adb and re-open watch face</string>
+    <string name="no_wake_lock">Can not obtain wake lock!</string>
 </resources>

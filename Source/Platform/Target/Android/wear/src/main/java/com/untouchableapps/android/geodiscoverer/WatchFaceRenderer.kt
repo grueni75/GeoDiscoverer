@@ -22,29 +22,27 @@
 package com.untouchableapps.android.geodiscoverer
 
 import android.Manifest
+import android.R.attr.x
+import android.R.attr.y
 import android.annotation.SuppressLint
-import android.app.AlarmManager
 import android.content.Context
 import android.content.Context.*
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.provider.Settings
-import androidx.wear.watchface.style.CurrentUserStyleRepository
-import com.untouchableapps.android.geodiscoverer.core.GDCore
-import java.time.ZonedDateTime
 import android.graphics.PixelFormat
 import android.hardware.Sensor
-import kotlinx.coroutines.*
-import android.provider.Settings.SettingNotFoundException
-import androidx.wear.watchface.*
-import java.util.*
 import android.hardware.SensorManager
-import android.R.attr.y
-
-import android.R.attr.x
+import android.opengl.GLES20
 import android.os.*
-import android.util.Log
+import android.provider.Settings
+import android.provider.Settings.SettingNotFoundException
 import android.view.*
+import androidx.wear.watchface.*
+import androidx.wear.watchface.style.CurrentUserStyleRepository
+import com.untouchableapps.android.geodiscoverer.core.GDCore
+import kotlinx.coroutines.*
+import java.time.ZonedDateTime
+import java.util.*
 
 
 // Default for how long each frame is displayed at expected frame rate.
@@ -96,6 +94,8 @@ class WatchFaceRenderer(
   var displayTimeout = 0L
   var visible = false
   var forceAnimate = false
+  var screenCleared = false
+  var clearScreen = false
 
   // Indicates if an overlay window shall be used to capture gestures
   val touchHandlerView: View = View(context)
@@ -322,10 +322,16 @@ class WatchFaceRenderer(
     //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","visible=${watchState.isVisible.value} isAmbient=${watchState.isAmbient.value}")
     var result=super.shouldAnimate()
     if (!watchState.isVisible.value!!) {
-      handleVisibility(false)
       // If watch face becomes invisible due to other activity and later
       // becomes visible during ambient then the ambient mode is not
       // correctly started
+      //handleVisibility(false)
+
+      // Fix animation bug in WearOS 4.0
+      if (!screenCleared) {
+        clearScreen = true
+        forceAnimate = true
+      }
     }
     if (forceAnimate) {
       result=true
@@ -362,7 +368,16 @@ class WatchFaceRenderer(
     } else {
       handleVisibility(true)
     }
-    coreObject?.onDrawFrame(null);
+    if (clearScreen) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","clearing screen")
+      GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+      GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+      screenCleared=true
+      clearScreen=false
+    } else {
+      coreObject?.onDrawFrame(null)
+      screenCleared=false
+    };
   }
 
   // Renders additional info above the main content
