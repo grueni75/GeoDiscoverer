@@ -22,6 +22,7 @@
 package com.untouchableapps.android.geodiscoverer
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -29,28 +30,37 @@ import android.provider.Settings
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.wear.ambient.AmbientModeSupport
-import androidx.wear.compose.material.*
-import com.untouchableapps.android.geodiscoverer.theme.WearAppTheme
-
+import androidx.wear.compose.material.Button
+import androidx.wear.compose.material.CircularProgressIndicator
+import androidx.wear.compose.material.Icon
+import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Text
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface
-import android.transition.Explode
-import android.transition.Fade
-import android.view.Window
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
+import com.untouchableapps.android.geodiscoverer.theme.WearAppTheme
 
 
 class Dialog : ComponentActivity() {
@@ -123,7 +133,20 @@ class Dialog : ComponentActivity() {
       )
       if (!Settings.canDrawOverlays(applicationContext)) {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDApp", "Requesting overlay permission")
-        viewModel.message=getString(R.string.overlay_permission_instructions)
+        //viewModel.message=getString(R.string.overlay_permission_instructions)
+        val packageName = applicationContext.packageName
+        val t = Intent(
+          Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri.parse(
+            "package:$packageName"
+          )
+        )
+        val startForResult = registerForActivityResult(
+          ActivityResultContracts.StartActivityForResult()
+        ) { result: ActivityResult ->
+          if (result.resultCode == Activity.RESULT_OK) {
+          }
+        }
+        startForResult.launch(t)
         GDApplication.showMessageBar(
           applicationContext,
           resources.getString(R.string.overlay_permission_toast),
