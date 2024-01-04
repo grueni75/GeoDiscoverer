@@ -51,8 +51,10 @@ public class GDAccessibilityService extends AccessibilityService {
   // State
   enum ScanState {
     NORMAL,
-    NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS
+    NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS,
+    NEXT_TEXT_VIEW_IS_NAME
   }
+  ScanState mapScanState = ScanState.NORMAL;
   ScanState bookingScanState = ScanState.NORMAL;
 
   // Regular expressions
@@ -124,76 +126,96 @@ public class GDAccessibilityService extends AccessibilityService {
   private void findPlace(AccessibilityNodeInfo info, int indentLevel) {
     if (info==null)
       return;
-    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
 
-      /* Output debug infos
-      String infoDesc="";
-      if (info.getClassName()!=null) {
-        infoDesc=infoDesc+"C:"+info.getClassName().toString()+" ";
-      }
-      if (info.getViewIdResourceName()!=null) {
-        infoDesc=infoDesc+"I:"+info.getViewIdResourceName()+" ";
-      }
-      if (info.getText()!=null) {
-        infoDesc=infoDesc+"T:"+info.getText().toString()+" ";
-      }
-      if (info.getContentDescription()!=null) {
-        infoDesc=infoDesc+"D:"+info.getContentDescription().toString()+" ";
-      }
-      if (infoDesc.compareTo("")!=0) {
-        String indent="";
-        for (int i=0; i<indentLevel; i++)
-          indent+="*";
-        if (indentLevel>0)
-          indent+=" ";
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", indent+infoDesc);
-      }*/
+    // Reset states
+    if (indentLevel==0) {
+      mapScanState=ScanState.NORMAL;
+      bookingScanState=ScanState.NORMAL;
+    }
 
-      // Name detected?
-      if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.google.android.apps.maps:id/title")==0)) {
+    /* Output debug infos
+    String infoDesc="";
+    if (info.getClassName()!=null) {
+      infoDesc=infoDesc+"C:"+info.getClassName().toString()+" ";
+    }
+    if (info.getViewIdResourceName()!=null) {
+      infoDesc=infoDesc+"I:"+info.getViewIdResourceName()+" ";
+    }
+    if (info.getText()!=null) {
+      infoDesc=infoDesc+"T:"+info.getText().toString()+" ";
+    }
+    if (info.getContentDescription()!=null) {
+      infoDesc=infoDesc+"D:"+info.getContentDescription().toString()+" ";
+    }
+    if (infoDesc.compareTo("")!=0) {
+      String indent="";
+      for (int i=0; i<indentLevel; i++)
+        indent+="*";
+      if (indentLevel>0)
+        indent+=" ";
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", indent+infoDesc);
+    }*/
+
+    // Name detected?
+    if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.google.android.apps.maps:id/title")==0)) {
+      currentAddressPoint.name=info.getText().toString();
+    }
+    if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.google.android.apps.maps:id/card_stack_header")==0)) {
+      mapScanState = ScanState.NEXT_TEXT_VIEW_IS_NAME;
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "next text view is name");
+    }
+    if ((info.getClassName()!=null)&&(info.getClassName().toString().compareTo("android.widget.TextView")==0)) {
+      if (mapScanState == ScanState.NEXT_TEXT_VIEW_IS_NAME) {
         currentAddressPoint.name=info.getText().toString();
+        mapScanState = ScanState.NORMAL;
       }
-      if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/hotel_name")==0)) {
-        currentAddressPoint.name=info.getText().toString();
-        //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "name="+currentAddressPoint.name);
-      }
+    }
+    if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/hotel_name")==0)) {
+      currentAddressPoint.name=info.getText().toString();
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "name="+currentAddressPoint.name);
+    }
 
-      // Plus code detected?y
-      if (info.getText()!=null) {
-        String potentialPlusCode=info.getText().toString();
-        Matcher m = plusCodePattern.matcher(potentialPlusCode);
-        if (m.find()) {
-          currentAddressPoint.plusCode=info.getText().toString();
-        }
+    // Plus code detected?y
+    if (info.getText()!=null) {
+      String potentialPlusCode=info.getText().toString();
+      Matcher m = plusCodePattern.matcher(potentialPlusCode);
+      if (m.find()) {
+        currentAddressPoint.plusCode=info.getText().toString();
       }
+    }
 
-      // Address detected?
-      if (info.getContentDescription()!=null) {
-        if (info.getContentDescription().toString().startsWith(getString(R.string.address_point_grabbing_gmap_address_tag))) {
-          currentAddressPoint.address=info.getContentDescription().toString().substring(9);
-        }
+    // Address detected?
+    if (info.getContentDescription()!=null) {
+      if (info.getContentDescription().toString().startsWith(getString(R.string.address_point_grabbing_gmap_address_tag))) {
+        currentAddressPoint.address=info.getContentDescription().toString().substring(9);
       }
-      if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/titleTextView")==0)) {
-        if (info.getText().toString().compareTo(getString(R.string.address_point_grabbing_booking_address_tag))==0) {
-          bookingScanState = ScanState.NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS;
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "next description text view is address");
-        } else {
-          bookingScanState = ScanState.NORMAL;
-        }
-      }
-      if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/descriptionTextView")==0)) {
-        if (bookingScanState == ScanState.NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS) {
-          currentAddressPoint.address=info.getText().toString();
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "address="+currentAddressPoint.address);
-        }
+    }
+    if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/titleTextView")==0)) {
+      if (info.getText().toString().compareTo(getString(R.string.address_point_grabbing_booking_address_tag))==0) {
+        bookingScanState = ScanState.NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS;
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "next description text view is address");
+      } else {
         bookingScanState = ScanState.NORMAL;
       }
-
-      // Go through all children recursively
-      for (int i = 0; i < info.getChildCount(); i++) {
-        if (info.getChild(i) != null)
-          findPlace(info.getChild(i),indentLevel+1);
+    }
+    if ((info.getViewIdResourceName()!=null)&&(info.getViewIdResourceName().compareTo("com.booking:id/descriptionTextView")==0)) {
+      if (bookingScanState == ScanState.NEXT_DESCRIPTION_TEXT_VIEW_IS_ADDRESS) {
+        currentAddressPoint.address=info.getText().toString();
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "address="+currentAddressPoint.address);
       }
+      bookingScanState = ScanState.NORMAL;
+    }
+
+    // Go through all children recursively
+    for (int i = 0; i < info.getChildCount(); i++) {
+      if (info.getChild(i) != null)
+        findPlace(info.getChild(i),indentLevel+1);
+    }
+
+    // Remove any newlines from the name
+    if (indentLevel==0) {
+      if (currentAddressPoint.name!=null)
+        currentAddressPoint.name = currentAddressPoint.name.replace("\n", "");
     }
   }
 
@@ -226,7 +248,7 @@ public class GDAccessibilityService extends AccessibilityService {
           else
             currentAddressPoint.name=currentAddressPoint.plusCode;
         }
-        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","New address point grabbed: "+currentAddressPoint.name);
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","New address point grabbed: "+currentAddressPoint.name+" (address="+currentAddressPoint.address+" plusCode="+currentAddressPoint.plusCode+")");
 
         // Already seen?
         if ((prevAddressPoint!=null)&&(prevAddressPoint.equals(currentAddressPoint))) {

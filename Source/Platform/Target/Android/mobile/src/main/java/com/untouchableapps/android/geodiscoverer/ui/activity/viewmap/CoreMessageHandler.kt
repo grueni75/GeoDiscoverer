@@ -145,6 +145,7 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
         }
         if (commandFunction == "addressPointsUpdated") {
           viewMap.viewModel.refreshAddressPoints()
+          commandExecuted = true
         }
         if (commandFunction == "exitActivity") {
           viewMap.exitRequested = true
