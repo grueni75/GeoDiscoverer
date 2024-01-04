@@ -233,97 +233,93 @@ public class GDAccessibilityService extends AccessibilityService {
       return;
     }
 
-    // Check if a place can be found in the window
-    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
+    // Output all IDs of the view hierarchy
+    currentAddressPoint=new AddressPoint();
+    findPlace(getRootInActiveWindow(),0);
 
-      // Output all IDs of the view hierarchy
-      currentAddressPoint=new AddressPoint();
-      findPlace(getRootInActiveWindow(),0);
-
-      // Place detected?
-      if ((currentAddressPoint.address!=null)||(currentAddressPoint.plusCode!=null)) {
-        if (currentAddressPoint.name==null) {
-          if (currentAddressPoint.address!=null)
-            currentAddressPoint.name=currentAddressPoint.address;
-          else
-            currentAddressPoint.name=currentAddressPoint.plusCode;
-        }
-        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","New address point grabbed: "+currentAddressPoint.name+" (address="+currentAddressPoint.address+" plusCode="+currentAddressPoint.plusCode+")");
-
-        // Already seen?
-        if ((prevAddressPoint!=null)&&(prevAddressPoint.equals(currentAddressPoint))) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Address point already seen, dropping it");
-          return;
-        }
-        prevAddressPoint=currentAddressPoint;
-
-        // Stop any previous thread
-        if (notificationThread!=null) {
-          notificationThread.interrupt();
-          notificationThread=null;
-        }
-
-        // Check if the address point already exists
-        final String selectedGroupName = GDApplication.coreObject.configStoreGetStringValue("Navigation","selectedAddressPointGroup");
-        String names[] = GDApplication.coreObject.configStoreGetAttributeValues("Navigation/AddressPoint","name");
-        boolean found=false;
-        for (int i=0;i<names.length;i++) {
-          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","name="+names[i]);
-          if (names[i].equals(currentAddressPoint.name)) {
-            found=true;
-            break;
-          }
-        }
-        if (found) {
-          GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Found address point exists already!");
-          return;
-        }
-
-        // Schedule the thread to create the notification
-        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Starting notification thread");
-        notificationThread=new Thread(new Runnable() {
-
-          AddressPoint addressPoint=currentAddressPoint;
-          String group=selectedGroupName;
-
-          @Override
-          public void run() {
-
-            // Wait a bit in case a newer address point is detected
-            try {
-              Thread.sleep(1000);
-            }
-            catch (InterruptedException e) {
-              return;
-            }
-            notificationThread=null;
-
-            // Create the notification
-            //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Creating notification");
-            Intent notificationIntent = new Intent(GDAccessibilityService.this, GDService.class);
-            notificationIntent.setAction("addAddressPoint");
-            notificationIntent.putExtra("name",addressPoint.name);
-            notificationIntent.putExtra("group",group);
-            if (addressPoint.plusCode!=null)
-              notificationIntent.putExtra("address",addressPoint.plusCode);
-            else
-              notificationIntent.putExtra("address",addressPoint.address);
-            PendingIntent pi = PendingIntent.getService(GDAccessibilityService.this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT|PendingIntent.FLAG_CANCEL_CURRENT);
-            String notificationTitle=getString(R.string.notification_address_point_grabbed_title,addressPoint.name);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(GDAccessibilityService.this, "addressPointGrabber")
-                .setContentTitle(notificationTitle)
-                .setContentText(getString(R.string.notification_address_point_grabbed_text))
-                .setContentIntent(pi)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.address_point))
-                .setSmallIcon(R.drawable.notification_running)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
-            notificationManager.notify(addressPoint.name.hashCode(), builder.build());
-          }
-        });
-        notificationThread.start();
+    // Place detected?
+    if ((currentAddressPoint.address!=null)||(currentAddressPoint.plusCode!=null)) {
+      if (currentAddressPoint.name==null) {
+        if (currentAddressPoint.address!=null)
+          currentAddressPoint.name=currentAddressPoint.address;
+        else
+          currentAddressPoint.name=currentAddressPoint.plusCode;
       }
+      GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","New address point grabbed: "+currentAddressPoint.name+" (address="+currentAddressPoint.address+" plusCode="+currentAddressPoint.plusCode+")");
+
+      // Already seen?
+      if ((prevAddressPoint!=null)&&(prevAddressPoint.equals(currentAddressPoint))) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Address point already seen, dropping it");
+        return;
+      }
+      prevAddressPoint=currentAddressPoint;
+
+      // Stop any previous thread
+      if (notificationThread!=null) {
+        notificationThread.interrupt();
+        notificationThread=null;
+      }
+
+      // Check if the address point already exists
+      final String selectedGroupName = GDApplication.coreObject.configStoreGetStringValue("Navigation","selectedAddressPointGroup");
+      String names[] = GDApplication.coreObject.configStoreGetAttributeValues("Navigation/AddressPoint","name");
+      boolean found=false;
+      for (int i=0;i<names.length;i++) {
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","name="+names[i]);
+        if (names[i].equals(currentAddressPoint.name)) {
+          found=true;
+          break;
+        }
+      }
+      if (found) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Found address point exists already!");
+        return;
+      }
+
+      // Schedule the thread to create the notification
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Starting notification thread");
+      notificationThread=new Thread(new Runnable() {
+
+        AddressPoint addressPoint=currentAddressPoint;
+        String group=selectedGroupName;
+
+        @Override
+        public void run() {
+
+          // Wait a bit in case a newer address point is detected
+          try {
+            Thread.sleep(1000);
+          }
+          catch (InterruptedException e) {
+            return;
+          }
+          notificationThread=null;
+
+          // Create the notification
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","Creating notification");
+          Intent notificationIntent = new Intent(GDAccessibilityService.this, GDService.class);
+          notificationIntent.setAction("addAddressPoint");
+          notificationIntent.putExtra("name",addressPoint.name);
+          notificationIntent.putExtra("group",group);
+          if (addressPoint.plusCode!=null)
+            notificationIntent.putExtra("address",addressPoint.plusCode);
+          else
+            notificationIntent.putExtra("address",addressPoint.address);
+          PendingIntent pi = PendingIntent.getService(GDAccessibilityService.this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT|PendingIntent.FLAG_CANCEL_CURRENT);
+          String notificationTitle=getString(R.string.notification_address_point_grabbed_title,addressPoint.name);
+          NotificationCompat.Builder builder = new NotificationCompat.Builder(GDAccessibilityService.this, "addressPointGrabber")
+              .setContentTitle(notificationTitle)
+              .setContentText(getString(R.string.notification_address_point_grabbed_text))
+              .setContentIntent(pi)
+              .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.address_point))
+              .setSmallIcon(R.drawable.notification_running)
+              .setDefaults(Notification.DEFAULT_ALL)
+              .setAutoCancel(true)
+              .setPriority(NotificationCompat.PRIORITY_HIGH);
+          notificationManager.notify(addressPoint.name.hashCode(), builder.build());
+        }
+      });
+      notificationThread.start();
     }
 
   }

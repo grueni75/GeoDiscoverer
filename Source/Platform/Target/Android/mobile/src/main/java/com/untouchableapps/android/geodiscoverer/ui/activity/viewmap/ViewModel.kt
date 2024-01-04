@@ -77,37 +77,37 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       confirmStateChange = {
         if (it == DismissValue.DismissedToStart) {
           if (isPOI) {
-            GDApplication.addMessage(
+            /*GDApplication.addMessage(
               GDApplication.DEBUG_MSG,
               "GDApp",
               "POI: delete confirmed for ${index}"
-            )
+            )*/
             integratedListDeleteItemHandler(index)
           } else {
-            GDApplication.addMessage(
+            /*GDApplication.addMessage(
               GDApplication.DEBUG_MSG,
               "GDApp",
               "AP: starting hide animation for ${index}"
-            )
+            )*/
             visibilityState.targetState = false
             return@DismissState true
           }
         }
         if (it == DismissValue.DismissedToEnd) {
           if (isPOI) {
-            GDApplication.addMessage(
+            /*GDApplication.addMessage(
               GDApplication.DEBUG_MSG,
               "GDApp",
               "export confirmed for ${index}"
-            )
+            )*/
             integratedListPOIImportHandler(index)
             return@DismissState false
           } else {
-            GDApplication.addMessage(
+            /*GDApplication.addMessage(
               GDApplication.DEBUG_MSG,
               "GDApp",
               "edit confirmed for ${index}"
-            )
+            )*/
             integratedListEditItemHandler(index)
             return@DismissState false
           }
