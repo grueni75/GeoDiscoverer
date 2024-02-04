@@ -7,11 +7,11 @@ remote 'cd Apps && git clone git@github.com:grueni75/GeoDiscoverer'
 remote 'ln -s ~/Apps/GeoDiscoverer/GCloud/.androidrc .'
 remote 'bash -c '\''echo "source ~/.androidrc" >>~/.bashrc'\'''
 remote 'cd Apps/GeoDiscoverer && git submodule update --init --recursive'
-remote sudo apt --assume-yes install openjdk-18-jdk
-remote sudo update-alternatives --set java /usr/lib/jvm/java-18-openjdk-amd64/bin/java
-remote 'source ~/.androidrc && cd Apps/GeoDiscoverer/ThirdParty/mapsforge && ./build.sh'
+remote sudo apt --assume-yes install openjdk-8-jdk
+remote sudo apt --assume-yes install openjdk-11-jdk
+remote sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+remote 'source ~/.androidrc && cd Apps/GeoDiscoverer/ThirdParty/mapsforge && ./build.dh'
 remote 'source ~/.androidrc && cd Apps/GeoDiscoverer/ThirdParty/acra && ./build.sh'
-remote sudo apt --assume-yes install maven 
 remote 'source ~/.androidrc && cd Apps/GeoDiscoverer/ThirdParty/brouter && ./build.sh'
 remote sudo apt --assume-yes install make rsync inkscape
 remote 'source ~/.androidrc && cd Apps/GeoDiscoverer/Source/Platform/Target/Android && ./gradlew assembleDebug'
