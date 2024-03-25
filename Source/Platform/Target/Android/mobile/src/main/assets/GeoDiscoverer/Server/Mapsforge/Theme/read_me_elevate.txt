@@ -1,4 +1,4 @@
-5.2
+5.3.1
 
 Elevate themes read me:
 ***********************
@@ -60,6 +60,15 @@ Manuelle Installation (fortgeschritten):
 - Entpacke die Zip-Datei mit einem Android Datei Explorer in den durch die App festgelegten Kartenstil-Ordner.-------------------------------------------------------------------------
 CHANGELOG
 -------------------------------------------------------------------------
+
+5.3.1 27/09/23
+- optimized rendering of missing trail_visibilty on paths with sac_scale
+- small bug fixed in cycle route captions
+
+5.3 16/09/23
+- now at least mapsforge 0.19 is required
+- added curve=cubic for contour lines/low zoom routes, leisure=track with area=no, leisure=track based on multipolygon, area=no/based_on_rel=~, cycle_highways, orientation of countourline captions to hillside, amenity=public_bath
+- optimized UK crags for different zoom levels, changed rendering for building names and housenumbers, zoom-min for landuse=residential/retail/commercial/industrial/brownfield, symbol for swimming_area, align-center="yes" to position="center", aerial ways/funicular rail rendering, state/country/sea ocean caption rendering
 
 5.2 06/11/22
 - added crags for UK maps, smaller symbols for parking lane/street side, amenity=parking_entrance, natural=sinkhole, natural=crater for nodes, highway=busway, names for various landuses to all map styles, mtb_role=forward/backward, landuse=plant_nursery, barrier=toll_booth, railway=train_station_entrance, railway=subway_entrance

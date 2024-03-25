@@ -80,6 +80,7 @@ public class MapsforgeWorker {
   MapsforgeWorker(String mapsforgePath, List<File> mapFiles, float userScale, float textScale, String preferredLanguage) {
     multiMapDataStore = new MultiMapDataStore(MultiMapDataStore.DataPolicy.RETURN_ALL);
     for (File mapFile : mapFiles) {
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "MapTileServer", "Adding map data store " + mapFile.getName());
       multiMapDataStore.addMapDataStore(new MapFile(mapFile, preferredLanguage), true, true);
     }
     displayModel = new DisplayModel();

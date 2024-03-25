@@ -518,7 +518,9 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
                 searchRadius,
                 categoryFilter,
                 null,
-                poiMaxCount
+                currentPos,
+                poiMaxCount,
+                true
               )
             } catch (t: Throwable) {
               GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp",t.message)
@@ -533,7 +535,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
               for (poi in nearbyPOIs) {
 
                 // Decide on the POI details
-                var name = poi.toString()
+                var name = "(${poi.latitude},${poi.longitude})"
                 if (poi.name != null) {
                   name = poi.name
                 } else {
