@@ -65,16 +65,16 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
     var limitReached = false
 
     fun equals(categoryPath: List<String>, lat: Double, lng: Double, searchRadius: Int): Boolean {
-      // GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "${categoryPath.toString()} ${lat} ${lng} ${searchRadius}")
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "${categoryPath.toString()} ${lat} ${lng} ${searchRadius}")
       if (this.categoryPath!=categoryPath)
         return false
       if (!(this.lat.isNaN()&&lat.isNaN())) {
-        if (this.lat!=this.lat) {
+        if (this.lat!=lat) {
           return false
         }
       }
       if (!(this.lng.isNaN()&&lng.isNaN())) {
-        if (this.lng!=this.lng) {
+        if (this.lng!=lng) {
           return false
         }
       }
@@ -517,13 +517,14 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
       }
 
       // Decide on the position
+      val t = coreObject!!.executeCoreCommand("getMapPos")
       val currentPos: LatLong = if (lng.isNaN() || lat.isNaN()) {
-        val t = coreObject!!.executeCoreCommand("getMapPos")
         val fields = t.split(",")
         LatLong(fields[0].toDouble(), fields[1].toDouble())
       } else {
         LatLong(lat, lng)
       }
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "$t")
 
       // Start the search
       poiFindJob = launch() {
