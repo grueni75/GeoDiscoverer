@@ -247,7 +247,7 @@ void WidgetCursorInfo::onDataChange() {
     MapPosition nearestPathMapPos;
     NavigationPath *nearestPath = widgetContainer->getWidgetEngine()->getNearestPath(NULL,&nearestPathMapPos);
     //DEBUG("nearestPath=0x%08x",nearestPath);
-    if (nearestPath!=NULL) {
+    if (((nearestPath!=NULL)&&(nearestPath->getHasBeenLoaded()))) {
       /*MapPosition mapCenterMapPos = *(core->getMapEngine()->lockMapPos(__FILE__,__LINE__));
       core->getMapEngine()->unlockMapPos();
       double distance;
