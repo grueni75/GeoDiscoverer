@@ -1529,6 +1529,16 @@ void WidgetEngine::createGraphic() {
     if (deviceName=="Default") {
       config=WidgetConfig();
       config.setPageName("Finger Menu");
+      config.setName("Reverse Path");
+      config.setType(WidgetTypeButton);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,100));
+      config.setParameter("iconFilename","reversePath");
+      config.setParameter("command","reversePath()");
+      config.setParameter("repeat","0");
+      addWidgetToPage(config);
+      config=WidgetConfig();
+      config.setPageName("Finger Menu");
       config.setName("Trash Path");
       config.setType(WidgetTypeButton);
       config.setActiveColor(GraphicColor(255,255,255,255));
@@ -1576,7 +1586,7 @@ void WidgetEngine::createGraphic() {
   std::vector<WidgetPrimitive*> fingerMenuCircleEntries;
   fingerMenuCircleEntries.resize(7);
   std::vector<WidgetPrimitive*> fingerMenuPathRowEntries;
-  fingerMenuPathRowEntries.resize(5);
+  fingerMenuPathRowEntries.resize(6);
   std::vector<WidgetPrimitive*> fingerMenuAddressPointRowEntries;
   fingerMenuAddressPointRowEntries.resize(2);
   for(i=pageNames.begin();i!=pageNames.end();i++) {
@@ -1921,6 +1931,7 @@ void WidgetEngine::createGraphic() {
         if (*j=="Set Active Route")         { fingerMenuPathRowEntries[2]=primitive; skipPageAdd=true;  }
         if (*j=="Path Info Lock")           { fingerMenuPathRowEntries[3]=primitive; skipPageAdd=true;  }
         if (*j=="Trash Path")               { fingerMenuPathRowEntries[4]=primitive; skipPageAdd=true;  }
+        if (*j=="Reverse Path")             { fingerMenuPathRowEntries[5]=primitive; skipPageAdd=true;  }
         if (*j=="Target At Address Point")  { fingerMenuAddressPointRowEntries[0]=primitive; skipPageAdd=true;  }
         if (*j=="Trash Address Point")      { fingerMenuAddressPointRowEntries[1]=primitive; skipPageAdd=true;  }
         if (*j=="Cursor Info")              { fingerMenu->setCursorInfoWidget((WidgetCursorInfo*)primitive); skipPageAdd=true; }

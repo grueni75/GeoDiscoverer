@@ -633,7 +633,7 @@
                               <xsd:documentation>Radius in inch of the buttons around the finger in the circle.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
-                          <xsd:element name="distanceRow" type="xsd:double" default="0.4">
+                          <xsd:element name="distanceRow" type="xsd:double" default="0.35">
                             <xsd:annotation>
                               <xsd:documentation>Distance in inch between the buttons in the row.</xsd:documentation>
                             </xsd:annotation>

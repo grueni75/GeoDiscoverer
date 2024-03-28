@@ -205,6 +205,27 @@ NavigationEngine::~NavigationEngine() {
   core->getThread()->destroyMutex(activeRouteMutex);
 }
 
+// Creates a route 
+NavigationPath *NavigationEngine::createRoute(std::string routePath, std::string name) {
+  NavigationPath *route=new NavigationPath();
+  if (!route) {
+    FATAL("can not create route",NULL);
+    return NULL;
+  }
+  ConfigStore *c=core->getConfigStore();
+  GraphicColor highlightColor = c->getGraphicColorValue(routePath + "/HighlightColor",__FILE__,__LINE__);
+  route->setHighlightColor(highlightColor,__FILE__,__LINE__);
+  route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor",__FILE__,__LINE__), __FILE__, __LINE__);
+  route->setBlinkMode(false, __FILE__, __LINE__);
+  route->setReverse(c->getIntValue(routePath,"reverse",__FILE__, __LINE__));
+  route->setImportWaypoints((NavigationPatImportWaypointsType)c->getIntValue(routePath,"importWaypoints",__FILE__, __LINE__));
+  route->setName(name);
+  route->setDescription("route number " + name);
+  route->setGpxFilefolder(getRoutePath());
+  route->setGpxFilename(name);
+  return route;
+}
+
 // Initializes the engine
 void NavigationEngine::init() {
 
@@ -255,22 +276,9 @@ void NavigationEngine::init() {
     std::string routePath=path + "[@name='" + *i + "']";
     if (c->getIntValue(routePath,"visible",__FILE__,__LINE__)) {
 
-      // Create the route
-      NavigationPath *route=new NavigationPath();
-      if (!route) {
-        FATAL("can not create route",NULL);
-        return;
-      }
-      GraphicColor highlightColor = c->getGraphicColorValue(routePath + "/HighlightColor",__FILE__,__LINE__);
-      route->setHighlightColor(highlightColor,__FILE__,__LINE__);
-      route->setNormalColor(c->getGraphicColorValue(routePath + "/NormalColor",__FILE__,__LINE__), __FILE__, __LINE__);
-      route->setBlinkMode(false, __FILE__, __LINE__);
-      route->setReverse(c->getIntValue(routePath,"reverse",__FILE__, __LINE__));
-      route->setImportWaypoints((NavigationPatImportWaypointsType)c->getIntValue(routePath,"importWaypoints",__FILE__, __LINE__));
-      route->setName(*i);
-      route->setDescription("route number " + *i);
-      route->setGpxFilefolder(getRoutePath());
-      route->setGpxFilename(*i);
+      // Create the route 
+      NavigationPath *route=createRoute(routePath,*i);
+      if (!route) return;
       routes.push_back(route);
 
       // Check if it is selected for navigation
@@ -1218,48 +1226,51 @@ void NavigationEngine::backgroundLoader() {
     if (core->getQuitCore()) {
       goto exitThread;
     }
-    if (!(*i)->readGPXFile()) { // locking is handled within method
-      NavigationPath *path=*i;
-      i=routes.erase(i);
-      deletePath(path);
-    } else {
-      (*i)->setIsInit(true);
-
-      // Update the position of the start and end flags
-      std::string routePath="Navigation/Route[@name='" + (*i)->getGpxFilename() + "']";
-      Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex", __FILE__, __LINE__);
-      //DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
-      if (startIndex==-1) startIndex=0;
-      //DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
-      Int endIndex=core->getConfigStore()->getIntValue(routePath,"endFlagIndex", __FILE__, __LINE__);
-      //DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
-      if (endIndex==-1) endIndex=(*i)->getSelectedSize()-1;
-      //DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
-      if ((*i)->getReverse()) {
-        if (startIndex>endIndex) {
-          (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
-          (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
-        } else {
-          (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
-          (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
-        }
+    if (!(*i)->getIsInit()) {
+      DEBUG("loading route <%s>",(*i)->getGpxFilename().c_str());
+      if (!(*i)->readGPXFile()) { // locking is handled within method
+        NavigationPath *path=*i;
+        i=routes.erase(i);
+        deletePath(path);
       } else {
-        if (startIndex<endIndex) {
-          (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
-          (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
+        (*i)->setIsInit(true);
+
+        // Update the position of the start and end flags
+        std::string routePath="Navigation/Route[@name='" + (*i)->getGpxFilename() + "']";
+        Int startIndex=core->getConfigStore()->getIntValue(routePath,"startFlagIndex", __FILE__, __LINE__);
+        //DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
+        if (startIndex==-1) startIndex=0;
+        //DEBUG("%s: startIndex=%d",(*i)->getGpxFilename().c_str(),startIndex);
+        Int endIndex=core->getConfigStore()->getIntValue(routePath,"endFlagIndex", __FILE__, __LINE__);
+        //DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
+        if (endIndex==-1) endIndex=(*i)->getSelectedSize()-1;
+        //DEBUG("%s: endIndex=%d",(*i)->getGpxFilename().c_str(),endIndex);
+        if ((*i)->getReverse()) {
+          if (startIndex>endIndex) {
+            (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
+            (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
+          } else {
+            (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
+            (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
+          }
         } else {
-          (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
-          (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
+          if (startIndex<endIndex) {
+            (*i)->setStartFlag(startIndex, __FILE__, __LINE__);
+            (*i)->setEndFlag(endIndex, __FILE__, __LINE__);
+          } else {
+            (*i)->setStartFlag(endIndex, __FILE__, __LINE__);
+            (*i)->setEndFlag(startIndex, __FILE__, __LINE__);
+          }
         }
+
+        // Add the visualization of the start and end flags
+        updateFlagVisualization(*i);
+
+        // Trigger navigation update if necessary
+        if (*i==activeRoute)
+          triggerNavigationInfoUpdate();
+        i++;
       }
-
-      // Add the visualization of the start and end flags
-      updateFlagVisualization(*i);
-
-      // Trigger navigation update if necessary
-      if (*i==activeRoute)
-        triggerNavigationInfoUpdate();
-      i++;
     }
   }
 
@@ -2148,6 +2159,44 @@ bool NavigationEngine::hidePath(NavigationPath *path) {
   path->deinit();
   return true;
 }
+
+// Reverse the path on the map
+bool NavigationEngine::reversePath(NavigationPath *path) {
+
+  // First hide the path
+  if (!hidePath(path))
+    return false;
+
+  // Reverse the path in the config and the local object
+  std::string configPath="Navigation/Route[@name='" + path->getGpxFilename() + "']";
+  int reverse=1-core->getConfigStore()->getIntValue(configPath,"reverse",__FILE__,__LINE__);
+  core->getConfigStore()->setIntValue(configPath,"reverse",reverse,__FILE__,__LINE__);
+  core->getConfigStore()->setIntValue(configPath,"visible",1,__FILE__,__LINE__);
+  NavigationPath *newPath=createRoute(configPath,path->getGpxFilename());
+
+  // Re-add the path
+  lockRoutes(__FILE__, __LINE__);
+  routes.push_back(newPath);
+  unlockRoutes();
+
+  // Check if it is selected for navigation
+  std::string activeRouteName = core->getConfigStore()->getStringValue("Navigation","activeRoute",__FILE__,__LINE__);
+  if (activeRouteName==path->getGpxFilename()) {
+    setActiveRoute(newPath);
+  }
+
+  // Load the path again
+  core->getThread()->lockMutex(backgroundLoaderFinishedMutex, __FILE__, __LINE__);
+  backgroundLoaderFinished=false;
+  core->getThread()->unlockMutex(backgroundLoaderFinishedMutex);
+  if (backgroundLoaderThreadInfo)
+    core->getThread()->destroyThread(backgroundLoaderThreadInfo);
+  if (!(backgroundLoaderThreadInfo=core->getThread()->createThread("navigation engine background loader thread",navigationEngineBackgroundLoaderThread,this)))
+    FATAL("can not start background loader thread",NULL);
+
+  return true;
+}
+
 
 
 }

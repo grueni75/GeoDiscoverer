@@ -224,6 +224,9 @@ protected:
     // Searches for a node with the given name in the given list of nodes
   XMLNode findNode(XMLNode node, const char *name);
 
+  // Creates a route 
+  NavigationPath *createRoute(std::string routePath, std::string name);
+
 public:
 
   // Constructor
@@ -369,6 +372,9 @@ public:
 
   // Hides the path on the map
   bool hidePath(NavigationPath *path);
+
+  // Reverse the path on the map
+  bool reversePath(NavigationPath *path);
 
   // Getters and setters
   NavigationPath *lockRecordedTrack(const char *file, int line)
