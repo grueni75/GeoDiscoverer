@@ -254,7 +254,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   var integratedListCenterItem: Boolean by mutableStateOf(false)
     private set
   var restartCoreAfterNoPendingWaypointsDecision = false
-  var selectedAddressPointName = ""
 
   @Synchronized
   fun toggleMessagesVisibility() {
@@ -981,26 +980,23 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun selectAddressPoint(name: String) {
-    if (integratedListVisible) {
-      if (selectedAddressPointName!=name) {
-        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","searching for ${name}")
-        if (integratedListSelectedTab==integratedListTabs.size-1) {
-          for (i in integratedListPOIItems.indices) {
-            if (integratedListPOIItems[i].left == name) {
-              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "selected: ${i}")
-              selectIntegratedListItem(i)
-              break
-            }
-          }
-        } else {
-          for (i in integratedListItems.indices) {
-            if (integratedListItems[i].left == name) {
-              selectIntegratedListItem(i)
-              break
-            }
+    if ((name!="")&&(integratedListVisible)) {
+      //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","searching for ${name}")
+      if (integratedListSelectedTab==integratedListTabs.size-1) {
+        for (i in integratedListPOIItems.indices) {
+          if (integratedListPOIItems[i].left == name) {
+            //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "selected: ${i}")
+            selectIntegratedListItem(i)
+            break
           }
         }
-        selectedAddressPointName=name
+      } else {
+        for (i in integratedListItems.indices) {
+          if (integratedListItems[i].left == name) {
+            selectIntegratedListItem(i)
+            break
+          }
+        }
       }
     }
   }
@@ -1084,7 +1080,6 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     integratedListCenterItem=false
     if (findPOIsJob!=null) GDApplication.backgroundTask.abortFindPOIs(findPOIsJob!!)
     viewMap.coreObject?.executeCoreCommand("removeAddressPointCandidates")
-    selectedAddressPointName=""
     viewMap.coreObject!!.executeCoreCommand("setPage",integratedListPrevWidgetPage,"-2")
     viewMap.coreObject!!.executeCoreCommand("openFingerMenu")
   }

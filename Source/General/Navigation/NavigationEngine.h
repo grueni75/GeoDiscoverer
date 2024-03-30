@@ -141,6 +141,9 @@ protected:
   double minDistanceToNavigationUpdate;
   bool forceNavigationInfoUpdate;
 
+  // Last found address point name
+  std::string lastAddressPointName;
+
   // Mutex for accessing the active route
   ThreadMutexInfo *activeRouteMutex;
 

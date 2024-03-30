@@ -1971,8 +1971,9 @@ bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &
     if (distance < r->getIconHeight()/8) {
       name=r->getName().front();
       //DEBUG("name=%s",name.c_str());
-      if (informApp) {
+      if ((informApp)&&(name!=lastAddressPointName)) {
         core->getCommander()->dispatch("nearbyAddressPoint(\""+name+"\")");
+        lastAddressPointName=name;
       }
       break;
     }
@@ -1991,6 +1992,13 @@ bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &
         }
       }
     }
+  } else {
+      if (informApp) {
+        if (lastAddressPointName!="") {
+          core->getCommander()->dispatch("nearbyAddressPoint(\"\")");
+          lastAddressPointName="";
+        }
+      }
   }
   core->getDefaultGraphicEngine()->unlockDrawing();
   return success;
