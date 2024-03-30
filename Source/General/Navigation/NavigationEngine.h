@@ -346,11 +346,17 @@ public:
   // Removes an address point
   void removeAddressPoint(std::string name);
 
+  // Adds an address point candidate
+  void addAddressPointCandidate(std::string name, double lng, double lat);
+
+  // Removes all address point candidates
+  void removeAddressPointCandidates();
+
   // Finds a route with the given name
   NavigationPath *findRoute(std::string name);
 
   // Returns the address point at the given position
-  bool getAddressPoint(GraphicPosition visPos, NavigationPoint &result);
+  bool getAddressPoint(GraphicPosition visPos, NavigationPoint &result, boolean informApp=false);
 
   // Returns information about the address point that is the nearest to the current position
   bool getNearestAddressPoint(NavigationPoint &navigationPoint, double &distance, TimestampInMicroseconds &updateTimestamp, bool &alarm);

@@ -161,6 +161,7 @@ bool GraphicObject::work(TimestampInMicroseconds currentTime) {
       key=j->first;
       primitive=j->second;
       if (primitive==*i) {
+        //DEBUG("removing primitive 0x%08x",primitive);
         removePrimitive(key,deletePrimitivesOnDestruct);
         break;
       }

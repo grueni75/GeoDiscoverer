@@ -57,6 +57,9 @@ protected:
   // Navigation point indicator icon
   GraphicRectangle navigationPointIcon;
 
+  // Navigation point candidate indicator icon
+  GraphicRectangle navigationPointCandidateIcon;
+
   // Arrow icon
   GraphicRectangle arrowIcon;
 
@@ -366,6 +369,10 @@ public:
 
   GraphicRectangle *getNavigationPointIcon() {
     return &navigationPointIcon;
+  }
+
+  GraphicRectangle *getNavigationPointCandidateIcon() {
+    return &navigationPointCandidateIcon;
   }
 
   bool getDrawingTooSlow() const {

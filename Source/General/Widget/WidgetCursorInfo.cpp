@@ -21,6 +21,7 @@
 //============================================================================
 
 #include <Core.h>
+#include <Commander.h>
 #include <WidgetCursorInfo.h>
 #include <WidgetContainer.h>
 #include <FontEngine.h>
@@ -232,7 +233,7 @@ void WidgetCursorInfo::onDataChange() {
   infoKeepEndCharCount=-1;
   NavigationPoint addressPoint;
   std::string name;
-  if (core->getNavigationEngine()->getAddressPoint(visPos,addressPoint)) {
+  if (core->getNavigationEngine()->getAddressPoint(visPos,addressPoint,true)) {
 
     // Address point found
     name=addressPoint.getName();

@@ -314,9 +314,10 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
                 .background(MaterialTheme.colorScheme.surface)
             ) {
               val itemListState = rememberLazyListState()
-              LaunchedEffect(viewModel.integratedListVisible) {
-                if (viewModel.integratedListSelectedItem != -1)
+              LaunchedEffect(viewModel.integratedListVisible,viewModel.integratedListSelectedItem) {
+                if (viewModel.integratedListSelectedItem != -1) {
                   itemListState.animateScrollToItem(viewModel.integratedListSelectedItem)
+                }
               }
               SwipeRefresh(
                 state = rememberSwipeRefreshState(false),

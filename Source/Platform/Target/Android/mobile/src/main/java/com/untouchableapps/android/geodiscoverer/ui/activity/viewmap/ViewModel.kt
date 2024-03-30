@@ -37,6 +37,8 @@ import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.File
 
 @ExperimentalGraphicsApi
@@ -118,11 +120,11 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     fun checkDismissState() {
       if (!visibilityState.targetState && !visibilityState.currentState) {
         if (dismissState.targetValue == DismissValue.DismissedToStart) {
-          GDApplication.addMessage(
+          /*GDApplication.addMessage(
             GDApplication.DEBUG_MSG,
             "GDApp",
             "AP: delete confirmed for ${index}"
-          )
+          )*/
           integratedListDeleteItemHandler(index)
         }
       }
@@ -136,6 +138,9 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     val confirmHandler: () -> Unit = {},
     val dismissHandler: () -> Unit = {}
   )
+
+  // Currently running findPOIs job
+  var findPOIsJob: Job? = null
 
   // State
   var fixSurfaceViewBug: Boolean by mutableStateOf(false)
@@ -249,6 +254,7 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   var integratedListCenterItem: Boolean by mutableStateOf(false)
     private set
   var restartCoreAfterNoPendingWaypointsDecision = false
+  var selectedAddressPointName = ""
 
   @Synchronized
   fun toggleMessagesVisibility() {
@@ -756,16 +762,19 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     integratedListPOIItems.clear()
     integratedListBusy=true
     integratedListSelectedItem=-1
-    GDApplication.backgroundTask.findPOIs(
+    if (findPOIsJob!=null) GDApplication.backgroundTask.abortFindPOIs(findPOIsJob!!)
+    findPOIsJob=GDApplication.backgroundTask.findPOIs(
       categoryPath=integratedListPOICategoryPath.toList(),
       searchRadius=integratedListPOISearchRadius.toInt()*1000)
     { result, limitReached ->
       integratedListBusy = false
+      findPOIsJob = null
       if (integratedListOutdated) {
         //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","new poi search requested, restarting")
         integratedListOutdated = false
         fillPOIs()
       } else {
+        viewMap.coreObject?.executeCoreCommand("removeAddressPointCandidates")
         for (i in result.indices) {
           integratedListPOIItems.add(IntegratedListItem(
             left=result[i].nameUniquified,
@@ -775,6 +784,11 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
             longitude=result[i].longitude,
             latitude=result[i].latitude
           ))
+          viewMap.coreObject?.executeCoreCommand("addAddressPointCandidate",
+            result[i].nameUniquified,
+            result[i].longitude.toString(),
+            result[i].latitude.toString(),
+          )
         }
         integratedListLimitReached=limitReached
       }
@@ -812,6 +826,9 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         fillPOIs()
 
       } else {
+
+        // Remove address point candidates (if any)
+        viewMap.coreObject?.executeCoreCommand("removeAddressPointCandidates")
 
         // Prepare the stored address points
         viewMap.coreObject!!.configStoreSetStringValue(
@@ -961,6 +978,33 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
       }
     }
   }
+
+  @Synchronized
+  fun selectAddressPoint(name: String) {
+    if (integratedListVisible) {
+      if (selectedAddressPointName!=name) {
+        //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","searching for ${name}")
+        if (integratedListSelectedTab==integratedListTabs.size-1) {
+          for (i in integratedListPOIItems.indices) {
+            if (integratedListPOIItems[i].left == name) {
+              //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "selected: ${i}")
+              selectIntegratedListItem(i)
+              break
+            }
+          }
+        } else {
+          for (i in integratedListItems.indices) {
+            if (integratedListItems[i].left == name) {
+              selectIntegratedListItem(i)
+              break
+            }
+          }
+        }
+        selectedAddressPointName=name
+      }
+    }
+  }
+
   @Synchronized
   fun informLocationLookupResult(address: String, found: Boolean) {
     if (!found) {
@@ -978,6 +1022,10 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
 
   @Synchronized
   fun selectIntegratedListTab(selected: Int) {
+    if (integratedListSelectedTab==integratedListTabs.size-1) {
+      if (findPOIsJob!=null) GDApplication.backgroundTask.abortFindPOIs(findPOIsJob!!)
+      integratedListBusy=false
+    }
     integratedListSelectedTab=selected
   }
 
@@ -1034,6 +1082,9 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     integratedListTitle = ""
     integratedListBusy=false
     integratedListCenterItem=false
+    if (findPOIsJob!=null) GDApplication.backgroundTask.abortFindPOIs(findPOIsJob!!)
+    viewMap.coreObject?.executeCoreCommand("removeAddressPointCandidates")
+    selectedAddressPointName=""
     viewMap.coreObject!!.executeCoreCommand("setPage",integratedListPrevWidgetPage,"-2")
     viewMap.coreObject!!.executeCoreCommand("openFingerMenu")
   }

@@ -52,7 +52,9 @@ void NavigationPointVisualization::init(GraphicObject *visualizationObject, Time
   this->reference=NULL;
   this->visualizationObject=visualizationObject;
   graphicPrimitiveKey=0;
-  this->createTime=createTime;;
+  this->createTime=createTime;
+  TimestampInMicroseconds animationMaxJitter=core->getConfigStore()->getDoubleValue("Graphic","navigationPointAnimationMaxJitter",__FILE__,__LINE__);
+  this->animationJitter=rand()%animationMaxJitter;
   animationDuration=core->getConfigStore()->getIntValue("Graphic","animationDuration", __FILE__, __LINE__);
 }
 
@@ -101,6 +103,11 @@ void NavigationPointVisualization::updateVisualization(TimestampInMicroseconds t
           FATAL("can not create graphic rectangle object",NULL);
         }
         break;
+      case NavigationPointVisualizationTypePointCandidate:
+        if (!(graphicRectangle=new GraphicRectangle(*core->getDefaultGraphicEngine()->getNavigationPointCandidateIcon()))) {
+          FATAL("can not create graphic rectangle object",NULL);
+        }
+        break;
       case NavigationPointVisualizationTypeStartFlag:
         if (!(graphicRectangle=new GraphicRectangle(*core->getDefaultGraphicEngine()->getPathStartFlagIcon()))) {
           FATAL("can not create graphic rectangle object",NULL);
@@ -123,10 +130,10 @@ void NavigationPointVisualization::updateVisualization(TimestampInMicroseconds t
     }
 
     // Update the position
-    if (t<createTime+animationDuration) {
+    if (t<createTime+animationJitter+animationDuration) {
       graphicRectangle->setX(visPosX);
       graphicRectangle->setY(visPosY+core->getDefaultScreen()->getHeight());
-      graphicRectangle->setTranslateAnimation(createTime,graphicRectangle->getX(),graphicRectangle->getY(),visPosX,visPosY,false,animationDuration,GraphicTranslateAnimationTypeAccelerated);
+      graphicRectangle->setTranslateAnimation(createTime+animationJitter,graphicRectangle->getX(),graphicRectangle->getY(),visPosX,visPosY,false,animationDuration,GraphicTranslateAnimationTypeAccelerated);
     } else {
       graphicRectangle->setX(visPosX);
       graphicRectangle->setY(visPosY);
@@ -182,6 +189,9 @@ void NavigationPointVisualization::createGraphic() {
     if (graphicRectangle) {
       switch(visualizationType) {
       case NavigationPointVisualizationTypePoint:
+        graphicRectangle->setTexture(core->getDefaultGraphicEngine()->getNavigationPointIcon()->getTexture());
+        break;
+      case NavigationPointVisualizationTypePointCandidate:
         graphicRectangle->setTexture(core->getDefaultGraphicEngine()->getNavigationPointIcon()->getTexture());
         break;
       case NavigationPointVisualizationTypeStartFlag:

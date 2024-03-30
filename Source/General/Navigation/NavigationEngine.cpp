@@ -1861,11 +1861,11 @@ void NavigationEngine::initAddressPoints() {
   for (std::list<NavigationPoint>::iterator i=removeAddressPoints.begin();i!=removeAddressPoints.end();i++) {
     for (std::list<NavigationPointVisualization>::iterator j=navigationPointsVisualization.begin();j!=navigationPointsVisualization.end();j++) {
       if ((j->getVisualizationType()==NavigationPointVisualizationTypePoint)&&(j->getName()==i->getName())) {        
-        core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
         GraphicPrimitive *primitive=navigationPointsGraphicObject.getPrimitive(j->getGraphicPrimitiveKey());
-        if (primitive!=NULL) 
+        if (primitive!=NULL) {
           primitive->setScaleAnimation(t,1.0,0.0,false,core->getDefaultGraphicEngine()->getAnimDuration());
-        core->getDefaultGraphicEngine()->unlockDrawing();
+          primitive->setLifeEnd(t+core->getDefaultGraphicEngine()->getAnimDuration());
+        }
         navigationPointsVisualization.erase(j);
         break;
       }
@@ -1887,6 +1887,50 @@ void NavigationEngine::initAddressPoints() {
   core->onDataChange();
 }
 
+// Adds an address point candidate
+void NavigationEngine::addAddressPointCandidate(std::string name, double lng, double lat) {
+
+  // Add new address point
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+  NavigationPointVisualization pointVis(&navigationPointsGraphicObject, lat, lng, NavigationPointVisualizationTypePointCandidate, name, NULL);
+  navigationPointsVisualization.push_back(pointVis);
+  resetOverlayGraphicHash();
+  core->getDefaultGraphicEngine()->unlockDrawing();
+
+  // Trigger updates
+  triggerNavigationInfoUpdate();
+  core->getCommander()->dispatch("forceRemoteMapUpdate()");
+  core->onDataChange();
+}
+
+// Removes all address point candidates
+void NavigationEngine::removeAddressPointCandidates() {
+
+  // Remove all candidates
+  core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
+  TimestampInMicroseconds t=core->getClock()->getMicrosecondsSinceStart();
+  std::list<NavigationPointVisualization>::iterator i=navigationPointsVisualization.begin();
+  while (i!=navigationPointsVisualization.end()) {
+    if (i->getVisualizationType()==NavigationPointVisualizationTypePointCandidate) {        
+      GraphicPrimitive *primitive=navigationPointsGraphicObject.getPrimitive(i->getGraphicPrimitiveKey());
+      if (primitive!=NULL) {
+        primitive->setScaleAnimation(t+i->getAnimationJitter(),1.0,0.0,false,core->getDefaultGraphicEngine()->getAnimDuration());
+        primitive->setLifeEnd(t+i->getAnimationJitter()+core->getDefaultGraphicEngine()->getAnimDuration());
+      }
+      i=navigationPointsVisualization.erase(i);
+    } else {
+      i++;
+    }
+  }
+
+  // Trigger updates
+  resetOverlayGraphicHash();
+  core->getDefaultGraphicEngine()->unlockDrawing();
+  triggerNavigationInfoUpdate();
+  core->getCommander()->dispatch("forceRemoteMapUpdate()");
+  core->onDataChange();
+}
+
 // Finds a route with the given name
 NavigationPath *NavigationEngine::findRoute(std::string name) {
   for (std::list<NavigationPath*>::iterator i=routes.begin();i!=routes.end();i++) {
@@ -1898,7 +1942,7 @@ NavigationPath *NavigationEngine::findRoute(std::string name) {
 }
 
 // Returns the address point at the given position
-bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &result) {
+bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &result, boolean informApp) {
   bool success=false;  
   std::string name="";
   core->getDefaultGraphicEngine()->lockDrawing(__FILE__,__LINE__);
@@ -1927,6 +1971,9 @@ bool NavigationEngine::getAddressPoint(GraphicPosition visPos, NavigationPoint &
     if (distance < r->getIconHeight()/8) {
       name=r->getName().front();
       //DEBUG("name=%s",name.c_str());
+      if (informApp) {
+        core->getCommander()->dispatch("nearbyAddressPoint(\""+name+"\")");
+      }
       break;
     }
   }

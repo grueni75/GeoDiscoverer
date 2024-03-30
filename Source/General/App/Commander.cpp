@@ -805,6 +805,14 @@ std::string Commander::execute(std::string cmd) {
     }
     cmdExecuted=true;
   }
+  if (cmdName=="addAddressPointCandidate") {
+    core->getNavigationEngine()->addAddressPointCandidate(args[0],atof(args[1].c_str()),atof(args[2].c_str()));
+    cmdExecuted=true;
+  }
+  if (cmdName=="removeAddressPointCandidates") {
+    core->getNavigationEngine()->removeAddressPointCandidates();
+    cmdExecuted=true;
+  }
   if (cmdName=="downloadActiveRoute") {
     const NavigationPath *activeRoute = core->getNavigationEngine()->getActiveRoute();
     if (!activeRoute) {
@@ -984,6 +992,13 @@ std::string Commander::execute(std::string cmd) {
     std::stringstream resultStream;
     resultStream << crc.getCRC();
     result=resultStream.str();
+    cmdExecuted=true;
+  }
+  if (cmdName=="setNearestPOI") {
+    core->getConfigStore()->setStringValue("Navigation/NearestPointOfInterest","name",args[0],__FILE__,__LINE__);
+    core->getConfigStore()->setDoubleValue("Navigation/NearestPointOfInterest","lat",atof(args[1].c_str()),__FILE__,__LINE__);
+    core->getConfigStore()->setDoubleValue("Navigation/NearestPointOfInterest","lng",atof(args[2].c_str()),__FILE__,__LINE__);
+    core->onDataChange();
     cmdExecuted=true;
   }
 

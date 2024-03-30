@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 import com.untouchableapps.android.geodiscoverer.R
 import java.util.*
 import com.untouchableapps.android.geodiscoverer.GDApplication
+import com.untouchableapps.android.geodiscoverer.logic.GDBackgroundTask
 import com.untouchableapps.android.geodiscoverer.logic.GDService
 import com.untouchableapps.android.geodiscoverer.ui.activity.AuthenticateGoogleBookmarks
 import com.untouchableapps.android.geodiscoverer.ui.activity.ViewMap
@@ -141,6 +142,10 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
         }
         if (commandFunction == "askForAddress") {
           viewMap.viewModel.manageAddressPoints()
+          commandExecuted = true
+        }
+        if (commandFunction == "nearbyAddressPoint") {
+          GDApplication.backgroundTask.selectAddressPoint(viewMap,commandArgs[0])
           commandExecuted = true
         }
         if (commandFunction == "addressPointsUpdated") {

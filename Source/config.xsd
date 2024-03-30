@@ -1780,6 +1780,11 @@
                   <xsd:documentation>Minimum factor to use in a target scale animation.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="navigationPointAnimationMaxJitter" type="xsd:integer" default="500000">
+                <xsd:annotation>
+                  <xsd:documentation>Maximum jitter to use when animating the appearance of the navigation points.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="targetScaleMaxFactor" type="xsd:double" default="4">
                 <xsd:annotation>
                   <xsd:documentation>Maximum factor to use in a target scale animation.</xsd:documentation>
@@ -1940,6 +1945,11 @@
               <xsd:element name="navigationPointIconFilename" type="xsd:string" default="navigationPoint">
                 <xsd:annotation>
                   <xsd:documentation>Filename of the image showing a navigation point.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
+              <xsd:element name="navigationPointCandidateIconFilename" type="xsd:string" default="navigationPointCandidate">
+                <xsd:annotation>
+                  <xsd:documentation>Filename of the image showing a navigation point candidate.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="arrowIconFilename" type="xsd:string" default="arrow">

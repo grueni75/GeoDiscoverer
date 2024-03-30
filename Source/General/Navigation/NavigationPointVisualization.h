@@ -28,11 +28,9 @@
 
 namespace GEODISCOVERER {
 
-typedef enum {NavigationPointVisualizationTypeUnknown=0, NavigationPointVisualizationTypePoint=1, NavigationPointVisualizationTypeStartFlag=2, NavigationPointVisualizationTypeEndFlag=3 } NavigationPointVisualizationType;
+typedef enum {NavigationPointVisualizationTypeUnknown=0, NavigationPointVisualizationTypePoint=1, NavigationPointVisualizationTypeStartFlag=2, NavigationPointVisualizationTypeEndFlag=3, NavigationPointVisualizationTypePointCandidate=4 } NavigationPointVisualizationType;
 
 class NavigationPointVisualization {
-
-  double prevLng, prevLat;
 
   // Visualization object of this
   GraphicObject *visualizationObject;
@@ -54,6 +52,9 @@ class NavigationPointVisualization {
 
   // Time the point was created
   TimestampInMicroseconds createTime;
+
+  // Jitter in microseconds that the point animation shall start or stop
+  TimestampInMicroseconds animationJitter;
 
   // Duration in microseconds that the point animation shall last
   TimestampInMicroseconds animationDuration;
@@ -102,6 +103,9 @@ public:
   }
   std::string getName() const {
     return name;
+  }
+  TimestampInMicroseconds getAnimationJitter() const {
+    return animationJitter;
   }
 
 };
