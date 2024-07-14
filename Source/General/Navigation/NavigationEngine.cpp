@@ -608,9 +608,9 @@ void NavigationEngine::updateTrack() {
 
   // If the track was just loaded, we need to add this point as a stable one
   core->getMapSource()->lockAccess(__FILE__, __LINE__);
-  if (recordedTrack->getHasBeenLoaded()) {
+  if (recordedTrack->getIsNew()) {
     pointMeetsCriterias=true;
-    recordedTrack->setHasBeenLoaded(false);
+    recordedTrack->setIsNew(false);
   } else {
 
     // Check if the point meets the criteras to become part of the path
