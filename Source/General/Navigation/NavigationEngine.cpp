@@ -693,6 +693,7 @@ void NavigationEngine::createNewTrack() {
   recordedTrack->deinit();
   recordedTrack->init();
   recordedTrack->setIsInit(true);
+  recordedTrack->setHasBeenLoaded(true);
   core->getMapSource()->unlockAccess();
   lockRecordedTrack(__FILE__, __LINE__);
   core->getConfigStore()->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename(), __FILE__, __LINE__);
