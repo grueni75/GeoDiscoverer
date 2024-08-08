@@ -37,7 +37,6 @@ class MapPosition {
 protected:
 
   bool doNotDelete;                                 // Indicates if the object has been alloacted by an own memory handler
-  static const char *unknownSource;                 // String indicating that the source is unknown
   static const double earthRadius;                  // Radius of earh in meter
   MapTile *mapTile;                                 // Tile this position belongs to
   Int x;                                            // X position in picture coordinate system
@@ -60,7 +59,6 @@ protected:
   TimestampInMilliseconds timestamp;                // Time in UTC notation when this position was generated
   double latScale;                                  // Scale factor for latitude
   double lngScale;                                  // Scale factor for longitude
-  char *source;                                     // Source of this position
   bool isUpdated;                                   // Indicates that the position has been changed
   Int index;                                        // Index of this point within the vector it is part of
 
@@ -75,7 +73,6 @@ public:
   // Constructors and destructor
   MapPosition(bool doNotDelete=false);
   MapPosition(const MapPosition &pos);
-  MapPosition(MapPosition *pos, bool deepCopy);
   virtual ~MapPosition();
 
   // Destructs the objects correctly (i.e., if memory has not been allocated by new)
@@ -281,23 +278,6 @@ public:
   void setTimestamp(TimestampInMilliseconds timestamp)
   {
       this->timestamp = timestamp;
-  }
-
-  std::string getSource() const
-  {
-      return source;
-  }
-
-  void setSource(std::string source)
-  {
-    if (doNotDelete) {
-      FATAL("can not set new source because memory is statically allocated",NULL);
-    } else {
-      if ((this->source)&&(this->source!=unknownSource)) free(this->source);
-      if (!(this->source=strdup(source.c_str()))) {
-        FATAL("can not create string",NULL);
-      }
-    }
   }
 
   bool getHasAccuracy() const

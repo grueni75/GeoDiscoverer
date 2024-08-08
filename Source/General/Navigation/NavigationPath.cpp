@@ -1291,7 +1291,7 @@ bool NavigationPath::retrieve(NavigationPath *navigationPath, char *&cacheData, 
       success=false;
       goto cleanup;
     }
-    navigationPath->addEndPosition(MapPosition(p,true));
+    navigationPath->addEndPosition(*p);
 
     // Update status
     processedPercentage=i*100/size;

@@ -43,6 +43,9 @@ protected:
   // Current location
   MapPosition locationPos;
 
+  // Source of the current location
+  std::string locationPosSource;
+
   // Current compass bearing in degrees
   double compassBearing;
 
@@ -257,7 +260,7 @@ public:
   void updateTrack();
 
   // Updates the current location
-  void newLocationFix(MapPosition newLocationPos);
+  void newLocationFix(MapPosition newLocationPos, std::string newSource);
 
   // Updates the compass
   void newCompassBearing(double bearing);
@@ -365,7 +368,7 @@ public:
   bool getNearestAddressPoint(NavigationPoint &navigationPoint, double &distance, TimestampInMicroseconds &updateTimestamp, bool &alarm);
 
   // Sets a location pos directly (e.g., on the watch)
-  void setLocationPos(MapPosition newLocationPos, bool computeNavigationInfos, const char *file, int line);
+  void setLocationPos(MapPosition newLocationPos, std::string newLocationPosSource, bool computeNavigationInfos, const char *file, int line);
 
   // Stores the navigation points into a file
   void storeOverlayGraphics(std::string filefolder, std::string filename);

@@ -323,7 +323,6 @@ std::string Commander::execute(std::string cmd) {
 
       // Get the fix
       MapPosition pos;
-      pos.setSource(std::string(args[0]));
       pos.setTimestamp(atoll(args[1].c_str()));
       pos.setLng(atof(args[2].c_str()));
       pos.setLat(atof(args[3].c_str()));
@@ -338,7 +337,7 @@ std::string Commander::execute(std::string cmd) {
       pos.setAccuracy(atof(args[12].c_str()));
 
       // Inform the location manager
-      core->getNavigationEngine()->newLocationFix(pos);
+      core->getNavigationEngine()->newLocationFix(pos,std::string(args[0]));
     }
     cmdExecuted=true;
   }
@@ -346,7 +345,6 @@ std::string Commander::execute(std::string cmd) {
 
     // Get the fix
     MapPosition pos;
-    pos.setSource(std::string(args[0]));
     pos.setTimestamp(atoll(args[1].c_str()));
     pos.setLng(atof(args[2].c_str()));
     pos.setLat(atof(args[3].c_str()));
@@ -361,7 +359,7 @@ std::string Commander::execute(std::string cmd) {
     pos.setAccuracy(atof(args[12].c_str()));
 
     // Inform the location manager
-    core->getNavigationEngine()->setLocationPos(pos,false,__FILE__,__LINE__);
+    core->getNavigationEngine()->setLocationPos(pos,std::string(args[0]),false,__FILE__,__LINE__);
     cmdExecuted=true;
   }
   if (cmdName=="setTargetPos") {

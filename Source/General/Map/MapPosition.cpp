@@ -27,7 +27,6 @@
 
 namespace GEODISCOVERER {
 
-const char * MapPosition::unknownSource = "unknown";
 const double MapPosition::earthRadius = 6.371 * 1e6;
 
 MapPosition::MapPosition(bool doNotDelete) {
@@ -54,31 +53,15 @@ MapPosition::MapPosition(bool doNotDelete) {
     isUpdated=false;
     invalidate();
     hasTimestamp=false;
-    source=(char*)unknownSource;
     index=0;
   }
 }
 
 MapPosition::MapPosition(const MapPosition &pos) {
-  source=NULL;
-  doNotDelete=pos.doNotDelete;
   *this=pos;
 }
 
-MapPosition::MapPosition(MapPosition *pos, bool deepCopy) {
-  source=NULL;
-  doNotDelete=pos->doNotDelete;
-  *this=*pos;
-  if (deepCopy) {
-    this->source=strdup(pos->source);
-    doNotDelete=false;
-  }
-}
-
 MapPosition::~MapPosition() {
-  if (!doNotDelete) {
-    if ((source)&&(source!=unknownSource)) free(source);
-  }
 }
 
 // Operators
@@ -104,18 +87,7 @@ bool MapPosition::operator!=(const MapPosition &rhs)
 }
 MapPosition &MapPosition::operator=(const MapPosition &rhs)
 {
-  if (!this->doNotDelete) {
-    if ((this->source)&&(this->source!=unknownSource)) {
-      free(source);
-    }
-  }
   memcpy((void*)this,(void*)&rhs,sizeof(MapPosition));
-  if (!this->doNotDelete) {
-    this->source=(char*)unknownSource;
-    if ((rhs.source!=unknownSource)&&(rhs.source!=NULL)) {
-      this->setSource(rhs.source);
-    }
-  }
   return *this;
 }
 
@@ -174,7 +146,6 @@ void MapPosition::store(std::ofstream *ofs)
   this->mapTile=NULL;
   Storage::storeMem(ofs,(char*)this,sizeof(MapPosition),true);
   this->mapTile=mapTile;
-  Storage::storeString(ofs, source);
 }
 
 // Reads the contents of the object from a binary file
@@ -209,10 +180,6 @@ MapPosition *MapPosition::retrieve(char *& cacheData, Int & cacheSize)
   MapPosition *mapPosition=new(cacheData) MapPosition(true);
   cacheData+=sizeof(MapPosition);
   //PROFILE_ADD("object creation");
-
-  // Read fields
-  Storage::retrieveString(cacheData,cacheSize,&mapPosition->source);
-  //PROFILE_ADD("field read");
 
   // Return result
   return mapPosition;

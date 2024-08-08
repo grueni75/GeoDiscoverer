@@ -83,6 +83,10 @@
     "variant": "cpp",
     "semaphore": "cpp",
     "span": "cpp",
-    "format": "cpp"
+    "format": "cpp",
+    "charconv": "cpp",
+    "shared_mutex": "cpp",
+    "stdfloat": "cpp",
+    "*.def": "cpp"
   }
 }

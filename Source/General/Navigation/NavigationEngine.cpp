@@ -111,6 +111,7 @@ NavigationEngine::NavigationEngine() :
   maxAddressPointAlarmDistance=core->getConfigStore()->getDoubleValue("Navigation","maxAddressPointAlarmDistance",__FILE__,__LINE__);
   nearestAddressPointName="";
   nearestAddressPointNameUpdate=0;
+  locationPosSource="unknown";
 
   // Create the track directory if it does not exist
   struct stat st;
@@ -452,11 +453,12 @@ void NavigationEngine::deinit() {
 }
 
 // Sets a location pos directly
-void NavigationEngine::setLocationPos(MapPosition newLocationPos, bool computeNavigationInfos, const char *file, int line) {
+void NavigationEngine::setLocationPos(MapPosition newLocationPos, std::string newLocationPosSource, bool computeNavigationInfos, const char *file, int line) {
 
   // Store the new fix
   lockLocationPos(file, line);
   locationPos=newLocationPos;
+  locationPosSource=newLocationPosSource;
   unlockLocationPos();
   MapPosition *pos=core->getMapEngine()->lockLocationPos(__FILE__, __LINE__);
   *pos=locationPos;
@@ -483,7 +485,7 @@ void NavigationEngine::setLocationPos(MapPosition newLocationPos, bool computeNa
 }
 
 // Updates the current location
-void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
+void NavigationEngine::newLocationFix(MapPosition newLocationPos, std::string newSource) {
 
   bool updatePos=false;
   bool isNewer=false;
@@ -526,7 +528,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
       } else {
 
         // If the new fix is from the same provider and is not significantly less accurate, use it
-        if ((newLocationPos.getSource()==locationPos.getSource())&&(newLocationPos.getAccuracy()<=locationSignificantlyInaccurateThreshold)) {
+        if ((newSource==locationPosSource)&&(newLocationPos.getAccuracy()<=locationSignificantlyInaccurateThreshold)) {
           updatePos=true;
         } else {
           //DEBUG("new location pos is significantly less accurate, discarding it",NULL);
@@ -565,7 +567,7 @@ void NavigationEngine::newLocationFix(MapPosition newLocationPos) {
     }
 
     // Store the new fix
-    setLocationPos(newLocationPos, true, __FILE__, __LINE__);
+    setLocationPos(newLocationPos, newSource, true, __FILE__, __LINE__);
 
   } else {
     //DEBUG("location pos has not been used",NULL);
@@ -595,7 +597,7 @@ void NavigationEngine::updateTrack() {
   }
 
   // Store only gps positions
-  if (locationPos.getSource()!="gps") {
+  if (locationPosSource!="gps") {
     return;
   }
 
@@ -1711,7 +1713,7 @@ void NavigationEngine::computeNavigationInfo() {
     infos << navigationInfo.getNearestNavigationPointDistance();
     cmd += "(" + infos.str() + ")";
     infos.str("");
-    infos << locationPos.getSource() << ",";
+    infos << locationPosSource << ",";
     infos << locationPos.getTimestamp() << ",";
     infos << locationPos.getLng() << ",";
     infos << locationPos.getLat() << ",";
