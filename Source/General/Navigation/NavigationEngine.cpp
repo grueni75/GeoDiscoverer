@@ -1272,9 +1272,9 @@ void NavigationEngine::backgroundLoader() {
         // Trigger navigation update if necessary
         if (*i==activeRoute)
           triggerNavigationInfoUpdate();
-        i++;
       }
     }
+    i++;
   }
 
   // Trigger download job processing
