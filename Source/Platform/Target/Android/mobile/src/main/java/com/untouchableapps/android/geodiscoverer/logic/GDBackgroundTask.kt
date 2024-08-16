@@ -362,7 +362,10 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
           if (routeFile.name.endsWith(".gpx")) {
             val cacheFile = File(cacheDir + "/" + routeFile.name)
             if (!cacheFile.exists()) {
-              routesOutdated = true
+              val path = "Navigation/Route[@name='" + routeFile.name + "']"
+              if (coreObject!!.configStoreGetStringValue(path, "visible").toInt()!=0) {
+                  routesOutdated = true
+              }
               return@forEach
             }
             if (routeFile.lastModified() > cacheFile.lastModified()) {
