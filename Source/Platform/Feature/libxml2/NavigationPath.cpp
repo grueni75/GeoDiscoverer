@@ -567,7 +567,7 @@ bool NavigationPath::readGPXFile() {
         core->getConfigStore()->setIntValue(configPath,"importWaypoints",(Int)importWaypoints,__FILE__,__LINE__);
       } else {
         std::stringstream cmd;
-        cmd << "decideWaypointImport(" << getGpxFilename() << "," << totalNumberOfPoints << ")";
+        cmd << "decideWaypointImport(\"" << getGpxFilename() << "\"," << totalNumberOfPoints << ")";
         core->getCommander()->dispatch(cmd.str());
       }
     } else {
