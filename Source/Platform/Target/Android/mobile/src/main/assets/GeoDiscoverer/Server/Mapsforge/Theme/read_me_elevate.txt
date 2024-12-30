@@ -1,4 +1,4 @@
-5.3.1
+5.5
 
 Elevate themes read me:
 ***********************
@@ -60,6 +60,14 @@ Manuelle Installation (fortgeschritten):
 - Entpacke die Zip-Datei mit einem Android Datei Explorer in den durch die App festgelegten Kartenstil-Ordner.-------------------------------------------------------------------------
 CHANGELOG
 -------------------------------------------------------------------------
+
+5.5 17/11/24
+- added highway=passing_place, amenity=lounger, added ebike_charging_commercial/ebike_charging_station/ebike_charging_public/ebike_charging_customer, barrier=cattle_grid, highway=ladder
+- fixed summer_toboggan captions, changed mini_roundabouts, changed zoom-min for bays
+
+5.4 04/04/24
+- added cyclestreet/bicycle_road for cycling/MTB mapstyle, separate rendering for customer toilets, location=overground/overhead for pipelines
+- changed color for local cycling routes, rendering for underground pipelines/waterways, rendering of highway refs
 
 5.3.1 27/09/23
 - optimized rendering of missing trail_visibilty on paths with sac_scale
