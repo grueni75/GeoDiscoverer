@@ -100,16 +100,18 @@ bool NavigationPoint::readGPX(XMLNode wptNode, std::string group, std::string de
       }
     }
   }
-  if (gpxType!="") {
+  /*if (gpxType!="") {
     error="contains a routing waypoint";
+    DEBUG("gpxType==%s",gpxType.c_str());
     return false;
-  }
+  }*/
   if (gpxDescription!="")
     setName(gpxDescription);
   else if (gpxName!="")
     setName(gpxName);
   else if (gpxComment!="")
     setName(gpxComment);
+  //DEBUG("name=%s",getName().c_str());
   return true;
 }
 
