@@ -112,7 +112,6 @@ dependencies {
     implementation files("../../../../../ThirdParty/brouter/brouter-util/build/libs/brouter-util-${brouterVersion}.jar")
     implementation 'net.sf.kxml:kxml2:2.3.0'
     implementation 'com.caverock:androidsvg:1.4'
-    wearApp project(':wear')
     implementation project(':core')
     implementation 'com.google.android.gms:play-services-wearable:17.1.0'
     implementation 'org.nanohttpd:nanohttpd:2.3.1'

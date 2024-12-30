@@ -70,6 +70,7 @@ public class GDMessageListenerService extends WearableListenerService {
     params.putString("path",path);
     params.putString("hash",hash);
     coreObject.channelPathToFilePath.put(channel.getPath(), params);
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "added file => channelPathToFilePath.size()=" + coreObject.channelPathToFilePath.size());
     Wearable.getChannelClient(this).receiveFile(channel,Uri.fromFile(f), false);
     coreObject.executeCoreCommand("setRemoteServerActive","1");
   }
@@ -96,6 +97,7 @@ public class GDMessageListenerService extends WearableListenerService {
         f.delete();
       }
       coreObject.channelPathToFilePath.remove(channel.getPath());
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "removed file => channelPathToFilePath.size()=" + coreObject.channelPathToFilePath.size());
       if (coreObject.channelPathToFilePath.size()==0) {
         coreObject.executeCoreCommand("setRemoteServerActive","0");
       }
