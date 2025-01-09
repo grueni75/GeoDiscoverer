@@ -41,6 +41,7 @@ class NavigationPath {
 
 protected:
 
+  char *cacheData;                                // Pointer to the cache (if used)
   std::vector<MapPosition> mapPositions;          // List of map positions the path consists of
   Int startIndex;                                 // Current start in mapPosition list
   Int endIndex;                                   // Current end in mapPosition list

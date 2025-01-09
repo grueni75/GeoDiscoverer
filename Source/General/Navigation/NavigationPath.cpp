@@ -37,6 +37,7 @@ namespace GEODISCOVERER {
 NavigationPath::NavigationPath() : animator(core->getDefaultScreen()) {
 
   // Init variables
+  cacheData=NULL;
   setGpxFilefolder(core->getNavigationEngine()->getTrackPath());
   pathMinSegmentLength=core->getConfigStore()->getIntValue("Graphic","pathMinSegmentLength", __FILE__, __LINE__);
   pathMinDirectionDistance=core->getConfigStore()->getIntValue("Graphic","pathMinDirectionDistance", __FILE__, __LINE__);
@@ -460,6 +461,9 @@ void NavigationPath::deinit() {
 
   // Delete all points
   mapPositions.clear();
+
+  // Delete the cahce (if used)
+  if (cacheData) free(cacheData);
 
   // Is not initialized
   setIsInit(false);

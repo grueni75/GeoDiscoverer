@@ -347,7 +347,7 @@ bool NavigationPath::readGPXFile() {
       } else {
 
         // Load the complete file into memory
-        char *cacheData;
+        if (cacheData!=NULL) free(cacheData);
         if (!(cacheData=(char*)malloc(cacheStat.st_size+1))) {
           FATAL("can not allocate memory for cache",NULL);
           return false;
@@ -368,7 +368,6 @@ bool NavigationPath::readGPXFile() {
         } else {
           cacheRetrieved=true;
         }
-        free(cacheData);
       }
     }
   }
