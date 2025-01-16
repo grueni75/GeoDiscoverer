@@ -579,6 +579,7 @@ bool MapSourceRemote::addOverlayArchive(std::string path, std::string hash) {
 
     // Read in the overlay
     c->retrieveOverlayGraphics(c->getArchiveFileFolder(),c->getOverlayFileName());
+    unlockAccess();
 
     // Redraw the map
     core->getMapEngine()->setForceZoomReset();
@@ -602,7 +603,6 @@ bool MapSourceRemote::addOverlayArchive(std::string path, std::string hash) {
   }
 
   // That's it
-  unlockAccess();
   return true;
 }
 
