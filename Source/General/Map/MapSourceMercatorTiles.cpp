@@ -55,7 +55,6 @@ MapSourceMercatorTiles::MapSourceMercatorTiles(TimestampInSeconds lastGDSModific
   mapFolderDiskUsage=0;
   mapFolderMaxSize=((Long)core->getConfigStore()->getIntValue("Map","mapFolderMaxSize",__FILE__, __LINE__))*1024LL*1024LL;
   mapTileLength=256;
-  accessMutex=core->getThread()->createMutex("map source mercator tiles access mutex");
   errorOccured=false;
   downloadWarningOccured=false;
   mapDownloader=new MapDownloader(this);
@@ -81,7 +80,6 @@ MapSourceMercatorTiles::~MapSourceMercatorTiles() {
   // Free everything else
   deinit();
   core->getThread()->destroyMutex(processDownloadJobsThreadMutex);
-  core->getThread()->destroyMutex(accessMutex);
   core->getThread()->destroyMutex(downloadJobsMutex);
 }
 

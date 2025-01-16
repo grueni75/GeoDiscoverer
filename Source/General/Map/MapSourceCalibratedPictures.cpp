@@ -542,7 +542,7 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   // Check if the class has changed
   Int size=sizeof(MapSourceCalibratedPictures);
 #ifdef TARGET_LINUX
-  if (size!=488) {
+  if (size!=552) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return false;
   }
@@ -626,8 +626,10 @@ bool MapSourceCalibratedPictures::retrieve(MapSourceCalibratedPictures *mapSourc
   }
 
   // The progress value was already consumed
+  DEBUG("cacheSize=%d",cacheSize);
   cacheSize-=sizeof(Int);
   cacheData+=sizeof(Int);
+
 
   // Object is initialized
   mapSource->setIsInitialized(true);

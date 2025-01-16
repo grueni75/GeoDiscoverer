@@ -87,6 +87,7 @@
     "charconv": "cpp",
     "shared_mutex": "cpp",
     "stdfloat": "cpp",
-    "*.def": "cpp"
+    "*.def": "cpp",
+    "text_encoding": "cpp"
   }
 }

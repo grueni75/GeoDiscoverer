@@ -69,7 +69,7 @@ INCLUDES += -I/usr/include/gdal
 LIBS += -lstdc++ -lglut -lpthread -lGLU -ljpeg -lxml2 -lfreetype -lpng -lcurl -lzip -lproj -lGL -lm -lcrypto -lgdal
 
 DEFINES = -DSRC_ROOT='"$(ROOT)/Source"' -DTARGET_LINUX
-CXXFLAGS += -Wnon-virtual-dtor
+CXXFLAGS += -Wnon-virtual-dtor -fsanitize=address
 # normal debug
 debug: CXXFLAGS += -g -O0 
 # Use this to get more warnings on the source code

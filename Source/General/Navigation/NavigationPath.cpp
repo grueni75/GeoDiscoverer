@@ -1258,8 +1258,9 @@ bool NavigationPath::retrieve(NavigationPath *navigationPath, char *&cacheData, 
   // Check if the class has changed
   Int size=sizeof(NavigationPath);
 #ifdef TARGET_LINUX
-  if (size!=1344) {
+  if (size!=1512) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
+    core->getMapSource()->unlockAccess();
     return false;
   }
 #endif

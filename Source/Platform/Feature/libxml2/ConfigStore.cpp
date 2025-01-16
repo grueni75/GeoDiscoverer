@@ -49,7 +49,7 @@ void ConfigStore::init()
 {
   if (!ConfigStore::parserInitialized) {
     xmlInitParser();
-    xmlSetStructuredErrorFunc(NULL, &xmlStructuredErrorHandler);
+    xmlSetStructuredErrorFunc(NULL, (xmlStructuredErrorFunc)&xmlStructuredErrorHandler);
     xmlSetGenericErrorFunc(NULL, &xmlGenericErrorHandler);
     ConfigStore::parserInitialized=true;
   }

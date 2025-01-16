@@ -32,7 +32,6 @@ class MapSourceMercatorTiles : public MapSource {
 
 protected:
 
-  ThreadMutexInfo *accessMutex;                     // Mutex for accessing the map source object
   Int mapContainerCacheSize;                        // Number of map containers to hold in the cache
   Int downloadAreaLength;                           // Length of the square in kilometers that is downloaded around a route position
   Int downloadAreaMinDistance;                      // Distance in kilometers that a route point must be away from the previous one before a new area is downloaded.
@@ -148,14 +147,6 @@ public:
   virtual void updateMapArchiveFiles(std::string filePath);
 
   // Getters and setters
-  virtual void lockAccess(const char *file, int line) {
-    core->getThread()->lockMutex(accessMutex, file, line);
-  }
-
-  virtual void unlockAccess() {
-    core->getThread()->unlockMutex(accessMutex);
-  }
-
   virtual void lockDownloadJobProcessing(const char *file, int line);
 
   virtual void unlockDownloadJobProcessing();

@@ -58,7 +58,9 @@ MapPosition::MapPosition(bool doNotDelete) {
 }
 
 MapPosition::MapPosition(const MapPosition &pos) {
+  bool doNotDelete=this->doNotDelete;
   *this=pos;
+  this->doNotDelete=doNotDelete;
 }
 
 MapPosition::~MapPosition() {
@@ -155,7 +157,7 @@ MapPosition *MapPosition::retrieve(char *& cacheData, Int & cacheSize)
   // Check if the class has changed
   Int size = sizeof (MapPosition);
 #ifdef TARGET_LINUX
-  if (size!=184) {
+  if (size!=176) {
     FATAL("unknown size of object (%d), please adapt class storage",size);
     return NULL;
   }

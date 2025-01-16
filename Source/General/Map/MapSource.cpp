@@ -47,6 +47,7 @@ void *mapSourceRemoteServerThread(void *args) {
 }
 
 MapSource::MapSource() {
+  accessMutex=core->getThread()->createMutex("map source access mutex");
   folder=core->getConfigStore()->getStringValue("Map","folder", __FILE__, __LINE__);
   neighborPixelTolerance=core->getConfigStore()->getDoubleValue("Map","neighborPixelTolerance", __FILE__, __LINE__);
   mapTileLength=core->getConfigStore()->getIntValue("Map","tileLength", __FILE__, __LINE__);
@@ -84,6 +85,7 @@ MapSource::~MapSource() {
   }
   core->getThread()->destroyMutex(statusMutex);
   core->getThread()->destroyMutex(mapArchivesMutex);
+  core->getThread()->destroyMutex(accessMutex);
 }
 
 // Clear the source

@@ -38,6 +38,7 @@ class MapSource {
 protected:
 
   MapSourceType type;                             // Type of source
+  ThreadMutexInfo *accessMutex;                   // Mutex for accessing the map source object
   std::string folder;                             // Folder that contains the map data
   std::list<ZipArchive*> mapArchives;             // Zip archives that contain the calibrated maps
   ThreadMutexInfo *mapArchivesMutex;              // Mutex to access the map archives
@@ -296,10 +297,12 @@ public:
     return core->getHomePath() + "/Map/" + folder;
   }
 
-  virtual void lockAccess(const char *file, int line) {
+  void lockAccess(const char *file, int line) {
+    core->getThread()->lockMutex(accessMutex, file, line);
   }
 
-  virtual void unlockAccess() {
+  void unlockAccess() {
+    core->getThread()->unlockMutex(accessMutex);
   }
 
   virtual void lockDownloadJobProcessing(const char *file, int line) {
