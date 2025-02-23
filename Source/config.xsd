@@ -380,6 +380,11 @@
                               <xsd:documentation>Minimum duration between off route alerts in seconds.</xsd:documentation>
                             </xsd:annotation>
                           </xsd:element>
+                          <xsd:element name="minDurationBetweenNormalAlerts" type="xsd:integer" default="10">
+                            <xsd:annotation>
+                              <xsd:documentation>Minimum duration between all other alerts in seconds.</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
                           <xsd:element name="forwardTurnMaxAngle" type="xsd:double" default="10.0">
                             <xsd:annotation>
                               <xsd:documentation>Maximum angle a turn is detected as a forward drive.</xsd:documentation>

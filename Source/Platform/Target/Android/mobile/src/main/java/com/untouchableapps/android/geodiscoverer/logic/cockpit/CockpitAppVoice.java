@@ -47,6 +47,7 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
   // Last time a navigation alert was spoken
   long lastAlert;
   long minDurationBetweenOffRouteAlerts;
+  long minDurationBetweenNormalAlerts;
 
   // Maximum angle a turn is detected as a forward drive
   float forwardTurnMaxAngle;
@@ -65,6 +66,7 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
         
     // Init parameters
     minDurationBetweenOffRouteAlerts = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "minDurationBetweenOffRouteAlerts")) *  1000;
+    minDurationBetweenNormalAlerts = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "minDurationBetweenNormalAlerts")) *  1000;
     speakDelay = Integer.parseInt(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "speakDelay")) *  1000;
     forwardTurnMaxAngle = Float.parseFloat(GDApplication.coreObject.configStoreGetStringValue("Cockpit/App/Voice", "forwardTurnMaxAngle"));
 
@@ -95,11 +97,11 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
       return;
     long t = Calendar.getInstance().getTimeInMillis();
     String navigationInstructions=this.navigationInstructions;
+    long diffToLastUpdate = t - lastAlert;
     if (type==AlertType.offRoute) {
       
       // Only speak off route alert with defined distance
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "voiceApp: got off route indication (repeated=" + String.valueOf(repeated) + ")");
-      long diffToLastUpdate = t - lastAlert;
       if ((!repeated)||(diffToLastUpdate>minDurationBetweenOffRouteAlerts)) {
         GDApplication.coreObject.audioWakeup();
         textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -108,9 +110,12 @@ public class CockpitAppVoice implements CockpitAppInterface, TextToSpeech.OnInit
       }
     }
     if (type==AlertType.newTurn) {
-      GDApplication.coreObject.audioWakeup();
-      textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null, null);
-      textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null, null);
+      if (diffToLastUpdate>minDurationBetweenNormalAlerts) {
+        GDApplication.coreObject.audioWakeup();
+        textToSpeech.playEarcon("[alert]", TextToSpeech.QUEUE_FLUSH, null, null);
+        textToSpeech.speak(navigationInstructions, TextToSpeech.QUEUE_ADD, null, null);
+        lastAlert = t;
+      }
     }
     //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", String.format("t(alert)=%d", System.currentTimeMillis() / 1000));
   }
