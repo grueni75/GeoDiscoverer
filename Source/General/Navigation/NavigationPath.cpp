@@ -463,7 +463,10 @@ void NavigationPath::deinit() {
   mapPositions.clear();
 
   // Delete the cahce (if used)
-  if (cacheData) free(cacheData);
+  if (cacheData) {
+    free(cacheData);
+    cacheData=NULL;
+  }
 
   // Is not initialized
   setIsInit(false);
