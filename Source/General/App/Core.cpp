@@ -522,7 +522,7 @@ void Core::addDashboardDevice(std::string host, Int port) {
 
   // Check if the device is reachable
   if (!(d->openSocket())) {
-    //DEBUG("dashboard device %s is not reachable",name.str().c_str());
+    DEBUG("dashboard device %s is not reachable",name.str().c_str());
     delete d;
     return;
   }

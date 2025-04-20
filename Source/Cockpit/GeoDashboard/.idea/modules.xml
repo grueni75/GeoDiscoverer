@@ -7,9 +7,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.androidTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/GeoDashboard.app.unitTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.iml" filepath="$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.test.iml" filepath="$PROJECT_DIR$/.idea/modules/-609254941/GeoDashboard.jmDNS.test.iml" />
     </modules>
   </component>
 </project>
