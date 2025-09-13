@@ -125,7 +125,7 @@ public class GDHeartRateService {
     /** Called when connection to the device has changed */
     @Override
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-      super.onConnectionStateChange(gatt,status,newState);
+      super.onConnectionStateChange(gatt,status,newState);  
       String intentAction;
       if (newState == BluetoothProfile.STATE_CONNECTED) {
         if (state==CONNECTING) {

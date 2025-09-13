@@ -135,7 +135,7 @@
                   <xsd:documentation>Enables the heart rate monitor.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
-              <xsd:element name="bluetoothAddress" type="xsd:string" default="FD:64:F3:96:A3:8C" gd:upgrade="restore">
+              <xsd:element name="bluetoothAddress" type="xsd:string" default="FO:13:C3:EE:C8:B6" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Address of the bluetooth low energy device that transmits heart rate information.</xsd:documentation>
                 </xsd:annotation>
