@@ -24,19 +24,8 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="/tmp/baseline_exit_to_app_24.xml" />
+                                                <entry key="imagePath" value="/tmp/baseline_power_off_24.xml" />
                                                 <entry key="opacityPercent" value="80" />
-                                              </map>
-                                            </option>
-                                          </PersistentState>
-                                        </value>
-                                      </entry>
-                                      <entry key="clipartAsset">
-                                        <value>
-                                          <PersistentState>
-                                            <option name="values">
-                                              <map>
-                                                <entry key="url" value="file:$PROJECT_DIR$/../../../../android/android-sdk/icons/material/materialicons/exit_to_app/baseline_exit_to_app_24.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -80,9 +69,9 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="outputName" value="exit" />
+                                      <entry key="outputName" value="nopower" />
                                       <entry key="theme" value="CUSTOM" />
-                                      <entry key="themeColor" value="ffffff" />
+                                      <entry key="themeColor" value="000000" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -335,6 +324,11 @@
                 </map>
               </option>
             </PersistentState>
+          </value>
+        </entry>
+        <entry key="vectorWizard">
+          <value>
+            <PersistentState />
           </value>
         </entry>
       </map>

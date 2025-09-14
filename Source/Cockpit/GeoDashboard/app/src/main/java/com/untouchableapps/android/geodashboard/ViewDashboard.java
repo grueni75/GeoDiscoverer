@@ -146,6 +146,11 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
   ImageView backlightIndicatorView;
 
   /**
+   * References to the nopower indicator image view
+   */
+  ImageView noPowerIndicatorView;
+
+  /**
    * Resolver for system settings
    */
   ContentResolver systemSettingsResolver;
@@ -179,7 +184,12 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
   /**
    * Broadcast receiver for WiFi Connected
    */
-  BroadcastReceiver wifiConnectedReceiver;
+  BroadcastReceiver wifiConnectedReceiver = null;
+
+  /**
+   * Broadcast receiver for Power status
+   */
+  BroadcastReceiver powerConnectionReceiver = null;
 
   /**
    * Port to listen to
@@ -381,7 +391,7 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
         if (brightnessLevel != 0)
           backlightIndicatorView.setVisibility(View.VISIBLE);
         else
-          backlightIndicatorView.setVisibility(View.INVISIBLE);
+          backlightIndicatorView.setVisibility(View.GONE);
       }
     });
   }
@@ -661,6 +671,7 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
     dashboardView = (ImageView)findViewById(R.id.fullscreen_content);
     soundButtonsView = (LinearLayout)findViewById(R.id.sound_buttons);
     backlightIndicatorView = (ImageView)findViewById(R.id.backlight_indicator);
+    noPowerIndicatorView =  (ImageView)findViewById(R.id.nopower_indicator);
 
     // Keep the screen on
     //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -787,6 +798,31 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
     // Let the screen keep on
     powerManager = (PowerManager) getSystemService(POWER_SERVICE);
     wakeLock = powerManager.newWakeLock(SCREEN_BRIGHT_WAKE_LOCK,"GeoDashboard");
+
+    // Indicate power losses
+    powerConnectionReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (action != null && action.equals(Intent.ACTION_POWER_DISCONNECTED)) {
+          noPowerIndicatorView.setVisibility(View.VISIBLE);
+        } else if (action != null && action.equals(Intent.ACTION_POWER_CONNECTED)) {
+          noPowerIndicatorView.setVisibility(View.GONE);
+        }
+      }
+    };
+
+    // Check initial power state
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(Intent.ACTION_POWER_CONNECTED);
+    filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+    Intent batteryStatus = registerReceiver(powerConnectionReceiver, filter);
+
+    if (batteryStatus != null && batteryStatus.getIntExtra(android.os.BatteryManager.EXTRA_PLUGGED, -1) == 0) {
+      noPowerIndicatorView.setVisibility(View.VISIBLE);
+    } else {
+      noPowerIndicatorView.setVisibility(View.GONE);
+    }
 
     // Service is down
     displayTextBitmap(getString(R.string.server_down));
@@ -915,6 +951,7 @@ public class ViewDashboard extends Activity implements NsdManager.RegistrationLi
   @Override
   protected void onDestroy() {
     unregisterReceiver(wifiConnectedReceiver);
+    unregisterReceiver(powerConnectionReceiver);
     quitThreads=true;
     if (monitorThread!=null) {
       try {

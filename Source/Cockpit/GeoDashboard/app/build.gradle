@@ -22,6 +22,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    namespace 'com.untouchableapps.android.geodashboard'
 
     applicationVariants.all { variant ->
         variant.outputs.all {
