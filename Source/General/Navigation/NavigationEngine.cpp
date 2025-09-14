@@ -244,12 +244,30 @@ void NavigationEngine::init() {
   }
   recordedTrack->setNormalColor(c->getGraphicColorValue("Navigation/TrackColor", __FILE__, __LINE__), __FILE__, __LINE__);
 
-  // Prepare the last recorded track if it does exist
+  // In case the last recorded track is not from today we create a new one
   std::string lastRecordedTrackFilename=c->getStringValue("Navigation","lastRecordedTrackFilename", __FILE__, __LINE__);
+  std::string today = core->getClock()->getFormattedDate(core->getClock()->getSecondsSinceEpoch(),"%Y%m%d",true); // format: YYYYMMDD-HHMMSS
+  bool isToday = false;
+  size_t dashPos = lastRecordedTrackFilename.find("-");
+  size_t dotPos = lastRecordedTrackFilename.find(".");
+  if (dashPos != std::string::npos && dotPos != std::string::npos && dotPos > dashPos) {
+      std::string datePart = lastRecordedTrackFilename.substr(dashPos + 1, 8); // expects 'track-YYYYMMDD-...gpx'
+      std::string todayDate = today.substr(0, 8); // YYYYMMDD
+      //DEBUG("datePart: %s, todayDate: %s", datePart.c_str(), todayDate.c_str());
+      if (datePart == todayDate) {
+        //DEBUG("track gpx filename is from today, reusing it",NULL);
+        isToday = true;
+      } else {
+        INFO("starting new track (day changed)",NULL);
+      }
+  }
+
+  // Prepare the last recorded track if it does exist
   std::string filepath=recordedTrack->getGpxFilefolder()+"/"+lastRecordedTrackFilename;
-  if ((lastRecordedTrackFilename!="")&&(access(filepath.c_str(),F_OK)==0)) {
+  if ((isToday)&&(lastRecordedTrackFilename!="")&&(access(filepath.c_str(),F_OK)==0)) {
     //DEBUG("track gpx file exists, using it",NULL);
     recordedTrack->setGpxFilename(lastRecordedTrackFilename);
+
   } else {
     //DEBUG("track gpx file does not exist, starting new track",NULL);
     c->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename(), __FILE__, __LINE__);
