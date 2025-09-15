@@ -272,6 +272,7 @@ void NavigationEngine::init() {
     //DEBUG("track gpx file does not exist, starting new track",NULL);
     c->setStringValue("Navigation","lastRecordedTrackFilename",recordedTrack->getGpxFilename(), __FILE__, __LINE__);
     recordedTrack->setIsInit(true);
+    recordedTrack->setHasBeenLoaded(true);
   }
 
   // Set the new recorded track
