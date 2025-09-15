@@ -22,6 +22,7 @@ package com.untouchableapps.android.geodiscoverer.logic.ble;
 //============================================================================
 
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -67,15 +68,21 @@ public class GDHeartRateService {
 
   // Constants for finding heart rate services and measurements
   private final static UUID UUID_HEART_RATE_SERVICE = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
+  private final static UUID UUID_BATTERY_SERVICE = UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb");
+  private final static UUID UUID_DESCRIPTOR = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
   private final static UUID UUID_HEART_RATE_MEASUREMENT_VALUE = UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb");
-  private final static UUID UUID_HEART_RATE_MEASUREMENT_DESCRIPTOR = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+  private final static UUID UUID_BATTERY_LEVEL_MEASUREMENT_VALUE = UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
 
   /** Address of the bluetooth device to monitor */
   String deviceAddress;
 
+  /** Reference to battery service */
+  BluetoothGattCharacteristic batteryServiceCharacteristic = null;
+
   // Heart rate info
   int currentHeartRate = 0;
   int currentHeartRateZone = 1;
+  int currentBatteryLevel = -1;
   int maxHeartRate = Integer.MAX_VALUE;
   int startHeartRateZoneTwo = Integer.MAX_VALUE;
   int startHeartRateZoneThree = Integer.MAX_VALUE;
@@ -119,10 +126,17 @@ public class GDHeartRateService {
     //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR", String.format("received heart rate: %d", currentHeartRate));
   }
 
+  /** Extracts the battery level from a characteristics */
+  private void updateBatteryLevel(BluetoothGattCharacteristic characteristic) {
+    currentBatteryLevel = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
+    GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR", String.format("received battery level: %d", currentBatteryLevel));
+  }
+
   /** Callback for gatt service updates */
   private BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
 
     /** Called when connection to the device has changed */
+    @SuppressLint("MissingPermission")
     @Override
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
       super.onConnectionStateChange(gatt,status,newState);  
@@ -141,30 +155,44 @@ public class GDHeartRateService {
     }
 
     /** Called when new services are discovered */
+    @SuppressLint("MissingPermission")
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
       super.onServicesDiscovered(gatt,status);
       if (status == BluetoothGatt.GATT_SUCCESS) {
         if (state == DISCOVERING_SERVICES) {
-          GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR","bluetooth gatt service discovery completed");
+          //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR","bluetooth gatt service discovery completed");
           List<BluetoothGattService> gattServices = gatt.getServices();
           if (gattServices == null) return;
           for (BluetoothGattService gattService : gattServices) {
-            //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("device supports service %s",gattService.getUuid().toString()));
+            //GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("device supports service %s", gattService.getUuid().toString()));
             if (gattService.getUuid().equals(UUID_HEART_RATE_SERVICE)) {
               List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
-              if (gattCharacteristics == null) return;
-              for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
-                //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("heart rate service supports characteristics %s",gattCharacteristic.getUuid().toString()));
-                if (gattCharacteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT_VALUE)) {
-                  GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("requesting read of characteristic",gattCharacteristic.getUuid().toString()));
-                  gatt.readCharacteristic(gattCharacteristic);
-                  gatt.setCharacteristicNotification(gattCharacteristic,true);
-                  BluetoothGattDescriptor descriptor = gattCharacteristic.getDescriptor(UUID_HEART_RATE_MEASUREMENT_DESCRIPTOR);
-                  descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                  gatt.writeDescriptor(descriptor);
-                  state = OPERATING;
-                  setConnectionState(true);
+              if (gattCharacteristics != null) {
+                for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
+                  //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("heart rate service supports characteristics %s",gattCharacteristic.getUuid().toString()));
+                  if (gattCharacteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT_VALUE)) {
+                    GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("requesting read of heart rate characteristic", gattCharacteristic.getUuid().toString()));
+                    //gatt.readCharacteristic(gattCharacteristic);
+                    gatt.setCharacteristicNotification(gattCharacteristic, true);
+                    BluetoothGattDescriptor descriptor = gattCharacteristic.getDescriptor(UUID_DESCRIPTOR);
+                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    gatt.writeDescriptor(descriptor);
+                    state = OPERATING;
+                    setConnectionState(true);
+                  }
+                }
+              }
+            }
+            if (gattService.getUuid().equals(UUID_BATTERY_SERVICE)) {
+              List<BluetoothGattCharacteristic> gattCharacteristics2 = gattService.getCharacteristics();
+              if (gattCharacteristics2 != null) {
+                for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics2) {
+                  //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("battery service supports characteristics %s",gattCharacteristic.getUuid().toString()));
+                  if (gattCharacteristic.getUuid().equals(UUID_BATTERY_LEVEL_MEASUREMENT_VALUE)) {
+                    GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("battery level characteristic discovered"));
+                    batteryServiceCharacteristic = gattCharacteristic;
+                  }
                 }
               }
             }
@@ -174,23 +202,41 @@ public class GDHeartRateService {
     }
 
     // Result of a characteristic read operation
+    @SuppressLint("MissingPermission")
     @Override
     public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,
                                      int status) {
       super.onCharacteristicRead(gatt, characteristic, status);
+      //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("characteristics %s has been read",characteristic.getUuid().toString()));
       if (status == BluetoothGatt.GATT_SUCCESS) {
         if (characteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT_VALUE)) {
           updateHeartRate(characteristic);
+        }
+        if (characteristic.getUuid().equals(UUID_BATTERY_LEVEL_MEASUREMENT_VALUE)) {
+          updateBatteryLevel(characteristic);
+          gatt.setCharacteristicNotification(characteristic, true);
+          BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID_DESCRIPTOR);
+          descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+          gatt.writeDescriptor(descriptor);
         }
       }
     }
 
     // Result of a characteristic update operation
+    @SuppressLint("MissingPermission")
     @Override
     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
       super.onCharacteristicChanged(gatt, characteristic);
+      //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR",String.format("characteristics %s has changed",characteristic.getUuid().toString()));
       if (characteristic.getUuid().equals(UUID_HEART_RATE_MEASUREMENT_VALUE)) {
         updateHeartRate(characteristic);
+        if (batteryServiceCharacteristic!=null) {
+          gatt.readCharacteristic(batteryServiceCharacteristic);
+          batteryServiceCharacteristic=null;
+        }
+      }
+      if (characteristic.getUuid().equals(UUID_BATTERY_LEVEL_MEASUREMENT_VALUE)) {
+        updateBatteryLevel(characteristic);
       }
     }
   };
@@ -198,6 +244,7 @@ public class GDHeartRateService {
   /** Callback for bluetooth devices discoveries  */
   private ScanCallback scanCallback = new ScanCallback() {
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onScanResult(int callbackType, ScanResult result) {
       super.onScanResult(callbackType, result);
@@ -250,6 +297,7 @@ public class GDHeartRateService {
   }
 
   /** Constructor */
+  @SuppressLint("MissingPermission")
   public GDHeartRateService(Context context, GDCore coreObject) {
 
     // Store important references
