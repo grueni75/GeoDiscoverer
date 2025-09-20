@@ -42,7 +42,7 @@ void *mainThread(void *args) {
 
   // Ensure that the widgets are positioned
   //GEODISCOVERER::core->getCommander()->execute("screenChanged(landscape,1536,960)");
-  GEODISCOVERER::core->getCommander()->execute("screenChanged(portrait,480,768)");
+  GEODISCOVERER::core->getCommander()->execute("screenChanged(portrait,960,1536)");
 
   // Start the main loop
   GEODISCOVERER::core->getDefaultScreen()->mainLoop();
@@ -139,7 +139,7 @@ void *debugThread(void *args) {
 int main(int argc, char **argv)
 {
   // Create the application
-  if (!(GEODISCOVERER::core=new GEODISCOVERER::Core(".",180,5))) {
+  if (!(GEODISCOVERER::core=new GEODISCOVERER::Core(".",360,5))) {
     puts("FATAL: can not create geo discoverer core object!");
     exit(1);
   }

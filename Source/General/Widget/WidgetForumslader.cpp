@@ -52,6 +52,10 @@ WidgetForumslader::WidgetForumslader(WidgetContainer *widgetContainer) :
   batteryChargingIconY=0;
   setIsHidden(true);
   core->getConfigStore()->setIntValue("Forumslader","connected",0,__FILE__,__LINE__);
+  /*core->getConfigStore()->setIntValue("Forumslader","connected",1,__FILE__,__LINE__);
+  core->getConfigStore()->setIntValue("Forumslader","batteryLevel",20,__FILE__,__LINE__);
+  core->getConfigStore()->setStringValue("Forumslader","powerDrawLevel","5.0",__FILE__,__LINE__);
+  core->getConfigStore()->setStringValue("Forumslader","powerDrawLevel","5.0",__FILE__,__LINE__);*/
 }
 
 // Destructor
@@ -243,8 +247,8 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
       changed |= powerDrawGaugeForeground.work(t);
 
       // Update the battery levels
-      batteryGaugeFlCurrentHeight=flBatteryLevel*batteryGaugeMaxHeight/100.0;
-      batteryGaugePhCurrentHeight=core->getBatteryLevel()*batteryGaugeMaxHeight/100.0;
+      batteryGaugeFlCurrentLevel=flBatteryLevel;
+      batteryGaugePhCurrentLevel=core->getBatteryLevel();
     }
 
     // Update the flags
@@ -264,55 +268,6 @@ bool WidgetForumslader::work(TimestampInMicroseconds t) {
 
   // Return result
   return changed;
-}
-
-// Draws a battery symbol
-void WidgetForumslader::drawBattery(TimestampInMicroseconds t, Int offsetX, Int batteryGaugeCurrentHeight, FontString *label, FontString *level) {
-  GraphicColor c=gaugeBackgroundColor;
-  c.setAlpha(color.getAlpha());
-  screen->setColor(c.getRed(),c.getGreen(),c.getBlue(),c.getAlpha());
-  screen->drawRectangle(x+getIconWidth()/2+offsetX-batteryGaugeBackgroundWidth/2,
-                        y+batteryGaugeOffsetY,
-                        x+getIconWidth()/2+offsetX+batteryGaugeBackgroundWidth/2,
-                        y+batteryGaugeOffsetY+batteryGaugeMaxHeight+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth),
-                        Screen::getTextureNotDefined(),true);
-  screen->drawRectangle(x+getIconWidth()/2+offsetX-batteryGaugeTipWidth/2,
-                        y+batteryGaugeOffsetY+batteryGaugeMaxHeight+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth),
-                        x+getIconWidth()/2+offsetX+batteryGaugeTipWidth/2,
-                        y+batteryGaugeOffsetY+batteryGaugeMaxHeight+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth)+batteryGaugeTipHeight,
-                        Screen::getTextureNotDefined(),true);
-  c=gaugeFillgroundColor;
-  c.setAlpha(color.getAlpha());
-  screen->setColor(c.getRed(),c.getGreen(),c.getBlue(),c.getAlpha());
-  screen->drawRectangle(x+getIconWidth()/2+offsetX-batteryGaugeForegroundWidth/2,
-                        y+batteryGaugeOffsetY+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth)/2,
-                        x+getIconWidth()/2+offsetX+batteryGaugeForegroundWidth/2,
-                        y+batteryGaugeOffsetY+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth)/2+batteryGaugeMaxHeight,
-                        Screen::getTextureNotDefined(),true);
-  c=gaugeForegroundColor;
-  c.setAlpha(color.getAlpha());
-  screen->setColor(c.getRed(),c.getGreen(),c.getBlue(),c.getAlpha());
-  screen->drawRectangle(x+getIconWidth()/2+offsetX-batteryGaugeForegroundWidth/2,
-                        y+batteryGaugeOffsetY+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth)/2,
-                        x+getIconWidth()/2+offsetX+batteryGaugeForegroundWidth/2,
-                        y+batteryGaugeOffsetY+(batteryGaugeBackgroundWidth-batteryGaugeForegroundWidth)/2+batteryGaugeCurrentHeight,
-                        Screen::getTextureNotDefined(),true);
-  if (label) {
-    label->setColor(color);
-    label->draw(t);
-  }
-  if (level) {
-    if (batteryCharging) {
-      screen->startObject();
-      screen->translate(batteryChargingIconX,batteryChargingIconY,batteryChargingIcon.getZ());
-      screen->scale(batteryChargingIconScale,batteryChargingIconScale,1.0);
-      batteryChargingIcon.setColor(color);
-      batteryChargingIcon.draw(t);
-      screen->endObject();
-    }
-    level->setColor(color);
-    level->draw(t);
-  }
 }
 
 // Executed every time the graphic engine needs to draw
@@ -351,8 +306,42 @@ void WidgetForumslader::draw(TimestampInMicroseconds t) {
   }
 
   // Draw the battery symbols
-  drawBattery(t,-batteryGaugeOffsetX,batteryGaugeFlCurrentHeight,flBatteryLabelFontString,flBatteryLevelFontString);
-  drawBattery(t,+batteryGaugeOffsetX,batteryGaugePhCurrentHeight,phBatteryLabelFontString,phBatteryLevelFontString);
+  drawBattery(
+    t,
+    -batteryGaugeOffsetX,
+    batteryGaugeFlCurrentLevel,
+    flBatteryLabelFontString,
+    flBatteryLevelFontString,
+    batteryGaugeBackgroundWidth,
+    batteryGaugeForegroundWidth,
+    batteryGaugeTipWidth,
+    batteryGaugeTipHeight,
+    batteryGaugeOffsetY,
+    batteryGaugeMaxHeight,
+    false,
+    0,
+    0,
+    NULL,
+    0
+  );
+  drawBattery(
+    t,
+    +batteryGaugeOffsetX,
+    batteryGaugePhCurrentLevel,
+    phBatteryLabelFontString,
+    phBatteryLevelFontString,
+    batteryGaugeBackgroundWidth,
+    batteryGaugeForegroundWidth,
+    batteryGaugeTipWidth,
+    batteryGaugeTipHeight,
+    batteryGaugeOffsetY,
+    batteryGaugeMaxHeight,
+    batteryCharging,
+    batteryChargingIconX,
+    batteryChargingIconY,
+    &batteryChargingIcon,
+    batteryChargingIconScale
+  );
   
   /* Draw the engine temperature gauge
   screen->setColor(gaugeBackgroundColor.getRed(),gaugeBackgroundColor.getGreen(),gaugeBackgroundColor.getBlue(),gaugeBackgroundColor.getAlpha());

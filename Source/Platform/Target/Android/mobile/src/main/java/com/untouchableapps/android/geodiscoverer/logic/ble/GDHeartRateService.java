@@ -87,6 +87,7 @@ public class GDHeartRateService {
   int startHeartRateZoneTwo = Integer.MAX_VALUE;
   int startHeartRateZoneThree = Integer.MAX_VALUE;
   int startHeartRateZoneFour = Integer.MAX_VALUE;
+  int startHeartRateZoneFive = Integer.MAX_VALUE;
   int minHeartRateZoneChangeTime = 0;
   long heartRateZoneChangeTimestamp = 0;
   int volumeHeartRateZoneChange = 100;
@@ -311,6 +312,7 @@ public class GDHeartRateService {
     startHeartRateZoneTwo = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneTwo"));
     startHeartRateZoneThree = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneThree"));
     startHeartRateZoneFour = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneFour"));
+    startHeartRateZoneFive = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "startHeartRateZoneFive"));
     minHeartRateZoneChangeTime = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "minHeartRateZoneChangeTime"));
     volumeHeartRateZoneChange = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "volumeHeartRateZoneChange"));
     connectionWarningPeriod = Integer.parseInt(coreObject.configStoreGetStringValue("HeartRateMonitor", "connectionWarningPeriod"));
@@ -435,13 +437,15 @@ public class GDHeartRateService {
 
             // Find out the zone the heart rate is in
             long t = System.currentTimeMillis() / 1000;
-            int nextHeartRateZone = 4;
+            int nextHeartRateZone = 5;
             if (currentHeartRate < startHeartRateZoneTwo)
               nextHeartRateZone = 1;
             else if (currentHeartRate < startHeartRateZoneThree)
               nextHeartRateZone = 2;
             else if (currentHeartRate < startHeartRateZoneFour)
               nextHeartRateZone = 3;
+            else if (currentHeartRate < startHeartRateZoneFive)
+              nextHeartRateZone = 4;
             if (currentHeartRateZone != nextHeartRateZone) {
               if (heartRateZoneChangeTimestamp == 0) {
                 heartRateZoneChangeTimestamp = t;
@@ -455,6 +459,12 @@ public class GDHeartRateService {
               heartRateZoneChangeTimestamp = 0;
             }
             //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDAppHR",String.format("current heart rate zone: %d",currentHeartRateZone));
+
+            // Update the GUI
+            coreObject.configStoreSetStringValue("HeartRateMonitor", "heartRate", Integer.toString(currentHeartRate));
+            coreObject.configStoreSetStringValue("HeartRateMonitor", "heartRateZone", Integer.toString(currentHeartRateZone));
+            coreObject.configStoreSetStringValue("HeartRateMonitor", "batteryLevel", Integer.toString(currentBatteryLevel));
+            coreObject.executeCoreCommand("dataChanged");
           }
 
           // Wait for next round
@@ -532,17 +542,30 @@ public class GDHeartRateService {
           } catch (InterruptedException e) {
             return;
           }
+
+          // Play the disconnect sound
           connectionNotificationLock.lock();
           signalConnectionChange(soundFile);
           connectionNotificationThread=null;
           connectionNotificationLock.unlock();
+
+          // Update the GUI
+          coreObject.configStoreSetStringValue("HeartRateMonitor", "connected", "0");
+          coreObject.executeCoreCommand("dataChanged");
         }
       };
       connectionNotificationThread.start();
+
     } else {
+
+      // Play the connect sound immediately
       connectionNotificationLock.lock();
       signalConnectionChange(soundFile);
       connectionNotificationLock.unlock();
+
+      // Update the GUI
+      coreObject.configStoreSetStringValue("HeartRateMonitor", "connected", "1");
+      coreObject.executeCoreCommand("dataChanged");
     }
   }
 

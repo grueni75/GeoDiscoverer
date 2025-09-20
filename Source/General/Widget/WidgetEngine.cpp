@@ -29,6 +29,7 @@
 #include <WidgetCheckbox.h>
 #include <WidgetCursorInfo.h>
 #include <WidgetEBike.h>
+#include <WidgetHeartRate.h>
 #include <WidgetForumslader.h>
 #include <WidgetFingerMenu.h>
 #include <WidgetMeter.h>
@@ -105,6 +106,7 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
     case WidgetTypeCursorInfo: widgetTypeString="cursorInfo"; break;
     case WidgetTypeAddressPoint: widgetTypeString="addressPoint"; break;
     case WidgetTypeEBike: widgetTypeString="eBike"; break;
+    case WidgetTypeHeartRate: widgetTypeString="heartRate"; break;
     case WidgetTypeForumslader: widgetTypeString="forumslader"; break;
     default: FATAL("unknown widget type",NULL); break;
   }
@@ -130,12 +132,13 @@ void WidgetEngine::addWidgetToPage(WidgetConfig config) {
   }
   if (config.getType()==WidgetTypeNavigation)
     c->setGraphicColorValue(path + "/BusyColor",GraphicColor(config.getBusyColor().getRed(),config.getBusyColor().getGreen(),config.getBusyColor().getBlue(),config.getBusyColor().getAlpha()),__FILE__, __LINE__);
-  if ((config.getType()==WidgetTypeEBike)||(config.getType()==WidgetTypeForumslader)) {
-    c->setGraphicColorValue(path + "/GaugeBackgroundColor",GraphicColor(config.getGaugeBackgroundColor().getRed(),config.getGaugeBackgroundColor().getGreen(),config.getGaugeBackgroundColor().getBlue(),config.getGaugeBackgroundColor().getAlpha()),__FILE__, __LINE__);
-    c->setGraphicColorValue(path + "/GaugeForegroundColor",GraphicColor(config.getGaugeForegroundColor().getRed(),config.getGaugeForegroundColor().getGreen(),config.getGaugeForegroundColor().getBlue(),config.getGaugeForegroundColor().getAlpha()),__FILE__, __LINE__);
-  }
-  if (config.getType()==WidgetTypeForumslader) {
-    c->setGraphicColorValue(path + "/GaugeFillgroundColor",GraphicColor(config.getGaugeFillgroundColor().getRed(),config.getGaugeFillgroundColor().getGreen(),config.getGaugeFillgroundColor().getBlue(),config.getGaugeFillgroundColor().getAlpha()),__FILE__, __LINE__);
+  if (config.getType()==WidgetTypeHeartRate) {
+    c->setGraphicColorValue(path + "/HeartRateZoneColorBackground",GraphicColor(config.getHeartRateZoneColorBackground().getRed(),config.getHeartRateZoneColorBackground().getGreen(),config.getHeartRateZoneColorBackground().getBlue(),config.getHeartRateZoneColorBackground().getAlpha()),__FILE__, __LINE__);
+    c->setGraphicColorValue(path + "/HeartRateZoneColorZoneOne",GraphicColor(config.getHeartRateZoneColorZoneOne().getRed(),config.getHeartRateZoneColorZoneOne().getGreen(),config.getHeartRateZoneColorZoneOne().getBlue(),config.getHeartRateZoneColorZoneOne().getAlpha()),__FILE__, __LINE__);
+    c->setGraphicColorValue(path + "/HeartRateZoneColorZoneTwo",GraphicColor(config.getHeartRateZoneColorZoneTwo().getRed(),config.getHeartRateZoneColorZoneTwo().getGreen(),config.getHeartRateZoneColorZoneTwo().getBlue(),config.getHeartRateZoneColorZoneTwo().getAlpha()),__FILE__, __LINE__);
+    c->setGraphicColorValue(path + "/HeartRateZoneColorZoneThree",GraphicColor(config.getHeartRateZoneColorZoneThree().getRed(),config.getHeartRateZoneColorZoneThree().getGreen(),config.getHeartRateZoneColorZoneThree().getBlue(),config.getHeartRateZoneColorZoneThree().getAlpha()),__FILE__, __LINE__);
+    c->setGraphicColorValue(path + "/HeartRateZoneColorZoneFour",GraphicColor(config.getHeartRateZoneColorZoneFour().getRed(),config.getHeartRateZoneColorZoneFour().getGreen(),config.getHeartRateZoneColorZoneFour().getBlue(),config.getHeartRateZoneColorZoneFour().getAlpha()),__FILE__, __LINE__);
+    c->setGraphicColorValue(path + "/HeartRateZoneColorZoneFive",GraphicColor(config.getHeartRateZoneColorZoneFive().getRed(),config.getHeartRateZoneColorZoneFive().getGreen(),config.getHeartRateZoneColorZoneFive().getBlue(),config.getHeartRateZoneColorZoneFive().getAlpha()),__FILE__, __LINE__);
   }
   ParameterMap::iterator i;
   for (i=config.getParameters()->begin();i!=config.getParameters()->end();i++) {
@@ -778,8 +781,6 @@ void WidgetEngine::createGraphic() {
         config.setInactiveColor(GraphicColor(255,255,255,255));
       }
       config.setActiveColor(GraphicColor(255,255,255,255));
-      config.setGaugeBackgroundColor(GraphicColor(255,127,0,255));
-      config.setGaugeForegroundColor(GraphicColor(255,190,127,255));
       config.setParameter("iconFilename", "eBikeBackground");
       config.setParameter("powerLevelOffsetX","35");
       config.setParameter("powerLevelOffsetY","50");
@@ -811,6 +812,47 @@ void WidgetEngine::createGraphic() {
         addWidgetToPage(config);
       }
       // ---------------------------------------------------------
+      if (deviceName=="Default") {
+        config=WidgetConfig();
+        config.setPageName("Default");
+        config.setName("HeartRate");
+        config.setType(WidgetTypeHeartRate);
+        config.setPageName("Finger Menu");
+        position=WidgetPosition();
+        position.setRefScreenDiagonal(4.0);
+        position.setPortraitX(72.0);
+        position.setPortraitY(84.0);
+        position.setPortraitZ(1);
+        position.setLandscapeX(87.0);
+        position.setLandscapeY(66.0);
+        position.setLandscapeZ(0);
+        config.addPosition(position);
+        config.setInactiveColor(GraphicColor(255,255,255,100));
+        config.setActiveColor(GraphicColor(255,255,255,255));
+        config.setHeartRateZoneColorBackground(GraphicColor(180,180,180,255));
+        config.setHeartRateZoneColorZoneOne(GraphicColor(100,100,100,255));
+        config.setHeartRateZoneColorZoneTwo(GraphicColor(34,54,103,255));
+        config.setHeartRateZoneColorZoneThree(GraphicColor(67,150,201,255));
+        config.setHeartRateZoneColorZoneFour(GraphicColor(90,176,76,255));
+        config.setHeartRateZoneColorZoneFive(GraphicColor(233,109,44,255));
+        config.setParameter("iconFilename", "heartRateBackground");
+        config.setParameter("heartRateOffsetX","15");
+        config.setParameter("heartRateOffsetY","60");
+        config.setParameter("alpha","150");
+        config.setParameter("batteryGaugeOffsetX","40");
+        config.setParameter("batteryGaugeOffsetY","13");
+        config.setParameter("batteryGaugeMaxHeight","50");
+        config.setParameter("batteryGaugeBackgroundWidth","0.12");
+        config.setParameter("batteryGaugeForegroundWidth","0.08");
+        config.setParameter("batteryGaugeTipWidth","0.06");
+        config.setParameter("batteryGaugeTipHeight","0.03");
+        config.setParameter("heartRateZoneWidth","8");
+        config.setParameter("heartRateZoneHeight","75");
+        config.setParameter("heartRateZoneOffsetX","21");
+        config.setParameter("heartRateZoneGapX","2");
+        addWidgetToPage(config);
+      }
+      // ---------------------------------------------------------
       config=WidgetConfig();
       config.setName("Forumslader");
       config.setType(WidgetTypeForumslader);
@@ -818,11 +860,11 @@ void WidgetEngine::createGraphic() {
         config.setPageName("Finger Menu");
         position=WidgetPosition();
         position.setRefScreenDiagonal(4.0);
-        position.setPortraitX(70.0);
-        position.setPortraitY(89.0);
+        position.setPortraitX(72.0);
+        position.setPortraitY(92.0);
         position.setPortraitZ(1);
-        position.setLandscapeX(86.0);
-        position.setLandscapeY(78.0);
+        position.setLandscapeX(87.0);
+        position.setLandscapeY(85.0);
         position.setLandscapeZ(0);
         config.addPosition(position);
         config.setInactiveColor(GraphicColor(255,255,255,100));
@@ -840,9 +882,6 @@ void WidgetEngine::createGraphic() {
         config.setInactiveColor(GraphicColor(255,255,255,255));
       }
       config.setActiveColor(GraphicColor(255,255,255,255));
-      config.setGaugeBackgroundColor(GraphicColor(255,127,0,255));
-      config.setGaugeFillgroundColor(GraphicColor(0.9*255,0.9*127,0,255));
-      config.setGaugeForegroundColor(GraphicColor(255,190,127,255));
       config.setParameter("iconFilename", "forumsladerBackground");
       config.setParameter("powerDrawLevelOffsetY","12");
       config.setParameter("powerDrawGaugeOffsetY","35");
@@ -1021,10 +1060,10 @@ void WidgetEngine::createGraphic() {
         position=WidgetPosition();
         position.setRefScreenDiagonal(4.0);
         position.setPortraitX(76.0);
-        position.setPortraitY(89.0);
+        position.setPortraitY(92.5);
         position.setPortraitZ(0);
         position.setLandscapeX(88.5);
-        position.setLandscapeY(78.0);
+        position.setLandscapeY(86.0);
         position.setLandscapeZ(0);      
         config.addPosition(position);
         addWidgetToPage(config);
@@ -1632,6 +1671,7 @@ void WidgetEngine::createGraphic() {
       WidgetCursorInfo *cursorInfo;
       WidgetAddressPoint *addressPoint;
       WidgetEBike *eBike;
+      WidgetHeartRate *heartRate;
       WidgetForumslader *forumslader;
       if (widgetType=="button") {
         WidgetContainer *container;
@@ -1686,6 +1726,10 @@ void WidgetEngine::createGraphic() {
         eBike=new WidgetEBike(page);
         primitive=eBike;
       }
+      if (widgetType=="heartRate") {
+        heartRate=new WidgetHeartRate(page);
+        primitive=heartRate;
+      }
       if (widgetType=="forumslader") {
         forumslader=new WidgetForumslader(page);
         primitive=forumslader;
@@ -1700,7 +1744,7 @@ void WidgetEngine::createGraphic() {
       primitive->setColor(primitive->getInactiveColor());
 
       // Load the image of the widget
-      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")||(widgetType=="addressPoint")||(widgetType=="eBike")||(widgetType=="forumslader")) {
+      if ((widgetType=="button")||(widgetType=="meter")||(widgetType=="scale")||(widgetType=="status")||(widgetType=="navigation")||(widgetType=="pathInfo")||(widgetType=="addressPoint")||(widgetType=="eBike")||(widgetType=="forumslader")||(widgetType=="heartRate")) {
         primitive->setTextureFromIcon(device->getScreen(),c->getStringValue(widgetPath,"iconFilename",__FILE__, __LINE__));
       }
       if (widgetType=="checkbox") {
@@ -1879,8 +1923,6 @@ void WidgetEngine::createGraphic() {
         cursorInfo->setColor(c);
       }
       if (widgetType=="eBike") {
-        eBike->setGaugeBackgroundColor(c->getGraphicColorValue(widgetPath + "/GaugeBackgroundColor",__FILE__, __LINE__));        
-        eBike->setGaugeForegroundColor(c->getGraphicColorValue(widgetPath + "/GaugeForegroundColor",__FILE__, __LINE__));        
         eBike->setPowerLevelOffsetX(c->getDoubleValue(widgetPath,"powerLevelOffsetX",__FILE__, __LINE__)*eBike->getIconWidth()/100.0);
         eBike->setPowerLevelOffsetY(c->getDoubleValue(widgetPath,"powerLevelOffsetY",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
         eBike->setEngineTemperatureOffsetX(c->getDoubleValue(widgetPath,"engineTemperatureOffsetX",__FILE__, __LINE__)*eBike->getIconWidth()/100.0);
@@ -1896,10 +1938,29 @@ void WidgetEngine::createGraphic() {
         eBike->setBatteryLevelBackgroundWidth(c->getDoubleValue(widgetPath,"batteryLevelBackgroundWidth",__FILE__, __LINE__)*eBike->getIconHeight()/100.0);
         eBike->setBatteryLevelForegroundWidth(c->getDoubleValue(widgetPath,"batteryLevelForegroundWidth",__FILE__, __LINE__)*eBike->getBatteryLevelBackgroundWidth()/100.0);        
       }
+      if (widgetType=="heartRate") {
+        heartRate->setBackgroundAlpha(c->getIntValue(widgetPath,"alpha",__FILE__, __LINE__));
+        heartRate->setHeartRateOffsetX(c->getDoubleValue(widgetPath,"heartRateOffsetX",__FILE__, __LINE__)*heartRate->getIconWidth()/100.0);
+        heartRate->setHeartRateOffsetY(c->getDoubleValue(widgetPath,"heartRateOffsetY",__FILE__, __LINE__)*heartRate->getIconHeight()/100.0);
+        heartRate->setBatteryGaugeOffsetX(c->getDoubleValue(widgetPath,"batteryGaugeOffsetX",__FILE__,__LINE__)*heartRate->getIconWidth()/100.0);
+        heartRate->setBatteryGaugeOffsetY(c->getDoubleValue(widgetPath,"batteryGaugeOffsetY",__FILE__,__LINE__)*heartRate->getIconHeight()/100.0);
+        heartRate->setBatteryGaugeMaxHeight(c->getDoubleValue(widgetPath,"batteryGaugeMaxHeight",__FILE__,__LINE__)*heartRate->getIconHeight()/100.0);
+        heartRate->setBatteryGaugeBackgroundWidth(c->getDoubleValue(widgetPath,"batteryGaugeBackgroundWidth",__FILE__,__LINE__)*getScreen()->getDPI());
+        heartRate->setBatteryGaugeForegroundWidth(c->getDoubleValue(widgetPath,"batteryGaugeForegroundWidth",__FILE__,__LINE__)*getScreen()->getDPI());
+        heartRate->setBatteryGaugeTipWidth(c->getDoubleValue(widgetPath,"batteryGaugeTipWidth",__FILE__,__LINE__)*getScreen()->getDPI());
+        heartRate->setBatteryGaugeTipHeight(c->getDoubleValue(widgetPath,"batteryGaugeTipHeight",__FILE__,__LINE__)*getScreen()->getDPI());
+        heartRate->setHeartRateZoneColorBackground(c->getGraphicColorValue(widgetPath + "/HeartRateZoneColorBackground",__FILE__, __LINE__));
+        heartRate->setHeartRateZoneColorZoneOne(c->getGraphicColorValue(widgetPath + "/HeartRateZoneColorZoneOne",__FILE__, __LINE__));
+        heartRate->setHeartRateZoneColorZoneTwo(c->getGraphicColorValue(widgetPath + "/HeartRateZoneColorZoneTwo",__FILE__, __LINE__));
+        heartRate->setHeartRateZoneColorZoneThree(c->getGraphicColorValue(widgetPath + "/HeartRateZoneColorZoneThree",__FILE__, __LINE__));
+        heartRate->setHeartRateZoneColorZoneFour(c->getGraphicColorValue(widgetPath + "/HeartRateZoneColorZoneFour",__FILE__, __LINE__));
+        heartRate->setHeartRateZoneColorZoneFive(c->getGraphicColorValue(widgetPath + "/HeartRateZoneColorZoneFive",__FILE__, __LINE__));
+        heartRate->setHeartRateZoneWidth(c->getDoubleValue(widgetPath,"heartRateZoneWidth",__FILE__,__LINE__)*heartRate->getIconWidth()/100.0);
+        heartRate->setHeartRateZoneHeight(c->getDoubleValue(widgetPath,"heartRateZoneHeight",__FILE__,__LINE__)*heartRate->getIconHeight()/100.0);
+        heartRate->setHeartRateZoneOffsetX(c->getDoubleValue(widgetPath,"heartRateZoneOffsetX",__FILE__,__LINE__)*heartRate->getIconWidth()/100.0);
+        heartRate->setHeartRateZoneGapX(c->getDoubleValue(widgetPath,"heartRateZoneGapX",__FILE__,__LINE__)*heartRate->getIconWidth()/100.0);
+      }
       if (widgetType=="forumslader") {
-        forumslader->setGaugeBackgroundColor(c->getGraphicColorValue(widgetPath + "/GaugeBackgroundColor",__FILE__, __LINE__));        
-        forumslader->setGaugeFillgroundColor(c->getGraphicColorValue(widgetPath + "/GaugeFillgroundColor",__FILE__, __LINE__));        
-        forumslader->setGaugeForegroundColor(c->getGraphicColorValue(widgetPath + "/GaugeForegroundColor",__FILE__, __LINE__));        
         forumslader->setPowerDrawLevelOffsetY(c->getDoubleValue(widgetPath,"powerDrawLevelOffsetY",__FILE__,__LINE__)*forumslader->getIconHeight()/100.0);
         forumslader->setPowerDrawGaugeOffsetY(c->getDoubleValue(widgetPath,"powerDrawGaugeOffsetY",__FILE__,__LINE__)*forumslader->getIconHeight()/100.0);
         forumslader->setPowerDrawGaugeRadius(c->getDoubleValue(widgetPath,"powerDrawGaugeRadius",__FILE__,__LINE__)*getScreen()->getDPI());

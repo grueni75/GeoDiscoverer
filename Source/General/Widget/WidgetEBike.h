@@ -48,10 +48,6 @@ protected:
   GraphicCircularStrip batteryLevelBackground;
   GraphicCircularStrip batteryLevelForeground;
   
-  // Gauge colors
-  GraphicColor gaugeBackgroundColor;
-  GraphicColor gaugeForegroundColor;
-
   // Indicates that the widget must be updated
   bool updateRequired;
   
@@ -105,14 +101,6 @@ public:
   virtual void onDataChange();
 
   // Getters and setters
-  void setGaugeBackgroundColor(GraphicColor gaugeBackgroundColor) {
-    this->gaugeBackgroundColor = gaugeBackgroundColor;
-  }
-
-  void setGaugeForegroundColor(GraphicColor gaugeForegroundColor) {
-    this->gaugeForegroundColor = gaugeForegroundColor;
-  }
-
   void setPowerLevelOffsetX(Int x) {
     this->powerLevelOffsetX=x;
   }

@@ -21,13 +21,14 @@
 //============================================================================
 
 #include <GraphicRectangle.h>
+#include <Font.h>
 
 #ifndef WIDGETPRIMITIVE_H_
 #define WIDGETPRIMITIVE_H_
 
 namespace GEODISCOVERER {
 
-typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale, WidgetTypeStatus, WidgetTypeCursorInfo, WidgetTypeNavigation, WidgetTypePathInfo, WidgetTypeAddressPoint, WidgetTypeEBike, WidgetTypeForumslader} WidgetType;
+typedef enum {WidgetTypePrimitive, WidgetTypeButton, WidgetTypeCheckbox, WidgetTypeMeter, WidgetTypeScale, WidgetTypeStatus, WidgetTypeCursorInfo, WidgetTypeNavigation, WidgetTypePathInfo, WidgetTypeAddressPoint, WidgetTypeEBike, WidgetTypeForumslader, WidgetTypeHeartRate} WidgetType;
 
 class WidgetContainer;
 class WidgetPage;
@@ -49,6 +50,11 @@ protected:
   Int xOriginal;                      // Original x coordinate of the widget when it was on screen
   Int yOriginal;                      // Original y coordinate of the widget when it was on screen
   Int touchMode;                      // Indicates if touch mode is enabled or disabled
+  GraphicColor gaugeBackgroundColor;  // Background color of any gauge
+  GraphicColor gaugeForegroundColor;  // Foreground color of any gauge
+  GraphicColor gaugeFillgroundColor;  // Fillground color of any gauge
+  GraphicColor gaugeEmptyColor;       // Fillground color of any gauge if considered empty
+  Int batteryEmptyLevel;              // Minimum level from which the battery is considered empty
 
   // Updates various flags
   virtual void updateFlags(Int x, Int y);
@@ -90,6 +96,26 @@ public:
 
   // Called when the widget must be drawn
   virtual void draw(TimestampInMicroseconds t);
+
+  // Draws a battery symbol
+  void drawBattery(
+    TimestampInMicroseconds t,
+    Int offsetX,
+    Int batteryLevel,
+    FontString *label,
+    FontString *level,
+    Int batteryGaugeBackgroundWidth,
+    Int batteryGaugeForegroundWidth,
+    Int batteryGaugeTipWidth,
+    Int batteryGaugeTipHeight,
+    Int batteryGaugeOffsetY,
+    Int batteryGaugeMaxHeight,
+    bool batteryCharging,
+    Int batteryChargingIconX,
+    Int batteryChargingIconY,
+    GraphicRectangle *batteryChargingIcon,
+    double batteryChargingIconScale
+  );
 
   // Getters and setters
   bool getIsHit() const

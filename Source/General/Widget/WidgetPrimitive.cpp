@@ -42,6 +42,11 @@ WidgetPrimitive::WidgetPrimitive(WidgetContainer *widgetContainer) : GraphicRect
   xOriginal=0;
   yOriginal=0;
   touchMode=0;
+  gaugeBackgroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/GaugeBackgroundColor",__FILE__, __LINE__);
+  gaugeForegroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/GaugeForegroundColor",__FILE__, __LINE__);
+  gaugeFillgroundColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/GaugeFillgroundColor",__FILE__, __LINE__);
+  gaugeEmptyColor=core->getConfigStore()->getGraphicColorValue("Graphic/Widget/GaugeEmptyColor",__FILE__, __LINE__);
+  batteryEmptyLevel=core->getConfigStore()->getIntValue("Graphic/Widget","batteryEmptyLevel",__FILE__, __LINE__);
 }
 
 // Destructor
@@ -145,6 +150,84 @@ void WidgetPrimitive::draw(TimestampInMicroseconds t) {
   Int y2=y1+getHeight();
   screen->drawRectangle(x1,y1,x2,y2,getTexture(),getFilled());
   screen->endObject();
+}
+
+// Draws a battery symbol
+void WidgetPrimitive::drawBattery(
+  TimestampInMicroseconds t,
+  Int offsetX,
+  Int batteryLevel,
+  FontString *label,
+  FontString *level,
+  Int batteryGaugeBackgroundWidth,
+  Int batteryGaugeForegroundWidth,
+  Int batteryGaugeTipWidth,
+  Int batteryGaugeTipHeight,
+  Int batteryGaugeOffsetY,
+  Int batteryGaugeMaxHeight,
+  bool batteryCharging,
+  Int batteryChargingIconX,
+  Int batteryChargingIconY,
+  GraphicRectangle *batteryChargingIcon,
+  double batteryChargingIconScale
+) {
+  Int batteryGaugeCurrentHeight=batteryLevel*batteryGaugeMaxHeight/100.0;
+  GraphicColor c = gaugeBackgroundColor;
+  c.setAlpha(color.getAlpha());
+  screen->setColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+  screen->drawRectangle(
+    x + getIconWidth() / 2 + offsetX - batteryGaugeBackgroundWidth / 2,
+    y + batteryGaugeOffsetY,
+    x + getIconWidth() / 2 + offsetX + batteryGaugeBackgroundWidth / 2,
+    y + batteryGaugeOffsetY + batteryGaugeMaxHeight + (batteryGaugeBackgroundWidth - batteryGaugeForegroundWidth),
+    Screen::getTextureNotDefined(), true);
+
+  screen->drawRectangle(
+    x + getIconWidth() / 2 + offsetX - batteryGaugeTipWidth / 2,
+    y + batteryGaugeOffsetY + batteryGaugeMaxHeight + (batteryGaugeBackgroundWidth - batteryGaugeForegroundWidth),
+    x + getIconWidth() / 2 + offsetX + batteryGaugeTipWidth / 2,
+    y + batteryGaugeOffsetY + batteryGaugeMaxHeight + (batteryGaugeBackgroundWidth - batteryGaugeForegroundWidth) + batteryGaugeTipHeight,
+    Screen::getTextureNotDefined(), true);
+
+  c = gaugeFillgroundColor;
+  c.setAlpha(color.getAlpha());
+  screen->setColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+  screen->drawRectangle(
+    x + getIconWidth() / 2 + offsetX - batteryGaugeForegroundWidth / 2,
+    y + batteryGaugeOffsetY + (batteryGaugeBackgroundWidth - batteryGaugeForegroundWidth) / 2,
+    x + getIconWidth() / 2 + offsetX + batteryGaugeForegroundWidth / 2,
+    y + batteryGaugeOffsetY + (batteryGaugeBackgroundWidth - batteryGaugeForegroundWidth) / 2 + batteryGaugeMaxHeight,
+    Screen::getTextureNotDefined(), true);
+  
+  if (batteryLevel<batteryEmptyLevel)
+    c = gaugeEmptyColor;
+  else
+    c = gaugeForegroundColor;
+  c.setAlpha(color.getAlpha());
+  screen->setColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+  screen->drawRectangle(
+    x + getIconWidth() / 2 + offsetX - batteryGaugeForegroundWidth / 2,
+    y + batteryGaugeOffsetY + (batteryGaugeBackgroundWidth - batteryGaugeForegroundWidth) / 2,
+    x + getIconWidth() / 2 + offsetX + batteryGaugeForegroundWidth / 2,
+    y + batteryGaugeOffsetY + (batteryGaugeBackgroundWidth - batteryGaugeForegroundWidth) / 2 + batteryGaugeCurrentHeight,
+    Screen::getTextureNotDefined(), true);
+
+  if (label) {
+    label->setColor(color);
+    label->draw(t);
+  }
+  if (level) {
+    if (batteryCharging) {
+      screen->startObject();
+      screen->translate(batteryChargingIconX, batteryChargingIconY, batteryChargingIcon->getZ());
+      screen->scale(batteryChargingIconScale, batteryChargingIconScale, 1.0);
+      batteryChargingIcon->setColor(color);
+      batteryChargingIcon->draw(t);
+      screen->endObject();
+    }
+    level->setColor(color);
+    level->draw(t);
+  }
 }
 
 }

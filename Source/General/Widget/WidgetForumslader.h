@@ -47,11 +47,6 @@ protected:
   GraphicCircularStrip powerDrawGaugeFillground;
   GraphicCircularStrip powerDrawGaugeForeground;
   
-  // Gauge colors
-  GraphicColor gaugeBackgroundColor;
-  GraphicColor gaugeFillgroundColor;
-  GraphicColor gaugeForegroundColor;
-
   // Graphic showing the charging icon
   GraphicRectangle batteryChargingIcon;
   double batteryChargingIconScale;
@@ -78,8 +73,8 @@ protected:
   Int batteryLevelOffsetY;
   Int batteryGaugeOffsetX;
   Int batteryGaugeOffsetY;
-  Int batteryGaugeFlCurrentHeight;
-  Int batteryGaugePhCurrentHeight;
+  Int batteryGaugeFlCurrentLevel;
+  Int batteryGaugePhCurrentLevel;
   Int batteryGaugeMaxHeight;
   Int batteryGaugeBackgroundWidth;
   Int batteryGaugeForegroundWidth;
@@ -87,9 +82,6 @@ protected:
   Int batteryGaugeTipHeight;
   bool batteryCharging;
   
-  // Draws a battery symbol
-  void drawBattery(TimestampInMicroseconds t, Int offsetX, Int batteryGaugeCurrentHeight, FontString *label, FontString *level);
-
 public:
 
   // Constructor
@@ -113,18 +105,6 @@ public:
   // Getters and setters
   GraphicRectangle *getBatteryChargingIcon() {
     return &batteryChargingIcon;
-  }
-
-  void setGaugeBackgroundColor(GraphicColor gaugeBackgroundColor) {
-    this->gaugeBackgroundColor = gaugeBackgroundColor;
-  }
-
-  void setGaugeFillgroundColor(GraphicColor gaugeFillgroundColor) {
-    this->gaugeFillgroundColor = gaugeFillgroundColor;
-  }
-
-  void setGaugeForegroundColor(GraphicColor gaugeForegroundColor) {
-    this->gaugeForegroundColor = gaugeForegroundColor;
   }
 
   void setPowerDrawLevelOffsetY(Int powerDrawLevelOffsetY) {

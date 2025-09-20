@@ -140,17 +140,22 @@
                   <xsd:documentation>Address of the bluetooth low energy device that transmits heart rate information.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
+              <xsd:element name="connected" type="xsd:integer" default="0" minOccurs="0">
+                <xsd:annotation>
+                  <xsd:documentation>Indicates if a heart rate monitor is connected.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>
               <xsd:element name="maxHeartRate" type="xsd:integer" default="190" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Maximum heart rate above which an alarm sound is played.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
-              <xsd:element name="startHeartRateZoneTwo" type="xsd:integer" default="118" gd:upgrade="restore">
+              <xsd:element name="startHeartRateZoneTwo" type="xsd:integer" default="122" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Heart rate at which zone two starts.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
-              <xsd:element name="startHeartRateZoneThree" type="xsd:integer" default="135" gd:upgrade="restore">
+              <xsd:element name="startHeartRateZoneThree" type="xsd:integer" default="142" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Heart rate at which zone three starts.</xsd:documentation>
                 </xsd:annotation>
@@ -158,6 +163,11 @@
               <xsd:element name="startHeartRateZoneFour" type="xsd:integer" default="152" gd:upgrade="restore">
                 <xsd:annotation>
                   <xsd:documentation>Heart rate at which zone four starts.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
+              <xsd:element name="startHeartRateZoneFive" type="xsd:integer" default="183" gd:upgrade="restore">
+                <xsd:annotation>
+                  <xsd:documentation>Heart rate at which zone five starts.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
               <xsd:element name="minHeartRateZoneChangeTime" type="xsd:integer" default="10">
@@ -173,6 +183,21 @@
               <xsd:element name="connectionWarningPeriod" type="xsd:integer" default="360">
                 <xsd:annotation>
                   <xsd:documentation>Time in seconds between two missing heart rate connection warnings.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
+              <xsd:element name="heartRate" type="xsd:integer" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Current measured heart rate.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
+              <xsd:element name="heartRateZone" type="xsd:integer" default="0">
+                <xsd:annotation>
+                  <xsd:documentation>Current measured heart rate zone.</xsd:documentation>
+                </xsd:annotation>
+              </xsd:element>              
+              <xsd:element name="batteryLevel" type="xsd:string" default="?">
+                <xsd:annotation>
+                  <xsd:documentation>Current measured battery level.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>              
             </xsd:sequence>
@@ -581,6 +606,127 @@
                           </xsd:element>
                         </xsd:sequence>
                       </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="GaugeBackgroundColor">
+                      <xsd:annotation>
+                        <xsd:documentation>Background color of any gauge.</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="red" type="xsd:integer" default="164">
+                            <xsd:annotation>
+                              <xsd:documentation>Red component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="green" type="xsd:integer" default="164">
+                            <xsd:annotation>
+                              <xsd:documentation>Green component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="blue" type="xsd:integer" default="164">
+                            <xsd:annotation>
+                              <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="alpha" type="xsd:integer" default="255">
+                            <xsd:annotation>
+                              <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="GaugeForegroundColor">
+                      <xsd:annotation>
+                        <xsd:documentation>Foreground color of any gauge.</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="red" type="xsd:integer" default="255">
+                            <xsd:annotation>
+                              <xsd:documentation>Red component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="green" type="xsd:integer" default="127">
+                            <xsd:annotation>
+                              <xsd:documentation>Green component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="blue" type="xsd:integer" default="0">
+                            <xsd:annotation>
+                              <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="alpha" type="xsd:integer" default="255">
+                            <xsd:annotation>
+                              <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="GaugeFillgroundColor">
+                      <xsd:annotation>
+                        <xsd:documentation>Fillground color of any gauge.</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="red" type="xsd:integer" default="224">
+                            <xsd:annotation>
+                              <xsd:documentation>Red component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="green" type="xsd:integer" default="224">
+                            <xsd:annotation>
+                              <xsd:documentation>Green component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="blue" type="xsd:integer" default="224">
+                            <xsd:annotation>
+                              <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="alpha" type="xsd:integer" default="255">
+                            <xsd:annotation>
+                              <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="GaugeEmptyColor">
+                      <xsd:annotation>
+                        <xsd:documentation>Fillground color of any gauge if considered empty.</xsd:documentation>
+                      </xsd:annotation>
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element name="red" type="xsd:integer" default="255">
+                            <xsd:annotation>
+                              <xsd:documentation>Red component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="green" type="xsd:integer" default="0">
+                            <xsd:annotation>
+                              <xsd:documentation>Green component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="blue" type="xsd:integer" default="0">
+                            <xsd:annotation>
+                              <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                          <xsd:element name="alpha" type="xsd:integer" default="255">
+                            <xsd:annotation>
+                              <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                            </xsd:annotation>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="batteryEmptyLevel" type="xsd:int" default="30">
+                      <xsd:annotation>
+                        <xsd:documentation>Min level that the battery is considered empty.</xsd:documentation>
+                      </xsd:annotation>
                     </xsd:element>
                     <xsd:element name="buttonRepeatDelay" type="xsd:integer" default="500000">
                       <xsd:annotation>
@@ -1510,6 +1656,36 @@
                                           <xsd:documentation>Alpha component [0-255] to be used in colors</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
+                                      <xsd:element name="heartRateOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset for the heart rate label in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="heartRateOffsetY" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Vertical offset for the heart rate label in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="heartRateZoneWidth" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the heart rate zone in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="heartRateZoneHeight" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Height of the heart rate zone in percent of the widget height.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="heartRateZoneOffsetX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal offset of the heart rate zone in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="heartRateZoneGapX" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Horizontal gap between heart rate zones in percent of the widget width.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
                                       <xsd:element name="TurnColor">
                                         <xsd:annotation>
                                           <xsd:documentation>Color of the turn arrow.</xsd:documentation>
@@ -1626,9 +1802,9 @@
                                           </xsd:sequence>
                                         </xsd:complexType>
                                       </xsd:element>
-                                      <xsd:element name="GaugeBackgroundColor">
+                                      <xsd:element name="HeartRateZoneColorBackground">
                                         <xsd:annotation>
-                                          <xsd:documentation>Background color of any gauge.</xsd:documentation>
+                                          <xsd:documentation>Color of the heart rate zone background.</xsd:documentation>
                                         </xsd:annotation>
                                         <xsd:complexType>
                                           <xsd:sequence>
@@ -1655,9 +1831,9 @@
                                           </xsd:sequence>
                                         </xsd:complexType>
                                       </xsd:element>
-                                      <xsd:element name="GaugeForegroundColor">
+                                      <xsd:element name="HeartRateZoneColorZoneOne">
                                         <xsd:annotation>
-                                          <xsd:documentation>Foreground color of any gauge.</xsd:documentation>
+                                          <xsd:documentation>Color of the heart rate zone one.</xsd:documentation>
                                         </xsd:annotation>
                                         <xsd:complexType>
                                           <xsd:sequence>
@@ -1684,9 +1860,96 @@
                                           </xsd:sequence>
                                         </xsd:complexType>
                                       </xsd:element>
-                                      <xsd:element name="GaugeFillgroundColor">
+                                      <xsd:element name="HeartRateZoneColorZoneTwo">
                                         <xsd:annotation>
-                                          <xsd:documentation>Fillground color of any gauge.</xsd:documentation>
+                                          <xsd:documentation>Color of the heart rate zone two.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="HeartRateZoneColorZoneThree">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the heart rate zone three.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="HeartRateZoneColorZoneFour">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the heart rate zone four.</xsd:documentation>
+                                        </xsd:annotation>
+                                        <xsd:complexType>
+                                          <xsd:sequence>
+                                            <xsd:element name="red" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Red component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="green" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Green component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="blue" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Blue component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                            <xsd:element name="alpha" type="xsd:integer" default="255">
+                                              <xsd:annotation>
+                                                <xsd:documentation>Alpha component [0-255]</xsd:documentation>
+                                              </xsd:annotation>
+                                            </xsd:element>
+                                          </xsd:sequence>
+                                        </xsd:complexType>
+                                      </xsd:element>
+                                      <xsd:element name="HeartRateZoneColorZoneFive">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Color of the heart rate zone five.</xsd:documentation>
                                         </xsd:annotation>
                                         <xsd:complexType>
                                           <xsd:sequence>

@@ -58,10 +58,13 @@ class WidgetConfig {
   GraphicColor safetyColor;
   bool hasSafetyColor;
 
-  // Gauge colors
-  GraphicColor gaugeBackgroundColor;
-  GraphicColor gaugeFillgroundColor;
-  GraphicColor gaugeForegroundColor;
+  // Heart rate zone colors
+  GraphicColor heartRateZoneColorBackground;
+  GraphicColor heartRateZoneColorZoneOne;
+  GraphicColor heartRateZoneColorZoneTwo;
+  GraphicColor heartRateZoneColorZoneThree;
+  GraphicColor heartRateZoneColorZoneFour;
+  GraphicColor heartRateZoneColorZoneFive;
 
   // Additional parameters
   ParameterMap parameters;
@@ -155,28 +158,52 @@ public:
     this->type = type;
   }
 
-  const GraphicColor& getGaugeBackgroundColor() const {
-    return gaugeBackgroundColor;
+  const GraphicColor& getHeartRateZoneColorBackground() const {
+    return heartRateZoneColorBackground;
   }
 
-  void setGaugeBackgroundColor(const GraphicColor& gaugeBackgroundColor) {
-    this->gaugeBackgroundColor = gaugeBackgroundColor;
+  void setHeartRateZoneColorBackground(const GraphicColor& color) {
+    this->heartRateZoneColorBackground = color;
   }
 
-  const GraphicColor& getGaugeFillgroundColor() const {
-    return gaugeFillgroundColor;
+  const GraphicColor& getHeartRateZoneColorZoneOne() const {
+    return heartRateZoneColorZoneOne;
   }
 
-  void setGaugeFillgroundColor(const GraphicColor& gaugeFillgroundColor) {
-    this->gaugeFillgroundColor = gaugeFillgroundColor;
+  void setHeartRateZoneColorZoneOne(const GraphicColor& color) {
+    this->heartRateZoneColorZoneOne = color;
   }
 
-  const GraphicColor& getGaugeForegroundColor() const {
-    return gaugeForegroundColor;
+  const GraphicColor& getHeartRateZoneColorZoneTwo() const {
+    return heartRateZoneColorZoneTwo;
   }
 
-  void setGaugeForegroundColor(const GraphicColor& gaugeForegroundColor) {
-    this->gaugeForegroundColor = gaugeForegroundColor;
+  void setHeartRateZoneColorZoneTwo(const GraphicColor& color) {
+    this->heartRateZoneColorZoneTwo = color;
+  }
+
+  const GraphicColor& getHeartRateZoneColorZoneThree() const {
+    return heartRateZoneColorZoneThree;
+  }
+
+  void setHeartRateZoneColorZoneThree(const GraphicColor& color) {
+    this->heartRateZoneColorZoneThree = color;
+  }
+
+  const GraphicColor& getHeartRateZoneColorZoneFour() const {
+    return heartRateZoneColorZoneFour;
+  }
+
+  void setHeartRateZoneColorZoneFour(const GraphicColor& color) {
+    this->heartRateZoneColorZoneFour = color;
+  }
+
+  const GraphicColor& getHeartRateZoneColorZoneFive() const {
+    return heartRateZoneColorZoneFive;
+  }
+
+  void setHeartRateZoneColorZoneFive(const GraphicColor& color) {
+    this->heartRateZoneColorZoneFive = color;
   }
 };
 
