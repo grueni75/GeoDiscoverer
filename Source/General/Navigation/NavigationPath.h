@@ -77,9 +77,8 @@ protected:
   double turnDetectionDistance;                   // Distance in meters to look forward and back for detecting a turn
   double minDistanceToBeOffRoute;                 // Minimum distance from nearest route point such that navigation considers location to be off route
   double averageTravelSpeed;                      // Speed in meters per second to use for calculating the duration of a route
-  double minAltitudeChange;                       // Minimum change of altitude required to update altitude meters
   double minDistanceToCalculateAltitude;          // Minimum distance to last position to calculate the altitude
-  double maxAltitudeFilterDistance;               // Maximum distance in meters to still include a previous path point into altitude averaging
+  double altitudeBufferMinNegativeValue;          // Minimum negative value the altitude buffer may have
   double trackRecordingMinDistance;               // Required minimum navigationDistance in meter to the last track point such that the point is added to the track
   NavigationPatImportWaypointsType importWaypoints; // Decides if the waypoints contained in the route shall be imported
   bool calculateAltitudeGainsFromDEM;             // Decides if track/route altitude is ignored and DEM data is used instead to calculate altitude gains
@@ -95,7 +94,7 @@ protected:
   std::vector<NavigationPathVisualization*> zoomLevelVisualizations;
   
   // Filter to smooth altitude values
-  std::list<MapPosition> altitudeFilter;
+  double altitudeUpBuffer, altitudeDownBuffer;
 
   // Finds nodes in a xml tree
   std::list<XMLNode> findNodes(XMLDocument document, XMLXPathContext xpathCtx, std::string path);
@@ -123,9 +122,6 @@ protected:
 
   // Writes the cache to a file
   void writeCache();
-
-  // Adds an elementt to the altitude filter while keeping it's sortinng
-  void addToAltitudeFilter(MapPosition);
 
 public:
 

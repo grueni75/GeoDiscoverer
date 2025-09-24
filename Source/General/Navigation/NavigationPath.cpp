@@ -48,9 +48,8 @@ NavigationPath::NavigationPath() : animator(core->getDefaultScreen()) {
   maxDistanceToTurnWayPoint=core->getConfigStore()->getDoubleValue("Navigation","maxDistanceToTurnWayPoint", __FILE__, __LINE__);
   turnDetectionDistance=core->getConfigStore()->getDoubleValue("Navigation","turnDetectionDistance", __FILE__, __LINE__);
   minDistanceToBeOffRoute=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToBeOffRoute", __FILE__, __LINE__);
-  minAltitudeChange=core->getConfigStore()->getDoubleValue("Navigation","minAltitudeChange", __FILE__, __LINE__);
+  altitudeBufferMinNegativeValue=core->getConfigStore()->getDoubleValue("Navigation","altitudeBufferMinNegativeValue", __FILE__, __LINE__);
   minDistanceToCalculateAltitude=core->getConfigStore()->getDoubleValue("Navigation","minDistanceToCalculateAltitude", __FILE__, __LINE__);
-  maxAltitudeFilterDistance=core->getConfigStore()->getDoubleValue("Navigation","maxAltitudeFilterDistance", __FILE__, __LINE__);
   averageTravelSpeed=core->getConfigStore()->getDoubleValue("Navigation","averageTravelSpeed", __FILE__, __LINE__);
   trackRecordingMinDistance=core->getConfigStore()->getDoubleValue("Navigation","trackRecordingMinDistance", __FILE__, __LINE__);
   calculateAltitudeGainsFromDEM=core->getConfigStore()->getDoubleValue("Navigation","calculateAltitudeGainsFromDEM", __FILE__, __LINE__);
@@ -921,57 +920,19 @@ void NavigationPath::computeNavigationInfo(MapPosition locationPos, MapPosition 
   navigationInfo.setTurnDistance(turnDistance);
 }
 
-// Adds an elementt to the altitude filter while keeping it's sortinng
-void NavigationPath::addToAltitudeFilter(MapPosition pos) {
-  
-  // Remove all points that are too far away from this one
-  std::list<MapPosition>::iterator i=altitudeFilter.begin();
-  while(i!=altitudeFilter.end()) {
-    std::list<MapPosition>::iterator j=i;
-    MapPosition pos2=*j;
-    i++;
-    if (pos.computeDistance(pos2)>maxAltitudeFilterDistance) {
-      altitudeFilter.erase(j);
-    }
-  }
-  
-  // Insert the new point and keep sorting
-  bool inserted=false;
-  for (std::list<MapPosition>::iterator i=altitudeFilter.begin();i!=altitudeFilter.end();i++) {
-    if (i->getAltitude()>pos.getAltitude()) {
-      altitudeFilter.insert(i,pos);
-      inserted=true;
-      break;
-    }
-  }
-  if (!inserted) {
-    altitudeFilter.push_back(pos);
-  }
-  
-  /* Debugging
-  int j=0;
-  for (i=altitudeFilter.begin();i!=altitudeFilter.end();i++) {
-    DEBUG("i=%d value=%f",j,i->getAltitude());
-    j++;
-  }*/
-}
-
 // Computes the metrics for the given map positions
 void NavigationPath::updateMetrics(MapPosition prevPoint, MapPosition curPoint) {
 
   // Reset the altitude filter if path is interrupted
   if (curPoint==NavigationPath::getPathInterruptedPos()) {
-    altitudeFilter.clear();    
     lastValidAltiudeMeters=NAN;
   } else {
     if (prevPoint==NavigationPath::getPathInterruptedPos()) {
-      if (curPoint.getHasAltitude()) {
-        addToAltitudeFilter(curPoint);
-      }
       lastValidAltiudePos=curPoint;
     }    
   }
   if ((prevPoint!=NavigationPath::getPathInterruptedPos())&&(curPoint!=NavigationPath::getPathInterruptedPos())) {
+    //DEBUG("prevPoint.altitude=%f curPoint.altitude=%f lastValidAltiudeMeters=%f",prevPoint.getAltitude(),curPoint.getAltitude(),lastValidAltiudeMeters);
     length+=prevPoint.computeDistance(curPoint);
     MapPosition demPos=curPoint;
     demPos.setHasAltitude(false);
@@ -980,19 +941,12 @@ void NavigationPath::updateMetrics(MapPosition prevPoint, MapPosition curPoint) 
     }
     if ((demPos.getHasAltitude())||(curPoint.getHasAltitude())) {
         
-      // Update the altitude filter
-      addToAltitudeFilter(curPoint);
-
       // Decide which source to use
       double altitude=NAN;
       if (demPos.getHasAltitude()) {
         altitude=demPos.getAltitude();
-        //DEBUG("altitude from DEM data: %f",altitude);
       } else {
-        //DEBUG("current altitude: %f altitudeFilter.size()=%d",curPoint.getAltitude(),altitudeFilter.size());
-        std::list<MapPosition>::iterator i=altitudeFilter.begin();
-        std::advance(i,altitudeFilter.size()/2);
-        altitude=i->getAltitude();
+        altitude=curPoint.getAltitude();
       }
 
       // Do we have an altitude?
@@ -1007,17 +961,30 @@ void NavigationPath::updateMetrics(MapPosition prevPoint, MapPosition curPoint) 
         // Check if we are far enough away from last point
         double altitudeDiff = altitude - lastValidAltiudeMeters;
         double distanceDiff = lastValidAltiudePos.computeDistance(curPoint);
-        if ((fabs(altitudeDiff)>=minAltitudeChange)&&(distanceDiff>=minDistanceToCalculateAltitude)) {
+        if (distanceDiff>=minDistanceToCalculateAltitude) {
 
           // Update the altitude meters
-          if (altitudeDiff>0) {
-            altitudeUp+=altitudeDiff;
+          altitudeUpBuffer+=altitudeDiff;
+          altitudeDownBuffer-=altitudeDiff;
+          if (altitudeUpBuffer>0) {
+            altitudeUp+=altitudeUpBuffer;
+            altitudeUpBuffer=0;
           } else {
-            altitudeDown+=-altitudeDiff;
+            if (altitudeUpBuffer<altitudeBufferMinNegativeValue) {
+              altitudeUpBuffer=altitudeBufferMinNegativeValue;
+            }
           }
+          if (altitudeDownBuffer>0) {
+            altitudeDown+=altitudeDownBuffer;
+            altitudeDownBuffer=0;
+          } else {
+            if (altitudeDownBuffer<altitudeBufferMinNegativeValue) {
+              altitudeDownBuffer=altitudeBufferMinNegativeValue;
+            }
+          } 
           lastValidAltiudeMeters=altitude;
           lastValidAltiudePos=curPoint;
-          //DEBUG("altitudeDiff=%f distanceDiff=%f altitudeUp=%f altitudeDown=%f",altitudeDiff,distanceDiff,altitudeUp,altitudeDown);
+          //DEBUG("altitudeDiff=%f distanceDiff=%f altitudeUpBuffer=%f altitudeUp=%f altitudeDownBuffer=%f altitudeDown=%f",altitudeDiff,distanceDiff,altitudeUpBuffer,altitudeUp,altitudeDownBuffer,altitudeDown);
 
         } else {
           //DEBUG("not using altitudeDiff=%f distanceDiff=%f altitude=%f lastValidAltitudeMeters=%f",altitudeDiff,distanceDiff,altitude,lastValidAltiudeMeters);
@@ -1057,7 +1024,11 @@ void NavigationPath::updateMetrics() {
   altitudeDown=0;
   minAltitude=std::numeric_limits<double>::max();
   maxAltitude=std::numeric_limits<double>::min();
-  altitudeFilter.clear();
+  altitudeUpBuffer=0;
+  altitudeDownBuffer=0;
+  lastValidAltiudeMeters=NAN;
+  lastValidAltiudePos=NavigationPath::getPathInterruptedPos();
+  //DEBUG("starting metric calculation for path %s",getGpxFilename().c_str());
   for(Int i=startIndex;reverse?i>endIndex:i<endIndex;reverse?i--:i++) {
     updateMetrics(prevPos,mapPositions[i]);
     prevPos=mapPositions[i];
