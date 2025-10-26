@@ -41,7 +41,9 @@ import android.os.PowerManager
 
 import android.os.Vibrator
 
-// Minimum distance between two toasts in milliseconds  */
+/*
+
+// Minimum distance between two toasts in milliseconds
 const val TOAST_DISTANCE = 5000
 
 // All active renderers
@@ -390,3 +392,5 @@ class GDWatchFaceService : androidx.wear.watchface.WatchFaceService() {
     }
   }
 }
+
+*/

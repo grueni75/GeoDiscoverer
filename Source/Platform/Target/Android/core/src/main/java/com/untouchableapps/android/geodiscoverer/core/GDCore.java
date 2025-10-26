@@ -848,6 +848,7 @@ public class GDCore implements
         appIf.addAppMessage(appIf.DEBUG_MSG, "GDApp", "getWearDeviceAlive(): setWearDeviceAlive(0)");
         appIf.sendWearCommand("setWearDeviceAlive(0)");
       }
+      cmdExecuted=false; // forward message to activity
     }
     if (cmd.equals("earlyInitComplete()")) {
 
@@ -866,7 +867,7 @@ public class GDCore implements
     if (cmd.startsWith("setWearDeviceSleeping(")) {
       if (isWatch)
         appIf.sendWearCommand(cmd);
-      cmdExecuted=true;
+      cmdExecuted=false; // forward message to activity
     }
     if (cmd.startsWith("setWearDeviceAlive(")) {
       if (isWatch)

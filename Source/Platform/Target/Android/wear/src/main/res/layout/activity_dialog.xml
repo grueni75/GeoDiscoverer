@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/black"
     android:padding="@dimen/box_inset_layout_padding"
-    tools:context="com.untouchableapps.android.geodiscoverer.Dialog"
+    tools:context="com.untouchableapps.android.geodiscoverer.ui.Dialog"
     tools:deviceIds="wear">
 
     <FrameLayout

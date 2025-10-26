@@ -88,7 +88,7 @@ void Storage::skipPadding(char *& mem, Int & memSize) {
 // Read integer from file
 void Storage::retrieveInt(char *&cacheData, Int &cacheSize, Int &value) {
   if (cacheSize>=sizeof(value)) {
-    value=*((Int *)cacheData);
+    memcpy(&value,cacheData,sizeof(value));
     cacheSize-=sizeof(value);
     cacheData+=sizeof(value);
   } else {
@@ -105,7 +105,7 @@ void Storage::storeByte(std::ofstream *ofs, Byte value) {
 // Read byte from file
 void Storage::retrieveByte(char *&cacheData, Int &cacheSize, Byte &value) {
   if (cacheSize>=sizeof(value)) {
-    value=*((Int *)cacheData);
+    value=*((Byte *)cacheData);
     cacheSize-=sizeof(value);
     cacheData+=sizeof(value);
   } else {
@@ -122,7 +122,7 @@ void Storage::storeShort(std::ofstream *ofs, Short value) {
 // Read short from file
 void Storage::retrieveShort(char *&cacheData, Int &cacheSize, Short &value) {
   if (cacheSize>=sizeof(value)) {
-    value=*((Int *)cacheData);
+    memcpy(&value,cacheData,sizeof(value));
     cacheSize-=sizeof(value);
     cacheData+=sizeof(value);
   } else {

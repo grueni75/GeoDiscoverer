@@ -44,6 +44,7 @@ import kotlinx.coroutines.*
 import java.time.ZonedDateTime
 import java.util.*
 
+/*
 
 // Default for how long each frame is displayed at expected frame rate.
 private const val FRAME_PERIOD_MS_DEFAULT: Long = 16L
@@ -427,3 +428,5 @@ class WatchFaceRenderer(
     updateDisplayTimeout()
   }
 }
+
+*/

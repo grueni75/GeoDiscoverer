@@ -34,14 +34,13 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
-import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.core.GDTools;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitEngine;
+import com.untouchableapps.android.geodiscoverer.ui.CoreMessageHandler;
 
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +53,7 @@ public class GDApplication extends Application implements GDAppInterface {
   public static GDCore coreObject=null;
 
   /** Reference to the message handler of the watch face */
-  GDWatchFaceService.CoreMessageHandler messageHandler = null;
+  CoreMessageHandler messageHandler = null;
 
   /** Cockpit engine */
   CockpitEngine cockpitEngine = null;
@@ -145,7 +144,7 @@ public class GDApplication extends Application implements GDAppInterface {
   }
 
   /** Sets the message handler */
-  public void setMessageHandler(GDWatchFaceService.CoreMessageHandler messageHandler) {
+  public void setMessageHandler(CoreMessageHandler messageHandler) {
     this.messageHandler = messageHandler;
   }
 
