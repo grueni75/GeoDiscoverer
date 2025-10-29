@@ -999,6 +999,10 @@ std::string Commander::execute(std::string cmd) {
     core->onDataChange();
     cmdExecuted=true;
   }
+  if (cmdName=="exit") {
+    dispatch("exit()");
+    cmdExecuted=true;
+  }
 
   // Check if command has been executed
   if (!cmdExecuted) {

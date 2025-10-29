@@ -49,6 +49,9 @@ import java.util.concurrent.TimeoutException;
 /* Main application class */
 public class GDApplication extends Application implements GDAppInterface {
 
+  // Notification IDs
+  static public final int NOTIFICATION_STATUS_ID=1;
+
   /** Interface to the native C++ core */
   public static GDCore coreObject=null;
 

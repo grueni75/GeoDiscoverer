@@ -47,6 +47,11 @@
             </intent-filter>
         </service>
 
+        <service
+          android:name=".GDService"
+          android:exported="true"
+          android:foregroundServiceType="location" />
+
         <!--
                Set to true if your app is Standalone, that is, it does not require the handheld
                app to run.

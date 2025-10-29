@@ -10,12 +10,13 @@ import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Message
 import android.os.PowerManager
 import android.os.SystemClock
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.Settings
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
@@ -25,8 +26,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.wear.ambient.AmbientLifecycleObserver
 import com.untouchableapps.android.geodiscoverer.GDApplication
 import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface
@@ -36,12 +40,15 @@ import com.untouchableapps.android.geodiscoverer.ui.theme.WearAppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import java.util.Timer
+import java.util.TimerTask
 
 class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   companion object {
     // Minimum distance between two toasts in milliseconds
     const val TOAST_DISTANCE = 5000
+    const val AMBIENT_MODE_TIMEOUT_OFFSET = 1000L
   }
 
   // Reference to the core object and it's view
@@ -67,6 +74,76 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   // For forcing redraws
   val invalidateState = mutableStateOf(0)
+
+  // Variables to keep the display on
+  var keepDisplayOnActive = false
+  var displayTimer: Timer? = null
+  var displayTimeout = 0L
+  var keepSreenOnCount = 0
+
+  // Ambient mode callback
+  val ambientCallback = object : AmbientLifecycleObserver.AmbientLifecycleCallback {
+    override fun onEnterAmbient(ambientDetails: AmbientLifecycleObserver.AmbientDetails) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "entering ambient mode")
+      //coreObject?.executeCoreCommand("setAmbientMode", "1");
+      //wakeLockCore?.acquire()
+      /*runOnUiThread {
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+      }*/
+    }
+
+    override fun onExitAmbient() {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "exiting ambient mode")
+    }
+
+    override fun onUpdateAmbient() {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "ambient mode update")
+    }
+  }
+  private val ambientObserver = AmbientLifecycleObserver(this, ambientCallback)
+
+  // Called when transition to ambient mode finishes
+  fun ambientTransitionFinished() {
+    //wakeLockCore?.release()
+    /*runOnUiThread {
+      window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }*/
+    releaseDisplay()
+  }
+
+  // Releases the display
+  @Synchronized
+  fun releaseDisplay() {
+    if (keepDisplayOnActive) return
+    displayTimer?.cancel()
+    displayTimer=null
+    //wakeLockCore?.release()
+    setKeepScreenOn(false)
+    keepDisplayOnActive = false
+  }
+
+  // Keeps the screen on for more than the default time
+  @Synchronized
+  fun updateDisplayTimeout() {
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp", "display timeout update");
+    if (displayTimeout == 0L) return
+    coreObject?.executeCoreCommand("setAmbientMode", "0");
+    if (displayTimer!=null)
+      displayTimer?.cancel()
+    displayTimer=Timer()
+    if (!keepDisplayOnActive)
+      setKeepScreenOn(true)
+    keepDisplayOnActive=true
+    displayTimer?.schedule(object : TimerTask() {
+      override fun run() {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "display timeout expired")
+        coreObject?.executeCoreCommand("setAmbientMode", "1");
+        keepDisplayOnActive=false
+      }
+    }, displayTimeout)
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "ambient mode start time pushed out")
+    //coreObject?.executeCoreCommand("setAmbientModeStartTime", (displayTimeout * 1000).toString())
+  }
 
   // Forces a redraw of the whole view hierarchy
   fun forceRedraw() {
@@ -126,6 +203,27 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     dialog(Dialog.Types.INFO, message)
   }
 
+  // Handles the setting of the keep screen on flag
+  fun setKeepScreenOn(keepOn: Boolean) {
+    if (keepOn) {
+      if (keepSreenOnCount==0) {
+        runOnUiThread {
+          window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+      }
+      keepSreenOnCount++
+    } else {
+      keepSreenOnCount--
+      if (keepSreenOnCount<=0) {
+        runOnUiThread {
+          window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        keepSreenOnCount=0
+      }
+    }
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "keep screen on count is $keepSreenOnCount")
+  }
+
   // Sets the screen time out
   @SuppressLint("Wakelock")
   fun updateWakeLock() {
@@ -133,10 +231,10 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
       val state = coreObject!!.executeCoreCommand("getWakeLock")
       if (state == "true") {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "wake lock enabled")
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        setKeepScreenOn(true)
       } else {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "wake lock disabled")
-        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        setKeepScreenOn(false)
       }
     }
   }
@@ -210,14 +308,23 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
     // Get the core object
     coreObject = GDApplication.coreObject
+    if (coreObject == null) {
+      finish()
+      return
+    }
     (application as GDApplication).setMessageHandler(coreMessageHandler)
 
-    // Start the core object if needed
-    if (coreObject!!.coreStopped) {
-      val m: Message = Message.obtain(coreObject!!.messageHandler)
-      m.what = GDCore.START_CORE
-      coreObject!!.messageHandler.sendMessage(m)
+    // Get display timeout
+    // use watchDisplayTimeout from config instead of system timeout
+    try {
+      displayTimeout =
+        Settings.System.getInt(contentResolver, Settings.System.SCREEN_OFF_TIMEOUT).toLong()
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "display timeout is $displayTimeout ms")
+    } catch (e: Settings.SettingNotFoundException) {
+      displayTimeout = 0
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", e.message)
     }
+    displayTimeout -= AMBIENT_MODE_TIMEOUT_OFFSET
 
     // Get the managers
     powerManager = getSystemService(POWER_SERVICE) as PowerManager
@@ -264,6 +371,9 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
       //viewModel.onCoreEarlyInitComplete()
     }
 
+    // Get ambient mode handling
+    lifecycle.addObserver(ambientObserver)
+
     // Create the activity content
     setContent {
       WearAppTheme {
@@ -281,6 +391,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
       "GDApp",
       "onDestroy called by " + Thread.currentThread().name
     )
+    lifecycle.removeObserver(ambientObserver)
     cancel() // Stop all coroutines
   }
 
@@ -302,6 +413,9 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     )
     stopWatchingCompass()
     coreObject?.executeAppCommand("setWearDeviceSleeping(1)");
+    val intent = Intent(this, com.untouchableapps.android.geodiscoverer.GDService::class.java)
+    intent.action = "activityPaused"
+    startService(intent)
   }
 
   override fun onResume() {
@@ -315,17 +429,32 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     // Resume all components only if a exit or restart is not requested
     startWatchingCompass()
     coreObject?.executeAppCommand("setWearDeviceSleeping(0)");
+    val intent = Intent(this, com.untouchableapps.android.geodiscoverer.GDService::class.java)
+    intent.action = "activityResumed"
+    startService(intent)
+    updateDisplayTimeout()
+  }
+
+  fun exit() {
+    finishAffinity();
+    val intent = Intent(this, com.untouchableapps.android.geodiscoverer.GDService::class.java)
+    intent.action = "exit"
+    startService(intent)
   }
 
   // Main content on the screen
+  @OptIn(ExperimentalComposeUiApi::class)
   @Composable
   private fun screenContent() {
     //val scope = rememberCoroutineScope()
     val tick = invalidateState.value
-
     Box(
       modifier = Modifier.Companion
         .fillMaxSize()
+        .pointerInteropFilter { motionEvent: MotionEvent ->
+          updateDisplayTimeout()
+          false
+        }
     ) {
       mapSurface()
     }

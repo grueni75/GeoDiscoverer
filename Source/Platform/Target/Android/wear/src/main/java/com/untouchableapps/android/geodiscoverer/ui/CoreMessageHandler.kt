@@ -166,10 +166,7 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
               it.isTransitioningToAmbient = false
             }
           }*/
-          GDApplication.addMessage(
-            GDApplication.ERROR_MSG, "GDApp",
-            "ambientTransitionFinished command not implemented"
-          )
+          viewMap.ambientTransitionFinished()
           commandExecuted = true
         }
         if (commandFunction == "setWearDeviceSleeping") {
@@ -179,6 +176,11 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
         if (commandFunction == "getWearDeviceAlive") {
           if (lastSetWearDeviceSleepingCmd!="")
             viewMap.coreObject?.executeAppCommand(lastSetWearDeviceSleepingCmd)
+          commandExecuted = true
+        }
+        if (commandFunction == "exit") {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "exit command received")
+          viewMap.exit()
           commandExecuted = true
         }
         if (!commandExecuted) {

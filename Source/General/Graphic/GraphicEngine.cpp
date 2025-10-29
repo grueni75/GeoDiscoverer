@@ -909,9 +909,11 @@ void GraphicEngine::setAmbientMode(boolean enabled) {
   if (enabled) 
     ambientModeStartTime=t;
   else {
-    ambientModeStartTime=0;
-    //interactiveModeStartTime=t+200000; // bug in current Samsung WearOS 4.0 requires delayed exit
-    interactiveModeStartTime=t;
+    if (ambientModeStartTime!=0) {
+      ambientModeStartTime=0;
+      //interactiveModeStartTime=t+200000; // bug in current Samsung WearOS 4.0 requires delayed exit
+      interactiveModeStartTime=t;
+    }
   }
 }
 

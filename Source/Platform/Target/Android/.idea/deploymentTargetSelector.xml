@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="wear">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-10-26T08:13:49.955482039Z">
+        <DropdownSelection timestamp="2025-10-26T13:54:29.181778279Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="Default" identifier="serial=pixelwatch4:39061;connection=ab6ab019" />
+              <DeviceId pluginId="Default" identifier="serial=pixel7pro:39547;connection=de148a2f" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,10 +15,10 @@
       </SelectionState>
       <SelectionState runConfigName="mobile">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-10-26T08:13:42.873411846Z">
+        <DropdownSelection timestamp="2025-10-26T15:01:21.431274065Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="Default" identifier="serial=pixelwatch4:39061;connection=ab6ab019" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=59091WRBNW40MV" />
             </handle>
           </Target>
         </DropdownSelection>

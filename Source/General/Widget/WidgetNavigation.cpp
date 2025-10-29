@@ -1099,18 +1099,20 @@ void WidgetNavigation::updateFlags(Int x, Int y) {
       }
     } else {
       double angle = FloatingPoint::rad2degree(FloatingPoint::computeAngle(dx,dy));
-      //DEBUG("angle=%f",angle);
-      if ((angle >= 90.0-circularButtonAngle/2)&&(angle <= 90.0+circularButtonAngle/2)) {
-        northButtonHit=true;
-      } else {
+      //if ((angle >= 90.0-circularButtonAngle/2)&&(angle <= 90.0+circularButtonAngle/2)) {
+      //  northButtonHit=true;
+      //} else {
+      {
         northButtonHit=false;
         if ((angle <= 270.0-circularButtonAngle/2)||(angle >= 270.0+circularButtonAngle/2)) {
+          DEBUG("forcing not hit",NULL);
           isHit=false;
           statusTextAbove=!statusTextAbove;
         }
       }
     }
   }
+  DEBUG("isHit=%d",isHit);
 }
 
 }

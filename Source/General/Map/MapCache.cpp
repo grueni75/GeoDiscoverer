@@ -162,8 +162,9 @@ void MapCache::removeTile(MapTile *tile) {
   } else {
     if (!tile->getIsCached()) {
       std::stringstream name;
-      for (std::list<std::string>::iterator i=tile->getVisName().begin();i!=tile->getVisName().end();i++) {
-        if (i!=tile->getVisName().begin()) 
+      std::list<std::string> visNames=tile->getVisName();
+      for (std::list<std::string>::iterator i=visNames.begin();i!=visNames.end();i++) {
+        if (i!=visNames.begin())
           name<<";";
         name<<(*i);
       }

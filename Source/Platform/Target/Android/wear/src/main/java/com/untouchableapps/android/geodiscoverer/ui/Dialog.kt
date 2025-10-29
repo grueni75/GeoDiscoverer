@@ -215,7 +215,7 @@ class Dialog : ComponentActivity() {
           if ((viewModel.kind == Types.FATAL) || (viewModel.kind == Types.ERROR)) {
             Icon(
               modifier = Modifier.Companion
-                .size(50.dp),
+                .size(40.dp),
               imageVector = Icons.Default.Warning,
               contentDescription = null,
             )

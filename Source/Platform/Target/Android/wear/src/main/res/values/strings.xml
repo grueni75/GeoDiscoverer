@@ -7,6 +7,10 @@
     <string name="overlay_permission_instructions">adb shell pm grant com.untouchableapps.android.geodiscoverer android.permission.SYSTEM_ALERT_WINDOW</string>
     <string name="overlay_permission_toast">Please grant overlay permission</string>
     <string name="no_wake_lock">Can not obtain wake lock!</string>
-  <string name="title_activity_viewmap">Geo Discoverer</string>
-  <string name="missing_system_service">System service missing!\n</string>
+    <string name="title_activity_viewmap">Geo Discoverer</string>
+    <string name="missing_system_service">System service missing!\n</string>
+    <string name="notification_service_in_foreground_message">Taking care of your position.</string>
+    <string name="notification_title">Geo Discoverer</string>
+    <string name="notification_channel_status_name">Status</string>
+    <string name="notification_channel_status_description">Notifications that indicate the app status</string>
 </resources>

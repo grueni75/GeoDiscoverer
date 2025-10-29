@@ -182,11 +182,13 @@ public:
   void setXHidden(Int xHidden) {
     this->xOriginal = x;
     this->xHidden = xHidden;
+    x=xHidden;
   }
 
   void setYHidden(Int yHidden) {
     this->yOriginal = y;
     this->yHidden = yHidden;
+    y=yHidden;
   }
 
   Int getXOriginal() const {
