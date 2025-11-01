@@ -20,7 +20,7 @@
 //
 //============================================================================
 
-package com.untouchableapps.android.geodiscoverer;
+package com.untouchableapps.android.geodiscoverer.logic;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,6 +30,7 @@ import com.google.android.gms.wearable.ChannelClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
+import com.untouchableapps.android.geodiscoverer.GDApplication;
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 

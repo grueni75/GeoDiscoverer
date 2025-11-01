@@ -39,7 +39,7 @@
                 android:resource="@drawable/preview_digital_circular"/>
         </service>
         -->
-        <service android:name=".GDMessageListenerService">
+        <service android:name=".logic.GDMessageListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
                 <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT"/>
@@ -48,7 +48,7 @@
         </service>
 
         <service
-          android:name=".GDService"
+          android:name=".logic.GDService"
           android:exported="true"
           android:foregroundServiceType="location" />
 

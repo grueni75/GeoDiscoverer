@@ -51,6 +51,7 @@ import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.core.GDAppInterface
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
+import com.untouchableapps.android.geodiscoverer.logic.GDService
 import com.untouchableapps.android.geodiscoverer.ui.theme.WearAppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -455,7 +456,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     )
     stopWatchingCompass()
     coreObject?.executeAppCommand("setWearDeviceSleeping(1)");
-    val intent = Intent(this, com.untouchableapps.android.geodiscoverer.GDService::class.java)
+    val intent = Intent(this, GDService::class.java)
     intent.action = "activityPaused"
     startService(intent)
   }
@@ -471,7 +472,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     // Resume all components only if a exit or restart is not requested
     startWatchingCompass()
     coreObject?.executeAppCommand("setWearDeviceSleeping(0)");
-    val intent = Intent(this, com.untouchableapps.android.geodiscoverer.GDService::class.java)
+    val intent = Intent(this, GDService::class.java)
     intent.action = "activityResumed"
     startService(intent)
     updateDisplayTimeout()
@@ -479,7 +480,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   fun exit() {
     finishAffinity();
-    val intent = Intent(this, com.untouchableapps.android.geodiscoverer.GDService::class.java)
+    val intent = Intent(this, GDService::class.java)
     intent.action = "exit"
     startService(intent)
   }

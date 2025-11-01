@@ -19,7 +19,7 @@
 // along with GeoDiscoverer.  If not, see <http://www.gnu.org/licenses/>.
 //
 //============================================================================
-package com.untouchableapps.android.geodiscoverer
+package com.untouchableapps.android.geodiscoverer.logic
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -32,6 +32,8 @@ import android.os.IBinder
 import android.os.Message
 import androidx.core.app.NotificationCompat
 import androidx.wear.ongoing.OngoingActivity
+import com.untouchableapps.android.geodiscoverer.GDApplication
+import com.untouchableapps.android.geodiscoverer.R
 import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.ui.ViewMap
 

@@ -160,11 +160,6 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
           commandExecuted = true
         }
         if (commandFunction == "ambientTransitionFinished") {
-          /*synchronized(activeRenderers) {
-            activeRenderers.forEach() {
-              it.isTransitioningToAmbient = false
-            }
-          }*/
           viewMap.ambientTransitionFinished()
           commandExecuted = true
         }
