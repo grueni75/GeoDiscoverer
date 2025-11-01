@@ -282,7 +282,7 @@ void WidgetEngine::createGraphic() {
       }
       if (deviceName=="Watch") {
         position.setRefScreenDiagonal(0);
-        position.setPortraitX(90.0);
+        position.setPortraitX(87.0);
         position.setPortraitY(65.0);
         position.setPortraitXHidden(150.0);
         position.setPortraitYHidden(position.getPortraitY());
@@ -331,7 +331,7 @@ void WidgetEngine::createGraphic() {
       }
       if (deviceName=="Watch") {
         position.setRefScreenDiagonal(0);
-        position.setPortraitX(90.0);
+        position.setPortraitX(87.0);
         position.setPortraitY(35.0);
         position.setPortraitXHidden(150.0);
         position.setPortraitYHidden(position.getPortraitY());
@@ -561,7 +561,7 @@ void WidgetEngine::createGraphic() {
       }
       if (deviceName=="Watch") {
         position.setRefScreenDiagonal(0);
-        position.setPortraitX(10.0);
+        position.setPortraitX(13.0);
         position.setPortraitY(65.0);
         position.setPortraitXHidden(-50.0);
         position.setPortraitYHidden(position.getPortraitY());
@@ -623,7 +623,7 @@ void WidgetEngine::createGraphic() {
       }
       if (deviceName=="Watch") {
         position.setRefScreenDiagonal(0);
-        position.setPortraitX(10.0);
+        position.setPortraitX(13.0);
         position.setPortraitY(35.0);
         position.setPortraitXHidden(-50.0);
         position.setPortraitYHidden(position.getPortraitY());

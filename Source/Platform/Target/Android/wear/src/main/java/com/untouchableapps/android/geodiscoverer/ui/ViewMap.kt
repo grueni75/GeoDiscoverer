@@ -22,13 +22,18 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.wear.ambient.AmbientLifecycleObserver
 import com.untouchableapps.android.geodiscoverer.GDApplication
@@ -38,8 +43,11 @@ import com.untouchableapps.android.geodiscoverer.core.GDCore
 import com.untouchableapps.android.geodiscoverer.core.GDMapSurfaceView
 import com.untouchableapps.android.geodiscoverer.ui.theme.WearAppTheme
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
 
@@ -75,8 +83,15 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   // For forcing redraws
   val invalidateState = mutableStateOf(0)
 
+  // Variables for zoom control
+  var zoomJob: Job? = null
+  var zoomPos = 0
+  var zoomRepeats = 5
+  var zoomWaitTime = 50L
+
   // Variables to keep the display on
-  var keepDisplayOnActive = false
+  var keepDisplayOnAppActive = false
+  var keepDisplayOnCoreActive = false
   var displayTimer: Timer? = null
   var displayTimeout = 0L
   var keepSreenOnCount = 0
@@ -114,12 +129,12 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   // Releases the display
   @Synchronized
   fun releaseDisplay() {
-    if (keepDisplayOnActive) return
+    if (keepDisplayOnAppActive) return
     displayTimer?.cancel()
     displayTimer=null
     //wakeLockCore?.release()
     setKeepScreenOn(false)
-    keepDisplayOnActive = false
+    keepDisplayOnAppActive = false
   }
 
   // Keeps the screen on for more than the default time
@@ -131,14 +146,14 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     if (displayTimer!=null)
       displayTimer?.cancel()
     displayTimer=Timer()
-    if (!keepDisplayOnActive)
+    if (!keepDisplayOnAppActive)
       setKeepScreenOn(true)
-    keepDisplayOnActive=true
+    keepDisplayOnAppActive=true
     displayTimer?.schedule(object : TimerTask() {
       override fun run() {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "display timeout expired")
         coreObject?.executeCoreCommand("setAmbientMode", "1");
-        keepDisplayOnActive=false
+        keepDisplayOnAppActive=false
       }
     }, displayTimeout)
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "ambient mode start time pushed out")
@@ -230,11 +245,17 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     if (coreObject != null) {
       val state = coreObject!!.executeCoreCommand("getWakeLock")
       if (state == "true") {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "wake lock enabled")
-        setKeepScreenOn(true)
+        if (!keepDisplayOnCoreActive) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "wake lock enabled")
+          setKeepScreenOn(true)
+          keepDisplayOnCoreActive=true
+        }
       } else {
-        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "wake lock disabled")
-        setKeepScreenOn(false)
+        if (keepDisplayOnCoreActive) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "wake lock disabled")
+          setKeepScreenOn(false)
+          keepDisplayOnCoreActive=false
+        }
       }
     }
   }
@@ -455,6 +476,41 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
           updateDisplayTimeout()
           false
         }
+        .onRotaryScrollEvent { rotaryScrollEvent ->
+          //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", rotaryScrollEvent.toString())
+          var startZoom = false
+          var zoomValue = "1.0"
+          if (rotaryScrollEvent.verticalScrollPixels > 0) {
+            zoomValue = "0.96"
+            startZoom = true
+          }
+          if (rotaryScrollEvent.verticalScrollPixels < 0) {
+            zoomValue = "1.04"
+            startZoom = true
+          }
+          if (startZoom) {
+
+            // Do the zooming
+            zoomJob?.cancel()
+            var zoomEnd = zoomPos + zoomRepeats
+            zoomJob=launch {
+              while (zoomPos < zoomEnd) {
+                /*GDApplication.addMessage(
+                  GDApplication.DEBUG_MSG,
+                  "GDApp",
+                  "zoomPos=${zoomPos} zoomEnd=${zoomEnd}"
+                )*/
+                coreObject?.executeCoreCommand("zoom", zoomValue)
+                delay(zoomWaitTime)
+                zoomPos++
+              }
+              zoomPos = 0
+            }
+          }
+          updateDisplayTimeout()
+          true
+        }
+        .focusable()
     ) {
       mapSurface()
     }

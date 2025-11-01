@@ -157,7 +157,6 @@ class CoreMessageHandler(viewMap: ViewMap) : Handler(Looper.getMainLooper()) {
             "deactivateSwipes command not implemented"
           )
           viewMap.vibrate()*/
-          viewMap.errorDialog("Test 123")
           commandExecuted = true
         }
         if (commandFunction == "ambientTransitionFinished") {

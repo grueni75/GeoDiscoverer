@@ -21,6 +21,8 @@
 //============================================================================
 package com.untouchableapps.android.geodiscoverer
 
+/*
+
 import android.content.Intent
 import android.view.SurfaceHolder
 import androidx.wear.watchface.ComplicationSlotsManager
@@ -41,7 +43,6 @@ import android.os.PowerManager
 
 import android.os.Vibrator
 
-/*
 
 // Minimum distance between two toasts in milliseconds
 const val TOAST_DISTANCE = 5000
