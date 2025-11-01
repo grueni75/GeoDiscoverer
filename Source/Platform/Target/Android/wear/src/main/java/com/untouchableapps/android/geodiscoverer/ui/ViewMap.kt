@@ -22,16 +22,26 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.wear.compose.material.Text
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.viewinterop.AndroidView
@@ -55,7 +65,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   companion object {
     // Minimum distance between two toasts in milliseconds
-    const val TOAST_DISTANCE = 5000
+    const val TOAST_DISTANCE = 3000L
     const val AMBIENT_MODE_TIMEOUT_OFFSET = 1000L
   }
 
@@ -82,6 +92,10 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   // For forcing redraws
   val invalidateState = mutableStateOf(0)
+
+  // Message bar state
+  val messageBarVisible = mutableStateOf(false)
+  val messageBarText = mutableStateOf("")
 
   // Variables for zoom control
   var zoomJob: Job? = null
@@ -170,6 +184,16 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     vibrator?.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
   }
 
+  // Shows the message bar
+  fun showMessageBar(message: String, durationMillis: Long = TOAST_DISTANCE) {
+    messageBarText.value = message
+    messageBarVisible.value = true
+    launch {
+      delay(durationMillis)
+      messageBarVisible.value = false
+    }
+  }
+
   // Shows a dialog
   @Synchronized
   fun dialog(kind: Int, message: String) {
@@ -182,11 +206,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
         )
         return
       }
-      GDApplication.showMessageBar(
-        applicationContext,
-        message,
-        GDApplication.MESSAGE_BAR_DURATION_LONG
-      )
+      showMessageBar(message)
       lastToastTimestamp = SystemClock.uptimeMillis()
     } else {
       val intent = Intent(this, Dialog::class.java)
@@ -418,6 +438,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   // Called when a new intent is available
   override fun onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
     setIntent(intent)
     GDApplication.addMessage(
       GDApplication.DEBUG_MSG, "GDApp",
@@ -513,6 +534,31 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
         .focusable()
     ) {
       mapSurface()
+
+      // Message bar with fade animation
+      AnimatedVisibility(
+        visible = messageBarVisible.value,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = Modifier
+          .align(Alignment.Center)
+          .fillMaxWidth()
+          .padding(horizontal = 32.dp, vertical = 16.dp)
+      ) {
+        Text(
+          text = messageBarText.value,
+          modifier = Modifier
+            .fillMaxWidth()
+            .background(
+              color = Color.Black.copy(alpha = 0.8f),
+              shape = RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = 6.dp, vertical = 6.dp),
+          color = Color.White,
+          fontSize = 12.sp,
+          textAlign = TextAlign.Center
+        )
+      }
     }
   }
 
