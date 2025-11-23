@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
@@ -68,6 +70,10 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     // Minimum distance between two toasts in milliseconds
     const val TOAST_DISTANCE = 3000L
     const val AMBIENT_MODE_TIMEOUT_OFFSET = 1000L
+
+    // Tilt-to-wake parameters
+    const val TILT_THRESHOLD = 2.5f // Acceleration threshold in m/s²
+    const val TILT_COOLDOWN = 1000L // Minimum time between tilt wake events in ms
   }
 
   // Reference to the core object and it's view
@@ -76,20 +82,23 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   // Flags
   var compassWatchStarted = false
 
+  // Tilt-to-wake state
+  var tiltToWakeEnabled = false
+  var lastTiltWakeTime = 0L
+
   // Managers
   var sensorManager: SensorManager? = null
   var powerManager: PowerManager? = null
   var vibrator: Vibrator? = null
 
   // Wake lock for the core
-  var wakeLockCore: PowerManager.WakeLock? = null
+  var wakeLock: PowerManager.WakeLock? = null
 
   // Time the last toast was shown
   var lastToastTimestamp: Long = 0
 
-  /* Variables to control fast rendering in ambient mode
+  // Ambient mode state
   var isAmbient=false
-  var isTransitioningToAmbient=false*/
 
   // For forcing redraws
   val invalidateState = mutableStateOf(0)
@@ -111,19 +120,48 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   var displayTimeout = 0L
   var keepSreenOnCount = 0
 
+  // Tilt-to-wake sensor listener
+  private val tiltSensorListener = object : SensorEventListener {
+    override fun onSensorChanged(event: SensorEvent?) {
+      if (event == null || !tiltToWakeEnabled) return
+
+      val currentTime = SystemClock.elapsedRealtime()
+      if (currentTime - lastTiltWakeTime < TILT_COOLDOWN) return
+
+      // Calculate total acceleration (excluding gravity)
+      val x = event.values[0]
+      val y = event.values[1]
+      val z = event.values[2]
+
+      val acceleration = Math.sqrt((x * x + y * y + z * z).toDouble()).toFloat() - SensorManager.GRAVITY_EARTH
+
+      // Check if acceleration exceeds threshold
+      if (Math.abs(acceleration) > TILT_THRESHOLD) {
+        GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "tilt detected, waking display")
+        lastTiltWakeTime = currentTime
+        if (isAmbient) {
+          triggerWakeUp()
+        } else {
+          updateDisplayTimeout()
+        }
+      }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+      // Not needed
+    }
+  }
+
   // Ambient mode callback
   val ambientCallback = object : AmbientLifecycleObserver.AmbientLifecycleCallback {
     override fun onEnterAmbient(ambientDetails: AmbientLifecycleObserver.AmbientDetails) {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "entering ambient mode")
-      //coreObject?.executeCoreCommand("setAmbientMode", "1");
-      //wakeLockCore?.acquire()
-      /*runOnUiThread {
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-      }*/
+      isAmbient=true
     }
 
     override fun onExitAmbient() {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "exiting ambient mode")
+      isAmbient=false
       updateDisplayTimeout()
     }
 
@@ -135,10 +173,6 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
   // Called when transition to ambient mode finishes
   fun ambientTransitionFinished() {
-    //wakeLockCore?.release()
-    /*runOnUiThread {
-      window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-    }*/
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "ambient transition finished")
     releaseDisplay()
   }
@@ -148,9 +182,13 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
   fun releaseDisplay() {
     displayTimer?.cancel()
     displayTimer=null
-    //wakeLockCore?.release()
     setKeepScreenOn(false)
     keepDisplayOnAppActive = false
+  }
+
+  // Triggers a wake-up of the device
+  fun triggerWakeUp() {
+    wakeLock?.acquire(1000)
   }
 
   // Keeps the screen on for more than the default time
@@ -308,6 +346,30 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     }
   }
 
+  // Start listening for tilt-to-wake
+  @Synchronized
+  fun startTiltToWake() {
+    if (!tiltToWakeEnabled) {
+      sensorManager?.registerListener(
+        tiltSensorListener,
+        sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+        SensorManager.SENSOR_DELAY_NORMAL
+      )
+      tiltToWakeEnabled = true
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "tilt-to-wake enabled")
+    }
+  }
+
+  // Stop listening for tilt-to-wake
+  @Synchronized
+  fun stopTiltToWake() {
+    if (tiltToWakeEnabled) {
+      sensorManager?.unregisterListener(tiltSensorListener)
+      tiltToWakeEnabled = false
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "tilt-to-wake disabled")
+    }
+  }
+
   // Called when a configuration change (e.g., caused by a screen rotation) has occured
   override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
@@ -377,8 +439,12 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     }
 
     // Get a wake lock
-    wakeLockCore = powerManager?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "GDApp: Active core");
-    if (wakeLockCore==null) {
+    wakeLock = powerManager?.newWakeLock(
+      PowerManager.FULL_WAKE_LOCK or
+          PowerManager.ACQUIRE_CAUSES_WAKEUP or
+          PowerManager.ON_AFTER_RELEASE,
+      "GDApp: Active core");
+    if (wakeLock==null) {
       fatalDialog(getString(R.string.no_wake_lock))
       return
     }
@@ -458,6 +524,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     coreObject?.executeAppCommand("setWearDeviceSleeping(1)");
     val intent = Intent(this, GDService::class.java)
     intent.action = "activityPaused"
+    stopTiltToWake()
     startService(intent)
   }
 
@@ -475,6 +542,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     val intent = Intent(this, GDService::class.java)
     intent.action = "activityResumed"
     startService(intent)
+    startTiltToWake()
     updateDisplayTimeout()
   }
 
