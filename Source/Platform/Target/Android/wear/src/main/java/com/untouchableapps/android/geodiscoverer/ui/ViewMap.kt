@@ -124,6 +124,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
 
     override fun onExitAmbient() {
       GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "exiting ambient mode")
+      updateDisplayTimeout()
     }
 
     override fun onUpdateAmbient() {
@@ -138,13 +139,13 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     /*runOnUiThread {
       window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }*/
+    GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "ambient transition finished")
     releaseDisplay()
   }
 
   // Releases the display
   @Synchronized
   fun releaseDisplay() {
-    if (keepDisplayOnAppActive) return
     displayTimer?.cancel()
     displayTimer=null
     //wakeLockCore?.release()
@@ -168,7 +169,6 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
       override fun run() {
         GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "display timeout expired")
         coreObject?.executeCoreCommand("setAmbientMode", "1");
-        keepDisplayOnAppActive=false
       }
     }, displayTimeout)
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "ambient mode start time pushed out")
