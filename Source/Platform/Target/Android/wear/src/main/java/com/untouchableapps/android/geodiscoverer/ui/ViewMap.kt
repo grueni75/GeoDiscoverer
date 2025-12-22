@@ -72,7 +72,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     const val AMBIENT_MODE_TIMEOUT_OFFSET = 1000L
 
     // Tilt-to-wake parameters
-    const val TILT_THRESHOLD = 2.5f // Acceleration threshold in m/s²
+    const val TILT_THRESHOLD = 10.0f // Acceleration threshold in m/s²
     const val TILT_COOLDOWN = 1000L // Minimum time between tilt wake events in ms
   }
 
