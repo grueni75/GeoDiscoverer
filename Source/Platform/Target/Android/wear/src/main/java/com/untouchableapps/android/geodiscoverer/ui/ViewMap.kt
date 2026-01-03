@@ -70,7 +70,7 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     // Minimum distance between two toasts in milliseconds
     const val TOAST_DISTANCE = 3000L
     const val AMBIENT_MODE_TIMEOUT_OFFSET = 1000L
-
+  x
     // Tilt-to-wake parameters
     const val TILT_THRESHOLD = 7.5f // Acceleration threshold in m/s²
     const val TILT_COOLDOWN = 1000L // Minimum time between tilt wake events in ms
