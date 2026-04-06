@@ -1,0 +1,12 @@
+# Login
+docker login
+sbx login
+
+# Build
+docker build -t grueni75/geodiscoverer-android:v1 --push .
+
+# Mit sbx nutzen (nach Push zu Registry)
+sbx rm --all && sbx run --template docker.io/grueni75/geodiscoverer-android:v1 shell ../..
+
+# Update image forcieren
+sbx reset 
