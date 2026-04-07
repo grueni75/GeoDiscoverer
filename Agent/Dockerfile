@@ -60,7 +60,4 @@ RUN echo 'source ~/.androidrc' >> ~/.bashrc
 RUN git config --global user.email "mina.mindclaw@example.com" && \
     git config --global user.name "Mina Mindclaw"
 
-# Configure git to use HTTPS instead of SSH
-RUN git config --global url."https://github.com/".insteadOf "git@github.com:"
-
 WORKDIR /home/agent
