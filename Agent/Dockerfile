@@ -20,6 +20,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     vim \
     ca-certificates \
+    systemd \
+    systemd-sysv \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Java 11 as default (needed for Gradle builds)
@@ -55,6 +57,23 @@ RUN echo '# Android environment' > ~/.androidrc && \
 
 # Source androidrc in bashrc
 RUN echo 'source ~/.androidrc' >> ~/.bashrc
+
+# Install nvm and Node.js 22
+#RUN echo 'export NPM_CONFIG_PREFIX=""' >> ~/.bashrc
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash && \
+    export NVM_DIR="$HOME/.nvm" && \
+    unset NPM_CONFIG_PREFIX && \
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+    nvm install 22 && \
+    nvm alias default 22 
+   
+# Install openclaw
+RUN export NVM_DIR="$HOME/.nvm" && \
+    unset NPM_CONFIG_PREFIX && \
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+    npm install -g @larksuiteoapi/node-sdk && \
+    npm install -g @slack/web-api && \
+    npm install -g openclaw@latest 
 
 # Configure git
 RUN git config --global user.email "mina.mindclaw@example.com" && \
