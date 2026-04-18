@@ -596,6 +596,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
                   limitReached = true
 
                 // Add the found POIs incl. duplicate handling
+                val resultSnapshot = result.toList()
                 for (poi in nearbyPOIs) {
 
                   // Decide on the POI details
@@ -611,7 +612,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
 
                   // Check for duplicates
                   var duplicate = false
-                  for (point in result) {
+                  for (point in resultSnapshot) {
                     if (point.nameOriginal == name) {
                       if ((point.latitude == poi.latitude) && (point.longitude == poi.longitude)) {
                         //GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","POI ${name} already exists in search result")
@@ -629,7 +630,7 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
                   var count = 2
                   while (!nameIsUnique) {
                     nameIsUnique = true
-                    for (point in result) {
+                    for (point in resultSnapshot) {
                       if (point.nameUniquified == uniqueName) {
                         uniqueName = "${name} ${count}"
                         count++
