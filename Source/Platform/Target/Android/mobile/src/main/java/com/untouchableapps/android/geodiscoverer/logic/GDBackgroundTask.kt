@@ -642,8 +642,8 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
                     GDApplication.addMessage(GDApplication.DEBUG_MSG,"GDApp","POI ${name} uniquified to ${uniqueName}")
                   }*/
 
-                  // Add the entry
-                  var item = AddressPointItem(
+                  // Add the entry (sort by distance after all POIs are collected)
+                  val item = AddressPointItem(
                     name,
                     uniqueName,
                     distance,
@@ -651,21 +651,14 @@ class GDBackgroundTask() : CoroutineScope by MainScope() {
                     poi.latitude,
                     poi.longitude
                   )
-                  var added = false
-                  for (i in result.indices) {
-                    if (distance < result[i].distanceRaw) {
-                      result.add(i, item)
-                      added = true
-                      break
-                    }
-                  }
-                  if (!added)
-                    result.add(item)
+                  result.add(item)
                 }
               }
             }
             //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "POI search finished")
           }
+          // Sort results by distance ascending
+          result.sortBy { it.distanceRaw }
           if (isActive) {
             poiFindLastItemCopy.result = result
             poiFindLastItemCopy.limitReached = limitReached
