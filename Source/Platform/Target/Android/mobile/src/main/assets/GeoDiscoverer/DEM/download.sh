@@ -12,27 +12,42 @@ for y in 29 30 31 32 33 34 35; do
     echo -n "$x "
     file=${x}${y}.zip
     skip=0
-    if [ "$file" = "L29.zip" ]; then
-      skip=1
+    if [ "$file" = "P30.zip" ]; then
+      file="SHL.zip"
     fi
     if [ "$file" = "P29.zip" ]; then
       file="FAR.zip"
     fi
+    if [ "$file" = "L29.zip" ]; then
+      skip=1
+    fi
     if [ "$file" = "Q29.zip" ]; then
       skip=1
     fi
-    if [ "$file" = "R29.zip" ]; then
-      file="JANMAYEN.zip"
+    if [ "$file" = "Q30.zip" ]; then
+      skip=1
     fi
-    if [ "$file" = "Q29.zip" ]; then
+    if [ "$file" = "Q31.zip" ]; then
+      skip=1
+    fi
+    if [ "$file" = "R29.zip" ]; then
+      skip=1
+    fi
+    if [ "$file" = "R30.zip" ]; then
+      skip=1
+    fi
+    if [ "$file" = "R31.zip" ]; then
       skip=1
     fi
     if [ "$file" = "R32.zip" ]; then
       skip=1
     fi
     if [ "$skip" = "0" ]; then
-      if ! wget http://viewfinderpanoramas.org/dem3/$file >/dev/null 2>&1; then
-        echo "Can not download $file.zip!"
+      file_v2="${file%.zip}v2.zip"
+      if wget "http://viewfinderpanoramas.org/dem3/$file_v2" >/dev/null 2>&1; then
+        echo -n "(v2) "
+      elif ! wget "http://viewfinderpanoramas.org/dem3/$file" >/dev/null 2>&1; then
+        echo "Can not download $file!"
       fi
     fi
   done
@@ -68,6 +83,4 @@ cd ..
 mv download/*.hgt .
 mv download/index.vrt .
 rm -rf download
-
-
 
