@@ -1666,9 +1666,14 @@
                                           <xsd:documentation>Vertical offset for the heart rate label in percent of the widget height.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
-                                      <xsd:element name="heartRateZoneWidth" type="xsd:double" default="0" minOccurs="0">
+                                      <xsd:element name="heartRateZoneWidthWithBattery" type="xsd:double" default="0" minOccurs="0">
                                         <xsd:annotation>
-                                          <xsd:documentation>Width of the heart rate zone in percent of the widget width.</xsd:documentation>
+                                          <xsd:documentation>Width of the heart rate zone in percent of the widget width when battery is present.</xsd:documentation>
+                                        </xsd:annotation>
+                                      </xsd:element>
+                                      <xsd:element name="heartRateZoneWidthNoBattery" type="xsd:double" default="0" minOccurs="0">
+                                        <xsd:annotation>
+                                          <xsd:documentation>Width of the heart rate zone in percent of the widget width when no battery is present.</xsd:documentation>
                                         </xsd:annotation>
                                       </xsd:element>
                                       <xsd:element name="heartRateZoneHeight" type="xsd:double" default="0" minOccurs="0">

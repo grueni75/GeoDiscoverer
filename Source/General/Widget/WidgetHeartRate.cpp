@@ -41,6 +41,7 @@ WidgetHeartRate::WidgetHeartRate(WidgetContainer *widgetContainer) :
   core->getConfigStore()->setIntValue("HeartRateMonitor","batteryLevel",75,__FILE__,__LINE__);
   core->getConfigStore()->setIntValue("HeartRateMonitor","connected",1,__FILE__,__LINE__);*/
   connected=false;
+  batteryLevel=-1;
   firstRun=true;  
   updateRequired=true;  
   setIsHidden(true);
@@ -173,24 +174,26 @@ void WidgetHeartRate::draw(TimestampInMicroseconds t) {
   }
 
   // Draw the battery
-  drawBattery(
-    t,
-    batteryGaugeOffsetX,
-    batteryLevel,
-    NULL,
-    NULL,
-    batteryGaugeBackgroundWidth,
-    batteryGaugeForegroundWidth,
-    batteryGaugeTipWidth,
-    batteryGaugeTipHeight,
-    batteryGaugeOffsetY,
-    batteryGaugeMaxHeight,
-    false,
-    0,
-    0,
-    NULL,
-    0
-  );
+  if (batteryLevel != -1) {
+    drawBattery(
+      t,
+      batteryGaugeOffsetX,
+      batteryLevel,
+      NULL,
+      NULL,
+      batteryGaugeBackgroundWidth,
+      batteryGaugeForegroundWidth,
+      batteryGaugeTipWidth,
+      batteryGaugeTipHeight,
+      batteryGaugeOffsetY,
+      batteryGaugeMaxHeight,
+      false,
+      0,
+      0,
+      NULL,
+      0
+    );
+  }
 
   // Draw the heart rate zones
   for (int z=1;z<=5;z++) {
@@ -208,12 +211,19 @@ void WidgetHeartRate::draw(TimestampInMicroseconds t) {
     }
     zoneColor.setAlpha(color.getAlpha());
     screen->setColor(zoneColor.getRed(),zoneColor.getGreen(),zoneColor.getBlue(),zoneColor.getAlpha());
-    Int x0=x+heartRateZoneOffsetX+z*(heartRateZoneWidth+heartRateZoneGapX);
+    Int x0, x1;
+    if (batteryLevel == -1) {
+      x0 = x + heartRateZoneOffsetX + z* (heartRateZoneWidthNoBattery + heartRateZoneGapX);
+      x1 = x0 + heartRateZoneWidthNoBattery;
+    } else {
+      x0 = x + heartRateZoneOffsetX + z * (heartRateZoneWidthWithBattery + heartRateZoneGapX);
+      x1 = x0 + heartRateZoneWidthWithBattery;
+    }
     Int y0=y+(getIconHeight()-heartRateZoneHeight)/2;
     screen->drawRectangle(
       x0,
       y0+heartRateZoneHeight,
-      x0+heartRateZoneWidth,
+      x1,
       y0,
       Screen::getTextureNotDefined(),
       true

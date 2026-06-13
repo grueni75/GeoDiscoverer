@@ -4,7 +4,7 @@
    height="72"
    id="svg2869"
    version="1.1"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
    sodipodi:docname="heartRateBackground.svg"
    inkscape:export-filename="/home/grueni/Apps/GeoDiscoverer/Source/Media/meterBackground.png"
    inkscape:export-xdpi="90"
@@ -19,6 +19,18 @@
    xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs2871">
+    <linearGradient
+       id="linearGradient1"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#ffb2b2;stop-opacity:0.31999999;"
+         offset="0"
+         id="stop1" />
+      <stop
+         style="stop-color:#ff0000;stop-opacity:0.91732907;"
+         offset="1"
+         id="stop2" />
+    </linearGradient>
     <linearGradient
        inkscape:collect="always"
        id="linearGradient1159">
@@ -747,6 +759,17 @@
        r="139.25997"
        gradientTransform="matrix(1,0,0,0.25063952,0,27.010426)"
        gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="radialGradient2"
+       cx="41.058445"
+       cy="-26.770432"
+       fx="41.058445"
+       fy="-26.770432"
+       r="30"
+       gradientTransform="matrix(1.3854153,0.0029421,-0.00194842,0.91749777,-15.876714,-1.7897378)"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -755,9 +778,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="4.0056771"
-     inkscape:cx="139.17747"
-     inkscape:cy="84.629887"
+     inkscape:zoom="11.329766"
+     inkscape:cx="51.722164"
+     inkscape:cy="53.04611"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:document-units="px"
@@ -765,10 +788,10 @@
      showguides="false"
      inkscape:guide-bbox="true"
      inkscape:snap-global="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1011"
+     inkscape:window-width="2560"
+     inkscape:window-height="1371"
      inkscape:window-x="0"
-     inkscape:window-y="32"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:snap-grids="true"
      inkscape:snap-bbox="true"
@@ -792,7 +815,10 @@
        enabled="true"
        snapvisiblegridlinesonly="true"
        originx="-0.48258595"
-       originy="3.451538e-07" />
+       originy="3.451538e-07"
+       spacingy="1"
+       spacingx="1"
+       units="px" />
     <sodipodi:guide
        position="-0.48258595,-48"
        orientation="0,150"
@@ -888,7 +914,7 @@
     <path
        d="m 41.234969,7.2961336 -4.35,-3.96 c -15.45,-14.0099886 -25.65,-23.2499906 -25.65,-34.5899806 0,-9.24001 7.26,-16.50001 16.5,-16.50001 5.22,0 10.23,2.43 13.5,6.27 3.27,-3.84 8.28,-6.27 13.5,-6.27 9.24,0 16.5,7.26 16.5,16.50001 0,11.33999 -10.2,20.579992 -25.65,34.6199806 z"
        id="path644"
-       style="fill:#ff7474;stroke-width:3;fill-opacity:1" />
+       style="fill:url(#radialGradient2);stroke-width:3;fill-opacity:1" />
     <g
        transform="matrix(1.1352346,0,0,1.1352169,106.35392,-6.7586546)"
        id="g4820-3" />

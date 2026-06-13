@@ -871,7 +871,8 @@ void WidgetEngine::createGraphic() {
         config.setParameter("batteryGaugeForegroundWidth","0.08");
         config.setParameter("batteryGaugeTipWidth","0.06");
         config.setParameter("batteryGaugeTipHeight","0.03");
-        config.setParameter("heartRateZoneWidth","8");
+        config.setParameter("heartRateZoneWidthWithBattery","8");
+        config.setParameter("heartRateZoneWidthNoBattery","10.8");
         config.setParameter("heartRateZoneHeight","75");
         config.setParameter("heartRateZoneOffsetX","21");
         config.setParameter("heartRateZoneGapX","2");
@@ -1980,7 +1981,8 @@ void WidgetEngine::createGraphic() {
         heartRate->setHeartRateZoneColorZoneThree(c->getGraphicColorValue(widgetPath + "/HeartRateZoneColorZoneThree",__FILE__, __LINE__));
         heartRate->setHeartRateZoneColorZoneFour(c->getGraphicColorValue(widgetPath + "/HeartRateZoneColorZoneFour",__FILE__, __LINE__));
         heartRate->setHeartRateZoneColorZoneFive(c->getGraphicColorValue(widgetPath + "/HeartRateZoneColorZoneFive",__FILE__, __LINE__));
-        heartRate->setHeartRateZoneWidth(c->getDoubleValue(widgetPath,"heartRateZoneWidth",__FILE__,__LINE__)*heartRate->getIconWidth()/100.0);
+        heartRate->setHeartRateZoneWidthWithBattery(c->getDoubleValue(widgetPath,"heartRateZoneWidthWithBattery",__FILE__,__LINE__)*heartRate->getIconWidth()/100.0);
+        heartRate->setHeartRateZoneWidthNoBattery(c->getDoubleValue(widgetPath,"heartRateZoneWidthNoBattery",__FILE__,__LINE__)*heartRate->getIconWidth()/100.0);
         heartRate->setHeartRateZoneHeight(c->getDoubleValue(widgetPath,"heartRateZoneHeight",__FILE__,__LINE__)*heartRate->getIconHeight()/100.0);
         heartRate->setHeartRateZoneOffsetX(c->getDoubleValue(widgetPath,"heartRateZoneOffsetX",__FILE__,__LINE__)*heartRate->getIconWidth()/100.0);
         heartRate->setHeartRateZoneGapX(c->getDoubleValue(widgetPath,"heartRateZoneGapX",__FILE__,__LINE__)*heartRate->getIconWidth()/100.0);

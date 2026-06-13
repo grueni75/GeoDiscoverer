@@ -74,7 +74,8 @@ protected:
   GraphicColor heartRateZoneColorZoneThree;
   GraphicColor heartRateZoneColorZoneFour;
   GraphicColor heartRateZoneColorZoneFive;
-  Int heartRateZoneWidth;
+  Int heartRateZoneWidthWithBattery;
+  Int heartRateZoneWidthNoBattery;
   Int heartRateZoneHeight;
   Int heartRateZoneOffsetX;
   Int heartRateZoneGapX;
@@ -166,8 +167,12 @@ public:
     this->heartRateZoneColorZoneFive = heartRateZoneColorZoneFive;
   }
 
-  void setHeartRateZoneWidth(Int width) {
-    this->heartRateZoneWidth = width;
+  void setHeartRateZoneWidthWithBattery(Int width) {
+    this->heartRateZoneWidthWithBattery = width;
+  }
+
+  void setHeartRateZoneWidthNoBattery(Int width) {
+    this->heartRateZoneWidthNoBattery = width;
   }
 
   void setHeartRateZoneHeight(Int height) {

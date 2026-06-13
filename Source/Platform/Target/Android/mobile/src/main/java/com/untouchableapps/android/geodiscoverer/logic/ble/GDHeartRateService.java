@@ -165,6 +165,7 @@ public class GDHeartRateService {
           //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR","bluetooth gatt service discovery completed");
           List<BluetoothGattService> gattServices = gatt.getServices();
           if (gattServices == null) return;
+          boolean batteryServiceFound = false;
           for (BluetoothGattService gattService : gattServices) {
             //GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("device supports service %s", gattService.getUuid().toString()));
             if (gattService.getUuid().equals(UUID_HEART_RATE_SERVICE)) {
@@ -193,10 +194,14 @@ public class GDHeartRateService {
                   if (gattCharacteristic.getUuid().equals(UUID_BATTERY_LEVEL_MEASUREMENT_VALUE)) {
                     GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("battery level characteristic discovered"));
                     batteryServiceCharacteristic = gattCharacteristic;
+                    batteryServiceFound = true;
                   }
                 }
               }
             }
+          }
+          if (!batteryServiceFound) {
+            currentBatteryLevel = -1;
           }
         }
       }
