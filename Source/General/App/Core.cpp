@@ -809,7 +809,7 @@ void Core::maintenance(bool endlessLoop) {
 #endif
 
     // Call the maintenance in the map source
-    if ((mapSource)&&(mapSource->getIsInitialized())) {
+    if ((!quitCore)&&(mapSource)&&(mapSource->getIsInitialized())) {
       mapSource->maintenance();
     }
 

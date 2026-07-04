@@ -419,7 +419,6 @@ class ViewMap : ComponentActivity(), CoroutineScope by MainScope() {
     (application as GDApplication).setMessageHandler(coreMessageHandler)
 
     // Get display timeout
-    // use watchDisplayTimeout from config instead of system timeout
     try {
       displayTimeout =
         Settings.System.getInt(contentResolver, Settings.System.SCREEN_OFF_TIMEOUT).toLong()

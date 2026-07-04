@@ -62,6 +62,6 @@ if ($status == 0) {
 }
  
 # Output the stack trace
-system("minidump_stackwalk /tmp/crash.bin sym/$arch 2>/dev/null");
+system("minidump-stackwalk /tmp/crash.bin sym/$arch 2>/dev/null");
 
 

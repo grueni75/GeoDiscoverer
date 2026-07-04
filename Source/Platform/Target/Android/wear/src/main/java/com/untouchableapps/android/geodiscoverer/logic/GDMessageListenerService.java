@@ -24,6 +24,8 @@ package com.untouchableapps.android.geodiscoverer.logic;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import com.google.android.gms.wearable.ChannelClient;
@@ -36,8 +38,13 @@ import com.untouchableapps.android.geodiscoverer.core.GDCore;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GDMessageListenerService extends WearableListenerService {
+
+  private static final Handler timeoutHandler = new Handler(Looper.getMainLooper());
+  private static final Map<String, Runnable> timeoutRunnables = new ConcurrentHashMap<>();
 
   /** Called when a channel is opened */
   @Override
@@ -72,6 +79,42 @@ public class GDMessageListenerService extends WearableListenerService {
     params.putString("hash",hash);
     coreObject.channelPathToFilePath.put(channel.getPath(), params);
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "added file => channelPathToFilePath.size()=" + coreObject.channelPathToFilePath.size());
+
+    // Setup timeout
+    String timeoutStr = coreObject.configStoreGetStringValue("General", "watchTransferTimeout");
+    long timeoutMs = 30000L; // Default
+    try {
+      if (timeoutStr != null && !timeoutStr.isEmpty()) {
+        timeoutMs = Long.parseLong(timeoutStr);
+      }
+    } catch (NumberFormatException e) {
+      GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "Error parsing watchTransferTimeout: " + timeoutStr);
+    }
+    final String channelPath = channel.getPath();
+    Runnable timeoutRunnable = new Runnable() {
+      @Override
+      public void run() {
+        GDCore coreObject = GDApplication.coreObject;
+        if (coreObject == null) return;
+        timeoutRunnables.remove(channelPath);
+        Bundle params = (Bundle) coreObject.channelPathToFilePath.remove(channelPath);
+        if (params != null) {
+          String path = params.getString("path");
+          GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel timeout: " + channelPath);
+          if (path != null) {
+            File f = new File(path);
+            if (f.exists()) f.delete();
+          }
+          if (coreObject.channelPathToFilePath.size() == 0) {
+            coreObject.executeCoreCommand("setRemoteServerActive", "0");
+          }
+        }
+      }
+    };
+    timeoutRunnables.put(channelPath, timeoutRunnable);
+    timeoutHandler.postDelayed(timeoutRunnable, timeoutMs);
+
+    // Get the file
     Wearable.getChannelClient(this).receiveFile(channel,Uri.fromFile(f), false);
     coreObject.executeCoreCommand("setRemoteServerActive","1");
   }
@@ -80,6 +123,13 @@ public class GDMessageListenerService extends WearableListenerService {
   @Override
   public void onChannelClosed(ChannelClient.Channel channel, int closeReason, int appSpecificErrorCode) {
     super.onChannelClosed(channel, closeReason, appSpecificErrorCode);
+
+    // Cancel timeout
+    Runnable runnable = timeoutRunnables.remove(channel.getPath());
+    if (runnable != null) {
+      timeoutHandler.removeCallbacks(runnable);
+    }
+
     GDCore coreObject = GDApplication.coreObject;
     if (coreObject == null)
       return;
@@ -105,6 +155,26 @@ public class GDMessageListenerService extends WearableListenerService {
     }
   }
 
+  /** Called when a channel is closed by output side */
+  @Override
+  public void onOutputClosed(ChannelClient.Channel channel, int closeReason, int appSpecificErrorCode) {
+    super.onOutputClosed(channel, closeReason, appSpecificErrorCode);
+    GDCore coreObject = GDApplication.coreObject;
+    if (coreObject == null)
+      return;
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel closed by output side (path="+channel.getPath()+")");
+  }
+
+  /** Called when a channel is closed by output side */
+  @Override
+  public void onInputClosed(ChannelClient.Channel channel, int closeReason, int appSpecificErrorCode) {
+    super.onOutputClosed(channel, closeReason, appSpecificErrorCode);
+    GDCore coreObject = GDApplication.coreObject;
+    if (coreObject == null)
+      return;
+    //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "channel closed by input side (path="+channel.getPath()+")");
+  }
+
   /** Called when a message is received */
   @Override
   public void onMessageReceived( final MessageEvent messageEvent ) {
@@ -123,7 +193,7 @@ public class GDMessageListenerService extends WearableListenerService {
       boolean cmdExecuted=false;
       //GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", cmd.substring(0,cmd.indexOf(")")+1));
       if (cmd.equals("forceRemoteMapUpdate()")) {
-        GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","map update requested by remote server");
+        //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDApp","map update requested by remote server");
         coreObject.executeCoreCommand("forceMapUpdate");
         cmdExecuted=true;
       }

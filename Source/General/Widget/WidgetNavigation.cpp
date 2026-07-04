@@ -1105,14 +1105,14 @@ void WidgetNavigation::updateFlags(Int x, Int y) {
       {
         northButtonHit=false;
         if ((angle <= 270.0-circularButtonAngle/2)||(angle >= 270.0+circularButtonAngle/2)) {
-          DEBUG("forcing not hit",NULL);
+          //DEBUG("forcing not hit",NULL);
           isHit=false;
           statusTextAbove=!statusTextAbove;
         }
       }
     }
   }
-  DEBUG("isHit=%d",isHit);
+  //DEBUG("isHit=%d",isHit);
 }
 
 }

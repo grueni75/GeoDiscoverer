@@ -56,9 +56,9 @@
                   <xsd:documentation>Screen backlight is kept on if ticked.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
-              <xsd:element name="watchDisplayTimeout" type="xsd:integer" default="0">
+              <xsd:element name="watchTransferTimeout" type="xsd:integer" default="30000" gd:upgrade="restore">
                 <xsd:annotation>
-                  <xsd:documentation>Timeout in milliseconds for the display if executed on a watch.</xsd:documentation>
+                  <xsd:documentation>Timeout in milliseconds for waiting for a file transfer over a channel to the watch.</xsd:documentation>
                 </xsd:annotation>
               </xsd:element>
               <xsd:element name="backButtonTurnsScreenOff" type="xsd:boolean" default="0" gd:upgrade="restore">

@@ -1229,7 +1229,7 @@ void MapSource::remoteServer() {
       unlockAccess();
 
       // Split the command
-      DEBUG("new cmd: %s",cmd.c_str());
+      //DEBUG("new cmd: %s",cmd.c_str());
       std::string cmdName;
       std::vector<std::string> args;
       if (!core->getCommander()->splitCommand(cmd,cmdName,args)) {
