@@ -190,4 +190,11 @@ public class MapsforgeWorker {
     return (TileBitmap) directRenderer.executeJob(job);
   }
 
+  // Closes the worker and releases resources
+  void close() {
+    if (multiMapDataStore != null) {
+      multiMapDataStore.close();
+    }
+  }
+
 }

@@ -43,6 +43,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import androidx.core.app.NotificationCompat;
 import kotlin.Unit;
+import kotlinx.coroutines.Job;
 
 import android.text.TextUtils;
 
@@ -57,7 +58,9 @@ import com.untouchableapps.android.geodiscoverer.logic.server.BRouterServer;
 import com.untouchableapps.android.geodiscoverer.logic.server.MapTileServer;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class GDService extends Service {
   
@@ -100,6 +103,9 @@ public class GDService extends Service {
 
   // E-Bike monitor
   GDEBikeService eBikeService = null;
+
+  // Active findPOIs jobs
+  private final List<Job> findPOIsJobs = new ArrayList<>();
 
   // Download status
   int tilesLeft;
@@ -277,7 +283,7 @@ public class GDService extends Service {
 
       // Immideately stop if requested
       if (stopImmideately) {
-        stopForeground(true);
+         stopForeground(true);
         serviceInForeground = false;
         return;
       }
@@ -554,7 +560,8 @@ public class GDService extends Service {
       String t=coreObject.configStoreGetStringValue("Navigation/NearestPointOfInterest","categoryPath");
       String path[]=t.split(";");
       double radius= Double.valueOf(coreObject.configStoreGetStringValue("Navigation/NearestPointOfInterest","searchRadius"))*1000.0;
-      GDApplication.backgroundTask.findPOIs(
+      final Job[] jobRef = new Job[1];
+      jobRef[0] = GDApplication.backgroundTask.findPOIs(
           Arrays.asList(path),
           intent.getDoubleExtra("lat",0),intent.getDoubleExtra("lng",0),
           (int)radius,(result, limitReached) -> {
@@ -567,8 +574,18 @@ public class GDService extends Service {
               String.valueOf(item.getLongitude())
           );
         }
+        if (jobRef[0] != null) {
+          synchronized (findPOIsJobs) {
+            findPOIsJobs.remove(jobRef[0]);
+          }
+        }
         return Unit.INSTANCE;
       });
+      if (jobRef[0] != null) {
+        synchronized (findPOIsJobs) {
+          findPOIsJobs.add(jobRef[0]);
+        }
+      }
     }
 
     // Handle heading update
@@ -618,6 +635,14 @@ public class GDService extends Service {
     // Stop the mapsforge server
     if (mapTileServer!=null) {
       mapTileServer.stop();
+    }
+
+    // Abort all findPOIs jobs
+    synchronized (findPOIsJobs) {
+      for (Job job : findPOIsJobs) {
+        GDApplication.backgroundTask.abortFindPOIs(job);
+      }
+      findPOIsJobs.clear();
     }
   }
 }

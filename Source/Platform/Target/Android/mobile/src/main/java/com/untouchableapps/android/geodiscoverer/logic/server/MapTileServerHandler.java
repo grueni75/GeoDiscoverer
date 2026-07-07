@@ -55,6 +55,7 @@ public class MapTileServerHandler extends NanoHTTPD {
   protected String mapsforgePath=null;
   protected String loopbackPath=null;
   protected String brouterWebPath=null;
+  private boolean quit = false;
   private static final Pattern P = Pattern.compile("/(.+)/(\\d+)/(\\d+)/(\\d+)\\.(.*)");
 
   protected class RuntimeMeasurement {
@@ -254,6 +255,10 @@ public class MapTileServerHandler extends NanoHTTPD {
       MapsforgeWorker worker=null;
       MapsforgeWorker.lock.lock();
       while (true) {
+        if (quit) {
+          MapsforgeWorker.lock.unlock();
+          return serveError("server is quitting");
+        }
         boolean found = false;
         for (int i = 0; i < mapsforgeWorker.length; i++) {
           if (!mapsforgeWorker[i].busy) {
@@ -316,5 +321,26 @@ public class MapTileServerHandler extends NanoHTTPD {
     }
 
     return serveError("tile type <" + type + "> not supported");
+  }
+
+  @Override
+  public void stop() {
+    GDApplication.addMessage(GDApplication.DEBUG_MSG,"MapTileServer","stopping tile server");
+    MapsforgeWorker.lock.lock();
+    try {
+      quit = true;
+      MapsforgeWorker.updated.signalAll();
+    } finally {
+      MapsforgeWorker.lock.unlock();
+    }
+    if (mapsforgeWorker != null) {
+      for (int i=0; i<mapsforgeWorker.length; i++) {
+        if (mapsforgeWorker[i] != null) {
+          GDApplication.addMessage(GDApplication.DEBUG_MSG,"MapTileServer","closing mapsforge worker " + i);
+          mapsforgeWorker[i].close();
+        }
+      }
+    }
+    super.stop();
   }
 }

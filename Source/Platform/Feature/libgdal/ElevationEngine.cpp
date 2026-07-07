@@ -140,7 +140,7 @@ void ElevationEngine::deinit() {
   isInitialized=false;
   core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
   if (demDatasetBusy) {
-    //DEBUG("requesting all render threads to quit",NULL);
+    DEBUG("requesting all render threads to quit",NULL);
     while (true) {
       bool threadActive=false;
       for (int i=0;i<workerCount;i++) {
@@ -158,10 +158,10 @@ void ElevationEngine::deinit() {
         core->getThread()->lockMutex(accessMutex,__FILE__,__LINE__);
       }
     }
-    //DEBUG("no thread active anymore",NULL);
+    DEBUG("no thread active anymore",NULL);
 
     // Wait for any thread getting alitutde information
-    //DEBUG("waiting for thread using the DEM dataset for altitude calculation",NULL);
+    DEBUG("waiting for thread using the DEM dataset for altitude calculation",NULL);
     while (demDatasetBusy[workerCount]) {
       core->getThread()->unlockMutex(accessMutex);
       usleep(1000);
@@ -346,6 +346,13 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   if (z<=lowResZoomLevel)
     srcDS[0]=demDatasetLowRes;
   
+  // Abort here if quit is requested
+  if (!isInitialized) {
+    GDALWarpAppOptionsFree(warpOptions);
+    resetDemDatasetBusy(workerNr);
+    return NULL;
+  }
+
   // Warp the source data set into the correct projection
   int usageError = FALSE;
   GDALDatasetH warpDS = GDALWarp(warpFilename.str().c_str(), NULL, 1, (GDALDatasetH*)srcDS, warpOptions, &usageError);
@@ -374,6 +381,17 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   GDALDEMProcessingOptions *hillshadeOptions = GDALDEMProcessingOptionsNew((char**)hillshadeArgs,NULL);
   if (hillshadeOptions==NULL) {
     FATAL("can not create hillshade options",NULL);
+    GDALClose(warpDS);
+    VSIUnlink(warpFilename.str().c_str());
+    resetDemDatasetBusy(workerNr);
+    return NULL;
+  }
+
+  // Abort here if quit is requested
+  if (!isInitialized) {
+    GDALDEMProcessingOptionsFree(hillshadeOptions);
+    GDALClose(warpDS);
+    VSIUnlink(warpFilename.str().c_str());
     resetDemDatasetBusy(workerNr);
     return NULL;
   }
@@ -390,6 +408,14 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   }
   GDALClose(hillshadeDS);
 
+  // Abort here if quit is requested
+  if (!isInitialized) {
+    VSIUnlink(imageFilename.c_str());
+    VSIUnlink((imageFilename+".aux.xml").c_str());
+    resetDemDatasetBusy(workerNr);
+    return NULL;
+  }
+
   // Load the png image
   vsi_l_offset size;
   GByte *data=VSIGetMemFileBuffer(imageFilename.c_str(), &size, true);  
@@ -399,16 +425,26 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   VSIUnlink((imageFilename+".aux.xml").c_str());
   if ((!hillshadePixels)||(pixelSize!=Image::getRGBPixelSize())) {
     FATAL("can not read <%s>",imageFilename.c_str());
+    if (hillshadePixels)
+      free(hillshadePixels);
     resetDemDatasetBusy(workerNr);
     return NULL;
   }
   //DEBUG("renderWidth=%d renderHeight=%d pixelSize=%d",renderWidth,renderHeight,pixelSize);
+
+  // Abort here if quit is requested
+  if (!isInitialized) {
+    free(hillshadePixels);
+    resetDemDatasetBusy(workerNr);
+    return NULL;
+  }
 
   // Copy this one in a RGBA image with alpha only
   // Invert the pixels on the run
   ImagePixel *filterPixels=(ImagePixel*)malloc(renderWidth*renderHeight);
   if (!filterPixels) {
     FATAL("can not reserve memory",NULL);
+    free(hillshadePixels);
     resetDemDatasetBusy(workerNr);
     return NULL;
   }
@@ -424,6 +460,13 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   }
   free(hillshadePixels);
 
+  // Abort here if quit is requested
+  if (!isInitialized) {
+    free(filterPixels);
+    resetDemDatasetBusy(workerNr);
+    return NULL;
+  }
+
   // Now apply a blur filter
   double blurRadius=z-10;
   if (z>=17) 
@@ -433,10 +476,18 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
     core->getImage()->iirGaussFilter(filterPixels,renderWidth,renderHeight,1,3*blurRadius);
   }
 
+  // Abort here if quit is requested
+  if (!isInitialized) {
+    free(filterPixels);
+    resetDemDatasetBusy(workerNr);
+    return NULL;
+  }
+
   // Crop the image
   ImagePixel *imagePixels=(ImagePixel*)malloc(imageWidth*imageHeight*Image::getRGBAPixelSize());
   if (!imagePixels) {
     FATAL("can not reserve memory",NULL);
+    free(filterPixels);
     resetDemDatasetBusy(workerNr);
     return NULL;
   }
@@ -453,6 +504,13 @@ UByte *ElevationEngine::renderHillshadeTile(Int z, Int y, Int x, UInt &imageSize
   }
   free(filterPixels);
   //DEBUG("t=%d",t);
+
+  // Abort here if quit is requested
+  if (!isInitialized) {
+    free(imagePixels);
+    resetDemDatasetBusy(workerNr);
+    return NULL;
+  }
 
   // Store the final image
   imageSize=0;
