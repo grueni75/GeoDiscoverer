@@ -106,6 +106,23 @@ public class GDHeartRateService {
   private final int OPERATING = 3;
   private int state = SCANNING;
 
+  public String getStateString(int s) {
+    switch (s) {
+      case SCANNING: return "SCANNING";
+      case CONNECTING: return "CONNECTING";
+      case DISCOVERING_SERVICES: return "DISCOVERING_SERVICES";
+      case OPERATING: return "OPERATING";
+      default: return "UNKNOWN (" + s + ")";
+    }
+  }
+
+  private void setState(int newState) {
+    if (this.state != newState) {
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("mode/state changed: %s -> %s", getStateString(this.state), getStateString(newState)));
+      this.state = newState;
+    }
+  }
+
   // List of known bluetooth devices
   public static LinkedList<String> knownDeviceAddresses = new LinkedList<String>();
 
@@ -141,16 +158,16 @@ public class GDHeartRateService {
     @Override
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
       super.onConnectionStateChange(gatt,status,newState);  
-      String intentAction;
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("onConnectionStateChange: status=%d, newState=%d, current mode=%s", status, newState, getStateString(state)));
       if (newState == BluetoothProfile.STATE_CONNECTED) {
-        if (state==CONNECTING) {
+        if (state != OPERATING && state != DISCOVERING_SERVICES) {
           GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", "connection to bluetooth gatt service established, requesting service discovery");
+          setState(DISCOVERING_SERVICES);
           gatt.discoverServices();
-          state = DISCOVERING_SERVICES;
         }
       } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
         GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR","connection to bluetooth gatt service dropped");
-        state = CONNECTING;
+        setState(CONNECTING);
         setConnectionState(false);
       }
     }
@@ -160,6 +177,7 @@ public class GDHeartRateService {
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
       super.onServicesDiscovered(gatt,status);
+      GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("onServicesDiscovered: status=%d, current mode=%s", status, getStateString(state)));
       if (status == BluetoothGatt.GATT_SUCCESS) {
         if (state == DISCOVERING_SERVICES) {
           //GDApplication.addMessage(GDAppInterface.DEBUG_MSG,"GDAppHR","bluetooth gatt service discovery completed");
@@ -178,9 +196,11 @@ public class GDHeartRateService {
                     //gatt.readCharacteristic(gattCharacteristic);
                     gatt.setCharacteristicNotification(gattCharacteristic, true);
                     BluetoothGattDescriptor descriptor = gattCharacteristic.getDescriptor(UUID_DESCRIPTOR);
-                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                    gatt.writeDescriptor(descriptor);
-                    state = OPERATING;
+                    if (descriptor != null) {
+                      descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                      gatt.writeDescriptor(descriptor);
+                    }
+                    setState(OPERATING);
                     setConnectionState(true);
                   }
                 }
@@ -269,9 +289,10 @@ public class GDHeartRateService {
         }
       }
       if (result.getDevice().getAddress().equals(deviceAddress)) {
+        GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("target heart rate monitor found <%s>, current mode=%s", deviceAddress, getStateString(state)));
         if (state==SCANNING) {
+          setState(CONNECTING);
           bluetoothGatt = result.getDevice().connectGatt(context, true, gattCallback);
-          state=CONNECTING;
           bluetoothScanner.stopScan(this);
         }
       }
@@ -352,12 +373,16 @@ public class GDHeartRateService {
             if ((heartRateUnavailableSound)&&(connectionNotificationThread==null)) {
               long t = System.currentTimeMillis() / 1000;
               if (t >= connectionWarningTimestamp + connectionWarningPeriod) {
+                GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("playing heartRateUnavailable sound (current mode=%s)", getStateString(state)));
                 coreObject.playSound("heartRateUnavailable.ogg", 1, 100);
                 connectionWarningTimestamp = t;
               }
             }
 
           } else {
+
+            // Reset connection warning timestamp while operating so that subsequent disconnects count warning period from the moment of disconnect
+            connectionWarningTimestamp = System.currentTimeMillis() / 1000;
 
             // Handle the heart rate alarm
             try {
@@ -516,6 +541,8 @@ public class GDHeartRateService {
   }
 
   private void setConnectionState(boolean connected) {
+
+    GDApplication.addMessage(GDAppInterface.DEBUG_MSG, "GDAppHR", String.format("setConnectionState(connected=%b), current mode=%s", connected, getStateString(state)));
 
     // Stop last notification thread (if running)
     connectionNotificationLock.lock();
