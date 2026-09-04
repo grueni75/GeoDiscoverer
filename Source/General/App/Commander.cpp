@@ -505,9 +505,16 @@ std::string Commander::execute(std::string cmd) {
   if (cmdName=="setTargetAtMapCenter") {
     if (core->getIsInitialized()) {
       core->getNavigationEngine()->setTargetAtMapCenter();
-      GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
-      visPos->updateLastUserModification();
-      core->getDefaultGraphicEngine()->unlockPos();
+      boolean addAddressPoint=false;
+      if (args.size()==1) {
+        if (atoi(args[0].c_str())) {
+          addAddressPoint=false;        }
+      }
+      if (addAddressPoint) {
+        GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
+        visPos->updateLastUserModification();
+        core->getDefaultGraphicEngine()->unlockPos();
+      }
     } else {
       WARNING("please wait until map is loaded (command ignored)",NULL);
     }
@@ -788,7 +795,15 @@ std::string Commander::execute(std::string cmd) {
       GraphicPosition visPos=*(core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__));
       core->getDefaultGraphicEngine()->unlockPos();
       if (!core->getNavigationEngine()->getAddressPoint(visPos,point)) {
-        WARNING("no address point near to the current map center found",NULL);
+        if (core->getDefaultDevice()->getIsWatch()) {
+          INFO("setting target at map center on mobile",NULL);
+          MapPosition pos = *(core->getMapEngine()->lockMapPos(__FILE__, __LINE__));
+          core->getMapEngine()->unlockMapPos();
+          std::string cmd="setTargetAtGeographicCoordinate(" + std::to_string(pos.getLng()) + "," + std::to_string(pos.getLat()) + ")";
+          dispatch(cmd);
+        } else {
+          WARNING("no address point near to the current map center found",NULL);
+        }
         found=false;
       }
     } else {
@@ -796,10 +811,16 @@ std::string Commander::execute(std::string cmd) {
       point.readFromConfig("Navigation/AddressPoint");
     }
     if (found) {
-      core->getNavigationEngine()->setTargetAtGeographicCoordinate(point.getLng(),point.getLat(),true);
-      GraphicPosition *visPos=core->getDefaultGraphicEngine()->lockPos(__FILE__, __LINE__);
-      visPos->updateLastUserModification();
-      core->getDefaultGraphicEngine()->unlockPos();
+      std::string cmd;
+      if (core->getDefaultDevice()->getIsWatch()) {
+        INFO("setting target at address point on mobile",NULL);
+        cmd="setTargetAtAddressPoint(\"" + point.getName() + "\")";
+        dispatch(cmd);
+      } else {
+        cmd="setTargetAtGeographicCoordinate(" + std::to_string(point.getLng()) + "," + std::to_string(point.getLat()) + ")";
+        execute(cmd);
+      }
+      //DEBUG(cmd.c_str(),NULL);
     }
     cmdExecuted=true;
   }

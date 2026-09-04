@@ -889,6 +889,16 @@ public class GDCore implements
         appIf.sendWearCommand(cmd);
       cmdExecuted=true;
     }
+    if (cmd.startsWith("setTargetAtGeographicCoordinate(")) {
+      if (isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
+    }
+    if (cmd.startsWith("setTargetAtAddressPoint(")) {
+      if (isWatch)
+        appIf.sendWearCommand(cmd);
+      cmdExecuted=true;
+    }
     if (cmd.startsWith("serveRemoteMapArchive(")) {
       if (!isWatch)
         appIf.sendWearCommand(cmd);

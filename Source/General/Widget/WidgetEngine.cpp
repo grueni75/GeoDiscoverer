@@ -358,12 +358,35 @@ void WidgetEngine::createGraphic() {
       // ---------------------------------------------------------
       config=WidgetConfig();
       config.setPageName("Default");
+      config.setName("Target At Address Point");
+      config.setType(WidgetTypeButton);
+      position=WidgetPosition();
+      position.setRefScreenDiagonal(0);
+      position.setPortraitX(35.0);
+      position.setPortraitY(87.0);
+      position.setPortraitXHidden(position.getPortraitX());
+      position.setPortraitYHidden(150.0);
+      position.setPortraitZ(1);
+      position.setLandscapeX(position.getPortraitX());
+      position.setLandscapeY(position.getPortraitY());
+      position.setLandscapeY(position.getPortraitXHidden());
+      position.setLandscapeY(position.getPortraitYHidden());
+      position.setLandscapeZ(position.getPortraitZ());
+      config.addPosition(position);
+      config.setActiveColor(GraphicColor(255,255,255,255));
+      config.setInactiveColor(GraphicColor(255,255,255,0));
+      config.setParameter("iconFilename","setTarget");
+      config.setParameter("command","setTargetAtAddressPoint()");
+      addWidgetToPage(config);
+      // ---------------------------------------------------------
+      config=WidgetConfig();
+      config.setPageName("Default");
       config.setName("Exit");
       config.setType(WidgetTypeButton);
       position=WidgetPosition();
       position.setRefScreenDiagonal(0);
-      position.setPortraitX(50.0);
-      position.setPortraitY(90.0);
+      position.setPortraitX(65.0);
+      position.setPortraitY(87.0);
       position.setPortraitXHidden(position.getPortraitX());
       position.setPortraitYHidden(150.0);
       position.setPortraitZ(1);
