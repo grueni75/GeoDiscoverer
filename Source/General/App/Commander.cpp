@@ -784,6 +784,10 @@ std::string Commander::execute(std::string cmd) {
     core->getNavigationEngine()->removeAddressPoint(args[0]);
     cmdExecuted=true;
   }
+  if (cmdName=="removeAddressPointGroup") {
+    core->getNavigationEngine()->removeAddressPointGroup(args[0]);
+    cmdExecuted=true;
+  }
   if (cmdName=="addressPointGroupChanged") {
     core->getNavigationEngine()->addressPointGroupChanged();
     cmdExecuted=true;

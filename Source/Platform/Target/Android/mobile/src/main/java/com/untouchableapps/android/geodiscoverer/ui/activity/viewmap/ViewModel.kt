@@ -233,6 +233,8 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
   var integratedListRefreshItemsHandler: () -> Unit = {}
   var integratedListSelectTabHandler: (Int) -> Unit = {}
     private set
+  var integratedListLongPressTabHandler: (Int) -> Unit = {}
+    private set
   var integratedListPOIImportHandler: (Int) -> Unit = {}
   var integratedListPOIFilerEnabled: Boolean by mutableStateOf(false)
     private set
@@ -440,6 +442,16 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
     askQuestionConfirmHandler = question.confirmHandler
     askQuestionDismissHandler = question.dismissHandler
     askTitle = viewMap.getString(R.string.dialog_waypoint_import_title)
+  }
+
+  @Synchronized
+  fun askForAddressPointGroupDelete(groupName: String, confirmHandler: () -> Unit) {
+    closeQuestion()
+    askMessage = "Delete group '$groupName' and all its points?"
+    askConfirmText = viewMap.getString(R.string.dialog_yes)
+    askDismissText = viewMap.getString(R.string.dialog_no)
+    askQuestionConfirmHandler = confirmHandler
+    askTitle = "Delete Group"
   }
 
   @Synchronized
@@ -837,6 +849,24 @@ class ViewModel(viewMap: ViewMap) : androidx.lifecycle.ViewModel() {
         )
         viewMap.coreObject?.executeCoreCommand("addressPointGroupChanged")
         fillAddressPoints()
+      }
+    }
+    integratedListLongPressTabHandler={
+      if (it < integratedListTabs.size - 1) {
+        val group = integratedListTabs[it]
+        askForAddressPointGroupDelete(group) {
+          viewMap.coreObject?.executeCoreCommand("removeAddressPointGroup", group)
+          
+          // Switch to another tab or default group
+          val nextGroup = if (integratedListTabs.size > 2 && it > 0) integratedListTabs[0] else "Default"
+          viewMap.coreObject!!.configStoreSetStringValue(
+            "Navigation",
+            "selectedAddressPointGroup",
+            nextGroup
+          )
+          viewMap.coreObject?.executeCoreCommand("addressPointGroupChanged")
+          fillAddressPoints(true)
+        }
       }
     }
     integratedListDeleteItemHandler={

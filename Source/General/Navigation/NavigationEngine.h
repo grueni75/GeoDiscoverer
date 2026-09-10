@@ -352,6 +352,9 @@ public:
   // Removes an address point
   void removeAddressPoint(std::string name);
 
+  // Removes an address point group
+  void removeAddressPointGroup(std::string groupName);
+
   // Adds an address point candidate
   void addAddressPointCandidate(std::string name, double lng, double lat);
 

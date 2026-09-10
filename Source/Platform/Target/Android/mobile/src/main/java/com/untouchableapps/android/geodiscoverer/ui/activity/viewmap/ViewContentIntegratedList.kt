@@ -26,8 +26,10 @@ import android.content.res.Configuration
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -71,6 +73,7 @@ import kotlinx.coroutines.*
 @ExperimentalMaterial3Api
 @ExperimentalMaterialApi
 @ExperimentalComposeUiApi
+@ExperimentalFoundationApi
 class ViewContentIntegratedList(viewContent: ViewContent) {
 
   // Parameters
@@ -557,6 +560,7 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
   }
 
   // Creates a tab for the integrated list
+  @ExperimentalFoundationApi
   @Composable
   fun tabContent(index: Int, tab: String, viewModel: ViewModel) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -564,12 +568,15 @@ class ViewContentIntegratedList(viewContent: ViewContent) {
       modifier = Modifier
         .height(layoutParams.integratedListTabHeight)
         .width(layoutParams.integratedListTabWidth)
-        .clickable(
+        .combinedClickable(
           onClick = {
             if (index != viewModel.integratedListSelectedTab) {
               viewModel.selectIntegratedListTab(index)
               viewModel.integratedListSelectTabHandler(index)
             }
+          },
+          onLongClick = {
+            viewModel.integratedListLongPressTabHandler(index)
           },
           interactionSource = interactionSource,
           indication = rememberRipple(bounded = true)

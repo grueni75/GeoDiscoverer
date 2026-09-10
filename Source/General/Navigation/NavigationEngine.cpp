@@ -1813,6 +1813,36 @@ void NavigationEngine::removeAddressPoint(std::string name) {
   }
 }
 
+// Removes an address point group
+void NavigationEngine::removeAddressPointGroup(std::string groupName) {
+  std::string path = "Navigation/AddressPoint";
+  std::list<std::string> names = core->getConfigStore()->getAttributeValues(path,"name",__FILE__,__LINE__);
+  bool pointsRemoved = false;
+  bool triggerSync = false;
+  for (std::list<std::string>::iterator j=names.begin();j!=names.end();j++) {
+    NavigationPoint p;
+    p.setName(*j);
+    p.readFromConfig(path);
+    if (p.getGroup() == groupName) {
+      if (p.getForeignTimestamp()!="0") {
+        p.setForeignRemovalRequest(true);
+        p.writeToConfig("Navigation/AddressPoint");
+        triggerSync = true;
+      } else {
+        std::string pointPath = "Navigation/AddressPoint[@name='" + *j + "']";
+        core->getConfigStore()->removePath(pointPath);
+        pointsRemoved = true;
+      }
+    }
+  }
+  if (triggerSync) {
+    triggerGoogleBookmarksSynchronization();
+  }
+  if (pointsRemoved) {
+    initAddressPoints();
+  }
+}
+
 // Reads the address points from disk
 void NavigationEngine::initAddressPoints() {
 
