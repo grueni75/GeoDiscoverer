@@ -57,6 +57,7 @@ class GDService : Service() {
   /** Called when the service is created the first time  */
   override fun onCreate() {
     super.onCreate()
+    instance = this
 
     // Get the core object
     coreObject = GDApplication.coreObject
@@ -222,8 +223,51 @@ class GDService : Service() {
   override fun onDestroy() {
     GDApplication.addMessage(GDApplication.DEBUG_MSG, "GDApp", "service is beeing destroyed")
 
+    if (instance == this) {
+      instance = null
+    }
+
     // Hide the notification
     stopForeground(STOP_FOREGROUND_REMOVE)
     //notificationManager.cancel(R.string.notification_title);
+  }
+
+  fun updateNotificationStatus(statusText: String) {
+    if (notificationManager == null) return
+    val pendingIntent =
+      PendingIntent.getActivity(
+        this,
+        0,
+        Intent(this, ViewMap::class.java).apply {
+          flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        },
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+      )
+    val notificationBuilder = NotificationCompat.Builder(this, "status")
+      .setContentTitle(getText(R.string.notification_title))
+      .setContentText(statusText)
+      .setSmallIcon(R.drawable.notification_running)
+      .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+      .setContentIntent(pendingIntent)
+      .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+      .setOngoing(true)
+    val ongoingActivity =
+      OngoingActivity.Builder(applicationContext, 0, notificationBuilder)
+        .setAnimatedIcon(R.drawable.notification_running)
+        .setStaticIcon(R.drawable.notification_running)
+        .setTouchIntent(pendingIntent)
+        .build()
+    ongoingActivity.apply(applicationContext)
+    notificationManager?.notify(GDApplication.NOTIFICATION_STATUS_ID, notificationBuilder.build())
+  }
+
+  companion object {
+    @JvmStatic
+    var instance: GDService? = null
+
+    @JvmStatic
+    fun updateStatus(statusText: String) {
+      instance?.updateNotificationStatus(statusText)
+    }
   }
 }
