@@ -39,6 +39,7 @@ import com.untouchableapps.android.geodiscoverer.core.GDAppInterface;
 import com.untouchableapps.android.geodiscoverer.core.GDCore;
 import com.untouchableapps.android.geodiscoverer.core.GDTools;
 import com.untouchableapps.android.geodiscoverer.core.cockpit.CockpitEngine;
+import com.untouchableapps.android.geodiscoverer.logic.GDService;
 import com.untouchableapps.android.geodiscoverer.ui.CoreMessageHandler;
 
 import java.util.concurrent.ExecutionException;
@@ -164,6 +165,35 @@ public class GDApplication extends Application implements GDAppInterface {
     if (cockpitEngine!=null)
       cockpitEngine.update(infos, false);
 
+    if (infos != null && !infos.isEmpty()) {
+      addMessage(DEBUG_MSG, "GDApp", "cockputEngineUpdate raw infos: " + infos);
+      String[] infosAsArray = infos.split(";");
+      /*for (int i = 0; i < infosAsArray.length; i++) {
+        addMessage(DEBUG_MSG, "GDApp", "  infosAsArray[" + i + "] = " + infosAsArray[i]);
+      }*/
+      String statusText = "🚫";
+      if (infosAsArray.length > 9) {
+        String targetDistance = infosAsArray[4];
+        String routeStatus = infosAsArray[8];
+        String routeDistance = infosAsArray[9];
+
+        boolean hasTarget = targetDistance != null && !targetDistance.equals("-") && !targetDistance.isEmpty() && !targetDistance.equalsIgnoreCase("infinite");
+        boolean hasRoute = routeStatus != null && (routeStatus.equals("on route") || routeStatus.equals("off route"));
+
+        addMessage(DEBUG_MSG, "GDApp", "targetDistance=" + targetDistance + " (hasTarget=" + hasTarget + "), routeStatus=" + routeStatus + ", routeDistance=" + routeDistance + " (hasRoute=" + hasRoute + ")");
+
+        if (hasRoute) {
+          if ((routeDistance != null) && (!routeDistance.isEmpty()) && (!routeDistance.equals("-")))
+            statusText = "🏁 -" + routeDistance;
+          else
+            statusText = "🏁 " + targetDistance;
+        } else if (hasTarget) {
+          statusText = "🎯 " + targetDistance;
+        }
+      }
+      addMessage(DEBUG_MSG, "GDApp", "Calculated statusText: " + statusText);
+      GDService.updateStatus(statusText);
+    }
   }
   @Override
   public void cockpitEngineStop() {
